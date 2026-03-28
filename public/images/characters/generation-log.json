@@ -1,0 +1,174 @@
+{
+  "generatedAt": "2026-03-28T20:36:30.707Z",
+  "model": "grok-imagine-image",
+  "results": [
+    {
+      "characterId": "arcana",
+      "mood": "default",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\default.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, neutral calm expression, gentle posture, looking at viewer"
+    },
+    {
+      "characterId": "arcana",
+      "mood": "smile",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\smile.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, warm bright smile, happy expression, slightly tilted head, cheerful mood"
+    },
+    {
+      "characterId": "arcana",
+      "mood": "serious",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\serious.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, serious focused expression, sharp gaze, intense eyes, determined look"
+    },
+    {
+      "characterId": "arcana",
+      "mood": "surprised",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\surprised.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, surprised expression, wide open eyes, open mouth, shocked reaction"
+    },
+    {
+      "characterId": "arcana",
+      "mood": "wink",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\wink.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, playful wink, one eye closed, flirty expression, charming smile, cute pose"
+    },
+    {
+      "characterId": "arcana",
+      "mood": "mystical",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\mystical.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, silver hair with cat ears, purple glowing eyes, wearing a low-cut dark purple witch robe with gold trim, holding a crystal ball, mystical tarot cards floating around her, soft moonlight, magical sparkles, dark mystical background with stars, detailed anime art, high quality, vibrant colors, mystical glowing aura, closed eyes in meditation, ethereal light surrounding, magical energy"
+    },
+    {
+      "characterId": "miko",
+      "mood": "default",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\default.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, neutral calm expression, gentle posture, looking at viewer"
+    },
+    {
+      "characterId": "miko",
+      "mood": "smile",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\smile.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, warm bright smile, happy expression, slightly tilted head, cheerful mood"
+    },
+    {
+      "characterId": "miko",
+      "mood": "serious",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\serious.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, serious focused expression, sharp gaze, intense eyes, determined look"
+    },
+    {
+      "characterId": "miko",
+      "mood": "surprised",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\surprised.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, surprised expression, wide open eyes, open mouth, shocked reaction"
+    },
+    {
+      "characterId": "miko",
+      "mood": "wink",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\wink.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, playful wink, one eye closed, flirty expression, charming smile, cute pose"
+    },
+    {
+      "characterId": "miko",
+      "mood": "mystical",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\mystical.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, long straight black hair, deep red eyes, wearing a traditional Japanese shrine maiden outfit (miko), white haori with revealing neckline, red hakama, red ribbon in hair, holding sacred paper streamers (shide), spiritual energy aura, shrine background with torii gate, cherry blossoms, detailed anime art, high quality, mystical glowing aura, closed eyes in meditation, ethereal light surrounding, magical energy"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "default",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\default.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, neutral calm expression, gentle posture, looking at viewer"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "smile",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\smile.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, warm bright smile, happy expression, slightly tilted head, cheerful mood"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "serious",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\serious.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, serious focused expression, sharp gaze, intense eyes, determined look"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "surprised",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\surprised.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, surprised expression, wide open eyes, open mouth, shocked reaction"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "wink",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\wink.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, playful wink, one eye closed, flirty expression, charming smile, cute pose"
+    },
+    {
+      "characterId": "seonhwa",
+      "mood": "mystical",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\mystical.jpg",
+      "prompt": "anime style illustration, beautiful sexy young woman, elegant long flowing hair with flower ornaments, golden eyes, wearing a fantasy fusion Korean hanbok dress, low shoulder design, holding a celestial fan with star patterns, floating flower petals around her, ethereal heavenly background with clouds and constellations, detailed anime art, high quality, pastel and gold color palette, mystical glowing aura, closed eyes in meditation, ethereal light surrounding, magical energy"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "default",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\default.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, neutral calm expression, gentle posture, looking at viewer"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "smile",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\smile.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, warm bright smile, happy expression, slightly tilted head, cheerful mood"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "serious",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\serious.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, serious focused expression, sharp gaze, intense eyes, determined look"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "surprised",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\surprised.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, surprised expression, wide open eyes, open mouth, shocked reaction"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "wink",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\wink.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, playful wink, one eye closed, flirty expression, charming smile, cute pose"
+    },
+    {
+      "characterId": "hoshi",
+      "mood": "mystical",
+      "success": true,
+      "filePath": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\mystical.jpg",
+      "prompt": "anime style illustration, cute handsome young boy, short messy pastel blue hair, bright starry eyes with star-shaped pupils, wearing a celestial themed outfit, star-patterned cape with constellation embroidery, crescent moon accessory, energetic cheerful pose, surrounded by floating stars and sparkles, dreamy galaxy background, detailed anime art, high quality, pastel color palette, mystical glowing aura, closed eyes in meditation, ethereal light surrounding, magical energy"
+    }
+  ]
+}

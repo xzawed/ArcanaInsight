@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { useCardAnimationStore } from "@/hooks/useCardAnimation";
@@ -159,7 +160,13 @@ export default function TarotSessionPage() {
   const spread = topic ? getSpreadForTopic(topic) : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col h-[calc(100vh-7rem)]">
+    <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col h-[calc(100vh-7rem)] relative">
+      {/* 배경 이미지 */}
+      <div className="fixed inset-0 -z-10">
+        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" />
+        <div className="absolute inset-0 bg-arcana-bg/50" />
+      </div>
+
       <div className="flex-shrink-0 h-[35%] flex items-center justify-center relative">
         <CharacterDisplay character={character} mood={currentMood} />
         {chatMessages.length > 0 && (
