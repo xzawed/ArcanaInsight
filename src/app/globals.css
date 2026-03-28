@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* ArcanaInsight color palette */
+  --color-arcana-bg: #0a0a1a;
+  --color-arcana-surface: #12122a;
+  --color-arcana-card: #1a1a3e;
+  --color-arcana-border: #2a2a5e;
+  --color-arcana-purple: #8b5cf6;
+  --color-arcana-indigo: #6366f1;
+  --color-arcana-gold: #f59e0b;
+  --color-arcana-silver: #c0c0c0;
+  --color-arcana-text: #e2e8f0;
+  --color-arcana-muted: #94a3b8;
+
+  /* Fonts */
+  --font-sans: var(--font-noto-sans-kr), sans-serif;
+  --font-display: var(--font-gothic-a1), sans-serif;
+
+  /* Animations */
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-blink: blink 3s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
+    100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); }
+  }
+
+  @keyframes blink {
+    0%, 45%, 55%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-arcana-bg);
+    color: var(--color-arcana-text);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-arcana-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-arcana-border);
+    border-radius: 9999px;
+  }
+}

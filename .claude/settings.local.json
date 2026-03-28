@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth:*)",
+      "Bash(npm --version)",
+      "Bash(git init:*)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(winget install:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm --version)",
+      "Bash(npm root:*)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:/c/Users/dirtc/AppData/Roaming/npm:$PATH\")",
+      "Bash(pnpm create:*)",
+      "Bash(export:*)",
+      "Bash(cp -r /f/DEVELOPMENT/SOURCE/CLAUDE/arcana-temp/src /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/)",
+      "Bash(cp -r /f/DEVELOPMENT/SOURCE/CLAUDE/arcana-temp/public /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
