@@ -6,7 +6,7 @@ export default function LoginPage() {
   const handleLogin = async (provider: "google" | "kakao") => {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
-      provider, options: { redirectTo: `${window.location.origin}/auth/callback` },
+      provider, options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback` },
     });
   };
 
