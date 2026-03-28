@@ -1,0 +1,136 @@
+import { TarotCard } from "@/types/card";
+
+export const majorArcana: TarotCard[] = [
+  {
+    id: "major-00", name: "The Fool", nameKo: "광대", number: 0, type: "major",
+    imageUrl: "/images/cards/major/00-fool.webp",
+    upright: { keywords: ["새로운 시작", "모험", "자유", "순수"], meaning: "새로운 여정의 시작을 의미합니다. 두려움 없이 앞으로 나아갈 때입니다." },
+    reversed: { keywords: ["무모함", "부주의", "위험", "경솔"], meaning: "충분한 준비 없이 성급하게 행동하고 있을 수 있습니다." },
+  },
+  {
+    id: "major-01", name: "The Magician", nameKo: "마법사", number: 1, type: "major",
+    imageUrl: "/images/cards/major/01-magician.webp",
+    upright: { keywords: ["의지력", "창조", "재능", "집중"], meaning: "원하는 것을 이룰 수 있는 모든 도구가 있습니다. 당신의 능력을 믿고 행동하세요." },
+    reversed: { keywords: ["조작", "속임수", "재능 낭비", "불안정"], meaning: "자신의 능력을 잘못된 방향으로 사용하고 있을 수 있습니다." },
+  },
+  {
+    id: "major-02", name: "The High Priestess", nameKo: "여사제", number: 2, type: "major",
+    imageUrl: "/images/cards/major/02-high-priestess.webp",
+    upright: { keywords: ["직관", "신비", "내면의 지혜", "잠재의식"], meaning: "내면의 목소리에 귀를 기울이세요. 이성보다 직관이 더 정확한 답을 줄 수 있습니다." },
+    reversed: { keywords: ["비밀", "억압", "단절", "직관 무시"], meaning: "내면의 목소리를 억압하거나 중요한 진실을 외면하고 있을 수 있습니다." },
+  },
+  {
+    id: "major-03", name: "The Empress", nameKo: "여황제", number: 3, type: "major",
+    imageUrl: "/images/cards/major/03-empress.webp",
+    upright: { keywords: ["풍요", "모성", "창조성", "자연"], meaning: "풍요와 번창의 시기입니다. 새로운 창조적 에너지가 충만하며 모든 것이 성장합니다." },
+    reversed: { keywords: ["의존", "창조적 장애", "결핍", "과잉 보호"], meaning: "창조적 에너지가 막혀 있거나 지나친 의존성을 보이고 있을 수 있습니다." },
+  },
+  {
+    id: "major-04", name: "The Emperor", nameKo: "황제", number: 4, type: "major",
+    imageUrl: "/images/cards/major/04-emperor.webp",
+    upright: { keywords: ["권위", "안정", "구조", "리더십"], meaning: "강한 의지와 리더십으로 상황을 통제하고 있습니다. 체계적인 접근이 성공을 가져옵니다." },
+    reversed: { keywords: ["독재", "경직", "통제 상실", "권위 남용"], meaning: "지나친 통제욕이나 경직된 사고방식이 문제를 일으키고 있을 수 있습니다." },
+  },
+  {
+    id: "major-05", name: "The Hierophant", nameKo: "교황", number: 5, type: "major",
+    imageUrl: "/images/cards/major/05-hierophant.webp",
+    upright: { keywords: ["전통", "가르침", "믿음", "관습"], meaning: "전통적인 가치관과 확립된 규범을 따르는 것이 현재 상황에서 옳습니다." },
+    reversed: { keywords: ["반항", "혁신", "규칙 위반", "비관습"], meaning: "기존 방식에 도전하거나 새로운 길을 찾고 싶은 욕구가 강합니다." },
+  },
+  {
+    id: "major-06", name: "The Lovers", nameKo: "연인", number: 6, type: "major",
+    imageUrl: "/images/cards/major/06-lovers.webp",
+    upright: { keywords: ["사랑", "선택", "조화", "결합"], meaning: "중요한 선택의 기로에 서 있습니다. 심장이 이끄는 대로 결정하세요. 사랑과 조화가 함께합니다." },
+    reversed: { keywords: ["불화", "잘못된 선택", "유혹", "갈등"], meaning: "관계에서 불화가 생기거나 가치관의 충돌이 있을 수 있습니다." },
+  },
+  {
+    id: "major-07", name: "The Chariot", nameKo: "전차", number: 7, type: "major",
+    imageUrl: "/images/cards/major/07-chariot.webp",
+    upright: { keywords: ["승리", "의지력", "극복", "추진력"], meaning: "강한 의지와 집중으로 모든 장애물을 극복할 수 있습니다. 앞으로 나아가세요." },
+    reversed: { keywords: ["패배", "통제 불능", "공격성", "방향 상실"], meaning: "내외부의 갈등으로 인해 목표를 향한 진행이 방해받고 있습니다." },
+  },
+  {
+    id: "major-08", name: "Strength", nameKo: "힘", number: 8, type: "major",
+    imageUrl: "/images/cards/major/08-strength.webp",
+    upright: { keywords: ["내면의 힘", "용기", "인내", "자기 통제"], meaning: "내면의 강인함과 부드러운 용기로 어떤 상황도 이겨낼 수 있습니다." },
+    reversed: { keywords: ["나약함", "자기 의심", "두려움", "억압"], meaning: "자기 의심이나 두려움이 앞을 가로막고 있습니다. 내면의 힘을 믿으세요." },
+  },
+  {
+    id: "major-09", name: "The Hermit", nameKo: "은둔자", number: 9, type: "major",
+    imageUrl: "/images/cards/major/09-hermit.webp",
+    upright: { keywords: ["고독", "내면 탐구", "지혜", "성찰"], meaning: "혼자만의 시간이 필요합니다. 내면을 들여다보고 진정한 지혜를 찾을 때입니다." },
+    reversed: { keywords: ["고립", "외로움", "편집증", "단절"], meaning: "지나친 고립이 오히려 해가 되고 있습니다. 타인과의 연결을 두려워하지 마세요." },
+  },
+  {
+    id: "major-10", name: "Wheel of Fortune", nameKo: "운명의 수레바퀴", number: 10, type: "major",
+    imageUrl: "/images/cards/major/10-wheel-of-fortune.webp",
+    upright: { keywords: ["운명", "변화", "행운", "전환점"], meaning: "운명의 바퀴가 유리한 방향으로 돌고 있습니다. 변화를 받아들이고 새로운 기회를 잡으세요." },
+    reversed: { keywords: ["불운", "저항", "정체", "나쁜 운"], meaning: "운이 따르지 않는 시기입니다. 변화에 저항하기보다 흐름에 맞게 적응하세요." },
+  },
+  {
+    id: "major-11", name: "Justice", nameKo: "정의", number: 11, type: "major",
+    imageUrl: "/images/cards/major/11-justice.webp",
+    upright: { keywords: ["공정", "진실", "균형", "인과응보"], meaning: "공정하고 균형 잡힌 판단이 내려질 것입니다. 진실이 밝혀지고 정의가 실현됩니다." },
+    reversed: { keywords: ["불공정", "불균형", "편향", "부정직"], meaning: "불공정한 상황이나 부정직한 행동이 문제를 만들고 있습니다." },
+  },
+  {
+    id: "major-12", name: "The Hanged Man", nameKo: "매달린 사람", number: 12, type: "major",
+    imageUrl: "/images/cards/major/12-hanged-man.webp",
+    upright: { keywords: ["희생", "새로운 관점", "일시 정지", "내려놓음"], meaning: "현재의 상황을 다른 각도에서 바라볼 필요가 있습니다. 잠시 멈추고 관점을 바꿔보세요." },
+    reversed: { keywords: ["지연", "저항", "희생 거부", "정체"], meaning: "필요한 변화나 희생을 거부하고 있어 상황이 정체되어 있습니다." },
+  },
+  {
+    id: "major-13", name: "Death", nameKo: "죽음", number: 13, type: "major",
+    imageUrl: "/images/cards/major/13-death.webp",
+    upright: { keywords: ["변화", "끝과 시작", "변환", "해방"], meaning: "한 사이클이 끝나고 새로운 시작이 옵니다. 두려워하지 마세요. 이 변화는 필요한 것입니다." },
+    reversed: { keywords: ["저항", "집착", "변화 거부", "정체"], meaning: "변화에 저항하며 이미 끝난 것에 집착하고 있습니다. 놓아주는 것이 필요합니다." },
+  },
+  {
+    id: "major-14", name: "Temperance", nameKo: "절제", number: 14, type: "major",
+    imageUrl: "/images/cards/major/14-temperance.webp",
+    upright: { keywords: ["균형", "조화", "인내", "중용"], meaning: "균형과 조화를 찾아가는 과정에 있습니다. 인내심을 갖고 천천히 나아가세요." },
+    reversed: { keywords: ["과잉", "불균형", "극단", "갈등"], meaning: "극단적인 행동이나 생각이 삶의 균형을 무너뜨리고 있습니다." },
+  },
+  {
+    id: "major-15", name: "The Devil", nameKo: "악마", number: 15, type: "major",
+    imageUrl: "/images/cards/major/15-devil.webp",
+    upright: { keywords: ["집착", "물질주의", "속박", "유혹"], meaning: "어떤 것에 속박되어 있다고 느낄 수 있습니다. 그러나 그 사슬을 끊을 힘이 당신 안에 있습니다." },
+    reversed: { keywords: ["해방", "각성", "속박에서 해방", "회복"], meaning: "오랫동안 당신을 억압했던 것들로부터 벗어나기 시작하고 있습니다." },
+  },
+  {
+    id: "major-16", name: "The Tower", nameKo: "탑", number: 16, type: "major",
+    imageUrl: "/images/cards/major/16-tower.webp",
+    upright: { keywords: ["급격한 변화", "붕괴", "계시", "혼돈"], meaning: "갑작스러운 변화나 충격적인 사건이 있을 수 있습니다. 이는 근본적인 변화의 시작입니다." },
+    reversed: { keywords: ["재앙 회피", "두려움", "지연", "작은 충격"], meaning: "큰 변화를 피했거나 재앙을 최소화했습니다. 그러나 필요한 변화를 미루고 있을 수도 있습니다." },
+  },
+  {
+    id: "major-17", name: "The Star", nameKo: "별", number: 17, type: "major",
+    imageUrl: "/images/cards/major/17-star.webp",
+    upright: { keywords: ["희망", "영감", "갱신", "평화"], meaning: "어둠이 지나고 희망의 별빛이 비추고 있습니다. 미래에 대한 긍정적인 에너지가 충만합니다." },
+    reversed: { keywords: ["절망", "희망 상실", "낙담", "불신"], meaning: "희망을 잃고 미래에 대해 부정적인 생각이 많아졌습니다. 다시 빛을 찾을 때입니다." },
+  },
+  {
+    id: "major-18", name: "The Moon", nameKo: "달", number: 18, type: "major",
+    imageUrl: "/images/cards/major/18-moon.webp",
+    upright: { keywords: ["환상", "두려움", "잠재의식", "불확실성"], meaning: "모든 것이 명확하지 않은 시기입니다. 두려움에 사로잡히지 말고 직관을 믿으세요." },
+    reversed: { keywords: ["혼란 해소", "명확성", "두려움 극복", "현실 파악"], meaning: "혼란스러운 시기가 지나가고 상황이 명확해지기 시작합니다." },
+  },
+  {
+    id: "major-19", name: "The Sun", nameKo: "태양", number: 19, type: "major",
+    imageUrl: "/images/cards/major/19-sun.webp",
+    upright: { keywords: ["기쁨", "성공", "활기", "낙관"], meaning: "밝고 긍정적인 에너지가 가득합니다. 성공과 행복의 시기가 찾아왔습니다." },
+    reversed: { keywords: ["우울", "과신", "에너지 부족", "지연"], meaning: "긍정적인 에너지가 일시적으로 차단되어 있습니다. 작은 성공에도 감사하세요." },
+  },
+  {
+    id: "major-20", name: "Judgement", nameKo: "심판", number: 20, type: "major",
+    imageUrl: "/images/cards/major/20-judgement.webp",
+    upright: { keywords: ["부활", "각성", "용서", "새 출발"], meaning: "과거를 용서하고 새로운 자아로 거듭날 때입니다. 내면의 부름에 응답하세요." },
+    reversed: { keywords: ["자기 의심", "후회", "용서 거부", "정체"], meaning: "과거의 실수에 대한 후회와 자기 비판이 앞으로 나아가는 것을 방해합니다." },
+  },
+  {
+    id: "major-21", name: "The World", nameKo: "세계", number: 21, type: "major",
+    imageUrl: "/images/cards/major/21-world.webp",
+    upright: { keywords: ["완성", "성취", "통합", "여행"], meaning: "한 사이클이 완전히 완성되었습니다. 크나큰 성취와 만족감을 누릴 때입니다." },
+    reversed: { keywords: ["미완성", "지연", "완성 부재", "단절"], meaning: "목표에 거의 다 왔지만 마지막 단계에서 막혀 있습니다. 인내심을 가지세요." },
+  },
+];

@@ -1,0 +1,437 @@
+import { TarotCard, CardSuit } from "@/types/card";
+
+interface MinorCardDef {
+  number: number; name: string; nameKo: string;
+  uprightKeywords: string[]; uprightMeaning: string;
+  reversedKeywords: string[]; reversedMeaning: string;
+}
+
+const suitNames: Record<CardSuit, { en: string; ko: string }> = {
+  wands: { en: "Wands", ko: "완드" },
+  cups: { en: "Cups", ko: "컵" },
+  swords: { en: "Swords", ko: "검" },
+  pentacles: { en: "Pentacles", ko: "펜타클" },
+};
+
+function buildSuit(suit: CardSuit, cards: MinorCardDef[]): TarotCard[] {
+  return cards.map((c) => ({
+    id: `${suit}-${String(c.number).padStart(2, "0")}`,
+    name: `${c.name} of ${suitNames[suit].en}`,
+    nameKo: `${suitNames[suit].ko}의 ${c.nameKo}`,
+    number: c.number, type: "minor" as const, suit,
+    imageUrl: `/images/cards/${suit}/${String(c.number).padStart(2, "0")}.webp`,
+    upright: { keywords: c.uprightKeywords, meaning: c.uprightMeaning },
+    reversed: { keywords: c.reversedKeywords, meaning: c.reversedMeaning },
+  }));
+}
+
+const wandsDefs: MinorCardDef[] = [
+  {
+    number: 1, name: "Ace", nameKo: "에이스",
+    uprightKeywords: ["새로운 열정", "영감", "창조적 시작"],
+    uprightMeaning: "새로운 창조적 에너지와 열정이 불꽃처럼 타오르기 시작합니다. 도전을 시작하기에 완벽한 시기입니다.",
+    reversedKeywords: ["지연", "창의력 차단", "동기 부족"],
+    reversedMeaning: "창조적 에너지가 막혀 있거나 새로운 시작을 두려워하고 있습니다.",
+  },
+  {
+    number: 2, name: "Two", nameKo: "2",
+    uprightKeywords: ["계획", "결정", "미래 전망"],
+    uprightMeaning: "앞에 놓인 선택지들을 신중하게 살펴보고 있습니다. 계획을 세우고 미래를 내다볼 때입니다.",
+    reversedKeywords: ["두려움", "계획 차질", "우유부단"],
+    reversedMeaning: "미래에 대한 두려움으로 결정을 미루고 있습니다. 용기를 내서 선택하세요.",
+  },
+  {
+    number: 3, name: "Three", nameKo: "3",
+    uprightKeywords: ["확장", "성장", "진보"],
+    uprightMeaning: "씨앗이 자라 열매를 맺기 시작합니다. 더 넓은 세계를 향한 확장의 시기입니다.",
+    reversedKeywords: ["제자리걸음", "협력 부재", "시야 좁음"],
+    reversedMeaning: "성장이 지연되거나 주변의 도움을 받지 못하고 있습니다.",
+  },
+  {
+    number: 4, name: "Four", nameKo: "4",
+    uprightKeywords: ["축하", "안정", "성취"],
+    uprightMeaning: "노력의 결실을 거두고 축하할 시기입니다. 안정과 조화 속에서 기쁨을 누리세요.",
+    reversedKeywords: ["불안정", "갈등", "불화"],
+    reversedMeaning: "가정이나 주변 환경에서 불화가 생기고 있습니다. 균형을 찾으세요.",
+  },
+  {
+    number: 5, name: "Five", nameKo: "5",
+    uprightKeywords: ["갈등", "경쟁", "분쟁"],
+    uprightMeaning: "주변에 갈등과 경쟁이 있습니다. 에너지를 건설적으로 사용하는 방법을 찾으세요.",
+    reversedKeywords: ["내적 갈등", "분쟁 회피", "허무한 싸움"],
+    reversedMeaning: "불필요한 갈등을 피하거나 내면의 충돌을 해결하려 하고 있습니다.",
+  },
+  {
+    number: 6, name: "Six", nameKo: "6",
+    uprightKeywords: ["승리", "인정", "진전"],
+    uprightMeaning: "노력이 결실을 맺어 주변의 인정과 찬사를 받게 됩니다. 승리를 만끽하세요.",
+    reversedKeywords: ["자만", "인정 부재", "실패"],
+    reversedMeaning: "기대했던 인정을 받지 못하거나 자만심으로 인해 문제가 생깁니다.",
+  },
+  {
+    number: 7, name: "Seven", nameKo: "7",
+    uprightKeywords: ["방어", "도전 극복", "용기"],
+    uprightMeaning: "강한 도전에 직면해 있지만 당신은 충분한 힘이 있습니다. 자신의 입장을 굳건히 지키세요.",
+    reversedKeywords: ["압도됨", "포기", "방어 실패"],
+    reversedMeaning: "너무 많은 도전에 압도되어 포기하고 싶은 마음이 듭니다.",
+  },
+  {
+    number: 8, name: "Eight", nameKo: "8",
+    uprightKeywords: ["빠른 진전", "활동", "뉴스"],
+    uprightMeaning: "일들이 빠르게 진행됩니다. 변화와 빠른 움직임의 시기로 기회를 놓치지 마세요.",
+    reversedKeywords: ["지연", "혼란", "서두름"],
+    reversedMeaning: "계획이 지연되거나 성급한 행동으로 실수를 할 수 있습니다.",
+  },
+  {
+    number: 9, name: "Nine", nameKo: "9",
+    uprightKeywords: ["인내", "회복력", "마지막 도전"],
+    uprightMeaning: "거의 다 왔습니다. 마지막 장애물을 넘기 위한 인내와 끈기가 필요합니다.",
+    reversedKeywords: ["탈진", "완고함", "편집증"],
+    reversedMeaning: "지나친 경계심이나 탈진 상태로 더 이상 나아가기 어렵습니다.",
+  },
+  {
+    number: 10, name: "Ten", nameKo: "10",
+    uprightKeywords: ["과부하", "책임", "완성"],
+    uprightMeaning: "너무 많은 짐을 지고 있습니다. 불필요한 짐을 내려놓고 진정 중요한 것에 집중하세요.",
+    reversedKeywords: ["짐을 놓음", "위임", "번아웃"],
+    reversedMeaning: "과도한 부담을 내려놓거나 남에게 위임하는 것이 필요합니다.",
+  },
+  {
+    number: 11, name: "Page", nameKo: "페이지",
+    uprightKeywords: ["열의", "탐구", "창조적 아이디어"],
+    uprightMeaning: "새로운 아이디어와 열의로 가득 찬 에너지가 솟구칩니다. 배움과 탐구의 시기입니다.",
+    reversedKeywords: ["산만함", "충동적", "에너지 낭비"],
+    reversedMeaning: "에너지가 넘치지만 방향이 없어 낭비되고 있습니다. 집중하세요.",
+  },
+  {
+    number: 12, name: "Knight", nameKo: "나이트",
+    uprightKeywords: ["행동", "열정", "모험"],
+    uprightMeaning: "열정적으로 목표를 향해 돌진합니다. 용감하게 행동하고 모험을 즐기세요.",
+    reversedKeywords: ["충동", "무모함", "성급함"],
+    reversedMeaning: "너무 성급하게 행동하거나 충동적인 결정이 문제를 일으킵니다.",
+  },
+  {
+    number: 13, name: "Queen", nameKo: "퀸",
+    uprightKeywords: ["독립", "자신감", "카리스마"],
+    uprightMeaning: "자신감 넘치는 에너지로 주변을 이끌고 있습니다. 활기차고 독립적인 힘이 빛납니다.",
+    reversedKeywords: ["질투", "이기심", "변덕"],
+    reversedMeaning: "질투심이나 이기적인 태도가 관계를 어렵게 만들고 있습니다.",
+  },
+  {
+    number: 14, name: "King", nameKo: "킹",
+    uprightKeywords: ["비전", "리더십", "기업가 정신"],
+    uprightMeaning: "강한 비전과 리더십으로 주변을 이끕니다. 자신감 있게 결정하고 앞장서세요.",
+    reversedKeywords: ["독단", "오만", "충동적 결정"],
+    reversedMeaning: "오만함이나 독단적 태도가 팀워크를 해치고 있습니다.",
+  },
+];
+
+const cupsDefs: MinorCardDef[] = [
+  {
+    number: 1, name: "Ace", nameKo: "에이스",
+    uprightKeywords: ["새로운 감정", "직관", "사랑의 시작"],
+    uprightMeaning: "사랑과 감정의 새로운 시작입니다. 마음을 열고 감정의 흐름에 몸을 맡기세요.",
+    reversedKeywords: ["감정 억압", "단절", "감정적 차단"],
+    reversedMeaning: "감정을 억압하거나 사랑을 받아들이기 어려워하고 있습니다.",
+  },
+  {
+    number: 2, name: "Two", nameKo: "2",
+    uprightKeywords: ["파트너십", "연결", "상호 매력"],
+    uprightMeaning: "아름다운 만남과 상호 이해가 이루어집니다. 관계가 깊어지고 화합이 이루어집니다.",
+    reversedKeywords: ["불화", "이별", "신뢰 부족"],
+    reversedMeaning: "관계에서 불화가 생기거나 신뢰가 무너지고 있습니다.",
+  },
+  {
+    number: 3, name: "Three", nameKo: "3",
+    uprightKeywords: ["축하", "우정", "기쁨"],
+    uprightMeaning: "소중한 사람들과 함께 기쁨을 나누고 축하하는 시기입니다. 풍요로운 감정이 넘칩니다.",
+    reversedKeywords: ["과음", "방종", "과잉 향락"],
+    reversedMeaning: "지나친 쾌락 추구나 과음 등 자기 방종이 문제가 될 수 있습니다.",
+  },
+  {
+    number: 4, name: "Four", nameKo: "4",
+    uprightKeywords: ["명상", "무관심", "재평가"],
+    uprightMeaning: "현재 상황에 감사함을 잃고 있습니다. 내면을 돌아보고 진정 원하는 것을 찾으세요.",
+    reversedKeywords: ["새로운 관심", "각성", "기회 수용"],
+    reversedMeaning: "오랜 침잠에서 벗어나 새로운 것에 관심을 갖기 시작합니다.",
+  },
+  {
+    number: 5, name: "Five", nameKo: "5",
+    uprightKeywords: ["슬픔", "상실", "후회"],
+    uprightMeaning: "상실의 슬픔과 후회가 있지만, 아직 남아있는 것에도 눈을 돌리세요. 희망은 있습니다.",
+    reversedKeywords: ["치유", "수용", "앞으로 나아감"],
+    reversedMeaning: "슬픔에서 서서히 회복하고 과거를 받아들이기 시작합니다.",
+  },
+  {
+    number: 6, name: "Six", nameKo: "6",
+    uprightKeywords: ["추억", "과거", "순수함"],
+    uprightMeaning: "아름다운 추억과 과거의 기쁨이 현재에 영향을 미칩니다. 순수했던 시절의 기억이 위안이 됩니다.",
+    reversedKeywords: ["과거 집착", "향수병", "미성숙"],
+    reversedMeaning: "과거에 지나치게 집착하며 현재를 살지 못하고 있습니다.",
+  },
+  {
+    number: 7, name: "Seven", nameKo: "7",
+    uprightKeywords: ["환상", "선택", "망상"],
+    uprightMeaning: "많은 가능성 앞에 있지만 일부는 환상일 수 있습니다. 현실을 직시하고 신중하게 선택하세요.",
+    reversedKeywords: ["명확성", "현실 직시", "혼란 해소"],
+    reversedMeaning: "환상에서 벗어나 현실을 명확하게 바라보기 시작합니다.",
+  },
+  {
+    number: 8, name: "Eight", nameKo: "8",
+    uprightKeywords: ["포기", "전환", "새 방향"],
+    uprightMeaning: "이미 이룬 것을 뒤로 하고 더 깊은 의미를 찾아 떠날 때입니다. 용기 있는 선택입니다.",
+    reversedKeywords: ["집착", "두려움", "변화 거부"],
+    reversedMeaning: "현 상황에서 벗어나야 한다는 것을 알면서도 두려움 때문에 떠나지 못합니다.",
+  },
+  {
+    number: 9, name: "Nine", nameKo: "9",
+    uprightKeywords: ["만족", "소원 성취", "행복"],
+    uprightMeaning: "소원이 이루어지는 시기입니다. 감사함과 만족감이 충만하며 원하는 것을 얻게 됩니다.",
+    reversedKeywords: ["불만족", "욕심", "내면의 결핍"],
+    reversedMeaning: "물질적으로는 충족되어 있지만 내면적인 만족을 찾지 못하고 있습니다.",
+  },
+  {
+    number: 10, name: "Ten", nameKo: "10",
+    uprightKeywords: ["행복한 가정", "조화", "완성"],
+    uprightMeaning: "가족과 주변 사람들과의 완전한 조화와 행복이 이루어집니다. 감정적 완성의 시기입니다.",
+    reversedKeywords: ["가족 갈등", "불화", "행복 깨짐"],
+    reversedMeaning: "가족 관계나 가까운 인연에서 갈등이 생기고 있습니다.",
+  },
+  {
+    number: 11, name: "Page", nameKo: "페이지",
+    uprightKeywords: ["직관", "감성", "새 감정"],
+    uprightMeaning: "감수성이 풍부하고 직관이 예민한 시기입니다. 내면의 목소리와 꿈에 귀를 기울이세요.",
+    reversedKeywords: ["감정적 미성숙", "불안정", "실망"],
+    reversedMeaning: "감정이 불안정하거나 지나치게 감상적이 되어 판단이 흐려집니다.",
+  },
+  {
+    number: 12, name: "Knight", nameKo: "나이트",
+    uprightKeywords: ["낭만", "헌신", "감정적 행동"],
+    uprightMeaning: "낭만적이고 이상주의적인 에너지로 가득합니다. 감정에 따라 행동하되 현실도 잃지 마세요.",
+    reversedKeywords: ["비현실적", "기분 변덕", "우유부단"],
+    reversedMeaning: "비현실적인 기대나 변덕스러운 감정으로 관계가 불안정해집니다.",
+  },
+  {
+    number: 13, name: "Queen", nameKo: "퀸",
+    uprightKeywords: ["공감", "배려", "감성 지능"],
+    uprightMeaning: "깊은 공감 능력과 따뜻한 배려로 주변을 치유합니다. 감성적 지혜가 빛나는 시기입니다.",
+    reversedKeywords: ["감정 의존", "불안정", "조종"],
+    reversedMeaning: "감정적 의존성이 강해지거나 타인을 감정으로 조종하려 할 수 있습니다.",
+  },
+  {
+    number: 14, name: "King", nameKo: "킹",
+    uprightKeywords: ["감성적 균형", "지혜", "친절한 리더"],
+    uprightMeaning: "감성과 이성이 균형 잡힌 성숙한 지도자입니다. 따뜻하고 지혜롭게 상황을 이끌어 갑니다.",
+    reversedKeywords: ["감정 조작", "냉담", "비감성적"],
+    reversedMeaning: "감정을 무시하거나 타인의 감정을 조작하는 경향이 있습니다.",
+  },
+];
+
+const swordsDefs: MinorCardDef[] = [
+  {
+    number: 1, name: "Ace", nameKo: "에이스",
+    uprightKeywords: ["진실", "명확성", "새로운 아이디어"],
+    uprightMeaning: "날카로운 지성과 명확한 진실이 떠오릅니다. 새로운 아이디어와 통찰력이 생겨납니다.",
+    reversedKeywords: ["혼란", "잘못된 정보", "오해"],
+    reversedMeaning: "판단이 흐려지거나 잘못된 정보로 인해 혼란이 생깁니다.",
+  },
+  {
+    number: 2, name: "Two", nameKo: "2",
+    uprightKeywords: ["교착 상태", "선택", "균형"],
+    uprightMeaning: "어려운 결정 앞에서 균형을 유지하고 있습니다. 신중하게 판단하되 결정을 미루지 마세요.",
+    reversedKeywords: ["우유부단", "정보 과부하", "긴장"],
+    reversedMeaning: "너무 많은 정보나 선택지로 인해 결정하기 더욱 어려워집니다.",
+  },
+  {
+    number: 3, name: "Three", nameKo: "3",
+    uprightKeywords: ["심장의 상처", "슬픔", "고통"],
+    uprightMeaning: "깊은 마음의 상처와 슬픔이 있습니다. 하지만 이 고통을 통해 성장할 수 있습니다.",
+    reversedKeywords: ["치유", "회복", "상처 극복"],
+    reversedMeaning: "마음의 상처가 서서히 치유되고 있습니다. 고통이 완화되고 있습니다.",
+  },
+  {
+    number: 4, name: "Four", nameKo: "4",
+    uprightKeywords: ["휴식", "회복", "성찰"],
+    uprightMeaning: "잠시 멈추고 에너지를 충전할 시간입니다. 휴식을 통해 다음 단계를 준비하세요.",
+    reversedKeywords: ["불안", "과부하", "휴식 거부"],
+    reversedMeaning: "필요한 휴식을 거부하고 무리하게 계속 나아가고 있습니다.",
+  },
+  {
+    number: 5, name: "Five", nameKo: "5",
+    uprightKeywords: ["갈등", "패배", "불명예"],
+    uprightMeaning: "갈등이나 패배가 있을 수 있습니다. 모든 싸움이 이길 가치가 있는 것은 아닙니다.",
+    reversedKeywords: ["화해", "용서", "갈등 해소"],
+    reversedMeaning: "갈등이 해소되거나 과거의 적과 화해의 기회가 생깁니다.",
+  },
+  {
+    number: 6, name: "Six", nameKo: "6",
+    uprightKeywords: ["전환", "이동", "어려움 통과"],
+    uprightMeaning: "어려운 시기를 지나 더 평화로운 곳으로 나아가고 있습니다. 여행이나 이동의 징조입니다.",
+    reversedKeywords: ["지연", "여정 방해", "도피"],
+    reversedMeaning: "어려움을 벗어나려는 시도가 방해받고 있거나 도피적 행동을 하고 있습니다.",
+  },
+  {
+    number: 7, name: "Seven", nameKo: "7",
+    uprightKeywords: ["속임수", "전략", "회피"],
+    uprightMeaning: "전략적으로 행동해야 하는 시기입니다. 그러나 부정직한 방법은 결국 역효과를 낳습니다.",
+    reversedKeywords: ["양심의 가책", "자백", "솔직함"],
+    reversedMeaning: "부정직한 행동에서 벗어나 진실을 말할 준비가 되어 있습니다.",
+  },
+  {
+    number: 8, name: "Eight", nameKo: "8",
+    uprightKeywords: ["속박", "제한", "무력감"],
+    uprightMeaning: "스스로 만든 한계 속에 갇혀 있습니다. 하지만 그 속박을 끊을 힘이 당신 안에 있습니다.",
+    reversedKeywords: ["해방", "자기 수용", "제한 극복"],
+    reversedMeaning: "스스로 부과한 제한에서 벗어나기 시작하고 있습니다.",
+  },
+  {
+    number: 9, name: "Nine", nameKo: "9",
+    uprightKeywords: ["불안", "두려움", "악몽"],
+    uprightMeaning: "불안과 두려움이 마음을 지배하고 있습니다. 많은 걱정이 실제로는 과장된 것일 수 있습니다.",
+    reversedKeywords: ["걱정 경감", "회복", "두려움 직면"],
+    reversedMeaning: "극심한 불안에서 서서히 회복하고 두려움을 직면하기 시작합니다.",
+  },
+  {
+    number: 10, name: "Ten", nameKo: "10",
+    uprightKeywords: ["끝", "배신", "고통"],
+    uprightMeaning: "고통스러운 끝이 있지만 이것은 새로운 시작을 위한 전제입니다. 가장 어두운 밤이 새벽 전입니다.",
+    reversedKeywords: ["회복", "재생", "더 나쁠 수 없음"],
+    reversedMeaning: "최악의 상황에서 벗어나 천천히 회복의 길로 접어들고 있습니다.",
+  },
+  {
+    number: 11, name: "Page", nameKo: "페이지",
+    uprightKeywords: ["호기심", "소통", "새 아이디어"],
+    uprightMeaning: "새로운 아이디어와 지식에 대한 갈증이 넘칩니다. 직설적인 소통이 중요합니다.",
+    reversedKeywords: ["가십", "험담", "미성숙한 소통"],
+    reversedMeaning: "가십이나 험담으로 인해 관계가 손상될 수 있습니다.",
+  },
+  {
+    number: 12, name: "Knight", nameKo: "나이트",
+    uprightKeywords: ["단호함", "야망", "행동"],
+    uprightMeaning: "빠르고 단호하게 행동하는 에너지입니다. 목표를 향해 직선으로 나아가세요.",
+    reversedKeywords: ["성급함", "공격성", "무모함"],
+    reversedMeaning: "지나치게 성급하거나 공격적인 방식이 관계를 해치고 있습니다.",
+  },
+  {
+    number: 13, name: "Queen", nameKo: "퀸",
+    uprightKeywords: ["명확한 사고", "독립", "진실"],
+    uprightMeaning: "날카로운 지성과 명확한 판단력으로 진실을 꿰뚫어 봅니다. 독립적이고 솔직합니다.",
+    reversedKeywords: ["냉혹함", "비판적", "신랄함"],
+    reversedMeaning: "지나치게 비판적이거나 냉혹한 태도가 주변 사람들을 멀리하게 만듭니다.",
+  },
+  {
+    number: 14, name: "King", nameKo: "킹",
+    uprightKeywords: ["지적 권위", "이성", "공정한 판단"],
+    uprightMeaning: "논리적이고 공정한 사고로 명확한 결정을 내립니다. 이성적 리더십이 돋보입니다.",
+    reversedKeywords: ["독재", "냉혹함", "잔인함"],
+    reversedMeaning: "권위를 남용하거나 지나치게 차갑고 독단적인 태도를 보이고 있습니다.",
+  },
+];
+
+const pentaclesDefs: MinorCardDef[] = [
+  {
+    number: 1, name: "Ace", nameKo: "에이스",
+    uprightKeywords: ["새 기회", "번영", "물질적 시작"],
+    uprightMeaning: "물질적, 금전적 새로운 시작의 기회가 왔습니다. 실용적인 행동을 통해 번영의 씨앗을 심으세요.",
+    reversedKeywords: ["기회 상실", "재정 불안", "낭비"],
+    reversedMeaning: "금전적 기회를 놓치거나 재정적으로 불안정한 시기입니다.",
+  },
+  {
+    number: 2, name: "Two", nameKo: "2",
+    uprightKeywords: ["균형", "적응", "유연성"],
+    uprightMeaning: "여러 일을 동시에 처리하며 균형을 맞추고 있습니다. 유연한 대처가 필요합니다.",
+    reversedKeywords: ["불균형", "과부하", "관리 실패"],
+    reversedMeaning: "너무 많은 일을 동시에 처리하려다 균형을 잃고 있습니다.",
+  },
+  {
+    number: 3, name: "Three", nameKo: "3",
+    uprightKeywords: ["협력", "기술", "장인 정신"],
+    uprightMeaning: "팀워크와 전문 기술로 훌륭한 결과물을 만들어 냅니다. 협력의 시너지가 발휘됩니다.",
+    reversedKeywords: ["갈등", "무능함", "협력 부재"],
+    reversedMeaning: "팀 내 갈등이나 기술 부족으로 원하는 결과를 얻지 못하고 있습니다.",
+  },
+  {
+    number: 4, name: "Four", nameKo: "4",
+    uprightKeywords: ["안정", "보안", "절약"],
+    uprightMeaning: "재정적 안정을 위해 노력하고 있습니다. 자원을 신중하게 관리하는 것이 중요합니다.",
+    reversedKeywords: ["인색함", "탐욕", "과소비"],
+    reversedMeaning: "물질에 지나치게 집착하거나 반대로 무분별하게 지출하고 있습니다.",
+  },
+  {
+    number: 5, name: "Five", nameKo: "5",
+    uprightKeywords: ["빈곤", "결핍", "고난"],
+    uprightMeaning: "재정적 어려움이나 결핍의 시기입니다. 그러나 도움은 가까이 있습니다. 도움을 구하세요.",
+    reversedKeywords: ["회복", "도움 수락", "재정 개선"],
+    reversedMeaning: "어려운 시기에서 벗어나기 시작합니다. 타인의 도움을 받아들이세요.",
+  },
+  {
+    number: 6, name: "Six", nameKo: "6",
+    uprightKeywords: ["관대함", "나눔", "자선"],
+    uprightMeaning: "풍요를 나누고 베푸는 시기입니다. 줌으로써 더 많은 것이 돌아옵니다.",
+    reversedKeywords: ["인색함", "자선 거부", "불균등 거래"],
+    reversedMeaning: "불공평한 거래나 인색함이 문제를 만들고 있습니다.",
+  },
+  {
+    number: 7, name: "Seven", nameKo: "7",
+    uprightKeywords: ["인내", "장기 투자", "성장"],
+    uprightMeaning: "꾸준한 노력의 결실이 천천히 맺히고 있습니다. 성급해하지 말고 기다리세요.",
+    reversedKeywords: ["조급함", "투자 후회", "방향 재설정"],
+    reversedMeaning: "기다림에 지쳐 포기하거나 잘못된 방향으로 자원을 쏟고 있습니다.",
+  },
+  {
+    number: 8, name: "Eight", nameKo: "8",
+    uprightKeywords: ["숙련", "집중", "장인 정신"],
+    uprightMeaning: "한 가지 기술을 완성시키는 데 집중하고 있습니다. 꾸준한 노력이 전문성을 만듭니다.",
+    reversedKeywords: ["완벽주의", "비효율", "지름길 추구"],
+    reversedMeaning: "지나친 완벽주의나 반대로 대충하는 태도가 성장을 방해합니다.",
+  },
+  {
+    number: 9, name: "Nine", nameKo: "9",
+    uprightKeywords: ["독립", "자족", "물질적 성공"],
+    uprightMeaning: "노력으로 이룬 풍요와 독립을 누리는 시기입니다. 스스로를 위한 시간을 즐기세요.",
+    reversedKeywords: ["의존", "자기 가치 의심", "낭비"],
+    reversedMeaning: "스스로의 성취를 과소평가하거나 지나친 사치로 균형이 흔들립니다.",
+  },
+  {
+    number: 10, name: "Ten", nameKo: "10",
+    uprightKeywords: ["부", "유산", "가족의 안정"],
+    uprightMeaning: "가족과 가정에 영원한 풍요와 안정이 깃듭니다. 세대를 넘어 전해지는 유산을 만들게 됩니다.",
+    reversedKeywords: ["가족 갈등", "재정 손실", "유산 분쟁"],
+    reversedMeaning: "가족 내 재정적 갈등이나 유산 문제로 분란이 생길 수 있습니다.",
+  },
+  {
+    number: 11, name: "Page", nameKo: "페이지",
+    uprightKeywords: ["연구", "실용성", "새로운 기회"],
+    uprightMeaning: "현실적이고 실용적인 태도로 새로운 기회를 탐색하고 있습니다. 꼼꼼함이 도움이 됩니다.",
+    reversedKeywords: ["비현실적", "집중 부족", "낭비"],
+    reversedMeaning: "비현실적인 계획이나 집중력 부족으로 기회를 놓칩니다.",
+  },
+  {
+    number: 12, name: "Knight", nameKo: "나이트",
+    uprightKeywords: ["근면", "신뢰성", "꾸준함"],
+    uprightMeaning: "꾸준하고 신뢰할 수 있는 방식으로 목표를 향해 나아갑니다. 실용적인 접근이 성공을 가져옵니다.",
+    reversedKeywords: ["게으름", "고집", "무기력"],
+    reversedMeaning: "게으르거나 고집스러운 태도가 진전을 막고 있습니다.",
+  },
+  {
+    number: 13, name: "Queen", nameKo: "퀸",
+    uprightKeywords: ["실용성", "풍요", "따뜻한 지원"],
+    uprightMeaning: "실용적이고 따뜻한 방식으로 주변을 지원합니다. 물질적 풍요와 실질적 도움이 넘칩니다.",
+    reversedKeywords: ["탐욕", "질투", "물질주의"],
+    reversedMeaning: "물질적인 것에 지나치게 집착하거나 주변에 대한 질투가 생깁니다.",
+  },
+  {
+    number: 14, name: "King", nameKo: "킹",
+    uprightKeywords: ["번영", "사업 수완", "안정적 리더"],
+    uprightMeaning: "뛰어난 사업 감각과 안정적인 리더십으로 물질적 번영을 이끌어 냅니다.",
+    reversedKeywords: ["탐욕", "부패", "고압적 태도"],
+    reversedMeaning: "물질에 대한 탐욕이나 권력 남용이 신뢰를 잃게 만듭니다.",
+  },
+];
+
+export const minorArcana: TarotCard[] = [
+  ...buildSuit("wands", wandsDefs),
+  ...buildSuit("cups", cupsDefs),
+  ...buildSuit("swords", swordsDefs),
+  ...buildSuit("pentacles", pentaclesDefs),
+];

@@ -1,0 +1,41 @@
+import { SelectedCard } from "./card";
+
+export type Topic = "love" | "finance" | "career" | "health" | "general";
+export type SpreadType = "one-card" | "three-card" | "five-card";
+export type SessionStatus = "in_progress" | "completed" | "abandoned";
+
+export interface SpreadPosition {
+  index: number;
+  label: string;
+  labelKo: string;
+  x: number;
+  y: number;
+}
+
+export interface SpreadDefinition {
+  type: SpreadType;
+  name: string;
+  nameKo: string;
+  description: string;
+  positions: SpreadPosition[];
+}
+
+export interface Session {
+  id: string;
+  userId: string | null;
+  serviceType: string;
+  topic: Topic;
+  status: SessionStatus;
+  spreadType: SpreadType;
+  selectedCards: SelectedCard[];
+  createdAt: Date;
+  completedAt: Date | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "character" | "user" | "system";
+  content: string;
+  mood?: string;
+  timestamp: Date;
+}
