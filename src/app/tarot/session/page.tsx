@@ -89,7 +89,12 @@ export default function TarotSessionPage() {
       });
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "", mood: "mystical", timestamp: new Date() });
+
+      // Show loading dots while AI generates
+      const loadingMsgId = crypto.randomUUID();
+      addChatMessage({ id: loadingMsgId, role: "character", content: "카드를 읽고 있어요... ✨", mood: "mystical", timestamp: new Date() });
+
+      let fullJson = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -99,8 +104,48 @@ export default function TarotSessionPage() {
           if (!line.startsWith("data: ")) continue;
           try {
             const data = JSON.parse(line.slice(6));
-            if (data.chunk) appendToLastMessage(data.chunk);
-            if (data.done && data.result) { setReadingResult(data.result); setPhase("result"); setMood("smile"); }
+            if (data.chunk) fullJson += data.chunk;
+            if (data.done && data.result) {
+              setReadingResult(data.result);
+
+              // Replace loading message with card interpretations
+              const messages = useSessionStore.getState().chatMessages.filter(m => m.id !== loadingMsgId);
+              // We can't easily remove, so we'll add new messages for the result
+
+              // Add individual card interpretations
+              const currentSpread = topic ? getSpreadForTopic(topic) : null;
+              if (data.result.cardInterpretations) {
+                for (const interp of data.result.cardInterpretations) {
+                  const card = cards.find(c => c.card.id === interp.cardId);
+                  const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
+                  addChatMessage({
+                    id: crypto.randomUUID(), role: "character",
+                    content: `🃏 [${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
+                    mood: "serious", timestamp: new Date(),
+                  });
+                }
+              }
+
+              // Add overall reading
+              if (data.result.overallReading) {
+                addChatMessage({
+                  id: crypto.randomUUID(), role: "character",
+                  content: `🔮 종합 해석\n\n${data.result.overallReading}`,
+                  mood: "mystical", timestamp: new Date(),
+                });
+              }
+
+              // Add advice
+              if (data.result.advice) {
+                addChatMessage({
+                  id: crypto.randomUUID(), role: "character",
+                  content: `✨ 조언\n\n${data.result.advice}`,
+                  mood: "smile", timestamp: new Date(),
+                });
+              }
+
+              setPhase("result"); setMood("smile");
+            }
           } catch { /* skip malformed */ }
         }
       }
@@ -119,7 +164,7 @@ export default function TarotSessionPage() {
         <CharacterDisplay character={character} mood={currentMood} />
         {chatMessages.length > 0 && (
           <div className="absolute bottom-2 left-4 right-4 bg-arcana-card/90 backdrop-blur-sm border border-arcana-border rounded-xl px-4 py-2">
-            <TypingDialogue text={chatMessages[chatMessages.length - 1].content} speed={20} isStreaming={phase === "reading"} className="text-sm" />
+            <TypingDialogue text={chatMessages[chatMessages.length - 1].content} speed={20} isStreaming={false} className="text-sm" />
           </div>
         )}
       </div>
