@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a3e"/>
+      <stop offset="100%" style="stop-color:#16163a"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="300" rx="12" fill="url(#bg)" stroke="#ef4444" stroke-width="2"/>
+  <rect x="8" y="8" width="184" height="284" rx="9" fill="none" stroke="#ef4444" stroke-width="0.5" opacity="0.3"/>
+  <text x="100" y="105" text-anchor="middle" fill="#ef4444" font-size="44" font-weight="bold" font-family="serif" opacity="0.9">4</text>
+  <line x1="40" y1="120" x2="160" y2="120" stroke="#ef4444" stroke-width="0.5" opacity="0.4"/>
+  <text x="100" y="148" text-anchor="middle" fill="#e2e8f0" font-size="13" font-family="sans-serif">Four of Wands</text>
+  <text x="100" y="270" text-anchor="middle" fill="#8b5cf6" font-size="9" opacity="0.4" letter-spacing="2">ArcanaInsight</text>
+</svg>

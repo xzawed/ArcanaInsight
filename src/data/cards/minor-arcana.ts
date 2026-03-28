@@ -19,7 +19,7 @@ function buildSuit(suit: CardSuit, cards: MinorCardDef[]): TarotCard[] {
     name: `${c.name} of ${suitNames[suit].en}`,
     nameKo: `${suitNames[suit].ko}의 ${c.nameKo}`,
     number: c.number, type: "minor" as const, suit,
-    imageUrl: `/images/cards/${suit}/${String(c.number).padStart(2, "0")}.webp`,
+    imageUrl: `/images/cards/${suit}/${String(c.number).padStart(2, "0")}.svg`,
     upright: { keywords: c.uprightKeywords, meaning: c.uprightMeaning },
     reversed: { keywords: c.reversedKeywords, meaning: c.reversedMeaning },
   }));
