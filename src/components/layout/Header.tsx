@@ -1,8 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 export function Header() {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-arcana-bg/80 backdrop-blur-md border-b border-arcana-border">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -14,7 +39,17 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/tarot" className="text-arcana-muted hover:text-arcana-text transition-colors">타로</Link>
           <Link href="/mypage" className="text-arcana-muted hover:text-arcana-text transition-colors">마이페이지</Link>
-          <Link href="/auth/login" className="px-4 py-1.5 rounded-full bg-arcana-purple/20 text-arcana-purple hover:bg-arcana-purple/30 transition-colors text-sm">로그인</Link>
+          {user ? (
+            <button onClick={handleLogout}
+              className="px-4 py-1.5 rounded-full bg-arcana-purple/20 text-arcana-purple hover:bg-arcana-purple/30 transition-colors text-sm">
+              로그아웃
+            </button>
+          ) : (
+            <Link href="/auth/login"
+              className="px-4 py-1.5 rounded-full bg-arcana-purple/20 text-arcana-purple hover:bg-arcana-purple/30 transition-colors text-sm">
+              로그인
+            </Link>
+          )}
         </nav>
       </div>
     </header>
