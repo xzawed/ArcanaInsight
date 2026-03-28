@@ -1,18 +1,21 @@
 # ArcanaInsight
 
-타로 카드 및 점술 기반 웹 애플리케이션
+일본 애니메이션 스타일 캐릭터와 대화하며 타로 리딩을 받는 운세 종합 콘텐츠 플랫폼
 
 ## 프로젝트 개요
 
-ArcanaInsight는 사용자에게 타로 카드 리딩, 운세, 점술 서비스를 제공하는 웹 애플리케이션입니다.
+ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 카드를 선택하고, Grok AI가 해석을 제공하는 웹 애플리케이션입니다. MVP는 타로 서비스에 집중하며, 사주/신점/오늘의 운세로 확장 가능한 모듈 구조입니다.
 
 ## 기술 스택
 
-- **언어**: TypeScript
-- **프레임워크**: Next.js (App Router)
-- **스타일링**: Tailwind CSS
-- **상태관리**: 필요 시 Zustand
-- **데이터베이스**: 필요 시 결정
+- **언어**: TypeScript (strict)
+- **프레임워크**: Next.js 16+ (App Router)
+- **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
+- **애니메이션**: Framer Motion
+- **AI**: Grok API (xAI) — `src/services/core/grok-provider.ts`에서 추상화
+- **인증**: Supabase Auth Helpers (카카오/구글)
+- **데이터베이스**: Supabase (PostgreSQL)
+- **상태관리**: Zustand
 - **패키지 매니저**: pnpm
 - **CI/CD**: GitHub Actions → Railway 자동 배포
 - **호스팅**: Railway
@@ -21,16 +24,34 @@ ArcanaInsight는 사용자에게 타로 카드 리딩, 운세, 점술 서비스�
 
 ```
 src/
-├── app/          # Next.js App Router 페이지
-├── components/   # 재사용 가능한 컴포넌트
-├── lib/          # 유틸리티, 헬퍼 함수
-├── types/        # TypeScript 타입 정의
-├── data/         # 타로 카드 데이터, 점술 데이터
-└── styles/       # 글로벌 스타일
-public/
-├── images/       # 타로 카드 이미지 등 정적 리소스
-└── fonts/        # 커스텀 폰트
+├── app/                    # Next.js App Router 페이지 & API
+│   ├── api/tarot/          # API 라우트 (session, reading SSE, result)
+│   ├── auth/               # 로그인, OAuth 콜백
+│   ├── mypage/             # 리딩 히스토리
+│   └── tarot/              # 주제 선택, 상담 세션, 결과
+├── components/
+│   ├── card/               # CardItem, CardDeck, CardSpread, CardSwiper
+│   ├── character/          # CharacterDisplay, CharacterSelector, TypingDialogue
+│   ├── chat/               # ChatBubble, ChatWindow
+│   └── layout/             # Header, Footer, MobileNav
+├── data/
+│   ├── cards/              # 메이저 22장 + 마이너 56장 정적 데이터
+│   ├── characters/         # 4캐릭터 설정 (아르카나/미코/선화/호시)
+│   └── spreads/            # 스프레드 정의 (1/3/5카드)
+├── hooks/                  # Zustand 스토어 (useSession, useCharacter, useCardAnimation)
+├── lib/supabase/           # Supabase 클라이언트 (browser/server/middleware)
+├── services/
+│   ├── core/               # AI Provider 추상화, Grok 구현체, 프롬프트 빌더
+│   └── tarot/              # TarotService, DeckManager, SpreadResolver
+└── types/                  # card, character, session, service 인터페이스
 ```
+
+## 핵심 아키텍처 패턴
+
+- **DivinationService 인터페이스**: 모든 운세 서비스는 이 인터페이스를 구현. 새 서비스 추가 = 구현체 + 프롬프트
+- **AIProvider 추상화**: Grok API를 직접 호출하지 않고 인터페이스 통해 호출. 모델 교체 용이
+- **SSE 스트리밍**: `/api/tarot/reading`에서 Grok 응답을 SSE로 클라이언트에 스트리밍
+- **Tailwind v4**: CSS `@theme` 블록에서 커스텀 컬러 정의 (`arcana-*` 계열)
 
 ## 코딩 컨벤션
 
@@ -56,8 +77,9 @@ public/
 ### 스타일링
 
 - Tailwind CSS 유틸리티 클래스 우선
-- 복잡한 애니메이션은 CSS 모듈 또는 Framer Motion 사용
-- 다크 모드를 기본 테마로 고려 (점술/타로의 신비로운 분위기)
+- 복잡한 애니메이션은 Framer Motion 사용
+- 다크 모드가 기본 테마 (점술/타로의 신비로운 분위기)
+- 커스텀 컬러: `arcana-bg`, `arcana-surface`, `arcana-card`, `arcana-border`, `arcana-purple`, `arcana-indigo`, `arcana-gold`, `arcana-text`, `arcana-muted`
 
 ## 명령어
 
@@ -65,12 +87,23 @@ public/
 pnpm dev          # 개발 서버 실행
 pnpm build        # 프로덕션 빌드
 pnpm lint         # ESLint 실행
-pnpm type-check   # TypeScript 타입 체크
+pnpm tsc --noEmit # TypeScript 타입 체크
+```
+
+## 환경 변수
+
+```
+GROK_API_KEY=               # xAI Grok API 키
+GROK_MODEL=grok-3           # 사용 모델
+NEXT_PUBLIC_SUPABASE_URL=   # Supabase 프로젝트 URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase 익명 키
+SUPABASE_SERVICE_ROLE_KEY=  # Supabase 서비스 키 (서버 전용)
+NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 ```
 
 ## Git 브랜치 전략
 
-- `main`: 프로덕션 브랜치 (Railway 자동 배포 트리거)
+- `main`/`master`: 프로덕션 브랜치 (Railway 자동 배포 트리거)
 - `dev`: 개발 브랜치
 - `feature/*`: 기능 개발 브랜치
 - `fix/*`: 버그 수정 브랜치
@@ -93,8 +126,6 @@ pnpm type-check   # TypeScript 타입 체크
 
 - 타로 카드 데이터는 `src/data/` 디렉토리에 정적으로 관리
 - 이미지 리소스는 `public/images/`에 저장
-- 사용자 프라이버시 중시 - 점술 결과는 서버에 저장하지 않음 (클라이언트 사이드 처리 우선)
-- 접근성(a11y)을 고려한 UI 구현
-- 모바일 퍼스트 반응형 디자인
+- DB 스키마는 `supabase/migrations/`에서 관리
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
