@@ -30,7 +30,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
           src={`/images/characters/${character.id}/nukki/idle.png`}
           alt={character.name}
           fill
-          className="object-contain object-bottom"
+          className="object-cover object-top"
         />
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-arcana-card/90 to-transparent" />
       </div>
