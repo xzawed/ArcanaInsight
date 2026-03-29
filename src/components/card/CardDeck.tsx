@@ -22,8 +22,8 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDi
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
         const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / 2) : 0;
-        const xOffset = isSpread ? (index - totalCards / 2) * 48 : (index - totalCards / 2) * 2;
-        const yOffset = isSpread ? Math.abs(index - totalCards / 2) * 8 : index * -0.5;
+        const xOffset = isSpread ? (index - totalCards / 2) * 42 : (index - totalCards / 2) * 2;
+        const yOffset = isSpread ? Math.abs(index - totalCards / 2) * 10 : index * -0.5;
 
         return (
           <motion.div
