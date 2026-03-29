@@ -29,32 +29,37 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // 컨테이너 크기에 맞춰 카드 크기/갯수/간격을 동적 계산
   const layout = useMemo(() => {
     if (!containerWidth || !containerHeight) {
-      return { maxDisplay: 16, spacing: 16, yOffset: 4, size: "sm" as const };
+      return { cardW: 40, cardH: 60, maxDisplay: 12, overlap: 16, yOffset: 3 };
     }
 
-    // 카드 비율 2:3 유지하여 컨테이너 높이의 70%를 카드 높이로
-    const cardHeight = Math.min(containerHeight * 0.7, 240);
-    const cardWidth = cardHeight * (2 / 3);
+    // 카드 크기: 컨테이너 높이의 65%, 2:3 비율 유지
+    let cardH = Math.min(containerHeight * 0.65, 200);
+    let cardW = cardH / 1.5;
 
-    // 카드 사이즈 결정 (sm/md/lg 중 가장 가까운 것)
-    let size: "sm" | "md" | "lg";
-    if (cardWidth >= 120) size = "md";
-    else size = "sm";
+    // 너비 상한: 컨테이너 너비의 25%를 초과하지 않도록
+    if (cardW > containerWidth * 0.25) {
+      cardW = containerWidth * 0.25;
+      cardH = cardW * 1.5;
+    }
 
-    // 사용 가능한 너비의 80%를 카드 영역으로 사용
-    const usableWidth = containerWidth * 0.85;
+    // 클램프
+    cardW = Math.max(Math.min(Math.round(cardW), 100), 32);
+    cardH = Math.round(cardW * 1.5);
 
-    // 카드 간격: 카드 겹침 팬 형태이므로, 간격 = 카드폭의 30~50%
-    const overlap = cardWidth * 0.35;
+    // 겹침 간격: 카드 너비의 35%
+    const overlap = Math.round(cardW * 0.35);
 
-    // 스크롤 없이 들어갈 수 있는 최대 카드 수
-    const maxFit = Math.floor((usableWidth + overlap) / overlap);
-    const maxDisplay = Math.min(Math.max(maxFit, 10), 24);
+    // 팬이 컨테이너 안에 들어가는 최대 카드 수
+    // 팬 너비 = (N-1) * overlap + cardW <= containerWidth * 0.92
+    const usableWidth = containerWidth * 0.92;
+    const maxFromWidth = Math.floor((usableWidth - cardW) / overlap) + 1;
+    const maxDisplay = Math.min(Math.max(maxFromWidth, 8), 24);
 
-    return { maxDisplay, spacing: overlap, yOffset: Math.max(cardHeight * 0.04, 3), size };
+    const yOffset = Math.max(cardH * 0.03, 2);
+
+    return { cardW, cardH, maxDisplay, overlap, yOffset };
   }, [containerWidth, containerHeight]);
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
@@ -67,9 +72,10 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
       {containerWidth > 0 && displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
-        const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / 3) : 0;
-        const xOffset = isSpread ? (index - totalCards / 2) * layout.spacing : (index - totalCards / 2) * 2;
-        const yOffset = isSpread ? Math.abs(index - totalCards / 2) * layout.yOffset : index * -0.5;
+        const half = totalCards / 2;
+        const angle = isSpread ? (index - half) * (180 / totalCards / 3) : 0;
+        const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 2;
+        const yOffset = isSpread ? Math.abs(index - half) * layout.yOffset : index * -0.5;
 
         return (
           <motion.div
@@ -96,7 +102,8 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
               isFlipped={false}
               isSelected={isSelected}
               onClick={() => !isSelected && onCardSelect(index)}
-              size={layout.size}
+              width={layout.cardW}
+              height={layout.cardH}
             />
           </motion.div>
         );
