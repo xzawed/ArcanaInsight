@@ -34,6 +34,7 @@ export default function TarotSessionPage() {
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
+  const [readingError, setReadingError] = useState(false);
   const resultBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function TarotSessionPage() {
   }, [shuffledDeck, selectedCards, requiredCards]);
 
   const startReading = async (cards: SelectedCard[]) => {
-    setPhase("reading"); setLoading(true); setMood("mystical");
+    setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요", mood: "mystical", timestamp: new Date() });
     const sessionId = useSessionStore.getState().sessionId;
     try {
@@ -99,6 +100,7 @@ export default function TarotSessionPage() {
       if (!response.ok || !response.body) {
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: "서버 연결에 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
         setMood("surprised");
+        setReadingError(true);
         setLoading(false);
         return;
       }
@@ -153,6 +155,7 @@ export default function TarotSessionPage() {
     } catch {
       addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
       setMood("surprised");
+      setReadingError(true);
     }
     setLoading(false);
   };
@@ -237,6 +240,27 @@ export default function TarotSessionPage() {
                     </div>
                   </div>
                 )}
+                {readingError && !isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="flex flex-col items-center gap-3">
+                      <p className="text-arcana-muted text-sm font-serif">해석에 문제가 발생했어요</p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => { setReadingError(false); startReading(selectedCards); }}
+                          className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity"
+                        >
+                          다시 시도
+                        </button>
+                        <button
+                          onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                          className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
+                        >
+                          새로운 상담
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
             {phase === "result" && (
@@ -248,11 +272,57 @@ export default function TarotSessionPage() {
               >
                 {/* 결과 메시지 목록 */}
                 <div className="space-y-3 flex-1 overflow-y-auto pr-2">
-                  {chatMessages.filter(m => m.role === "character").map((msg) => (
-                    <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
-                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    </div>
-                  ))}
+                  {chatMessages.filter(m => m.role === "character").map((msg) => {
+                    // 카드 해석 메시지 (위치 라벨로 시작하는 메시지)
+                    const cardMatch = msg.content.match(/^\[(.+?)\]\s*(.+?)\n\n([\s\S]+)$/);
+                    // 종합 해석 메시지
+                    const isOverall = msg.content.startsWith("종합 해석\n\n");
+                    // 조언 메시지
+                    const isAdvice = msg.content.startsWith("조언\n\n");
+
+                    if (cardMatch) {
+                      const [, posLabel, cardName, interpretation] = cardMatch;
+                      return (
+                        <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
+                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-arcana-border/50">
+                            <span className="text-arcana-gold text-xs font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
+                            <span className="text-arcana-text font-bold text-sm">{cardName}</span>
+                          </div>
+                          <p className="text-arcana-text text-sm leading-relaxed">{interpretation}</p>
+                        </div>
+                      );
+                    }
+
+                    if (isOverall) {
+                      return (
+                        <div key={msg.id} className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">🔮</span>
+                            <span className="text-arcana-purple font-serif font-bold">종합 해석</span>
+                          </div>
+                          <p className="text-arcana-text text-sm leading-relaxed">{msg.content.replace("종합 해석\n\n", "")}</p>
+                        </div>
+                      );
+                    }
+
+                    if (isAdvice) {
+                      return (
+                        <div key={msg.id} className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">✨</span>
+                            <span className="text-arcana-gold font-serif font-bold">조언</span>
+                          </div>
+                          <p className="text-arcana-text text-sm leading-relaxed">{msg.content.replace("조언\n\n", "")}</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
+                        <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    );
+                  })}
                   <div ref={resultBottomRef} />
                 </div>
 
@@ -268,7 +338,21 @@ export default function TarotSessionPage() {
                   >
                     새로운 상담
                   </button>
-                  <button className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
+                  <button
+                    onClick={async () => {
+                      const result = useSessionStore.getState().readingResult;
+                      const shareToken = result?.shareToken;
+                      if (!shareToken) return;
+                      const url = `${window.location.origin}/tarot/result/${shareToken}`;
+                      const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ArcanaInsight`;
+                      if (navigator.share) {
+                        try { await navigator.share({ title: "타로 리딩 결과 - ArcanaInsight", text, url }); } catch { /* 취소 */ }
+                      } else {
+                        try { await navigator.clipboard.writeText(`${text}\n${url}`); } catch { /* 실패 */ }
+                      }
+                    }}
+                    className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
+                  >
                     결과 공유하기
                   </button>
                 </div>

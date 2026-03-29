@@ -33,19 +33,32 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
           >
             {selectedCard ? (
-              <div className="flex flex-col items-center gap-1">
-                <CardItem
-                  card={selectedCard.card}
-                  isFlipped={isRevealed}
-                  isSelected={true}
-                  isReversed={selectedCard.isReversed}
-                  size="sm"
-                />
-                <span className="text-arcana-gold/70 text-[10px] md:text-xs font-serif">{pos.labelKo}</span>
+              <div className="flex flex-col items-center gap-1.5">
+                {/* 카드 공개 시 글로우 펄스 애니메이션 */}
+                <div className="relative">
+                  {isRevealed && (
+                    <motion.div
+                      className="absolute -inset-2 rounded-xl bg-arcana-gold/20 blur-md"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.1, 1] }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
+                    />
+                  )}
+                  <CardItem
+                    card={selectedCard.card}
+                    isFlipped={isRevealed}
+                    isSelected={true}
+                    isReversed={selectedCard.isReversed}
+                    size="sm"
+                  />
+                </div>
+                <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)]">
+                  {pos.labelKo}
+                </span>
               </div>
             ) : (
               <div className="w-16 h-24 md:w-24 md:h-36 rounded-lg border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5">
-                <span className="text-arcana-muted text-[10px] md:text-xs font-serif">{pos.labelKo}</span>
+                <span className="text-arcana-gold/60 text-xs md:text-sm font-serif font-bold">{pos.labelKo}</span>
               </div>
             )}
           </motion.div>

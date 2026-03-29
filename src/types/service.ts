@@ -6,6 +6,7 @@ export interface ReadingResult {
   cardInterpretations: { cardId: string; position: number; interpretation: string; }[];
   overallReading: string;
   advice: string;
+  shareToken?: string | null;
 }
 
 export interface SessionContext {

@@ -43,12 +43,13 @@ export async function POST(request: NextRequest) {
           await supabase.from("session_cards").insert(
             cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
           );
-          await supabase.from("readings").insert({
+          const { data: readingData } = await supabase.from("readings").insert({
             session_id: sessionId, card_interpretation: result.cardInterpretations,
             overall_reading: result.overallReading, advice: result.advice,
-          });
+          }).select("share_token").single();
           await supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
+          const shareToken = readingData?.share_token ?? null;
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
         } catch {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Reading generation failed" })}\n\n`));
         }
