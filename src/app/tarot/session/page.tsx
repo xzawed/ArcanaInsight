@@ -24,7 +24,7 @@ export default function TarotSessionPage() {
   const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
-    phase, topic, characterId, requiredCards, selectedCards, chatMessages, isLoading,
+    phase, topic, characterId, requiredCards, selectedCards, chatMessages, readingResult, isLoading,
     setPhase, setSessionId, setAvailableCards,
     selectCard, addChatMessage, setReadingResult, setLoading,
   } = useSessionStore();
@@ -263,66 +263,52 @@ export default function TarotSessionPage() {
                 )}
               </motion.div>
             )}
-            {phase === "result" && (
+            {phase === "result" && readingResult && (
               <motion.div
                 key="result"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full flex-1 flex flex-col overflow-y-auto py-4"
               >
-                {/* 결과 메시지 목록 */}
+                {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
                 <div className="space-y-3 flex-1 overflow-y-auto pr-2">
-                  {chatMessages.filter(m => m.role === "character").map((msg) => {
-                    // 카드 해석 메시지 (위치 라벨로 시작하는 메시지)
-                    const cardMatch = msg.content.match(/^\[(.+?)\]\s*(.+?)\n\n([\s\S]+)$/);
-                    // 종합 해석 메시지
-                    const isOverall = msg.content.startsWith("종합 해석\n\n");
-                    // 조언 메시지
-                    const isAdvice = msg.content.startsWith("조언\n\n");
-
-                    if (cardMatch) {
-                      const [, posLabel, cardName, interpretation] = cardMatch;
-                      return (
-                        <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
-                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-arcana-border/50">
-                            <span className="text-arcana-gold text-xs font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
-                            <span className="text-arcana-text font-bold text-sm">{cardName}</span>
-                          </div>
-                          <p className="text-arcana-text text-sm leading-relaxed">{interpretation}</p>
-                        </div>
-                      );
-                    }
-
-                    if (isOverall) {
-                      return (
-                        <div key={msg.id} className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">🔮</span>
-                            <span className="text-arcana-purple font-serif font-bold">종합 해석</span>
-                          </div>
-                          <p className="text-arcana-text text-sm leading-relaxed">{msg.content.replace("종합 해석\n\n", "")}</p>
-                        </div>
-                      );
-                    }
-
-                    if (isAdvice) {
-                      return (
-                        <div key={msg.id} className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">✨</span>
-                            <span className="text-arcana-gold font-serif font-bold">조언</span>
-                          </div>
-                          <p className="text-arcana-text text-sm leading-relaxed">{msg.content.replace("조언\n\n", "")}</p>
-                        </div>
-                      );
-                    }
-
+                  {/* 카드별 해석 */}
+                  {readingResult.cardInterpretations?.map((interp, i) => {
+                    const card = selectedCards.find(c => c.card.id === interp.cardId);
+                    const posLabel = spread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
                     return (
-                      <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
-                        <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      <div key={`card-${i}`} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-arcana-border/50">
+                          <span className="text-arcana-gold text-xs font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
+                          <span className="text-arcana-text font-bold text-sm">{card?.card.nameKo || ""}</span>
+                        </div>
+                        <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
                       </div>
                     );
                   })}
+
+                  {/* 종합 해석 */}
+                  {readingResult.overallReading && (
+                    <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">🔮</span>
+                        <span className="text-arcana-purple font-serif font-bold">종합 해석</span>
+                      </div>
+                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{readingResult.overallReading}</p>
+                    </div>
+                  )}
+
+                  {/* 조언 */}
+                  {readingResult.advice && (
+                    <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">✨</span>
+                        <span className="text-arcana-gold font-serif font-bold">조언</span>
+                      </div>
+                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{readingResult.advice}</p>
+                    </div>
+                  )}
+
                   <div ref={resultBottomRef} />
                 </div>
 
