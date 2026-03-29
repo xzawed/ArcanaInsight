@@ -86,8 +86,8 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
         {!isLooping && enterAnim ? (
           <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
             className="relative w-full h-full">
-            <Image src={imageSrc} alt="character" fill sizes="40vw"
-              className="object-contain object-bottom" priority />
+            <Image src={imageSrc} alt="character" fill sizes="50vw"
+              className="object-contain object-center" priority />
           </motion.div>
         ) : (
           <motion.div
@@ -95,8 +95,8 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
             transition={{ duration: mood === "mystical" ? 4 : 3, repeat: Infinity, ease: "easeInOut" }}
             className="relative w-full h-full"
           >
-            <Image src={imageSrc} alt="character" fill sizes="40vw"
-              className="object-contain object-bottom" priority />
+            <Image src={imageSrc} alt="character" fill sizes="50vw"
+              className="object-contain object-center" priority />
           </motion.div>
         )}
       </motion.div>
