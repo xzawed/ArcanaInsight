@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,6 +34,7 @@ export default function TarotSessionPage() {
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
+  const resultBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!topic || !character) { router.push("/tarot"); return; }
@@ -156,8 +157,14 @@ export default function TarotSessionPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (phase === "result") {
+      resultBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, phase]);
+
   const spread = topic ? getSpreadForTopic(topic) : null;
-  const particleDensity = phase === "reading" || phase === "result" ? "high" : "medium";
+  const particleDensity = phase === "reading" ? "high" : phase === "result" ? "low" : "medium";
 
   return (
     <div className="relative h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
@@ -177,13 +184,22 @@ export default function TarotSessionPage() {
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 좌측 50% */}
         {character && (
-          <div className={`${phase === "result" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden`}>
+          <div className={`${phase === "result" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden transition-all duration-500`}>
             <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
           </div>
         )}
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
+          {phase === "card-select" && (
+            <button
+              onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+              className="self-start mb-2 text-arcana-muted text-xs hover:text-arcana-purple transition-colors"
+              type="button"
+            >
+              ← 상담사 다시 선택
+            </button>
+          )}
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
               <motion.div
@@ -206,13 +222,21 @@ export default function TarotSessionPage() {
                 key="spread"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto"
+                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto relative"
               >
                 <CardSpread
                   selectedCards={selectedCards}
                   spread={spread}
                   revealedPositions={revealedPositions}
                 />
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-10 h-10 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
+                      <p className="text-arcana-muted text-xs font-serif">카드를 해석하고 있어요...</p>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
             {phase === "result" && (
@@ -229,6 +253,7 @@ export default function TarotSessionPage() {
                       <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                     </div>
                   ))}
+                  <div ref={resultBottomRef} />
                 </div>
 
                 {/* 액션 버튼 */}
