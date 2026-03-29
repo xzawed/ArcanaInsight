@@ -12,8 +12,8 @@ const deckManager = new DeckManager();
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, topic, cards } = (await request.json()) as {
-      sessionId: string; topic: Topic;
+    const { sessionId, topic, characterId, cards } = (await request.json()) as {
+      sessionId: string; topic: Topic; characterId?: string;
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
     const selectedCards: SelectedCard[] = cards.map((c) => {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       if (!card) throw new Error(`Card not found: ${c.cardId}`);
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
-    const systemPrompt = tarotService.getSystemPrompt();
+    const systemPrompt = tarotService.getSystemPrompt(characterId);
     const readingPrompt = tarotService.getReadingPrompt({
       session: { id: sessionId, userId: null, serviceType: "tarot", topic, status: "in_progress",
         spreadType: "three-card", selectedCards, createdAt: new Date(), completedAt: null },

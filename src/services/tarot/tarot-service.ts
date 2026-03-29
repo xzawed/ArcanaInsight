@@ -1,7 +1,7 @@
 import { DivinationService, ReadingResult, SessionContext } from "@/types/service";
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic } from "@/types/session";
-import { getCharacterByService } from "@/data/characters";
+import { getCharacterByService, getCharacterById } from "@/data/characters";
 import { buildSystemPrompt, buildReadingPrompt } from "@/services/core/prompt-builder";
 import { SpreadResolver } from "./spread-resolver";
 
@@ -21,7 +21,12 @@ export class TarotService implements DivinationService {
     return { userId: null, serviceType: this.id, topic, status: "in_progress", spreadType: spread.type, selectedCards: [], completedAt: null };
   }
 
-  getSystemPrompt(): string { return buildSystemPrompt(this.getCharacter()); }
+  getSystemPrompt(characterId?: string): string {
+    const character = characterId
+      ? getCharacterById(characterId) ?? this.getCharacter()
+      : this.getCharacter();
+    return buildSystemPrompt(character);
+  }
 
   getReadingPrompt(context: SessionContext): string {
     const spread = this.spreadResolver.resolveForTopic(context.topic);
