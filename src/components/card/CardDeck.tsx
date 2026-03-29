@@ -31,36 +31,47 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
 
   const layout = useMemo(() => {
     if (!containerWidth || !containerHeight) {
-      return { cardW: 40, cardH: 60, maxDisplay: 12, overlap: 16, yOffset: 3 };
+      return { cardW: 40, cardH: 60, maxDisplay: 12, overlap: 5, yOffset: 2 };
     }
 
-    // 카드 크기: 컨테이너 높이의 65%, 2:3 비율 유지
-    let cardH = Math.min(containerHeight * 0.65, 200);
+    // 카드 크기: 컨테이너 높이의 55%, 2:3 비율
+    let cardH = Math.min(containerHeight * 0.55, 160);
     let cardW = cardH / 1.5;
 
-    // 너비 상한: 컨테이너 너비의 25%를 초과하지 않도록
-    if (cardW > containerWidth * 0.25) {
-      cardW = containerWidth * 0.25;
-      cardH = cardW * 1.5;
-    }
-
     // 클램프
-    cardW = Math.max(Math.min(Math.round(cardW), 100), 32);
+    cardW = Math.max(Math.min(Math.round(cardW), 100), 28);
     cardH = Math.round(cardW * 1.5);
 
-    // 겹침 간격: 카드 너비의 35%
-    const overlap = Math.round(cardW * 0.35);
+    // 사용 가능 너비 (양쪽 약간 여유)
+    const usableWidth = containerWidth * 0.94;
 
-    // 팬이 컨테이너 안에 들어가는 최대 카드 수
-    // 팬 너비 = (N-1) * overlap + cardW <= containerWidth * 0.92
-    const usableWidth = containerWidth * 0.92;
-    const maxFromWidth = Math.floor((usableWidth - cardW) / overlap) + 1;
-    const maxDisplay = Math.min(Math.max(maxFromWidth, 8), 24);
+    // 전체 카드를 넣을 수 있는 겹침 간격 계산
+    const totalCards = cards.length;
+    // overlap = (usableWidth - cardW) / (totalCards - 1)
+    const idealOverlap = totalCards > 1
+      ? (usableWidth - cardW) / (totalCards - 1)
+      : 0;
 
-    const yOffset = Math.max(cardH * 0.03, 2);
+    // 최소 겹침: 카드 사이 3px 이상은 보여야 터치/클릭 가능
+    const MIN_OVERLAP = 3;
+
+    let overlap: number;
+    let maxDisplay: number;
+
+    if (idealOverlap >= MIN_OVERLAP) {
+      // 전체 카드가 들어감
+      overlap = Math.round(idealOverlap);
+      maxDisplay = totalCards;
+    } else {
+      // 너비 부족 → 최소 겹침으로 가능한 최대 수
+      overlap = MIN_OVERLAP;
+      maxDisplay = Math.floor((usableWidth - cardW) / overlap) + 1;
+    }
+
+    const yOffset = Math.max(cardH * 0.02, 1);
 
     return { cardW, cardH, maxDisplay, overlap, yOffset };
-  }, [containerWidth, containerHeight]);
+  }, [containerWidth, containerHeight, cards.length]);
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
 
@@ -73,9 +84,13 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
         const half = totalCards / 2;
-        const angle = isSpread ? (index - half) * (180 / totalCards / 3) : 0;
-        const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 2;
-        const yOffset = isSpread ? Math.abs(index - half) * layout.yOffset : index * -0.5;
+        // 아크 각도: 카드 수에 따라 조절 (많으면 총 각도 넓게, 개별 각도는 좁게)
+        const maxArc = Math.min(totalCards * 1.2, 60); // 최대 60도 범위
+        const angle = isSpread ? (index - half) * (maxArc / totalCards) : 0;
+        const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 1.5;
+        const yOffset = isSpread
+          ? Math.pow(Math.abs(index - half) / half, 2) * layout.cardH * 0.25
+          : index * -0.3;
 
         return (
           <motion.div
@@ -92,7 +107,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
               type: "spring",
               stiffness: 120,
               damping: 18,
-              delay: isSpread ? index * 0.04 : 0,
+              delay: isSpread ? index * 0.015 : 0,
             }}
             className="absolute"
             style={{ zIndex: isSelected ? 0 : index }}
