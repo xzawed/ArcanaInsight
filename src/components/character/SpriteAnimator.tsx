@@ -1,25 +1,49 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mood } from "@/types/character";
 
-interface SpriteConfig {
+interface MoodConfig {
   src: string;
-  frameCount: number;
-  frameWidth: number;
-  frameHeight: number;
-  duration: number;
   loop: boolean;
+  /** 1회 재생 동작의 표시 시간 (ms) — loop 동작은 무시 */
+  displayDuration: number;
 }
 
-const SPRITE_CONFIGS: Record<Mood, SpriteConfig> = {
-  default: { src: "/images/characters/arcana/sprites/idle.svg", frameCount: 6, frameWidth: 512, frameHeight: 768, duration: 1200, loop: true },
-  smile: { src: "/images/characters/arcana/sprites/happy.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  serious: { src: "/images/characters/arcana/sprites/serious.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  surprised: { src: "/images/characters/arcana/sprites/surprised.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 600, loop: false },
-  wink: { src: "/images/characters/arcana/sprites/happy.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  mystical: { src: "/images/characters/arcana/sprites/mystical.svg", frameCount: 8, frameWidth: 512, frameHeight: 768, duration: 1600, loop: true },
+const MOOD_CONFIGS: Record<Mood, MoodConfig> = {
+  default: { src: "/images/characters/arcana/sprites/idle.png", loop: true, displayDuration: 0 },
+  smile: { src: "/images/characters/arcana/sprites/happy.png", loop: false, displayDuration: 2000 },
+  serious: { src: "/images/characters/arcana/sprites/serious.png", loop: false, displayDuration: 2000 },
+  surprised: { src: "/images/characters/arcana/sprites/surprised.png", loop: false, displayDuration: 1500 },
+  wink: { src: "/images/characters/arcana/sprites/happy.png", loop: false, displayDuration: 1500 },
+  mystical: { src: "/images/characters/arcana/sprites/mystical.png", loop: true, displayDuration: 0 },
+};
+
+// 루프 동작별 미세 모션 정의
+const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
+  default: {
+    y: [0, -6, 0],
+    scale: [1, 1.01, 1],
+  },
+  mystical: {
+    y: [0, -10, 0],
+    scale: [1, 1.02, 1],
+    filter: [
+      "drop-shadow(0 0 8px rgba(139,92,246,0.3))",
+      "drop-shadow(0 0 20px rgba(139,92,246,0.6))",
+      "drop-shadow(0 0 8px rgba(139,92,246,0.3))",
+    ],
+  },
+};
+
+// 1회 재생 동작 진입 모션
+const ENTER_MOTION: Record<string, Record<string, number[]>> = {
+  smile: { scale: [0.95, 1.03, 1], y: [5, -3, 0] },
+  serious: { scale: [1, 0.98, 1], y: [0, 2, 0] },
+  surprised: { scale: [0.9, 1.05, 1], y: [10, -5, 0] },
+  wink: { scale: [0.95, 1.02, 1], y: [3, -2, 0] },
 };
 
 interface SpriteAnimatorProps {
@@ -29,75 +53,68 @@ interface SpriteAnimatorProps {
 }
 
 export function SpriteAnimator({ mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
-  const frameRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lastTimeRef = useRef(0);
+  const config = MOOD_CONFIGS[mood];
 
-  const config = SPRITE_CONFIGS[mood];
-
+  // 1회 재생 동작 → displayDuration 후 onAnimationEnd 호출
   useEffect(() => {
-    frameRef.current = 0;
-    lastTimeRef.current = 0;
+    if (config.loop || !onAnimationEnd) return;
 
-    const frameDuration = config.duration / config.frameCount;
+    const timer = setTimeout(() => {
+      onAnimationEnd();
+    }, config.displayDuration);
 
-    const animate = (timestamp: number) => {
-      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const elapsed = timestamp - lastTimeRef.current;
-
-      if (elapsed >= frameDuration) {
-        frameRef.current++;
-        lastTimeRef.current = timestamp;
-
-        if (frameRef.current >= config.frameCount) {
-          if (config.loop) {
-            frameRef.current = 0;
-          } else {
-            frameRef.current = config.frameCount - 1;
-            onAnimationEnd?.();
-            return;
-          }
-        }
-
-        if (containerRef.current) {
-          const offsetX = -(frameRef.current * config.frameWidth);
-          containerRef.current.style.backgroundPosition = `${offsetX}px 0`;
-        }
-      }
-
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => clearTimeout(timer);
   }, [mood, config, onAnimationEnd]);
+
+  const isLooping = config.loop;
+  const loopAnim = LOOP_MOTION[mood] ?? LOOP_MOTION.default;
+  const enterAnim = ENTER_MOTION[mood];
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={mood}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className={className}
       >
-        <div
-          ref={containerRef}
-          className={`${className}`}
-          style={{
-            width: config.frameWidth,
-            height: config.frameHeight,
-            backgroundImage: `url(${config.src})`,
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "0 0",
-            backgroundSize: `${config.frameWidth * config.frameCount}px ${config.frameHeight}px`,
-            imageRendering: "auto",
-          }}
-        />
+        {/* 1회 재생 동작 진입 모션 */}
+        {!isLooping && enterAnim ? (
+          <motion.div
+            animate={enterAnim}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Image
+              src={config.src}
+              alt="character"
+              width={512}
+              height={768}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </motion.div>
+        ) : (
+          /* 루프 동작 — 호흡/부유 미세 모션 */
+          <motion.div
+            animate={loopAnim}
+            transition={{
+              duration: mood === "mystical" ? 4 : 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <Image
+              src={config.src}
+              alt="character"
+              width={512}
+              height={768}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </motion.div>
+        )}
       </motion.div>
     </AnimatePresence>
   );
