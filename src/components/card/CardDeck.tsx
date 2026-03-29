@@ -13,11 +13,11 @@ interface CardDeckProps {
   maxDisplay?: number;
 }
 
-export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDisplay = 12 }: CardDeckProps) {
+export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDisplay = 18 }: CardDeckProps) {
   const displayCards = useMemo(() => cards.slice(0, maxDisplay), [cards, maxDisplay]);
 
-  const cardSpacing = 24;
-  const cardYOffset = 6;
+  const cardSpacing = 18;
+  const cardYOffset = 5;
 
   return (
     <div className="relative w-full flex items-center justify-center min-h-[180px] md:min-h-[300px] overflow-hidden">
