@@ -6,7 +6,7 @@ interface CardBackProps {
 }
 
 const sizeDimensions = {
-  sm: { w: 48, h: 72 },
+  sm: { w: 40, h: 60 },
   md: { w: 96, h: 144 },
   lg: { w: 128, h: 192 },
 };
