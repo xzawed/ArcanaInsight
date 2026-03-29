@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="768" viewBox="0 0 2048 768">
+  <rect width="2048" height="768" fill="#1a0a3e"/>
+  <g fill="none" stroke="#8b5cf6" stroke-width="2">
+    <circle cx="256" cy="300" r="60"/>
+    <circle cx="768" cy="300" r="60"/>
+    <circle cx="1280" cy="300" r="60"/>
+    <circle cx="1792" cy="300" r="60"/>
+  </g>
+  <g fill="#8b5cf6" font-size="20" text-anchor="middle">
+    <text x="256" y="310">SERIOUS 1</text>
+    <text x="768" y="310">SERIOUS 2</text>
+    <text x="1280" y="310">SERIOUS 3</text>
+    <text x="1792" y="310">SERIOUS 4</text>
+  </g>
+</svg>

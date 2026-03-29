@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3072" height="768" viewBox="0 0 3072 768">
+  <rect width="3072" height="768" fill="#1a0a3e"/>
+  <g fill="none" stroke="#8b5cf6" stroke-width="2">
+    <circle cx="256" cy="300" r="60"/>
+    <circle cx="768" cy="300" r="60"/>
+    <circle cx="1280" cy="300" r="60"/>
+    <circle cx="1792" cy="300" r="60"/>
+    <circle cx="2304" cy="300" r="60"/>
+    <circle cx="2816" cy="300" r="60"/>
+  </g>
+  <g fill="#8b5cf6" font-size="20" text-anchor="middle">
+    <text x="256" y="310">IDLE 1</text>
+    <text x="768" y="310">IDLE 2</text>
+    <text x="1280" y="310">IDLE 3</text>
+    <text x="1792" y="310">IDLE 4</text>
+    <text x="2304" y="310">IDLE 5</text>
+    <text x="2816" y="310">IDLE 6</text>
+  </g>
+</svg>

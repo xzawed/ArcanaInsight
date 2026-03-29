@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4096" height="768" viewBox="0 0 4096 768">
+  <rect width="4096" height="768" fill="#1a0a3e"/>
+  <g fill="none" stroke="#8b5cf6" stroke-width="2">
+    <circle cx="256" cy="300" r="60"/>
+    <circle cx="768" cy="300" r="60"/>
+    <circle cx="1280" cy="300" r="60"/>
+    <circle cx="1792" cy="300" r="60"/>
+    <circle cx="2304" cy="300" r="60"/>
+    <circle cx="2816" cy="300" r="60"/>
+    <circle cx="3328" cy="300" r="60"/>
+    <circle cx="3840" cy="300" r="60"/>
+  </g>
+  <g fill="#8b5cf6" font-size="20" text-anchor="middle">
+    <text x="256" y="310">MYSTIC 1</text>
+    <text x="768" y="310">MYSTIC 2</text>
+    <text x="1280" y="310">MYSTIC 3</text>
+    <text x="1792" y="310">MYSTIC 4</text>
+    <text x="2304" y="310">MYSTIC 5</text>
+    <text x="2816" y="310">MYSTIC 6</text>
+    <text x="3328" y="310">MYSTIC 7</text>
+    <text x="3840" y="310">MYSTIC 8</text>
+  </g>
+</svg>

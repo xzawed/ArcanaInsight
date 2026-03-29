@@ -14,12 +14,12 @@ interface SpriteConfig {
 }
 
 const SPRITE_CONFIGS: Record<Mood, SpriteConfig> = {
-  default: { src: "/images/characters/arcana/sprites/idle.png", frameCount: 6, frameWidth: 512, frameHeight: 768, duration: 1200, loop: true },
-  smile: { src: "/images/characters/arcana/sprites/happy.png", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  serious: { src: "/images/characters/arcana/sprites/serious.png", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  surprised: { src: "/images/characters/arcana/sprites/surprised.png", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 600, loop: false },
-  wink: { src: "/images/characters/arcana/sprites/happy.png", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
-  mystical: { src: "/images/characters/arcana/sprites/mystical.png", frameCount: 8, frameWidth: 512, frameHeight: 768, duration: 1600, loop: true },
+  default: { src: "/images/characters/arcana/sprites/idle.svg", frameCount: 6, frameWidth: 512, frameHeight: 768, duration: 1200, loop: true },
+  smile: { src: "/images/characters/arcana/sprites/happy.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
+  serious: { src: "/images/characters/arcana/sprites/serious.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
+  surprised: { src: "/images/characters/arcana/sprites/surprised.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 600, loop: false },
+  wink: { src: "/images/characters/arcana/sprites/happy.svg", frameCount: 4, frameWidth: 512, frameHeight: 768, duration: 800, loop: false },
+  mystical: { src: "/images/characters/arcana/sprites/mystical.svg", frameCount: 8, frameWidth: 512, frameHeight: 768, duration: 1600, loop: true },
 };
 
 interface SpriteAnimatorProps {
