@@ -87,7 +87,7 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
           <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
             className="relative w-full h-full">
             <Image src={imageSrc} alt="character" fill sizes="40vw"
-              className="object-cover object-top" priority />
+              className="object-contain object-bottom" priority />
           </motion.div>
         ) : (
           <motion.div
@@ -96,7 +96,7 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
             className="relative w-full h-full"
           >
             <Image src={imageSrc} alt="character" fill sizes="40vw"
-              className="object-cover object-top" priority />
+              className="object-contain object-bottom" priority />
           </motion.div>
         )}
       </motion.div>
