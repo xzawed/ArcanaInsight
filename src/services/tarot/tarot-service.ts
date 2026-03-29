@@ -34,11 +34,38 @@ export class TarotService implements DivinationService {
   }
 
   parseResult(aiResponse: string): ReadingResult {
+    // AI 응답에서 JSON 부분 추출 (마크다운 코드블록, 앞뒤 텍스트 제거)
+    let jsonStr = aiResponse.trim();
+
+    // ```json ... ``` 코드블록 제거
+    const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1].trim();
+    }
+
+    // JSON 객체 부분만 추출 ({ ... } 찾기)
+    const jsonObjMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (jsonObjMatch) {
+      jsonStr = jsonObjMatch[0];
+    }
+
     try {
-      const parsed = JSON.parse(aiResponse);
-      return { cardInterpretations: parsed.cardInterpretations || [], overallReading: parsed.overallReading || "", advice: parsed.advice || "" };
+      const parsed = JSON.parse(jsonStr);
+      return {
+        cardInterpretations: parsed.cardInterpretations || [],
+        overallReading: parsed.overallReading || "",
+        advice: parsed.advice || "",
+      };
     } catch {
-      return { cardInterpretations: [], overallReading: aiResponse, advice: "" };
+      // JSON 파싱 실패 시 코드/태그 제거 후 텍스트만 표시
+      const cleanText = aiResponse
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/[{}[\]"]/g, "")
+        .replace(/cardInterpretations|cardId|position|interpretation|overallReading|advice/g, "")
+        .replace(/:\s*,/g, "")
+        .replace(/,\s*,/g, "")
+        .trim();
+      return { cardInterpretations: [], overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.", advice: "" };
     }
   }
 }
