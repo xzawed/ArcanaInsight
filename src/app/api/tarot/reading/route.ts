@@ -6,6 +6,7 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
+import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
 
 const tarotService = new TarotService();
 const grokProvider = new GrokProvider();
@@ -14,8 +15,9 @@ const spreadResolver = new SpreadResolver();
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, topic, characterId, cards } = (await request.json()) as {
+    const { sessionId, topic, characterId, userInfo, cards } = (await request.json()) as {
       sessionId: string; topic: Topic; characterId?: string;
+      userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
     const selectedCards: SelectedCard[] = cards.map((c) => {
@@ -24,6 +26,7 @@ export async function POST(request: NextRequest) {
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
     const systemPrompt = tarotService.getSystemPrompt(characterId);
+    const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const readingPrompt = tarotService.getReadingPrompt({
       session: { id: sessionId, userId: null, serviceType: "tarot", topic, status: "in_progress",
         spreadType: spreadResolver.resolveForTopic(topic).type, selectedCards, createdAt: new Date(), completedAt: null },
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt)) {
+          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }

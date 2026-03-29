@@ -51,3 +51,10 @@ ${cardDescriptions}
 
 위 카드들의 조합을 해석해주세요.`;
 }
+
+export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string; gender: string; birthHour: string } | null): string {
+  if (!userInfo) return "";
+  const genderMap: Record<string, string> = { male: "남성", female: "여성", other: "기타" };
+  const birthHourMap: Record<string, string> = { unknown: "모름" };
+  return `\n\n상담자 정보:\n- 이름: ${userInfo.name}\n- 생년월일: ${userInfo.birthDate}\n- 성별: ${genderMap[userInfo.gender] || userInfo.gender}\n- 태어난 시: ${birthHourMap[userInfo.birthHour] || userInfo.birthHour}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
+}

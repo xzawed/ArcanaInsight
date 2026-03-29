@@ -95,7 +95,7 @@ export default function TarotSessionPage() {
     try {
       const response = await fetch("/api/tarot/reading", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, topic, characterId, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
+        body: JSON.stringify({ sessionId, topic, characterId, userInfo: useSessionStore.getState().userInfo, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
       });
       if (!response.ok || !response.body) {
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: "서버 연결에 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });

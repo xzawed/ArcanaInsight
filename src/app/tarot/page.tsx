@@ -6,10 +6,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Topic } from "@/types/session";
 import { useSessionStore } from "@/hooks/useSession";
+import { UserInfo } from "@/hooks/useSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { UserInfoForm, UserInfoData } from "@/components/tarot/UserInfoForm";
 import { getAvailableCharacters } from "@/data/characters";
 import { getSpreadForTopic } from "@/data/spreads";
 import { CharacterConfig } from "@/types/character";
@@ -23,7 +25,7 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "general", label: "일반 상담", icon: "✨", desc: "자유로운 주제의 종합 상담" },
 ];
 
-type PageStep = "character-select" | "character-detail" | "topic-select";
+type PageStep = "character-select" | "character-detail" | "topic-select" | "user-info";
 
 export default function TarotPage() {
   const router = useRouter();
@@ -55,18 +57,28 @@ export default function TarotPage() {
     const spread = getSpreadForTopic(topic);
     setTopic(topic);
     setSpreadType(spread.type, spread.positions.length);
+    setStep("user-info");
+  };
+
+  const handleUserInfoSubmit = (data: UserInfoData) => {
+    useSessionStore.getState().setUserInfo({
+      name: data.name,
+      birthDate: data.birthDate,
+      gender: data.gender as UserInfo["gender"],
+      birthHour: data.birthHour,
+    });
     setPhase("card-shuffle");
     router.push("/tarot/session");
   };
 
   const handleBack = () => {
-    if (step === "topic-select") {
-      // 주제 선택에서 뒤로가면 캐릭터 선택으로 (설명 건너뜀)
+    if (step === "user-info") {
+      setStep("topic-select");
+    } else if (step === "topic-select") {
       setStep("character-select");
       setSelectedCharacter(null);
       setDialogueMessages([]);
     } else {
-      // 캐릭터 설명에서 뒤로가면 캐릭터 선택으로
       setStep("character-select");
       setSelectedCharacter(null);
       setDialogueMessages([]);
@@ -182,7 +194,7 @@ export default function TarotPage() {
               </div>
             </div>
           </motion.div>
-        ) : (
+        ) : step === "topic-select" ? (
           <motion.div
             key="topic-select"
             initial={{ opacity: 0, x: 50 }}
@@ -242,7 +254,37 @@ export default function TarotPage() {
               </div>
             </div>
           </motion.div>
-        )}
+        ) : step === "user-info" ? (
+          <motion.div
+            key="user-info"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+          >
+            {/* 캐릭터 */}
+            {selectedCharacter && (
+              <div className="h-[35%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
+                <div className="absolute inset-0 overflow-hidden">
+                  <CharacterDisplay
+                    character={selectedCharacter}
+                    mood="default"
+                    className="w-full h-full"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 폼 */}
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-10 py-4 md:py-6 overflow-y-auto">
+              <UserInfoForm
+                onSubmit={handleUserInfoSubmit}
+                onBack={() => setStep("topic-select")}
+                characterName={selectedCharacter?.name}
+              />
+            </div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
     </div>
   );
