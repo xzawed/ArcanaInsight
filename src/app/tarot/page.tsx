@@ -18,7 +18,8 @@ import { CharacterConfig } from "@/types/character";
 import { ChatMessage } from "@/types/session";
 
 const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
-  { id: "love", label: "연애/관계", icon: "💕", desc: "사랑과 인간관계에 대한 상담" },
+  { id: "love-single", label: "연애 (솔로)", icon: "💝", desc: "새로운 만남과 인연에 대한 상담" },
+  { id: "love-couple", label: "연애 (커플)", icon: "💑", desc: "현재 관계의 발전과 미래에 대한 상담" },
   { id: "career", label: "직장/진로", icon: "💼", desc: "커리어와 진로에 대한 조언" },
   { id: "finance", label: "재정/금전", icon: "💰", desc: "돈과 재정 상황에 대한 통찰" },
   { id: "health", label: "건강", icon: "🌿", desc: "건강과 웰빙에 대한 가이드" },

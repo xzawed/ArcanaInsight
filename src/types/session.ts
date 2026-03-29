@@ -1,6 +1,6 @@
 import { SelectedCard } from "./card";
 
-export type Topic = "love" | "finance" | "career" | "health" | "general";
+export type Topic = "love" | "love-single" | "love-couple" | "finance" | "career" | "health" | "general";
 export type SpreadType = "one-card" | "three-card" | "five-card";
 export type SessionStatus = "in_progress" | "completed" | "abandoned";
 

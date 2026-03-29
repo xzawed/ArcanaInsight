@@ -19,7 +19,7 @@ export class GrokProvider implements AIProvider {
       body: JSON.stringify({
         model: this.model,
         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-        temperature: 0.8, max_tokens: 2000,
+        temperature: 0.8, max_tokens: 4000,
       }),
     });
     if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
@@ -34,7 +34,7 @@ export class GrokProvider implements AIProvider {
       body: JSON.stringify({
         model: this.model,
         messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-        temperature: 0.8, max_tokens: 2000, stream: true,
+        temperature: 0.8, max_tokens: 4000, stream: true,
       }),
     });
     if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }

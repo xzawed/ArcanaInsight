@@ -29,7 +29,8 @@ export const spreads: Record<SpreadType, SpreadDefinition> = {
 };
 
 export const topicToSpread: Record<Topic, SpreadType> = {
-  love: "three-card", general: "three-card", health: "one-card",
+  love: "three-card", "love-single": "three-card", "love-couple": "three-card",
+  general: "three-card", health: "one-card",
   finance: "five-card", career: "five-card",
 };
 
