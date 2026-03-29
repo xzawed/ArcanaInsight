@@ -2,6 +2,8 @@
 
 애니메이션 캐릭터와 대화하며 타로 리딩을 받는 운세 종합 콘텐츠 플랫폼
 
+**운영 URL**: https://arcanainsight-production.up.railway.app
+
 ## 소개
 
 ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 대화하며 타로 카드를 선택하고, AI가 해석을 제공하는 웹 애플리케이션입니다.
