@@ -6,7 +6,9 @@ export class GrokProvider implements AIProvider {
   private baseUrl = "https://api.x.ai/v1";
 
   constructor() {
-    this.apiKey = process.env.GROK_API_KEY!;
+    const apiKey = process.env.GROK_API_KEY;
+    if (!apiKey) throw new Error("GROK_API_KEY environment variable is required");
+    this.apiKey = apiKey;
     this.model = process.env.GROK_MODEL || "grok-3";
   }
 

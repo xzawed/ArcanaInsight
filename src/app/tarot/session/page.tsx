@@ -38,14 +38,19 @@ export default function TarotSessionPage() {
   useEffect(() => {
     if (!topic || !character) { router.push("/tarot"); return; }
     const allCards = deckManager.getAllCards();
-    const shuffled = [...allCards].sort(() => Math.random() - 0.5);
+    const shuffled = [...allCards];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     setShuffledDeck(shuffled);
     setAvailableCards(shuffled);
 
     fetch("/api/tarot/session", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ topic }),
-    }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); });
+    }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); })
+      .catch(() => { /* 세션 생성 실패 — 카드 선택은 계속 가능 */ });
 
     setMood("smile");
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "smile", timestamp: new Date() });
@@ -90,7 +95,13 @@ export default function TarotSessionPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, topic, characterId, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
       });
-      const reader = response.body!.getReader();
+      if (!response.ok || !response.body) {
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "서버 연결에 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
+        setMood("surprised");
+        setLoading(false);
+        return;
+      }
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
       const loadingMsgId = crypto.randomUUID();

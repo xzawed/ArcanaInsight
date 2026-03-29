@@ -25,7 +25,7 @@ export interface DivinationService {
   name: string;
   getCharacter(): CharacterConfig;
   startSession(topic: Topic): Omit<Session, "id" | "createdAt">;
-  getSystemPrompt(): string;
+  getSystemPrompt(characterId?: string): string;
   getReadingPrompt(context: SessionContext): string;
   parseResult(aiResponse: string): ReadingResult;
 }
