@@ -171,8 +171,8 @@ export default function TarotSessionPage() {
           </div>
         )}
 
-        {/* 카드: 모바일 하단 / 데스크탑 우측 50% */}
-        <div className="flex-1 md:w-[50%] flex items-center justify-center px-4">
+        {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
+        <div className="flex-1 md:w-[50%] flex flex-col px-4">
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
               <motion.div
@@ -180,7 +180,7 @@ export default function TarotSessionPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="w-full"
+                className="w-full flex-1 flex items-center justify-center"
               >
                 <CardDeck
                   cards={shuffledDeck.slice(0, 12)}
@@ -190,12 +190,12 @@ export default function TarotSessionPage() {
                 />
               </motion.div>
             )}
-            {(phase === "reading" || phase === "result") && spread && (
+            {phase === "reading" && spread && (
               <motion.div
                 key="spread"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md"
+                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto"
               >
                 <CardSpread
                   selectedCards={selectedCards}
@@ -204,39 +204,53 @@ export default function TarotSessionPage() {
                 />
               </motion.div>
             )}
+            {phase === "result" && (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full flex-1 flex flex-col overflow-y-auto py-4"
+              >
+                {/* 결과 메시지 목록 */}
+                <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+                  {chatMessages.filter(m => m.role === "character").map((msg) => (
+                    <div key={msg.id} className="bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 액션 버튼 */}
+                <div className="flex gap-3 pt-4 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      useSessionStore.getState().reset();
+                      useCardAnimationStore.getState().reset();
+                      router.push("/tarot");
+                    }}
+                    className="flex-1 py-2.5 rounded-full bg-arcana-surface border border-arcana-border text-sm hover:border-arcana-purple transition-colors font-serif"
+                  >
+                    새로운 상담
+                  </button>
+                  <button className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity font-serif">
+                    결과 공유하기
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
+
+          {/* 하단 대화창 (카드 선택/리딩 단계에서만) */}
+          {phase !== "result" && (
+            <div className="flex-shrink-0 z-30">
+              <DialogueBox
+                messages={chatMessages}
+                characterName={character?.name ?? ""}
+                isTyping={isLoading && phase === "reading"}
+              />
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* 하단 대화창 */}
-      <div className="relative z-30 flex-shrink-0">
-        <DialogueBox
-          messages={chatMessages}
-          characterName={character?.name ?? ""}
-          isTyping={isLoading && phase === "reading"}
-        />
-
-        {phase === "result" && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-arcana-card/90 backdrop-blur-sm px-4 pb-4 flex gap-3"
-          >
-            <button
-              onClick={() => {
-                useSessionStore.getState().reset();
-                useCardAnimationStore.getState().reset();
-                router.push("/tarot");
-              }}
-              className="flex-1 py-2.5 rounded-full bg-arcana-surface border border-arcana-border text-sm hover:border-arcana-purple transition-colors font-serif"
-            >
-              새로운 상담
-            </button>
-            <button className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity font-serif">
-              결과 공유하기
-            </button>
-          </motion.div>
-        )}
       </div>
     </div>
   );
