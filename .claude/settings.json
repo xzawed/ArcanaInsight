@@ -33,7 +33,7 @@
           {
             "type": "command",
             "if": "Bash(git push*)",
-            "command": "cd F:/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight && bash scripts/pre-push-checks.sh",
+            "command": "cd $(git rev-parse --show-toplevel) && bash scripts/pre-push-checks.sh",
             "timeout": 180,
             "statusMessage": "코드 품질 검증 중 (tsc + lint + build)..."
           }
