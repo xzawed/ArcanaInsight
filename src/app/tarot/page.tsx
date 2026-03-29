@@ -53,10 +53,19 @@ export default function TarotPage() {
     setStep("topic-select");
   };
 
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+
   const handleTopicSelect = (topic: Topic) => {
     const spread = getSpreadForTopic(topic);
     setTopic(topic);
+    setSelectedTopic(topic);
     setSpreadType(spread.type, spread.positions.length);
+    // 바로 세션 진입 (개인정보는 선택 사항)
+    setPhase("card-shuffle");
+    router.push("/tarot/session");
+  };
+
+  const handleOpenUserInfo = () => {
     setStep("user-info");
   };
 
@@ -67,8 +76,13 @@ export default function TarotPage() {
       gender: data.gender as UserInfo["gender"],
       birthHour: data.birthHour,
     });
-    setPhase("card-shuffle");
-    router.push("/tarot/session");
+    // 주제가 이미 선택되어 있으면 세션 진입, 아니면 주제 선택으로
+    if (selectedTopic) {
+      setPhase("card-shuffle");
+      router.push("/tarot/session");
+    } else {
+      setStep("topic-select");
+    }
   };
 
   const handleBack = () => {
@@ -252,6 +266,15 @@ export default function TarotPage() {
                   </motion.button>
                 ))}
               </div>
+
+              {/* 개인정보 입력 (선택 사항) */}
+              <button
+                type="button"
+                onClick={handleOpenUserInfo}
+                className="mt-4 w-full py-2.5 rounded-full border border-arcana-border text-arcana-muted text-xs font-serif hover:border-arcana-purple hover:text-arcana-purple transition-colors"
+              >
+                📝 개인정보 입력하고 더 정확한 리딩 받기 (선택)
+              </button>
             </div>
           </motion.div>
         ) : step === "user-info" ? (

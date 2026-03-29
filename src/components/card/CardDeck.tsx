@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
@@ -10,17 +10,27 @@ interface CardDeckProps {
   isSpread: boolean;
   selectedIndices: number[];
   onCardSelect: (index: number) => void;
-  maxDisplay?: number;
 }
 
-export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDisplay = 18 }: CardDeckProps) {
+export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const maxDisplay = isDesktop ? 24 : 16;
+  const cardSpacing = isDesktop ? 28 : 16;
+  const cardYOffset = isDesktop ? 8 : 4;
+  const cardSize = isDesktop ? "md" : "sm";
+
   const displayCards = useMemo(() => cards.slice(0, maxDisplay), [cards, maxDisplay]);
 
-  const cardSpacing = 18;
-  const cardYOffset = 5;
-
   return (
-    <div className="relative w-full flex items-center justify-center min-h-[180px] md:min-h-[300px] overflow-hidden">
+    <div className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[300px] overflow-hidden">
       {displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
@@ -53,7 +63,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDi
               isFlipped={false}
               isSelected={isSelected}
               onClick={() => !isSelected && onCardSelect(index)}
-              size="md"
+              size={cardSize}
             />
           </motion.div>
         );
