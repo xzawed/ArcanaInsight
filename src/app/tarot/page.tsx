@@ -61,8 +61,12 @@ export default function TarotPage() {
 
   const handleBack = () => {
     if (step === "topic-select") {
-      setStep("character-detail");
+      // 주제 선택에서 뒤로가면 캐릭터 선택으로 (설명 건너뜀)
+      setStep("character-select");
+      setSelectedCharacter(null);
+      setDialogueMessages([]);
     } else {
+      // 캐릭터 설명에서 뒤로가면 캐릭터 선택으로
       setStep("character-select");
       setSelectedCharacter(null);
       setDialogueMessages([]);
