@@ -18,7 +18,7 @@ export function MobileNav() {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return (
             <Link key={item.href} href={item.href}
-              className={`flex flex-col items-center gap-0.5 text-xs transition-colors ${isActive ? "text-arcana-purple" : "text-arcana-muted"}`}>
+              className={`flex flex-col items-center justify-center gap-0.5 text-xs transition-colors min-h-[44px] ${isActive ? "text-arcana-purple" : "text-arcana-muted"}`}>
               <span className="text-lg">{item.icon}</span>
               <span>{item.label}</span>
             </Link>

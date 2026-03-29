@@ -6,7 +6,7 @@
   --color-arcana-surface: #12122a;
   --color-arcana-card: #1a1a3e;
   --color-arcana-border: #2a2a5e;
-  --color-arcana-purple: #8b5cf6;
+  --color-arcana-purple: #a78bfa;
   --color-arcana-indigo: #6366f1;
   --color-arcana-gold: #f59e0b;
   --color-arcana-silver: #c0c0c0;
@@ -84,6 +84,11 @@
   body {
     background-color: var(--color-arcana-bg);
     color: var(--color-arcana-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-arcana-gold);
+    outline-offset: 2px;
   }
 
   ::-webkit-scrollbar {

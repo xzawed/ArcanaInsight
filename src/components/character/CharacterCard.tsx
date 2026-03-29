@@ -18,6 +18,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, type: "spring", stiffness: 100 }}
       whileHover={{ y: -8, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
       onClick={onClick}
       className={`relative bg-arcana-card/80 backdrop-blur-sm border-2 rounded-2xl p-4 text-center transition-all overflow-hidden group ${
         isSelected

@@ -228,6 +228,7 @@ export default function TarotPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.08 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => handleTopicSelect(topic.id)}
                     className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
                   >
