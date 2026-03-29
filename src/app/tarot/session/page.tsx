@@ -162,17 +162,17 @@ export default function TarotSessionPage() {
       {/* 파티클 */}
       <ParticleOverlay density={particleDensity} className="z-10" />
 
-      {/* 상단 무대: 캐릭터(50%) + 카드(50%) */}
-      <div className="relative flex-1 min-h-0 flex flex-row z-20">
-        {/* 좌측 50%: 캐릭터 */}
+      {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
+      <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
+        {/* 캐릭터: 모바일 상단 40% / 데스크탑 좌측 50% */}
         {character && (
-          <div className="w-[50%] flex-shrink-0 relative overflow-hidden">
+          <div className="h-[40%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden">
             <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
           </div>
         )}
 
-        {/* 우측 50%: 카드 */}
-        <div className="w-[50%] flex items-center justify-center px-4">
+        {/* 카드: 모바일 하단 / 데스크탑 우측 50% */}
+        <div className="flex-1 md:w-[50%] flex items-center justify-center px-4">
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
               <motion.div

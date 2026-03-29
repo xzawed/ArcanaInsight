@@ -105,10 +105,10 @@ export default function TarotPage() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-row overflow-hidden"
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
-            {/* 좌측: 캐릭터 (빨간 영역) + 대사 (하늘색 영역) */}
-            <div className="w-[50%] flex-shrink-0 relative flex flex-col">
+            {/* 캐릭터 + 대사: 모바일 상단 / 데스크탑 좌측 50% */}
+            <div className="h-[40%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative flex flex-col">
               {/* 빨간 영역: 캐릭터 (전체 높이 꽉 채움) */}
               {selectedCharacter && (
                 <div className="flex-1 relative overflow-hidden">
@@ -129,8 +129,8 @@ export default function TarotPage() {
               </div>
             </div>
 
-            {/* 우측: 카테고리 선택 (녹색 영역) */}
-            <div className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
+            {/* 카테고리: 모바일 하단 / 데스크탑 우측 50% */}
+            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
               <button
                 onClick={handleBack}
                 className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
