@@ -12,7 +12,7 @@ import { CardDeck } from "@/components/card/CardDeck";
 import { CardSpread } from "@/components/card/CardSpread";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { getCharacterByService } from "@/data/characters";
+import { getCharacterById } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getSpreadForTopic } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
@@ -21,21 +21,22 @@ const deckManager = new DeckManager();
 
 export default function TarotSessionPage() {
   const router = useRouter();
-  const character = getCharacterByService("tarot")!;
   const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
-    phase, topic, requiredCards, selectedCards, chatMessages, isLoading,
+    phase, topic, characterId, requiredCards, selectedCards, chatMessages, isLoading,
     setPhase, setSessionId, setAvailableCards,
     selectCard, addChatMessage, setReadingResult, setLoading,
   } = useSessionStore();
+
+  const character = characterId ? getCharacterById(characterId) : null;
 
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
 
   useEffect(() => {
-    if (!topic) { router.push("/tarot"); return; }
+    if (!topic || !character) { router.push("/tarot"); return; }
     const allCards = deckManager.getAllCards();
     const shuffled = [...allCards].sort(() => Math.random() - 0.5);
     setShuffledDeck(shuffled);
@@ -47,7 +48,7 @@ export default function TarotSessionPage() {
     }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); });
 
     setMood("smile");
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character.greeting, mood: "smile", timestamp: new Date() });
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "smile", timestamp: new Date() });
 
     setTimeout(() => {
       setAnimationPhase("spreading");
@@ -87,7 +88,7 @@ export default function TarotSessionPage() {
     try {
       const response = await fetch("/api/tarot/reading", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, topic, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
+        body: JSON.stringify({ sessionId, topic, characterId, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
       });
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
@@ -163,11 +164,13 @@ export default function TarotSessionPage() {
 
       {/* 상단 무대 */}
       <div className="relative flex-1 min-h-0 flex items-end z-20">
-        <div className="absolute bottom-0 left-0 z-30 w-[35%] md:w-[30%] max-w-[280px]">
-          <CharacterDisplay character={character} mood={currentMood} />
-        </div>
+        {character && (
+          <div className="absolute bottom-0 left-0 z-30 w-[40%] md:w-[35%] max-w-[400px]">
+            <CharacterDisplay character={character} mood={currentMood} size="large" />
+          </div>
+        )}
 
-        <div className="flex-1 flex items-center justify-center ml-[30%] md:ml-[25%] pb-4">
+        <div className="flex-1 flex items-center justify-center ml-[38%] md:ml-[33%] pb-4">
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
               <motion.div
@@ -207,7 +210,7 @@ export default function TarotSessionPage() {
       <div className="relative z-30 flex-shrink-0">
         <DialogueBox
           messages={chatMessages}
-          characterName={character.name}
+          characterName={character?.name ?? ""}
           isTyping={isLoading && phase === "reading"}
         />
 
