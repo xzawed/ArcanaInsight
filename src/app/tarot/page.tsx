@@ -107,9 +107,9 @@ export default function TarotPage() {
             exit={{ opacity: 0 }}
             className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col"
           >
-            <div className="flex-1 flex items-end relative min-h-0">
+            <div className="flex-1 flex flex-col md:flex-row items-end relative min-h-0">
               {selectedCharacter && (
-                <div className="w-[40%] max-w-[360px] flex-shrink-0">
+                <div className="w-full md:w-[50%] md:max-w-[480px] flex-shrink-0 flex justify-center">
                   <CharacterDisplay
                     character={selectedCharacter}
                     mood="smile"
@@ -119,15 +119,15 @@ export default function TarotPage() {
                 </div>
               )}
 
-              <div className="flex-1 flex flex-col justify-center px-6 pb-8">
+              <div className="flex-1 flex flex-col justify-center px-4 md:px-6 pb-4 md:pb-8 w-full">
                 <button
                   onClick={handleBack}
-                  className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
+                  className="self-start mb-3 md:mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
                 >
                   ← 다른 상담사 선택
                 </button>
-                <h3 className="font-serif font-bold text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
-                <div className="grid grid-cols-1 gap-3">
+                <h3 className="font-serif font-bold text-lg mb-3 md:mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+                <div className="grid grid-cols-1 gap-2 md:gap-3">
                   {topics.map((topic, index) => (
                     <motion.button
                       key={topic.id}
@@ -135,7 +135,7 @@ export default function TarotPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.08 }}
                       onClick={() => handleTopicSelect(topic.id)}
-                      className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
+                      className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-3 md:p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
                     >
                       <span className="text-xl">{topic.icon}</span>
                       <div>

@@ -22,7 +22,7 @@ export function CharacterDisplay({ character, mood, size = "normal", className =
   }, [mood, setMood]);
 
   const sizeClasses = size === "large"
-    ? "max-w-[400px] max-h-[600px]"
+    ? "max-w-[500px] max-h-[70vh]"
     : "max-w-[280px] max-h-[420px]";
 
   return (
