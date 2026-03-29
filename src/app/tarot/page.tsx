@@ -108,7 +108,7 @@ export default function TarotPage() {
             className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-row overflow-hidden"
           >
             {/* 좌측: 캐릭터 (빨간 영역) + 대사 (하늘색 영역) */}
-            <div className="w-[40%] max-w-[480px] flex-shrink-0 relative flex flex-col">
+            <div className="w-[50%] flex-shrink-0 relative flex flex-col">
               {/* 빨간 영역: 캐릭터 (전체 높이 꽉 채움) */}
               {selectedCharacter && (
                 <div className="flex-1 relative overflow-hidden">
