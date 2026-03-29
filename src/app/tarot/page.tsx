@@ -107,16 +107,11 @@ export default function TarotPage() {
             exit={{ opacity: 0 }}
             className="relative z-20 min-h-[calc(100vh-3.5rem)] flex flex-col"
           >
-            <div className="flex-shrink-0">
-              <DialogueBox
-                messages={dialogueMessages}
-                characterName={selectedCharacter?.name}
-              />
-            </div>
-
+            {/* 모바일: 캐릭터 → 대사 → 카테고리 세로 배치 */}
+            {/* 데스크톱: 좌측 캐릭터 | 우측 대사+카테고리 가로 배치 */}
             <div className="flex flex-col md:flex-row md:items-end md:flex-1 relative">
               {selectedCharacter && (
-                <div className="hidden md:flex w-[50%] max-w-[480px] flex-shrink-0 justify-center">
+                <div className="flex justify-center md:w-[50%] md:max-w-[480px] flex-shrink-0">
                   <CharacterDisplay
                     character={selectedCharacter}
                     mood="smile"
@@ -127,6 +122,13 @@ export default function TarotPage() {
               )}
 
               <div className="flex flex-col justify-center px-4 md:px-6 py-4 md:pb-8 w-full">
+                <div className="flex-shrink-0 mb-4 md:mb-6">
+                  <DialogueBox
+                    messages={dialogueMessages}
+                    characterName={selectedCharacter?.name}
+                  />
+                </div>
+
                 <button
                   onClick={handleBack}
                   className="self-start mb-3 md:mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
