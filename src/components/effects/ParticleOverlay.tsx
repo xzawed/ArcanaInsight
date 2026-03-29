@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ParticleOverlayProps {
   density?: "low" | "medium" | "high";
@@ -39,7 +39,11 @@ function generateParticles(count: number): Particle[] {
 }
 
 export function ParticleOverlay({ density = "medium", className = "" }: ParticleOverlayProps) {
-  const [particles] = useState<Particle[]>(() => generateParticles(DENSITY_COUNT[density]));
+  const [particles, setParticles] = useState<Particle[]>(() => generateParticles(DENSITY_COUNT[density]));
+
+  useEffect(() => {
+    setParticles(generateParticles(DENSITY_COUNT[density]));
+  }, [density]);
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>

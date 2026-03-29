@@ -12,7 +12,11 @@ export class DeckManager {
   getCardById(id: string): TarotCard | undefined { return this.deck.find((c) => c.id === id); }
 
   shuffleAndDraw(count: number): SelectedCard[] {
-    const shuffled = [...this.deck].sort(() => Math.random() - 0.5);
+    const shuffled = [...this.deck];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, count).map((card, index) => ({
       card, position: index, isReversed: Math.random() > 0.5, selectedAt: new Date(),
     }));

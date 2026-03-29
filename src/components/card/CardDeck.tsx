@@ -16,21 +16,15 @@ interface CardDeckProps {
 export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDisplay = 12 }: CardDeckProps) {
   const displayCards = useMemo(() => cards.slice(0, maxDisplay), [cards, maxDisplay]);
 
-  // 화면 크기에 따라 카드 간격 계산 (SSR 안전)
-  const isBrowser = typeof window !== "undefined";
-  const viewWidth = isBrowser ? window.innerWidth : 1024;
-  const isMobile = viewWidth < 768;
-
-  const cardSpacing = isMobile ? 22 : 42;
-  const cardYOffset = isMobile ? 5 : 10;
-  const angleDiv = isMobile ? 3 : 2;
+  const cardSpacing = 24;
+  const cardYOffset = 6;
 
   return (
     <div className="relative w-full flex items-center justify-center min-h-[180px] md:min-h-[300px] overflow-hidden">
       {displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
-        const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / angleDiv) : 0;
+        const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / 3) : 0;
         const xOffset = isSpread ? (index - totalCards / 2) * cardSpacing : (index - totalCards / 2) * 2;
         const yOffset = isSpread ? Math.abs(index - totalCards / 2) * cardYOffset : index * -0.5;
 
@@ -59,7 +53,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDi
               isFlipped={false}
               isSelected={isSelected}
               onClick={() => !isSelected && onCardSelect(index)}
-              size={isMobile ? "md" : "lg"}
+              size="md"
             />
           </motion.div>
         );
