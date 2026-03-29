@@ -11,7 +11,7 @@ interface CardFaceProps {
 }
 
 const sizeDimensions = {
-  sm: { w: 56, h: 84 },
+  sm: { w: 48, h: 72 },
   md: { w: 96, h: 144 },
   lg: { w: 128, h: 192 },
 };
