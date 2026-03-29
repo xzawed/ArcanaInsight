@@ -1,13 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Topic } from "@/types/session";
 import { useSessionStore } from "@/hooks/useSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
-import { getCharacterByService } from "@/data/characters";
+import { CharacterCard } from "@/components/character/CharacterCard";
+import { DialogueBox } from "@/components/chat/DialogueBox";
+import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { getAvailableCharacters } from "@/data/characters";
 import { getSpreadForTopic } from "@/data/spreads";
+import { CharacterConfig } from "@/types/character";
+import { ChatMessage } from "@/types/session";
 
 const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "love", label: "연애/관계", icon: "💕", desc: "사랑과 인간관계에 대한 상담" },
@@ -17,10 +23,29 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "general", label: "일반 상담", icon: "✨", desc: "자유로운 주제의 종합 상담" },
 ];
 
+type PageStep = "character-select" | "topic-select";
+
 export default function TarotPage() {
   const router = useRouter();
-  const { setTopic, setSpreadType, setPhase } = useSessionStore();
-  const character = getCharacterByService("tarot")!;
+  const { setTopic, setSpreadType, setPhase, setCharacterId } = useSessionStore();
+  const availableCharacters = getAvailableCharacters();
+
+  const [step, setStep] = useState<PageStep>("character-select");
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
+  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
+
+  const handleCharacterSelect = (character: CharacterConfig) => {
+    setSelectedCharacter(character);
+    setCharacterId(character.id);
+    setDialogueMessages([{
+      id: crypto.randomUUID(),
+      role: "character",
+      content: character.greeting,
+      mood: "smile",
+      timestamp: new Date(),
+    }]);
+    setTimeout(() => setStep("topic-select"), 500);
+  };
 
   const handleTopicSelect = (topic: Topic) => {
     const spread = getSpreadForTopic(topic);
@@ -30,52 +55,108 @@ export default function TarotPage() {
     router.push("/tarot/session");
   };
 
+  const handleBack = () => {
+    setStep("character-select");
+    setSelectedCharacter(null);
+    setDialogueMessages([]);
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
-        <Image
-          src="/images/backgrounds/tarot-topic-bg.jpg"
-          alt=""
-          fill
-          className="object-cover"
-        />
+        <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",
+        }} />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 relative">
-        <div className="flex justify-center mb-8">
-          <CharacterDisplay character={character} mood="smile" className="h-64" />
-        </div>
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-display font-bold mb-2 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h2>
-          <p className="text-arcana-muted drop-shadow-sm">상담 주제를 선택해주세요</p>
-        </div>
+      <ParticleOverlay density="low" className="z-10" />
 
-        {/* 마법진 장식 */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] opacity-10 pointer-events-none">
-          <Image
-            src="/images/backgrounds/deco-magic-circle.jpg"
-            alt=""
-            fill
-            className="object-contain animate-[spin_60s_linear_infinite]"
-          />
-        </div>
+      <AnimatePresence mode="wait">
+        {step === "character-select" ? (
+          <motion.div
+            key="character-select"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="max-w-4xl mx-auto px-4 py-8 relative z-20"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
+              <p className="text-arcana-muted drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 relative">
-          {topics.map((topic, index) => (
-            <motion.button key={topic.id}
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => handleTopicSelect(topic.id)}
-              className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-2xl p-5 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10">
-              <span className="text-2xl block mb-2">{topic.icon}</span>
-              <h3 className="font-display font-bold group-hover:text-arcana-purple transition-colors">{topic.label}</h3>
-              <p className="text-arcana-muted text-sm mt-1">{topic.desc}</p>
-            </motion.button>
-          ))}
-        </div>
-      </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {availableCharacters.map((character, index) => (
+                <CharacterCard
+                  key={character.id}
+                  character={character}
+                  isSelected={selectedCharacter?.id === character.id}
+                  onClick={() => handleCharacterSelect(character)}
+                  index={index}
+                />
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="topic-select"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col"
+          >
+            <div className="flex-1 flex items-end relative min-h-0">
+              {selectedCharacter && (
+                <div className="w-[40%] max-w-[360px] flex-shrink-0">
+                  <CharacterDisplay
+                    character={selectedCharacter}
+                    mood="smile"
+                    size="large"
+                    className="h-full"
+                  />
+                </div>
+              )}
+
+              <div className="flex-1 flex flex-col justify-center px-6 pb-8">
+                <button
+                  onClick={handleBack}
+                  className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
+                >
+                  ← 다른 상담사 선택
+                </button>
+                <h3 className="font-serif font-bold text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+                <div className="grid grid-cols-1 gap-3">
+                  {topics.map((topic, index) => (
+                    <motion.button
+                      key={topic.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.08 }}
+                      onClick={() => handleTopicSelect(topic.id)}
+                      className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
+                    >
+                      <span className="text-xl">{topic.icon}</span>
+                      <div>
+                        <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
+                        <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0">
+              <DialogueBox
+                messages={dialogueMessages}
+                characterName={selectedCharacter?.name}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
