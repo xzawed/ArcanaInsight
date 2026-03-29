@@ -122,17 +122,34 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
   - `RAILWAY_TOKEN`: Railway API 토큰
   - `RAILWAY_SERVICE_ID`: Railway 서비스 ID
 
-## 코드 품질 게이트
+## 코드 변경 프로세스 (필수 준수)
 
-모든 코드 변경 후 GitHub push 전에 반드시 다음 검증을 통과해야 합니다:
+모든 코드 변경은 반드시 다음 4단계를 일관되게 수행해야 합니다. 단순 수정이라도 예외 없음:
 
+### 1단계: 코드 변경
+- 요청된 수정 사항 구현
+
+### 2단계: 3단계 검증 (tsc + lint + build)
 ```bash
-bash scripts/pre-push-checks.sh  # tsc + lint + build 자동 검증
+pnpm tsc --noEmit      # TypeScript 타입 체크
+pnpm lint              # ESLint 코드 품질 검사
+pnpm build             # 프로덕션 빌드 확인
 ```
+- 3가지 모두 통과해야 다음 단계로 진행
+- 에러 발생 시 수정 후 재검증
 
-이 검증은 `.claude/settings.json`의 PreToolUse 훅으로 자동화되어 있습니다.
-`git push` 실행 시 자동으로 타입 체크 → ESLint → 프로덕션 빌드를 순서대로 수행하며,
-하나라도 실패하면 push가 차단됩니다.
+### 3단계: 변경 사항 리뷰
+- **스펙 준수 확인**: 요청된 사항이 모두 반영되었는지 확인
+- **코드 품질 확인**: 미사용 변수, 불필요한 코드, 기존 패턴과의 일관성 확인
+- **레이아웃 규칙 확인**: 5:5 비율, 모바일 세로 배치 등 공통 규칙 준수 여부
+
+### 4단계: 커밋 + push
+- 의미 있는 커밋 메시지 작성
+- `git push` 실행 (PreToolUse 훅이 자동으로 `scripts/pre-push-checks.sh` 재실행)
+
+### 자동화
+- `.claude/settings.json`의 PreToolUse 훅으로 `git push` 시 자동 검증
+- 하나라도 실패하면 push 차단
 
 ## 레이아웃 규칙 (필수 준수)
 
