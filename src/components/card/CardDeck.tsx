@@ -23,14 +23,14 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   }, []);
 
   const maxDisplay = isDesktop ? 24 : 16;
-  const cardSpacing = isDesktop ? 28 : 16;
-  const cardYOffset = isDesktop ? 8 : 4;
+  const cardSpacing = isDesktop ? 50 : 16;
+  const cardYOffset = isDesktop ? 10 : 4;
   const cardSize = isDesktop ? "md" : "sm";
 
   const displayCards = useMemo(() => cards.slice(0, maxDisplay), [cards, maxDisplay]);
 
   return (
-    <div className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[300px] overflow-hidden">
+    <div className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[320px] overflow-x-auto overflow-y-hidden">
       {displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;

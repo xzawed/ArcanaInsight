@@ -15,7 +15,7 @@ interface CardItemProps {
   className?: string;
 }
 
-const sizeClasses = { sm: "w-14 h-20", md: "w-20 h-30", lg: "w-32 h-48" };
+const sizeClasses = { sm: "w-14 h-20", md: "w-40 h-60", lg: "w-32 h-48" };
 
 export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", className = "" }: CardItemProps) {
   return (
