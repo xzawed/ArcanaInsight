@@ -7,6 +7,8 @@ interface CardFaceProps {
   card: TarotCard;
   isReversed: boolean;
   size?: "sm" | "md" | "lg";
+  width?: number;
+  height?: number;
   className?: string;
 }
 
@@ -16,8 +18,10 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardFace({ card, isReversed, size = "md", className = "" }: CardFaceProps) {
-  const { w, h } = sizeDimensions[size];
+export function CardFace({ card, isReversed, size = "md", width, height, className = "" }: CardFaceProps) {
+  const preset = sizeDimensions[size];
+  const w = width ?? preset.w;
+  const h = height ?? preset.h;
   const symbol = card.type === "major"
     ? majorSymbols[card.id]
     : card.suit ? suitSymbols[card.suit] : null;

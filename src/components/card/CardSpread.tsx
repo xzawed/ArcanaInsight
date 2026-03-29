@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { SelectedCard } from "@/types/card";
 import { SpreadDefinition } from "@/types/session";
@@ -15,11 +15,13 @@ interface CardSpreadProps {
 export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpreadProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
 
   useEffect(() => {
     const measure = () => {
       if (containerRef.current) {
         setContainerWidth(containerRef.current.offsetWidth);
+        setContainerHeight(containerRef.current.offsetHeight);
       }
     };
     measure();
@@ -27,17 +29,60 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // 컨테이너 너비 기반으로 카드 사이즈 결정
-  // 카드 5장이 겹침 없이 들어가려면 카드폭 < 컨테이너/5 * 1.5
-  const cardSize: "sm" | "md" | "lg" = containerWidth >= 500 ? "md" : "sm";
-  const placeholderW = containerWidth >= 500 ? "w-24 h-36" : "w-10 h-[60px]";
+  // 컨테이너 크기 + 스프레드 포지션 기반으로 카드 크기 동적 계산
+  const cardDimensions = useMemo(() => {
+    if (!containerWidth || !containerHeight) return { w: 40, h: 60 };
+
+    const positions = spread.positions;
+
+    // X/Y 좌표에서 최소 여백과 최소 간격 계산
+    const xValues = positions.map((p) => p.x);
+    const yValues = positions.map((p) => p.y);
+
+    const minEdgeX = Math.min(...xValues.map((x) => Math.min(x, 100 - x)));
+    const minEdgeY = Math.min(...yValues.map((y) => Math.min(y, 100 - y)));
+
+    const uniqueX = [...new Set(xValues)].sort((a, b) => a - b);
+    const uniqueY = [...new Set(yValues)].sort((a, b) => a - b);
+
+    const minGapX = uniqueX.length > 1
+      ? Math.min(...uniqueX.slice(1).map((x, i) => x - uniqueX[i]))
+      : 100;
+    const minGapY = uniqueY.length > 1
+      ? Math.min(...uniqueY.slice(1).map((y, i) => y - uniqueY[i]))
+      : 100;
+
+    // 카드가 넘치지 않도록: 카드 반폭 < 최소 여백, 카드 전폭 < 최소 간격
+    const maxWFromEdge = (minEdgeX * 2) * containerWidth / 100;
+    const maxWFromGap = minGapX * containerWidth / 100;
+    const maxHFromEdge = (minEdgeY * 2) * containerHeight / 100;
+    const maxHFromGap = minGapY * containerHeight / 100;
+
+    // 가로/세로 각각의 제한치 (간격의 80%까지 사용)
+    const maxW = Math.min(maxWFromEdge, maxWFromGap) * 0.8;
+    const maxH = Math.min(maxHFromEdge, maxHFromGap) * 0.8;
+
+    // 2:3 비율 유지하며 양쪽 제한 모두 충족
+    let cardW = maxW;
+    let cardH = cardW * 1.5;
+    if (cardH > maxH) {
+      cardH = maxH;
+      cardW = cardH / 1.5;
+    }
+
+    // 최소/최대 클램프
+    cardW = Math.max(Math.min(cardW, 96), 32);
+    cardH = cardW * 1.5;
+
+    return { w: Math.round(cardW), h: Math.round(cardH) };
+  }, [containerWidth, containerHeight, spread.positions]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full mx-auto aspect-[4/3] overflow-hidden"
     >
-      {containerWidth > 0 && spread.positions.map((pos) => {
+      {containerWidth > 0 && containerHeight > 0 && spread.positions.map((pos) => {
         const selectedCard = selectedCards.find((sc) => sc.position === pos.index);
         const isRevealed = revealedPositions.includes(pos.index);
 
@@ -71,16 +116,28 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
                     isFlipped={isRevealed}
                     isSelected={true}
                     isReversed={selectedCard.isReversed}
-                    size={cardSize}
+                    width={cardDimensions.w}
+                    height={cardDimensions.h}
                   />
                 </div>
-                <span className="text-arcana-gold text-[8px] md:text-sm font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)] truncate max-w-[60px] md:max-w-none">
+                <span
+                  className="text-arcana-gold font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)] truncate text-center"
+                  style={{ fontSize: Math.max(cardDimensions.w * 0.18, 8), maxWidth: cardDimensions.w * 1.5 }}
+                >
                   {pos.labelKo}
                 </span>
               </div>
             ) : (
-              <div className={`${placeholderW} rounded border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5`}>
-                <span className="text-arcana-gold/60 text-[8px] md:text-sm font-serif font-bold truncate">{pos.labelKo}</span>
+              <div
+                className="rounded border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5"
+                style={{ width: cardDimensions.w, height: cardDimensions.h }}
+              >
+                <span
+                  className="text-arcana-gold/60 font-serif font-bold truncate"
+                  style={{ fontSize: Math.max(cardDimensions.w * 0.18, 8) }}
+                >
+                  {pos.labelKo}
+                </span>
               </div>
             )}
           </motion.div>
