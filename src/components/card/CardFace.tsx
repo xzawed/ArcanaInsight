@@ -23,7 +23,6 @@ export function CardFace({ card, isReversed, size = "md", className = "" }: Card
     : card.suit ? suitSymbols[card.suit] : null;
 
   const fontSize = size === "sm" ? 6 : size === "md" ? 8 : 10;
-  const titleSize = size === "sm" ? 5 : size === "md" ? 7 : 9;
   const numberSize = size === "sm" ? 7 : size === "md" ? 10 : 12;
 
   const cx = w / 2;

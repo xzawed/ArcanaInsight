@@ -22,12 +22,12 @@ const deckManager = new DeckManager();
 export default function TarotSessionPage() {
   const router = useRouter();
   const character = getCharacterByService("tarot")!;
-  const { currentMood, setMood, isTyping } = useCharacterStore();
+  const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
     phase, topic, requiredCards, selectedCards, chatMessages, isLoading,
     setPhase, setSessionId, setAvailableCards,
-    selectCard, addChatMessage, appendToLastMessage, setReadingResult, setLoading,
+    selectCard, addChatMessage, setReadingResult, setLoading,
   } = useSessionStore();
 
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
@@ -95,7 +95,6 @@ export default function TarotSessionPage() {
       const loadingMsgId = crypto.randomUUID();
       addChatMessage({ id: loadingMsgId, role: "character", content: "카드를 읽고 있어요...", mood: "mystical", timestamp: new Date() });
 
-      let fullJson = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -105,7 +104,6 @@ export default function TarotSessionPage() {
           if (!line.startsWith("data: ")) continue;
           try {
             const data = JSON.parse(line.slice(6));
-            if (data.chunk) fullJson += data.chunk;
             if (data.done && data.result) {
               setReadingResult(data.result);
               const currentSpread = topic ? getSpreadForTopic(topic) : null;
@@ -148,9 +146,6 @@ export default function TarotSessionPage() {
 
   const spread = topic ? getSpreadForTopic(topic) : null;
   const particleDensity = phase === "reading" || phase === "result" ? "high" : "medium";
-
-  // isTyping is used by DialogueBox indirectly via the store; suppress unused warning
-  void isTyping;
 
   return (
     <div className="relative h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">

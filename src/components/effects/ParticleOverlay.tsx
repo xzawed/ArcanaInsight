@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 
 interface ParticleOverlayProps {
   density?: "low" | "medium" | "high";
@@ -26,19 +26,20 @@ const COLORS = [
   "rgba(99, 102, 241, 0.3)",
 ];
 
+function generateParticles(count: number): Particle[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: 1 + Math.random() * 3,
+    delay: `${Math.random() * 6}s`,
+    duration: `${4 + Math.random() * 4}s`,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+  }));
+}
+
 export function ParticleOverlay({ density = "medium", className = "" }: ParticleOverlayProps) {
-  const particles = useMemo<Particle[]>(() => {
-    const count = DENSITY_COUNT[density];
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      size: 1 + Math.random() * 3,
-      delay: `${Math.random() * 6}s`,
-      duration: `${4 + Math.random() * 4}s`,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    }));
-  }, [density]);
+  const [particles] = useState<Particle[]>(() => generateParticles(DENSITY_COUNT[density]));
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
