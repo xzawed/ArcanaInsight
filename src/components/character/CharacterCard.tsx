@@ -32,7 +32,10 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
           fill
           className="object-cover object-top"
         />
+        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-arcana-card/60 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-arcana-card/90 to-transparent" />
+        <div className="absolute top-0 bottom-0 left-0 w-1/5 bg-gradient-to-r from-arcana-card/50 to-transparent" />
+        <div className="absolute top-0 bottom-0 right-0 w-1/5 bg-gradient-to-l from-arcana-card/50 to-transparent" />
       </div>
 
       <h3 className="font-serif font-bold text-base group-hover:text-arcana-purple transition-colors">
