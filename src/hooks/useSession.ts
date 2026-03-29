@@ -4,6 +4,13 @@ import { SelectedCard, TarotCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { Topic } from "@/types/session";
 
+export interface UserInfo {
+  name: string;
+  birthDate: string;
+  gender: "male" | "female" | "other";
+  birthHour: string;
+}
+
 type SessionPhase = "topic-select" | "card-shuffle" | "card-select" | "reading" | "result";
 
 interface SessionState {
@@ -18,6 +25,7 @@ interface SessionState {
   chatMessages: ChatMessage[];
   readingResult: ReadingResult | null;
   isLoading: boolean;
+  userInfo: UserInfo | null;
 
   setPhase: (phase: SessionPhase) => void;
   setTopic: (topic: Topic) => void;
@@ -30,6 +38,7 @@ interface SessionState {
   appendToLastMessage: (content: string) => void;
   setReadingResult: (result: ReadingResult) => void;
   setLoading: (loading: boolean) => void;
+  setUserInfo: (info: UserInfo) => void;
   reset: () => void;
 }
 
@@ -45,6 +54,7 @@ const initialState = {
   chatMessages: [],
   readingResult: null,
   isLoading: false,
+  userInfo: null,
 };
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -67,5 +77,6 @@ export const useSessionStore = create<SessionState>((set) => ({
   }),
   setReadingResult: (result) => set({ readingResult: result }),
   setLoading: (loading) => set({ isLoading: loading }),
+  setUserInfo: (info) => set({ userInfo: info }),
   reset: () => set(initialState),
 }));
