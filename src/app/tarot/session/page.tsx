@@ -213,7 +213,7 @@ export default function TarotSessionPage() {
                 className="w-full flex-1 flex items-center justify-center"
               >
                 <CardDeck
-                  cards={shuffledDeck.slice(0, 24)}
+                  cards={shuffledDeck}
                   isSpread={animationPhase === "spreading"}
                   selectedIndices={selectedIndices}
                   onCardSelect={handleCardSelect}
