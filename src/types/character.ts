@@ -10,6 +10,8 @@ export interface CharacterConfig {
   expressions: Record<Mood, string>;
   idleAnimation: string;
   personality: string;
+  description: string;
+  speciality: string;
   speechStyle: string;
   voiceTone: string;
   unlocked: boolean;

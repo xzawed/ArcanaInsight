@@ -23,7 +23,7 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "general", label: "일반 상담", icon: "✨", desc: "자유로운 주제의 종합 상담" },
 ];
 
-type PageStep = "character-select" | "topic-select";
+type PageStep = "character-select" | "character-detail" | "topic-select";
 
 export default function TarotPage() {
   const router = useRouter();
@@ -44,7 +44,11 @@ export default function TarotPage() {
       mood: "smile",
       timestamp: new Date(),
     }]);
-    setTimeout(() => setStep("topic-select"), 500);
+    setStep("character-detail");
+  };
+
+  const handleConfirmCharacter = () => {
+    setStep("topic-select");
   };
 
   const handleTopicSelect = (topic: Topic) => {
@@ -56,9 +60,13 @@ export default function TarotPage() {
   };
 
   const handleBack = () => {
-    setStep("character-select");
-    setSelectedCharacter(null);
-    setDialogueMessages([]);
+    if (step === "topic-select") {
+      setStep("character-detail");
+    } else {
+      setStep("character-select");
+      setSelectedCharacter(null);
+      setDialogueMessages([]);
+    }
   };
 
   return (
@@ -97,6 +105,77 @@ export default function TarotPage() {
                   index={index}
                 />
               ))}
+            </div>
+          </motion.div>
+        ) : step === "character-detail" && selectedCharacter ? (
+          <motion.div
+            key="character-detail"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+          >
+            {/* 좌측 50%: 캐릭터 일러스트 */}
+            <div className="h-[40%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
+              <div className="absolute inset-0 overflow-hidden">
+                <CharacterDisplay
+                  character={selectedCharacter}
+                  mood="smile"
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
+
+            {/* 우측 50%: 캐릭터 프로필 */}
+            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-6 md:px-10 py-6 overflow-y-auto">
+              <button
+                onClick={handleBack}
+                className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
+              >
+                ← 다른 상담사 선택
+              </button>
+
+              <div className="space-y-5">
+                {/* 이름 */}
+                <div>
+                  <h2 className="text-3xl font-serif font-bold text-arcana-purple drop-shadow-md">
+                    {selectedCharacter.name}
+                  </h2>
+                  <p className="text-arcana-muted text-sm mt-1">{selectedCharacter.nameJp}</p>
+                </div>
+
+                {/* 특기 태그 */}
+                <div className="inline-block px-3 py-1 bg-arcana-purple/20 border border-arcana-purple/40 rounded-full">
+                  <span className="text-arcana-purple text-xs font-serif">{selectedCharacter.speciality}</span>
+                </div>
+
+                {/* 상세 소개 */}
+                <p className="text-arcana-text text-sm leading-relaxed">
+                  {selectedCharacter.description}
+                </p>
+
+                {/* 말투 스타일 */}
+                <div className="bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                  <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">리딩 스타일</h4>
+                  <p className="text-arcana-muted text-xs leading-relaxed">{selectedCharacter.speechStyle}</p>
+                </div>
+
+                {/* 인사 미리보기 */}
+                <div className="bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                  <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">첫 인사</h4>
+                  <p className="text-arcana-text text-sm italic leading-relaxed">&ldquo;{selectedCharacter.greeting}&rdquo;</p>
+                </div>
+
+                {/* 상담 시작 버튼 */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleConfirmCharacter}
+                  className="w-full py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
+                >
+                  {selectedCharacter.name}와 상담 시작하기
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         ) : (
