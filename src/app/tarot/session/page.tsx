@@ -166,7 +166,7 @@ export default function TarotSessionPage() {
       <div className="relative flex-1 min-h-0 flex items-end z-20">
         {character && (
           <div className="absolute bottom-0 left-0 z-30 w-[40%] md:w-[35%] max-w-[400px]">
-            <CharacterDisplay character={character} mood={currentMood} size="large" />
+            <CharacterDisplay character={character} mood={currentMood} />
           </div>
         )}
 
