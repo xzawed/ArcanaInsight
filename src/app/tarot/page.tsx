@@ -216,11 +216,11 @@ export default function TarotPage() {
             exit={{ opacity: 0 }}
             className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
-            {/* 캐릭터 + 대사: 모바일 상단 / 데스크탑 좌측 50% */}
-            <div className="h-[40%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
-              {/* 캐릭터 (전체 영역 꽉 채움) */}
+            {/* 캐릭터 + 대사: 모바일 세로 배치 / 데스크탑 좌측 50% 오버레이 */}
+            <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
+              {/* 캐릭터 */}
               {selectedCharacter && (
-                <div className="absolute inset-0 overflow-hidden">
+                <div className="h-[30vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
                   <CharacterDisplay
                     character={selectedCharacter}
                     mood="smile"
@@ -229,8 +229,8 @@ export default function TarotPage() {
                 </div>
               )}
 
-              {/* 대사 (캐릭터 하단에 오버레이) */}
-              <div className="absolute bottom-0 left-0 right-0 z-20">
+              {/* 대사: 모바일은 캐릭터 아래 / 데스크탑은 하단 오버레이 */}
+              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20">
                 <DialogueBox
                   messages={dialogueMessages}
                   characterName={selectedCharacter?.name}
