@@ -9,6 +9,7 @@ type SessionPhase = "topic-select" | "card-shuffle" | "card-select" | "reading" 
 interface SessionState {
   phase: SessionPhase;
   sessionId: string | null;
+  characterId: string | null;
   topic: Topic | null;
   spreadType: SpreadType | null;
   requiredCards: number;
@@ -22,6 +23,7 @@ interface SessionState {
   setTopic: (topic: Topic) => void;
   setSpreadType: (type: SpreadType, required: number) => void;
   setSessionId: (id: string) => void;
+  setCharacterId: (id: string) => void;
   setAvailableCards: (cards: TarotCard[]) => void;
   selectCard: (card: SelectedCard) => void;
   addChatMessage: (message: ChatMessage) => void;
@@ -34,6 +36,7 @@ interface SessionState {
 const initialState = {
   phase: "topic-select" as SessionPhase,
   sessionId: null,
+  characterId: null,
   topic: null,
   spreadType: null,
   requiredCards: 0,
@@ -50,6 +53,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   setTopic: (topic) => set({ topic }),
   setSpreadType: (type, required) => set({ spreadType: type, requiredCards: required }),
   setSessionId: (id) => set({ sessionId: id }),
+  setCharacterId: (id) => set({ characterId: id }),
   setAvailableCards: (cards) => set({ availableCards: cards }),
   selectCard: (card) => set((state) => ({ selectedCards: [...state.selectedCards, card] })),
   addChatMessage: (message) => set((state) => ({ chatMessages: [...state.chatMessages, message] })),
