@@ -61,7 +61,7 @@ interface SpriteAnimatorProps {
 export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
-  const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
+  const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.jpg`;
 
   useEffect(() => {
     if (config.loop || !onAnimationEnd) return;

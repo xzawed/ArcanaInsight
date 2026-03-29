@@ -27,7 +27,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
     >
       <div className="relative w-full aspect-[2/3] mb-3 overflow-hidden rounded-xl">
         <Image
-          src={`/images/characters/${character.id}/nukki/idle.png`}
+          src={`/images/characters/${character.id}/nukki/idle.jpg`}
           alt={character.name}
           fill
           className="object-cover object-top"
