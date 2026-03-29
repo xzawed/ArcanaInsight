@@ -31,7 +31,7 @@ export function HeroSection() {
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="h-[40%] md:h-auto w-full md:w-[50%] relative"
+          className="h-[40%] md:h-full w-full md:w-[50%] relative"
         >
           <CharacterDisplay character={arcana} mood="smile" className="w-full h-full" />
         </motion.div>
