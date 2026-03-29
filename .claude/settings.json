@@ -6,6 +6,7 @@
       "Bash(pnpm lint)",
       "Bash(pnpm type-check)",
       "Bash(pnpm test)",
+      "Bash(pnpm tsc:*)",
       "Bash(pnpm install*)",
       "Bash(pnpm add*)",
       "Bash(git status*)",
@@ -13,12 +14,31 @@
       "Bash(git log*)",
       "Bash(git add*)",
       "Bash(git commit*)",
-      "Bash(npx next*)"
+      "Bash(git push*)",
+      "Bash(git rev-parse*)",
+      "Bash(npx next*)",
+      "Bash(bash scripts/pre-push-checks.sh)"
     ],
     "deny": [
       "Bash(rm -rf /)",
       "Bash(git push --force*)",
       "Bash(git reset --hard*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "cd F:/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight && bash scripts/pre-push-checks.sh",
+            "timeout": 180,
+            "statusMessage": "코드 품질 검증 중 (tsc + lint + build)..."
+          }
+        ]
+      }
     ]
   }
 }

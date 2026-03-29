@@ -122,6 +122,18 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
   - `RAILWAY_TOKEN`: Railway API 토큰
   - `RAILWAY_SERVICE_ID`: Railway 서비스 ID
 
+## 코드 품질 게이트
+
+모든 코드 변경 후 GitHub push 전에 반드시 다음 검증을 통과해야 합니다:
+
+```bash
+bash scripts/pre-push-checks.sh  # tsc + lint + build 자동 검증
+```
+
+이 검증은 `.claude/settings.json`의 PreToolUse 훅으로 자동화되어 있습니다.
+`git push` 실행 시 자동으로 타입 체크 → ESLint → 프로덕션 빌드를 순서대로 수행하며,
+하나라도 실패하면 push가 차단됩니다.
+
 ## 작업 시 주의사항
 
 - 타로 카드 데이터는 `src/data/` 디렉토리에 정적으로 관리
