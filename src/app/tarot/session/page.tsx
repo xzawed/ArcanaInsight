@@ -3,14 +3,15 @@
 import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { useCardAnimationStore } from "@/hooks/useCardAnimation";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
-import { TypingDialogue } from "@/components/character/TypingDialogue";
 import { CardDeck } from "@/components/card/CardDeck";
 import { CardSpread } from "@/components/card/CardSpread";
-import { ChatWindow } from "@/components/chat/ChatWindow";
+import { DialogueBox } from "@/components/chat/DialogueBox";
+import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { getCharacterByService } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getSpreadForTopic } from "@/data/spreads";
@@ -21,7 +22,7 @@ const deckManager = new DeckManager();
 export default function TarotSessionPage() {
   const router = useRouter();
   const character = getCharacterByService("tarot")!;
-  const { currentMood, setMood } = useCharacterStore();
+  const { currentMood, setMood, isTyping } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
     phase, topic, requiredCards, selectedCards, chatMessages, isLoading,
@@ -53,7 +54,7 @@ export default function TarotSessionPage() {
       setPhase("card-select");
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: `${requiredCards}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요 ✨`,
+        content: `${requiredCards}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요`,
         mood: "mystical", timestamp: new Date(),
       });
       setMood("mystical");
@@ -81,7 +82,7 @@ export default function TarotSessionPage() {
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical");
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요 🔮", mood: "mystical", timestamp: new Date() });
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요", mood: "mystical", timestamp: new Date() });
     const sessionId = useSessionStore.getState().sessionId;
     try {
       const response = await fetch("/api/tarot/reading", {
@@ -91,9 +92,8 @@ export default function TarotSessionPage() {
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();
 
-      // Show loading dots while AI generates
       const loadingMsgId = crypto.randomUUID();
-      addChatMessage({ id: loadingMsgId, role: "character", content: "카드를 읽고 있어요... ✨", mood: "mystical", timestamp: new Date() });
+      addChatMessage({ id: loadingMsgId, role: "character", content: "카드를 읽고 있어요...", mood: "mystical", timestamp: new Date() });
 
       let fullJson = "";
       while (true) {
@@ -108,12 +108,6 @@ export default function TarotSessionPage() {
             if (data.chunk) fullJson += data.chunk;
             if (data.done && data.result) {
               setReadingResult(data.result);
-
-              // Replace loading message with card interpretations
-              const messages = useSessionStore.getState().chatMessages.filter(m => m.id !== loadingMsgId);
-              // We can't easily remove, so we'll add new messages for the result
-
-              // Add individual card interpretations
               const currentSpread = topic ? getSpreadForTopic(topic) : null;
               if (data.result.cardInterpretations) {
                 for (const interp of data.result.cardInterpretations) {
@@ -121,84 +115,129 @@ export default function TarotSessionPage() {
                   const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
                   addChatMessage({
                     id: crypto.randomUUID(), role: "character",
-                    content: `🃏 [${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
+                    content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
                     mood: "serious", timestamp: new Date(),
                   });
                 }
               }
-
-              // Add overall reading
               if (data.result.overallReading) {
                 addChatMessage({
                   id: crypto.randomUUID(), role: "character",
-                  content: `🔮 종합 해석\n\n${data.result.overallReading}`,
+                  content: `종합 해석\n\n${data.result.overallReading}`,
                   mood: "mystical", timestamp: new Date(),
                 });
               }
-
-              // Add advice
               if (data.result.advice) {
                 addChatMessage({
                   id: crypto.randomUUID(), role: "character",
-                  content: `✨ 조언\n\n${data.result.advice}`,
+                  content: `조언\n\n${data.result.advice}`,
                   mood: "smile", timestamp: new Date(),
                 });
               }
-
               setPhase("result"); setMood("smile");
             }
           } catch { /* skip malformed */ }
         }
       }
     } catch {
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "앗, 카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요 🙏", mood: "surprised", timestamp: new Date() });
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
       setMood("surprised");
     }
     setLoading(false);
   };
 
   const spread = topic ? getSpreadForTopic(topic) : null;
+  const particleDensity = phase === "reading" || phase === "result" ? "high" : "medium";
+
+  // isTyping is used by DialogueBox indirectly via the store; suppress unused warning
+  void isTyping;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col h-[calc(100vh-7rem)] relative">
-      {/* 배경 이미지 */}
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" />
+    <div className="relative h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
+      {/* 배경 */}
+      <div className="absolute inset-0 -z-10">
+        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-arcana-bg/50" />
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",
+        }} />
       </div>
 
-      <div className="flex-shrink-0 h-[35%] flex items-center justify-center relative">
-        <CharacterDisplay character={character} mood={currentMood} />
-        {chatMessages.length > 0 && (
-          <div className="absolute bottom-2 left-4 right-4 bg-arcana-card/90 backdrop-blur-sm border border-arcana-border rounded-xl px-4 py-2">
-            <TypingDialogue text={chatMessages[chatMessages.length - 1].content} speed={20} isStreaming={false} className="text-sm" />
-          </div>
+      {/* 파티클 */}
+      <ParticleOverlay density={particleDensity} className="z-10" />
+
+      {/* 상단 무대 */}
+      <div className="relative flex-1 min-h-0 flex items-end z-20">
+        <div className="absolute bottom-0 left-0 z-30 w-[35%] md:w-[30%] max-w-[280px]">
+          <CharacterDisplay character={character} mood={currentMood} />
+        </div>
+
+        <div className="flex-1 flex items-center justify-center ml-[30%] md:ml-[25%] pb-4">
+          <AnimatePresence mode="wait">
+            {phase === "card-select" && (
+              <motion.div
+                key="deck"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="w-full"
+              >
+                <CardDeck
+                  cards={shuffledDeck.slice(0, 12)}
+                  isSpread={animationPhase === "spreading"}
+                  selectedIndices={selectedIndices}
+                  onCardSelect={handleCardSelect}
+                />
+              </motion.div>
+            )}
+            {(phase === "reading" || phase === "result") && spread && (
+              <motion.div
+                key="spread"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-md"
+              >
+                <CardSpread
+                  selectedCards={selectedCards}
+                  spread={spread}
+                  revealedPositions={revealedPositions}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* 하단 대화창 */}
+      <div className="relative z-30 flex-shrink-0">
+        <DialogueBox
+          messages={chatMessages}
+          characterName={character.name}
+          isTyping={isLoading && phase === "reading"}
+        />
+
+        {phase === "result" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-arcana-card/90 backdrop-blur-sm px-4 pb-4 flex gap-3"
+          >
+            <button
+              onClick={() => {
+                useSessionStore.getState().reset();
+                useCardAnimationStore.getState().reset();
+                router.push("/tarot");
+              }}
+              className="flex-1 py-2.5 rounded-full bg-arcana-surface border border-arcana-border text-sm hover:border-arcana-purple transition-colors font-serif"
+            >
+              새로운 상담
+            </button>
+            <button className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity font-serif">
+              결과 공유하기
+            </button>
+          </motion.div>
         )}
       </div>
-      {phase === "card-select" && (
-        <div className="flex-shrink-0 h-[30%] flex items-center">
-          <CardDeck cards={shuffledDeck.slice(0, 12)} isSpread={animationPhase === "spreading"} selectedIndices={selectedIndices} onCardSelect={handleCardSelect} />
-        </div>
-      )}
-      {(phase === "reading" || phase === "result") && spread && (
-        <div className="flex-shrink-0 h-[30%] flex items-center">
-          <CardSpread selectedCards={selectedCards} spread={spread} revealedPositions={revealedPositions} />
-        </div>
-      )}
-      <div className="flex-1 min-h-0 border-t border-arcana-border mt-2">
-        <ChatWindow messages={chatMessages} className="h-full" />
-      </div>
-      {phase === "result" && (
-        <div className="flex-shrink-0 flex gap-3 py-3 border-t border-arcana-border">
-          <button onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
-            className="flex-1 py-2.5 rounded-full bg-arcana-card border border-arcana-border text-sm hover:border-arcana-purple transition-colors">
-            새로운 상담
-          </button>
-          <button className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity">
-            결과 공유하기
-          </button>
-        </div>
-      )}
     </div>
   );
 }
