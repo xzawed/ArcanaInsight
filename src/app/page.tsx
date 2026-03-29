@@ -2,8 +2,6 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { CharacterGallery } from "@/components/home/CharacterGallery";
 import { DailyCard } from "@/components/home/DailyCard";
 import { ServiceFlow } from "@/components/home/ServiceFlow";
-import { ReviewCarousel } from "@/components/home/ReviewCarousel";
-import { StatsCounter } from "@/components/home/StatsCounter";
 import { FAQ } from "@/components/home/FAQ";
 import { BottomCTA } from "@/components/home/BottomCTA";
 
@@ -14,8 +12,6 @@ export default function HomePage() {
       <CharacterGallery />
       <DailyCard />
       <ServiceFlow />
-      <ReviewCarousel />
-      <StatsCounter />
       <FAQ />
       <BottomCTA />
     </div>

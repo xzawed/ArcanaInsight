@@ -234,13 +234,13 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+            className="relative z-20 min-h-[calc(100vh-3.5rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden"
           >
             {/* 캐릭터 + 대사: 모바일 세로 배치 / 데스크탑 좌측 50% 오버레이 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
               {/* 캐릭터 */}
               {selectedCharacter && (
-                <div className="h-[30vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
+                <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
                   <CharacterDisplay
                     character={selectedCharacter}
                     mood="smile"
@@ -259,7 +259,7 @@ function TarotPageContent() {
             </div>
 
             {/* 카테고리: 모바일 하단 / 데스크탑 우측 50% */}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
+            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
               <button
                 onClick={handleBack}
                 className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
@@ -267,7 +267,7 @@ function TarotPageContent() {
                 ← 다른 상담사 선택
               </button>
               <h3 className="font-serif font-bold text-base md:text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2 md:gap-3">
                 {topics.map((topic, index) => (
                   <motion.button
                     key={topic.id}
@@ -276,7 +276,7 @@ function TarotPageContent() {
                     transition={{ delay: index * 0.08 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleTopicSelect(topic.id)}
-                    className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
+                    className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3 md:p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
                   >
                     <span className="text-xl">{topic.icon}</span>
                     <div>
