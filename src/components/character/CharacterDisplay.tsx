@@ -8,10 +8,11 @@ import { useCharacterStore } from "@/hooks/useCharacter";
 interface CharacterDisplayProps {
   character: CharacterConfig;
   mood: Mood;
+  size?: "normal" | "large";
   className?: string;
 }
 
-export function CharacterDisplay({ character, mood, className = "" }: CharacterDisplayProps) {
+export function CharacterDisplay({ character, mood, size = "normal", className = "" }: CharacterDisplayProps) {
   const { setMood } = useCharacterStore();
 
   const handleAnimationEnd = useCallback(() => {
@@ -20,17 +21,22 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
     }
   }, [mood, setMood]);
 
+  const sizeClasses = size === "large"
+    ? "max-w-[400px] max-h-[600px]"
+    : "max-w-[280px] max-h-[420px]";
+
   return (
-    <div className={`relative flex items-end justify-start ${className}`}>
-      <div className="absolute bottom-0 left-1/4 -translate-x-1/2 w-64 h-64 bg-gradient-radial from-arcana-purple/20 to-transparent rounded-full blur-3xl" />
-      <div className="relative z-10 max-w-[280px] max-h-[420px] overflow-hidden">
+    <div className={`relative flex items-end justify-center ${className}`}>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-radial from-arcana-purple/20 to-transparent rounded-full blur-3xl" />
+      <div className={`relative z-10 ${sizeClasses} overflow-hidden`}>
         <SpriteAnimator
+          characterId={character.id}
           mood={mood}
           onAnimationEnd={handleAnimationEnd}
           className="w-full h-full scale-100 origin-bottom"
         />
       </div>
-      <div className="absolute bottom-2 left-2 z-20">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 text-center">
         <span className="text-arcana-purple font-serif font-bold text-sm drop-shadow-lg">
           {character.name}
         </span>
