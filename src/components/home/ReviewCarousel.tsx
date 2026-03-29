@@ -22,17 +22,17 @@ export function ReviewCarousel() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-3xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-3">상담 후기</h2>
+          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">상담 후기</h2>
           <p className="text-arcana-muted text-sm md:text-base">실제 사용자들의 리딩 경험</p>
         </ScrollReveal>
 
         <div className="relative">
           <button onClick={prev} type="button" aria-label="이전 후기"
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 z-10 w-10 h-10 rounded-full bg-arcana-card/80 border border-arcana-border flex items-center justify-center text-arcana-muted hover:text-arcana-purple transition-colors">
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-6 z-10 w-10 h-10 rounded-full bg-arcana-card/70 backdrop-blur-sm border border-arcana-border flex items-center justify-center text-arcana-muted hover:text-arcana-purple transition-colors">
             ‹
           </button>
           <button onClick={next} type="button" aria-label="다음 후기"
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 z-10 w-10 h-10 rounded-full bg-arcana-card/80 border border-arcana-border flex items-center justify-center text-arcana-muted hover:text-arcana-purple transition-colors">
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-6 z-10 w-10 h-10 rounded-full bg-arcana-card/70 backdrop-blur-sm border border-arcana-border flex items-center justify-center text-arcana-muted hover:text-arcana-purple transition-colors">
             ›
           </button>
 
@@ -44,7 +44,7 @@ export function ReviewCarousel() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
-                className="bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-2xl p-6 md:p-8"
+                className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-6 md:p-8"
               >
                 <div className="flex gap-1 mb-3">
                   {Array.from({ length: 5 }, (_, i) => (

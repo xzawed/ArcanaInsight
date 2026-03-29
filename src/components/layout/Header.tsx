@@ -41,12 +41,12 @@ export function Header() {
           <Link href="/mypage" className="text-arcana-muted hover:text-arcana-text transition-colors">마이페이지</Link>
           {user ? (
             <button onClick={handleLogout}
-              className="px-4 py-1.5 rounded-full bg-arcana-purple/20 text-arcana-purple hover:bg-arcana-purple/30 transition-colors text-sm min-h-[44px] flex items-center">
+              className="px-4 py-2 rounded-full text-xs font-serif font-bold text-arcana-muted hover:text-arcana-purple transition-colors min-h-[44px] flex items-center">
               로그아웃
             </button>
           ) : (
             <Link href="/auth/login"
-              className="px-4 py-1.5 rounded-full bg-arcana-purple/20 text-arcana-purple hover:bg-arcana-purple/30 transition-colors text-sm min-h-[44px] flex items-center">
+              className="px-4 py-2 rounded-full text-xs font-serif font-bold bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white hover:opacity-90 shadow-lg shadow-arcana-purple/20 transition-opacity min-h-[44px] flex items-center">
               로그인
             </Link>
           )}

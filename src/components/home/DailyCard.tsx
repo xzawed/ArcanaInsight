@@ -72,7 +72,7 @@ export function DailyCard() {
     <section id="daily-card" className="py-16 md:py-24 px-4">
       <div className="max-w-4xl mx-auto">
         <ScrollReveal className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-2">오늘의 카드</h2>
+          <h2 className="text-xl md:text-2xl font-serif font-bold mb-2">오늘의 카드</h2>
           <p className="text-arcana-muted text-sm">{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}</p>
         </ScrollReveal>
 
@@ -80,10 +80,10 @@ export function DailyCard() {
         <div className="flex justify-center gap-2 mb-8">
           {characters.map((char) => (
             <button key={char.id} type="button" onClick={() => setActiveTab(char.id)}
-              className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-full text-xs font-serif transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-serif transition-all ${
                 activeTab === char.id
                   ? "bg-arcana-purple text-white shadow-lg shadow-arcana-purple/30"
-                  : "bg-arcana-card/60 text-arcana-muted hover:text-arcana-text border border-arcana-border"
+                  : "bg-arcana-card/70 text-arcana-muted hover:text-arcana-text border border-arcana-border"
               }`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden">
@@ -156,7 +156,7 @@ export function DailyCard() {
                     ))}
                   </div>
 
-                  <div className="bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="px-2 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">
                         <span className="text-white text-[10px] font-serif font-bold">
@@ -168,7 +168,7 @@ export function DailyCard() {
                   </div>
 
                   <button onClick={handleShare} type="button"
-                    className="px-4 py-2 rounded-full border border-arcana-border text-arcana-muted text-xs hover:border-arcana-purple hover:text-arcana-purple transition-colors">
+                    className="px-4 py-2 text-xs rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold hover:bg-arcana-purple/10 transition-colors">
                     공유하기
                   </button>
                 </div>

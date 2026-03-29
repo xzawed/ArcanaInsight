@@ -13,7 +13,7 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
       <button
         onClick={() => setIsOpen(!isOpen)}
         type="button"
-        className="w-full bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4 md:p-5 text-left hover:border-arcana-purple/50 transition-colors"
+        className="w-full bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 md:p-5 text-left hover:border-arcana-purple/50 transition-colors"
       >
         <div className="flex items-center justify-between gap-4">
           <h3 className="font-serif font-bold text-sm md:text-base">{question}</h3>
@@ -50,7 +50,7 @@ export function FAQ() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-3xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-3">자주 묻는 질문</h2>
+          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">자주 묻는 질문</h2>
         </ScrollReveal>
 
         <div className="space-y-3">

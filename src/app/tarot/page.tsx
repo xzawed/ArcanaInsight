@@ -95,7 +95,7 @@ export default function TarotPage() {
             className="max-w-4xl mx-auto px-4 py-8 relative z-20"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
+              <h2 className="text-xl md:text-2xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
               <p className="text-arcana-muted drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
             </div>
 
@@ -159,13 +159,13 @@ export default function TarotPage() {
                 </p>
 
                 {/* 말투 스타일 */}
-                <div className="bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
                   <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">리딩 스타일</h4>
                   <p className="text-arcana-muted text-xs leading-relaxed">{selectedCharacter.speechStyle}</p>
                 </div>
 
                 {/* 인사 미리보기 */}
-                <div className="bg-arcana-card/60 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
                   <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">첫 인사</h4>
                   <p className="text-arcana-text text-sm italic leading-relaxed">&ldquo;{selectedCharacter.greeting}&rdquo;</p>
                 </div>
@@ -175,7 +175,7 @@ export default function TarotPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleConfirmCharacter}
-                  className="w-full py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
+                  className="w-full px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
                 >
                   {selectedCharacter.name}와 상담 시작하기
                 </motion.button>
@@ -220,7 +220,7 @@ export default function TarotPage() {
               >
                 ← 다른 상담사 선택
               </button>
-              <h3 className="font-serif font-bold text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+              <h3 className="font-serif font-bold text-base md:text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
               <div className="grid grid-cols-1 gap-3">
                 {topics.map((topic, index) => (
                   <motion.button
@@ -230,7 +230,7 @@ export default function TarotPage() {
                     transition={{ delay: index * 0.08 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleTopicSelect(topic.id)}
-                    className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
+                    className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
                   >
                     <span className="text-xl">{topic.icon}</span>
                     <div>

@@ -20,7 +20,7 @@ export function CharacterGallery() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-6xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-3">당신의 상담사를 만나보세요</h2>
+          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">당신의 상담사를 만나보세요</h2>
           <p className="text-arcana-muted text-sm md:text-base max-w-lg mx-auto">
             각 상담사만의 특별한 리딩 스타일로 카드의 메시지를 전합니다
           </p>
@@ -33,7 +33,7 @@ export function CharacterGallery() {
                 <motion.div
                   whileHover={{ y: -12, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className={`bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-2xl overflow-hidden transition-all hover:shadow-xl ${THEME_COLORS[char.id] || ""}`}
+                  className={`bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl overflow-hidden transition-all hover:shadow-xl ${THEME_COLORS[char.id] || ""}`}
                 >
                   <div className="relative aspect-[3/4] overflow-hidden">
                     <Image

@@ -14,7 +14,7 @@ export function ServiceFlow() {
     <section className="py-16 md:py-24 px-4 bg-arcana-surface/30">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-3">이렇게 진행됩니다</h2>
+          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">이렇게 진행됩니다</h2>
           <p className="text-arcana-muted text-sm md:text-base">간단한 4단계로 타로 상담을 받아보세요</p>
         </ScrollReveal>
 

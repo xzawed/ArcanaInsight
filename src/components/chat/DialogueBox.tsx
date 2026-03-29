@@ -40,7 +40,7 @@ export function DialogueBox({ messages, characterName = "아르카나", isTyping
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute inset-0 bg-arcana-card/85 backdrop-blur-md border-t-2 border-arcana-purple/60 rounded-t-xl" />
+      <div className="absolute inset-0 bg-arcana-card/90 backdrop-blur-md border-t-2 border-arcana-purple/60 rounded-t-xl" />
       <div className="relative z-10 p-3 md:p-5">
         <div className="flex items-center gap-2 mb-2">
           <div className="px-3 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">

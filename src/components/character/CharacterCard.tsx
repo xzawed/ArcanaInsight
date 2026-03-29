@@ -20,9 +20,9 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
       whileHover={{ y: -8, scale: 1.03 }}
       whileTap={{ scale: 0.97 }}
       onClick={onClick}
-      className={`relative bg-arcana-card/80 backdrop-blur-sm border-2 rounded-2xl p-4 text-center transition-all overflow-hidden group ${
+      className={`relative bg-arcana-card/70 backdrop-blur-sm border-2 rounded-2xl p-4 text-center transition-all overflow-hidden group ${
         isSelected
-          ? "border-arcana-purple shadow-lg shadow-arcana-purple/30"
+          ? "border-arcana-purple shadow-lg shadow-arcana-purple/20"
           : "border-arcana-border hover:border-arcana-purple/50"
       }`}
     >
@@ -51,8 +51,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          style={{ boxShadow: "inset 0 0 30px rgba(139,92,246,0.2)" }}
+          className="absolute inset-0 rounded-2xl pointer-events-none shadow-[inset_0_0_30px_rgba(139,92,246,0.2)]"
         />
       )}
     </motion.button>

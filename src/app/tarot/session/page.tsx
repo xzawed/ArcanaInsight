@@ -249,7 +249,7 @@ export default function TarotSessionPage() {
                 {/* 결과 메시지 목록 */}
                 <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                   {chatMessages.filter(m => m.role === "character").map((msg) => (
-                    <div key={msg.id} className="bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+                    <div key={msg.id} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
                       <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                     </div>
                   ))}
@@ -264,11 +264,11 @@ export default function TarotSessionPage() {
                       useCardAnimationStore.getState().reset();
                       router.push("/tarot");
                     }}
-                    className="flex-1 py-2.5 rounded-full bg-arcana-surface border border-arcana-border text-sm hover:border-arcana-purple transition-colors font-serif"
+                    className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
                   >
                     새로운 상담
                   </button>
-                  <button className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity font-serif">
+                  <button className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
                     결과 공유하기
                   </button>
                 </div>

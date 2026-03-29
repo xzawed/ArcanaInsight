@@ -39,7 +39,7 @@ function LoginForm() {
       </div>
 
       <div className="w-full max-w-sm relative">
-        <div className="bg-arcana-card/80 backdrop-blur-md border border-arcana-border rounded-2xl p-8 shadow-2xl shadow-arcana-purple/10">
+        <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-8 shadow-xl shadow-arcana-purple/30">
           {/* 장식 이미지 */}
           <div className="flex justify-center mb-6">
             <div className="relative w-20 h-20 animate-float">
@@ -53,7 +53,7 @@ function LoginForm() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-display font-bold text-arcana-purple mb-2">로그인</h1>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2">로그인</h1>
             <p className="text-arcana-muted text-sm">리딩 히스토리를 저장하고 관리하세요</p>
           </div>
 
@@ -66,11 +66,11 @@ function LoginForm() {
 
           <div className="space-y-3">
             <button onClick={() => handleLogin("google")}
-              className="w-full py-3 rounded-xl bg-white text-gray-800 font-medium flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors shadow-md">
+              className="w-full px-6 py-2.5 rounded-full bg-white text-gray-800 font-serif font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors shadow-lg shadow-arcana-purple/20">
               <span>G</span> Google로 로그인
             </button>
             <button onClick={() => handleLogin("kakao")}
-              className="w-full py-3 rounded-xl bg-[#FEE500] text-[#191919] font-medium flex items-center justify-center gap-2 hover:bg-[#FDD835] transition-colors shadow-md">
+              className="w-full px-6 py-2.5 rounded-full bg-[#FEE500] text-[#191919] font-serif font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FDD835] transition-colors shadow-lg shadow-arcana-purple/20">
               <span>💬</span> 카카오로 로그인
             </button>
           </div>
