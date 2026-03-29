@@ -2,6 +2,8 @@
 
 interface CardBackProps {
   size?: "sm" | "md" | "lg";
+  width?: number;
+  height?: number;
   className?: string;
 }
 
@@ -11,8 +13,10 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardBack({ size = "md", className = "" }: CardBackProps) {
-  const { w, h } = sizeDimensions[size];
+export function CardBack({ size = "md", width, height, className = "" }: CardBackProps) {
+  const preset = sizeDimensions[size];
+  const w = width ?? preset.w;
+  const h = height ?? preset.h;
   const cx = w / 2;
   const cy = h / 2;
   const r1 = Math.min(w, h) * 0.3;

@@ -12,12 +12,16 @@ interface CardItemProps {
   isReversed?: boolean;
   onClick?: () => void;
   size?: "sm" | "md" | "lg";
+  width?: number;
+  height?: number;
   className?: string;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
 
-export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", className = "" }: CardItemProps) {
+export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "" }: CardItemProps) {
+  const useCustomSize = width !== undefined && height !== undefined;
+
   return (
     <motion.div
       onClick={onClick}
@@ -26,8 +30,8 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
         scale: 1.02,
         transition: { duration: 0.2 },
       } : undefined}
-      className={`relative cursor-pointer ${sizeClasses[size]} ${className}`}
-      style={{ perspective: "1000px" }}
+      className={`relative cursor-pointer ${useCustomSize ? "" : sizeClasses[size]} ${className}`}
+      style={{ perspective: "1000px", ...(useCustomSize ? { width, height } : {}) }}
     >
       {!isFlipped && (
         <motion.div
@@ -50,14 +54,14 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
           className={`absolute inset-0 ${isSelected ? "ring-2 ring-arcana-gold shadow-lg shadow-arcana-gold/20" : ""}`}
           style={{ backfaceVisibility: "hidden", borderRadius: "0.5rem" }}
         >
-          <CardBack size={size} className="w-full h-full" />
+          <CardBack size={size} width={width} height={height} className="w-full h-full" />
         </div>
 
         <div
           className="absolute inset-0"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", borderRadius: "0.5rem" }}
         >
-          <CardFace card={card} isReversed={isReversed} size={size} className="w-full h-full" />
+          <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" />
         </div>
       </motion.div>
 
