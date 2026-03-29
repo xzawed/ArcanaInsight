@@ -52,20 +52,35 @@ export class TarotService implements DivinationService {
     try {
       const parsed = JSON.parse(jsonStr);
       return {
-        cardInterpretations: parsed.cardInterpretations || [],
-        overallReading: parsed.overallReading || "",
-        advice: parsed.advice || "",
+        cardInterpretations: (parsed.cardInterpretations || []).map(
+          (interp: { cardId: string; position: number; interpretation: string; isReversed?: boolean }) => ({
+            ...interp,
+            interpretation: this.cleanReadingText(interp.interpretation),
+          })
+        ),
+        overallReading: this.cleanReadingText(parsed.overallReading || ""),
+        advice: this.cleanReadingText(parsed.advice || ""),
       };
     } catch {
       // JSON 파싱 실패 시 코드/태그 제거 후 텍스트만 표시
       const cleanText = aiResponse
         .replace(/```[\s\S]*?```/g, "")
         .replace(/[{}[\]"]/g, "")
-        .replace(/cardInterpretations|cardId|position|interpretation|overallReading|advice/g, "")
-        .replace(/:\s*,/g, "")
-        .replace(/,\s*,/g, "")
+        .replace(/\b(cardInterpretations|cardId|position|interpretation|overallReading|advice|isReversed)\b\s*:/g, "")
+        .replace(/,\s*,+/g, "")
+        .replace(/^\s*,|,\s*$/gm, "")
+        .replace(/\n{3,}/g, "\n\n")
         .trim();
       return { cardInterpretations: [], overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.", advice: "" };
     }
+  }
+
+  /** JSON 파싱 후 텍스트에 남은 이스케이프/코드 잔여물 정리 */
+  private cleanReadingText(text: string): string {
+    return text
+      .replace(/\\n/g, "\n")           // 리터럴 \n → 실제 개행
+      .replace(/\\"/g, '"')            // 이스케이프된 따옴표 복원
+      .replace(/\n{3,}/g, "\n\n")      // 과도한 개행 정리
+      .trim();
   }
 }

@@ -65,7 +65,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">🔮</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed">{reading.overall_reading}</p>
+              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{reading.overall_reading}</p>
             </div>
 
             {/* 조언 */}
@@ -74,7 +74,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">✨</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed">{reading.advice}</p>
+              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{reading.advice}</p>
             </div>
           </div>
 
@@ -100,7 +100,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       </div>
                     </div>
                   </div>
-                  <p className="text-arcana-text text-sm leading-relaxed">{interp.interpretation}</p>
+                  <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
                 </div>
               );
             })}
