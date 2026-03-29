@@ -105,55 +105,57 @@ export default function TarotPage() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-3.5rem)] flex flex-col"
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-row overflow-hidden"
           >
-            {/* 모바일: 캐릭터 → 대사 → 카테고리 세로 배치 */}
-            {/* 데스크톱: 좌측 캐릭터 | 우측 대사+카테고리 가로 배치 */}
-            <div className="flex flex-col md:flex-row md:items-end md:flex-1 relative">
+            {/* 좌측: 캐릭터 (빨간 영역) + 대사 (파란 영역) */}
+            <div className="w-[40%] max-w-[480px] flex-shrink-0 relative flex flex-col">
+              {/* 파란 영역: 캐릭터 대사 (상단) */}
+              <div className="flex-shrink-0 px-3 pt-4 pb-2 z-20">
+                <DialogueBox
+                  messages={dialogueMessages}
+                  characterName={selectedCharacter?.name}
+                />
+              </div>
+
+              {/* 빨간 영역: 캐릭터 (하단, 남은 공간 전체) */}
               {selectedCharacter && (
-                <div className="flex justify-center md:w-[50%] md:max-w-[480px] flex-shrink-0">
+                <div className="flex-1 relative flex items-end justify-center overflow-hidden">
                   <CharacterDisplay
                     character={selectedCharacter}
                     mood="smile"
                     size="large"
-                    className="h-full"
+                    className="w-full h-full"
                   />
                 </div>
               )}
+            </div>
 
-              <div className="flex flex-col justify-center px-4 md:px-6 py-4 md:pb-8 w-full">
-                <div className="flex-shrink-0 mb-4 md:mb-6">
-                  <DialogueBox
-                    messages={dialogueMessages}
-                    characterName={selectedCharacter?.name}
-                  />
-                </div>
-
-                <button
-                  onClick={handleBack}
-                  className="self-start mb-3 md:mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
-                >
-                  ← 다른 상담사 선택
-                </button>
-                <h3 className="font-serif font-bold text-lg mb-3 md:mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
-                <div className="grid grid-cols-1 gap-2 md:gap-3">
-                  {topics.map((topic, index) => (
-                    <motion.button
-                      key={topic.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                      onClick={() => handleTopicSelect(topic.id)}
-                      className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-3 md:p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
-                    >
-                      <span className="text-xl">{topic.icon}</span>
-                      <div>
-                        <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
-                        <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
+            {/* 우측: 카테고리 선택 (녹색 영역) */}
+            <div className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
+              <button
+                onClick={handleBack}
+                className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
+              >
+                ← 다른 상담사 선택
+              </button>
+              <h3 className="font-serif font-bold text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {topics.map((topic, index) => (
+                  <motion.button
+                    key={topic.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    onClick={() => handleTopicSelect(topic.id)}
+                    className="group bg-arcana-card/80 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
+                  >
+                    <span className="text-xl">{topic.icon}</span>
+                    <div>
+                      <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
+                      <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
+                    </div>
+                  </motion.button>
+                ))}
               </div>
             </div>
           </motion.div>
