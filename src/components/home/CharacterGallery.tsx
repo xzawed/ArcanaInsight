@@ -29,7 +29,7 @@ export function CharacterGallery() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {characters.map((char, index) => (
             <ScrollReveal key={char.id} delay={index * 0.15}>
-              <Link href="/tarot">
+              <Link href={`/tarot?character=${char.id}`}>
                 <motion.div
                   whileHover={{ y: -12, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}

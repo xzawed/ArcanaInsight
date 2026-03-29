@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Topic } from "@/types/session";
@@ -12,7 +12,7 @@ import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm, UserInfoData } from "@/components/tarot/UserInfoForm";
-import { getAvailableCharacters } from "@/data/characters";
+import { getAvailableCharacters, getCharacterById } from "@/data/characters";
 import { getSpreadForTopic } from "@/data/spreads";
 import { CharacterConfig } from "@/types/character";
 import { ChatMessage } from "@/types/session";
@@ -27,14 +27,34 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
 
 type PageStep = "character-select" | "character-detail" | "topic-select" | "user-info";
 
-export default function TarotPage() {
+function TarotPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTopic, setSpreadType, setPhase, setCharacterId } = useSessionStore();
   const availableCharacters = getAvailableCharacters();
 
-  const [step, setStep] = useState<PageStep>("character-select");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
-  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
+  // 홈에서 캐릭터를 선택하고 왔을 때 자동으로 캐릭터 상세로 진입
+  const preselectedCharId = searchParams.get("character");
+  const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
+
+  const [step, setStep] = useState<PageStep>(() => preselectedChar ? "character-detail" : "character-select");
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
+  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>(() =>
+    preselectedChar ? [{
+      id: crypto.randomUUID(),
+      role: "character" as const,
+      content: preselectedChar.greeting,
+      mood: "smile",
+      timestamp: new Date(),
+    }] : []
+  );
+
+  // 프리셀렉트된 캐릭터 ID를 스토어에 반영
+  useEffect(() => {
+    if (preselectedChar) {
+      setCharacterId(preselectedChar.id);
+    }
+  }, [preselectedChar, setCharacterId]);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
@@ -310,5 +330,17 @@ export default function TarotPage() {
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function TarotPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
+      </div>
+    }>
+      <TarotPageContent />
+    </Suspense>
   );
 }
