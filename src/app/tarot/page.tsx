@@ -115,8 +115,8 @@ export default function TarotPage() {
             exit={{ opacity: 0, x: -50 }}
             className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
-            {/* 좌측 50%: 캐릭터 일러스트 */}
-            <div className="h-[40%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
+            {/* 좌측: 모바일 상단 35% / 데스크탑 50% */}
+            <div className="h-[35%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
               <div className="absolute inset-0 overflow-hidden">
                 <CharacterDisplay
                   character={selectedCharacter}
@@ -126,8 +126,8 @@ export default function TarotPage() {
               </div>
             </div>
 
-            {/* 우측 50%: 캐릭터 프로필 */}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-6 md:px-10 py-6 overflow-y-auto">
+            {/* 우측: 모바일 하단 / 데스크탑 50% */}
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-10 py-4 md:py-6 overflow-y-auto">
               <button
                 onClick={handleBack}
                 className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"

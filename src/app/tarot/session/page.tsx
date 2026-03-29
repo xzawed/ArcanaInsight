@@ -164,15 +164,15 @@ export default function TarotSessionPage() {
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
-        {/* 캐릭터: 모바일 상단 (결과 시 30%, 그 외 40%) / 데스크탑 좌측 50% */}
+        {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 좌측 50% */}
         {character && (
-          <div className={`${phase === "result" ? "h-[30%]" : "h-[40%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden`}>
+          <div className={`${phase === "result" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden`}>
             <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
           </div>
         )}
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
-        <div className="flex-1 md:w-[50%] flex flex-col px-4">
+        <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
               <motion.div

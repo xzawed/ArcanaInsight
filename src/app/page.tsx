@@ -43,7 +43,7 @@ export default function HomePage() {
         </div>
 
         {/* 캐릭터 미리보기 */}
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-3 md:gap-4 mb-12">
           {[
             { id: "arcana", name: "아르카나" },
             { id: "miko", name: "미코" },
@@ -51,7 +51,7 @@ export default function HomePage() {
             { id: "hoshi", name: "호시" },
           ].map((char) => (
             <div key={char.id} className="text-center group">
-              <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-arcana-purple/50 group-hover:border-arcana-gold transition-colors shadow-lg shadow-arcana-purple/20">
+              <div className="relative w-16 h-16 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-arcana-purple/50 group-hover:border-arcana-gold transition-colors shadow-lg shadow-arcana-purple/20">
                 <Image
                   src={`/images/characters/${char.id}/default.jpg`}
                   alt={char.name}

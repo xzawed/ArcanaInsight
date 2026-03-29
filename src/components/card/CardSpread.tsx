@@ -13,7 +13,7 @@ interface CardSpreadProps {
 
 export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpreadProps) {
   return (
-    <div className="relative w-full max-w-lg mx-auto aspect-[4/3]">
+    <div className="relative w-full max-w-sm md:max-w-lg mx-auto aspect-[4/3]">
       {spread.positions.map((pos) => {
         const selectedCard = selectedCards.find((sc) => sc.position === pos.index);
         const isRevealed = revealedPositions.includes(pos.index);
@@ -39,13 +39,13 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
                   isFlipped={isRevealed}
                   isSelected={true}
                   isReversed={selectedCard.isReversed}
-                  size="md"
+                  size="sm"
                 />
-                <span className="text-arcana-gold/70 text-xs font-serif">{pos.labelKo}</span>
+                <span className="text-arcana-gold/70 text-[10px] md:text-xs font-serif">{pos.labelKo}</span>
               </div>
             ) : (
-              <div className="w-24 h-36 rounded-lg border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5">
-                <span className="text-arcana-muted text-xs font-serif">{pos.labelKo}</span>
+              <div className="w-16 h-24 md:w-24 md:h-36 rounded-lg border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5">
+                <span className="text-arcana-muted text-[10px] md:text-xs font-serif">{pos.labelKo}</span>
               </div>
             )}
           </motion.div>

@@ -22,7 +22,7 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
 
   return (
     <div className={`relative flex items-end justify-center ${className}`}>
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-radial from-arcana-purple/20 to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 h-40 md:w-64 md:h-64 bg-gradient-radial from-arcana-purple/20 to-transparent rounded-full blur-3xl" />
       <div
         className="relative z-10 w-full h-full overflow-hidden"
         style={{

@@ -16,14 +16,23 @@ interface CardDeckProps {
 export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDisplay = 12 }: CardDeckProps) {
   const displayCards = useMemo(() => cards.slice(0, maxDisplay), [cards, maxDisplay]);
 
+  // 화면 크기에 따라 카드 간격 계산 (SSR 안전)
+  const isBrowser = typeof window !== "undefined";
+  const viewWidth = isBrowser ? window.innerWidth : 1024;
+  const isMobile = viewWidth < 768;
+
+  const cardSpacing = isMobile ? 22 : 42;
+  const cardYOffset = isMobile ? 5 : 10;
+  const angleDiv = isMobile ? 3 : 2;
+
   return (
-    <div className="relative w-full flex items-center justify-center min-h-[250px] md:min-h-[350px]">
+    <div className="relative w-full flex items-center justify-center min-h-[180px] md:min-h-[300px] overflow-hidden">
       {displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
-        const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / 2) : 0;
-        const xOffset = isSpread ? (index - totalCards / 2) * 42 : (index - totalCards / 2) * 2;
-        const yOffset = isSpread ? Math.abs(index - totalCards / 2) * 10 : index * -0.5;
+        const angle = isSpread ? (index - totalCards / 2) * (180 / totalCards / angleDiv) : 0;
+        const xOffset = isSpread ? (index - totalCards / 2) * cardSpacing : (index - totalCards / 2) * 2;
+        const yOffset = isSpread ? Math.abs(index - totalCards / 2) * cardYOffset : index * -0.5;
 
         return (
           <motion.div
@@ -31,7 +40,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDi
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
             animate={{
               x: xOffset,
-              y: isSelected ? -40 : yOffset,
+              y: isSelected ? -30 : yOffset,
               rotate: angle,
               opacity: isSelected ? 0.3 : 1,
               scale: isSelected ? 0.9 : 1,
@@ -50,7 +59,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect, maxDi
               isFlipped={false}
               isSelected={isSelected}
               onClick={() => !isSelected && onCardSelect(index)}
-              size="lg"
+              size={isMobile ? "md" : "lg"}
             />
           </motion.div>
         );
