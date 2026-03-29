@@ -28,7 +28,7 @@ export const characters: CharacterConfig[] = [
     idleAnimation: "float",
     personality: "엄숙하면서도 자비로운 무녀. 흰색 하카마에 검은 장발, 붉은 리본.",
     speechStyle: "~입니다/~합니다체. 차분하고 엄숙한 톤.",
-    voiceTone: "calm-solemn", unlocked: false,
+    voiceTone: "calm-solemn", unlocked: true,
   },
   {
     id: "seonhwa", name: "선화", nameJp: "仙花", serviceType: "saju",
@@ -41,7 +41,7 @@ export const characters: CharacterConfig[] = [
     idleAnimation: "float",
     personality: "우아하고 지혜로운 선녀. 한복+판타지 복장에 꽃장식과 부채.",
     speechStyle: "~세요/~랍니다체. 우아하고 따뜻한 톤.",
-    voiceTone: "elegant-warm", unlocked: false,
+    voiceTone: "elegant-warm", unlocked: true,
   },
   {
     id: "hoshi", name: "호시", nameJp: "星", serviceType: "fortune",
@@ -54,7 +54,7 @@ export const characters: CharacterConfig[] = [
     idleAnimation: "float",
     personality: "발랄하고 에너지 넘치는 별의 정령. 파스텔톤, 별 모티프, 짧은 머리.",
     speechStyle: "~야/~지체. 반말에 가까운 친근한 톤. 이모지 많이 사용.",
-    voiceTone: "bright-cheerful", unlocked: false,
+    voiceTone: "bright-cheerful", unlocked: true,
   },
 ];
 
@@ -64,4 +64,8 @@ export function getCharacterByService(serviceType: string): CharacterConfig | un
 
 export function getCharacterById(id: string): CharacterConfig | undefined {
   return characters.find((c) => c.id === id);
+}
+
+export function getAvailableCharacters(): CharacterConfig[] {
+  return characters.filter((c) => c.unlocked);
 }
