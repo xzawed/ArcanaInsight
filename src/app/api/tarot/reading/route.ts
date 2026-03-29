@@ -3,12 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { TarotService } from "@/services/tarot/tarot-service";
 import { GrokProvider } from "@/services/core/grok-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
+import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 
 const tarotService = new TarotService();
 const grokProvider = new GrokProvider();
 const deckManager = new DeckManager();
+const spreadResolver = new SpreadResolver();
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const readingPrompt = tarotService.getReadingPrompt({
       session: { id: sessionId, userId: null, serviceType: "tarot", topic, status: "in_progress",
-        spreadType: "three-card", selectedCards, createdAt: new Date(), completedAt: null },
+        spreadType: spreadResolver.resolveForTopic(topic).type, selectedCards, createdAt: new Date(), completedAt: null },
       selectedCards, chatHistory: [], topic,
     });
     const encoder = new TextEncoder();

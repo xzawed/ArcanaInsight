@@ -2,6 +2,14 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 
+interface SessionWithReadings {
+  id: string;
+  service_type: string;
+  topic: string;
+  created_at: string;
+  readings?: { id: string; share_token?: string; overall_reading?: string }[];
+}
+
 export default async function MyPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -50,7 +58,7 @@ export default async function MyPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {sessions.map((session: any) => {
+            {sessions.map((session: SessionWithReadings) => {
               const reading = session.readings?.[0];
               return (
                 <a key={session.id} href={reading?.share_token ? `/tarot/result/${reading.share_token}` : "#"}
