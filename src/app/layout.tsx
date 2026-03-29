@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR, Gothic_A1 } from "next/font/google";
+import { Noto_Sans_KR, Gothic_A1, Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -18,6 +18,13 @@ const gothicA1 = Gothic_A1({
   display: "swap",
 });
 
+const notoSerifKr = Noto_Serif_KR({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-noto-serif-kr",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "ArcanaInsight — 타로 & 운세 상담",
   description:
@@ -32,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`dark ${notoSansKr.variable} ${gothicA1.variable}`}
+      className={`dark ${notoSansKr.variable} ${gothicA1.variable} ${notoSerifKr.variable}`}
     >
       <body className="bg-arcana-bg text-arcana-text font-sans min-h-screen antialiased flex flex-col">
         <Header />

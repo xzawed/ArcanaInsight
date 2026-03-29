@@ -17,10 +17,24 @@
   --font-sans: var(--font-noto-sans-kr), sans-serif;
   --font-display: var(--font-gothic-a1), sans-serif;
 
+  /* Serif font */
+  --font-serif: var(--font-noto-serif-kr), serif;
+
   /* Animations */
   --animate-float: float 3s ease-in-out infinite;
   --animate-glow: glow 2s ease-in-out infinite alternate;
   --animate-blink: blink 3s ease-in-out infinite;
+
+  /* Particle */
+  --animate-particle-float: particle-float 6s ease-in-out infinite;
+  --animate-particle-glow: particle-glow 4s ease-in-out infinite alternate;
+
+  /* VN dialogue */
+  --animate-dialogue-arrow: dialogue-arrow 1s ease-in-out infinite;
+  --animate-typing-dot: typing-dot 1.4s ease-in-out infinite;
+
+  /* Card flash */
+  --animate-card-flash: card-flash 0.6s ease-out forwards;
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -35,6 +49,34 @@
   @keyframes blink {
     0%, 45%, 55%, 100% { transform: scaleY(1); }
     50% { transform: scaleY(0.1); }
+  }
+
+  @keyframes particle-float {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+    25% { transform: translateY(-30px) translateX(10px); opacity: 0.8; }
+    50% { transform: translateY(-60px) translateX(-5px); opacity: 0.6; }
+    75% { transform: translateY(-40px) translateX(15px); opacity: 0.3; }
+  }
+
+  @keyframes particle-glow {
+    0% { box-shadow: 0 0 2px rgba(212, 175, 55, 0.3); }
+    100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.8); }
+  }
+
+  @keyframes dialogue-arrow {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(4px); opacity: 0.5; }
+  }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+  }
+
+  @keyframes card-flash {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1.2); }
   }
 }
 
