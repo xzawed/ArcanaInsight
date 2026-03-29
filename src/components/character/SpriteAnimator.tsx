@@ -6,22 +6,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mood } from "@/types/character";
 
 interface MoodConfig {
-  src: string;
   loop: boolean;
-  /** 1회 재생 동작의 표시 시간 (ms) — loop 동작은 무시 */
   displayDuration: number;
 }
 
 const MOOD_CONFIGS: Record<Mood, MoodConfig> = {
-  default: { src: "/images/characters/arcana/sprites/idle.png", loop: true, displayDuration: 0 },
-  smile: { src: "/images/characters/arcana/sprites/happy.png", loop: false, displayDuration: 2000 },
-  serious: { src: "/images/characters/arcana/sprites/serious.png", loop: false, displayDuration: 2000 },
-  surprised: { src: "/images/characters/arcana/sprites/surprised.png", loop: false, displayDuration: 1500 },
-  wink: { src: "/images/characters/arcana/sprites/happy.png", loop: false, displayDuration: 1500 },
-  mystical: { src: "/images/characters/arcana/sprites/mystical.png", loop: true, displayDuration: 0 },
+  default: { loop: true, displayDuration: 0 },
+  smile: { loop: false, displayDuration: 2000 },
+  serious: { loop: false, displayDuration: 2000 },
+  surprised: { loop: false, displayDuration: 1500 },
+  wink: { loop: false, displayDuration: 1500 },
+  mystical: { loop: true, displayDuration: 0 },
 };
 
-// 루프 동작별 미세 모션 정의
+const MOOD_TO_FILE: Record<Mood, string> = {
+  default: "idle",
+  smile: "happy",
+  serious: "serious",
+  surprised: "surprised",
+  wink: "happy",
+  mystical: "mystical",
+};
+
 const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
   default: {
     y: [0, -6, 0],
@@ -38,7 +44,6 @@ const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
   },
 };
 
-// 1회 재생 동작 진입 모션
 const ENTER_MOTION: Record<string, Record<string, number[]>> = {
   smile: { scale: [0.95, 1.03, 1], y: [5, -3, 0] },
   serious: { scale: [1, 0.98, 1], y: [0, 2, 0] },
@@ -47,22 +52,20 @@ const ENTER_MOTION: Record<string, Record<string, number[]>> = {
 };
 
 interface SpriteAnimatorProps {
+  characterId: string;
   mood: Mood;
   onAnimationEnd?: () => void;
   className?: string;
 }
 
-export function SpriteAnimator({ mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
+export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
+  const fileName = MOOD_TO_FILE[mood];
+  const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
 
-  // 1회 재생 동작 → displayDuration 후 onAnimationEnd 호출
   useEffect(() => {
     if (config.loop || !onAnimationEnd) return;
-
-    const timer = setTimeout(() => {
-      onAnimationEnd();
-    }, config.displayDuration);
-
+    const timer = setTimeout(() => { onAnimationEnd(); }, config.displayDuration);
     return () => clearTimeout(timer);
   }, [mood, config, onAnimationEnd]);
 
@@ -73,46 +76,25 @@ export function SpriteAnimator({ mood, onAnimationEnd, className = "" }: SpriteA
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={mood}
+        key={`${characterId}-${mood}`}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
         className={className}
       >
-        {/* 1회 재생 동작 진입 모션 */}
         {!isLooping && enterAnim ? (
-          <motion.div
-            animate={enterAnim}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          >
-            <Image
-              src={config.src}
-              alt="character"
-              width={512}
-              height={768}
-              className="w-full h-auto object-contain"
-              priority
-            />
+          <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}>
+            <Image src={imageSrc} alt="character" width={512} height={768}
+              className="w-full h-auto object-contain" priority />
           </motion.div>
         ) : (
-          /* 루프 동작 — 호흡/부유 미세 모션 */
           <motion.div
             animate={loopAnim}
-            transition={{
-              duration: mood === "mystical" ? 4 : 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            transition={{ duration: mood === "mystical" ? 4 : 3, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Image
-              src={config.src}
-              alt="character"
-              width={512}
-              height={768}
-              className="w-full h-auto object-contain"
-              priority
-            />
+            <Image src={imageSrc} alt="character" width={512} height={768}
+              className="w-full h-auto object-contain" priority />
           </motion.div>
         )}
       </motion.div>
