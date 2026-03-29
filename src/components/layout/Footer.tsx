@@ -1,9 +1,66 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
-    <footer className="border-t border-arcana-border py-8 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 text-center text-arcana-muted text-sm">
-        <p>&copy; 2026 ArcanaInsight. All rights reserved.</p>
-        <p className="mt-1">타로 & 운세 종합 플랫폼</p>
+    <footer className="bg-arcana-surface border-t border-arcana-border mt-auto">
+      {/* 상단 섹션 */}
+      <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 컬럼 1: 로고 & 설명 */}
+        <div>
+          <span className="text-lg font-display font-bold bg-gradient-to-r from-arcana-purple to-arcana-indigo bg-clip-text text-transparent">
+            ArcanaInsight
+          </span>
+          <p className="mt-2 text-sm text-arcana-muted leading-relaxed">
+            AI 캐릭터와 함께하는 타로 &amp; 운세 플랫폼
+          </p>
+        </div>
+
+        {/* 컬럼 2: 서비스 링크 */}
+        <div>
+          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">서비스</h3>
+          <ul className="space-y-2">
+            <li>
+              <Link href="/tarot" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+                타로 상담
+              </Link>
+            </li>
+            <li>
+              <Link href="/#daily-card" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+                오늘의 운세
+              </Link>
+            </li>
+            <li>
+              <Link href="/mypage" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+                마이페이지
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* 컬럼 3: 정보 링크 */}
+        <div>
+          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">정보</h3>
+          <ul className="space-y-2">
+            <li>
+              <a href="#" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+                이용약관
+              </a>
+            </li>
+            <li>
+              <a href="#" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+                개인정보처리방침
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* 하단 섹션 */}
+      <div className="border-t border-arcana-border">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-arcana-muted">
+          <p>&copy; 2026 ArcanaInsight. All rights reserved.</p>
+          <p>Powered by Grok AI</p>
+        </div>
       </div>
     </footer>
   );
