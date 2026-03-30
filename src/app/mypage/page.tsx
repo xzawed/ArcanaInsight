@@ -6,13 +6,21 @@ import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
 
-interface SessionWithReadings {
+/** readings는 1:1 관계(unique session_id)이므로 PostgREST가 단일 객체로 반환 */
+interface ReadingData {
+  id: string;
+  share_token?: string | null;
+  overall_reading?: string | null;
+}
+
+interface SessionRow {
   id: string;
   service_type: string;
   topic: string;
+  status: string;
   created_at: string;
-  character_id?: string;
-  readings?: { id: string; share_token?: string; overall_reading?: string }[];
+  character_id?: string | null;
+  readings: ReadingData | ReadingData[] | null;
 }
 
 interface SessionCard {
@@ -62,10 +70,17 @@ function formatRelativeDate(dateStr: string): string {
   return date.toLocaleDateString("ko-KR");
 }
 
-function getCharacterName(characterId?: string): string | null {
+function getCharacterName(characterId?: string | null): string | null {
   if (!characterId) return null;
   const char = characters.find((c) => c.id === characterId);
   return char?.name ?? null;
+}
+
+/** PostgREST 1:1 관계: 객체 또는 배열 모두 처리 */
+function normalizeReading(readings: ReadingData | ReadingData[] | null | undefined): ReadingData | undefined {
+  if (!readings) return undefined;
+  if (Array.isArray(readings)) return readings[0];
+  return readings;
 }
 
 /** 카드 빈도 집계 → 가장 많이 뽑은 카드명 반환 */
@@ -87,7 +102,8 @@ export default async function MyPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const [profileRes, sessionsRes, cardsRes] = await Promise.all([
+  // 1. 프로필 + 세션 조회 (리딩이 있는 세션도 포함하기 위해 completed + in_progress 모두 조회)
+  const [profileRes, sessionsRes] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, email, nickname, avatar_url, provider, favorite_character_id")
@@ -95,27 +111,35 @@ export default async function MyPage() {
       .single<Profile>(),
     supabase
       .from("sessions")
-      .select("id, service_type, topic, created_at, character_id, readings(id, share_token, overall_reading)")
+      .select("id, service_type, topic, status, created_at, character_id, readings(id, share_token, overall_reading)")
       .eq("user_id", user.id)
-      .eq("status", "completed")
+      .in("status", ["completed", "in_progress"])
       .order("created_at", { ascending: false })
-      .limit(20),
-    supabase
-      .from("session_cards")
-      .select("card_id, session_id")
-      .in(
-        "session_id",
-        (await supabase.from("sessions").select("id").eq("user_id", user.id).eq("status", "completed")).data?.map(
-          (s: { id: string }) => s.id,
-        ) ?? [],
-      ),
+      .limit(50),
   ]);
 
   const profile = profileRes.data;
   const profileError = profileRes.error;
-  const sessionList = (sessionsRes.data ?? []) as SessionWithReadings[];
+  const rawSessions = (sessionsRes.data ?? []) as SessionRow[];
   const sessionsError = sessionsRes.error;
-  const sessionCards = (cardsRes.data ?? []) as SessionCard[];
+
+  // completed 세션 + 리딩이 있는 in_progress 세션 (상태 업데이트 누락 복구)
+  const sessionList = rawSessions.filter((s) => {
+    if (s.status === "completed") return true;
+    const reading = normalizeReading(s.readings);
+    return !!reading;
+  }).slice(0, 20);
+
+  // 2. 세션 ID 목록으로 session_cards 조회 (별도 쿼리)
+  const sessionIds = sessionList.map((s) => s.id);
+  let sessionCards: SessionCard[] = [];
+  if (sessionIds.length > 0) {
+    const cardsRes = await supabase
+      .from("session_cards")
+      .select("card_id")
+      .in("session_id", sessionIds);
+    sessionCards = (cardsRes.data ?? []) as SessionCard[];
+  }
 
   const totalReadings = sessionList.length;
   const lastReadingDate = sessionList.length > 0 ? sessionList[0].created_at : null;
@@ -130,7 +154,6 @@ export default async function MyPage() {
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/mypage-bg.jpg" alt="" fill className="object-cover" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
-        {/* 비네팅 효과 */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)]" />
       </div>
 
@@ -217,15 +240,14 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-3">
             {sessionList.map((session) => {
-              const reading = session.readings?.[0];
+              const reading = normalizeReading(session.readings);
               const charName = getCharacterName(session.character_id);
               const topicColor = topicColors[session.topic] ?? topicColors.general;
-              const preview =
-                reading?.overall_reading && reading.overall_reading.length > 80
-                  ? reading.overall_reading.slice(0, 80) + "..."
-                  : reading?.overall_reading;
-
-              const hasResult = !!reading?.share_token;
+              const overallText = reading?.overall_reading || "";
+              const preview = overallText.length > 80
+                ? overallText.slice(0, 80) + "..."
+                : overallText || null;
+              const shareToken = reading?.share_token;
 
               const content = (
                 <>
@@ -257,10 +279,10 @@ export default async function MyPage() {
                 </>
               );
 
-              return hasResult ? (
+              return shareToken ? (
                 <Link
                   key={session.id}
-                  href={`/tarot/result/${reading!.share_token}`}
+                  href={`/tarot/result/${shareToken}`}
                   className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 transition-colors hover:shadow-lg hover:shadow-arcana-purple/10 hover:border-arcana-purple cursor-pointer"
                 >
                   {content}
