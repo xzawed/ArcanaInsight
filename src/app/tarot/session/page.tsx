@@ -149,10 +149,11 @@ export default function TarotSessionPage() {
               }
               setPhase("result"); setMood("smile");
             }
-          } catch { /* skip malformed */ }
+          } catch (e) { console.warn("SSE 파싱 실패:", e); }
         }
       }
-    } catch {
+    } catch (e) {
+      console.error("리딩 요청 실패:", e);
       addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
       setMood("surprised");
       setReadingError(true);
