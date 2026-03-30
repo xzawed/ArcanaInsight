@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { characters } from "@/data/characters";
+import { LogoutButton } from "./LogoutButton";
 
 interface SessionWithReadings {
   id: string;
@@ -114,14 +115,7 @@ export default async function MyPage() {
                 </p>
               )}
             </div>
-            <button
-              type="button"
-              disabled
-              title="준비 중"
-              className="rounded-full px-4 py-2 text-xs border border-arcana-border text-arcana-muted cursor-not-allowed opacity-50 shrink-0"
-            >
-              프로필 편집
-            </button>
+            <LogoutButton />
           </div>
         </div>
 
