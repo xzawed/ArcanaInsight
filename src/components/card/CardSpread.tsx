@@ -65,12 +65,12 @@ function computeLayout(
   cardW = Math.max(Math.min(Math.round(cardW), 120), 30);
   cardH = Math.round(cardW * 1.5);
 
-  // 포지션 매핑: 카드 중심이 [cardW/2, containerW - cardW/2] 범위에 들어오도록
-  // position_px = margin + (pos - origMin) / origRange * available
+  // 포지션 매핑: 카드 중심이 [margin, containerDim - margin] 범위에 들어오도록
   const marginX = cardW / 2;
-  const marginY = cardH / 2;
-  const availX = containerW - cardW; // 중심이 이동할 수 있는 범위(px)
-  const availY = containerH - cardH;
+  const marginY = cardH / 2 + cardH * 0.15; // 상단 여유 15% 추가 (라벨 공간 + 캐릭터 겹침 방지)
+  const marginYBottom = cardH / 2 + cardH * 0.15; // 하단 여유 (라벨 공간)
+  const availX = containerW - cardW;
+  const availY = containerH - marginY - marginYBottom;
 
   const origMinX = uniqueX[0] ?? 50;
   const origMinY = uniqueY[0] ?? 50;

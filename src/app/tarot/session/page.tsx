@@ -308,7 +308,7 @@ export default function TarotSessionPage() {
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 좌측 50% */}
         {character && (
-          <div className={`${phase === "result" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden transition-all duration-500`}>
+          <div className={`${phase === "result" ? "h-[25%]" : phase === "reading" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden transition-all duration-500`}>
             <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
           </div>
         )}
@@ -367,7 +367,7 @@ export default function TarotSessionPage() {
                 key="spread"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto relative"
+                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto relative pt-2"
               >
                 <CardSpread
                   selectedCards={selectedCards}
