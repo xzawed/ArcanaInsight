@@ -130,31 +130,8 @@ export default function TarotSessionPage() {
     // 대기 연출 시작 (API 호출과 동시 실행)
     const stopSequence = startWaitingSequence(cards, characterId || "arcana");
 
-    // sessionId가 아직 없으면 세션 생성 재시도
-    let sessionId = useSessionStore.getState().sessionId;
-    if (!sessionId) {
-      try {
-        const sessionRes = await fetch("/api/tarot/session", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic }),
-        });
-        const sessionData = await sessionRes.json();
-        if (sessionData.session?.id) {
-          sessionId = sessionData.session.id as string;
-          useSessionStore.getState().setSessionId(sessionId);
-        }
-      } catch { /* 세션 생성 재시도 실패 — 아래에서 처리 */ }
-    }
-
-    if (!sessionId) {
-      stopSequence();
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "세션을 생성하지 못했어요. 네트워크를 확인하고 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-      setMood("surprised");
-      setReadingError(true);
-      setLoading(false);
-      return;
-    }
-
+    // sessionId가 없어도 리딩은 진행 (DB 저장만 스킵됨)
+    const sessionId = useSessionStore.getState().sessionId;
     try {
       const response = await fetch("/api/tarot/reading", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -162,8 +139,7 @@ export default function TarotSessionPage() {
       });
       if (!response.ok || !response.body) {
         stopSequence();
-        const errorText = response.ok ? "응답 스트림 없음" : `서버 오류 (${response.status})`;
-        console.error("리딩 API 응답 실패:", errorText);
+        console.error("리딩 API 응답 실패:", response.status);
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: "서버 연결에 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
         setMood("surprised");
         setReadingError(true);
