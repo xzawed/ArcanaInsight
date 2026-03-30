@@ -9,7 +9,9 @@ export class GrokProvider implements AIProvider {
   private get apiKey(): string {
     if (!this._apiKey) {
       const key = process.env.GROK_API_KEY;
-      if (!key) throw new Error("GROK_API_KEY environment variable is required");
+      if (!key || key === "your_grok_api_key") {
+        throw new Error("GROK_API_KEY 환경변수가 설정되지 않았습니다. Railway 또는 .env.local에 실제 API 키를 설정해주세요.");
+      }
       this._apiKey = key;
     }
     return this._apiKey;
