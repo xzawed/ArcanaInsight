@@ -81,8 +81,12 @@ export class TarotService implements DivinationService {
   /** JSON 파싱 후 텍스트에 남은 이스케이프/코드 잔여물 정리 */
   private cleanReadingText(text: string): string {
     return text
-      .replace(/\\n/g, "\n")           // 리터럴 \n → 실제 개행
+      .replace(/\\n\\n/g, "\n\n")     // 이중 이스케이프 \\n\\n → 실제 개행 2줄
+      .replace(/\\n/g, "\n")           // 이중 이스케이프 \\n → 실제 개행
+      .replace(/\\r/g, "")             // 캐리지 리턴 제거
+      .replace(/\\t/g, " ")            // 탭 → 공백
       .replace(/\\"/g, '"')            // 이스케이프된 따옴표 복원
+      .replace(/\\/g, "")              // 남은 불필요한 백슬래시 제거
       .replace(/\n{3,}/g, "\n\n")      // 과도한 개행 정리
       .trim();
   }

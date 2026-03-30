@@ -9,6 +9,19 @@ import { ResultShareButton } from "./ResultShareButton";
 
 const deckManager = new DeckManager();
 
+/** DB에서 읽은 텍스트의 이스케이프 잔여물 정리 */
+function cleanText(text: string): string {
+  return text
+    .replace(/\\n\\n/g, "\n\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "")
+    .replace(/\\t/g, " ")
+    .replace(/\\"/g, '"')
+    .replace(/\\/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -16,7 +29,13 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   if (!reading) notFound();
   const session = reading.sessions;
   const spread = spreads[session.spread_type as SpreadType];
-  const interpretations = reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[];
+  const rawInterpretations = reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[];
+  const interpretations = rawInterpretations.map((interp) => ({
+    ...interp,
+    interpretation: cleanText(interp.interpretation),
+  }));
+  const overallReading = cleanText(reading.overall_reading || "");
+  const advice = cleanText(reading.advice || "");
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -65,7 +84,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">🔮</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{reading.overall_reading}</p>
+              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{overallReading}</p>
             </div>
 
             {/* 조언 */}
@@ -74,7 +93,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">✨</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{reading.advice}</p>
+              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{advice}</p>
             </div>
           </div>
 
