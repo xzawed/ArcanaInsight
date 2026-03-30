@@ -42,14 +42,14 @@ export function Footer() {
           <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">정보</h3>
           <ul className="space-y-2">
             <li>
-              <a href="#" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+              <Link href="/terms" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
                 이용약관
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+              <Link href="/privacy" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
                 개인정보처리방침
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

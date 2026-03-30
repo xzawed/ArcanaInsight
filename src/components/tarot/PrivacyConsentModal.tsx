@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PrivacyConsentModalProps {
@@ -44,6 +45,11 @@ export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsen
 
             <p className="text-arcana-muted text-[10px] mb-4">
               개인정보 수집에 동의하지 않으셔도 서비스 이용이 가능하며, 동의하신 경우 다음 방문 시 자동으로 정보가 채워집니다.
+              자세한 내용은{" "}
+              <Link href="/privacy" className="text-arcana-purple underline hover:opacity-80" target="_blank">
+                개인정보처리방침
+              </Link>
+              을 확인해주세요.
             </p>
 
             <div className="flex gap-3">
