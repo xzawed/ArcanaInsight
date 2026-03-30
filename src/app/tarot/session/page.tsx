@@ -82,45 +82,54 @@ export default function TarotSessionPage() {
     setSelectedIndices((prev) => [...prev, index]);
     setRevealedPositions((prev) => [...prev, position]);
     setMood("surprised");
-    setTimeout(() => setMood("default"), 1000);
 
-    if (selectedCards.length + 1 >= requiredCards) {
-      // 모든 카드 선택 완료 → 확인 모드
-      setPendingConfirm(true);
+    // 매 카드 선택마다 확인 요청
+    const currentCount = selectedCards.length + 1;
+    const isLast = currentCount >= requiredCards;
+    setPendingConfirm(true);
+    setTimeout(() => {
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`,
-        mood: "smile", timestamp: new Date(),
+        content: isLast
+          ? `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
+          : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${requiredCards})`,
+        mood: isLast ? "smile" : "default", timestamp: new Date(),
       });
-      setMood("smile");
-    }
+      setMood(isLast ? "smile" : "default");
+    }, 500);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shuffledDeck, selectedCards, requiredCards, pendingConfirm]);
 
-  /** 확인 → 리딩 시작 */
-  const handleConfirmCards = useCallback(() => {
+  /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
+  const handleConfirmCard = useCallback(() => {
     setPendingConfirm(false);
-    startReading(selectedCards);
+    const currentCount = useSessionStore.getState().selectedCards.length;
+    if (currentCount >= requiredCards) {
+      startReading(useSessionStore.getState().selectedCards);
+    } else {
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: `좋아요! 다음 카드를 골라주세요. (${currentCount}/${requiredCards})`,
+        mood: "mystical", timestamp: new Date(),
+      });
+      setMood("mystical");
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCards]);
+  }, [requiredCards, addChatMessage, setMood]);
 
   /** 취소 → 마지막 카드 제거, 다시 선택 가능 */
   const handleCancelLastCard = useCallback(() => {
     setPendingConfirm(false);
-    // Zustand 스토어에서 마지막 카드 제거
     const currentCards = useSessionStore.getState().selectedCards;
     if (currentCards.length === 0) return;
     const lastCard = currentCards[currentCards.length - 1];
-    // 스토어 selectedCards에서 마지막 제거 (reset 후 재추가)
     const remaining = currentCards.slice(0, -1);
     useSessionStore.setState({ selectedCards: remaining });
-    // UI 상태 복원
     setSelectedIndices((prev) => prev.slice(0, -1));
     setRevealedPositions((prev) => prev.filter((p) => p !== lastCard.position));
-    setMood("default");
     addChatMessage({
       id: crypto.randomUUID(), role: "character",
-      content: "카드를 다시 골라주세요. 직감을 믿으세요!",
+      content: "다른 카드를 골라주세요. 직감을 믿으세요!",
       mood: "mystical", timestamp: new Date(),
     });
     setMood("mystical");
@@ -315,10 +324,10 @@ export default function TarotSessionPage() {
                       다시 고르기
                     </button>
                     <button
-                      onClick={handleConfirmCards}
+                      onClick={handleConfirmCard}
                       className="px-5 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-xs font-serif font-bold hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
                     >
-                      이 카드로 진행
+                      {selectedCards.length >= requiredCards ? "이 카드로 진행" : "확인"}
                     </button>
                   </motion.div>
                 )}
