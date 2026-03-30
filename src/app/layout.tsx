@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 const notoSansKr = Noto_Sans_KR({
   subsets: ["latin"],
@@ -45,12 +46,14 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-arcana-purple focus:text-white focus:rounded-lg">
           메인 콘텐츠로 이동
         </a>
-        <Header />
-        <main id="main-content" className="flex-1 pt-14 pb-14 md:pb-0">
-          {children}
-        </main>
-        <Footer />
-        <MobileNav />
+        <ThemeProvider>
+          <Header />
+          <main id="main-content" className="flex-1 pt-14 pb-14 md:pb-0">
+            {children}
+          </main>
+          <Footer />
+          <MobileNav />
+        </ThemeProvider>
       </body>
     </html>
   );

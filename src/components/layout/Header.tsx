@@ -3,13 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useThemeStore, themes, type ThemeId } from "@/hooks/useTheme";
 import type { User } from "@supabase/supabase-js";
+
+const themeList = Object.values(themes);
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
+  const { mode, activeTheme, setMode } = useThemeStore();
 
   useEffect(() => {
     const supabase = createClient();
@@ -39,6 +45,9 @@ export function Header() {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsDropdownOpen(false);
+      }
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+        setIsThemeOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -98,6 +107,52 @@ export function Header() {
             마이페이지
           </Link>
 
+          {/* 테마 선택 */}
+          <div ref={themeRef} className="relative">
+            <button
+              onClick={() => setIsThemeOpen(!isThemeOpen)}
+              className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="테마 변경"
+              title={`현재: ${themes[activeTheme].nameKo}`}
+            >
+              {themes[activeTheme].icon}
+            </button>
+            {isThemeOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden">
+                <div className="px-3 py-2 border-b border-arcana-border">
+                  <p className="text-arcana-muted text-[10px] font-serif">테마 설정</p>
+                </div>
+                <button
+                  onClick={() => { setMode("auto"); setIsThemeOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
+                    mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                  }`}
+                >
+                  <span>🔄</span>
+                  <span className="font-serif text-xs">자동 (시간/계절)</span>
+                  {mode === "auto" && <span className="ml-auto text-[10px] text-arcana-muted">{themes[activeTheme].nameKo}</span>}
+                </button>
+                <div className="border-t border-arcana-border" />
+                {themeList.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => { setMode(t.id as ThemeId); setIsThemeOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
+                      mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                    }`}
+                  >
+                    <span>{t.icon}</span>
+                    <span className="font-serif text-xs">{t.nameKo}</span>
+                    <span
+                      className="ml-auto w-3 h-3 rounded-full border border-arcana-border"
+                      style={{ backgroundColor: t.colors.primary }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* 유저 영역 */}
           {user ? (
             <div ref={dropdownRef} className="relative">
@@ -136,7 +191,44 @@ export function Header() {
           )}
         </nav>
 
-        {/* 모바일: 로고만 표시, 네비는 MobileNav 하단 바에서 처리 */}
+        {/* 모바일: 테마 버튼만 표시 */}
+        <div className="md:hidden">
+          <div ref={themeRef} className="relative">
+            <button
+              onClick={() => setIsThemeOpen(!isThemeOpen)}
+              className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="테마 변경"
+            >
+              {themes[activeTheme].icon}
+            </button>
+            {isThemeOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden z-50">
+                <button
+                  onClick={() => { setMode("auto"); setIsThemeOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
+                    mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                  }`}
+                >
+                  <span>🔄</span>
+                  <span className="font-serif text-xs">자동 (시간/계절)</span>
+                </button>
+                {themeList.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => { setMode(t.id as ThemeId); setIsThemeOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
+                      mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                    }`}
+                  >
+                    <span>{t.icon}</span>
+                    <span className="font-serif text-xs">{t.nameKo}</span>
+                    <span className="ml-auto w-3 h-3 rounded-full border border-arcana-border" style={{ backgroundColor: t.colors.primary }} />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </header>
   );
