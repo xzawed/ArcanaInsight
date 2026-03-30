@@ -17,13 +17,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { sessionId, topic, characterId, userInfo, cards } = body as {
-      sessionId: string; topic: Topic; characterId?: string;
+      sessionId?: string | null; topic: Topic; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
 
-    // 입력 검증
-    if (!sessionId || !topic || !Array.isArray(cards) || cards.length === 0) {
+    // 입력 검증 — sessionId는 선택 (Supabase 연결 실패 시에도 리딩 가능)
+    if (!topic || !Array.isArray(cards) || cards.length === 0) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const readingPrompt = tarotService.getReadingPrompt({
-      session: { id: sessionId, userId: null, serviceType: "tarot", topic, status: "in_progress",
+      session: { id: sessionId || "anonymous", userId: null, serviceType: "tarot", topic, status: "in_progress",
         spreadType: spreadResolver.resolveForTopic(topic).type, selectedCards, createdAt: new Date(), completedAt: null },
       selectedCards, chatHistory: [], topic,
     });
@@ -55,19 +55,28 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
           const result = tarotService.parseResult(fullResponse);
-          const supabase = await createClient();
-          // DB 쿼리 병렬 실행으로 대기 시간 단축
-          const [, readingResult] = await Promise.all([
-            supabase.from("session_cards").insert(
-              cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
-            ),
-            supabase.from("readings").insert({
-              session_id: sessionId, card_interpretation: result.cardInterpretations,
-              overall_reading: result.overallReading, advice: result.advice,
-            }).select("share_token").single(),
-            supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
-          ]);
-          const shareToken = readingResult.data?.share_token ?? null;
+
+          // DB 저장 — sessionId가 있을 때만 (Supabase 실패해도 리딩 결과는 전달)
+          let shareToken: string | null = null;
+          if (sessionId) {
+            try {
+              const supabase = await createClient();
+              const [, readingResult] = await Promise.all([
+                supabase.from("session_cards").insert(
+                  cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
+                ),
+                supabase.from("readings").insert({
+                  session_id: sessionId, card_interpretation: result.cardInterpretations,
+                  overall_reading: result.overallReading, advice: result.advice,
+                }).select("share_token").single(),
+                supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
+              ]);
+              shareToken = readingResult.data?.share_token ?? null;
+            } catch (dbError) {
+              console.error("DB 저장 실패 (리딩 결과는 정상 전달):", dbError);
+            }
+          }
+
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
         } catch (e) {
           console.error("리딩 생성 실패:", e);
