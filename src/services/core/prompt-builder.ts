@@ -44,7 +44,7 @@ export function buildSystemPrompt(character: CharacterConfig): string {
 
 export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], spread: SpreadDefinition): string {
   const cardDescriptions = selectedCards.map((sc) => {
-    const pos = spread.positions[sc.position];
+    const pos = spread.positions[sc.position] ?? { labelKo: `위치 ${sc.position + 1}`, label: `Position ${sc.position + 1}` };
     const direction = sc.isReversed ? "역방향" : "정방향";
     const meanings = sc.isReversed ? sc.card.reversed : sc.card.upright;
     return `- 위치: ${pos.labelKo} (${pos.label})
