@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
@@ -16,6 +16,8 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     const measure = () => {
@@ -75,10 +77,49 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
 
+  /** 컨테이너 클릭 → 클릭 좌표에서 가장 가까운 카드를 판별 */
+  const handleContainerClick = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const clickX = e.clientX - containerRect.left;
+    const clickY = e.clientY - containerRect.top;
+
+    // 각 카드의 중심과 클릭 좌표 거리를 계산하여 가장 가까운 카드를 선택
+    // z-index가 높은 카드(나중 인덱스)를 우선
+    let bestIndex = -1;
+    let bestDist = Infinity;
+
+    for (let i = displayCards.length - 1; i >= 0; i--) {
+      const el = cardRefs.current.get(i);
+      if (!el || selectedIndices.includes(i)) continue;
+
+      const rect = el.getBoundingClientRect();
+      const cardCenterX = rect.left - containerRect.left + rect.width / 2;
+      const cardCenterY = rect.top - containerRect.top + rect.height / 2;
+
+      // 클릭이 카드 영역 내에 있는지 확인
+      const inX = clickX >= rect.left - containerRect.left && clickX <= rect.right - containerRect.left;
+      const inY = clickY >= rect.top - containerRect.top && clickY <= rect.bottom - containerRect.top;
+
+      if (inX && inY) {
+        const dist = Math.hypot(clickX - cardCenterX, clickY - cardCenterY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIndex = i;
+        }
+      }
+    }
+
+    if (bestIndex >= 0) {
+      onCardSelect(bestIndex);
+    }
+  }, [displayCards.length, selectedIndices, onCardSelect]);
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full overflow-hidden"
+      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full overflow-hidden cursor-pointer"
+      onClick={handleContainerClick}
     >
       {containerWidth > 0 && displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
@@ -95,6 +136,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
         return (
           <motion.div
             key={card.id}
+            ref={(el) => { if (el) cardRefs.current.set(index, el); }}
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
             animate={{
               x: xOffset,
@@ -109,14 +151,15 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
               damping: 18,
               delay: isSpread ? index * 0.015 : 0,
             }}
-            className="absolute"
-            style={{ zIndex: isSelected ? 0 : index }}
+            className="absolute pointer-events-none"
+            style={{ zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index }}
+            onPointerEnter={() => setHoveredIndex(index)}
+            onPointerLeave={() => setHoveredIndex(null)}
           >
             <CardItem
               card={card}
               isFlipped={false}
               isSelected={isSelected}
-              onClick={() => !isSelected && onCardSelect(index)}
               width={layout.cardW}
               height={layout.cardH}
             />

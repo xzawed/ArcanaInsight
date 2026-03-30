@@ -74,33 +74,39 @@ export async function POST(request: NextRequest) {
 
           // DB 저장 — Supabase 클라이언트가 있을 때만
           let shareToken: string | null = null;
+          let dbSaved = false;
           if (supabase && sessionId) {
             try {
-              const [cardsRes, readingRes, sessionRes] = await Promise.all([
-                supabase.from("session_cards").insert(
-                  cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
-                    session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
-                  }))
-                ),
+              // 세션 상태 업데이트는 항상 실행 (readings 성공 여부와 독립)
+              const [readingRes, sessionRes] = await Promise.all([
                 supabase.from("readings").insert({
                   session_id: sessionId, card_interpretation: result.cardInterpretations,
                   overall_reading: result.overallReading, advice: result.advice,
                 }).select("share_token").single(),
                 supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
               ]);
-              if (cardsRes.error) console.error("session_cards 저장 실패:", cardsRes.error.message);
+
               if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
               if (readingRes.error) {
                 console.error("readings 저장 실패:", readingRes.error.message);
               } else {
                 shareToken = readingRes.data?.share_token ?? null;
+                dbSaved = true;
               }
+
+              // 부수 데이터: session_cards 저장
+              const cardsRes = await supabase.from("session_cards").insert(
+                cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
+                  session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
+                }))
+              );
+              if (cardsRes.error) console.error("session_cards 저장 실패:", cardsRes.error.message);
             } catch (dbError) {
-              console.error("DB 저장 실패 (리딩 결과는 정상 전달):", dbError);
+              console.error("DB 저장 실패:", dbError);
             }
           }
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken }, dbSaved })}\n\n`));
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
           console.error("리딩 생성 실패:", errMsg);

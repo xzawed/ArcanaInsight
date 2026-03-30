@@ -3,15 +3,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { characters } from "@/data/characters";
+import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
 
-interface SessionWithReadings {
+/** readings는 1:1 관계(unique session_id)이므로 PostgREST가 단일 객체로 반환 */
+interface ReadingData {
+  id: string;
+  share_token?: string | null;
+  overall_reading?: string | null;
+}
+
+interface SessionRow {
   id: string;
   service_type: string;
   topic: string;
+  status: string;
   created_at: string;
-  character_id?: string;
-  readings?: { id: string; share_token?: string; overall_reading?: string }[];
+  character_id?: string | null;
+  readings: ReadingData | ReadingData[] | null;
+}
+
+interface SessionCard {
+  card_id: string;
 }
 
 interface Profile {
@@ -43,6 +56,8 @@ const topicColors: Record<string, string> = {
   general: "bg-arcana-purple/20 text-arcana-purple border-arcana-purple/30",
 };
 
+const deckManager = new DeckManager();
+
 function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -55,10 +70,29 @@ function formatRelativeDate(dateStr: string): string {
   return date.toLocaleDateString("ko-KR");
 }
 
-function getCharacterName(characterId?: string): string | null {
+function getCharacterName(characterId?: string | null): string | null {
   if (!characterId) return null;
   const char = characters.find((c) => c.id === characterId);
   return char?.name ?? null;
+}
+
+/** PostgREST 1:1 관계: 객체 또는 배열 모두 처리 */
+function normalizeReading(readings: ReadingData | ReadingData[] | null | undefined): ReadingData | undefined {
+  if (!readings) return undefined;
+  if (Array.isArray(readings)) return readings[0];
+  return readings;
+}
+
+/** 카드 빈도 집계 → 가장 많이 뽑은 카드명 반환 */
+function getMostFrequentCard(sessionCards: SessionCard[]): string | null {
+  if (sessionCards.length === 0) return null;
+  const freq: Record<string, number> = {};
+  for (const sc of sessionCards) {
+    freq[sc.card_id] = (freq[sc.card_id] || 0) + 1;
+  }
+  const topCardId = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+  const card = deckManager.getCardById(topCardId);
+  return card?.nameKo ?? topCardId;
 }
 
 export default async function MyPage() {
@@ -68,24 +102,49 @@ export default async function MyPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single<Profile>();
+  // 1. 프로필 + 세션 조회 (리딩이 있는 세션도 포함하기 위해 completed + in_progress 모두 조회)
+  const [profileRes, sessionsRes] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, email, nickname, avatar_url, provider, favorite_character_id")
+      .eq("id", user.id)
+      .single<Profile>(),
+    supabase
+      .from("sessions")
+      .select("id, service_type, topic, status, created_at, character_id, readings(id, share_token, overall_reading)")
+      .eq("user_id", user.id)
+      .in("status", ["completed", "in_progress"])
+      .order("created_at", { ascending: false })
+      .limit(50),
+  ]);
 
-  const { data: sessions } = await supabase
-    .from("sessions")
-    .select("*, readings(*)")
-    .eq("user_id", user.id)
-    .eq("status", "completed")
-    .order("created_at", { ascending: false })
-    .limit(20);
+  const profile = profileRes.data;
+  const profileError = profileRes.error;
+  const rawSessions = (sessionsRes.data ?? []) as SessionRow[];
+  const sessionsError = sessionsRes.error;
 
-  const sessionList = (sessions ?? []) as SessionWithReadings[];
+  // completed 세션 + 리딩이 있는 in_progress 세션 (상태 업데이트 누락 복구)
+  const sessionList = rawSessions.filter((s) => {
+    if (s.status === "completed") return true;
+    const reading = normalizeReading(s.readings);
+    return !!reading;
+  }).slice(0, 20);
+
+  // 2. 세션 ID 목록으로 session_cards 조회 (별도 쿼리)
+  const sessionIds = sessionList.map((s) => s.id);
+  let sessionCards: SessionCard[] = [];
+  if (sessionIds.length > 0) {
+    const cardsRes = await supabase
+      .from("session_cards")
+      .select("card_id")
+      .in("session_id", sessionIds);
+    sessionCards = (cardsRes.data ?? []) as SessionCard[];
+  }
+
   const totalReadings = sessionList.length;
   const lastReadingDate = sessionList.length > 0 ? sessionList[0].created_at : null;
   const favoriteCharName = getCharacterName(profile?.favorite_character_id);
+  const mostFrequentCard = getMostFrequentCard(sessionCards);
   const nickname = profile?.nickname || "사용자";
   const initial = nickname.charAt(0);
 
@@ -95,11 +154,22 @@ export default async function MyPage() {
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/mypage-bg.jpg" alt="" fill className="object-cover" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
-        {/* 비네팅 효과 */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)]" />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 relative">
+        {/* DB 에러 안내 */}
+        {(profileError || sessionsError) && (
+          <div className="mb-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <p className="font-bold">데이터를 불러오는 중 문제가 발생했습니다</p>
+            <p className="mt-1 text-xs text-red-400/70">
+              {profileError && `프로필: ${profileError.message}`}
+              {profileError && sessionsError && " / "}
+              {sessionsError && `히스토리: ${sessionsError.message}`}
+            </p>
+          </div>
+        )}
+
         {/* 프로필 섹션 */}
         <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-5">
@@ -126,7 +196,9 @@ export default async function MyPage() {
             <p className="text-arcana-muted text-xs mt-1">총 리딩 수</p>
           </div>
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
-            <p className="text-sm font-serif font-bold text-arcana-gold truncate">데이터 수집 중</p>
+            <p className="text-sm font-serif font-bold text-arcana-gold truncate">
+              {mostFrequentCard ?? "아직 없음"}
+            </p>
             <p className="text-arcana-muted text-xs mt-1">자주 뽑은 카드</p>
           </div>
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
@@ -168,21 +240,17 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-3">
             {sessionList.map((session) => {
-              const reading = session.readings?.[0];
+              const reading = normalizeReading(session.readings);
               const charName = getCharacterName(session.character_id);
               const topicColor = topicColors[session.topic] ?? topicColors.general;
-              const preview =
-                reading?.overall_reading && reading.overall_reading.length > 80
-                  ? reading.overall_reading.slice(0, 80) + "..."
-                  : reading?.overall_reading;
+              const overallText = reading?.overall_reading || "";
+              const preview = overallText.length > 80
+                ? overallText.slice(0, 80) + "..."
+                : overallText || null;
+              const shareToken = reading?.share_token;
 
-              const hasResult = !!reading?.share_token;
-              return (
-                <Link
-                  key={session.id}
-                  href={hasResult ? `/tarot/result/${reading.share_token}` : "/tarot"}
-                  className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 hover:border-arcana-purple transition-colors hover:shadow-lg hover:shadow-arcana-purple/10"
-                >
+              const content = (
+                <>
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span
@@ -205,10 +273,27 @@ export default async function MyPage() {
                   </div>
                   {preview ? (
                     <p className="text-arcana-text/80 text-sm mt-2 line-clamp-2">{preview}</p>
-                  ) : !hasResult ? (
-                    <p className="text-arcana-muted/60 text-xs mt-2 italic">결과가 저장되지 않았습니다. 다시 상담해보세요.</p>
-                  ) : null}
+                  ) : (
+                    <p className="text-arcana-muted/60 text-xs mt-2 italic">결과가 저장되지 않았습니다</p>
+                  )}
+                </>
+              );
+
+              return shareToken ? (
+                <Link
+                  key={session.id}
+                  href={`/tarot/result/${shareToken}`}
+                  className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 transition-colors hover:shadow-lg hover:shadow-arcana-purple/10 hover:border-arcana-purple cursor-pointer"
+                >
+                  {content}
                 </Link>
+              ) : (
+                <div
+                  key={session.id}
+                  className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 opacity-80"
+                >
+                  {content}
+                </div>
               );
             })}
           </div>
