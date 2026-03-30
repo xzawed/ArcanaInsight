@@ -15,7 +15,7 @@ import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { getCharacterById } from "@/data/characters";
 import { waitingLines, buildCardPreviewLine } from "@/data/characters/waiting-lines";
 import { DeckManager } from "@/services/tarot/deck-manager";
-import { getSpreadForTopic } from "@/data/spreads";
+import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
 
 const deckManager = new DeckManager();
@@ -25,7 +25,7 @@ export default function TarotSessionPage() {
   const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
-    phase, topic, characterId, requiredCards, selectedCards, chatMessages, readingResult, isLoading,
+    phase, topic, characterId, spreadType, requiredCards, selectedCards, chatMessages, readingResult, isLoading,
     setPhase, setSessionId, setAvailableCards,
     selectCard, addChatMessage, setReadingResult, setLoading,
   } = useSessionStore();
@@ -40,7 +40,7 @@ export default function TarotSessionPage() {
   const resultBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!topic || !character) { router.push("/tarot"); return; }
+    if (!topic || !character || !spreadType) { router.push("/tarot"); return; }
     const allCards = deckManager.getAllCards();
     const shuffled = [...allCards];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -138,7 +138,7 @@ export default function TarotSessionPage() {
   // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
   const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const currentSpread = topic ? getSpreadForTopic(topic) : null;
+    const currentSpread = spreadType ? spreads[spreadType] : null;
     const lines = waitingLines[charId] || waitingLines["arcana"];
 
     // 1단계: 카드 순차 뒤집기 (2초 간격) + 카드 정보 미리보기
@@ -165,7 +165,7 @@ export default function TarotSessionPage() {
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [topic, addChatMessage, setMood]);
+  }, [spreadType, addChatMessage, setMood]);
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
@@ -181,7 +181,7 @@ export default function TarotSessionPage() {
     try {
       const response = await fetch("/api/tarot/reading", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, topic, characterId, userInfo: useSessionStore.getState().userInfo, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
+        body: JSON.stringify({ sessionId, topic, spreadType, characterId, userInfo: useSessionStore.getState().userInfo, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
       });
       if (!response.ok || !response.body) {
         stopSequence();
@@ -211,7 +211,7 @@ export default function TarotSessionPage() {
               setRevealedPositions(cards.map((c) => c.position));
 
               setReadingResult(data.result);
-              const currentSpread = topic ? getSpreadForTopic(topic) : null;
+              const currentSpread = spreadType ? spreads[spreadType] : null;
               if (data.result.cardInterpretations) {
                 for (const interp of data.result.cardInterpretations) {
                   const card = cards.find(c => c.card.id === interp.cardId);
@@ -258,7 +258,7 @@ export default function TarotSessionPage() {
     }
   }, [chatMessages, phase]);
 
-  const spread = topic ? getSpreadForTopic(topic) : null;
+  const spread = spreadType ? spreads[spreadType] : null;
   const particleDensity = phase === "reading" ? "high" : phase === "result" ? "low" : "medium";
 
   return (

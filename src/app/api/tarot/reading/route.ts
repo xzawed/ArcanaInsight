@@ -16,8 +16,8 @@ const spreadResolver = new SpreadResolver();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, topic, characterId, userInfo, cards } = body as {
-      sessionId?: string | null; topic: Topic; characterId?: string;
+    const { sessionId, topic, spreadType, characterId, userInfo, cards } = body as {
+      sessionId?: string | null; topic: Topic; spreadType?: string; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
@@ -40,9 +40,13 @@ export async function POST(request: NextRequest) {
     });
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
+    // 사용자가 선택한 spreadType 우선, 없으면 topic 기반 자동 결정
+    const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
+      ? spreadType
+      : spreadResolver.resolveForTopic(topic).type;
     const readingPrompt = tarotService.getReadingPrompt({
       session: { id: sessionId || "anonymous", userId: null, serviceType: "tarot", topic, status: "in_progress",
-        spreadType: spreadResolver.resolveForTopic(topic).type, selectedCards, createdAt: new Date(), completedAt: null },
+        spreadType: resolvedSpreadType, selectedCards, createdAt: new Date(), completedAt: null },
       selectedCards, chatHistory: [], topic,
     });
     const encoder = new TextEncoder();
