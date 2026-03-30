@@ -13,9 +13,8 @@ echo "✅ 타입 체크 통과"
 
 echo ""
 echo "=== 2/3: ESLint 코드 품질 검사 ==="
-# mypage의 기존 any 에러는 무시 (--max-warnings로 허용)
-pnpm lint 2>&1 || true
-echo "✅ 린트 완료"
+pnpm lint
+echo "✅ 린트 통과"
 
 echo ""
 echo "=== 3/3: 프로덕션 빌드 ==="
