@@ -15,14 +15,27 @@ const spreadResolver = new SpreadResolver();
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId, topic, characterId, userInfo, cards } = (await request.json()) as {
+    const body = await request.json();
+    const { sessionId, topic, characterId, userInfo, cards } = body as {
       sessionId: string; topic: Topic; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
+
+    // 입력 검증
+    if (!sessionId || !topic || !Array.isArray(cards) || cards.length === 0) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    const validTopics = ["love", "love-single", "love-couple", "finance", "career", "health", "general"];
+    if (!validTopics.includes(topic)) {
+      return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
     const selectedCards: SelectedCard[] = cards.map((c) => {
       const card = deckManager.getCardById(c.cardId);
       if (!card) throw new Error(`Card not found: ${c.cardId}`);
+      if (typeof c.position !== "number" || c.position < 0) throw new Error(`Invalid position: ${c.position}`);
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
     const systemPrompt = tarotService.getSystemPrompt(characterId);
@@ -53,7 +66,8 @@ export async function POST(request: NextRequest) {
           await supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId);
           const shareToken = readingData?.share_token ?? null;
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
-        } catch {
+        } catch (e) {
+          console.error("리딩 생성 실패:", e);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Reading generation failed" })}\n\n`));
         }
         controller.close();
@@ -62,7 +76,8 @@ export async function POST(request: NextRequest) {
     return new Response(stream, {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
     });
-  } catch {
+  } catch (e) {
+    console.error("리딩 API 오류:", e);
     return new Response(JSON.stringify({ error: "Failed to generate reading" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

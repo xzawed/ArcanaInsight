@@ -8,7 +8,7 @@ const tarotService = new TarotService();
 export async function POST(request: NextRequest) {
   try {
     const { topic } = (await request.json()) as { topic: Topic };
-    if (!["love", "finance", "career", "health", "general"].includes(topic)) {
+    if (!["love", "love-single", "love-couple", "finance", "career", "health", "general"].includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 });
     }
     const supabase = await createClient();
@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       }).select().single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ session });
-  } catch {
+  } catch (e) {
+    console.error("세션 생성 오류:", e);
     return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 }
