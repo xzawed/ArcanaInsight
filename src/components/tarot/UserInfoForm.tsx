@@ -91,16 +91,21 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
 
     // 로그인 + 저장 동의 시 DB 업데이트
     if (isLoggedIn && saveInfo) {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("profiles").update({
-          birth_name: data.name,
-          birth_date: birthDate,
-          gender: data.gender,
-          birth_hour: data.birthHour,
-          privacy_agreed_at: new Date().toISOString(),
-        }).eq("id", user.id);
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error: updateError } = await supabase.from("profiles").update({
+            birth_name: data.name,
+            birth_date: birthDate,
+            gender: data.gender,
+            birth_hour: data.birthHour,
+            privacy_agreed_at: new Date().toISOString(),
+          }).eq("id", user.id);
+          if (updateError) console.error("프로필 저장 실패:", updateError);
+        }
+      } catch (e) {
+        console.error("프로필 저장 오류:", e);
       }
     }
 

@@ -61,8 +61,9 @@ export class TarotService implements DivinationService {
         overallReading: this.cleanReadingText(parsed.overallReading || ""),
         advice: this.cleanReadingText(parsed.advice || ""),
       };
-    } catch {
+    } catch (e) {
       // JSON 파싱 실패 시 코드/태그 제거 후 텍스트만 표시
+      console.error("AI 응답 JSON 파싱 실패:", e, "\n원본 응답:", aiResponse.slice(0, 500));
       const cleanText = aiResponse
         .replace(/```[\s\S]*?```/g, "")
         .replace(/[{}[\]"]/g, "")

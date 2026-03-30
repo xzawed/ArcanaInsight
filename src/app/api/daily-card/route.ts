@@ -74,15 +74,15 @@ export async function POST(request: NextRequest) {
 
     const keywords = meanings.keywords.slice(0, 3);
 
-    // 캐시 저장
-    await supabase.from("daily_cards").insert({
+    // 캐시 저장 (동시 요청 시 중복 방지 — 충돌 무시)
+    await supabase.from("daily_cards").upsert({
       date,
       character_id: characterId,
       card_id: card.id,
       is_reversed: isReversed,
       interpretation,
       keywords,
-    });
+    }, { onConflict: "date,character_id" });
 
     return NextResponse.json({ cardId: card.id, isReversed, interpretation, keywords });
   } catch (error) {
