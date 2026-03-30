@@ -20,26 +20,25 @@ export function buildSystemPrompt(character: CharacterConfig): string {
 - 지나치게 부정적이거나 공포를 조장하는 해석은 피합니다.
 - 모든 카드에는 긍정적 메시지와 실용적 조언을 포함합니다.
 
-중요 규칙 — 응답 길이 및 형식:
-- 각 카드 해석(interpretation)은 200~250자 정도로 작성합니다.
-- 종합 해석(overallReading)은 350~400자 정도로 작성합니다.
-- 조언(advice)은 200~250자 정도로 작성합니다.
-- 각 카드의 상징과 의미를 현재 상황에 연결하여 서술합니다.
+중요 규칙 — 응답 길이:
+- 각 카드 해석(interpretation)은 150~200자로 간결하게 작성합니다.
+- 종합 해석(overallReading)은 200~300자로 핵심만 작성합니다.
+- 조언(advice)은 100~150자로 짧고 임팩트 있게 작성합니다.
+- 불필요한 수식어, 반복 표현을 피하고 핵심 메시지에 집중합니다.
 
 중요 규칙 — 문단 구분:
-- 모든 해석 텍스트는 반드시 2~3개 문단으로 나누어 작성합니다.
-- 문단과 문단 사이에 빈 줄(\\n\\n)을 넣어 시각적으로 구분합니다.
+- 해석 텍스트는 2개 문단으로 나누어 작성합니다.
+- 문단 사이에 빈 줄(\\n\\n)을 넣어 구분합니다.
 - 하나의 문단은 2~3문장으로 구성합니다.
-- 절대로 하나의 긴 문단으로 작성하지 마세요.
 
 응답 형식:
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력합니다.
 {
   "cardInterpretations": [
-    { "cardId": "카드 ID", "position": 0, "interpretation": "문단1\\n\\n문단2\\n\\n문단3" }
+    { "cardId": "카드 ID", "position": 0, "interpretation": "문단1\\n\\n문단2" }
   ],
-  "overallReading": "문단1\\n\\n문단2\\n\\n문단3",
-  "advice": "문단1\\n\\n문단2"
+  "overallReading": "문단1\\n\\n문단2",
+  "advice": "조언 내용"
 }`;
 }
 
@@ -68,7 +67,7 @@ export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], 
 선택된 카드:
 ${cardDescriptions}
 
-위 카드들의 조합을 깊이 있고 상세하게 해석해주세요. 각 카드의 상징과 그림에 담긴 의미를 구체적으로 설명하고, 카드들 간의 관계와 흐름을 분석하여 풍부한 리딩을 제공해주세요.`;
+위 카드들을 해석해주세요. 각 카드의 핵심 의미와 카드 간 관계를 간결하게 분석해주세요.`;
 }
 
 export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string; gender: string; birthHour: string } | null): string {

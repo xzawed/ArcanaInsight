@@ -56,15 +56,18 @@ export async function POST(request: NextRequest) {
           }
           const result = tarotService.parseResult(fullResponse);
           const supabase = await createClient();
-          await supabase.from("session_cards").insert(
-            cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
-          );
-          const { data: readingData } = await supabase.from("readings").insert({
-            session_id: sessionId, card_interpretation: result.cardInterpretations,
-            overall_reading: result.overallReading, advice: result.advice,
-          }).select("share_token").single();
-          await supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId);
-          const shareToken = readingData?.share_token ?? null;
+          // DB 쿼리 병렬 실행으로 대기 시간 단축
+          const [, readingResult] = await Promise.all([
+            supabase.from("session_cards").insert(
+              cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
+            ),
+            supabase.from("readings").insert({
+              session_id: sessionId, card_interpretation: result.cardInterpretations,
+              overall_reading: result.overallReading, advice: result.advice,
+            }).select("share_token").single(),
+            supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
+          ]);
+          const shareToken = readingResult.data?.share_token ?? null;
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
         } catch (e) {
           console.error("리딩 생성 실패:", e);
