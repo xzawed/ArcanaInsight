@@ -45,9 +45,11 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
     // 사용 가능 너비 (양쪽 약간 여유)
     const usableWidth = containerWidth * 0.94;
 
+    // 모바일(768px 미만)에서는 최대 30장, 데스크탑은 전체
+    const isMobile = containerWidth < 768;
+    const totalCards = isMobile ? Math.min(cards.length, 30) : cards.length;
+
     // 전체 카드를 넣을 수 있는 겹침 간격 계산
-    const totalCards = cards.length;
-    // overlap = (usableWidth - cardW) / (totalCards - 1)
     const idealOverlap = totalCards > 1
       ? (usableWidth - cardW) / (totalCards - 1)
       : 0;
@@ -59,11 +61,9 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
     let maxDisplay: number;
 
     if (idealOverlap >= MIN_OVERLAP) {
-      // 전체 카드가 들어감
       overlap = Math.round(idealOverlap);
       maxDisplay = totalCards;
     } else {
-      // 너비 부족 → 최소 겹침으로 가능한 최대 수
       overlap = MIN_OVERLAP;
       maxDisplay = Math.floor((usableWidth - cardW) / overlap) + 1;
     }
