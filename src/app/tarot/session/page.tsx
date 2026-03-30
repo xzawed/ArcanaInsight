@@ -36,6 +36,7 @@ export default function TarotSessionPage() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
   const [readingError, setReadingError] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState(false);
   const resultBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function TarotSessionPage() {
   }, [topic]);
 
   const handleCardSelect = useCallback((index: number) => {
-    if (selectedCards.length >= requiredCards) return;
+    if (selectedCards.length >= requiredCards || pendingConfirm) return;
     const card = shuffledDeck[index];
     const isReversed = Math.random() > 0.5;
     const position = selectedCards.length;
@@ -82,12 +83,48 @@ export default function TarotSessionPage() {
     setRevealedPositions((prev) => [...prev, position]);
     setMood("surprised");
     setTimeout(() => setMood("default"), 1000);
+
     if (selectedCards.length + 1 >= requiredCards) {
-      const allSelected = [...selectedCards, selected];
-      setTimeout(() => startReading(allSelected), 1500);
+      // 모든 카드 선택 완료 → 확인 모드
+      setPendingConfirm(true);
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`,
+        mood: "smile", timestamp: new Date(),
+      });
+      setMood("smile");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shuffledDeck, selectedCards, requiredCards]);
+  }, [shuffledDeck, selectedCards, requiredCards, pendingConfirm]);
+
+  /** 확인 → 리딩 시작 */
+  const handleConfirmCards = useCallback(() => {
+    setPendingConfirm(false);
+    startReading(selectedCards);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCards]);
+
+  /** 취소 → 마지막 카드 제거, 다시 선택 가능 */
+  const handleCancelLastCard = useCallback(() => {
+    setPendingConfirm(false);
+    // Zustand 스토어에서 마지막 카드 제거
+    const currentCards = useSessionStore.getState().selectedCards;
+    if (currentCards.length === 0) return;
+    const lastCard = currentCards[currentCards.length - 1];
+    // 스토어 selectedCards에서 마지막 제거 (reset 후 재추가)
+    const remaining = currentCards.slice(0, -1);
+    useSessionStore.setState({ selectedCards: remaining });
+    // UI 상태 복원
+    setSelectedIndices((prev) => prev.slice(0, -1));
+    setRevealedPositions((prev) => prev.filter((p) => p !== lastCard.position));
+    setMood("default");
+    addChatMessage({
+      id: crypto.randomUUID(), role: "character",
+      content: "카드를 다시 골라주세요. 직감을 믿으세요!",
+      mood: "mystical", timestamp: new Date(),
+    });
+    setMood("mystical");
+  }, [addChatMessage, setMood]);
 
   // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
   const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
@@ -256,7 +293,7 @@ export default function TarotSessionPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="w-full flex-1 flex items-center justify-center"
+                className="w-full flex-1 flex flex-col items-center justify-center"
               >
                 <CardDeck
                   cards={shuffledDeck}
@@ -264,6 +301,27 @@ export default function TarotSessionPage() {
                   selectedIndices={selectedIndices}
                   onCardSelect={handleCardSelect}
                 />
+                {/* 카드 확인/취소 버튼 */}
+                {pendingConfirm && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex gap-3 mt-3"
+                  >
+                    <button
+                      onClick={handleCancelLastCard}
+                      className="px-5 py-2 rounded-full border border-arcana-border text-arcana-muted text-xs font-serif font-bold hover:border-arcana-purple hover:text-arcana-purple transition-colors"
+                    >
+                      다시 고르기
+                    </button>
+                    <button
+                      onClick={handleConfirmCards}
+                      className="px-5 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-xs font-serif font-bold hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
+                    >
+                      이 카드로 진행
+                    </button>
+                  </motion.div>
+                )}
               </motion.div>
             )}
             {phase === "reading" && spread && (
