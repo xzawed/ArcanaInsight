@@ -50,16 +50,21 @@ export default function TarotSessionPage() {
     setShuffledDeck(shuffled);
     setAvailableCards(shuffled);
 
-    fetch("/api/tarot/session", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, characterId, spreadType }),
-    }).then(async (res) => {
-      if (!res.ok) throw new Error(`세션 생성 실패: ${res.status}`);
-      const data = await res.json();
-      if (data.session?.id) setSessionId(data.session.id);
-    }).catch((err) => {
-      console.warn("세션 생성 실패 (리딩은 계속 진행):", err);
-    });
+    // 세션 생성을 await하여 sessionId 확보 후 카드 선택 시작
+    const initSession = async () => {
+      try {
+        const res = await fetch("/api/tarot/session", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic, characterId, spreadType }),
+        });
+        if (!res.ok) throw new Error(`세션 생성 실패: ${res.status}`);
+        const data = await res.json();
+        if (data.session?.id) setSessionId(data.session.id);
+      } catch (err) {
+        console.warn("세션 생성 실패 (리딩은 계속 진행):", err);
+      }
+    };
+    initSession();
 
     setMood("smile");
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "smile", timestamp: new Date() });
@@ -181,8 +186,15 @@ export default function TarotSessionPage() {
     // 대기 연출 시작 (API 호출과 동시 실행)
     const stopSequence = startWaitingSequence(cards, characterId || "arcana");
 
-    // sessionId가 없어도 리딩은 진행 (DB 저장만 스킵됨)
-    const sessionId = useSessionStore.getState().sessionId;
+    // sessionId 확보 대기 (최대 3초) — race condition 방지
+    let sessionId = useSessionStore.getState().sessionId;
+    if (!sessionId) {
+      for (let i = 0; i < 6; i++) {
+        await new Promise((r) => setTimeout(r, 500));
+        sessionId = useSessionStore.getState().sessionId;
+        if (sessionId) break;
+      }
+    }
     try {
       const response = await fetch("/api/tarot/reading", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -262,6 +274,14 @@ export default function TarotSessionPage() {
                   id: crypto.randomUUID(), role: "character",
                   content: `조언\n\n${data.result.advice}`,
                   mood: "smile", timestamp: new Date(),
+                });
+              }
+              // DB 저장 실패 알림
+              if (data.dbSaved === false && sessionId) {
+                addChatMessage({
+                  id: crypto.randomUUID(), role: "system",
+                  content: "리딩 결과가 저장되지 않았습니다. 결과를 스크린샷으로 보관해주세요.",
+                  timestamp: new Date(),
                 });
               }
               setPhase("result"); setMood("smile");
