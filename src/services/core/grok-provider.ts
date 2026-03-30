@@ -1,15 +1,25 @@
 import { AIProvider } from "@/types/service";
 
 export class GrokProvider implements AIProvider {
-  private apiKey: string;
-  private model: string;
+  private _apiKey: string | null = null;
+  private _model: string | null = null;
   private baseUrl = "https://api.x.ai/v1";
 
-  constructor() {
-    const apiKey = process.env.GROK_API_KEY;
-    if (!apiKey) throw new Error("GROK_API_KEY environment variable is required");
-    this.apiKey = apiKey;
-    this.model = process.env.GROK_MODEL || "grok-3";
+  /** 환경변수를 지연 로드 — 모듈 로드 시점이 아니라 첫 호출 시점에 확인 */
+  private get apiKey(): string {
+    if (!this._apiKey) {
+      const key = process.env.GROK_API_KEY;
+      if (!key) throw new Error("GROK_API_KEY environment variable is required");
+      this._apiKey = key;
+    }
+    return this._apiKey;
+  }
+
+  private get model(): string {
+    if (!this._model) {
+      this._model = process.env.GROK_MODEL || "grok-3";
+    }
+    return this._model;
   }
 
   private static readonly TIMEOUT_MS = 60_000; // 60초 타임아웃
