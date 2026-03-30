@@ -2,7 +2,9 @@
 
 ## 개요
 
-ArcanaInsight에 사주명리학 서비스를 추가한다. 외부 라이브러리(`lunar-javascript`)로 사주팔자를 정확히 계산하고, Grok AI가 해석을 제공하는 구조. 독립 페이지(`/saju`)로 운영하며, 캐릭터 확장을 고려한 설계.
+ArcanaInsight에 사주명리학 서비스를 추가한다. 외부 라이브러리(`tyme4ts`)로 사주팔자를 정확히 계산하고, Grok AI가 해석을 제공하는 구조. 독립 페이지(`/saju`)로 운영하며, 캐릭터 확장을 고려한 설계.
+
+> **라이브러리 선정**: `lunar-javascript`의 후속작인 `tyme4ts`를 사용. 동일 저자(6tail), TypeScript 네이티브 지원, 2026-03 활발 업데이트, 사주 계산 API 내장(`HeavenStem.getTenStar()`, `ChildLimit`, `DecadeFortune` 등).
 
 ## 분석 깊이: 고급
 
@@ -350,11 +352,64 @@ share_token으로 사주 결과 조회. `saju_readings` 테이블에서 전체 �
 
 ---
 
+## 기존 코드 변경 사항 (Breaking Changes)
+
+사주 서비스 추가로 인해 기존 코드 수정이 필요한 항목. 타로 서비스의 정상 동작을 보장하면서 변경해야 한다.
+
+### 타입 시스템 수정
+
+| 파일 | 변경 | 이유 |
+|---|---|---|
+| `src/types/session.ts` | `spreadType: SpreadType` → `SpreadType \| null` | 사주는 스프레드 불필요 |
+| `src/types/session.ts` | `Topic` 타입에 `fortune-3y`, `fortune-5y`, `fortune-full` 추가 | 사주 종합운세 주제 |
+| `src/types/service.ts` | `ReadingResult.cardInterpretations` → 선택 필드 (`?`) | 사주는 카드 해석 없음 |
+| `src/types/service.ts` | `SessionContext.selectedCards` → 선택 필드 (`?`) | 사주는 카드 선택 없음 |
+
+### 캐릭터 시스템 수정
+
+| 파일 | 변경 | 이유 |
+|---|---|---|
+| `src/data/characters/index.ts` | `getCharactersByService(serviceType)` 함수 추가 | 서비스별 복수 캐릭터 필터 |
+| `src/app/tarot/page.tsx` | `getAvailableCharacters()` → `getCharactersByService("tarot")` | 타로 캐릭터만 표시 |
+
+### 세션 스토어
+
+| 파일 | 변경 | 이유 |
+|---|---|---|
+| `src/hooks/` | `useSajuSession.ts` 신규 생성 | 사주는 카드 선택 없이 생년월일 입력 → 분석 흐름이므로 별도 스토어 |
+
+기존 `useSession.ts`는 타로 전용으로 유지. 사주 스토어의 Phase: `"info-input" \| "topic-select" \| "reading" \| "result"`
+
+### DB 마이그레이션 (`006_saju_readings.sql`에 포함)
+
+| 변경 | SQL |
+|---|---|
+| `sessions.spread_type` NULL 허용 | `ALTER TABLE sessions ALTER COLUMN spread_type DROP NOT NULL;` |
+| `sessions.topic` 제약 확장 | fortune-3y, fortune-5y, fortune-full 추가 |
+| `services` 테이블 활성화 | `UPDATE services SET is_active = true WHERE id = 'saju';` |
+
+### 네비게이션 수정
+
+| 파일 | 변경 |
+|---|---|
+| `src/components/layout/Header.tsx` | "사주 상담" 링크 추가 (`/saju`) |
+| `src/components/layout/MobileNav.tsx` | 사주 탭 추가 (아이콘: `🔮` 또는 `☯`) |
+| `src/components/home/CharacterGallery.tsx` | `serviceType` 기반 동적 라우팅 (`/tarot`, `/saju` 분기) |
+
+### 마이페이지 수정
+
+| 파일 | 변경 |
+|---|---|
+| `src/app/mypage/page.tsx` | `service_type` 분기: tarot → readings join, saju → saju_readings join |
+| `src/app/mypage/page.tsx` | 서비스 태그 색상 분기: `TAROT` (보라) / `SAJU` (분홍) |
+
+---
+
 ## 기술 의존성
 
 ### 신규 패키지
 
-- `lunar-javascript`: 음양력 변환 + 절기 + 간지 계산
+- `tyme4ts`: 음양력 변환 + 절기 + 간지 계산 (TypeScript 네이티브, lunar-javascript 후속작)
 
 ### 기존 재사용
 
@@ -364,3 +419,49 @@ share_token으로 사주 결과 조회. `saju_readings` 테이블에서 전체 �
 - 타로 SSE 스트리밍 패턴
 - 레이아웃 5:5 규칙
 - 공유 메커니즘 (share_token)
+
+---
+
+## 구현 순서
+
+### Phase 1: 기반 인프라 (기존 코드 수정)
+
+1. `tyme4ts` 패키지 설치
+2. 타입 시스템 수정 (session.ts, service.ts) — 기존 타로 동작 보장
+3. `getCharactersByService()` 추가 + 타로 페이지 캐릭터 필터 적용
+4. DB 마이그레이션 (006_saju_readings.sql)
+
+### Phase 2: 사주 계산 엔진
+
+5. `src/data/saju/constants.ts` — 천간/지지/오행/십성 상수 데이터
+6. `src/services/saju/saju-types.ts` — SajuInput, SajuResult 타입 정의
+7. `src/services/saju/saju-calculator.ts` — 핵심 계산 로직 (tyme4ts 기반)
+8. 계산 엔진 단위 테스트 (알려진 사주 결과와 비교 검증)
+
+### Phase 3: 서비스 + API
+
+9. `src/services/saju/saju-service.ts` — DivinationService 구현
+10. `src/services/core/prompt-builder.ts` — 사주 프롬프트 함수 추가
+11. `src/app/api/saju/reading/route.ts` — SSE 스트리밍 API
+12. `src/app/api/saju/result/[id]/route.ts` — 결과 조회 API
+
+### Phase 4: UI 컴포넌트
+
+13. `src/hooks/useSajuSession.ts` — 사주 세션 스토어
+14. `src/components/saju/SajuInfoForm.tsx` — 생년월일/시간 필수 입력
+15. `src/components/saju/SajuChart.tsx` — 사주팔자 차트
+16. `src/components/saju/OhaengGraph.tsx` — 오행 분포 시각화
+17. `src/components/saju/DaeunTimeline.tsx` — 대운/세운 타임라인
+
+### Phase 5: 페이지 조립
+
+18. `src/app/saju/page.tsx` — 진입 페이지 (캐릭터 → 정보 입력 → 주제)
+19. `src/app/saju/session/page.tsx` — 세션 페이지 (AI 해석 진행)
+20. `src/app/saju/result/[id]/page.tsx` — 결과 페이지 (차트 중심)
+
+### Phase 6: 통합
+
+21. Header/MobileNav 네비게이션 추가
+22. CharacterGallery 동적 라우팅
+23. 마이페이지 사주 히스토리 통합
+24. 홈페이지 ServiceFlow 사주 카드 추가
