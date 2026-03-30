@@ -17,7 +17,6 @@ import { waitingLines, buildCardPreviewLine } from "@/data/characters/waiting-li
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getSpreadForTopic } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
-import { Mood } from "@/types/character";
 
 const deckManager = new DeckManager();
 
@@ -106,7 +105,7 @@ export default function TarotSessionPage() {
         const posLabel = currentSpread?.positions[sc.position]?.labelKo || `위치 ${sc.position + 1}`;
         const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
         const preview = buildCardPreviewLine(charId, sc.card.nameKo, keywords, posLabel);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: preview, mood: "serious" as Mood, timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: preview, mood: "serious", timestamp: new Date() });
       }, (i + 1) * 2000));
     });
 
@@ -277,14 +276,7 @@ export default function TarotSessionPage() {
                   spread={spread}
                   revealedPositions={revealedPositions}
                 />
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-                      <p className="text-arcana-muted text-xs font-serif">카드를 해석하고 있어요...</p>
-                    </div>
-                  </div>
-                )}
+                {/* 스피너 제거 — 카드 순차 뒤집기 연출이 로딩 상태를 시각적으로 대체 */}
                 {readingError && !isLoading && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="flex flex-col items-center gap-3">
@@ -397,7 +389,7 @@ export default function TarotSessionPage() {
               <DialogueBox
                 messages={chatMessages}
                 characterName={character?.name ?? ""}
-                isTyping={isLoading && phase === "reading"}
+                isTyping={false}
               />
             </div>
           )}
