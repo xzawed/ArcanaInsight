@@ -463,13 +463,33 @@ export default function TarotSessionPage() {
                     onClick={async () => {
                       const result = useSessionStore.getState().readingResult;
                       const shareToken = result?.shareToken;
-                      if (!shareToken) return;
-                      const url = `${window.location.origin}/tarot/result/${shareToken}`;
-                      const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ArcanaInsight`;
-                      if (navigator.share) {
-                        try { await navigator.share({ title: "타로 리딩 결과 - ArcanaInsight", text, url }); } catch { /* 취소 */ }
+                      const siteName = "ArcanaInsight";
+
+                      if (shareToken) {
+                        // 공유 링크가 있으면 URL 공유
+                        const url = `${window.location.origin}/tarot/result/${shareToken}`;
+                        const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
+                        if (navigator.share) {
+                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 취소 */ }
+                        } else {
+                          try {
+                            await navigator.clipboard.writeText(`${text}\n${url}`);
+                            alert("링크가 복사되었습니다!");
+                          } catch { /* 실패 */ }
+                        }
                       } else {
-                        try { await navigator.clipboard.writeText(`${text}\n${url}`); } catch { /* 실패 */ }
+                        // 공유 링크 없으면 결과 텍스트 직접 공유
+                        const summary = result?.overallReading
+                          ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
+                          : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
+                        if (navigator.share) {
+                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 취소 */ }
+                        } else {
+                          try {
+                            await navigator.clipboard.writeText(summary);
+                            alert("결과가 복사되었습니다!");
+                          } catch { /* 실패 */ }
+                        }
                       }
                     }}
                     className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
