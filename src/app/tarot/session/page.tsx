@@ -52,7 +52,7 @@ export default function TarotSessionPage() {
 
     fetch("/api/tarot/session", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, characterId }),
+      body: JSON.stringify({ topic, characterId, spreadType }),
     }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); })
       .catch(() => { /* 세션 생성 실패 — 카드 선택은 계속 가능 */ });
 
@@ -204,6 +204,16 @@ export default function TarotSessionPage() {
           if (!line.startsWith("data: ")) continue;
           try {
             const data = JSON.parse(line.slice(6));
+            // SSE 에러 처리 — Grok API 실패 등
+            if (data.error) {
+              stopSequence();
+              console.error("리딩 SSE 에러:", data.error);
+              addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
+              setMood("surprised");
+              setReadingError(true);
+              setLoading(false);
+              return;
+            }
             if (data.done && data.result) {
               // 연출 중단 — 결과 도착
               stopSequence();
