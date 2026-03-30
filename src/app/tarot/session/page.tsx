@@ -190,12 +190,15 @@ export default function TarotSessionPage() {
       });
       if (!response.ok || !response.body) {
         stopSequence();
-        let errorBody = "";
-        try { errorBody = await response.text(); } catch { /* 무시 */ }
-        console.error("리딩 API 응답 실패:", response.status, errorBody);
-        const message = response.status === 500
-          ? "서버에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요."
-          : "카드 리딩 요청에 실패했어요. 다시 시도해주세요.";
+        let errorDetail = "";
+        try {
+          const errorBody = await response.json();
+          errorDetail = errorBody?.error || "";
+        } catch { /* JSON 파싱 실패 무시 */ }
+        console.error("리딩 API 응답 실패:", response.status, errorDetail);
+        const message = errorDetail.includes("GROK_API_KEY")
+          ? "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요."
+          : "서버에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.";
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: message, mood: "surprised", timestamp: new Date() });
         setMood("surprised");
         setReadingError(true);

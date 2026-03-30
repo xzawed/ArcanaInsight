@@ -99,7 +99,8 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
     });
   } catch (e) {
-    console.error("리딩 API 오류:", e);
-    return new Response(JSON.stringify({ error: "Failed to generate reading" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    const errMsg = e instanceof Error ? e.message : String(e);
+    console.error("리딩 API 오류:", errMsg);
+    return new Response(JSON.stringify({ error: errMsg }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
