@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Topic } from "@/types/session";
+import { Topic, SpreadType } from "@/types/session";
 import { useSessionStore } from "@/hooks/useSession";
 import { UserInfo } from "@/hooks/useSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
@@ -13,7 +13,7 @@ import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm, UserInfoData } from "@/components/tarot/UserInfoForm";
 import { getAvailableCharacters, getCharacterById } from "@/data/characters";
-import { getSpreadForTopic } from "@/data/spreads";
+import { spreads } from "@/data/spreads";
 import { CharacterConfig } from "@/types/character";
 import { ChatMessage } from "@/types/session";
 
@@ -26,7 +26,25 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "general", label: "일반 상담", icon: "✨", desc: "자유로운 주제의 종합 상담" },
 ];
 
-type PageStep = "character-select" | "character-detail" | "topic-select" | "user-info";
+const spreadOptions: { type: SpreadType; label: string; icon: string; cards: number; desc: string; detail: string }[] = [
+  {
+    type: "one-card", label: "원카드", icon: "🃏", cards: 1,
+    desc: "빠르고 직관적인 답변",
+    detail: "하나의 카드로 질문에 대한 핵심 메시지를 받습니다. 간단한 질문이나 오늘의 조언이 필요할 때 적합합니다.",
+  },
+  {
+    type: "three-card", label: "쓰리카드", icon: "🎴", cards: 3,
+    desc: "과거 · 현재 · 미래",
+    detail: "세 장의 카드로 시간의 흐름에 따른 상황 변화를 읽습니다. 과거의 원인, 현재의 상태, 미래의 방향을 종합적으로 파악합니다.",
+  },
+  {
+    type: "five-card", label: "켈틱 크로스 (5장)", icon: "✦", cards: 5,
+    desc: "심층 다각도 분석",
+    detail: "다섯 장의 카드로 현재 상황, 도전, 기반, 가까운 미래, 최종 결과를 다각도로 분석합니다. 복잡한 상황에 깊이 있는 통찰이 필요할 때 추천합니다.",
+  },
+];
+
+type PageStep = "character-select" | "character-detail" | "topic-select" | "spread-select" | "user-info";
 
 function TarotPageContent() {
   const router = useRouter();
@@ -77,11 +95,14 @@ function TarotPageContent() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
   const handleTopicSelect = (topic: Topic) => {
-    const spread = getSpreadForTopic(topic);
     setTopic(topic);
     setSelectedTopic(topic);
+    setStep("spread-select");
+  };
+
+  const handleSpreadSelect = (spreadType: SpreadType) => {
+    const spread = spreads[spreadType];
     setSpreadType(spread.type, spread.positions.length);
-    // 바로 세션 진입 (개인정보는 선택 사항)
     setPhase("card-shuffle");
     router.push("/tarot/session");
   };
@@ -97,10 +118,8 @@ function TarotPageContent() {
       gender: data.gender as UserInfo["gender"],
       birthHour: data.birthHour,
     });
-    // 주제가 이미 선택되어 있으면 세션 진입, 아니면 주제 선택으로
     if (selectedTopic) {
-      setPhase("card-shuffle");
-      router.push("/tarot/session");
+      setStep("spread-select");
     } else {
       setStep("topic-select");
     }
@@ -108,6 +127,8 @@ function TarotPageContent() {
 
   const handleBack = () => {
     if (step === "user-info") {
+      setStep("spread-select");
+    } else if (step === "spread-select") {
       setStep("topic-select");
     } else if (step === "topic-select") {
       setStep("character-select");
@@ -284,6 +305,65 @@ function TarotPageContent() {
                       <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
                       <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
                     </div>
+                  </motion.button>
+                ))}
+              </div>
+
+            </div>
+          </motion.div>
+        ) : step === "spread-select" ? (
+          <motion.div
+            key="spread-select"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            className="relative z-20 min-h-[calc(100vh-3.5rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden"
+          >
+            {/* 캐릭터 + 대사 */}
+            <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
+              {selectedCharacter && (
+                <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
+                  <CharacterDisplay character={selectedCharacter} mood="mystical" className="w-full h-full" />
+                </div>
+              )}
+              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20">
+                <DialogueBox
+                  messages={dialogueMessages}
+                  characterName={selectedCharacter?.name}
+                />
+              </div>
+            </div>
+
+            {/* 스프레드 선택 */}
+            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
+              <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
+                ← 주제 다시 선택
+              </button>
+              <h3 className="font-serif font-bold text-base md:text-lg mb-2 drop-shadow-md">카드 리딩 방식을 선택해주세요</h3>
+              <p className="text-arcana-muted text-xs mb-4">카드 수가 많을수록 더 깊이 있는 해석을 받을 수 있어요</p>
+
+              <div className="grid grid-cols-1 gap-3">
+                {spreadOptions.map((opt, index) => (
+                  <motion.button
+                    key={opt.type}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => handleSpreadSelect(opt.type)}
+                    className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-2xl">{opt.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{opt.label}</h4>
+                          <span className="text-arcana-gold text-[10px] font-bold bg-arcana-gold/10 px-2 py-0.5 rounded-full">{opt.cards}장</span>
+                        </div>
+                        <p className="text-arcana-purple text-xs font-serif mt-0.5">{opt.desc}</p>
+                      </div>
+                    </div>
+                    <p className="text-arcana-muted text-xs leading-relaxed">{opt.detail}</p>
                   </motion.button>
                 ))}
               </div>
