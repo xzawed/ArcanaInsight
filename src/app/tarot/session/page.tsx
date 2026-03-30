@@ -53,8 +53,13 @@ export default function TarotSessionPage() {
     fetch("/api/tarot/session", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ topic, characterId, spreadType }),
-    }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); })
-      .catch(() => { /* 세션 생성 실패 — 카드 선택은 계속 가능 */ });
+    }).then(async (res) => {
+      if (!res.ok) throw new Error(`세션 생성 실패: ${res.status}`);
+      const data = await res.json();
+      if (data.session?.id) setSessionId(data.session.id);
+    }).catch((err) => {
+      console.warn("세션 생성 실패 (리딩은 계속 진행):", err);
+    });
 
     setMood("smile");
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "smile", timestamp: new Date() });
@@ -103,13 +108,13 @@ export default function TarotSessionPage() {
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
     setPendingConfirm(false);
-    const currentCount = useSessionStore.getState().selectedCards.length;
-    if (currentCount >= requiredCards) {
-      startReading(useSessionStore.getState().selectedCards);
+    const { selectedCards: currentCards } = useSessionStore.getState();
+    if (currentCards.length >= requiredCards) {
+      startReading(currentCards);
     } else {
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: `좋아요! 다음 카드를 골라주세요. (${currentCount}/${requiredCards})`,
+        content: `좋아요! 다음 카드를 골라주세요. (${currentCards.length}/${requiredCards})`,
         mood: "mystical", timestamp: new Date(),
       });
       setMood("mystical");
@@ -194,13 +199,16 @@ export default function TarotSessionPage() {
       }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let sseBuffer = "";
+      let streamDone = false;
 
-      while (true) {
+      while (!streamDone) {
         const { done, value } = await reader.read();
         if (done) break;
-        const text = decoder.decode(value, { stream: true });
-        const lines = text.split("\n");
-        for (const line of lines) {
+        sseBuffer += decoder.decode(value, { stream: true });
+        const sseLines = sseBuffer.split("\n");
+        sseBuffer = sseLines.pop() || ""; // 불완전한 마지막 줄은 버퍼에 유지
+        for (const line of sseLines) {
           if (!line.startsWith("data: ")) continue;
           try {
             const data = JSON.parse(line.slice(6));
@@ -212,7 +220,8 @@ export default function TarotSessionPage() {
               setMood("surprised");
               setReadingError(true);
               setLoading(false);
-              return;
+              streamDone = true;
+              break;
             }
             if (data.done && data.result) {
               // 연출 중단 — 결과 도착
@@ -248,6 +257,8 @@ export default function TarotSessionPage() {
                 });
               }
               setPhase("result"); setMood("smile");
+              streamDone = true;
+              break;
             }
           } catch (e) { console.warn("SSE 파싱 실패:", e); }
         }

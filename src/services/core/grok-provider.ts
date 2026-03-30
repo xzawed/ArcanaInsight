@@ -80,7 +80,7 @@ export class GrokProvider implements AIProvider {
             const parsed = JSON.parse(data);
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) yield content;
-          } catch { /* skip malformed SSE chunk */ }
+          } catch (e) { console.warn("Grok SSE 청크 파싱 실패:", data.slice(0, 100), e); }
         }
       }
     } finally {

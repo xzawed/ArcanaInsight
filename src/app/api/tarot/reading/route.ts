@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
           if (sessionId) {
             try {
               const supabase = await createClient();
-              const [, readingResult] = await Promise.all([
+              const [cardsRes, readingRes, sessionRes] = await Promise.all([
                 supabase.from("session_cards").insert(
                   cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
                 ),
@@ -75,7 +75,13 @@ export async function POST(request: NextRequest) {
                 }).select("share_token").single(),
                 supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
               ]);
-              shareToken = readingResult.data?.share_token ?? null;
+              if (cardsRes.error) console.error("session_cards 저장 실패:", cardsRes.error.message);
+              if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
+              if (readingRes.error) {
+                console.error("readings 저장 실패:", readingRes.error.message);
+              } else {
+                shareToken = readingRes.data?.share_token ?? null;
+              }
             } catch (dbError) {
               console.error("DB 저장 실패 (리딩 결과는 정상 전달):", dbError);
             }
