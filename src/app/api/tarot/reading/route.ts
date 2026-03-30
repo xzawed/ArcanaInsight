@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { TarotService } from "@/services/tarot/tarot-service";
 import { GrokProvider } from "@/services/core/grok-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
@@ -22,7 +21,7 @@ export async function POST(request: NextRequest) {
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
 
-    // 입력 검증 — sessionId는 선택 (Supabase 연결 실패 시에도 리딩 가능)
+    // 입력 검증
     if (!topic || !Array.isArray(cards) || cards.length === 0) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
@@ -38,9 +37,9 @@ export async function POST(request: NextRequest) {
       if (typeof c.position !== "number" || c.position < 0) throw new Error(`Invalid position: ${c.position}`);
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
+
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
-    // 사용자가 선택한 spreadType 우선, 없으면 topic 기반 자동 결정
     const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
       ? spreadType
       : spreadResolver.resolveForTopic(topic).type;
@@ -49,6 +48,19 @@ export async function POST(request: NextRequest) {
         spreadType: resolvedSpreadType, selectedCards, createdAt: new Date(), completedAt: null },
       selectedCards, chatHistory: [], topic,
     });
+
+    // Supabase 클라이언트를 스트림 시작 전에 미리 생성 (cookies()는 스트림 밖에서 호출해야 함)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let supabase: any = null;
+    if (sessionId) {
+      try {
+        const { createClient } = await import("@/lib/supabase/server");
+        supabase = await createClient();
+      } catch (e) {
+        console.warn("Supabase 클라이언트 생성 실패 (리딩은 계속 진행):", e);
+      }
+    }
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -60,14 +72,15 @@ export async function POST(request: NextRequest) {
           }
           const result = tarotService.parseResult(fullResponse);
 
-          // DB 저장 — sessionId가 있을 때만 (Supabase 실패해도 리딩 결과는 전달)
+          // DB 저장 — Supabase 클라이언트가 있을 때만
           let shareToken: string | null = null;
-          if (sessionId) {
+          if (supabase && sessionId) {
             try {
-              const supabase = await createClient();
               const [cardsRes, readingRes, sessionRes] = await Promise.all([
                 supabase.from("session_cards").insert(
-                  cards.map((c) => ({ session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed }))
+                  cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
+                    session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
+                  }))
                 ),
                 supabase.from("readings").insert({
                   session_id: sessionId, card_interpretation: result.cardInterpretations,
@@ -89,8 +102,9 @@ export async function POST(request: NextRequest) {
 
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result: { ...result, shareToken } })}\n\n`));
         } catch (e) {
-          console.error("리딩 생성 실패:", e);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "Reading generation failed" })}\n\n`));
+          const errMsg = e instanceof Error ? e.message : String(e);
+          console.error("리딩 생성 실패:", errMsg);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`));
         }
         controller.close();
       },
