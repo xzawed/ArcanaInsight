@@ -7,7 +7,7 @@ const tarotService = new TarotService();
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic } = (await request.json()) as { topic: Topic };
+    const { topic, characterId } = (await request.json()) as { topic: Topic; characterId?: string };
     if (!["love", "love-single", "love-couple", "finance", "career", "health", "general"].includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 });
     }
@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       .from("sessions").insert({
         user_id: user?.id || null, service_type: sessionData.serviceType,
         topic: sessionData.topic, spread_type: sessionData.spreadType, status: sessionData.status,
+        character_id: characterId || null,
       }).select().single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ session });

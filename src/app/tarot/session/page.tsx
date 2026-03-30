@@ -51,7 +51,7 @@ export default function TarotSessionPage() {
 
     fetch("/api/tarot/session", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic }),
+      body: JSON.stringify({ topic, characterId }),
     }).then((res) => res.json()).then((data) => { if (data.session) setSessionId(data.session.id); })
       .catch(() => { /* 세션 생성 실패 — 카드 선택은 계속 가능 */ });
 

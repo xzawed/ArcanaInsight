@@ -24,6 +24,8 @@ interface Profile {
 
 const topicLabels: Record<string, string> = {
   love: "연애/관계",
+  "love-single": "연애 (솔로)",
+  "love-couple": "연애 (커플)",
   finance: "재정/금전",
   career: "직장/진로",
   health: "건강",
@@ -32,6 +34,8 @@ const topicLabels: Record<string, string> = {
 
 const topicColors: Record<string, string> = {
   love: "bg-pink-500/20 text-pink-300 border-pink-500/30",
+  "love-single": "bg-pink-500/20 text-pink-300 border-pink-500/30",
+  "love-couple": "bg-rose-500/20 text-rose-300 border-rose-500/30",
   finance: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
   career: "bg-blue-500/20 text-blue-300 border-blue-500/30",
   health: "bg-green-500/20 text-green-300 border-green-500/30",
@@ -178,10 +182,11 @@ export default async function MyPage() {
                   ? reading.overall_reading.slice(0, 80) + "..."
                   : reading?.overall_reading;
 
+              const hasResult = !!reading?.share_token;
               return (
                 <Link
                   key={session.id}
-                  href={reading?.share_token ? `/tarot/result/${reading.share_token}` : "#"}
+                  href={hasResult ? `/tarot/result/${reading.share_token}` : "/tarot"}
                   className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 hover:border-arcana-purple transition-colors hover:shadow-lg hover:shadow-arcana-purple/10"
                 >
                   <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -204,9 +209,11 @@ export default async function MyPage() {
                       {formatRelativeDate(session.created_at)}
                     </span>
                   </div>
-                  {preview && (
+                  {preview ? (
                     <p className="text-arcana-text/80 text-sm mt-2 line-clamp-2">{preview}</p>
-                  )}
+                  ) : !hasResult ? (
+                    <p className="text-arcana-muted/60 text-xs mt-2 italic">결과가 저장되지 않았습니다. 다시 상담해보세요.</p>
+                  ) : null}
                 </Link>
               );
             })}
