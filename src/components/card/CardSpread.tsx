@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { SelectedCard } from "@/types/card";
 import { SpreadDefinition, SpreadPosition } from "@/types/session";
 import { CardItem } from "./CardItem";
+import { useSkinStore } from "@/hooks/useSkinStore";
 
 interface CardSpreadProps {
   selectedCards: SelectedCard[];
@@ -91,6 +92,7 @@ function computeLayout(
 }
 
 export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpreadProps) {
+  const { selectedSkinId } = useSkinStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
@@ -155,6 +157,7 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
                     isReversed={selectedCard.isReversed}
                     width={layout.cardW}
                     height={layout.cardH}
+                    skinId={selectedSkinId}
                   />
                 </div>
                 <span

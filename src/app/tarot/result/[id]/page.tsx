@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { DeckManager } from "@/services/tarot/deck-manager";
-import { CardFace } from "@/components/card/CardFace";
 import { spreads } from "@/data/spreads";
 import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "./ResultShareButton";
+import { ResultCardFace } from "./ResultCardFace";
 
 const deckManager = new DeckManager();
 
@@ -69,7 +69,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   if (!card) return null;
                   return (
                     <div key={interp.cardId} className="flex flex-col items-center gap-2">
-                      <CardFace card={card} isReversed={!!interp.isReversed} size="sm" />
+                      <ResultCardFace card={card} isReversed={!!interp.isReversed} />
                       <span className="text-arcana-gold text-xs font-serif font-bold">{pos?.labelKo}</span>
                       <span className="text-arcana-text text-xs text-center max-w-[80px] truncate">{card.nameKo}</span>
                     </div>
@@ -107,7 +107,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   <div className="flex items-start gap-4 mb-3">
                     {card && (
                       <div className="flex-shrink-0">
-                        <CardFace card={card} isReversed={!!interp.isReversed} size="sm" />
+                        <ResultCardFace card={card} isReversed={!!interp.isReversed} />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">

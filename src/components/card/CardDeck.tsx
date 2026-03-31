@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
+import { useSkinStore } from "@/hooks/useSkinStore";
 
 interface CardDeckProps {
   cards: TarotCard[];
@@ -13,6 +14,7 @@ interface CardDeckProps {
 }
 
 export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
+  const { selectedSkinId } = useSkinStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
@@ -147,6 +149,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
               isSelected={isSelected}
               width={layout.cardW}
               height={layout.cardH}
+              skinId={selectedSkinId}
             />
           </motion.div>
         );
