@@ -338,12 +338,14 @@ export default function TarotSessionPage() {
           )}
           {/* 대사창 — 데스크탑에서 캐릭터 하단에 표시 */}
           {phase !== "result" && (
-            <div className="hidden md:block flex-shrink-0">
-              <DialogueBox
-                messages={chatMessages}
-                characterName={character?.name ?? ""}
-                isTyping={false}
-              />
+            <div className="hidden md:block flex-shrink-0 px-6 pb-4">
+              <div className="max-w-sm mx-auto">
+                <DialogueBox
+                  messages={chatMessages}
+                  characterName={character?.name ?? ""}
+                  isTyping={false}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -441,7 +443,7 @@ export default function TarotSessionPage() {
                 className="w-full flex-1 flex flex-col overflow-y-auto py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
-                <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+                <div className="space-y-3 flex-1 overflow-y-auto pr-2 md:max-w-lg md:mx-auto md:w-full">
                   {/* 카드별 해석 */}
                   {readingResult.cardInterpretations?.map((interp, i) => {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);
@@ -483,7 +485,7 @@ export default function TarotSessionPage() {
                 </div>
 
                 {/* 액션 버튼 */}
-                <div className="flex gap-3 pt-4 flex-shrink-0">
+                <div className="flex gap-3 pt-4 flex-shrink-0 md:max-w-lg md:mx-auto md:w-full">
                   <button
                     onClick={() => {
                       useSessionStore.getState().reset();
