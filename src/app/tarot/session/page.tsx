@@ -326,12 +326,25 @@ export default function TarotSessionPage() {
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
-        {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 좌측 50% */}
-        {character && (
-          <div className={`${phase === "result" ? "h-[25%]" : phase === "reading" ? "h-[25%]" : "h-[35%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden transition-all duration-500`}>
-            <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
-          </div>
-        )}
+        {/* 좌측 컬럼: 캐릭터 + 대사 (데스크탑) */}
+        <div className="w-full md:w-[50%] md:flex-shrink-0 flex flex-col">
+          {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 flex-1 */}
+          {character && (
+            <div className={`${phase === "result" ? "h-[25%]" : phase === "reading" ? "h-[25%]" : "h-[35%]"} md:flex-1 relative overflow-hidden transition-all duration-500`}>
+              <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
+            </div>
+          )}
+          {/* 대사창 — 데스크탑에서 캐릭터 하단에 표시 */}
+          {phase !== "result" && (
+            <div className="hidden md:block flex-shrink-0">
+              <DialogueBox
+                messages={chatMessages}
+                characterName={character?.name ?? ""}
+                isTyping={false}
+              />
+            </div>
+          )}
+        </div>
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
@@ -521,9 +534,9 @@ export default function TarotSessionPage() {
             )}
           </AnimatePresence>
 
-          {/* 하단 대화창 (카드 선택/리딩 단계에서만) */}
+          {/* 대사창 — 모바일에서만 (데스크탑은 캐릭터 하단에 표시) */}
           {phase !== "result" && (
-            <div className="flex-shrink-0 z-30">
+            <div className="md:hidden flex-shrink-0 z-30">
               <DialogueBox
                 messages={chatMessages}
                 characterName={character?.name ?? ""}

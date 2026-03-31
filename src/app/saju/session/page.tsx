@@ -149,11 +149,20 @@ export default function SajuSessionPage() {
       <ParticleOverlay density={phase === "reading" ? "high" : "low"} className="z-10" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
-        {character && (
-          <div className={`${phase === "result" ? "h-[20%]" : "h-[30%]"} md:h-auto w-full md:w-[50%] flex-shrink-0 relative overflow-hidden transition-all duration-500`}>
-            <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
-          </div>
-        )}
+        {/* 좌측 컬럼: 캐릭터 + 대사 (데스크탑) */}
+        <div className="w-full md:w-[50%] md:flex-shrink-0 flex flex-col">
+          {character && (
+            <div className={`${phase === "result" ? "h-[20%]" : "h-[30%]"} md:flex-1 relative overflow-hidden transition-all duration-500`}>
+              <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
+            </div>
+          )}
+          {/* 대사창 — 데스크탑에서 캐릭터 하단에 표시 */}
+          {phase !== "result" && (
+            <div className="hidden md:block flex-shrink-0">
+              <DialogueBox messages={chatMessages} characterName={character?.name ?? ""} isTyping={false} />
+            </div>
+          )}
+        </div>
 
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           {phase === "result" && readingResult && sajuData ? (
@@ -242,8 +251,9 @@ export default function SajuSessionPage() {
             </div>
           )}
 
+          {/* 대사창 — 모바일에서만 (데스크탑은 캐릭터 하단에 표시) */}
           {phase !== "result" && (
-            <div className="flex-shrink-0 z-30">
+            <div className="md:hidden flex-shrink-0 z-30">
               <DialogueBox messages={chatMessages} characterName={character?.name ?? ""} isTyping={false} />
             </div>
           )}
