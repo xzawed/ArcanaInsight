@@ -77,41 +77,26 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
 
-  /** 컨테이너 클릭 → 클릭 좌표에서 가장 가까운 카드를 판별 */
+  /** 컨테이너 클릭 → 클릭 좌표에 있는 가장 위(z-index 높은) 카드를 선택 */
   const handleContainerClick = useCallback((e: React.MouseEvent) => {
     if (!containerRef.current) return;
     const containerRect = containerRef.current.getBoundingClientRect();
     const clickX = e.clientX - containerRect.left;
     const clickY = e.clientY - containerRect.top;
 
-    // 각 카드의 중심과 클릭 좌표 거리를 계산하여 가장 가까운 카드를 선택
-    // z-index가 높은 카드(나중 인덱스)를 우선
-    let bestIndex = -1;
-    let bestDist = Infinity;
-
+    // z-index가 높은 카드(인덱스 큰 카드)부터 역순으로 검사 → 첫 히트가 시각적 최상단
     for (let i = displayCards.length - 1; i >= 0; i--) {
       const el = cardRefs.current.get(i);
       if (!el || selectedIndices.includes(i)) continue;
 
       const rect = el.getBoundingClientRect();
-      const cardCenterX = rect.left - containerRect.left + rect.width / 2;
-      const cardCenterY = rect.top - containerRect.top + rect.height / 2;
-
-      // 클릭이 카드 영역 내에 있는지 확인
       const inX = clickX >= rect.left - containerRect.left && clickX <= rect.right - containerRect.left;
       const inY = clickY >= rect.top - containerRect.top && clickY <= rect.bottom - containerRect.top;
 
       if (inX && inY) {
-        const dist = Math.hypot(clickX - cardCenterX, clickY - cardCenterY);
-        if (dist < bestDist) {
-          bestDist = dist;
-          bestIndex = i;
-        }
+        onCardSelect(i);
+        return;
       }
-    }
-
-    if (bestIndex >= 0) {
-      onCardSelect(bestIndex);
     }
   }, [displayCards.length, selectedIndices, onCardSelect]);
 
