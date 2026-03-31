@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
+import { getCardBackUrl } from "@/lib/supabase/storage";
+
 interface CardBackProps {
   size?: "sm" | "md" | "lg";
   width?: number;
   height?: number;
   className?: string;
+  skinId?: string;
 }
 
 const sizeDimensions = {
@@ -13,7 +18,8 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardBack({ size = "md", width, height, className = "" }: CardBackProps) {
+export function CardBack({ size = "md", width, height, className = "", skinId }: CardBackProps) {
+  const [imageError, setImageError] = useState(false);
   const preset = sizeDimensions[size];
   const w = width ?? preset.w;
   const h = height ?? preset.h;
@@ -25,6 +31,22 @@ export function CardBack({ size = "md", width, height, className = "" }: CardBac
   const starSize = size === "sm" ? 6 : size === "md" ? 8 : 10;
   const cornerStarSize = size === "sm" ? 4 : size === "md" ? 5 : 6;
   const inset = size === "sm" ? 4 : size === "md" ? 6 : 8;
+
+  if (skinId && !imageError) {
+    return (
+      <div className={`relative rounded-lg overflow-hidden ${className}`} style={{ width: w, height: h }}>
+        <Image
+          src={getCardBackUrl(skinId)}
+          alt="카드 뒷면"
+          fill
+          sizes={`${Math.max(w, h)}px`}
+          unoptimized
+          onError={() => setImageError(true)}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`relative rounded-lg overflow-hidden ${className}`} style={{ width: w, height: h }}>

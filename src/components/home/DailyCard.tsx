@@ -8,6 +8,7 @@ import { getAvailableCharacters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { CardFace } from "@/components/card/CardFace";
 import { CardBack } from "@/components/card/CardBack";
+import { useSkinStore } from "@/hooks/useSkinStore";
 
 const deckManager = new DeckManager();
 
@@ -20,6 +21,7 @@ interface DailyCardData {
 
 export function DailyCard() {
   const characters = getAvailableCharacters();
+  const { selectedSkinId } = useSkinStore();
   const [activeTab, setActiveTab] = useState(characters[0].id);
   const [data, setData] = useState<Record<string, DailyCardData>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -124,10 +126,10 @@ export function DailyCard() {
                     className="relative w-32 h-48"
                   >
                     <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
-                      <CardBack size="lg" className="w-full h-full" />
+                      <CardBack size="lg" className="w-full h-full" skinId={selectedSkinId} />
                     </div>
                     <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
-                      <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" />
+                      <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} />
                     </div>
                   </motion.div>
                   {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">탭하여 카드 확인</p>}

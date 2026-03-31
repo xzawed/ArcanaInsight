@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import { TarotCard } from "@/types/card";
 import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
+import { getCardImageUrl } from "@/lib/supabase/storage";
 
 interface CardFaceProps {
   card: TarotCard;
@@ -10,6 +13,7 @@ interface CardFaceProps {
   width?: number;
   height?: number;
   className?: string;
+  skinId?: string;
 }
 
 const sizeDimensions = {
@@ -18,7 +22,8 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardFace({ card, isReversed, size = "md", width, height, className = "" }: CardFaceProps) {
+export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId }: CardFaceProps) {
+  const [imageError, setImageError] = useState(false);
   const preset = sizeDimensions[size];
   const w = width ?? preset.w;
   const h = height ?? preset.h;
@@ -36,6 +41,30 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
   const romanNumerals = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
     "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
   const numeral = card.type === "major" ? romanNumerals[card.number] : `${card.number}`;
+
+  if (skinId && !imageError) {
+    return (
+      <div
+        className={`relative rounded-lg overflow-hidden ${isReversed ? "rotate-180" : ""} ${className}`}
+        style={{ width: w, height: h }}
+      >
+        <Image
+          src={getCardImageUrl(skinId, card.id)}
+          alt={card.nameKo}
+          fill
+          sizes={`${Math.max(w, h)}px`}
+          unoptimized
+          onError={() => setImageError(true)}
+          className="object-cover"
+        />
+        {isReversed && (
+          <span className="absolute top-1 right-1 text-[8px] text-red-400 bg-red-900/40 px-1 rounded rotate-180">
+            역
+          </span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
