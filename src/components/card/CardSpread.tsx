@@ -119,7 +119,7 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden"
+      className="relative w-full h-full"
     >
       {containerWidth > 0 && containerHeight > 0 && layout.positions.map((pos) => {
         const selectedCard = selectedCards.find((sc) => sc.position === pos.index);

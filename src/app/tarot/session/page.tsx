@@ -387,7 +387,7 @@ export default function TarotSessionPage() {
                 key="spread"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md flex-1 flex items-center justify-center mx-auto relative pt-2"
+                className="w-full max-w-md md:max-w-2xl flex-1 flex items-center justify-center mx-auto relative pt-2"
               >
                 <CardSpread
                   selectedCards={selectedCards}
