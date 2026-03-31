@@ -179,14 +179,11 @@ export default function SajuPage() {
                   <CharacterDisplay character={selectedCharacter} mood="mystical" className="w-full h-full" />
                 </div>
               )}
-              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-6 md:pb-4">
-                <div className="md:max-w-sm md:mx-auto">
-                  <DialogueBox messages={dialogueMessages} characterName={selectedCharacter?.name} />
-                </div>
+              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-4 md:pb-4">
+                <DialogueBox messages={dialogueMessages} characterName={selectedCharacter?.name} />
               </div>
             </div>
             <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4">
-              <div className="md:max-w-md md:mx-auto md:w-full">
               <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
                 ← 정보 수정
               </button>
@@ -204,7 +201,6 @@ export default function SajuPage() {
                     </div>
                   </motion.button>
                 ))}
-              </div>
               </div>
             </div>
           </motion.div>

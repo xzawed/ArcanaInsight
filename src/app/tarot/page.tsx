@@ -272,19 +272,16 @@ function TarotPageContent() {
               )}
 
               {/* 대사: 모바일은 캐릭터 아래 / 데스크탑은 하단 오버레이 */}
-              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-6 md:pb-4">
-                <div className="md:max-w-sm md:mx-auto">
-                  <DialogueBox
-                    messages={dialogueMessages}
-                    characterName={selectedCharacter?.name}
-                  />
-                </div>
+              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-4 md:pb-4">
+                <DialogueBox
+                  messages={dialogueMessages}
+                  characterName={selectedCharacter?.name}
+                />
               </div>
             </div>
 
             {/* 카테고리: 모바일 하단 / 데스크탑 우측 50% */}
             <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
-              <div className="md:max-w-md md:mx-auto md:w-full">
               <button
                 onClick={handleBack}
                 className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
@@ -311,7 +308,6 @@ function TarotPageContent() {
                   </motion.button>
                 ))}
               </div>
-              </div>
 
             </div>
           </motion.div>
@@ -330,19 +326,16 @@ function TarotPageContent() {
                   <CharacterDisplay character={selectedCharacter} mood="mystical" className="w-full h-full" />
                 </div>
               )}
-              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-6 md:pb-4">
-                <div className="md:max-w-sm md:mx-auto">
-                  <DialogueBox
-                    messages={dialogueMessages}
-                    characterName={selectedCharacter?.name}
-                  />
-                </div>
+              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-4 md:pb-4">
+                <DialogueBox
+                  messages={dialogueMessages}
+                  characterName={selectedCharacter?.name}
+                />
               </div>
             </div>
 
             {/* 스프레드 선택 */}
             <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
-              <div className="md:max-w-md md:mx-auto md:w-full">
               <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
                 ← 주제 다시 선택
               </button>
@@ -383,7 +376,6 @@ function TarotPageContent() {
               >
                 📝 개인정보 입력하고 더 정확한 리딩 받기 (선택)
               </button>
-              </div>
             </div>
           </motion.div>
         ) : step === "user-info" ? (

@@ -160,10 +160,8 @@ export default function SajuSessionPage() {
           )}
           {/* 대사창 — 데스크탑에서 캐릭터 하단에 표시 */}
           {phase !== "result" && (
-            <div className="hidden md:block flex-shrink-0 px-6 pb-4">
-              <div className="max-w-sm mx-auto">
-                <DialogueBox messages={chatMessages} characterName={character?.name ?? ""} isTyping={false} />
-              </div>
+            <div className="hidden md:block flex-shrink-0 px-4 pb-4">
+              <DialogueBox messages={chatMessages} characterName={character?.name ?? ""} isTyping={false} />
             </div>
           )}
         </div>
@@ -172,7 +170,7 @@ export default function SajuSessionPage() {
           {phase === "result" && readingResult && sajuData ? (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               className="w-full flex-1 flex flex-col overflow-y-auto py-4">
-              <div className="space-y-3 flex-1 overflow-y-auto pr-2 md:max-w-xl md:mx-auto md:w-full">
+              <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                 <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
                   dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
                 <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
@@ -211,7 +209,7 @@ export default function SajuSessionPage() {
                 <div ref={resultBottomRef} />
               </div>
 
-              <div className="flex gap-3 pt-4 flex-shrink-0 md:max-w-xl md:mx-auto md:w-full">
+              <div className="flex gap-3 pt-4 flex-shrink-0">
                 <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
                   className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
                   새로운 상담
