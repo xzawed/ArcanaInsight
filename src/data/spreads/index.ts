@@ -28,12 +28,13 @@ export const spreads: Record<SpreadType, SpreadDefinition> = {
   },
 };
 
-export const topicToSpread: Record<Topic, SpreadType> = {
+export const topicToSpread: Partial<Record<Topic, SpreadType>> = {
   love: "three-card", "love-single": "three-card", "love-couple": "three-card",
   general: "three-card", health: "one-card",
   finance: "five-card", career: "five-card",
 };
 
 export function getSpreadForTopic(topic: Topic): SpreadDefinition {
-  return spreads[topicToSpread[topic]];
+  const spreadType = topicToSpread[topic] ?? "three-card";
+  return spreads[spreadType];
 }

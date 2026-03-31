@@ -95,6 +95,12 @@ export function Header() {
             타로 상담
           </Link>
           <Link
+            href="/saju"
+            className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
+          >
+            사주 상담
+          </Link>
+          <Link
             href="/#daily-card"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >

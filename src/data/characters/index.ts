@@ -77,3 +77,7 @@ export function getCharacterById(id: string): CharacterConfig | undefined {
 export function getAvailableCharacters(): CharacterConfig[] {
   return characters.filter((c) => c.unlocked);
 }
+
+export function getCharactersByService(serviceType: string): CharacterConfig[] {
+  return characters.filter((c) => c.unlocked && c.serviceType === serviceType);
+}

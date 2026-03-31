@@ -12,7 +12,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/", label: "홈", icon: "🏠" },
   { href: "/tarot", label: "타로", icon: "🃏" },
-  { href: "/#daily-card", label: "오늘의 운세", icon: "⭐" },
+  { href: "/saju", label: "사주", icon: "☯" },
   { href: "/mypage", label: "MY", icon: "👤" },
 ];
 

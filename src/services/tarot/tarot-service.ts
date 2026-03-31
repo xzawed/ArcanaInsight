@@ -29,10 +29,10 @@ export class TarotService implements DivinationService {
   }
 
   getReadingPrompt(context: SessionContext): string {
-    // 사용자가 선택한 spreadType 사용 (topic 기반 자동 결정이 아닌 실제 선택값)
-    const spread = this.spreadResolver.getSpreadByType(context.session.spreadType)
-      ?? this.spreadResolver.resolveForTopic(context.topic);
-    return buildReadingPrompt(context.topic, context.selectedCards, spread);
+    const spread = (context.session.spreadType
+      ? this.spreadResolver.getSpreadByType(context.session.spreadType)
+      : null) ?? this.spreadResolver.resolveForTopic(context.topic);
+    return buildReadingPrompt(context.topic, context.selectedCards ?? [], spread);
   }
 
   parseResult(aiResponse: string): ReadingResult {

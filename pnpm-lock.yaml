@@ -26,6 +26,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      tyme4ts:
+        specifier: ^1.4.5
+        version: 1.4.5
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(react@19.2.4)
@@ -2111,6 +2114,9 @@ packages:
     resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
+
+  tyme4ts@1.4.5:
+    resolution: {integrity: sha512-PwrWXVvMDVZR7CnYJnI5wPvPliBJfQQcuoe6qpIAu370dbw8WkPQvwC8f0l1M6GpuiS7fWphk1BR19yF2UPnGA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -4386,6 +4392,8 @@ snapshots:
       get-tsconfig: 4.13.7
     optionalDependencies:
       fsevents: 2.3.3
+
+  tyme4ts@1.4.5: {}
 
   type-check@0.4.0:
     dependencies:

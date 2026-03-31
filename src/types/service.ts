@@ -3,15 +3,16 @@ import { Session, Topic, ChatMessage } from "./session";
 import { SelectedCard } from "./card";
 
 export interface ReadingResult {
-  cardInterpretations: { cardId: string; position: number; interpretation: string; }[];
+  cardInterpretations?: { cardId: string; position: number; interpretation: string; }[];
   overallReading: string;
   advice: string;
+  topicReading?: string;
   shareToken?: string | null;
 }
 
 export interface SessionContext {
   session: Session;
-  selectedCards: SelectedCard[];
+  selectedCards?: SelectedCard[];
   chatHistory: ChatMessage[];
   topic: Topic;
 }

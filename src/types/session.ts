@@ -1,6 +1,7 @@
 import { SelectedCard } from "./card";
 
-export type Topic = "love" | "love-single" | "love-couple" | "finance" | "career" | "health" | "general";
+export type Topic = "love" | "love-single" | "love-couple" | "finance" | "career" | "health" | "general"
+  | "fortune-3y" | "fortune-5y" | "fortune-full";
 export type SpreadType = "one-card" | "three-card" | "five-card";
 export type SessionStatus = "in_progress" | "completed" | "abandoned";
 
@@ -26,7 +27,7 @@ export interface Session {
   serviceType: string;
   topic: Topic;
   status: SessionStatus;
-  spreadType: SpreadType;
+  spreadType: SpreadType | null;
   selectedCards: SelectedCard[];
   createdAt: Date;
   completedAt: Date | null;
