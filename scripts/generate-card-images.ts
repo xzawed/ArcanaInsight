@@ -13,7 +13,7 @@ import path from "path";
 
 const API_KEY = process.env.GROK_API_KEY;
 const API_URL = "https://api.x.ai/v1/images/generations";
-const MODEL = "grok-2-image";
+const MODEL = "grok-imagine-image-pro";
 const OUTPUT_DIR = path.join(process.cwd(), "public/images/cards");
 
 if (!API_KEY || API_KEY === "your_grok_api_key") {

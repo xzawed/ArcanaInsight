@@ -1,5 +1,5 @@
 /**
- * 카드 스킨 이미지 생성 스크립트 (Grok grok-2-image 모델 사용)
+ * 카드 스킨 이미지 생성 스크립트 (Grok grok-imagine-image-pro 모델 사용)
  *
  * 사용법:
  *   GROK_API_KEY=your_key pnpm tsx scripts/generate-skin-images.ts
@@ -13,7 +13,7 @@ import path from "path";
 
 const API_KEY = process.env.GROK_API_KEY;
 const API_URL = "https://api.x.ai/v1/images/generations";
-const MODEL = "grok-2-image";
+const MODEL = "grok-imagine-image-pro";
 const OUTPUT_DIR = path.join(process.cwd(), "output/card-skins");
 
 if (!API_KEY || API_KEY === "your_grok_api_key") {
