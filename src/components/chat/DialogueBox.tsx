@@ -40,7 +40,12 @@ export function DialogueBox({ messages, characterName = "아르카나", isTyping
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute inset-0 bg-arcana-card/90 backdrop-blur-md border-t-2 border-arcana-purple/60 rounded-t-xl" />
+      {/* 메인 배경 — 투명도 강화 */}
+      <div className="absolute inset-0 bg-arcana-card/55 backdrop-blur-xl rounded-t-xl" />
+      {/* 캐릭터에서 이어지는 상단 그라디언트 페이드 */}
+      <div className="absolute top-0 inset-x-0 h-12 bg-gradient-to-b from-transparent to-arcana-card/55 rounded-t-xl pointer-events-none" />
+      {/* 은은한 퍼플 글로우 상단선 */}
+      <div className="absolute top-0 inset-x-6 h-px bg-gradient-to-r from-transparent via-arcana-purple/50 to-transparent" />
       <div className="relative z-10 p-3 md:p-5">
         <div className="flex items-center gap-2 mb-2">
           <div className="px-3 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">

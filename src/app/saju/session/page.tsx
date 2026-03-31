@@ -154,6 +154,8 @@ export default function SajuSessionPage() {
           {character && (
             <div className={`${phase === "result" ? "h-[20%]" : "h-[30%]"} md:flex-1 relative overflow-hidden transition-all duration-500`}>
               <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
+              {/* 데스크탑: 하단 그라디언트 — 대사창과 자연스럽게 연결 */}
+              <div className="hidden md:block absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-arcana-bg/80 to-transparent pointer-events-none" />
             </div>
           )}
           {/* 대사창 — 데스크탑에서 캐릭터 하단에 표시 */}
