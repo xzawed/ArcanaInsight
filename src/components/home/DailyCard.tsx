@@ -139,10 +139,14 @@ export function DailyCard() {
               )}
             </div>
 
-            {/* 해석 */}
+            {/* 해석 — 카드를 뒤집은 후에만 표시 */}
             <div className="flex-1 min-w-0">
-              {currentData && currentCard ? (
-                <div className="space-y-4">
+              {currentData && currentCard && isFlipped ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
                   <div>
                     <h3 className="font-serif font-bold text-lg">{currentCard.nameKo}</h3>
                     <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? "(역방향)" : "(정방향)"}</p>
@@ -171,6 +175,10 @@ export function DailyCard() {
                     className="px-4 py-2 text-xs rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold hover:bg-arcana-purple/10 transition-colors">
                     공유하기
                   </button>
+                </motion.div>
+              ) : currentData && !isFlipped ? (
+                <div className="flex flex-col items-center md:items-start justify-center h-full">
+                  <p className="text-arcana-muted text-sm font-serif">카드를 탭하여 오늘의 운세를 확인해보세요</p>
                 </div>
               ) : loading === activeTab ? (
                 <div className="space-y-3">
