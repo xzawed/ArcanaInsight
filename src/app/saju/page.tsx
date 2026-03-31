@@ -113,34 +113,34 @@ export default function SajuPage() {
           </motion.div>
         ) : step === "info-input" ? (
           <motion.div key="info-input" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden">
+            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
             {selectedCharacter && (
-              <div className="h-[25vh] md:h-auto md:w-[50%] flex-shrink-0 overflow-hidden">
+              <div className="h-[20%] md:h-auto md:w-[50%] flex-shrink-0 overflow-hidden">
                 <CharacterDisplay character={selectedCharacter} mood="smile" className="w-full h-full" />
               </div>
             )}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-8 py-4 overflow-y-auto">
-              <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-8 py-3 overflow-y-auto">
+              <button onClick={handleBack} className="self-start mb-2 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
                 ← 뒤로
               </button>
-              <h3 className="font-serif font-bold text-lg mb-4">생년월일 정보 입력</h3>
-              <p className="text-arcana-muted text-xs mb-4">정확한 사주 분석을 위해 필수 정보입니다</p>
+              <h3 className="font-serif font-bold text-base md:text-lg mb-1">생년월일 정보 입력</h3>
+              <p className="text-arcana-muted text-[10px] mb-3">정확한 사주 분석을 위해 필수 정보입니다</p>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <label className="text-arcana-muted text-xs font-serif mb-1 block">이름 (선택)</label>
+                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">이름 (선택)</label>
                   <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동"
-                    className="w-full px-4 py-2.5 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
+                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
                 </div>
                 <div>
-                  <label className="text-arcana-muted text-xs font-serif mb-1 block">생년월일 (필수)</label>
+                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">생년월일 (필수)</label>
                   <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
+                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
                 </div>
                 <div>
-                  <label className="text-arcana-muted text-xs font-serif mb-1 block">태어난 시간 (필수)</label>
+                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">태어난 시간 (필수)</label>
                   <select value={birthHour} onChange={(e) => setBirthHour(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none">
+                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none">
                     <option value="">선택하세요</option>
                     {birthHourOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -148,11 +148,11 @@ export default function SajuPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-arcana-muted text-xs font-serif mb-1 block">성별 (필수)</label>
+                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">성별 (필수)</label>
                   <div className="flex gap-2">
                     {(["male", "female", "other"] as const).map((g) => (
                       <button key={g} onClick={() => setGender(g)}
-                        className={`flex-1 py-2.5 rounded-xl text-xs font-serif font-bold border transition-colors ${
+                        className={`flex-1 py-2 rounded-xl text-xs font-serif font-bold border transition-colors ${
                           gender === g ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple" : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
                         }`}
                       >
@@ -163,7 +163,7 @@ export default function SajuPage() {
                 </div>
 
                 <button onClick={handleInfoSubmit} disabled={!birthDate || !birthHour}
-                  className="w-full mt-2 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
+                  className="w-full mt-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
                   사주 분석 시작
                 </button>
               </div>

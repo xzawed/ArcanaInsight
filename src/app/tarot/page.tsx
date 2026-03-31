@@ -187,8 +187,8 @@ function TarotPageContent() {
             exit={{ opacity: 0, x: -50 }}
             className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
-            {/* 좌측: 모바일 상단 35% / 데스크탑 50% */}
-            <div className="h-[35%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
+            {/* 좌측: 모바일 상단 25% / 데스크탑 50% */}
+            <div className="h-[25%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
               <div className="absolute inset-0 overflow-hidden">
                 <CharacterDisplay
                   character={selectedCharacter}
@@ -199,26 +199,26 @@ function TarotPageContent() {
             </div>
 
             {/* 우측: 모바일 하단 / 데스크탑 50% */}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-10 py-4 md:py-6 overflow-y-auto">
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-10 py-3 md:py-6 overflow-y-auto">
               <button
                 onClick={handleBack}
-                className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
+                className="self-start mb-2 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
               >
                 ← 다른 상담사 선택
               </button>
 
-              <div className="space-y-5">
-                {/* 이름 */}
+              <div className="space-y-3">
+                {/* 이름 + 특기 */}
                 <div>
-                  <h2 className="text-3xl font-serif font-bold text-arcana-purple drop-shadow-md">
+                  <h2 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple drop-shadow-md">
                     {selectedCharacter.name}
                   </h2>
-                  <p className="text-arcana-muted text-sm mt-1">{selectedCharacter.nameJp}</p>
-                </div>
-
-                {/* 특기 태그 */}
-                <div className="inline-block px-3 py-1 bg-arcana-purple/20 border border-arcana-purple/40 rounded-full">
-                  <span className="text-arcana-purple text-xs font-serif">{selectedCharacter.speciality}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-arcana-muted text-xs">{selectedCharacter.nameJp}</p>
+                    <span className="px-2 py-0.5 bg-arcana-purple/20 border border-arcana-purple/40 rounded-full text-arcana-purple text-[10px] font-serif">
+                      {selectedCharacter.speciality}
+                    </span>
+                  </div>
                 </div>
 
                 {/* 상세 소개 */}
@@ -226,16 +226,16 @@ function TarotPageContent() {
                   {selectedCharacter.description}
                 </p>
 
-                {/* 말투 스타일 */}
-                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
-                  <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">리딩 스타일</h4>
-                  <p className="text-arcana-muted text-xs leading-relaxed">{selectedCharacter.speechStyle}</p>
-                </div>
-
-                {/* 인사 미리보기 */}
-                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
-                  <h4 className="text-arcana-gold text-xs font-serif font-bold mb-2">첫 인사</h4>
-                  <p className="text-arcana-text text-sm italic leading-relaxed">&ldquo;{selectedCharacter.greeting}&rdquo;</p>
+                {/* 리딩 스타일 + 첫 인사 (모바일에서 가로 배치) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3">
+                    <h4 className="text-arcana-gold text-[10px] font-serif font-bold mb-1">리딩 스타일</h4>
+                    <p className="text-arcana-muted text-xs leading-relaxed">{selectedCharacter.speechStyle}</p>
+                  </div>
+                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3">
+                    <h4 className="text-arcana-gold text-[10px] font-serif font-bold mb-1">첫 인사</h4>
+                    <p className="text-arcana-text text-xs italic leading-relaxed line-clamp-2">&ldquo;{selectedCharacter.greeting}&rdquo;</p>
+                  </div>
                 </div>
 
                 {/* 상담 시작 버튼 */}
