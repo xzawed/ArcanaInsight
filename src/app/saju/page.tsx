@@ -9,7 +9,7 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { getAvailableCharacters } from "@/data/characters";
+import { getCharacterById } from "@/data/characters";
 import { CharacterConfig } from "@/types/character";
 import { ChatMessage, Topic } from "@/types/session";
 import { BIRTH_HOUR_MAP } from "@/data/saju/constants";
@@ -42,7 +42,8 @@ type PageStep = "character-select" | "info-input" | "topic-select";
 export default function SajuPage() {
   const router = useRouter();
   const { setTopic, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
-  const availableCharacters = getAvailableCharacters();
+  // 사주 서비스 캐릭터: 선화(사주 전문) + 미코(신점 전문)
+  const sajuCharacters = ["seonhwa", "miko"].map(getCharacterById).filter(Boolean) as CharacterConfig[];
 
   const [step, setStep] = useState<PageStep>("character-select");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
@@ -104,8 +105,8 @@ export default function SajuPage() {
               <h2 className="text-xl md:text-2xl font-serif font-bold mb-2">사주 상담사를 선택해주세요</h2>
               <p className="text-arcana-muted">사주명리학 전문 상담을 받아보세요</p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {availableCharacters.map((character, index) => (
+            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+              {sajuCharacters.map((character, index) => (
                 <CharacterCard key={character.id} character={character} isSelected={selectedCharacter?.id === character.id}
                   onClick={() => handleCharacterSelect(character)} index={index} />
               ))}
