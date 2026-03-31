@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           let shareToken: string | null = null;
           if (supabase && sessionId) {
             try {
-              const { data: readingRes } = await supabase.from("saju_readings").insert({
+              const readingRes = await supabase.from("saju_readings").insert({
                 session_id: sessionId,
                 birth_date: userInfo.birthDate,
                 birth_hour: userInfo.birthHour,
@@ -86,11 +86,16 @@ export async function POST(request: NextRequest) {
                 advice: result.advice,
               }).select("share_token").single();
 
-              shareToken = readingRes?.share_token ?? null;
+              if (readingRes?.error) {
+                console.error("saju_readings 저장 실패:", readingRes.error.message);
+              } else {
+                shareToken = readingRes?.data?.share_token ?? null;
+              }
 
-              await supabase.from("sessions").update({
+              const sessionRes = await supabase.from("sessions").update({
                 status: "completed", completed_at: new Date().toISOString(),
               }).eq("id", sessionId);
+              if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
             } catch (dbError) {
               console.error("DB 저장 실패:", dbError);
             }

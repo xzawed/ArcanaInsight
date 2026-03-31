@@ -15,19 +15,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [setMode]);
 
-  // 활성 테마 색상을 CSS 변수로 적용
+  // 활성 테마 색상을 CSS 변수로 자동 적용
   useEffect(() => {
     const { colors } = themes[activeTheme];
     const root = document.documentElement;
-    root.style.setProperty("--color-arcana-bg", colors.bg);
-    root.style.setProperty("--color-arcana-surface", colors.surface);
-    root.style.setProperty("--color-arcana-card", colors.card);
-    root.style.setProperty("--color-arcana-border", colors.border);
-    root.style.setProperty("--color-arcana-purple", colors.primary);
-    root.style.setProperty("--color-arcana-indigo", colors.secondary);
-    root.style.setProperty("--color-arcana-gold", colors.accent);
-    root.style.setProperty("--color-arcana-text", colors.text);
-    root.style.setProperty("--color-arcana-muted", colors.muted);
+    const cssVarMap: Record<string, string> = {
+      bg: "bg", surface: "surface", card: "card", border: "border",
+      primary: "purple", secondary: "indigo", accent: "gold",
+      text: "text", muted: "muted",
+    };
+    Object.entries(colors).forEach(([key, value]) => {
+      const cssName = cssVarMap[key] || key;
+      root.style.setProperty(`--color-arcana-${cssName}`, value);
+    });
   }, [activeTheme]);
 
   // auto 모드: 30분마다 시간/계절 체크하여 자동 갱신

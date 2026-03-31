@@ -4,6 +4,7 @@ import { Session, Topic } from "@/types/session";
 import { getCharacterByService, getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
+import { cleanReadingText } from "@/services/core/text-cleaner";
 
 export class SajuService implements DivinationService {
   id = "saju";
@@ -135,9 +136,9 @@ ${yearlyText}
     try {
       const parsed = JSON.parse(jsonStr);
       return {
-        overallReading: this.cleanText(parsed.overallReading || ""),
-        topicReading: this.cleanText(parsed.topicReading || ""),
-        advice: this.cleanText(parsed.advice || ""),
+        overallReading: cleanReadingText(parsed.overallReading || ""),
+        topicReading: cleanReadingText(parsed.topicReading || ""),
+        advice: cleanReadingText(parsed.advice || ""),
       };
     } catch {
       const cleanText = aiResponse
@@ -151,13 +152,4 @@ ${yearlyText}
     }
   }
 
-  private cleanText(text: string): string {
-    return text
-      .replace(/\\n\\n/g, "\n\n")
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\/g, "")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-  }
 }

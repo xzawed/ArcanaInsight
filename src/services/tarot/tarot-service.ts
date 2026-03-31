@@ -3,6 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic } from "@/types/session";
 import { getCharacterByService, getCharacterById } from "@/data/characters";
 import { buildSystemPrompt, buildReadingPrompt } from "@/services/core/prompt-builder";
+import { cleanReadingText } from "@/services/core/text-cleaner";
 import { SpreadResolver } from "./spread-resolver";
 
 export class TarotService implements DivinationService {
@@ -57,11 +58,11 @@ export class TarotService implements DivinationService {
         cardInterpretations: (parsed.cardInterpretations || []).map(
           (interp: { cardId: string; position: number; interpretation: string; isReversed?: boolean }) => ({
             ...interp,
-            interpretation: this.cleanReadingText(interp.interpretation),
+            interpretation: cleanReadingText(interp.interpretation),
           })
         ),
-        overallReading: this.cleanReadingText(parsed.overallReading || ""),
-        advice: this.cleanReadingText(parsed.advice || ""),
+        overallReading: cleanReadingText(parsed.overallReading || ""),
+        advice: cleanReadingText(parsed.advice || ""),
       };
     } catch (e) {
       // JSON 파싱 실패 시 코드/태그 제거 후 텍스트만 표시
@@ -78,16 +79,4 @@ export class TarotService implements DivinationService {
     }
   }
 
-  /** JSON 파싱 후 텍스트에 남은 이스케이프/코드 잔여물 정리 */
-  private cleanReadingText(text: string): string {
-    return text
-      .replace(/\\n\\n/g, "\n\n")     // 이중 이스케이프 \\n\\n → 실제 개행 2줄
-      .replace(/\\n/g, "\n")           // 이중 이스케이프 \\n → 실제 개행
-      .replace(/\\r/g, "")             // 캐리지 리턴 제거
-      .replace(/\\t/g, " ")            // 탭 → 공백
-      .replace(/\\"/g, '"')            // 이스케이프된 따옴표 복원
-      .replace(/\\/g, "")              // 남은 불필요한 백슬래시 제거
-      .replace(/\n{3,}/g, "\n\n")      // 과도한 개행 정리
-      .trim();
-  }
 }
