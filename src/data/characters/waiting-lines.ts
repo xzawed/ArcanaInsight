@@ -37,6 +37,26 @@ export const waitingLines: Record<string, WaitingLine[]> = {
   ],
 };
 
+/** 사주 대기 중 캐릭터별 대사 시퀀스 */
+export const sajuWaitingLines: Record<string, WaitingLine[]> = {
+  seonhwa: [
+    { content: "사주팔자의 기운을 살펴보고 있어요...", mood: "mystical" },
+    { content: "오행의 흐름이 보이기 시작하네요~", mood: "serious" },
+    { content: "천간과 지지의 관계가 참 흥미로워요", mood: "surprised" },
+    { content: "대운의 흐름까지 꼼꼼히 확인하고 있어요", mood: "mystical" },
+    { content: "용신이 무엇인지 거의 파악했어요~", mood: "smile" },
+    { content: "아름다운 사주를 가지고 계시네요!", mood: "smile" },
+  ],
+  miko: [
+    { content: "...팔자의 기운이 느껴집니다", mood: "serious" },
+    { content: "천간과 지지가 말을 걸어오고 있습니다", mood: "mystical" },
+    { content: "오행의 균형을 살피고 있습니다. 잠시만 기다려주십시오", mood: "serious" },
+    { content: "십성과 운성의 흐름이 드러나고 있습니다", mood: "mystical" },
+    { content: "대운과 세운의 방향이 보입니다", mood: "serious" },
+    { content: "사주의 전체 그림이 완성되었습니다", mood: "smile" },
+  ],
+};
+
 /** 선택한 카드 정보를 캐릭터 말투로 소개하는 템플릿 */
 export function buildCardPreviewLine(
   characterId: string,

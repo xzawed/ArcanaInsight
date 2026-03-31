@@ -13,7 +13,7 @@ import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
-import { waitingLines } from "@/data/characters/waiting-lines";
+import { sajuWaitingLines } from "@/data/characters/waiting-lines";
 
 export default function SajuSessionPage() {
   const router = useRouter();
@@ -41,9 +41,12 @@ export default function SajuSessionPage() {
     }).catch(() => {});
 
     setMood("mystical");
+    const namePrefix = userInfo.name ? `${userInfo.name}님의` : "";
+    const initMsg = characterId === "miko"
+      ? `${namePrefix} 사주팔자를 읽어보겠습니다. 조용히 기다려주십시오.`
+      : `${namePrefix} 사주를 살펴보고 있어요~ 잠시만 기다려주세요.`;
     addChatMessage({ id: crypto.randomUUID(), role: "character",
-      content: `${userInfo.name || ""}님의 사주를 분석하고 있어요... 잠시만 기다려주세요.`,
-      mood: "mystical", timestamp: new Date(),
+      content: initMsg, mood: "mystical", timestamp: new Date(),
     });
 
     startReading();
@@ -56,7 +59,8 @@ export default function SajuSessionPage() {
     const state = useSajuSessionStore.getState();
 
     // 대기 대사
-    const lines = waitingLines[state.characterId || "arcana"] || waitingLines["arcana"];
+    const charId = state.characterId || "seonhwa";
+    const lines = sajuWaitingLines[charId] || sajuWaitingLines["seonhwa"];
     const timers: ReturnType<typeof setTimeout>[] = [];
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
@@ -110,8 +114,11 @@ export default function SajuSessionPage() {
               setReadingResult(data.result);
               if (data.sajuData) setSajuData(data.sajuData);
               setPhase("result"); setMood("smile");
+              const doneMsg = state.characterId === "miko"
+                ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
+                : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
               addChatMessage({ id: crypto.randomUUID(), role: "character",
-                content: "사주 분석이 완료되었어요! 결과를 확인해보세요.", mood: "smile", timestamp: new Date() });
+                content: doneMsg, mood: "smile", timestamp: new Date() });
               streamDone = true; break;
             }
           } catch (e) { console.warn("SSE 파싱 실패:", e); }
