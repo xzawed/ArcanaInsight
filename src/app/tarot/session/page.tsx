@@ -326,11 +326,11 @@ export default function TarotSessionPage() {
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
-        {/* 좌측 컬럼: 캐릭터 + 대사 (데스크탑) */}
-        <div className="w-full md:w-[50%] md:flex-shrink-0 flex flex-col">
-          {/* 캐릭터: 모바일 상단 25~35% / 데스크탑 flex-1 */}
+        {/* 좌측 컬럼: 캐릭터 + 대사 */}
+        <div className={`w-full ${phase === "result" ? "h-[25%]" : phase === "reading" ? "h-[25%]" : "h-[35%]"} md:h-auto md:w-[50%] md:flex-shrink-0 flex flex-col transition-all duration-500`}>
+          {/* 캐릭터 */}
           {character && (
-            <div className={`${phase === "result" ? "h-[25%]" : phase === "reading" ? "h-[25%]" : "h-[35%]"} md:flex-1 relative overflow-hidden transition-all duration-500`}>
+            <div className="flex-1 relative overflow-hidden">
               <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
               {/* 데스크탑: 하단 그라디언트 — 대사창과 자연스럽게 연결 */}
               <div className="hidden md:block absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-arcana-bg/80 to-transparent pointer-events-none" />
