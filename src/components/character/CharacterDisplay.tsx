@@ -26,10 +26,20 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       <div
         className="relative z-10 w-full h-full overflow-hidden"
         style={{
-          mask: "linear-gradient(to bottom, transparent 0%, black 10%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%), linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
-          maskComposite: "intersect",
-          WebkitMask: "linear-gradient(to bottom, transparent 0%, black 10%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%), linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
-          WebkitMaskComposite: "destination-in" as string,
+          WebkitMaskImage: [
+            "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+            "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+            "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+            "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+          ].join(", "),
+          WebkitMaskComposite: "destination-in, destination-in, destination-in" as string,
+          maskImage: [
+            "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+            "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+            "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+            "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+          ].join(", "),
+          maskComposite: "intersect, intersect, intersect",
         }}
       >
         <SpriteAnimator
