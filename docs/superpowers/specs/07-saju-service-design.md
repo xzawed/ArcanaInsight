@@ -1,5 +1,6 @@
-> **Status**: 구현 완료 (일부 미구현)
+> **Status**: 구현 완료 (일부 미구현) — **2026-04-02 프로세스 전면 재설계됨**
 > **Note**: 설계 시점(2026-03-31) 기준 문서. 구현 과정에서 아래 항목이 변경됨:
+> - **[2026-04-02 재설계]** Topic 구조 변경: `fortune-3y`/`fortune-5y`/`fortune-full` 등 구 사주 Topic 16개 제거 → 사주 분석영역 8개(`saju-general` 등)로 교체. 시간 차원은 별도 `SajuTimeRange` 타입(7개)으로 분리. 최신 구현은 `src/types/session.ts` + `src/data/saju/categories.ts` 참고
 > - 라이브러리: 이 스펙 내 `tyme4ts`와 `lunar-javascript`가 혼재 → 실제 구현은 **`tyme4ts`** 사용
 > - 주제 수: "9가지"라고 기재되어 있으나 실제 나열은 **8가지** (love/career/finance/health/general/fortune-3y/5y/full)
 > - `SajuInfoForm.tsx` 미생성 → `src/components/tarot/UserInfoForm.tsx` 재사용

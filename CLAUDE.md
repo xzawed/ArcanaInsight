@@ -105,7 +105,7 @@ src/
 │   ├── cards/                  # 메이저 22장 (major-arcana.ts) + 마이너 56장 (minor-arcana.ts) + symbols.ts
 │   ├── characters/             # 12캐릭터 설정 (index.ts), 대기 대사 (waiting-lines.ts)
 │   ├── home/                   # faq.ts, reviews.ts, stats.ts (홈 페이지 정적 데이터)
-│   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (3카테고리 16주제)
+│   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (시간단위 7개+분석영역 8개)
 │   ├── skins/                  # index.ts (6종 스킨 정의)
 │   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
 │   └── birth-hours.ts          # 12시진 데이터

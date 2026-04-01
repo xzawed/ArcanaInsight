@@ -21,7 +21,7 @@ description: 새 DivinationService 구현체 추가 시 필요한 파일들을 �
 - `src/app/api/tarot/reading/route.ts` — SSE 스트리밍 API 패턴
 - `src/app/api/saju/reading/route.ts` — 사주 API 패턴
 - `src/app/saju/page.tsx` — 서비스 메인 페이지 패턴 (멀티스텝 + 카테고리 선택)
-- `src/data/saju/categories.ts` — 카테고리 기반 주제 선택 패턴 (SajuCategory/SajuSubTopic)
+- `src/data/saju/categories.ts` — 시간단위×분석영역 매트릭스 패턴 (SajuTimeOption 7개 / SajuAreaOption 8개)
 - `src/services/saju/saju-calculator.ts` — SajuCalculateOptions 확장 계산 패턴
 - `supabase/migrations/006_saju_readings.sql` — 마이그레이션 패턴
 
