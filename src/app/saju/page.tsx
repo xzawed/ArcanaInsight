@@ -9,8 +9,9 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { getCharacterById } from "@/data/characters";
-import { CharacterConfig } from "@/types/character";
+import { getCharactersByGender } from "@/data/characters";
+import { CharacterConfig, GenderFilter } from "@/types/character";
+import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage, Topic } from "@/types/session";
 import { BIRTH_HOUR_MAP } from "@/data/saju/constants";
 
@@ -42,8 +43,8 @@ type PageStep = "character-select" | "info-input" | "topic-select";
 export default function SajuPage() {
   const router = useRouter();
   const { setTopic, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
-  // 사주 서비스 캐릭터: 선화(사주 전문) + 미코(신점 전문)
-  const sajuCharacters = ["seonhwa", "miko"].map(getCharacterById).filter(Boolean) as CharacterConfig[];
+  const { genderFilter, setGenderFilter } = useGenderStore();
+  const sajuCharacters = getCharactersByGender(genderFilter);
 
   const [step, setStep] = useState<PageStep>("character-select");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
@@ -105,7 +106,24 @@ export default function SajuPage() {
               <h2 className="text-xl md:text-2xl font-serif font-bold mb-2">사주 상담사를 선택해주세요</h2>
               <p className="text-arcana-muted">사주명리학 전문 상담을 받아보세요</p>
             </div>
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            {/* 성별 필터 */}
+            <div className="flex justify-center gap-2 mb-6">
+              {(["all", "female", "male"] as GenderFilter[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setGenderFilter(f)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
+                    genderFilter === f
+                      ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
+                      : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
+                  }`}
+                >
+                  {{ all: "전부", female: "여자", male: "남자" }[f]}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {sajuCharacters.map((character, index) => (
                 <CharacterCard key={character.id} character={character} isSelected={selectedCharacter?.id === character.id}
                   onClick={() => handleCharacterSelect(character)} index={index} />

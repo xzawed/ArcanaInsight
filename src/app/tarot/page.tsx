@@ -12,9 +12,10 @@ import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm, UserInfoData } from "@/components/tarot/UserInfoForm";
-import { getAvailableCharacters, getCharacterById } from "@/data/characters";
+import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { spreads } from "@/data/spreads";
-import { CharacterConfig } from "@/types/character";
+import { CharacterConfig, GenderFilter } from "@/types/character";
+import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage } from "@/types/session";
 
 const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
@@ -50,7 +51,8 @@ function TarotPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setTopic, setSpreadType, setPhase, setCharacterId } = useSessionStore();
-  const availableCharacters = getAvailableCharacters();
+  const { genderFilter, setGenderFilter } = useGenderStore();
+  const availableCharacters = getCharactersByGender(genderFilter);
 
   // 홈에서 캐릭터를 선택하고 왔을 때 자동으로 캐릭터 상세로 진입
   const preselectedCharId = searchParams.get("character");
@@ -167,7 +169,24 @@ function TarotPageContent() {
               <p className="text-arcana-muted drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* 성별 필터 */}
+            <div className="flex justify-center gap-2 mb-6">
+              {(["all", "female", "male"] as GenderFilter[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setGenderFilter(f)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
+                    genderFilter === f
+                      ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
+                      : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
+                  }`}
+                >
+                  {{ all: "전부", female: "여자", male: "남자" }[f]}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {availableCharacters.map((character, index) => (
                 <CharacterCard
                   key={character.id}
