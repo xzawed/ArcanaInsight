@@ -2,7 +2,9 @@ import { SelectedCard } from "./card";
 
 export type Topic = "love" | "love-single" | "love-couple" | "finance" | "career" | "health" | "general"
   | "fortune-3y" | "fortune-5y" | "fortune-full";
-export type SpreadType = "one-card" | "three-card" | "five-card";
+export type SpreadType = "one-card" | "three-card" | "five-card"
+  | "celtic-cross" | "relationship" | "horseshoe" | "decision"
+  | "week-ahead" | "zodiac" | "tree-of-life";
 export type SessionStatus = "in_progress" | "completed" | "abandoned";
 
 export interface SpreadPosition {

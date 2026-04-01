@@ -43,6 +43,41 @@ const spreadOptions: { type: SpreadType; label: string; icon: string; cards: num
     desc: "심층 다각도 분석",
     detail: "다섯 장의 카드로 현재 상황, 도전, 기반, 가까운 미래, 최종 결과를 다각도로 분석합니다. 복잡한 상황에 깊이 있는 통찰이 필요할 때 추천합니다.",
   },
+  {
+    type: "celtic-cross", label: "켈틱 크로스 (10장)", icon: "☘️", cards: 10,
+    desc: "전통 10장 종합 분석",
+    detail: "가장 유명한 전통 타로 배열법입니다. 현재 상황, 방해 요소, 과거, 의식, 근미래, 자아, 외부 환경, 희망과 두려움, 최종 결과까지 10개 관점에서 심층 분석합니다.",
+  },
+  {
+    type: "relationship", label: "관계 스프레드", icon: "💕", cards: 7,
+    desc: "두 사람의 관계 분석",
+    detail: "나와 상대방의 시각, 관계의 의미, 장애물과 강점을 양면에서 거울처럼 분석합니다. 연인, 가족, 친구 등 모든 대인 관계 상담에 최적화되어 있습니다.",
+  },
+  {
+    type: "horseshoe", label: "말굽 스프레드", icon: "🔮", cards: 7,
+    desc: "시간 흐름 + 내외부 요인",
+    detail: "U자 모양으로 과거에서 미래까지의 흐름을 보여주며, 심리 상태·외부 환경·장애물을 함께 분석합니다. 재정·커리어 등 복합적 상황에 적합합니다.",
+  },
+  {
+    type: "decision", label: "의사결정", icon: "⚖️", cards: 5,
+    desc: "두 갈래 길의 선택",
+    detail: "문제의 핵심을 파악한 뒤 두 가지 선택지와 각각의 결과를 비교합니다. 중요한 결정 앞에서 방향을 찾을 때 도움을 줍니다.",
+  },
+  {
+    type: "week-ahead", label: "한 주 전망", icon: "📅", cards: 7,
+    desc: "월요일부터 일요일까지",
+    detail: "이번 주 7일간의 에너지와 테마를 하루씩 카드로 읽어드립니다. 한 주를 의미 있게 준비하고 싶을 때 추천합니다.",
+  },
+  {
+    type: "zodiac", label: "조디악 휠", icon: "♈", cards: 12,
+    desc: "12하우스 인생 전반",
+    detail: "점성술의 12하우스에 각각 카드를 배치하여 자아·재정·소통·가정·사랑·건강·관계·변화·철학·커리어·우정·영성을 종합 분석합니다.",
+  },
+  {
+    type: "tree-of-life", label: "생명의 나무", icon: "🌳", cards: 10,
+    desc: "카발라 영적 탐구",
+    detail: "카발라의 세피로트 10개에 카드를 배치하여 영적 목표·지혜·이해·자비·도전·균형·감정·지성·잠재의식·현실을 탐구하는 심층 배열법입니다.",
+  },
 ];
 
 type PageStep = "character-select" | "character-detail" | "topic-select" | "spread-select" | "user-info";
