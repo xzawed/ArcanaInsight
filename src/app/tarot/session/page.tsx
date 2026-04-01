@@ -445,7 +445,7 @@ export default function TarotSessionPage() {
                 key="result"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full flex-1 flex flex-col overflow-y-auto py-4"
+                className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
                 <div className="space-y-3 flex-1 overflow-y-auto pr-2">

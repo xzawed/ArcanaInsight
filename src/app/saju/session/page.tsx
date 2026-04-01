@@ -169,7 +169,7 @@ export default function SajuSessionPage() {
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           {phase === "result" && readingResult && sajuData ? (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="w-full flex-1 flex flex-col overflow-y-auto py-4">
+              className="w-full flex-1 flex flex-col overflow-hidden py-4">
               <div className="space-y-3 flex-1 overflow-y-auto pr-2">
                 <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
                   dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
