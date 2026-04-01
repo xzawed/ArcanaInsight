@@ -190,9 +190,8 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 
 ### 캐릭터 이미지 경로 규칙
 
-- **초기 4캐릭터** (arcana/miko/seonhwa/hoshi): JPG, 루트 직접 경로
-  - 예: `/images/characters/arcana/default.jpg`
-- **신규 8캐릭터** (luna 이후): PNG 누끼, `nukki/` 폴더 경로
+- **모든 12캐릭터**: PNG 누끼, `nukki/` 폴더 경로 (1408×768 통일)
+  - 예: `/images/characters/arcana/nukki/default.png`
   - 예: `/images/characters/luna/nukki/default.png`
 
 ## 핵심 아키텍처 패턴
@@ -234,7 +233,7 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 
 ### 이미지 리소스
 
-- 캐릭터 이미지: 초기 4캐릭터는 JPG(루트), 신규 8캐릭터는 PNG(nukki/ 폴더)
+- 캐릭터 이미지: 모든 12캐릭터 PNG 누끼(nukki/ 폴더), 1408×768
 - 카드 이미지: SVG
 - 배경 이미지: JPG
 - 새 이미지 생성 시 `scripts/` 디렉토리의 생성 스크립트 활용
@@ -345,4 +344,4 @@ pnpm build             # 프로덕션 빌드 확인
 - DB 스키마는 `supabase/migrations/`에서 관리 (번호 순서 유지, 002는 결번)
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
-- 캐릭터 이미지 규격: 864×1296 세로 (초기 4캐릭터 JPG / 신규 8캐릭터 PNG 누끼)
+- 캐릭터 이미지 규격: 1408×768 (모든 12캐릭터 PNG 누끼, grok-imagine-image-pro API 기본 출력 사이즈)
