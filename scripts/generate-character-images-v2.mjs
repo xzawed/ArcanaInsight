@@ -128,12 +128,12 @@ Cyber-fantasy background with neon grid patterns and floating holographic displa
   },
   ethan: {
     name: "에단",
-    base: `An extraordinarily handsome and charismatic Western-featured anime young man with lush wavy chestnut-brown hair with subtle golden highlights, artfully tousled.
-Stunning deep ocean-teal eyes radiating warmth and intelligence, perfectly sculpted facial features with a naturally charming smile that makes everyone fall in love.
-Tall, confident posture with broad shoulders. Wears an elegant deep burgundy academic coat with gold trim over a crisp white open-collar shirt — sophisticated yet approachable.
-A glowing magical tome with golden arcane script levitates gracefully beside him, pages shimmering.
-The most popular and beloved professor at the magic academy, exuding irresistible warmth and star-quality charisma.
-Grand library background with soaring golden bookshelves, warm amber light streaming through arched stained-glass windows, magical sparkles in the air.`,
+    base: `A breathtakingly beautiful anime young man with champagne gold hair with a subtle pink tint, soft and elegant waves framing his face.
+Mesmerizing heterochromia eyes — one deep emerald green, one luminous golden amber — each shining with an otherworldly mystical light, behind slim silver-framed glasses.
+Porcelain-white flawless skin with an almost ethereal translucence, like a noble elf in appearance but fully human. Idol-like visual perfection with an aura of transcendence that commands every room.
+Wears a formal and dignified black aristocratic ceremonial coat with intricate gold embroidery on the cuffs and lapels, high stiff collar, ornate gold buttons, and an elegant white jabot cravat at the neck. Exudes absolute nobility, purity, and refinement.
+A floating magical tome levitates beside him, its pages glowing with constellation patterns and golden arcane star runes orbiting around it.
+Grand celestial observatory background: towering bookshelves curving upward, a massive golden orrery, starlight and moonlight streaming through a vast domed glass ceiling, golden star particles drifting in the air.`,
   },
 };
 

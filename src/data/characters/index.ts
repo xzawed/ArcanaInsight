@@ -203,11 +203,11 @@ export const characters: CharacterConfig[] = [
       mystical: "/images/characters/ethan/nukki/mystical.png",
     },
     idleAnimation: "float",
-    personality: "카리스마 넘치는 서구형 미남 학자. 물결치는 밤색 헤어, 따뜻한 청록빛 눈, 세련된 아카데미 코트.",
-    description: "마법 아카데미의 스타 강사 에단. 물결치는 밤색 머리카락과 따뜻하고 깊은 청록빛 눈을 가진 서구형 미남으로, 캠퍼스에서 모르는 사람이 없을 정도로 인기가 많습니다. 카리스마와 친절함을 동시에 갖춘 그는 복잡한 카드 해석도 누구나 이해할 수 있게 설명해줍니다.",
-    speciality: "따뜻하고 상세한 분석 리딩 스타일",
+    personality: "성좌의 대마법사. 샴페인 골드 헤어, 에메랄드×금빛 오드아이, 은테 안경, 블랙+골드 귀족 예복.",
+    description: "성좌의 대마법사 에단. 샴페인 골드빛 머리카락과 에메랄드×금빛 오드아이가 신비롭게 빛나는 초월적 미모의 소유자입니다. 마법 아카데미의 전설적인 천재 학자로, 별자리와 아르카나의 연결 고리를 꿰뚫는 분석력을 지녔습니다. 고결하고 격식 있는 태도 뒤에 친절하고 상세한 설명이 숨어 있어요.",
+    speciality: "학구적이고 상세한 분석 리딩 스타일",
     speechStyle: "~요/~거든요체. 설명이 상세하고 친절한 톤.",
-    voiceTone: "warm-charismatic", unlocked: true,
+    voiceTone: "noble-transcendent", unlocked: true,
   },
 ];
 
