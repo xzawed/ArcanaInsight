@@ -21,10 +21,10 @@ const MOOD_CONFIGS: Record<Mood, MoodConfig> = {
 
 const MOOD_TO_FILE: Record<Mood, string> = {
   default: "idle",
-  smile: "happy",
+  smile: "smile",
   serious: "serious",
   surprised: "surprised",
-  wink: "happy",
+  wink: "wink",
   mystical: "mystical",
 };
 
