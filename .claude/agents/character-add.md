@@ -25,13 +25,12 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
 2. `name` — 한글 이름 (예: `유리`)
 3. `nameJp` — 일본어 이름 (예: `ユリ`)
 4. `gender` — `"female"` 또는 `"male"`
-5. `serviceType` — 전문 서비스 (`"tarot"`, `"saju"`, `"shinjeom"`, `"fortune"`)
-6. `personality` — 성격 한 줄 (외모 포함)
-7. `speechStyle` — 말투 규칙 (예: `"~요/~네요체. 다정한 톤."`)
-8. `voiceTone` — 보이스 톤 ID (예: `"warm-gentle"`)
-9. `greeting` — 첫 인사 대사
-10. `description` — 상세 소개 (3~4문장)
-11. `speciality` — 리딩 스타일 한 줄
+5. `personality` — 성격 한 줄 (외모 포함)
+6. `speechStyle` — 말투 규칙 (예: `"~요/~네요체. 다정한 톤."`)
+7. `voiceTone` — 보이스 톤 ID (예: `"warm-gentle"`)
+8. `greeting` — 첫 인사 대사
+9. `description` — 상세 소개 (3~4문장)
+10. `speciality` — 리딩 스타일 한 줄
 
 ## 생성/수정 파일
 
@@ -79,21 +78,22 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
 ### 3. 카드 미리보기 대사 추가
 **파일**: `src/data/characters/waiting-lines.ts`
 
-`buildCardPreviewLine` 함수의 switch에 case 추가.
+`buildCardPreviewLine` 함수 내 `cardPreviewTemplates` 객체에 새 캐릭터 ID 키 추가 (switch/case 구조가 아닌 Record 객체).
 
 ### 4. 이미지 디렉토리 생성
 ```bash
 mkdir -p public/images/characters/{id}/nukki
 ```
 
-필요한 파일 (7개):
-- `nukki/default.png` (= idle.png과 동일)
-- `nukki/idle.png`
+필요한 파일 (6개 고유 이미지):
+- `nukki/default.png`
 - `nukki/smile.png`
 - `nukki/serious.png`
 - `nukki/surprised.png`
 - `nukki/wink.png`
 - `nukki/mystical.png`
+
+> `idle.png`은 `default.png`과 동일한 이미지이므로, 필요 시 복사하거나 동일 파일을 사용한다.
 
 **이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용 가능.
 
@@ -108,6 +108,6 @@ pnpm lint
 - [ ] `characters` 배열에 추가됨
 - [ ] `expressions` 경로가 실제 파일과 일치
 - [ ] `waitingLines`에 대사 추가됨
-- [ ] `buildCardPreviewLine`에 case 추가됨
-- [ ] 누끼 이미지 7개 존재
+- [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
+- [ ] 누끼 이미지 6개(default/smile/serious/surprised/wink/mystical) 존재
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치

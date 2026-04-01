@@ -31,9 +31,9 @@ export default function SajuSessionPage() {
     if (!topic || !character || !userInfo) { router.push("/saju"); return; }
 
     // 세션 생성
-    fetch("/api/tarot/session", {
+    fetch("/api/saju/session", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, characterId, spreadType: null }),
+      body: JSON.stringify({ topic, characterId }),
     }).then(async (res) => {
       if (!res.ok) return;
       const data = await res.json();

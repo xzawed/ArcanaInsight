@@ -1,3 +1,11 @@
+> **Status**: 구현 완료
+> **Note**: 설계 시점(2026-03-29) 기준 문서. 구현 과정에서 아래 항목이 변경됨:
+> - 캐릭터: 4명 → **12명** (arcana/miko/seonhwa/hoshi + luna/rei/cairn/zero/haru/ren/lix/ethan)
+> - `CharacterConfig`에 `serviceType` 필드 없음 → `gender`, `speciality` 필드로 대체
+> - DivinationService 인터페이스 시그니처 변경 (`getCharacter()` → `getSystemPrompt(characterId?)`)
+> - 파일 구조 일부 미생성: `CardSwiper.tsx`, `ChatWindow.tsx`, `session-manager.ts`, `services/tarot/prompts/` 없음
+> - 실제 추가된 파일: `text-cleaner.ts`, `waiting-lines.ts`, `character/[id]/page.tsx`, `privacy/`, `terms/`
+
 # ArcanaInsight — 운세 종합 콘텐츠 플랫폼 기획서
 
 ## 1. 프로젝트 개요

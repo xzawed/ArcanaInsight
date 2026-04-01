@@ -1,3 +1,9 @@
+> **Status**: 구현 완료 (방식 변경)
+> **Note**: 작성 시점(2026-03-29) 기준 구현 계획. 실제 구현과 다른 주요 항목:
+> - **SpriteAnimator 방식 교체**: 이 플랜의 스프라이트 시트(CSS background-position) 방식은 미채택
+>   → 실제로는 02번 플랜의 **단일 누끼 이미지 + Framer Motion** 방식으로 구현
+> - CharacterDisplay props: `characterId` prop이 실제로 SpriteAnimator에 전달됨
+
 # 타로 상담 페이지 비주얼 대개선 — 구현 계획
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

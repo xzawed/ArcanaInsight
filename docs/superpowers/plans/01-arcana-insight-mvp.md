@@ -1,3 +1,12 @@
+> **Status**: 구현 완료 (일부 변경)
+> **Note**: 작성 시점(2026-03-29) 기준 구현 계획. 실제 구현과 다른 주요 항목:
+> - Next.js 버전: "14+" → 실제 **16.2**
+> - 이미지 확장자: `.webp` → 초기 4캐릭터 **`.jpg`**, 신규 8캐릭터 **`nukki/*.png`**
+> - 캐릭터 수: 4명 → **12명**; 캐릭터 잠금 상태 폐기 (전원 `unlocked: true`)
+> - `CharacterConfig`의 `serviceType` 필드 없음 → `gender`, `speciality`로 대체
+> - 미생성 파일: `CardSwiper.tsx`, `ChatWindow.tsx`, `session-manager.ts`, `services/tarot/prompts/`
+> - Topic 타입: 5개 → **10개** (love-single/love-couple/fortune-3y/5y/full 추가)
+
 # ArcanaInsight MVP Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

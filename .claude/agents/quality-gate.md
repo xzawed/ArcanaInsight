@@ -41,24 +41,26 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 - `src/app/tarot/session/page.tsx` — SSE 버퍼링, 카드 확인, 대기 연출
 - `src/app/saju/session/page.tsx` — SSE 처리, 결과 표시
 
-### Phase 3: 20개+ 테스트 케이스 실행
+### Phase 3: 27개 테스트 케이스 실행
 
-Node.js 스크립트로 다음 카테고리별 테스트를 실행한다:
+코드를 직접 읽고 아래 항목을 검증한다 (자동화 테스트 프레임워크 없음, 정적 코드 분석 + 파일 존재 확인):
 
 1. **사주 계산 엔진** (5개) — 알려진 사주, 윤년, 십성, 12운성, 대운
-2. **상수 데이터 무결성** (4개) — 천간 10, 지지 12, 오행 5, 12시진
+2. **상수 데이터 무결성** (4개) — 천간 10개, 지지 12개, 오행 5개, 12시진
 3. **카드 데이터** (2개) — 메이저 22장, 스프레드 3종
-4. **캐릭터 데이터** (2개) — 전체 캐릭터 수, 이미지 경로 존재
-5. **API 입력 검증** (2개) — 유효 토픽, 스프레드 타입
+4. **캐릭터 데이터** (2개) — 전체 캐릭터 수 12명, 이미지 경로 형식 일치
+5. **API 입력 검증** (2개) — 유효 토픽(10개), 스프레드 타입(3종)
 6. **SSE 패턴** (4개) — 버퍼링, error 처리, done+break, 사주 동일 패턴
 7. **타입 안전성** (4개) — spreadType nullable, cardInterpretations optional, 타임아웃, 플레이스홀더
-8. **레이아웃 규칙** (2개) — 타로/사주 5:5 레이아웃
+8. **레이아웃 규칙** (2개) — 타로/사주 5:5 레이아웃 (md:w-1/2 적용 여부)
 9. **보안** (2개) — 환경변수 하드코딩 없음, 법적 페이지 존재
 
 ### Phase 4: 이미지 에셋 검증
 
 모든 캐릭터 디렉토리를 확인:
-- 누끼 PNG 파일 (idle, smile, serious, surprised, wink, mystical, default)
+- **초기 4캐릭터** (arcana/miko/seonhwa/hoshi): JPG 루트 경로 (`/images/characters/{id}/default.jpg` 형식)
+- **신규 8캐릭터** (luna~ethan): PNG 누끼 경로 (`/images/characters/{id}/nukki/default.png` 형식)
+- 필수 표정 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 - SpriteAnimator MOOD_TO_FILE 매핑과 파일명 일치
 - expressions 경로가 실제 파일과 일치
 

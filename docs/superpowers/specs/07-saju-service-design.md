@@ -1,3 +1,12 @@
+> **Status**: 구현 완료 (일부 미구현)
+> **Note**: 설계 시점(2026-03-31) 기준 문서. 구현 과정에서 아래 항목이 변경됨:
+> - 라이브러리: 이 스펙 내 `tyme4ts`와 `lunar-javascript`가 혼재 → 실제 구현은 **`tyme4ts`** 사용
+> - 주제 수: "9가지"라고 기재되어 있으나 실제 나열은 **8가지** (love/career/finance/health/general/fortune-3y/5y/full)
+> - `SajuInfoForm.tsx` 미생성 → `src/components/tarot/UserInfoForm.tsx` 재사용
+> - `src/app/saju/result/[id]/` 미생성
+> - `getCharactersByService()` 미구현 → `CharacterConfig`에 `serviceType` 필드 없음
+> - `serviceType` 기반 캐릭터 필터 미지원 → `getAvailableCharacters()` + `getCharactersByGender()` 사용
+
 # 사주 서비스 설계 문서
 
 ## 개요

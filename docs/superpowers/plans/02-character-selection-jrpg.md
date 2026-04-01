@@ -1,3 +1,9 @@
+> **Status**: 구현 완료 (방식 변경)
+> **Note**: 작성 시점(2026-03-29) 기준 구현 계획. 실제 구현과 다른 주요 항목:
+> - SpriteAnimator: 스프라이트 시트 방식 → **단일 누끼 이미지 + Framer Motion** 방식 채택
+> - MOOD_TO_FILE 매핑: `wink→"happy"` → 실제 `wink→"wink"`, `smile→"smile"` (각자 고유 파일)
+> - 대상 캐릭터: 4명 → **12명** (성별 필터 `GenderFilter` 컴포넌트 추가)
+
 # 캐릭터 선택 + JRPG 누끼 스타일 — 구현 계획
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

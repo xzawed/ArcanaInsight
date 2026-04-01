@@ -1,3 +1,8 @@
+> **Status**: 구현 완료
+> **Note**: 작성 시점(2026-03-31) 기준 구현 계획. 실제 구현과 다른 주요 항목:
+> - Grok 이미지 모델명: 실제 사용 모델은 **`grok-2-image`** (02번의 `grok-imagine-image-pro`와 통일)
+> - 마이그레이션: `007_skin_selection.sql` (현재 최신)
+
 # 카드 스킨 시스템 구현 계획
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

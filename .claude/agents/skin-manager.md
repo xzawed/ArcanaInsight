@@ -52,7 +52,7 @@ card-skins/
 - `nameKo` — 한국어 이름
 - `description` — 설명 (1줄)
 - `previewColor` — 미리보기 색상 (hex)
-- `stylePrompt` — Grok Aurora 이미지 생성 스타일 프롬프트
+- `stylePrompt` — Grok 이미지 생성 API(`grok-2-image` 모델) 스타일 프롬프트
 
 ### 2. 수정 파일
 
@@ -61,7 +61,7 @@ card-skins/
 ### 3. 이미지 생성
 
 ```bash
-# Grok Aurora로 79장 생성
+# Grok 이미지 API(grok-2-image)로 79장 생성 (앞면 78장 + 뒷면 1장)
 GROK_API_KEY=키 pnpm tsx scripts/generate-skin-images.ts --skin={skinId}
 
 # Supabase Storage에 업로드

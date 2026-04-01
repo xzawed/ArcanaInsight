@@ -1,3 +1,12 @@
+> **Status**: 구현 완료 (일부 변경)
+> **Note**: 설계 시점(2026-03-29) 기준 문서. 구현 과정에서 아래 항목이 변경됨:
+> - 대상 캐릭터: 4명 → **12명** (성별 필터 추가)
+> - 이미지 모델명: `grok-imagine-image-pro` → **`grok-2-image`** (실제 모델명)
+> - Mood 파일명: `idle/talking/happy` → **`default/smile/wink`** (실제 구현)
+> - SpriteAnimator: 스프라이트 시트 방식 → **단일 누끼 이미지 + Framer Motion** 방식으로 변경
+> - 레이아웃: 좌 40%/우 55% → **좌 50%/우 50%** (5:5 공통 규칙 통일)
+> - `getCharacterByService()` 미구현 → `getAvailableCharacters()` + `getCharactersByGender()` 사용
+
 # 캐릭터 선택 + JRPG 누끼 스타일 — 디자인 스펙
 
 ## 개요

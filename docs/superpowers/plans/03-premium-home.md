@@ -1,3 +1,9 @@
+> **Status**: 구현 완료 (일부 변경)
+> **Note**: 작성 시점(2026-03-29) 기준 구현 계획. 실제 구현과 다른 주요 항목:
+> - 홈 섹션: 8개 → **실제 10개** (GenderFilter, SkinGallery 추가)
+> - 캐릭터 갤러리: `char.speciality`, `char.description` 사용 — `CharacterConfig`에 실제 존재함
+> - CharacterGallery Link href: 캐릭터별 `/character/[id]` 라우트로 이동
+
 # 홈 페이지 전면 리뉴얼 — 구현 계획
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

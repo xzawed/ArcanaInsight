@@ -32,7 +32,7 @@ description: 새 DivinationService 구현체 추가 시 필요한 파일들을 �
 4. `hasCards` — 카드 선택 단계 존재 여부 (타로처럼 카드 필요 → true, 사주처럼 정보 입력 → false)
 5. `topics` — 서비스 전용 토픽 목록 (예: `["love", "health"]` 또는 신규 토픽)
 
-## 생성할 파일 목록 (총 6~7개)
+## 생성할 파일 목록 (필수 6개 + 선택 1개)
 
 ### 1. 서비스 클래스
 **경로**: `src/services/{serviceName}/{serviceName}-service.ts`
@@ -91,7 +91,7 @@ const readingPrompt = service.getReadingPrompt(context);
 ### 6. DB 마이그레이션
 **경로**: `supabase/migrations/{nextNumber}_{serviceName}.sql`
 
-번호는 기존 마이그레이션 파일 목록을 확인해 다음 번호 자동 할당 (예: 007이 최신이면 008).
+번호는 `supabase/migrations/` 디렉토리를 직접 확인해 가장 큰 번호에 +1 (예: 007이 최신이면 008). 자동 할당이 아니라 수동으로 확인 후 지정한다.
 
 포함 항목:
 - `{serviceName}_readings` 테이블 생성 (sessions(id) 외래키)

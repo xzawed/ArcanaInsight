@@ -1,3 +1,10 @@
+> **Status**: 구현 완료 (방식 변경)
+> **Note**: 설계 시점(2026-03-29) 기준 문서. 구현 과정에서 아래 항목이 변경됨:
+> - **SpriteAnimator**: 이 스펙의 스프라이트 시트(CSS background-position 오프셋) 방식은 미채택
+>   → 실제로는 **단일 누끼 이미지 + Framer Motion float 애니메이션** 방식으로 구현 (02번 스펙 방식 채택)
+> - "잠긴 캐릭터" 개념 폐기 → 전체 12명 `unlocked: true`
+> - `VignetteOverlay.tsx` 미생성
+
 # 타로 상담 페이지 비주얼 대개선 — 디자인 스펙
 
 ## 개요
