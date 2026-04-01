@@ -13,7 +13,7 @@ import { CardSpread } from "@/components/card/CardSpread";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { getCharacterById } from "@/data/characters";
-import { waitingLines, buildCardPreviewLine } from "@/data/characters/waiting-lines";
+import { waitingLines, defaultWaitingLines, buildCardPreviewLine } from "@/data/characters/waiting-lines";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
@@ -149,7 +149,7 @@ export default function TarotSessionPage() {
   const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     const currentSpread = spreadType ? spreads[spreadType] : null;
-    const lines = waitingLines[charId] || waitingLines["arcana"];
+    const lines = waitingLines[charId] || defaultWaitingLines;
 
     // 1단계: 카드 순차 뒤집기 (2초 간격) + 카드 정보 미리보기
     cards.forEach((sc, i) => {
