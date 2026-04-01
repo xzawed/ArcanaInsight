@@ -311,7 +311,7 @@ export default function TarotSessionPage() {
   const particleDensity = phase === "reading" ? "high" : phase === "result" ? "low" : "medium";
 
   return (
-    <div className="relative h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
+    <div className="relative h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
       {/* 배경 */}
       <div className="absolute inset-0 -z-10">
         <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority />

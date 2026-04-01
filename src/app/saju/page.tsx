@@ -132,7 +132,7 @@ export default function SajuPage() {
           </motion.div>
         ) : step === "info-input" ? (
           <motion.div key="info-input" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
+            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
             {selectedCharacter && (
               <div className="h-[20%] md:h-auto md:w-[50%] flex-shrink-0 overflow-hidden">
                 <CharacterDisplay character={selectedCharacter} mood="smile" className="w-full h-full" />
@@ -190,7 +190,7 @@ export default function SajuPage() {
           </motion.div>
         ) : step === "topic-select" ? (
           <motion.div key="topic-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden">
+            className="relative z-20 min-h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden">
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
               {selectedCharacter && (
                 <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">

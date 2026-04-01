@@ -35,7 +35,7 @@ export default function CharacterPage() {
       </div>
       <ParticleOverlay density="low" className="z-10" />
 
-      <div className="relative z-20 min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row">
+      <div className="relative z-20 min-h-[calc(100vh-7rem)] md:min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row">
         {/* 좌측: 캐릭터 이미지 */}
         <div className="h-[40vh] md:h-auto md:w-[50%] md:flex-shrink-0 relative overflow-hidden">
           <Image
