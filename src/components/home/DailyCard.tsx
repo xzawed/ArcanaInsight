@@ -79,7 +79,7 @@ export function DailyCard() {
         </ScrollReveal>
 
         {/* 캐릭터 탭 */}
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide justify-start md:justify-center md:flex-wrap">
           {characters.map((char) => (
             <button key={char.id} type="button" onClick={() => setActiveTab(char.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-serif transition-all ${
@@ -154,7 +154,7 @@ export function DailyCard() {
                     <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? "(역방향)" : "(정방향)"}</p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {currentData.keywords.map((kw) => (
                       <span key={kw} className="px-2 py-0.5 text-[10px] rounded-full bg-arcana-purple/10 text-arcana-purple border border-arcana-purple/20">
                         {kw}

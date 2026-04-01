@@ -81,6 +81,10 @@
 }
 
 @layer base {
+  html, body {
+    overflow-x: hidden;
+  }
+
   body {
     background-color: var(--color-arcana-bg);
     color: var(--color-arcana-text);
@@ -102,5 +106,14 @@
   ::-webkit-scrollbar-thumb {
     background-color: var(--color-arcana-border);
     border-radius: 9999px;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
