@@ -84,7 +84,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">🔮</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{overallReading}</p>
+              <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{overallReading}</p>
             </div>
 
             {/* 조언 */}
@@ -93,7 +93,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">✨</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
               </div>
-              <p className="text-arcana-text leading-relaxed whitespace-pre-wrap">{advice}</p>
+              <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{advice}</p>
             </div>
           </div>
 
@@ -114,12 +114,12 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       <span className="inline-block text-arcana-gold text-sm font-serif font-bold mb-1">{pos?.labelKo}</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-arcana-text font-bold">{card?.nameKo}</span>
-                        <span className="text-arcana-muted text-xs">{card?.name}</span>
+                        <span className="text-arcana-muted text-xs md:text-sm">{card?.name}</span>
                         {interp.isReversed && <span className="text-red-400 text-xs bg-red-900/30 px-1.5 py-0.5 rounded">역방향</span>}
                       </div>
                     </div>
                   </div>
-                  <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
+                  <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
                 </div>
               );
             })}

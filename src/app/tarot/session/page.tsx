@@ -448,41 +448,41 @@ export default function TarotSessionPage() {
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
-                <div className="space-y-3 flex-1 overflow-y-auto pr-2">
+                <div className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
                   {/* 카드별 해석 */}
                   {readingResult.cardInterpretations?.map((interp, i) => {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);
                     const posLabel = spread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
                     return (
-                      <div key={`card-${i}`} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4">
-                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-arcana-border/50">
-                          <span className="text-arcana-gold text-xs font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
-                          <span className="text-arcana-text font-bold text-sm">{card?.card.nameKo || ""}</span>
+                      <div key={`card-${i}`} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">
+                        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-arcana-border/50">
+                          <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
+                          <span className="text-arcana-text font-bold text-sm md:text-base">{card?.card.nameKo || ""}</span>
                         </div>
-                        <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
+                        <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
                       </div>
                     );
                   })}
 
                   {/* 종합 해석 */}
                   {readingResult.overallReading && (
-                    <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5">
+                      <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">🔮</span>
-                        <span className="text-arcana-purple font-serif font-bold">종합 해석</span>
+                        <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                       </div>
-                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{readingResult.overallReading}</p>
+                      <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.overallReading}</p>
                     </div>
                   )}
 
                   {/* 조언 */}
                   {readingResult.advice && (
-                    <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5">
+                      <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">✨</span>
-                        <span className="text-arcana-gold font-serif font-bold">조언</span>
+                        <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                       </div>
-                      <p className="text-arcana-text text-sm leading-relaxed whitespace-pre-wrap">{readingResult.advice}</p>
+                      <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.advice}</p>
                     </div>
                   )}
 
@@ -490,7 +490,7 @@ export default function TarotSessionPage() {
                 </div>
 
                 {/* 액션 버튼 */}
-                <div className="flex gap-3 pt-4 flex-shrink-0">
+                <div className="flex gap-3 pt-5 flex-shrink-0">
                   <button
                     onClick={() => {
                       useSessionStore.getState().reset();
