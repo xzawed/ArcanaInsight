@@ -29,7 +29,8 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 - `src/services/tarot/tarot-service.ts` — DivinationService 구현
 - `src/services/saju/saju-service.ts` — DivinationService 구현
 - `src/services/core/grok-provider.ts` — AI Provider (타임아웃, null 체크)
-- `src/services/core/text-cleaner.ts` — 텍스트 정리 유틸
+- `src/services/core/text-cleaner.ts` — cleanReadingText + parseJsonSafe (JSON 안전 파싱)
+- `src/data/saju/categories.ts` — 사주 3카테고리 16주제 정의, getRequiresData 헬퍼
 
 **API 라우트**:
 - `src/app/api/tarot/reading/route.ts` — 입력 검증, SSE, DB 저장, 에러 처리
@@ -47,9 +48,9 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 
 1. **사주 계산 엔진** (5개) — 알려진 사주, 윤년, 십성, 12운성, 대운
 2. **상수 데이터 무결성** (4개) — 천간 10개, 지지 12개, 오행 5개, 12시진
-3. **카드 데이터** (2개) — 메이저 22장, 스프레드 3종
+3. **카드 데이터** (2개) — 메이저 22장, 스프레드 10종
 4. **캐릭터 데이터** (2개) — 전체 캐릭터 수 12명, 이미지 경로 형식 일치
-5. **API 입력 검증** (2개) — 유효 토픽(10개), 스프레드 타입(3종)
+5. **API 입력 검증** (2개) — 유효 토픽(23개), 스프레드 타입(10종)
 6. **SSE 패턴** (4개) — 버퍼링, error 처리, done+break, 사주 동일 패턴
 7. **타입 안전성** (4개) — spreadType nullable, cardInterpretations optional, 타임아웃, 플레이스홀더
 8. **레이아웃 규칙** (2개) — 타로/사주 5:5 레이아웃 (md:w-1/2 적용 여부)

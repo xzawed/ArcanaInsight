@@ -6,14 +6,22 @@
 
 ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 카드를 선택하거나 사주 정보를 입력하면, Grok AI가 해석을 제공하는 웹 애플리케이션입니다. 타로와 사주 서비스를 운영 중이며, 신점/오늘의 운세로 확장 가능한 모듈 구조입니다.
 
-### 서비스 흐름 (공통 4단계)
+### 서비스 흐름
 
+#### 타로 (4단계)
 1. **캐릭터 선택** → 12명의 캐릭터 중 상담사 선택 (성별 필터 지원)
 2. **개인정보 입력** → 생년월일, 출생시간(12시진), 성별, 혈액형 + 제3자 제공 동의
-3. **주제 선택 + 입력** → 주제 선택 후 카드 뽑기(타로) 또는 사주 계산(사주)
+3. **주제 선택 + 카드 뽑기** → 주제 선택 후 카드 선택
 4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
 
-#### 주제(Topic) 목록 — 총 10개
+#### 사주 (5단계)
+1. **캐릭터 선택** → 12명의 캐릭터 중 상담사 선택 (성별 필터 지원)
+2. **개인정보 입력** → 생년월일, 출생시간(12시진), 성별, 혈액형 + 제3자 제공 동의
+3. **카테고리 선택** → 시간 기반 운세 / 관계·이벤트 / 심층 분석 중 선택
+4. **세부 주제 선택** → 선택한 카테고리 내 세부 주제 선택 + 사주 계산
+5. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
+
+#### 주제(Topic) 목록 — 총 23개
 
 | 구분 | Topic 값 | 한국어 |
 |------|---------|--------|
@@ -24,9 +32,22 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 | 타로 | `career` | 직업/직장 |
 | 타로 | `health` | 건강 |
 | 타로 | `general` | 종합 |
-| 사주 | `fortune-3y` | 3년 운세 |
-| 사주 | `fortune-5y` | 5년 운세 |
-| 사주 | `fortune-full` | 전체 인생 운세 |
+| 사주 — 시간 기반 | `saju-monthly` | 올해 월운 |
+| 사주 — 시간 기반 | `saju-this-month` | 이번 달 운세 |
+| 사주 — 시간 기반 | `saju-weekly` | 이번 주 일운 |
+| 사주 — 시간 기반 | `saju-next-year` | 내년 운세 |
+| 사주 — 시간 기반 | `fortune-3y` | 3년 운세 |
+| 사주 — 시간 기반 | `fortune-5y` | 5년 운세 |
+| 사주 — 시간 기반 | `fortune-full` | 전체 대운 |
+| 사주 — 관계/이벤트 | `saju-compatibility` | 궁합 분석 |
+| 사주 — 관계/이벤트 | `saju-love-timing` | 연애/결혼 시기 |
+| 사주 — 관계/이벤트 | `saju-career-timing` | 이직/사업 시기 |
+| 사주 — 관계/이벤트 | `saju-auspicious-date` | 택일 조언 |
+| 사주 — 심층 분석 | `saju-personality` | 성격 심층 분석 |
+| 사주 — 심층 분석 | `saju-aptitude` | 적성/직업 분석 |
+| 사주 — 심층 분석 | `saju-constitution` | 오행 체질 |
+| 사주 — 심층 분석 | `saju-yongsin` | 용신 활용법 |
+| 사주 — 심층 분석 | `saju-relationships` | 대인관계 패턴 |
 
 ## 기술 스택
 
@@ -73,16 +94,17 @@ src/
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
 │   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (4탭), ThemeProvider
+│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의)
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
 │   ├── skin/                   # SkinSelector
-│   └── tarot/                  # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의)
+│   └── tarot/                  # (타로 전용 UI 컴포넌트)
 ├── data/
 │   ├── cards/                  # 메이저 22장 (major-arcana.ts) + 마이너 56장 (minor-arcana.ts) + symbols.ts
 │   ├── characters/             # 12캐릭터 설정 (index.ts), 대기 대사 (waiting-lines.ts)
 │   ├── home/                   # faq.ts, reviews.ts, stats.ts (홈 페이지 정적 데이터)
-│   ├── saju/                   # constants.ts (천간·지지·오행 상수)
+│   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (3카테고리 16주제)
 │   ├── skins/                  # index.ts (6종 스킨 정의)
-│   ├── spreads/                # 스프레드 정의 (1/3/5카드)
+│   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
 │   └── birth-hours.ts          # 12시진 데이터
 ├── hooks/                      # Zustand 스토어
 │   ├── useCardAnimation.ts     # 카드 애니메이션 상태
@@ -95,7 +117,7 @@ src/
 ├── lib/supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts)
 ├── services/
 │   ├── core/                   # ai-provider.ts (인터페이스), grok-provider.ts (구현체),
-│   │                           # prompt-builder.ts, text-cleaner.ts
+│   │                           # prompt-builder.ts, text-cleaner.ts (cleanReadingText, parseJsonSafe)
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
 └── types/                      # card.ts, character.ts, session.ts, service.ts

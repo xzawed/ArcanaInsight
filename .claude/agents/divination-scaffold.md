@@ -20,7 +20,9 @@ description: 새 DivinationService 구현체 추가 시 필요한 파일들을 �
 - `src/hooks/useSajuSession.ts` — 사주 Zustand 스토어 패턴
 - `src/app/api/tarot/reading/route.ts` — SSE 스트리밍 API 패턴
 - `src/app/api/saju/reading/route.ts` — 사주 API 패턴
-- `src/app/saju/page.tsx` — 서비스 메인 페이지 패턴
+- `src/app/saju/page.tsx` — 서비스 메인 페이지 패턴 (멀티스텝 + 카테고리 선택)
+- `src/data/saju/categories.ts` — 카테고리 기반 주제 선택 패턴 (SajuCategory/SajuSubTopic)
+- `src/services/saju/saju-calculator.ts` — SajuCalculateOptions 확장 계산 패턴
 - `supabase/migrations/006_saju_readings.sql` — 마이그레이션 패턴
 
 ## 스캐폴딩 전 수집할 정보
@@ -30,7 +32,8 @@ description: 새 DivinationService 구현체 추가 시 필요한 파일들을 �
 2. `serviceNameKo` — 서비스 한국어 명칭 (예: `신점`, `오늘의 운세`)
 3. `linkedCharacterId` — 기본 연결 캐릭터 ID (예: `miko`, `hoshi`)
 4. `hasCards` — 카드 선택 단계 존재 여부 (타로처럼 카드 필요 → true, 사주처럼 정보 입력 → false)
-5. `topics` — 서비스 전용 토픽 목록 (예: `["love", "health"]` 또는 신규 토픽)
+5. `hasCategories` — 카테고리 2단계 선택 여부 (사주처럼 카테고리→주제 선택 → true)
+6. `topics` — 서비스 전용 토픽 목록 (예: `["love", "health"]` 또는 신규 토픽)
 
 ## 생성할 파일 목록 (필수 6개 + 선택 1개)
 
@@ -44,7 +47,7 @@ DivinationService 인터페이스를 구현한다. 필수 메서드:
 - `startSession(topic: Topic): Omit<Session, "id" | "createdAt">`
 - `getSystemPrompt(characterId?: string): string` — `buildSystemPrompt(character)` 활용
 - `getReadingPrompt(context: SessionContext): string`
-- `parseResult(aiResponse: string): ReadingResult` — `cleanReadingText()` 포함
+- `parseResult(aiResponse: string): ReadingResult` — `parseJsonSafe()` + `cleanReadingText()` 활용
 
 ### 2. Zustand 세션 스토어
 **경로**: `src/hooks/use{ServiceName}Session.ts`

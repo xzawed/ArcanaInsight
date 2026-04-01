@@ -12,6 +12,7 @@ ArcanaInsight의 디자인 시스템과 레이아웃 규칙을 준수하는 새 
 - `src/app/layout.tsx` — 루트 레이아웃 (Header + Footer + MobileNav + ThemeProvider)
 - `src/app/globals.css` — Tailwind v4 @theme 커스텀 컬러
 - `src/app/tarot/page.tsx` — 캐릭터가 있는 페이지 패턴
+- `src/app/saju/page.tsx` — 멀티스텝 + 카테고리 선택이 있는 페이지 패턴
 - `src/app/terms/page.tsx` — 정적 콘텐츠 페이지 패턴
 - `src/app/mypage/page.tsx` — 서버 컴포넌트 + Supabase 데이터 페이지 패턴
 - `src/components/layout/Header.tsx` — 네비게이션 링크
