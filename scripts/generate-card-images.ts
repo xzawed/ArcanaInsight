@@ -146,7 +146,7 @@ async function main() {
       console.log("📦 카드 뒷면 생성...");
       const outputPath = path.join(OUTPUT_DIR, "card-back.png");
       const ok = await generateImage(buildBackPrompt(), outputPath);
-      ok ? generated++ : failed++;
+      if (ok) generated++; else failed++;
       await delay(2000);
     }
   }
@@ -159,7 +159,7 @@ async function main() {
       const outputPath = path.join(OUTPUT_DIR, "major", `${card.id}.png`);
       console.log(`  [${card.id}] ${card.nameKo} (${card.name})`);
       const ok = await generateImage(buildMajorPrompt(card), outputPath);
-      ok ? generated++ : failed++;
+      if (ok) generated++; else failed++;
       await delay(2000);
     }
   }
@@ -175,7 +175,7 @@ async function main() {
         const outputPath = path.join(OUTPUT_DIR, suit, `${id}.png`);
         console.log(`  [${id}] ${minorNames[i]} of ${suitNames[suit].en}`);
         const ok = await generateImage(buildMinorPrompt(suit, num, minorNames[i]), outputPath);
-        ok ? generated++ : failed++;
+        if (ok) generated++; else failed++;
         await delay(2000);
       }
     }

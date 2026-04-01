@@ -53,13 +53,13 @@ async function generateImage(charId, charPrompt, moodName, moodDesc, attempt = 1
   });
 
   if (!response.ok) {
-    const err = await response.text();
+    const errText = await response.text();
     if (response.status === 503 && attempt < MAX_RETRIES) {
       console.log(`    ⏳ 503 에러, ${attempt + 1}번째 재시도 (5초 대기)...`);
       await new Promise(r => setTimeout(r, 5000));
       return generateImage(charId, charPrompt, moodName, moodDesc, attempt + 1);
     }
-    console.error(`  ❌ [${charId}/${moodName}] 실패 (${response.status})`);
+    console.error(`  ❌ [${charId}/${moodName}] 실패 (${response.status}): ${errText.slice(0, 100)}`);
     return false;
   }
 

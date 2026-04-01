@@ -180,7 +180,8 @@ function judgeStrength(dayElement: OhaengType, elements: Record<OhaengType, numb
   return strength >= 4;
 }
 
-/** 용신 결정 */
+/** 용신 결정 (향후 elements 기반 정밀 판별로 확장 예정) */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function determineYongsin(dayElement: OhaengType, isStrong: boolean, _elements: Record<OhaengType, number>): { element: OhaengType; reason: string } {
   // 신강이면 설기(일간을 약화시키는 오행), 신약이면 생조(일간을 강화하는 오행)
   const weakenMap: Record<OhaengType, OhaengType> = {

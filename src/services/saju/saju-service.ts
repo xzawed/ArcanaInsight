@@ -52,8 +52,9 @@ export class SajuService implements DivinationService {
 }`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getReadingPrompt(_context: SessionContext): string {
-    return ""; // 사주는 buildSajuPrompt로 별도 구성
+    return ""; // 사주는 buildSajuPrompt()로 별도 구성 — DivinationService 인터페이스 준수
   }
 
   /** 사주 전용 프롬프트 생성 */
