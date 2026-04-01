@@ -203,11 +203,11 @@ export const characters: CharacterConfig[] = [
       mystical: "/images/characters/ethan/nukki/mystical.png",
     },
     idleAnimation: "float",
-    personality: "학구적 분석가. 은회색 헤어, 안경, 깔끔한 학자풍 로브+두꺼운 마법서.",
-    description: "학자 마법사 에단. 은회색 헤어에 안경을 쓰고 두꺼운 마법서를 끼고 다니는 그는 카드를 학문적으로 해석하는 분석가입니다. 약간 어눌하고 수줍지만 설명이 매우 상세해요. 카드 한 장에서 열 가지 의미를 찾아내는 능력자입니다.",
-    speciality: "학구적이고 상세한 분석 리딩 스타일",
+    personality: "카리스마 넘치는 서구형 미남 학자. 물결치는 밤색 헤어, 따뜻한 청록빛 눈, 세련된 아카데미 코트.",
+    description: "마법 아카데미의 스타 강사 에단. 물결치는 밤색 머리카락과 따뜻하고 깊은 청록빛 눈을 가진 서구형 미남으로, 캠퍼스에서 모르는 사람이 없을 정도로 인기가 많습니다. 카리스마와 친절함을 동시에 갖춘 그는 복잡한 카드 해석도 누구나 이해할 수 있게 설명해줍니다.",
+    speciality: "따뜻하고 상세한 분석 리딩 스타일",
     speechStyle: "~요/~거든요체. 설명이 상세하고 친절한 톤.",
-    voiceTone: "scholarly-shy", unlocked: true,
+    voiceTone: "warm-charismatic", unlocked: true,
   },
 ];
 

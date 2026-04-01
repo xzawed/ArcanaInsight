@@ -128,11 +128,12 @@ Cyber-fantasy background with neon grid patterns and floating holographic displa
   },
   ethan: {
     name: "에단",
-    base: `A studious and shy anime young man with silver-gray hair, neatly combed.
-Warm brown eyes behind round glasses, gentle and earnest expression.
-Wears a scholar's robe over a neat shirt, carrying a thick magical tome.
-The book has glowing arcane runes on its cover.
-Library background with countless floating magical books and warm amber light.`,
+    base: `An extraordinarily handsome and charismatic Western-featured anime young man with lush wavy chestnut-brown hair with subtle golden highlights, artfully tousled.
+Stunning deep ocean-teal eyes radiating warmth and intelligence, perfectly sculpted facial features with a naturally charming smile that makes everyone fall in love.
+Tall, confident posture with broad shoulders. Wears an elegant deep burgundy academic coat with gold trim over a crisp white open-collar shirt — sophisticated yet approachable.
+A glowing magical tome with golden arcane script levitates gracefully beside him, pages shimmering.
+The most popular and beloved professor at the magic academy, exuding irresistible warmth and star-quality charisma.
+Grand library background with soaring golden bookshelves, warm amber light streaming through arched stained-glass windows, magical sparkles in the air.`,
   },
 };
 
