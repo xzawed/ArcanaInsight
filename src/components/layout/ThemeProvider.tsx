@@ -30,10 +30,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   }, [activeTheme]);
 
-  // auto 모드: 30분마다 시간/계절 체크하여 자동 갱신
+  // auto 모드: 1분마다 시간/계절 체크하여 자동 갱신
   useEffect(() => {
     if (mode !== "auto") return;
-    const interval = setInterval(refresh, 30 * 60 * 1000);
+    const interval = setInterval(refresh, 60 * 1000);
     return () => clearInterval(interval);
   }, [mode, refresh]);
 
