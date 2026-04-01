@@ -4,7 +4,7 @@ import { Session, Topic } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
-import { cleanReadingText } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
 
 export class SajuService implements DivinationService {
   id = "saju";
@@ -43,8 +43,11 @@ export class SajuService implements DivinationService {
 - 조언(advice)은 150~200자로 작성합니다.
 - 문단은 2~3개로 나누고, 문단 사이에 빈 줄(\\n\\n)을 넣습니다.
 
-응답 형식:
-반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력합니다.
+응답 형식 — 절대 규칙:
+- 반드시 아래 JSON 형식으로만 응답합니다.
+- JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
+- 마크다운 코드블록을 사용하지 않습니다.
+- JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
 {
   "overallReading": "종합 해석 문단1\\n\\n문단2",
   "topicReading": "주제별 해석 문단1\\n\\n문단2",
@@ -192,29 +195,32 @@ ${instruction}
   }
 
   parseResult(aiResponse: string): ReadingResult {
-    let jsonStr = aiResponse.trim();
-    const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (codeBlockMatch) jsonStr = codeBlockMatch[1].trim();
-    const jsonObjMatch = jsonStr.match(/\{[\s\S]*\}/);
-    if (jsonObjMatch) jsonStr = jsonObjMatch[0];
+    const parsed = parseJsonSafe(aiResponse);
 
-    try {
-      const parsed = JSON.parse(jsonStr);
+    if (parsed) {
       return {
-        overallReading: cleanReadingText(parsed.overallReading || ""),
-        topicReading: cleanReadingText(parsed.topicReading || ""),
-        advice: cleanReadingText(parsed.advice || ""),
+        overallReading: cleanReadingText(String(parsed.overallReading || "")),
+        topicReading: cleanReadingText(String(parsed.topicReading || "")),
+        advice: cleanReadingText(String(parsed.advice || "")),
       };
-    } catch {
-      const cleanText = aiResponse
-        .replace(/```[\s\S]*?```/g, "")
-        .replace(/[{}[\]"]/g, "")
-        .replace(/\b(overallReading|topicReading|advice)\b\s*:/g, "")
-        .replace(/,\s*,+/g, "")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-      return { overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.", advice: "" };
     }
+
+    // JSON 파싱 완전 실패 — 텍스트에서 의미 있는 내용만 추출
+    console.error("사주 AI 응답 JSON 파싱 실패 (최종 fallback)\n원본 응답:", aiResponse.slice(0, 500));
+    const cleanText = aiResponse
+      .replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "")
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/[{}[\]]/g, "")
+      .replace(/"(?:overallReading|topicReading|advice)"\s*:/g, "")
+      .replace(/"\s*,?\s*\n/g, "\n")
+      .replace(/^\s*"/, "")
+      .replace(/",?\s*$/, "")
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/,\s*\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    return { overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.", advice: "" };
   }
 
 }

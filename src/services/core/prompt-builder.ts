@@ -32,8 +32,11 @@ export function buildSystemPrompt(character: CharacterConfig): string {
 - 문단 사이에 빈 줄(\\n\\n)을 넣어 구분합니다.
 - 하나의 문단은 2~3문장으로 구성합니다.
 
-응답 형식:
-반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력합니다.
+응답 형식 — 절대 규칙:
+- 반드시 아래 JSON 형식으로만 응답합니다.
+- JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
+- 마크다운 코드블록을 사용하지 않습니다.
+- JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
 {
   "cardInterpretations": [
     { "cardId": "카드 ID", "position": 0, "interpretation": "문단1\\n\\n문단2" }
