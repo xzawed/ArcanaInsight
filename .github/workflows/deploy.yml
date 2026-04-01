@@ -43,6 +43,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://example.com' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
   deploy:
     name: Deploy to Railway
