@@ -2,7 +2,7 @@ import { CharacterConfig } from "@/types/character";
 import { SelectedCard } from "@/types/card";
 import { Topic, SpreadDefinition } from "@/types/session";
 
-const topicLabels: Record<Topic, string> = {
+const topicLabels: Partial<Record<Topic, string>> = {
   love: "연애/관계", "love-single": "연애/관계 (솔로)", "love-couple": "연애/관계 (커플)",
   finance: "재정/금전", career: "직장/진로", health: "건강", general: "일반 상담",
   "fortune-3y": "종합운세 (3년)", "fortune-5y": "종합운세 (5년)", "fortune-full": "종합운세 (전체)",
@@ -62,7 +62,7 @@ export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], 
     ? "\n\n상담 맥락: 현재 연인/파트너가 있는 커플 상태입니다. 관계의 현재 상태, 소통 방식, 갈등 해결, 관계 발전 방향, 신뢰와 친밀감 등을 중심으로 해석해주세요."
     : "";
 
-  return `상담 주제: ${topicLabels[topic]}
+  return `상담 주제: ${topicLabels[topic] ?? topic}
 스프레드: ${spread.nameKo} (${spread.name})${topicContext}
 
 선택된 카드:

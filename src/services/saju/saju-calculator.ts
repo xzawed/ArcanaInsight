@@ -1,9 +1,15 @@
-import { SolarTime, ChildLimit, Gender, SixtyCycle, HeavenStem } from "tyme4ts";
+import { SolarTime, SolarDay, ChildLimit, Gender, SixtyCycle, SixtyCycleYear, SixtyCycleDay, HeavenStem } from "tyme4ts";
 import { OhaengType, STEM_ELEMENT, BRANCH_ELEMENT, STEM_KO, BRANCH_KO, TEN_STARS, TWELVE_STAGES, BIRTH_HOUR_MAP } from "@/data/saju/constants";
-import { SajuInput, SajuResult, Pillar } from "./saju-types";
+import { SajuInput, SajuResult, Pillar, MonthlyFortune, DailyFortune } from "./saju-types";
+
+export interface SajuCalculateOptions {
+  monthly?: boolean;       // 올해 12개월 월운
+  yearlyMulti?: number;    // N년치 세운 (1이면 내년 1개)
+  daily?: boolean;         // 이번 주 7일 일운
+}
 
 /** 사주팔자 전체 계산 */
-export function calculateSaju(input: SajuInput): SajuResult {
+export function calculateSaju(input: SajuInput, options?: SajuCalculateOptions): SajuResult {
   const [y, m, d] = input.birthDate.split("-").map(Number);
   const hourVal = BIRTH_HOUR_MAP[input.birthHour] ?? 0;
   const gender = input.gender === "female" ? Gender.WOMAN : Gender.MAN;
@@ -53,11 +59,24 @@ export function calculateSaju(input: SajuInput): SajuResult {
   // 9. 세운 (올해)
   const yearlyFortune = calculateYearlyFortune();
 
-  return {
+  const result: SajuResult = {
     pillars, dayMaster, dayMasterElement, isStrong, elements,
     tenStars, twelveStages, interactions, yongsin,
     majorFortunes, yearlyFortune,
   };
+
+  const currentYear = new Date().getFullYear();
+  if (options?.monthly) {
+    result.monthlyFortunes = calculateMonthlyFortunes(currentYear);
+  }
+  if (options?.yearlyMulti && options.yearlyMulti > 0) {
+    result.yearlyFortunes = calculateYearlyFortunes(currentYear + 1, options.yearlyMulti);
+  }
+  if (options?.daily) {
+    result.dailyFortunes = calculateDailyFortunes(new Date(), 7);
+  }
+
+  return result;
 }
 
 /** SixtyCycle → Pillar 변환 */
@@ -226,17 +245,88 @@ function calculateMajorFortunes(childLimit: ChildLimit) {
 /** 올해 세운 계산 */
 function calculateYearlyFortune(): SajuResult["yearlyFortune"] {
   const currentYear = new Date().getFullYear();
-  const solarDay = SolarTime.fromYmdHms(currentYear, 6, 1, 0, 0, 0); // 올해 중간
-  const lunarDay = solarDay.getSolarDay().getLunarDay();
-  const yearSC = lunarDay.getYearSixtyCycle();
-  const stemHanja = yearSC.getHeavenStem().toString();
-  const branchHanja = yearSC.getEarthBranch().toString();
+  const scYear = SixtyCycleYear.fromYear(currentYear);
+  const sc = scYear.getSixtyCycle();
+  const stemHanja = sc.getHeavenStem().toString();
+  const branchHanja = sc.getEarthBranch().toString();
+  const stem = STEM_KO[stemHanja] || stemHanja;
+  const branch = BRANCH_KO[branchHanja] || branchHanja;
 
   return {
     year: currentYear,
-    stem: STEM_KO[stemHanja] || stemHanja,
-    branch: BRANCH_KO[branchHanja] || branchHanja,
+    stem,
+    branch,
     element: STEM_ELEMENT[stemHanja] || "earth",
-    description: `${currentYear}년 ${STEM_KO[stemHanja] || stemHanja}${BRANCH_KO[branchHanja] || branchHanja}년`,
+    description: `${currentYear}년 ${stem}${branch}년`,
   };
+}
+
+/** 올해 12개월 월운 계산 */
+function calculateMonthlyFortunes(year: number): MonthlyFortune[] {
+  const scYear = SixtyCycleYear.fromYear(year);
+  const months = scYear.getMonths(); // SixtyCycleMonth[] (12개)
+  return months.map((scMonth, idx) => {
+    const sc = scMonth.getSixtyCycle();
+    const stemHanja = sc.getHeavenStem().toString();
+    const branchHanja = sc.getEarthBranch().toString();
+    const stem = STEM_KO[stemHanja] || stemHanja;
+    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    return {
+      month: idx + 1,
+      stem,
+      branch,
+      element: STEM_ELEMENT[stemHanja] || "earth",
+      description: `${idx + 1}월 ${stem}${branch}월`,
+    };
+  });
+}
+
+/** startYear부터 count년간 세운 계산 */
+function calculateYearlyFortunes(startYear: number, count: number): NonNullable<SajuResult["yearlyFortunes"]> {
+  const fortunes: NonNullable<SajuResult["yearlyFortunes"]> = [];
+  for (let i = 0; i < count; i++) {
+    const y = startYear + i;
+    const scYear = SixtyCycleYear.fromYear(y);
+    const sc = scYear.getSixtyCycle();
+    const stemHanja = sc.getHeavenStem().toString();
+    const branchHanja = sc.getEarthBranch().toString();
+    const stem = STEM_KO[stemHanja] || stemHanja;
+    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    fortunes.push({
+      year: y,
+      stem,
+      branch,
+      element: STEM_ELEMENT[stemHanja] || "earth",
+      description: `${y}년 ${stem}${branch}년`,
+    });
+  }
+  return fortunes;
+}
+
+/** startDate 기준 days일간 일운 계산 */
+function calculateDailyFortunes(startDate: Date, days: number): DailyFortune[] {
+  const fortunes: DailyFortune[] = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    const solarDay = SolarDay.fromYmd(y, m, day);
+    const scDay = SixtyCycleDay.fromSolarDay(solarDay);
+    const sc = scDay.getSixtyCycle();
+    const stemHanja = sc.getHeavenStem().toString();
+    const branchHanja = sc.getEarthBranch().toString();
+    const stem = STEM_KO[stemHanja] || stemHanja;
+    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    fortunes.push({
+      date: dateStr,
+      stem,
+      branch,
+      element: STEM_ELEMENT[stemHanja] || "earth",
+      description: `${m}/${day} ${stem}${branch}일`,
+    });
+  }
+  return fortunes;
 }

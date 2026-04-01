@@ -1,5 +1,21 @@
 import { OhaengType } from "@/data/saju/constants";
 
+export interface MonthlyFortune {
+  month: number;        // 1~12
+  stem: string;
+  branch: string;
+  element: OhaengType;
+  description: string;
+}
+
+export interface DailyFortune {
+  date: string;         // "YYYY-MM-DD"
+  stem: string;
+  branch: string;
+  element: OhaengType;
+  description: string;
+}
+
 export interface SajuInput {
   birthDate: string;   // "1990-05-15" (양력)
   birthHour: string;   // "ja" (12시진 코드)
@@ -49,4 +65,10 @@ export interface SajuResult {
     element: OhaengType;
     description: string;
   };
+  /** 올해 12개월 월운 (시간 기반 주제에서만 계산) */
+  monthlyFortunes?: MonthlyFortune[];
+  /** 다년도 세운 (next-year, 3y, 5y 주제에서만 계산) */
+  yearlyFortunes?: { year: number; stem: string; branch: string; element: OhaengType; description: string }[];
+  /** 이번 주 7일 일운 (weekly 주제에서만 계산) */
+  dailyFortunes?: DailyFortune[];
 }

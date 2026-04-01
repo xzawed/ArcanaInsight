@@ -3,14 +3,34 @@ import { SajuService } from "@/services/saju/saju-service";
 import { GrokProvider } from "@/services/core/grok-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic } from "@/types/session";
+import { getRequiresData } from "@/data/saju/categories";
 
 const sajuService = new SajuService();
 const grokProvider = new GrokProvider();
 
-const VALID_TOPICS = [
+const VALID_TOPICS: Topic[] = [
+  // 타로 공용 (사주에서도 사용 가능)
   "love", "love-single", "love-couple", "finance", "career", "health", "general",
+  // 사주 - 시간 기반
+  "saju-monthly", "saju-this-month", "saju-weekly", "saju-next-year",
   "fortune-3y", "fortune-5y", "fortune-full",
+  // 사주 - 관계/이벤트
+  "saju-compatibility", "saju-love-timing", "saju-career-timing", "saju-auspicious-date",
+  // 사주 - 심층 분석
+  "saju-personality", "saju-aptitude", "saju-constitution", "saju-yongsin", "saju-relationships",
 ];
+
+/** topic에 따른 calculator options 결정 */
+function resolveCalcOptions(topic: Topic) {
+  const req = getRequiresData(topic);
+  if (req === "monthly") return { monthly: true };
+  if (req === "daily") return { daily: true };
+  if (req === "yearly-multi") {
+    const counts: Partial<Record<Topic, number>> = { "saju-next-year": 1, "fortune-3y": 3, "fortune-5y": 5 };
+    return { yearlyMulti: counts[topic] ?? 1 };
+  }
+  return undefined;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,12 +48,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 사주팔자 계산 (서버 사이드)
+    const calcOptions = resolveCalcOptions(topic);
     const sajuResult = calculateSaju({
       birthDate: userInfo.birthDate,
       birthHour: userInfo.birthHour,
       gender: userInfo.gender,
       name: userInfo.name,
-    });
+    }, calcOptions);
 
     const systemPrompt = sajuService.getSystemPrompt(characterId);
     const readingPrompt = sajuService.buildSajuPrompt(topic, sajuResult, userInfo);
