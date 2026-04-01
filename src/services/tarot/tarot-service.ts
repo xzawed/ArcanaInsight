@@ -1,7 +1,7 @@
 import { DivinationService, ReadingResult, SessionContext } from "@/types/service";
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic } from "@/types/session";
-import { getCharacterByService, getCharacterById } from "@/data/characters";
+import { getCharacterById } from "@/data/characters";
 import { buildSystemPrompt, buildReadingPrompt } from "@/services/core/prompt-builder";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { SpreadResolver } from "./spread-resolver";
@@ -12,8 +12,8 @@ export class TarotService implements DivinationService {
   private spreadResolver = new SpreadResolver();
 
   getCharacter(): CharacterConfig {
-    const character = getCharacterByService("tarot");
-    if (!character) throw new Error("Tarot character not found");
+    const character = getCharacterById("arcana");
+    if (!character) throw new Error("Arcana character not found");
     return character;
   }
 

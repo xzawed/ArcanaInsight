@@ -1,8 +1,8 @@
-import { CharacterConfig } from "@/types/character";
+import { CharacterConfig, GenderFilter } from "@/types/character";
 
 export const characters: CharacterConfig[] = [
   {
-    id: "arcana", name: "아르카나", nameJp: "アルカナ", serviceType: "tarot",
+    id: "arcana", name: "아르카나", nameJp: "アルカナ", gender: "female",
     greeting: "안녕하세요, 저는 아르카나예요. 오늘은 어떤 이야기를 카드에 물어볼까요? ✨",
     expressions: {
       default: "/images/characters/arcana/default.jpg",
@@ -20,7 +20,7 @@ export const characters: CharacterConfig[] = [
     voiceTone: "soft-mystical", unlocked: true,
   },
   {
-    id: "miko", name: "미코", nameJp: "巫女", serviceType: "shinjeom",
+    id: "miko", name: "미코", nameJp: "巫女", gender: "female",
     greeting: "...영혼의 목소리가 들려옵니다. 무엇이 궁금하신가요?",
     expressions: {
       default: "/images/characters/miko/default.jpg", smile: "/images/characters/miko/smile.jpg",
@@ -35,7 +35,7 @@ export const characters: CharacterConfig[] = [
     voiceTone: "calm-solemn", unlocked: true,
   },
   {
-    id: "seonhwa", name: "선화", nameJp: "仙花", serviceType: "saju",
+    id: "seonhwa", name: "선화", nameJp: "仙花", gender: "female",
     greeting: "어서 오세요~ 하늘의 별이 당신의 사주를 비추고 있네요.",
     expressions: {
       default: "/images/characters/seonhwa/default.jpg", smile: "/images/characters/seonhwa/smile.jpg",
@@ -50,7 +50,7 @@ export const characters: CharacterConfig[] = [
     voiceTone: "elegant-warm", unlocked: true,
   },
   {
-    id: "hoshi", name: "호시", nameJp: "星", serviceType: "fortune",
+    id: "hoshi", name: "호시", nameJp: "星", gender: "female",
     greeting: "안녕~! 오늘의 별운을 확인해볼까? 🌟",
     expressions: {
       default: "/images/characters/hoshi/default.jpg", smile: "/images/characters/hoshi/smile.jpg",
@@ -64,11 +64,152 @@ export const characters: CharacterConfig[] = [
     speechStyle: "~야/~지체. 반말에 가까운 친근한 톤. 이모지 많이 사용.",
     voiceTone: "bright-cheerful", unlocked: true,
   },
+  // 신규 캐릭터
+  {
+    id: "luna", name: "루나", nameJp: "ルナ", gender: "female",
+    greeting: "괜찮아요, 달빛이 당신을 지켜주고 있으니까요... ✨",
+    expressions: {
+      default: "/images/characters/luna/default.jpg",
+      smile: "/images/characters/luna/smile.jpg",
+      serious: "/images/characters/luna/serious.jpg",
+      surprised: "/images/characters/luna/surprised.jpg",
+      wink: "/images/characters/luna/wink.jpg",
+      mystical: "/images/characters/luna/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "신비롭고 따뜻한 달의 수호자. 달빛 은청색 롱헤어, 별자리 문양 드레스, 반투명 망토.",
+    description: "달의 수호자 루나. 은청색 롱헤어 사이로 빛나는 별자리 문양의 드레스와 반투명 망토를 두른 그녀는 언제나 포근한 달빛을 품고 있습니다. 다정하고 부드러운 목소리로 당신의 마음속 두려움을 감싸주며, 신비로운 비유로 카드의 메시지를 전해드려요.",
+    speciality: "포근하고 따뜻한 신비 리딩 스타일",
+    speechStyle: "~요/~네요체. 다정하고 부드러운 톤. 신비로운 비유를 섞어 위로.",
+    voiceTone: "mystic-tender", unlocked: true,
+  },
+  {
+    id: "rei", name: "레이", nameJp: "零", gender: "female",
+    greeting: "감정은 빼고 사실만 볼게. 뭐가 궁금해?",
+    expressions: {
+      default: "/images/characters/rei/default.jpg",
+      smile: "/images/characters/rei/smile.jpg",
+      serious: "/images/characters/rei/serious.jpg",
+      surprised: "/images/characters/rei/surprised.jpg",
+      wink: "/images/characters/rei/wink.jpg",
+      mystical: "/images/characters/rei/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "냉철하고 정확한 분석가. 순백 숏컷, 붉은 눈동자, 검은 장갑, 날카로운 인상.",
+    description: "냉철한 분석가 레이. 순백의 숏컷과 붉은 눈동자, 검은 장갑이 인상적인 그녀는 감정 없이 카드를 해석합니다. 독설적으로 들릴 수 있지만 그 누구보다 정확하게 핵심을 짚어냅니다. 은근히 챙겨주는 건 비밀이에요.",
+    speciality: "냉철하고 정확한 분석 리딩 스타일",
+    speechStyle: "~야/~지체. 짧고 건조하지만 핵심을 찌르는 말투.",
+    voiceTone: "cold-precise", unlocked: true,
+  },
+  {
+    id: "cairn", name: "카이른", nameJp: "カイルン", gender: "male",
+    greeting: "제가 도와드리겠습니다. 어떤 것이 궁금하신지요?",
+    expressions: {
+      default: "/images/characters/cairn/default.jpg",
+      smile: "/images/characters/cairn/smile.jpg",
+      serious: "/images/characters/cairn/serious.jpg",
+      surprised: "/images/characters/cairn/surprised.jpg",
+      wink: "/images/characters/cairn/wink.jpg",
+      mystical: "/images/characters/cairn/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "귀족적 젠틀맨. 짙은 남색 헤어, 금빛 눈, 고급 블레이저+마법 문장 브로치.",
+    description: "귀족 마법사 카이른. 짙은 남색의 헤어와 금빛 눈이 인상적인 그는 고급 블레이저에 마법 문장 브로치를 달고 품격 있는 자태를 뽐냅니다. 예의 바르고 우아하지만 장난기가 살짝 숨어 있어요. 어떤 고민이든 젠틀하게 해결해 드리겠습니다.",
+    speciality: "우아하고 격식 있는 젠틀 리딩 스타일",
+    speechStyle: "~습니다/~ㅂ니다체. 격식 있고 다정한 톤.",
+    voiceTone: "noble-gentle", unlocked: true,
+  },
+  {
+    id: "zero", name: "제로", nameJp: "ゼロ", gender: "male",
+    greeting: "...운명이란 건, 피하려 할수록 가까워지지.",
+    expressions: {
+      default: "/images/characters/zero/default.jpg",
+      smile: "/images/characters/zero/smile.jpg",
+      serious: "/images/characters/zero/serious.jpg",
+      surprised: "/images/characters/zero/surprised.jpg",
+      wink: "/images/characters/zero/wink.jpg",
+      mystical: "/images/characters/zero/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "미스터리한 로맨티스트. 검붉은 헤어, 한쪽 눈 가린 앞머리, 검은 후드코트, 체인 액세서리.",
+    description: "운명의 해석자 제로. 검붉은 헤어가 한쪽 눈을 가린 채 검은 후드코트와 체인 액세서리로 무장한 그는 어둡고 위험한 분위기를 풍깁니다. 하지만 그의 말은 의외로 시적이고 다정해요. 운명의 실마리를 가장 깊이 꿰뚫는 상담사입니다.",
+    speciality: "어둡고 깊이 있는 로맨틱 리딩 스타일",
+    speechStyle: "~다/~지체. 낮은 톤의 시적인 말투.",
+    voiceTone: "dark-romantic", unlocked: true,
+  },
+  {
+    id: "haru", name: "하루", nameJp: "ハル", gender: "male",
+    greeting: "걱정 마세요, 제가 함께할게요. 어떤 이야기든 들어드릴게요.",
+    expressions: {
+      default: "/images/characters/haru/default.jpg",
+      smile: "/images/characters/haru/smile.jpg",
+      serious: "/images/characters/haru/serious.jpg",
+      surprised: "/images/characters/haru/surprised.jpg",
+      wink: "/images/characters/haru/wink.jpg",
+      mystical: "/images/characters/haru/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "따뜻하고 듬직한 햇살 같은 존재. 밝은 금발, 햇살 같은 미소, 흰 셔츠+청바지+별 귀걸이.",
+    description: "햇살 같은 상담사 하루. 밝은 금발과 따뜻한 미소를 가진 그는 언제나 당신 곁에서 진심으로 걱정해주는 든든한 형/오빠 같은 존재입니다. 흰 셔츠와 청바지에 별 귀걸이를 한 그의 리딩은 언제나 용기와 희망을 불어넣어 줍니다.",
+    speciality: "따뜻하고 응원하는 힐링 리딩 스타일",
+    speechStyle: "~요/~세요체. 존댓말이지만 친근하고 따뜻한 톤.",
+    voiceTone: "warm-supportive", unlocked: true,
+  },
+  {
+    id: "ren", name: "렌", nameJp: "蓮", gender: "male",
+    greeting: "...그대가 왔군요. 연꽃은 진흙에서 피어나는 법이오.",
+    expressions: {
+      default: "/images/characters/ren/default.jpg",
+      smile: "/images/characters/ren/smile.jpg",
+      serious: "/images/characters/ren/serious.jpg",
+      surprised: "/images/characters/ren/surprised.jpg",
+      wink: "/images/characters/ren/wink.jpg",
+      mystical: "/images/characters/ren/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "고요하고 지혜로운 도사. 흑발 장발(묶음), 동양풍 의상+연꽃 장식, 부채.",
+    description: "지혜로운 도사 렌. 흑발 장발을 묶고 동양풍 의상에 연꽃 장식을 한 그는 고요함 속에 깊은 지혜를 품고 있습니다. 말수가 적지만 한마디 한마디가 깊은 통찰을 담고 있어요. 부채를 접으며 운명의 흐름을 읽어냅니다.",
+    speciality: "고요하고 깊이 있는 선인 리딩 스타일",
+    speechStyle: "~오/~하오체. 고풍스러운 문어체.",
+    voiceTone: "serene-sage", unlocked: true,
+  },
+  {
+    id: "lix", name: "릭스", nameJp: "リクス", gender: "male",
+    greeting: "ㅋㅋ 왔어? 이 카드 뽑은 거 실화임? 재밌는데~ 힌트 줄까?",
+    expressions: {
+      default: "/images/characters/lix/default.jpg",
+      smile: "/images/characters/lix/smile.jpg",
+      serious: "/images/characters/lix/serious.jpg",
+      surprised: "/images/characters/lix/surprised.jpg",
+      wink: "/images/characters/lix/wink.jpg",
+      mystical: "/images/characters/lix/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "장난꾸러기 트릭스터. 네온 그린+퍼플 투톤 헤어, 헤드폰, 디지털 패턴 재킷, 홀로그램 카드.",
+    description: "트릭스터 릭스. 네온 그린과 퍼플의 투톤 헤어에 헤드폰을 걸치고 디지털 패턴 재킷을 입은 그는 언제나 수수께끼 같은 말로 정답을 빙빙 돌려 알려줍니다. 홀로그램 카드로 장난치는 것 같아도 결국은 맞는 방향을 가리키고 있어요.",
+    speciality: "장난스럽고 위트 있는 트릭스터 리딩 스타일",
+    speechStyle: "~는데/~ㄹ까체. 장난스러운 톤.",
+    voiceTone: "playful-trickster", unlocked: true,
+  },
+  {
+    id: "ethan", name: "에단", nameJp: "エタン", gender: "male",
+    greeting: "아, 안녕하세요! 이 카드의 상징 체계를 분석해드릴게요... 쉽게 설명할게요!",
+    expressions: {
+      default: "/images/characters/ethan/default.jpg",
+      smile: "/images/characters/ethan/smile.jpg",
+      serious: "/images/characters/ethan/serious.jpg",
+      surprised: "/images/characters/ethan/surprised.jpg",
+      wink: "/images/characters/ethan/wink.jpg",
+      mystical: "/images/characters/ethan/mystical.jpg",
+    },
+    idleAnimation: "float",
+    personality: "학구적 분석가. 은회색 헤어, 안경, 깔끔한 학자풍 로브+두꺼운 마법서.",
+    description: "학자 마법사 에단. 은회색 헤어에 안경을 쓰고 두꺼운 마법서를 끼고 다니는 그는 카드를 학문적으로 해석하는 분석가입니다. 약간 어눌하고 수줍지만 설명이 매우 상세해요. 카드 한 장에서 열 가지 의미를 찾아내는 능력자입니다.",
+    speciality: "학구적이고 상세한 분석 리딩 스타일",
+    speechStyle: "~요/~거든요체. 설명이 상세하고 친절한 톤.",
+    voiceTone: "scholarly-shy", unlocked: true,
+  },
 ];
-
-export function getCharacterByService(serviceType: string): CharacterConfig | undefined {
-  return characters.find((c) => c.serviceType === serviceType);
-}
 
 export function getCharacterById(id: string): CharacterConfig | undefined {
   return characters.find((c) => c.id === id);
@@ -78,6 +219,7 @@ export function getAvailableCharacters(): CharacterConfig[] {
   return characters.filter((c) => c.unlocked);
 }
 
-export function getCharactersByService(serviceType: string): CharacterConfig[] {
-  return characters.filter((c) => c.unlocked && c.serviceType === serviceType);
+export function getCharactersByGender(filter: GenderFilter): CharacterConfig[] {
+  if (filter === "all") return characters.filter((c) => c.unlocked);
+  return characters.filter((c) => c.unlocked && c.gender === filter);
 }

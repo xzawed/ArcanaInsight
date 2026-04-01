@@ -1,7 +1,7 @@
 import { DivinationService, ReadingResult, SessionContext } from "@/types/service";
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic } from "@/types/session";
-import { getCharacterByService, getCharacterById } from "@/data/characters";
+import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
 import { cleanReadingText } from "@/services/core/text-cleaner";
@@ -11,8 +11,8 @@ export class SajuService implements DivinationService {
   name = "사주";
 
   getCharacter(): CharacterConfig {
-    const character = getCharacterByService("saju");
-    if (!character) throw new Error("Saju character not found");
+    const character = getCharacterById("seonhwa");
+    if (!character) throw new Error("Seonhwa character not found");
     return character;
   }
 

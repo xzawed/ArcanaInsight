@@ -1,11 +1,12 @@
 export type Mood = "default" | "smile" | "serious" | "surprised" | "wink" | "mystical";
-export type ServiceType = "tarot" | "saju" | "shinjeom" | "fortune";
+export type Gender = "female" | "male";
+export type GenderFilter = "female" | "male" | "all";
 
 export interface CharacterConfig {
   id: string;
   name: string;
   nameJp: string;
-  serviceType: ServiceType;
+  gender: Gender;
   greeting: string;
   expressions: Record<Mood, string>;
   idleAnimation: string;
