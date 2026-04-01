@@ -7,11 +7,43 @@ import { PrivacyConsentModal } from "./PrivacyConsentModal";
 import { createClient } from "@/lib/supabase/client";
 import { UserInfo } from "@/types/user-info";
 
+const STORAGE_KEY = "arcana_user_info";
+const CONSENT_KEY = "arcana_privacy_agreed";
+
 interface UserInfoFormProps {
   mode: "tarot" | "saju";
   onSubmit: (data: UserInfo) => void;
   onBack: () => void;
   characterName?: string;
+}
+
+/** localStorage에 저장된 정보 로드 (동의한 경우만) */
+function loadLocalInfo(): UserInfo | null {
+  try {
+    const consent = localStorage.getItem(CONSENT_KEY);
+    if (!consent) return null;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as UserInfo;
+  } catch {
+    return null;
+  }
+}
+
+/** localStorage에 정보 저장 */
+function saveLocalInfo(info: UserInfo): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+    localStorage.setItem(CONSENT_KEY, new Date().toISOString());
+  } catch { /* 시크릿 모드 등 localStorage 차단 시 무시 */ }
+}
+
+/** localStorage에서 정보 삭제 (동의 철회) */
+function clearLocalInfo(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CONSENT_KEY);
+  } catch { /* 무시 */ }
 }
 
 export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {
@@ -25,7 +57,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 로그인 상태 + 저장된 정보 자동 채우기
+  // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: localStorage)
   useEffect(() => {
     const loadUserInfo = async () => {
       const supabase = createClient();
@@ -41,10 +73,21 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
         if (profile?.birth_date) {
           if (profile.birth_name) setName(profile.birth_name);
-          setBirthDate(profile.birth_date); // Supabase date 타입은 "YYYY-MM-DD" 반환
+          setBirthDate(profile.birth_date);
           if (profile.gender) setGender(profile.gender as "male" | "female" | "other");
           if (profile.birth_hour) setBirthHour(profile.birth_hour);
           if (profile.privacy_agreed_at) setSaveInfo(true);
+          setHasSavedInfo(true);
+        }
+      } else {
+        // 비로그인: localStorage에서 로드
+        const local = loadLocalInfo();
+        if (local) {
+          if (local.name) setName(local.name);
+          if (local.birthDate) setBirthDate(local.birthDate);
+          if (local.gender) setGender(local.gender);
+          if (local.birthHour) setBirthHour(local.birthHour);
+          setSaveInfo(true);
           setHasSavedInfo(true);
         }
       }
@@ -68,27 +111,42 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       birthHour: birthHour || "unknown",
     };
 
-    // 로그인 + 저장 동의 시 profiles 테이블 업데이트
-    if (isLoggedIn && saveInfo) {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { error } = await supabase.from("profiles").update({
-            birth_name: data.name,
-            birth_date: birthDate,
-            gender: data.gender,
-            birth_hour: data.birthHour,
-            privacy_agreed_at: new Date().toISOString(),
-          }).eq("id", user.id);
-          if (error) console.error("프로필 저장 실패:", error);
+    if (saveInfo) {
+      if (isLoggedIn) {
+        // 로그인 사용자: Supabase profiles 업데이트
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { error } = await supabase.from("profiles").update({
+              birth_name: data.name,
+              birth_date: birthDate,
+              gender: data.gender,
+              birth_hour: data.birthHour,
+              privacy_agreed_at: new Date().toISOString(),
+            }).eq("id", user.id);
+            if (error) console.error("프로필 저장 실패:", error);
+          }
+        } catch (e) {
+          console.error("프로필 저장 오류:", e);
         }
-      } catch (e) {
-        console.error("프로필 저장 오류:", e);
+      } else {
+        // 비로그인 사용자: localStorage 저장
+        saveLocalInfo(data);
       }
     }
 
     onSubmit(data);
+  };
+
+  /** 동의 철회 시 저장된 데이터도 삭제 */
+  const handleSaveToggle = () => {
+    if (!saveInfo) {
+      setShowPrivacyModal(true);
+    } else {
+      setSaveInfo(false);
+      if (!isLoggedIn) clearLocalInfo();
+    }
   };
 
   if (loading) {
@@ -206,23 +264,20 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
         </select>
       </div>
 
-      {/* 정보 저장 (로그인 시만) */}
-      {isLoggedIn && (
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={saveInfo}
-            onChange={() => {
-              if (!saveInfo) setShowPrivacyModal(true);
-              else setSaveInfo(false);
-            }}
-            className="w-4 h-4 rounded border-arcana-border text-arcana-purple focus:ring-arcana-purple"
-          />
-          <span className="text-arcana-muted text-xs">
-            개인정보를 저장하여 다음 방문 시 자동 입력
-          </span>
-        </label>
-      )}
+      {/* 정보 저장 동의 (로그인/비로그인 모두 표시) */}
+      <label className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={saveInfo}
+          onChange={handleSaveToggle}
+          className="w-4 h-4 rounded border-arcana-border text-arcana-purple focus:ring-arcana-purple"
+        />
+        <span className="text-arcana-muted text-xs">
+          {isLoggedIn
+            ? "개인정보를 저장하여 다음 방문 시 자동 입력"
+            : "이 브라우저에 정보를 저장하여 다음 이용 시 자동 입력"}
+        </span>
+      </label>
 
       <motion.button
         type="button"
