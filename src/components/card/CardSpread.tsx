@@ -11,6 +11,13 @@ interface CardSpreadProps {
   selectedCards: SelectedCard[];
   spread: SpreadDefinition;
   revealedPositions: number[];
+  glowColor?: string;
+}
+
+function hexToRgbBase(hex: string): string {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!r) return "212, 175, 55";
+  return `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}`;
 }
 
 /**
@@ -91,8 +98,9 @@ function computeLayout(
   return { cardW, cardH, positions: adjusted };
 }
 
-export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpreadProps) {
+export function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
   const { selectedSkinId } = useSkinStore();
+  const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
@@ -144,10 +152,11 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
                 <div className="relative">
                   {isRevealed && (
                     <motion.div
-                      className="absolute -inset-1 md:-inset-2 rounded-xl bg-arcana-gold/20 blur-md"
+                      className="absolute -inset-1 md:-inset-2 rounded-xl blur-md"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: [0, 0.6, 0], scale: [0.8, 1.1, 1] }}
                       transition={{ duration: 1.2, ease: "easeOut" }}
+                      style={{ background: `rgba(${rgb}, 0.25)` }}
                     />
                   )}
                   <CardItem
@@ -158,6 +167,7 @@ export function CardSpread({ selectedCards, spread, revealedPositions }: CardSpr
                     width={layout.cardW}
                     height={layout.cardH}
                     skinId={selectedSkinId}
+                    glowColor={glowColor}
                   />
                 </div>
                 <span

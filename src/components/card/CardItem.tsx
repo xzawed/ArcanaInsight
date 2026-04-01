@@ -16,12 +16,20 @@ interface CardItemProps {
   height?: number;
   className?: string;
   skinId?: string;
+  glowColor?: string;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
 
-export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId }: CardItemProps) {
+function hexToRgbBase(hex: string): string {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!r) return "212, 175, 55";
+  return `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}`;
+}
+
+export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, glowColor }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
+  const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
 
   return (
     <motion.div
@@ -39,8 +47,8 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
           className="absolute -inset-1 rounded-xl opacity-0 pointer-events-none"
           whileHover={{ opacity: 1 }}
           style={{
-            background: "radial-gradient(ellipse, rgba(212,175,55,0.15), transparent 70%)",
-            boxShadow: "0 0 20px rgba(212,175,55,0.2)",
+            background: `radial-gradient(ellipse, rgba(${rgb},0.15), transparent 70%)`,
+            boxShadow: `0 0 20px rgba(${rgb},0.2)`,
           }}
         />
       )}
@@ -52,8 +60,14 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
         className="w-full h-full relative"
       >
         <div
-          className={`absolute inset-0 ${isSelected ? "ring-2 ring-arcana-gold shadow-lg shadow-arcana-gold/20" : ""}`}
-          style={{ backfaceVisibility: "hidden", borderRadius: "0.5rem" }}
+          className="absolute inset-0"
+          style={{
+            backfaceVisibility: "hidden",
+            borderRadius: "0.5rem",
+            ...(isSelected ? {
+              boxShadow: `0 0 0 2px rgba(${rgb},0.9), 0 4px 16px rgba(${rgb},0.3)`,
+            } : {}),
+          }}
         >
           <CardBack size={size} width={width} height={height} className="w-full h-full" skinId={skinId} />
         </div>
@@ -68,11 +82,11 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
 
       {isFlipped && (
         <motion.div
-          initial={{ opacity: 0.8, scale: 1 }}
-          animate={{ opacity: 0, scale: 1.3 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          initial={{ opacity: 0.9, scale: 1 }}
+          animate={{ opacity: 0, scale: 1.5 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="absolute inset-0 rounded-lg pointer-events-none"
-          style={{ background: "radial-gradient(ellipse, rgba(212,175,55,0.4), transparent 70%)" }}
+          style={{ background: `radial-gradient(ellipse, rgba(${rgb},0.5), transparent 70%)` }}
         />
       )}
     </motion.div>

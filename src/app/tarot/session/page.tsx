@@ -309,6 +309,7 @@ export default function TarotSessionPage() {
 
   const spread = spreadType ? spreads[spreadType] : null;
   const particleDensity = phase === "reading" ? "high" : phase === "result" ? "low" : "medium";
+  const effectTheme = character?.effectTheme;
 
   return (
     <div className="relative h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
@@ -322,7 +323,12 @@ export default function TarotSessionPage() {
       </div>
 
       {/* 파티클 */}
-      <ParticleOverlay density={particleDensity} className="z-10" />
+      <ParticleOverlay
+        density={particleDensity}
+        colorScheme={effectTheme ? { primary: effectTheme.primary, secondary: effectTheme.secondary, accent: effectTheme.accent } : undefined}
+        particleStyle={effectTheme?.particleStyle}
+        className="z-10"
+      />
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
@@ -408,6 +414,7 @@ export default function TarotSessionPage() {
                   selectedCards={selectedCards}
                   spread={spread}
                   revealedPositions={revealedPositions}
+                  glowColor={effectTheme?.primary}
                 />
                 {/* 스피너 제거 — 카드 순차 뒤집기 연출이 로딩 상태를 시각적으로 대체 */}
                 {readingError && !isLoading && (

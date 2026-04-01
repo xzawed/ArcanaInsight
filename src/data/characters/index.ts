@@ -18,6 +18,7 @@ export const characters: CharacterConfig[] = [
     speciality: "직관적이고 감성적인 리딩 스타일",
     speechStyle: "~네요/~해요체. 부드럽고 신비로운 톤. 가끔 '냥~'을 붙인다.",
     voiceTone: "soft-mystical", unlocked: true,
+    effectTheme: { primary: "#a78bfa", secondary: "#c084fc", accent: "#f59e0b", particleStyle: "sparkle" },
   },
   {
     id: "miko", name: "미코", nameJp: "巫女", gender: "female",
@@ -33,6 +34,7 @@ export const characters: CharacterConfig[] = [
     speciality: "영적이고 깊이 있는 해석 스타일",
     speechStyle: "~입니다/~합니다체. 차분하고 엄숙한 톤.",
     voiceTone: "calm-solemn", unlocked: true,
+    effectTheme: { primary: "#ef4444", secondary: "#fbbf24", accent: "#ffffff", particleStyle: "petal" },
   },
   {
     id: "seonhwa", name: "선화", nameJp: "仙花", gender: "female",
@@ -48,6 +50,7 @@ export const characters: CharacterConfig[] = [
     speciality: "지혜롭고 우아한 동양적 해석 스타일",
     speechStyle: "~세요/~랍니다체. 우아하고 따뜻한 톤.",
     voiceTone: "elegant-warm", unlocked: true,
+    effectTheme: { primary: "#f9a8d4", secondary: "#fde68a", accent: "#a7f3d0", particleStyle: "petal" },
   },
   {
     id: "hoshi", name: "호시", nameJp: "星", gender: "female",
@@ -63,6 +66,7 @@ export const characters: CharacterConfig[] = [
     speciality: "밝고 친근한 캐주얼 리딩 스타일",
     speechStyle: "~야/~지체. 반말에 가까운 친근한 톤. 이모지 많이 사용.",
     voiceTone: "bright-cheerful", unlocked: true,
+    effectTheme: { primary: "#60a5fa", secondary: "#c084fc", accent: "#fbbf24", particleStyle: "star" },
   },
   // 신규 캐릭터
   {
@@ -82,6 +86,7 @@ export const characters: CharacterConfig[] = [
     speciality: "포근하고 따뜻한 신비 리딩 스타일",
     speechStyle: "~요/~네요체. 다정하고 부드러운 톤. 신비로운 비유를 섞어 위로.",
     voiceTone: "mystic-tender", unlocked: true,
+    effectTheme: { primary: "#93c5fd", secondary: "#c4b5fd", accent: "#e2e8f0", particleStyle: "bubble" },
   },
   {
     id: "rei", name: "레이", nameJp: "零", gender: "female",
@@ -100,6 +105,7 @@ export const characters: CharacterConfig[] = [
     speciality: "냉철하고 정확한 분석 리딩 스타일",
     speechStyle: "~야/~지체. 짧고 건조하지만 핵심을 찌르는 말투.",
     voiceTone: "cold-precise", unlocked: true,
+    effectTheme: { primary: "#f8fafc", secondary: "#dc2626", accent: "#64748b", particleStyle: "snowflake" },
   },
   {
     id: "cairn", name: "카이른", nameJp: "カイルン", gender: "male",
@@ -118,6 +124,7 @@ export const characters: CharacterConfig[] = [
     speciality: "우아하고 격식 있는 젠틀 리딩 스타일",
     speechStyle: "~습니다/~ㅂ니다체. 격식 있고 다정한 톤.",
     voiceTone: "noble-gentle", unlocked: true,
+    effectTheme: { primary: "#fbbf24", secondary: "#1e3a5f", accent: "#f59e0b", particleStyle: "sparkle" },
   },
   {
     id: "zero", name: "제로", nameJp: "ゼロ", gender: "male",
@@ -136,6 +143,7 @@ export const characters: CharacterConfig[] = [
     speciality: "어둡고 깊이 있는 로맨틱 리딩 스타일",
     speechStyle: "~다/~지체. 낮은 톤의 시적인 말투.",
     voiceTone: "dark-romantic", unlocked: true,
+    effectTheme: { primary: "#dc2626", secondary: "#1a1a2e", accent: "#f43f5e", particleStyle: "flame" },
   },
   {
     id: "haru", name: "하루", nameJp: "ハル", gender: "male",
@@ -154,6 +162,7 @@ export const characters: CharacterConfig[] = [
     speciality: "따뜻하고 응원하는 힐링 리딩 스타일",
     speechStyle: "~요/~세요체. 존댓말이지만 친근하고 따뜻한 톤.",
     voiceTone: "warm-supportive", unlocked: true,
+    effectTheme: { primary: "#fbbf24", secondary: "#fb923c", accent: "#fef3c7", particleStyle: "star" },
   },
   {
     id: "ren", name: "렌", nameJp: "蓮", gender: "male",
@@ -172,6 +181,7 @@ export const characters: CharacterConfig[] = [
     speciality: "고요하고 깊이 있는 선인 리딩 스타일",
     speechStyle: "~오/~하오체. 고풍스러운 문어체.",
     voiceTone: "serene-sage", unlocked: true,
+    effectTheme: { primary: "#2dd4bf", secondary: "#064e3b", accent: "#a7f3d0", particleStyle: "rune" },
   },
   {
     id: "lix", name: "릭스", nameJp: "リクス", gender: "male",
@@ -190,6 +200,7 @@ export const characters: CharacterConfig[] = [
     speciality: "장난스럽고 위트 있는 트릭스터 리딩 스타일",
     speechStyle: "~는데/~ㄹ까체. 장난스러운 톤.",
     voiceTone: "playful-trickster", unlocked: true,
+    effectTheme: { primary: "#4ade80", secondary: "#a855f7", accent: "#22d3ee", particleStyle: "lightning" },
   },
   {
     id: "ethan", name: "에단", nameJp: "エタン", gender: "male",
@@ -208,6 +219,7 @@ export const characters: CharacterConfig[] = [
     speciality: "학구적이고 상세한 분석 리딩 스타일",
     speechStyle: "~요/~거든요체. 설명이 상세하고 친절한 톤.",
     voiceTone: "noble-transcendent", unlocked: true,
+    effectTheme: { primary: "#fbbf24", secondary: "#10b981", accent: "#c084fc", particleStyle: "rune" },
   },
 ];
 
