@@ -74,14 +74,15 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
   const enterAnim = ENTER_MOTION[mood];
 
   return (
-    <AnimatePresence mode="wait">
+    <div className={`relative ${className}`}>
+    <AnimatePresence mode="sync">
       <motion.div
         key={`${characterId}-${mood}`}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className={className}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.55, ease: "easeInOut" }}
+        className="absolute inset-0"
       >
         {!isLooping && enterAnim ? (
           <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
@@ -101,5 +102,6 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
         )}
       </motion.div>
     </AnimatePresence>
+    </div>
   );
 }

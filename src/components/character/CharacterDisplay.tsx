@@ -26,9 +26,9 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       <div
         className="relative z-10 w-full h-full overflow-hidden"
         style={{
-          mask: "linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%), linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+          mask: "linear-gradient(to bottom, transparent 0%, black 10%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%), linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
           maskComposite: "intersect",
-          WebkitMask: "linear-gradient(to bottom, transparent 0%, black 15%, black 75%, transparent 100%), linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+          WebkitMask: "linear-gradient(to bottom, transparent 0%, black 10%, black 50%, rgba(0,0,0,0.6) 78%, transparent 100%), linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)",
           WebkitMaskComposite: "destination-in" as string,
         }}
       >
