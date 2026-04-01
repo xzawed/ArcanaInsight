@@ -35,7 +35,7 @@ export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsen
               </div>
               <div className="bg-arcana-surface/50 rounded-xl p-4">
                 <h4 className="text-arcana-purple text-xs font-serif font-bold mb-2">이용 목적</h4>
-                <p className="text-arcana-muted text-xs leading-relaxed">타로 상담 개인화 및 정확도 향상, 재방문 시 자동 입력</p>
+                <p className="text-arcana-muted text-xs leading-relaxed">상담 개인화 및 정확도 향상, 재방문 시 자동 입력</p>
               </div>
               <div className="bg-arcana-surface/50 rounded-xl p-4">
                 <h4 className="text-arcana-purple text-xs font-serif font-bold mb-2">보유 기간</h4>

@@ -56,7 +56,29 @@
       "Bash(node scripts/generate-character-images-v2.mjs hoshi wink)",
       "Bash(grep -r \"seonhwa\\\\|miko\\\\|arcana\" /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/src --include=*.tsx --include=*.ts)",
       "Bash(grep -r getCharactersByService /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/src --include=*.tsx --include=*.ts)",
-      "Bash(grep -rn serviceType /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/src --include=*.tsx --include=*.ts)"
+      "Bash(grep -rn serviceType /f/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight/src --include=*.tsx --include=*.ts)",
+      "Bash(mv \"docs/superpowers/specs/2026-03-29-arcana-insight-design.md\" \"docs/superpowers/specs/01-arcana-insight-design.md\")",
+      "Bash(mv \"docs/superpowers/specs/2026-03-29-character-selection-jrpg-design.md\" \"docs/superpowers/specs/02-character-selection-jrpg-design.md\")",
+      "Bash(mv \"docs/superpowers/specs/2026-03-29-premium-home-redesign.md\" \"docs/superpowers/specs/03-premium-home-redesign.md\")",
+      "Bash(mv \"docs/superpowers/specs/2026-03-29-tarot-visual-upgrade-design.md\" \"docs/superpowers/specs/04-tarot-visual-upgrade-design.md\")",
+      "Bash(mv \"docs/superpowers/specs/2026-03-30-user-info-input-design.md\" \"docs/superpowers/specs/05-user-info-input-design.md\")",
+      "Bash(mv \"docs/superpowers/plans/2026-03-29-arcana-insight-mvp.md\" \"docs/superpowers/plans/01-arcana-insight-mvp.md\")",
+      "Bash(mv \"docs/superpowers/plans/2026-03-29-character-selection-jrpg.md\" \"docs/superpowers/plans/02-character-selection-jrpg.md\")",
+      "Bash(mv \"docs/superpowers/plans/2026-03-29-premium-home.md\" \"docs/superpowers/plans/03-premium-home.md\")",
+      "Bash(mv \"docs/superpowers/plans/2026-03-29-tarot-visual-upgrade.md\" \"docs/superpowers/plans/04-tarot-visual-upgrade.md\")",
+      "Bash(mv \"docs/superpowers/plans/2026-03-31-card-skin-system.md\" \"docs/superpowers/plans/05-card-skin-system.md\")",
+      "Bash(pnpm next:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh run:*)",
+      "Bash(certutil -hashfile \"public/images/characters/ethan/nukki/default.png\" MD5)",
+      "Bash(certutil -hashfile \"public/images/characters/ethan/nukki/idle.png\" MD5)",
+      "Bash(node scripts/generate-character-images-v2.mjs ethan surprised)",
+      "Bash(node scripts/generate-character-images-v2.mjs ethan mystical)",
+      "WebSearch",
+      "WebFetch(domain:tarostarot.com)",
+      "WebFetch(domain:labyrinthos.co)",
+      "WebFetch(domain:science.howstuffworks.com)",
+      "WebFetch(domain:www.modernwaytarot.com)"
     ]
   }
 }

@@ -3,13 +3,9 @@ import { SpreadType, ChatMessage } from "@/types/session";
 import { SelectedCard, TarotCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { Topic } from "@/types/session";
+import { UserInfo } from "@/types/user-info";
 
-export interface UserInfo {
-  name: string;
-  birthDate: string;
-  gender: "male" | "female" | "other";
-  birthHour: string;
-}
+export type { UserInfo };
 
 type SessionPhase = "topic-select" | "card-shuffle" | "card-select" | "reading" | "result";
 

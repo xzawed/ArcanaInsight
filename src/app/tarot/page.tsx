@@ -6,12 +6,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Topic, SpreadType } from "@/types/session";
 import { useSessionStore } from "@/hooks/useSession";
-import { UserInfo } from "@/hooks/useSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { UserInfoForm, UserInfoData } from "@/components/tarot/UserInfoForm";
+import { UserInfoForm } from "@/components/common/UserInfoForm";
+import { UserInfo } from "@/types/user-info";
 import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { spreads } from "@/data/spreads";
 import { CharacterConfig, GenderFilter } from "@/types/character";
@@ -148,13 +148,8 @@ function TarotPageContent() {
     setStep("user-info");
   };
 
-  const handleUserInfoSubmit = (data: UserInfoData) => {
-    useSessionStore.getState().setUserInfo({
-      name: data.name,
-      birthDate: data.birthDate,
-      gender: data.gender as UserInfo["gender"],
-      birthHour: data.birthHour,
-    });
+  const handleUserInfoSubmit = (data: UserInfo) => {
+    useSessionStore.getState().setUserInfo(data);
     if (selectedTopic) {
       setStep("spread-select");
     } else {
@@ -456,6 +451,7 @@ function TarotPageContent() {
             {/* 폼 */}
             <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-10 py-4 md:py-6 overflow-y-auto">
               <UserInfoForm
+                mode="tarot"
                 onSubmit={handleUserInfoSubmit}
                 onBack={() => setStep("topic-select")}
                 characterName={selectedCharacter?.name}

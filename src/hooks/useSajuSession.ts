@@ -2,13 +2,9 @@ import { create } from "zustand";
 import { ChatMessage, Topic } from "@/types/session";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
+import { UserInfo } from "@/types/user-info";
 
-export interface SajuUserInfo {
-  name: string;
-  birthDate: string;
-  birthHour: string;
-  gender: "male" | "female" | "other";
-}
+export type { UserInfo };
 
 type SajuPhase = "info-input" | "topic-select" | "reading" | "result";
 
@@ -17,7 +13,7 @@ interface SajuSessionState {
   sessionId: string | null;
   characterId: string | null;
   topic: Topic | null;
-  userInfo: SajuUserInfo | null;
+  userInfo: UserInfo | null;
   chatMessages: ChatMessage[];
   readingResult: ReadingResult | null;
   sajuData: SajuResult | null;
@@ -27,7 +23,7 @@ interface SajuSessionState {
   setSessionId: (id: string) => void;
   setCharacterId: (id: string) => void;
   setTopic: (topic: Topic) => void;
-  setUserInfo: (info: SajuUserInfo) => void;
+  setUserInfo: (info: UserInfo) => void;
   addChatMessage: (message: ChatMessage) => void;
   setReadingResult: (result: ReadingResult) => void;
   setSajuData: (data: SajuResult) => void;

@@ -5,32 +5,18 @@ import { motion } from "framer-motion";
 import { birthHours } from "@/data/birth-hours";
 import { PrivacyConsentModal } from "./PrivacyConsentModal";
 import { createClient } from "@/lib/supabase/client";
-
-export interface UserInfoData {
-  name: string;
-  birthDate: string;
-  gender: "male" | "female" | "other" | "";
-  birthHour: string;
-}
+import { UserInfo } from "@/types/user-info";
 
 interface UserInfoFormProps {
-  onSubmit: (data: UserInfoData) => void;
+  mode: "tarot" | "saju";
+  onSubmit: (data: UserInfo) => void;
   onBack: () => void;
   characterName?: string;
 }
 
-const YEARS = Array.from({ length: 61 }, (_, i) => 2010 - i);
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
-
-function getDaysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate();
-}
-
-export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormProps) {
+export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {
   const [name, setName] = useState("");
-  const [birthYear, setBirthYear] = useState("");
-  const [birthMonth, setBirthMonth] = useState("");
-  const [birthDay, setBirthDay] = useState("");
+  const [birthDate, setBirthDate] = useState(""); // "YYYY-MM-DD"
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
   const [birthHour, setBirthHour] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
@@ -39,7 +25,7 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 로그인 상태 + 저장된 정보 확인
+  // 로그인 상태 + 저장된 정보 자동 채우기
   useEffect(() => {
     const loadUserInfo = async () => {
       const supabase = createClient();
@@ -53,18 +39,13 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
           .eq("id", user.id)
           .single();
 
-        if (profile?.birth_name) {
-          setName(profile.birth_name);
-          setHasSavedInfo(true);
-          if (profile.birth_date) {
-            const d = new Date(profile.birth_date);
-            setBirthYear(String(d.getFullYear()));
-            setBirthMonth(String(d.getMonth() + 1));
-            setBirthDay(String(d.getDate()));
-          }
+        if (profile?.birth_date) {
+          if (profile.birth_name) setName(profile.birth_name);
+          setBirthDate(profile.birth_date); // Supabase date 타입은 "YYYY-MM-DD" 반환
           if (profile.gender) setGender(profile.gender as "male" | "female" | "other");
           if (profile.birth_hour) setBirthHour(profile.birth_hour);
           if (profile.privacy_agreed_at) setSaveInfo(true);
+          setHasSavedInfo(true);
         }
       }
       setLoading(false);
@@ -72,37 +53,35 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
     loadUserInfo();
   }, []);
 
-  const days = birthYear && birthMonth
-    ? Array.from({ length: getDaysInMonth(Number(birthYear), Number(birthMonth)) }, (_, i) => i + 1)
-    : Array.from({ length: 31 }, (_, i) => i + 1);
-
-  const isValid = name.trim() && birthYear && birthMonth && birthDay && gender;
+  // mode별 유효성 검증
+  const isValid = mode === "saju"
+    ? !!(birthDate && birthHour && gender)
+    : !!(name.trim() && birthDate && gender);
 
   const handleSubmit = async () => {
     if (!isValid) return;
 
-    const birthDate = `${birthYear}-${birthMonth.padStart(2, "0")}-${birthDay.padStart(2, "0")}`;
-    const data: UserInfoData = {
+    const data: UserInfo = {
       name: name.trim(),
       birthDate,
       gender: gender as "male" | "female" | "other",
       birthHour: birthHour || "unknown",
     };
 
-    // 로그인 + 저장 동의 시 DB 업데이트
+    // 로그인 + 저장 동의 시 profiles 테이블 업데이트
     if (isLoggedIn && saveInfo) {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { error: updateError } = await supabase.from("profiles").update({
+          const { error } = await supabase.from("profiles").update({
             birth_name: data.name,
             birth_date: birthDate,
             gender: data.gender,
             birth_hour: data.birthHour,
             privacy_agreed_at: new Date().toISOString(),
           }).eq("id", user.id);
-          if (updateError) console.error("프로필 저장 실패:", updateError);
+          if (error) console.error("프로필 저장 실패:", error);
         }
       } catch (e) {
         console.error("프로필 저장 오류:", e);
@@ -110,19 +89,6 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
     }
 
     onSubmit(data);
-  };
-
-  const handleSaveToggle = () => {
-    if (!saveInfo) {
-      setShowPrivacyModal(true);
-    } else {
-      setSaveInfo(false);
-    }
-  };
-
-  const handlePrivacyAgree = () => {
-    setSaveInfo(true);
-    setShowPrivacyModal(false);
   };
 
   if (loading) {
@@ -133,8 +99,22 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
     );
   }
 
-  const selectClasses =
-    "w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-3 py-2.5 text-arcana-text text-sm focus:border-arcana-purple focus:outline-none appearance-none";
+  const inputClasses =
+    "w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-3 py-2.5 text-arcana-text text-sm focus:border-arcana-purple focus:outline-none";
+
+  // saju 모드에서는 "모름" 항목 제외 (사주 계산에 출생시간 필수)
+  const hourOptions = mode === "saju"
+    ? birthHours.filter((h) => h.value !== "unknown")
+    : birthHours;
+
+  const backLabel = mode === "saju" ? "← 뒤로" : "← 주제 다시 선택";
+  const title = mode === "saju" ? "생년월일 정보 입력" : "상담 정보 입력";
+  const subtitle = mode === "saju"
+    ? "정확한 사주 분석을 위해 필수 정보입니다"
+    : characterName
+      ? `${characterName}가 더 정확한 리딩을 위해 필요한 정보예요`
+      : "더 정확한 리딩을 위해 정보를 입력해주세요";
+  const submitLabel = mode === "saju" ? "사주 분석 시작" : "상담 시작하기";
 
   return (
     <div className="space-y-5">
@@ -143,16 +123,12 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
         onClick={onBack}
         className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
       >
-        ← 주제 다시 선택
+        {backLabel}
       </button>
 
       <div>
-        <h3 className="font-serif font-bold text-lg mb-1">상담 정보 입력</h3>
-        <p className="text-arcana-muted text-xs">
-          {characterName
-            ? `${characterName}가 더 정확한 리딩을 위해 필요한 정보예요`
-            : "더 정확한 리딩을 위해 정보를 입력해주세요"}
-        </p>
+        <h3 className="font-serif font-bold text-lg mb-1">{title}</h3>
+        <p className="text-arcana-muted text-xs">{subtitle}</p>
       </div>
 
       {hasSavedInfo && (
@@ -165,70 +141,36 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
 
       {/* 이름 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">이름 *</label>
+        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
+          이름 {mode === "tarot" ? "*" : "(선택)"}
+        </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="이름을 입력하세요"
-          className="w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-4 py-2.5 text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:border-arcana-purple focus:outline-none"
+          className={inputClasses}
         />
       </div>
 
-      {/* 생년월일 */}
+      {/* 생년월일 — 단일 date input */}
       <div>
         <label className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 *</label>
-        <div className="grid grid-cols-3 gap-2">
-          <select
-            value={birthYear}
-            onChange={(e) => setBirthYear(e.target.value)}
-            className={selectClasses}
-          >
-            <option value="">년</option>
-            {YEARS.map((y) => (
-              <option key={y} value={String(y)}>
-                {y}년
-              </option>
-            ))}
-          </select>
-          <select
-            value={birthMonth}
-            onChange={(e) => setBirthMonth(e.target.value)}
-            className={selectClasses}
-          >
-            <option value="">월</option>
-            {MONTHS.map((m) => (
-              <option key={m} value={String(m)}>
-                {m}월
-              </option>
-            ))}
-          </select>
-          <select
-            value={birthDay}
-            onChange={(e) => setBirthDay(e.target.value)}
-            className={selectClasses}
-          >
-            <option value="">일</option>
-            {days.map((d) => (
-              <option key={d} value={String(d)}>
-                {d}일
-              </option>
-            ))}
-          </select>
-        </div>
+        <input
+          type="date"
+          value={birthDate}
+          onChange={(e) => setBirthDate(e.target.value)}
+          min="1950-01-01"
+          max="2010-12-31"
+          className={inputClasses}
+        />
       </div>
 
       {/* 성별 */}
       <div>
         <label className="text-arcana-muted text-xs font-serif mb-1.5 block">성별 *</label>
         <div className="grid grid-cols-3 gap-2">
-          {(
-            [
-              ["male", "남성"],
-              ["female", "여성"],
-              ["other", "기타"],
-            ] as const
-          ).map(([val, label]) => (
+          {(["male", "female", "other"] as const).map((val) => (
             <button
               key={val}
               type="button"
@@ -239,7 +181,7 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
                   : "bg-arcana-card/70 border border-arcana-border text-arcana-muted hover:border-arcana-purple"
               }`}
             >
-              {label}
+              {{ male: "남성", female: "여성", other: "기타" }[val]}
             </button>
           ))}
         </div>
@@ -247,14 +189,16 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
 
       {/* 태어난 시 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">태어난 시 (선택)</label>
+        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
+          태어난 시 {mode === "saju" ? "*" : "(선택)"}
+        </label>
         <select
           value={birthHour}
           onChange={(e) => setBirthHour(e.target.value)}
-          className={selectClasses}
+          className={`${inputClasses} appearance-none`}
         >
           <option value="">선택하세요</option>
-          {birthHours.map((h) => (
+          {hourOptions.map((h) => (
             <option key={h.value} value={h.value}>
               {h.label}{h.time ? ` (${h.time})` : ""}
             </option>
@@ -268,7 +212,10 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
           <input
             type="checkbox"
             checked={saveInfo}
-            onChange={handleSaveToggle}
+            onChange={() => {
+              if (!saveInfo) setShowPrivacyModal(true);
+              else setSaveInfo(false);
+            }}
             className="w-4 h-4 rounded border-arcana-border text-arcana-purple focus:ring-arcana-purple"
           />
           <span className="text-arcana-muted text-xs">
@@ -277,7 +224,6 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
         </label>
       )}
 
-      {/* 상담 시작 */}
       <motion.button
         type="button"
         whileHover={{ scale: 1.02 }}
@@ -290,12 +236,12 @@ export function UserInfoForm({ onSubmit, onBack, characterName }: UserInfoFormPr
             : "bg-arcana-card/50 text-arcana-muted/50 cursor-not-allowed"
         }`}
       >
-        상담 시작하기
+        {submitLabel}
       </motion.button>
 
       <PrivacyConsentModal
         isOpen={showPrivacyModal}
-        onAgree={handlePrivacyAgree}
+        onAgree={() => { setSaveInfo(true); setShowPrivacyModal(false); }}
         onCancel={() => setShowPrivacyModal(false)}
       />
     </div>

@@ -4,16 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSajuSessionStore, SajuUserInfo } from "@/hooks/useSajuSession";
+import { useSajuSessionStore } from "@/hooks/useSajuSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { getCharactersByGender } from "@/data/characters";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage, Topic } from "@/types/session";
-import { BIRTH_HOUR_MAP } from "@/data/saju/constants";
+import { UserInfo } from "@/types/user-info";
 
 const sajuTopics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "general", label: "종합 상담", icon: "✨", desc: "사주 전체를 종합적으로 해석" },
@@ -26,17 +27,6 @@ const sajuTopics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "fortune-full", label: "전체 운세", icon: "🌟", desc: "전체 대운 인생 로드맵" },
 ];
 
-const birthHourOptions = Object.entries(BIRTH_HOUR_MAP)
-  .filter(([k]) => k !== "unknown")
-  .map(([key, hour]) => {
-    const labels: Record<string, string> = {
-      ja: "자시 (23:00~01:00)", chuk: "축시 (01:00~03:00)", in: "인시 (03:00~05:00)",
-      myo: "묘시 (05:00~07:00)", jin: "진시 (07:00~09:00)", sa: "사시 (09:00~11:00)",
-      o: "오시 (11:00~13:00)", mi: "미시 (13:00~15:00)", sin: "신시 (15:00~17:00)",
-      yu: "유시 (17:00~19:00)", sul: "술시 (19:00~21:00)", hae: "해시 (21:00~23:00)",
-    };
-    return { value: key, label: labels[key] || key, hour };
-  });
 
 type PageStep = "character-select" | "info-input" | "topic-select";
 
@@ -50,11 +40,6 @@ export default function SajuPage() {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
   const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
 
-  // 입력 폼 상태
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [birthHour, setBirthHour] = useState("");
-  const [gender, setGender] = useState<"male" | "female" | "other">("male");
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
@@ -66,13 +51,11 @@ export default function SajuPage() {
     setStep("info-input");
   };
 
-  const handleInfoSubmit = () => {
-    if (!birthDate || !birthHour) return;
-    const info: SajuUserInfo = { name, birthDate, birthHour, gender };
+  const handleInfoSubmit = (info: UserInfo) => {
     setUserInfo(info);
     setDialogueMessages((prev) => [...prev, {
       id: crypto.randomUUID(), role: "character",
-      content: `${name || ""}님의 사주를 준비했어요. 어떤 주제로 상담받으실 건가요?`,
+      content: `${info.name || ""}님의 사주를 준비했어요. 어떤 주제로 상담받으실 건가요?`,
       mood: "smile", timestamp: new Date(),
     }]);
     setStep("topic-select");
@@ -139,53 +122,12 @@ export default function SajuPage() {
               </div>
             )}
             <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-8 py-3 overflow-y-auto">
-              <button onClick={handleBack} className="self-start mb-2 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-                ← 뒤로
-              </button>
-              <h3 className="font-serif font-bold text-base md:text-lg mb-1">생년월일 정보 입력</h3>
-              <p className="text-arcana-muted text-[10px] mb-3">정확한 사주 분석을 위해 필수 정보입니다</p>
-
-              <div className="space-y-2">
-                <div>
-                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">이름 (선택)</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="홍길동"
-                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">생년월일 (필수)</label>
-                  <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">태어난 시간 (필수)</label>
-                  <select value={birthHour} onChange={(e) => setBirthHour(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-arcana-surface border border-arcana-border text-arcana-text text-sm focus:border-arcana-purple focus:outline-none">
-                    <option value="">선택하세요</option>
-                    {birthHourOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-arcana-muted text-[10px] font-serif mb-0.5 block">성별 (필수)</label>
-                  <div className="flex gap-2">
-                    {(["male", "female", "other"] as const).map((g) => (
-                      <button key={g} onClick={() => setGender(g)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-serif font-bold border transition-colors ${
-                          gender === g ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple" : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
-                        }`}
-                      >
-                        {{ male: "남성", female: "여성", other: "기타" }[g]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button onClick={handleInfoSubmit} disabled={!birthDate || !birthHour}
-                  className="w-full mt-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
-                  사주 분석 시작
-                </button>
-              </div>
+              <UserInfoForm
+                mode="saju"
+                onSubmit={handleInfoSubmit}
+                onBack={handleBack}
+                characterName={selectedCharacter?.name}
+              />
             </div>
           </motion.div>
         ) : step === "topic-select" ? (
