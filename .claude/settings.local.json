@@ -78,7 +78,9 @@
       "WebFetch(domain:tarostarot.com)",
       "WebFetch(domain:labyrinthos.co)",
       "WebFetch(domain:science.howstuffworks.com)",
-      "WebFetch(domain:www.modernwaytarot.com)"
+      "WebFetch(domain:www.modernwaytarot.com)",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(grep:*)"
     ]
   }
 }
