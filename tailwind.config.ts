@@ -9,20 +9,8 @@ const config: Config = {
   darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        arcana: {
-          bg: "#0a0a1a",
-          surface: "#12122a",
-          card: "#1a1a3e",
-          border: "#2a2a5e",
-          purple: "#8b5cf6",
-          indigo: "#6366f1",
-          gold: "#f59e0b",
-          silver: "#c0c0c0",
-          text: "#e2e8f0",
-          muted: "#94a3b8",
-        },
-      },
+      // arcana 색상은 globals.css @theme 블록에서 CSS 변수로 정의 (Tailwind v4 방식)
+      // 여기에 정의하면 정적 hex값으로 컴파일되어 ThemeProvider의 런타임 CSS 변수 교체가 무시됨
       fontFamily: {
         sans: ["var(--font-noto-sans-kr)", "sans-serif"],
         display: ["var(--font-gothic-a1)", "sans-serif"],
