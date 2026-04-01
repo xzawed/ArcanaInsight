@@ -211,10 +211,9 @@ ${mood.desc}`;
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "grok-2-image",
+      model: "grok-imagine-image-pro",
       prompt,
       n: 1,
-      response_format: "b64_json",
     }),
   });
 

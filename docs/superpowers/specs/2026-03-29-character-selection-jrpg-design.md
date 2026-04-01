@@ -54,7 +54,7 @@
 
 - Grok API(`grok-imagine-image-pro`)로 4캐릭터 × 6표정 = 24장 생성
 - 프롬프트에 `"white background, full body, character only, no background elements, anime illustration"` 지정
-- 생성 후 흰색 배경을 프로그래밍으로 제거하여 투명 PNG 변환
+- 생성 후 배경을 프로그래밍으로 제거하여 투명 PNG 변환
 
 ### 캐릭터별 프롬프트 핵심
 
