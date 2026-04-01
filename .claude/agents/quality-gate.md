@@ -75,6 +75,14 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
   ```
   비표준 파일이 0개여야 통과. 있으면 해당 파일을 재생성한다.
 
+- **[필수] 캐릭터 이미지 테두리 투명도 — 표준 mask 값 일치 확인**:
+  캐릭터 이미지를 직접 표시하는 모든 컴포넌트/페이지에서 아래 표준값이 그대로 사용되는지 grep으로 확인:
+  ```bash
+  grep -rn "black 14%\|black 18%\|black 10%" src/ --include="*.tsx"
+  ```
+  `CharacterDisplay.tsx` 외에 캐릭터 이미지를 직접 렌더링하는 곳(예: `character/[id]/page.tsx`)도 동일한 수치를 사용해야 한다.
+  수치가 다르면 표준값(`top: 14%, bottom: 18%, left/right: 10%`)으로 수정한다.
+
 ### Phase 5: 문서 일관성
 
 - `README.md` — 캐릭터 수, 기능 목록이 코드와 일치

@@ -318,8 +318,29 @@ pnpm build             # 프로덕션 빌드 확인
 - **데스크탑(md 이상)**: 좌측 캐릭터 `md:w-1/2` + 우측 콘텐츠 `md:w-1/2` — 가로 5:5 비율 flex 레이아웃
 - **모바일(md 미만)**: `flex-col` 세로 배치 — 캐릭터 → 콘텐츠 순서
 - **캐릭터 이미지 블렌딩**: CSS mask로 투명도 그라디언트를 적용하여 배경과 자연스럽게 블렌딩
+  - 아래 표준값을 **반드시 그대로** 사용할 것 (수치 임의 변경 금지):
+    ```
+    top:         transparent 0% → black 14%
+    bottom:      transparent 0% → black 18%
+    left / right: transparent 0% → black 10%
+    ```
+  - 구현 패턴 (`CharacterDisplay.tsx` 기준):
+    ```tsx
+    style={{
+      WebkitMaskImage: [
+        "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+        "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+        "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+        "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+      ].join(", "),
+      WebkitMaskComposite: "destination-in, destination-in, destination-in",
+      maskImage: "...(동일)",
+      maskComposite: "intersect, intersect, intersect",
+    }}
+    ```
+  - `CharacterDisplay`를 사용하면 자동 적용됨. 직접 `<Image>`를 쓸 때는 이 스타일을 래퍼 div에 직접 적용
 - **컴포넌트**: `CharacterDisplay` + `TypingDialogue` 조합 사용
-- 이 규칙은 타로/사주 주제 선택 페이지, 세션 페이지, 결과 페이지, 향후 추가되는 모든 캐릭터 등장 페이지에 동일 적용
+- 이 규칙은 타로/사주 주제 선택 페이지, 세션 페이지, 결과 페이지, 캐릭터 상세 페이지, 향후 추가되는 모든 캐릭터 등장 페이지에 동일 적용
 
 ## 홈 페이지 구성
 

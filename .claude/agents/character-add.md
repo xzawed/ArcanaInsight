@@ -118,6 +118,39 @@ node scripts/generate-character-images-v2.mjs {id} smile
 > ```
 > 비표준 사이즈가 있으면 해당 표정을 재생성한다. 사이즈가 맞지 않으면 이후 작업을 중단하고 수정한다.
 
+## 이미지 표시 규칙
+
+캐릭터 이미지를 화면에 표시할 때 **항상** 아래 두 가지를 동시에 지킨다:
+
+### 1. 사이즈 규격 — 1408×768 (필수)
+생성 후 반드시 검증 (위 4단계 참조).
+
+### 2. 테두리 투명도 — CSS mask 표준값 (필수)
+모든 캐릭터 이미지 표시 컨테이너에 아래 mask 스타일을 적용한다. 수치 임의 변경 금지.
+
+```tsx
+// 표준 mask 스타일 — 수치를 절대 바꾸지 말 것
+style={{
+  WebkitMaskImage: [
+    "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+    "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+    "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+    "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+  ].join(", "),
+  WebkitMaskComposite: "destination-in, destination-in, destination-in",
+  maskImage: [
+    "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+    "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+    "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+    "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+  ].join(", "),
+  maskComposite: "intersect, intersect, intersect",
+}}
+```
+
+> `CharacterDisplay` 컴포넌트를 사용하면 자동으로 적용된다.
+> 직접 `<Image>`나 커스텀 레이아웃을 쓸 경우에만 위 스타일을 래퍼 div에 명시한다.
+
 ## 검증
 
 ```bash
@@ -132,4 +165,5 @@ pnpm lint
 - [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
 - [ ] 누끼 이미지 6개(default/smile/serious/surprised/wink/mystical) 존재
 - [ ] **모든 nukki 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
+- [ ] **캐릭터 이미지 표시 시 표준 mask 스타일 적용** (CharacterDisplay 사용 또는 직접 스타일 명시)
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치

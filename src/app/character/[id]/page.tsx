@@ -37,14 +37,31 @@ export default function CharacterPage() {
 
       <div className="relative z-20 min-h-[calc(100vh-7rem)] md:min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row">
         {/* 좌측: 캐릭터 이미지 */}
-        <div className="h-[40vh] md:h-auto md:w-[50%] md:flex-shrink-0 relative overflow-hidden">
+        <div
+          className="h-[40vh] md:h-auto md:w-[50%] md:flex-shrink-0 relative overflow-hidden"
+          style={{
+            WebkitMaskImage: [
+              "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+              "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+              "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+              "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+            ].join(", "),
+            WebkitMaskComposite: "destination-in, destination-in, destination-in" as string,
+            maskImage: [
+              "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
+              "linear-gradient(to top,    transparent 0%, black 18%, black 100%)",
+              "linear-gradient(to right,  transparent 0%, black 10%, black 100%)",
+              "linear-gradient(to left,   transparent 0%, black 10%, black 100%)",
+            ].join(", "),
+            maskComposite: "intersect, intersect, intersect",
+          }}
+        >
           <Image
             src={`/images/characters/${character.id}/nukki/idle.png`}
             alt={character.name}
             fill
             className="object-cover object-top"
           />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-arcana-bg/80 to-transparent pointer-events-none" />
         </div>
 
         {/* 우측: 캐릭터 정보 + 서비스 선택 */}
