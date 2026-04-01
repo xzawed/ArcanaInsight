@@ -95,7 +95,28 @@ mkdir -p public/images/characters/{id}/nukki
 
 > `idle.png`은 `default.png`과 동일한 이미지이므로, 필요 시 복사하거나 동일 파일을 사용한다.
 
-**이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용 가능.
+**이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용.
+
+```bash
+# 특정 캐릭터 전체 표정 생성
+node scripts/generate-character-images-v2.mjs {id}
+
+# 특정 캐릭터 + 특정 표정만 생성
+node scripts/generate-character-images-v2.mjs {id} smile
+```
+
+> **[필수] 이미지 사이즈 규격: 1408×768**
+> `grok-imagine-image-pro` API 기본 출력 사이즈이므로 별도 지정 불필요.
+> 생성 후 반드시 아래 명령으로 사이즈를 검증한다:
+> ```bash
+> python3 -c "
+> from PIL import Image; import glob
+> files = sorted(glob.glob('public/images/characters/{id}/nukki/*.png'))
+> bad = [(f, Image.open(f).size) for f in files if Image.open(f).size != (1408, 768)]
+> print('비표준 파일:', bad if bad else '없음 (모두 1408x768)')
+> "
+> ```
+> 비표준 사이즈가 있으면 해당 표정을 재생성한다. 사이즈가 맞지 않으면 이후 작업을 중단하고 수정한다.
 
 ## 검증
 
@@ -110,4 +131,5 @@ pnpm lint
 - [ ] `waitingLines`에 대사 추가됨
 - [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
 - [ ] 누끼 이미지 6개(default/smile/serious/surprised/wink/mystical) 존재
+- [ ] **모든 nukki 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치
