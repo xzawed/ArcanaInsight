@@ -4,8 +4,9 @@ import { getCharacterById } from "@/data/characters";
 import { Topic } from "@/types/session";
 
 const VALID_TOPICS: string[] = [
-  "love", "love-single", "love-couple", "finance", "career", "health", "general",
-  "fortune-3y", "fortune-5y", "fortune-full",
+  "saju-general", "saju-love-single", "saju-love-couple",
+  "saju-career", "saju-health", "saju-personality",
+  "saju-compatibility", "saju-auspicious-date",
 ];
 
 export async function POST(request: NextRequest) {
