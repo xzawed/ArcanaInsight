@@ -128,9 +128,13 @@ Cyber-fantasy background with neon grid patterns and floating holographic displa
   },
   ethan: {
     name: "에단",
-    base: `A breathtakingly beautiful anime young man with champagne gold hair with a subtle pink tint, soft and elegant waves framing his face.
-Mesmerizing heterochromia eyes — one deep emerald green, one luminous golden amber — each shining with an otherworldly mystical light, behind slim silver-framed glasses.
-Porcelain-white flawless skin with an almost ethereal translucence, like a noble elf in appearance but fully human. Idol-like visual perfection with an aura of transcendence that commands every room.
+    base: `CONSISTENT CHARACTER DESIGN — same face, same hair, same outfit in every image:
+Hair: ALWAYS champagne gold with subtle pink tint, ALWAYS medium-length jaw-line soft waves, NEVER short, NEVER long, exact same style every image.
+Eyes: ALWAYS heterochromia — left eye deep emerald green, right eye luminous golden amber — ALWAYS behind slim silver-framed glasses.
+Skin: ALWAYS porcelain-white flawless, ethereally translucent.
+
+A breathtakingly beautiful anime young man with the above consistent features.
+Idol-like visual perfection with an aura of transcendence that commands every room.
 Wears a formal and dignified black aristocratic ceremonial coat with intricate gold embroidery on the cuffs and lapels, high stiff collar, ornate gold buttons, and an elegant white jabot cravat at the neck. Exudes absolute nobility, purity, and refinement.
 A floating magical tome levitates beside him, its pages glowing with constellation patterns and golden arcane star runes orbiting around it.
 Grand celestial observatory background: towering bookshelves curving upward, a massive golden orrery, starlight and moonlight streaming through a vast domed glass ceiling, golden star particles drifting in the air.`,
