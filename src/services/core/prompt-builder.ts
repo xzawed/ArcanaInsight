@@ -5,7 +5,6 @@ import { Topic, SpreadDefinition } from "@/types/session";
 const topicLabels: Partial<Record<Topic, string>> = {
   love: "연애/관계", "love-single": "연애/관계 (솔로)", "love-couple": "연애/관계 (커플)",
   finance: "재정/금전", career: "직장/진로", health: "건강", general: "일반 상담",
-  "fortune-3y": "종합운세 (3년)", "fortune-5y": "종합운세 (5년)", "fortune-full": "종합운세 (전체)",
 };
 
 export function buildSystemPrompt(character: CharacterConfig): string {

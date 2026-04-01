@@ -3,13 +3,19 @@ import { SelectedCard } from "./card";
 export type Topic =
   // 타로 전용
   | "love" | "love-single" | "love-couple" | "finance" | "career" | "health" | "general"
-  // 사주 - 시간 기반 운세
-  | "saju-monthly" | "saju-this-month" | "saju-weekly" | "saju-next-year"
-  | "fortune-3y" | "fortune-5y" | "fortune-full"
-  // 사주 - 관계/이벤트
-  | "saju-compatibility" | "saju-love-timing" | "saju-career-timing" | "saju-auspicious-date"
-  // 사주 - 심층 분석
-  | "saju-personality" | "saju-aptitude" | "saju-constitution" | "saju-yongsin" | "saju-relationships";
+  // 사주 - 분석영역 (8개, 시간단위와 독립)
+  | "saju-general" | "saju-love-single" | "saju-love-couple"
+  | "saju-career" | "saju-health" | "saju-personality"
+  | "saju-compatibility" | "saju-auspicious-date";
+
+export type SajuTimeRange =
+  | "this-week"      // 이번 주 (일운 7일)
+  | "this-month"     // 이번 달 (월운)
+  | "this-year"      // 올해 (세운)
+  | "next-year"      // 내년 (세운)
+  | "three-year"     // 3년 (다년 세운)
+  | "five-year"      // 5년 (다년 세운)
+  | "full-fortune";  // 전체 대운
 export type SpreadType = "one-card" | "three-card" | "five-card"
   | "celtic-cross" | "relationship" | "horseshoe" | "decision"
   | "week-ahead" | "zodiac" | "tree-of-life";

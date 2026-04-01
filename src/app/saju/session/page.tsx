@@ -19,7 +19,7 @@ export default function SajuSessionPage() {
   const router = useRouter();
   const { currentMood, setMood } = useCharacterStore();
   const {
-    phase, topic, characterId, userInfo, chatMessages, readingResult, sajuData,
+    phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData,
     setPhase, setSessionId, addChatMessage, setReadingResult, setSajuData, setLoading,
   } = useSajuSessionStore();
 
@@ -28,7 +28,7 @@ export default function SajuSessionPage() {
   const resultBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!topic || !character || !userInfo) { router.push("/saju"); return; }
+    if (!topic || !character || !userInfo || !timeRange) { router.push("/saju"); return; }
 
     // 세션 생성
     fetch("/api/saju/session", {
@@ -75,6 +75,7 @@ export default function SajuSessionPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId: state.sessionId, topic: state.topic,
+          timeRange: state.timeRange, includeMonthly: state.includeMonthly,
           characterId: state.characterId, userInfo: state.userInfo,
         }),
       });

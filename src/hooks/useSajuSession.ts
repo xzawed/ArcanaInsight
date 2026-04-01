@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ChatMessage, Topic } from "@/types/session";
+import { ChatMessage, Topic, SajuTimeRange } from "@/types/session";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
 import { UserInfo } from "@/types/user-info";
@@ -13,6 +13,8 @@ interface SajuSessionState {
   sessionId: string | null;
   characterId: string | null;
   topic: Topic | null;
+  timeRange: SajuTimeRange | null;
+  includeMonthly: boolean;
   userInfo: UserInfo | null;
   chatMessages: ChatMessage[];
   readingResult: ReadingResult | null;
@@ -23,6 +25,8 @@ interface SajuSessionState {
   setSessionId: (id: string) => void;
   setCharacterId: (id: string) => void;
   setTopic: (topic: Topic) => void;
+  setTimeRange: (range: SajuTimeRange) => void;
+  setIncludeMonthly: (v: boolean) => void;
   setUserInfo: (info: UserInfo) => void;
   addChatMessage: (message: ChatMessage) => void;
   setReadingResult: (result: ReadingResult) => void;
@@ -36,6 +40,8 @@ const initialState = {
   sessionId: null,
   characterId: null,
   topic: null,
+  timeRange: null,
+  includeMonthly: false,
   userInfo: null,
   chatMessages: [],
   readingResult: null,
@@ -49,6 +55,8 @@ export const useSajuSessionStore = create<SajuSessionState>((set) => ({
   setSessionId: (id) => set({ sessionId: id }),
   setCharacterId: (id) => set({ characterId: id }),
   setTopic: (topic) => set({ topic }),
+  setTimeRange: (range) => set({ timeRange: range }),
+  setIncludeMonthly: (v) => set({ includeMonthly: v }),
   setUserInfo: (info) => set({ userInfo: info }),
   addChatMessage: (message) => set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   setReadingResult: (result) => set({ readingResult: result }),

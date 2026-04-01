@@ -2,53 +2,56 @@ import { NextRequest } from "next/server";
 import { SajuService } from "@/services/saju/saju-service";
 import { GrokProvider } from "@/services/core/grok-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
-import { Topic } from "@/types/session";
-import { getRequiresData } from "@/data/saju/categories";
+import { Topic, SajuTimeRange } from "@/types/session";
+import { sajuTimeOptions } from "@/data/saju/categories";
 
 const sajuService = new SajuService();
 const grokProvider = new GrokProvider();
 
 const VALID_TOPICS: Topic[] = [
-  // 타로 공용 (사주에서도 사용 가능)
-  "love", "love-single", "love-couple", "finance", "career", "health", "general",
-  // 사주 - 시간 기반
-  "saju-monthly", "saju-this-month", "saju-weekly", "saju-next-year",
-  "fortune-3y", "fortune-5y", "fortune-full",
-  // 사주 - 관계/이벤트
-  "saju-compatibility", "saju-love-timing", "saju-career-timing", "saju-auspicious-date",
-  // 사주 - 심층 분석
-  "saju-personality", "saju-aptitude", "saju-constitution", "saju-yongsin", "saju-relationships",
+  "saju-general", "saju-love-single", "saju-love-couple",
+  "saju-career", "saju-health", "saju-personality",
+  "saju-compatibility", "saju-auspicious-date",
 ];
 
-/** topic에 따른 calculator options 결정 */
-function resolveCalcOptions(topic: Topic) {
-  const req = getRequiresData(topic);
-  if (req === "monthly") return { monthly: true };
-  if (req === "daily") return { daily: true };
-  if (req === "yearly-multi") {
-    const counts: Partial<Record<Topic, number>> = { "saju-next-year": 1, "fortune-3y": 3, "fortune-5y": 5 };
-    return { yearlyMulti: counts[topic] ?? 1 };
+const VALID_TIME_RANGES: SajuTimeRange[] = [
+  "this-week", "this-month", "this-year", "next-year", "three-year", "five-year", "full-fortune",
+];
+
+/** timeRange + includeMonthly 기반 calculator options 결정 */
+function resolveCalcOptions(timeRange: SajuTimeRange, includeMonthly: boolean) {
+  const timeOption = sajuTimeOptions.find((t) => t.id === timeRange);
+  const opts = { ...timeOption?.calcOption };
+  if (includeMonthly && timeOption?.allowMonthly) {
+    opts.monthly = true;
   }
-  return undefined;
+  return opts;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, topic, characterId, userInfo } = body as {
-      sessionId?: string | null; topic: Topic; characterId?: string;
+    const { sessionId, topic, timeRange, includeMonthly, characterId, userInfo } = body as {
+      sessionId?: string | null;
+      topic: Topic;
+      timeRange: SajuTimeRange;
+      includeMonthly: boolean;
+      characterId?: string;
       userInfo: { name?: string; birthDate: string; birthHour: string; gender: "male" | "female" | "other" };
     };
 
-    if (!topic || !userInfo?.birthDate || !userInfo?.birthHour || !userInfo?.gender) {
-      return new Response(JSON.stringify({ error: "생년월일, 출생시간, 성별은 필수입니다." }), { status: 400, headers: { "Content-Type": "application/json" } });
+    if (!topic || !timeRange || !userInfo?.birthDate || !userInfo?.birthHour || !userInfo?.gender) {
+      return new Response(JSON.stringify({ error: "생년월일, 출생시간, 성별, 분석 설정은 필수입니다." }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
     if (!VALID_TOPICS.includes(topic)) {
       return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
+    if (!VALID_TIME_RANGES.includes(timeRange)) {
+      return new Response(JSON.stringify({ error: "Invalid timeRange" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
 
     // 사주팔자 계산 (서버 사이드)
-    const calcOptions = resolveCalcOptions(topic);
+    const calcOptions = resolveCalcOptions(timeRange, includeMonthly ?? false);
     const sajuResult = calculateSaju({
       birthDate: userInfo.birthDate,
       birthHour: userInfo.birthHour,
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest) {
     }, calcOptions);
 
     const systemPrompt = sajuService.getSystemPrompt(characterId);
-    const readingPrompt = sajuService.buildSajuPrompt(topic, sajuResult, userInfo);
+    const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo);
 
     // Supabase 클라이언트 (스트림 밖에서 미리 생성)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

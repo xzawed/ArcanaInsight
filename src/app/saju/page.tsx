@@ -13,22 +13,24 @@ import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { getCharactersByGender } from "@/data/characters";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
-import { ChatMessage, Topic } from "@/types/session";
+import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
-import { sajuCategories, SajuCategoryId } from "@/data/saju/categories";
+import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
 
-type PageStep = "character-select" | "info-input" | "category-select" | "topic-select";
+type PageStep = "character-select" | "info-input" | "saju-select";
 
 export default function SajuPage() {
   const router = useRouter();
-  const { setTopic, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
+  const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const sajuCharacters = getCharactersByGender(genderFilter);
 
   const [step, setStep] = useState<PageStep>("character-select");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<SajuCategoryId | null>(null);
   const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
+  const [selectedTime, setSelectedTime] = useState<SajuTimeRange | null>(null);
+  const [selectedArea, setSelectedArea] = useState<Topic | null>(null);
+  const [monthlyToggle, setMonthlyToggle] = useState(false);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
@@ -44,42 +46,29 @@ export default function SajuPage() {
     setUserInfo(info);
     setDialogueMessages((prev) => [...prev, {
       id: crypto.randomUUID(), role: "character",
-      content: `${info.name || ""}님의 사주를 확인했어요. 어떤 방식으로 상담받으실 건가요?`,
-      mood: "smile", timestamp: new Date(),
+      content: `${info.name || ""}님의 사주를 확인했어요. 어느 기간의 어떤 분야를 알아볼까요?`,
+      mood: "mystical", timestamp: new Date(),
     }]);
-    setStep("category-select");
+    setStep("saju-select");
   };
 
-  const handleCategorySelect = (categoryId: SajuCategoryId) => {
-    setSelectedCategory(categoryId);
-    const category = sajuCategories.find((c) => c.id === categoryId);
-    if (category) {
-      setDialogueMessages((prev) => [...prev, {
-        id: crypto.randomUUID(), role: "character",
-        content: `${category.label} 중에서 원하시는 주제를 선택해주세요.`,
-        mood: "mystical", timestamp: new Date(),
-      }]);
-    }
-    setStep("topic-select");
-  };
-
-  const handleTopicSelect = (topic: Topic) => {
-    setTopic(topic);
+  const handleStart = () => {
+    if (!selectedTime || !selectedArea) return;
+    setTopic(selectedArea);
+    setTimeRange(selectedTime);
+    setIncludeMonthly(monthlyToggle);
     setPhase("reading");
     router.push("/saju/session");
   };
 
   const handleBack = () => {
-    if (step === "topic-select") setStep("category-select");
-    else if (step === "category-select") setStep("info-input");
+    if (step === "saju-select") setStep("info-input");
     else if (step === "info-input") { setStep("character-select"); setSelectedCharacter(null); setDialogueMessages([]); }
     else { setStep("character-select"); setSelectedCharacter(null); }
   };
 
-  const currentCategory = sajuCategories.find((c) => c.id === selectedCategory);
-
-  // topic-select인데 카테고리가 없으면 (새로고침 등) category-select로 자동 복귀
-  const resolvedStep: PageStep = (step === "topic-select" && !currentCategory) ? "category-select" : step;
+  const selectedTimeOption = sajuTimeOptions.find((t) => t.id === selectedTime);
+  const canStart = selectedTime !== null && selectedArea !== null;
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -90,30 +79,25 @@ export default function SajuPage() {
       <ParticleOverlay density="low" className="z-10" />
 
       <AnimatePresence mode="wait">
-        {resolvedStep === "character-select" ? (
+        {step === "character-select" ? (
           <motion.div key="char-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="max-w-4xl mx-auto px-4 py-8 relative z-20">
             <div className="text-center mb-8">
               <h2 className="text-xl md:text-2xl font-serif font-bold mb-2">사주 상담사를 선택해주세요</h2>
               <p className="text-arcana-muted">사주명리학 전문 상담을 받아보세요</p>
             </div>
-            {/* 성별 필터 */}
             <div className="flex justify-center gap-2 mb-6">
               {(["all", "female", "male"] as GenderFilter[]).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setGenderFilter(f)}
+                <button key={f} onClick={() => setGenderFilter(f)}
                   className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
                     genderFilter === f
                       ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
                       : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
-                  }`}
-                >
+                  }`}>
                   {{ all: "전부", female: "여자", male: "남자" }[f]}
                 </button>
               ))}
             </div>
-
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {sajuCharacters.map((character, index) => (
                 <CharacterCard key={character.id} character={character} isSelected={selectedCharacter?.id === character.id}
@@ -122,7 +106,7 @@ export default function SajuPage() {
             </div>
           </motion.div>
 
-        ) : resolvedStep === "info-input" ? (
+        ) : step === "info-input" ? (
           <motion.div key="info-input" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
             className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
             {selectedCharacter && (
@@ -131,74 +115,14 @@ export default function SajuPage() {
               </div>
             )}
             <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-8 py-3 overflow-y-auto">
-              <UserInfoForm
-                mode="saju"
-                onSubmit={handleInfoSubmit}
-                onBack={handleBack}
-                characterName={selectedCharacter?.name}
-              />
+              <UserInfoForm mode="saju" onSubmit={handleInfoSubmit} onBack={handleBack} characterName={selectedCharacter?.name} />
             </div>
           </motion.div>
 
-        ) : resolvedStep === "category-select" ? (
-          <motion.div key="category-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+        ) : step === "saju-select" ? (
+          <motion.div key="saju-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
             className="relative z-20 min-h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden">
-            <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
-              {selectedCharacter && (
-                <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
-                  <CharacterDisplay character={selectedCharacter} mood="smile" className="w-full h-full" />
-                </div>
-              )}
-              <div className="flex-shrink-0 md:absolute md:bottom-0 md:left-0 md:right-0 z-20 md:px-4 md:pb-4">
-                <DialogueBox messages={dialogueMessages} characterName={selectedCharacter?.name} />
-              </div>
-            </div>
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 overflow-y-auto">
-              <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-                ← 정보 수정
-              </button>
-              <h3 className="font-serif font-bold text-base md:text-lg mb-1">상담 방식을 선택해주세요</h3>
-              <p className="text-arcana-muted text-xs mb-4">원하는 카테고리를 선택하면 세부 주제를 확인할 수 있어요</p>
-              <div className="space-y-3">
-                {sajuCategories.map((category, index) => (
-                  <motion.button
-                    key={category.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.08 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => handleCategorySelect(category.id)}
-                    className="w-full group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl mt-0.5">{category.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{category.label}</h4>
-                          <span className="text-arcana-muted text-xs border border-arcana-border rounded-full px-2 py-0.5">{category.topics.length}개 주제</span>
-                        </div>
-                        <p className="text-arcana-muted text-xs mb-2">{category.desc}</p>
-                        <div className="flex flex-wrap gap-1">
-                          {category.topics.slice(0, 4).map((topic) => (
-                            <span key={topic.id} className="text-arcana-muted/70 text-xs bg-arcana-surface/50 rounded-full px-2 py-0.5 border border-arcana-border/50">
-                              {topic.label}
-                            </span>
-                          ))}
-                          {category.topics.length > 4 && (
-                            <span className="text-arcana-muted/50 text-xs px-1">+{category.topics.length - 4}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-        ) : resolvedStep === "topic-select" && currentCategory ? (
-          <motion.div key="topic-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden">
+            {/* 좌측: 캐릭터 + 대사 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
               {selectedCharacter && (
                 <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
@@ -209,33 +133,91 @@ export default function SajuPage() {
                 <DialogueBox messages={dialogueMessages} characterName={selectedCharacter?.name} />
               </div>
             </div>
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 overflow-y-auto">
+
+            {/* 우측: 시간단위 x 분석영역 선택 */}
+            <div className="flex-1 md:w-[50%] flex flex-col px-4 md:px-6 py-4 overflow-y-auto">
               <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-                ← {currentCategory.label}
+                ← 정보 수정
               </button>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">{currentCategory.icon}</span>
-                <h3 className="font-serif font-bold text-base md:text-lg">{currentCategory.label}</h3>
+
+              {/* 시간단위 */}
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">⏳</span>
+                  <h3 className="font-serif font-bold text-sm text-arcana-purple">시간단위</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {sajuTimeOptions.map((opt) => (
+                    <button key={opt.id} onClick={() => {
+                      setSelectedTime(opt.id);
+                      if (!opt.allowMonthly) setMonthlyToggle(false);
+                    }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-bold border transition-all ${
+                        selectedTime === opt.id
+                          ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple shadow-sm shadow-arcana-purple/20"
+                          : "border-arcana-border text-arcana-muted hover:border-arcana-purple/60 bg-arcana-card/50"
+                      }`}>
+                      <span>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {selectedTimeOption && (
+                  <p className="text-arcana-muted text-xs mt-1.5 pl-1">{selectedTimeOption.desc}</p>
+                )}
               </div>
-              <div className="grid grid-cols-1 gap-2">
-                {currentCategory.topics.map((topic, index) => (
-                  <motion.button
-                    key={topic.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.06 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => handleTopicSelect(topic.id)}
-                    className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
-                  >
-                    <span className="text-xl">{topic.icon}</span>
-                    <div>
-                      <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
-                      <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
+
+              {/* 월별 상세 토글 — 년단위만 표시 */}
+              {selectedTimeOption?.allowMonthly && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+                  className="mb-5">
+                  <label className="flex items-center gap-2 cursor-pointer group w-fit">
+                    <div onClick={() => setMonthlyToggle(!monthlyToggle)}
+                      className={`w-9 h-5 rounded-full transition-colors relative ${monthlyToggle ? "bg-arcana-purple" : "bg-arcana-border"}`}>
+                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${monthlyToggle ? "translate-x-4" : "translate-x-0.5"}`} />
                     </div>
-                  </motion.button>
-                ))}
+                    <span className="text-xs font-serif text-arcana-muted group-hover:text-arcana-text transition-colors">
+                      월별 상세 포함
+                    </span>
+                  </label>
+                </motion.div>
+              )}
+
+              {/* 분석영역 */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">🔮</span>
+                  <h3 className="font-serif font-bold text-sm text-arcana-purple">분석영역</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {sajuAreaOptions.map((opt) => (
+                    <button key={opt.id} onClick={() => setSelectedArea(opt.id)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-left border transition-all ${
+                        selectedArea === opt.id
+                          ? "border-arcana-purple bg-arcana-purple/15 shadow-sm shadow-arcana-purple/20"
+                          : "border-arcana-border bg-arcana-card/50 hover:border-arcana-purple/60"
+                      }`}>
+                      <span className="text-lg flex-shrink-0">{opt.icon}</span>
+                      <div className="min-w-0">
+                        <p className={`text-xs font-serif font-bold truncate ${selectedArea === opt.id ? "text-arcana-purple" : "text-arcana-text"}`}>
+                          {opt.label}
+                        </p>
+                        <p className="text-arcana-muted text-[10px] truncate">{opt.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* 시작 버튼 */}
+              <button onClick={handleStart} disabled={!canStart}
+                className={`w-full py-3 rounded-full font-serif font-bold text-sm transition-all ${
+                  canStart
+                    ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/30 hover:opacity-90"
+                    : "bg-arcana-surface/50 text-arcana-muted border border-arcana-border cursor-not-allowed"
+                }`}>
+                {canStart ? "사주 분석 시작하기 →" : "시간단위와 분석영역을 선택해주세요"}
+              </button>
             </div>
           </motion.div>
         ) : null}

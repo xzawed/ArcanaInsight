@@ -14,14 +14,13 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 3. **주제 선택 + 카드 뽑기** → 주제 선택 후 카드 선택
 4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
 
-#### 사주 (5단계)
+#### 사주 (4단계)
 1. **캐릭터 선택** → 12명의 캐릭터 중 상담사 선택 (성별 필터 지원)
 2. **개인정보 입력** → 생년월일, 출생시간(12시진), 성별, 혈액형 + 제3자 제공 동의
-3. **카테고리 선택** → 시간 기반 운세 / 관계·이벤트 / 심층 분석 중 선택
-4. **세부 주제 선택** → 선택한 카테고리 내 세부 주제 선택 + 사주 계산
-5. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
+3. **시간단위 × 분석영역 선택** → 시간단위(7) + 분석영역(8) 동시 선택, 년단위 시 "월별 상세" 토글 옵션
+4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
 
-#### 주제(Topic) 목록 — 총 23개
+#### 주제(Topic) 목록 — 총 15개
 
 | 구분 | Topic 값 | 한국어 |
 |------|---------|--------|
@@ -32,22 +31,26 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 | 타로 | `career` | 직업/직장 |
 | 타로 | `health` | 건강 |
 | 타로 | `general` | 종합 |
-| 사주 — 시간 기반 | `saju-monthly` | 올해 월운 |
-| 사주 — 시간 기반 | `saju-this-month` | 이번 달 운세 |
-| 사주 — 시간 기반 | `saju-weekly` | 이번 주 일운 |
-| 사주 — 시간 기반 | `saju-next-year` | 내년 운세 |
-| 사주 — 시간 기반 | `fortune-3y` | 3년 운세 |
-| 사주 — 시간 기반 | `fortune-5y` | 5년 운세 |
-| 사주 — 시간 기반 | `fortune-full` | 전체 대운 |
-| 사주 — 관계/이벤트 | `saju-compatibility` | 궁합 분석 |
-| 사주 — 관계/이벤트 | `saju-love-timing` | 연애/결혼 시기 |
-| 사주 — 관계/이벤트 | `saju-career-timing` | 이직/사업 시기 |
-| 사주 — 관계/이벤트 | `saju-auspicious-date` | 택일 조언 |
-| 사주 — 심층 분석 | `saju-personality` | 성격 심층 분석 |
-| 사주 — 심층 분석 | `saju-aptitude` | 적성/직업 분석 |
-| 사주 — 심층 분석 | `saju-constitution` | 오행 체질 |
-| 사주 — 심층 분석 | `saju-yongsin` | 용신 활용법 |
-| 사주 — 심층 분석 | `saju-relationships` | 대인관계 패턴 |
+| 사주 분석영역 | `saju-general` | 종합운 |
+| 사주 분석영역 | `saju-love-single` | 연애운 (솔로) |
+| 사주 분석영역 | `saju-love-couple` | 연애운 (커플) |
+| 사주 분석영역 | `saju-career` | 직장·재물운 |
+| 사주 분석영역 | `saju-health` | 건강운 |
+| 사주 분석영역 | `saju-personality` | 성격·적성 |
+| 사주 분석영역 | `saju-compatibility` | 궁합 |
+| 사주 분석영역 | `saju-auspicious-date` | 택일 |
+
+#### 사주 시간단위(`SajuTimeRange`) — 7개 (`src/types/session.ts`)
+
+| 값 | 한국어 | 월별 상세 토글 |
+|----|--------|--------------|
+| `this-week` | 이번 주 | ✗ |
+| `this-month` | 이번 달 | ✗ |
+| `this-year` | 올해 | ✓ |
+| `next-year` | 내년 | ✓ |
+| `three-year` | 3년 | ✓ |
+| `five-year` | 5년 | ✓ |
+| `full-fortune` | 전체 대운 | ✗ |
 
 ## 기술 스택
 
