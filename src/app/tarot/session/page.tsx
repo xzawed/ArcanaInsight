@@ -37,7 +37,21 @@ export default function TarotSessionPage() {
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
   const [readingError, setReadingError] = useState(false);
   const [pendingConfirm, setPendingConfirm] = useState(false);
+  const [confirmEachCard, setConfirmEachCard] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("arcana-confirm-each-card") !== "false";
+    }
+    return true;
+  });
   const resultBottomRef = useRef<HTMLDivElement>(null);
+
+  const toggleConfirmMode = () => {
+    setConfirmEachCard((prev) => {
+      const next = !prev;
+      localStorage.setItem("arcana-confirm-each-card", String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!topic || !character || !spreadType) { router.push("/tarot"); return; }
@@ -93,22 +107,28 @@ export default function TarotSessionPage() {
     setRevealedPositions((prev) => [...prev, position]);
     setMood("surprised");
 
-    // 매 카드 선택마다 확인 요청
     const currentCount = selectedCards.length + 1;
     const isLast = currentCount >= requiredCards;
-    setPendingConfirm(true);
-    setTimeout(() => {
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: isLast
-          ? `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
-          : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${requiredCards})`,
-        mood: isLast ? "smile" : "default", timestamp: new Date(),
-      });
-      setMood(isLast ? "smile" : "default");
-    }, 500);
+
+    if (confirmEachCard || isLast) {
+      // 확인 모드 ON이거나 마지막 카드 → 확인 요청
+      setPendingConfirm(true);
+      setTimeout(() => {
+        addChatMessage({
+          id: crypto.randomUUID(), role: "character",
+          content: isLast
+            ? `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
+            : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${requiredCards})`,
+          mood: isLast ? "smile" : "default", timestamp: new Date(),
+        });
+        setMood(isLast ? "smile" : "default");
+      }, 500);
+    } else {
+      // 확인 모드 OFF + 중간 카드 → 즉시 다음 카드 선택 계속
+      setTimeout(() => setMood("default"), 800);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shuffledDeck, selectedCards, requiredCards, pendingConfirm]);
+  }, [shuffledDeck, selectedCards, requiredCards, pendingConfirm, confirmEachCard]);
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
@@ -357,13 +377,29 @@ export default function TarotSessionPage() {
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           {phase === "card-select" && (
-            <button
-              onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
-              className="self-start mb-2 text-arcana-muted text-xs hover:text-arcana-purple transition-colors"
-              type="button"
-            >
-              ← 상담사 다시 선택
-            </button>
+            <div className="flex items-center justify-between mb-2">
+              <button
+                onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                className="text-arcana-muted text-xs hover:text-arcana-purple transition-colors"
+                type="button"
+              >
+                ← 상담사 다시 선택
+              </button>
+              <button
+                onClick={toggleConfirmMode}
+                className={`flex items-center gap-1.5 text-[10px] font-serif px-2.5 py-1 rounded-full border transition-colors ${
+                  confirmEachCard
+                    ? "border-arcana-purple/40 bg-arcana-purple/10 text-arcana-purple"
+                    : "border-arcana-border text-arcana-muted hover:border-arcana-purple/30"
+                }`}
+                type="button"
+              >
+                <span className={`w-3 h-3 rounded-full border transition-colors ${
+                  confirmEachCard ? "bg-arcana-purple border-arcana-purple" : "border-arcana-muted"
+                }`} />
+                카드 확인
+              </button>
+            </div>
           )}
           <AnimatePresence mode="wait">
             {phase === "card-select" && (
