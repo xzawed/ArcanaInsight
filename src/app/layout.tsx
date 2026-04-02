@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Noto_Sans_KR, Gothic_A1, Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
@@ -48,7 +49,9 @@ export default function RootLayout({
           메인 콘텐츠로 이동
         </a>
         <ThemeProvider>
-          <FocusReset />
+          <Suspense fallback={null}>
+            <FocusReset />
+          </Suspense>
           <Header />
           <main id="main-content" className="flex-1 pt-14 pb-14 md:pb-0">
             {children}

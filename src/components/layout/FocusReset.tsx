@@ -1,20 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
-/** 페이지 전환 시 포커스를 초기화하고 스크롤을 최상단으로 이동 */
+/** 페이지 전환 시 포커스 해제 + 모든 스크롤 최상단 초기화 */
 export function FocusReset() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // 현재 포커스된 요소에서 포커스 해제
+    // 포커스 해제
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
-    // 스크롤 최상단으로
+
+    // 메인 윈도우 스크롤 초기화
     window.scrollTo(0, 0);
-  }, [pathname]);
+
+    // 내부 overflow 스크롤 컨테이너도 초기화
+    const scrollables = document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto'], [class*='overflow-y-scroll']");
+    scrollables.forEach((el) => {
+      el.scrollTop = 0;
+    });
+  }, [pathname, searchParams]);
 
   return null;
 }
