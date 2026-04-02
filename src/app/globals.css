@@ -119,6 +119,11 @@
     color: var(--color-arcana-text);
   }
 
+  /* 키보드 탐색 시에만 포커스 표시 (마우스/터치 클릭 시 제거) */
+  :focus {
+    outline: none;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-arcana-gold);
     outline-offset: 2px;
