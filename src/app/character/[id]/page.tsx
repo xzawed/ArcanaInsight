@@ -35,10 +35,10 @@ export default function CharacterPage() {
       </div>
       <ParticleOverlay density="low" className="z-10" />
 
-      <div className="relative z-20 min-h-[calc(100vh-7rem)] md:min-h-[calc(100vh-3.5rem)] flex flex-col md:flex-row">
+      <div className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
         {/* 좌측: 캐릭터 이미지 */}
         <div
-          className="h-[40vh] md:h-auto md:w-[50%] md:flex-shrink-0 relative overflow-hidden"
+          className="h-[25%] md:h-auto md:w-[50%] md:flex-shrink-0 relative overflow-hidden"
           style={{
             WebkitMaskImage: [
               "linear-gradient(to bottom, transparent 0%, black 14%, black 100%)",
@@ -65,7 +65,7 @@ export default function CharacterPage() {
         </div>
 
         {/* 우측: 캐릭터 정보 + 서비스 선택 */}
-        <div className="flex-1 md:w-[50%] flex flex-col justify-center px-6 md:px-10 py-6">
+        <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-6 md:px-10 py-4 md:py-6 overflow-y-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <button
               onClick={() => router.back()}

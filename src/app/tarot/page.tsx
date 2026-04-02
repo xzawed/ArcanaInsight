@@ -305,7 +305,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-7rem)] md:min-h-0 md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden"
+            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 캐릭터 + 대사: 모바일 세로 배치 / 데스크탑 좌측 50% 오버레이 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
@@ -330,7 +330,7 @@ function TarotPageContent() {
             </div>
 
             {/* 카테고리: 모바일 하단 / 데스크탑 우측 50% */}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
               <button
                 onClick={handleBack}
                 className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors"
@@ -366,7 +366,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 min-h-[calc(100vh-7rem)] md:min-h-0 md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row md:overflow-hidden"
+            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 캐릭터 + 대사 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
@@ -384,7 +384,7 @@ function TarotPageContent() {
             </div>
 
             {/* 스프레드 선택 */}
-            <div className="flex-1 md:w-[50%] flex flex-col justify-center px-4 md:px-6 py-4 md:py-8">
+            <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
               <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
                 ← 주제 다시 선택
               </button>
@@ -437,7 +437,7 @@ function TarotPageContent() {
           >
             {/* 캐릭터 */}
             {selectedCharacter && (
-              <div className="h-[35%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
+              <div className="h-[25%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
                 <div className="absolute inset-0 overflow-hidden">
                   <CharacterDisplay
                     character={selectedCharacter}
