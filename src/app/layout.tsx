@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { FocusReset } from "@/components/layout/FocusReset";
 
 const notoSansKr = Noto_Sans_KR({
   subsets: ["latin"],
@@ -47,6 +48,7 @@ export default function RootLayout({
           메인 콘텐츠로 이동
         </a>
         <ThemeProvider>
+          <FocusReset />
           <Header />
           <main id="main-content" className="flex-1 pt-14 pb-14 md:pb-0">
             {children}
