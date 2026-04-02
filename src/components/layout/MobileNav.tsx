@@ -43,7 +43,8 @@ export function MobileNav() {
           );
 
           return (
-            <Link key={item.href} href={item.href} className="flex items-center justify-center">
+            <Link key={item.href} href={item.href} className="flex items-center justify-center"
+              onClick={(e) => { (e.currentTarget as HTMLElement).blur(); }}>
               {content}
             </Link>
           );
