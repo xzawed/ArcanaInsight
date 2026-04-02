@@ -38,12 +38,12 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
       return { cardW: 40, cardH: 60, maxDisplay: 12, overlap: 5, yOffset: 2 };
     }
 
-    // 카드 크기: 컨테이너 높이의 55%, 2:3 비율
-    let cardH = Math.min(containerHeight * 0.55, 160);
+    // 카드 크기: 컨테이너 높이의 45%, 2:3 비율 (아크 Y offset 공간 확보)
+    let cardH = Math.min(containerHeight * 0.45, 140);
     let cardW = cardH / 1.5;
 
     // 클램프
-    cardW = Math.max(Math.min(Math.round(cardW), 100), 28);
+    cardW = Math.max(Math.min(Math.round(cardW), 90), 28);
     cardH = Math.round(cardW * 1.5);
 
     // 사용 가능 너비 (양쪽 약간 여유)
@@ -105,19 +105,19 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   return (
     <div
       ref={containerRef}
-      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full overflow-hidden cursor-pointer"
+      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full cursor-pointer"
       onClick={handleContainerClick}
     >
       {containerWidth > 0 && displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
         const half = totalCards / 2;
-        // 아크 각도: 카드 수에 따라 조절 (많으면 총 각도 넓게, 개별 각도는 좁게)
-        const maxArc = Math.min(totalCards * 1.2, 60); // 최대 60도 범위
+        // 아크 각도: 카드 수에 따라 조절 (많으면 총 각도 넓게, 개별 각도는 ��게)
+        const maxArc = Math.min(totalCards * 0.9, 40); // ��대 40도 범위 (겹침 방지)
         const angle = isSpread ? (index - half) * (maxArc / totalCards) : 0;
         const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 1.5;
         const yOffset = isSpread
-          ? Math.pow(Math.abs(index - half) / half, 2) * layout.cardH * 0.25
+          ? Math.pow(Math.abs(index - half) / half, 2) * layout.cardH * 0.15
           : index * -0.3;
 
         return (
