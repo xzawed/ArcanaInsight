@@ -250,10 +250,11 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
         <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
           태어난 시 {mode === "saju" ? "*" : "(선택)"}
         </label>
+        <div className="relative">
         <select
           value={birthHour}
           onChange={(e) => setBirthHour(e.target.value)}
-          className={`${inputClasses} appearance-none`}
+          className={`${inputClasses} appearance-none pr-8`}
         >
           <option value="">선택하세요</option>
           {hourOptions.map((h) => (
@@ -262,6 +263,8 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
             </option>
           ))}
         </select>
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-arcana-muted pointer-events-none text-xs">▼</span>
+        </div>
       </div>
 
       {/* 정보 저장 동의 (로그인/비로그인 모두 표시) */}

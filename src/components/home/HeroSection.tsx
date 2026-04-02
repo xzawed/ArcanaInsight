@@ -15,7 +15,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative h-screen flex flex-col overflow-hidden">
+    <section className="relative h-[100dvh] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-arcana-bg/50" />

@@ -110,13 +110,33 @@
 }
 
 @layer base {
+  /* iOS 터치 하이라이트 제거 + 더블탭 줌 방지 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button, a, [role="button"], select, input {
+    touch-action: manipulation;
+  }
+
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
     background-color: var(--color-arcana-bg);
     color: var(--color-arcana-text);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* iOS date input 텍스트 정렬 */
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+  }
+
+  /* iOS 스크롤 컨테이너 관성 스크롤 */
+  .overflow-y-auto, .overflow-auto {
+    -webkit-overflow-scrolling: touch;
   }
 
   /* 키보드 탐색 시에만 포커스 표시 (마우스/터치 클릭 시 제거) */

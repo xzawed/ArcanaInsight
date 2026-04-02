@@ -332,7 +332,7 @@ export default function TarotSessionPage() {
   const effectTheme = character?.effectTheme;
 
   return (
-    <div className="relative h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
+    <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       {/* 배경 */}
       <div className="absolute inset-0 -z-10">
         <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority />

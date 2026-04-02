@@ -20,7 +20,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-arcana-bg/90 backdrop-blur-md border-t border-arcana-border">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-arcana-bg/90 backdrop-blur-md border-t border-arcana-border pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around py-1">
         {navItems.map((item) => {
           const isActive = item.href === "/" || item.href === "/#daily-card"

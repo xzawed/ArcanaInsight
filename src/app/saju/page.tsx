@@ -108,7 +108,7 @@ export default function SajuPage() {
 
         ) : step === "info-input" ? (
           <motion.div key="info-input" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
             {selectedCharacter && (
               <div className="h-[25%] md:h-auto md:w-[50%] flex-shrink-0 overflow-hidden">
                 <CharacterDisplay character={selectedCharacter} mood="smile" className="w-full h-full" />
@@ -121,7 +121,7 @@ export default function SajuPage() {
 
         ) : step === "saju-select" ? (
           <motion.div key="saju-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
             {/* 좌측: 캐릭터 + 대사 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
               {selectedCharacter && (

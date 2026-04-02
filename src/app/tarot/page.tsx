@@ -234,7 +234,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 좌측: 모바일 상단 25% / 데스크탑 50% */}
             <div className="h-[25%] md:h-auto w-full md:w-[50%] flex-shrink-0 relative">
@@ -305,7 +305,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 캐릭터 + 대사: 모바일 세로 배치 / 데스크탑 좌측 50% 오버레이 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
@@ -366,7 +366,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 캐릭터 + 대사 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
@@ -433,7 +433,7 @@ function TarotPageContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            className="relative z-20 h-[calc(100vh-7rem)] md:h-[calc(100vh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
+            className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden"
           >
             {/* 캐릭터 */}
             {selectedCharacter && (

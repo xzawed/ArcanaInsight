@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Noto_Sans_KR, Gothic_A1, Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
@@ -27,6 +27,12 @@ const notoSerifKr = Noto_Serif_KR({
   variable: "--font-noto-serif-kr",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "ArcanaInsight — 타로 & 운세 상담",
