@@ -1,12 +1,21 @@
-/** AI 응답 텍스트에서 이스케이프/코드 잔여물을 정리 */
+/** AI 응답 텍스트에서 이스케이프/JSON 잔여물을 정리 */
 export function cleanReadingText(text: string): string {
   return text
+    // JSON 구조 잔여물 제거
+    .replace(/"(cardInterpretations|cardId|position|interpretation|overallReading|topicReading|advice|isReversed|result|done|error)":\s*/g, "")
+    .replace(/^\s*\[\s*\{/gm, "")
+    .replace(/\}\s*\]\s*$/gm, "")
+    .replace(/^\s*\{|\}\s*$/g, "")
+    // 이스케이프 문자 처리
     .replace(/\\n\\n/g, "\n\n")
     .replace(/\\n/g, "\n")
     .replace(/\\r/g, "")
     .replace(/\\t/g, " ")
     .replace(/\\"/g, '"')
     .replace(/\\/g, "")
+    // 줄 정리
+    .replace(/^["']+|["']+$/gm, "")
+    .replace(/,\s*$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }

@@ -209,10 +209,10 @@ ${instruction}
       .replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "")
       .replace(/```[\s\S]*?```/g, "")
       .replace(/[{}[\]]/g, "")
-      .replace(/"(?:overallReading|topicReading|advice)"\s*:/g, "")
+      .replace(/"[a-zA-Z_]+"\s*:/g, "")    // 모든 JSON 키 패턴 제거
       .replace(/"\s*,?\s*\n/g, "\n")
-      .replace(/^\s*"/, "")
-      .replace(/",?\s*$/, "")
+      .replace(/^\s*"/gm, "")
+      .replace(/",?\s*$/gm, "")
       .replace(/\\n/g, "\n")
       .replace(/\\"/g, '"')
       .replace(/,\s*\n/g, "\n")

@@ -2,25 +2,13 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { DeckManager } from "@/services/tarot/deck-manager";
+import { cleanReadingText } from "@/services/core/text-cleaner";
 import { spreads } from "@/data/spreads";
 import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "./ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 
 const deckManager = new DeckManager();
-
-/** DB에서 읽은 텍스트의 이스케이프 잔여물 정리 */
-function cleanText(text: string): string {
-  return text
-    .replace(/\\n\\n/g, "\n\n")
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "")
-    .replace(/\\t/g, " ")
-    .replace(/\\"/g, '"')
-    .replace(/\\/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,10 +20,10 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   const rawInterpretations = reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[];
   const interpretations = rawInterpretations.map((interp) => ({
     ...interp,
-    interpretation: cleanText(interp.interpretation),
+    interpretation: cleanReadingText(interp.interpretation),
   }));
-  const overallReading = cleanText(reading.overall_reading || "");
-  const advice = cleanText(reading.advice || "");
+  const overallReading = cleanReadingText(reading.overall_reading || "");
+  const advice = cleanReadingText(reading.advice || "");
 
   return (
     <div className="relative min-h-screen overflow-hidden">
