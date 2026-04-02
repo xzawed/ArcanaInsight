@@ -182,7 +182,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">☯</span>
                       <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                     </div>
-                    <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.overallReading}</p>
+                    <p className="text-arcana-text reading-text">{readingResult.overallReading}</p>
                   </div>
                 )}
 
@@ -192,7 +192,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">🔍</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</span>
                     </div>
-                    <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.topicReading}</p>
+                    <p className="text-arcana-text reading-text">{readingResult.topicReading}</p>
                   </div>
                 )}
 
@@ -204,7 +204,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">✨</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                     </div>
-                    <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.advice}</p>
+                    <p className="text-arcana-text reading-text">{readingResult.advice}</p>
                   </div>
                 )}
                 <div ref={resultBottomRef} />

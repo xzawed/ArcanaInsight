@@ -495,7 +495,7 @@ export default function TarotSessionPage() {
                           <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
                           <span className="text-arcana-text font-bold text-sm md:text-base">{card?.card.nameKo || ""}</span>
                         </div>
-                        <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{interp.interpretation}</p>
+                        <p className="text-arcana-text reading-text">{interp.interpretation}</p>
                       </div>
                     );
                   })}
@@ -507,7 +507,7 @@ export default function TarotSessionPage() {
                         <span className="text-lg">🔮</span>
                         <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                       </div>
-                      <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.overallReading}</p>
+                      <p className="text-arcana-text reading-text">{readingResult.overallReading}</p>
                     </div>
                   )}
 
@@ -518,7 +518,7 @@ export default function TarotSessionPage() {
                         <span className="text-lg">✨</span>
                         <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                       </div>
-                      <p className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap">{readingResult.advice}</p>
+                      <p className="text-arcana-text reading-text">{readingResult.advice}</p>
                     </div>
                   )}
 
