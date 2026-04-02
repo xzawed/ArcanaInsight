@@ -342,6 +342,53 @@ pnpm build             # 프로덕션 빌드 확인
 - **컴포넌트**: `CharacterDisplay` + `TypingDialogue` 조합 사용
 - 이 규칙은 타로/사주 주제 선택 페이지, 세션 페이지, 결과 페이지, 캐릭터 상세 페이지, 향후 추가되는 모든 캐릭터 등장 페이지에 동일 적용
 
+## 크로스 플랫폼 품질 규칙 (필수 준수)
+
+모든 UI 변경 시 데스크탑(Chrome), 모바일(iOS Safari, Android Chrome) 동일 품질을 보장해야 합니다.
+
+### 뷰포트 높이
+
+- **`100vh` 사용 금지** — iOS Safari에서 주소창/하단바 포함 높이로 계산되어 콘텐츠가 가려짐
+- **`100dvh`(Dynamic Viewport Height) 사용** — 실제 보이는 영역에 정확히 맞춤
+- 패턴: `h-[calc(100dvh-7rem)]` (모바일) / `md:h-[calc(100dvh-3.5rem)]` (데스크탑)
+- `min-h-screen`은 페이지 전체 최소 높이 용도로만 허용
+
+### Safe Area (노치/홈바 대응)
+
+- `layout.tsx`에 `viewport: { viewportFit: "cover" }` 설정 유지
+- `globals.css`에 `body { padding-top: env(safe-area-inset-top) }` 유지
+- **하단 고정 요소**(MobileNav 등)는 반드시 `pb-[env(safe-area-inset-bottom)]` 적용
+- 새로운 `position: fixed` bottom 요소 추가 시 safe area 패딩 필수
+
+### 터치 인터랙션
+
+- `-webkit-tap-highlight-color: transparent` 전역 적용 유지 (globals.css)
+- 버튼/링크/입력에 `touch-action: manipulation` 전역 적용 유지 (더블탭 줌 방지)
+- `overflow-x: clip` 사용 (`hidden` 대신 — iOS 스크롤 바운스 호환)
+
+### 포커스 관리
+
+- `:focus { outline: none }` + `:focus-visible { outline: ... }` 유지 — 마우스/터치는 포커스 숨김, 키보드만 표시
+- 페이지 전환 시 `FocusReset` 컴포넌트가 자동으로 포커스 해제 + 스크롤 초기화
+- `<Link>`, `<button>` 클릭 후 포커스가 남는 문제 → CSS 전역 처리로 해결됨
+
+### 스크롤 컨테이너
+
+- `overflow-y-auto` 사용 시 `-webkit-overflow-scrolling: touch` 자동 적용 (globals.css)
+- 내부 스크롤 컨테이너는 `FocusReset`이 페이지 전환 시 `scrollTop = 0` 자동 초기화
+
+### 폼 입력 (iOS 대응)
+
+- `input[type="date"]` — iOS Safari 네이티브 피커 호환, 텍스트 좌측 정렬 유지
+- `<select>` — `appearance-none` 사용 시 반드시 커스텀 화살표 아이콘(▼) 추가
+- 키보드가 올라올 때 `position: fixed` 요소 주의 — 입력 폼이 가려지지 않도록 확인
+
+### 프레임 크기 통일
+
+- 캐릭터 등장 페이지의 모바일 캐릭터 영역: **`h-[25%]`** 통일
+- 콘텐츠 영역: **`overflow-y-auto`** 필수 (뷰포트 내 스크롤 보장)
+- 모든 스텝/페이지에서 동일한 높이 계산식 사용
+
 ## 홈 페이지 구성
 
 `src/app/page.tsx`에서 10개 섹션을 순서대로 조합:
