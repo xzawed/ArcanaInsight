@@ -4,6 +4,8 @@
 >   → 캐릭터 선택은 `getAvailableCharacters()` + `getCharactersByGender()` 사용
 > - `src/app/tarot/page.tsx`에서 `getCharactersByService("tarot")` 호출 미적용
 > - 참조 스펙 파일: `docs/superpowers/specs/07-saju-service-design.md`
+>
+> **⚠️ 이 문서는 개발 히스토리 기록입니다.** 현재 구현 상태는 `CLAUDE.md`를 참조하세요.
 
 # 사주 서비스 구현 계획
 

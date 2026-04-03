@@ -6,6 +6,8 @@
 > - SpriteAnimator: 스프라이트 시트 방식 → **단일 누끼 이미지 + Framer Motion** 방식으로 변경
 > - 레이아웃: 좌 40%/우 55% → **좌 50%/우 50%** (5:5 공통 규칙 통일)
 > - `getCharacterByService()` 미구현 → `getAvailableCharacters()` + `getCharactersByGender()` 사용
+>
+> **⚠️ 역사적 설계 문서** — 최종 구현 상태는 `CLAUDE.md` 참조
 
 # 캐릭터 선택 + JRPG 누끼 스타일 — 디자인 스펙
 

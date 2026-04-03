@@ -97,18 +97,21 @@ export default function TarotSessionPage() {
   }, [topic]);
 
   const handleCardSelect = useCallback((index: number) => {
-    if (selectedCards.length >= requiredCards || pendingConfirm) return;
+    // 항상 fresh 스토어 상태를 읽어 stale closure 방지
+    const { selectedCards: currentCards, requiredCards: required } = useSessionStore.getState();
+    if (currentCards.length >= required || pendingConfirm) return;
+
     const card = shuffledDeck[index];
     const isReversed = Math.random() > 0.5;
-    const position = selectedCards.length;
+    const position = currentCards.length;
     const selected: SelectedCard = { card, position, isReversed, selectedAt: new Date() };
     selectCard(selected);
     setSelectedIndices((prev) => [...prev, index]);
     setRevealedPositions((prev) => [...prev, position]);
     setMood("surprised");
 
-    const currentCount = selectedCards.length + 1;
-    const isLast = currentCount >= requiredCards;
+    const currentCount = currentCards.length + 1;
+    const isLast = currentCount >= required;
 
     if (confirmEachCard || isLast) {
       // 확인 모드 ON이거나 마지막 카드 → 확인 요청
@@ -117,8 +120,8 @@ export default function TarotSessionPage() {
         addChatMessage({
           id: crypto.randomUUID(), role: "character",
           content: isLast
-            ? `${requiredCards}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
-            : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${requiredCards})`,
+            ? `${required}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
+            : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${required})`,
           mood: isLast ? "smile" : "default", timestamp: new Date(),
         });
         setMood(isLast ? "smile" : "default");
@@ -127,8 +130,7 @@ export default function TarotSessionPage() {
       // 확인 모드 OFF + 중간 카드 → 즉시 다음 카드 선택 계속
       setTimeout(() => setMood("default"), 800);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shuffledDeck, selectedCards, requiredCards, pendingConfirm, confirmEachCard]);
+  }, [shuffledDeck, pendingConfirm, confirmEachCard, selectCard, setMood, addChatMessage]);
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
