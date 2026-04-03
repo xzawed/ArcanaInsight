@@ -3,6 +3,8 @@
 > - SpriteAnimator: 스프라이트 시트 방식 → **단일 누끼 이미지 + Framer Motion** 방식 채택
 > - MOOD_TO_FILE 매핑: `wink→"happy"` → 실제 `wink→"wink"`, `smile→"smile"` (각자 고유 파일)
 > - 대상 캐릭터: 4명 → **12명** (성별 필터 `GenderFilter` 컴포넌트 추가)
+>
+> **⚠️ 이 문서는 개발 히스토리 기록입니다.** 현재 구현 상태는 `CLAUDE.md`를 참조하세요.
 
 # 캐릭터 선택 + JRPG 누끼 스타일 — 구현 계획
 

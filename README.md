@@ -133,7 +133,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 | 사이즈 | **1408×768** (grok-imagine-image-pro API 기본 출력) |
 | 포맷 | PNG (투명 배경) |
 | 경로 | `/images/characters/{id}/nukki/{mood}.png` |
-| 표정 종류 | default · idle · smile · serious · surprised · wink · mystical |
+| 표정 종류 | default · smile · serious · surprised · wink · mystical |
 
 ### 테두리 투명도 (CSS mask)
 

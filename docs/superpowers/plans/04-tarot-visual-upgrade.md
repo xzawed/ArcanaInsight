@@ -3,6 +3,8 @@
 > - **SpriteAnimator 방식 교체**: 이 플랜의 스프라이트 시트(CSS background-position) 방식은 미채택
 >   → 실제로는 02번 플랜의 **단일 누끼 이미지 + Framer Motion** 방식으로 구현
 > - CharacterDisplay props: `characterId` prop이 실제로 SpriteAnimator에 전달됨
+>
+> **⚠️ 이 문서는 개발 히스토리 기록입니다.** 현재 구현 상태는 `CLAUDE.md`를 참조하세요.
 
 # 타로 상담 페이지 비주얼 대개선 — 구현 계획
 

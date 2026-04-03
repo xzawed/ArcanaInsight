@@ -6,6 +6,8 @@
 > - `CharacterConfig`의 `serviceType` 필드 없음 → `gender`, `speciality`로 대체
 > - 미생성 파일: `CardSwiper.tsx`, `ChatWindow.tsx`, `session-manager.ts`, `services/tarot/prompts/`
 > - Topic 타입: 5개 → **10개** (love-single/love-couple/fortune-3y/5y/full 추가)
+>
+> **⚠️ 이 문서는 개발 히스토리 기록입니다.** 현재 구현 상태는 `CLAUDE.md`를 참조하세요.
 
 # ArcanaInsight MVP Implementation Plan
 
@@ -3571,7 +3573,7 @@ export default function TarotSessionPage() {
           </button>
           <button
             onClick={() => {
-              // TODO: share functionality with share_token
+              // 구현 완료: share_token 기반 URL 공유
             }}
             className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-sm hover:opacity-90 transition-opacity"
           >

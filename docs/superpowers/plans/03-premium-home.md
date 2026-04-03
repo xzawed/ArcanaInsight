@@ -3,6 +3,8 @@
 > - 홈 섹션: 8개 → **실제 10개** (GenderFilter, SkinGallery 추가)
 > - 캐릭터 갤러리: `char.speciality`, `char.description` 사용 — `CharacterConfig`에 실제 존재함
 > - CharacterGallery Link href: 캐릭터별 `/character/[id]` 라우트로 이동
+>
+> **⚠️ 이 문서는 개발 히스토리 기록입니다.** 현재 구현 상태는 `CLAUDE.md`를 참조하세요.
 
 # 홈 페이지 전면 리뉴얼 — 구현 계획
 

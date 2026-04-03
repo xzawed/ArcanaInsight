@@ -5,6 +5,9 @@
 > - DivinationService 인터페이스 시그니처 변경 (`getCharacter()` → `getSystemPrompt(characterId?)`)
 > - 파일 구조 일부 미생성: `CardSwiper.tsx`, `ChatWindow.tsx`, `session-manager.ts`, `services/tarot/prompts/` 없음
 > - 실제 추가된 파일: `text-cleaner.ts`, `waiting-lines.ts`, `character/[id]/page.tsx`, `privacy/`, `terms/`
+> - Next.js 14+ → 실제 **16.2**
+>
+> **⚠️ 역사적 설계 문서** — 최종 구현 상태는 `CLAUDE.md` 참조
 
 # ArcanaInsight — 운세 종합 콘텐츠 플랫폼 기획서
 
