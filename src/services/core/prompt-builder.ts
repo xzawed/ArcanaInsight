@@ -41,6 +41,12 @@ export function buildSystemPrompt(character: CharacterConfig): string {
 - 문단 사이에 빈 줄(\\n\\n)을 넣어 구분합니다.
 - 하나의 문단은 2~4문장으로 구성합니다.
 
+중요 규칙 — 카드별 해석 독립성:
+- 각 카드의 해석(interpretation)은 해당 위치(position)의 관점에서만 작성합니다.
+- 다른 위치의 카드를 참조하거나 중복 언급하지 않습니다.
+- 카드 간 상호작용, 전체 흐름 분석은 반드시 종합 해석(overallReading)에서만 다룹니다.
+- 이 규칙은 카드 수에 관계없이 모든 스프레드에 동일하게 적용됩니다.
+
 응답 형식 — 절대 규칙:
 - 반드시 아래 JSON 형식으로만 응답합니다.
 - JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
@@ -56,6 +62,8 @@ export function buildSystemPrompt(character: CharacterConfig): string {
 }
 
 export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], spread: SpreadDefinition): string {
+  const cardCount = selectedCards.length;
+
   const cardDescriptions = selectedCards.map((sc) => {
     const pos = spread.positions[sc.position] ?? { labelKo: `위치 ${sc.position + 1}`, label: `Position ${sc.position + 1}` };
     const direction = sc.isReversed ? "역방향" : "정방향";
@@ -74,13 +82,44 @@ export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], 
     ? "\n\n상담 맥락: 현재 연인/파트너가 있는 커플 상태입니다. 관계의 현재 상태, 소통 방식, 갈등 해결, 관계 발전 방향, 신뢰와 친밀감 등을 중심으로 해석해주세요."
     : "";
 
+  // 카드 수에 따른 해석 깊이 지침
+  const depthGuide = cardCount <= 3
+    ? `해석 깊이 지침 (${cardCount}장 스프레드):
+- 각 카드 해석(interpretation)은 3~4문단으로 상세하게 작성합니다.
+- 카드의 상징, 위치 의미, 실생활 적용을 풍부하게 풀어줍니다.
+- 종합 해석은 카드 간 상호작용을 깊이 분석합니다.`
+    : cardCount <= 7
+    ? `해석 깊이 지침 (${cardCount}장 스프레드):
+- 각 카드 해석(interpretation)은 2~3문단으로 핵심을 집중합니다.
+- 해당 위치(position)의 관점에서만 해석하고, 다른 위치의 카드 내용을 중복하지 않습니다.
+- 종합 해석에서 카드 간 관계와 전체 흐름을 집중적으로 분석합니다.`
+    : `해석 깊이 지침 (${cardCount}장 스프레드):
+- 각 카드 해석(interpretation)은 1~2문단으로 간결하되 핵심 메시지를 명확히 전달합니다.
+- 해당 위치(position)의 관점에서만 해석합니다. 절대 다른 위치의 카드를 언급하지 않습니다.
+- 종합 해석(overallReading)에서 전체 카드의 흐름, 상호작용, 핵심 메시지를 4~5문단으로 충실히 분석합니다.
+- 카드가 많으므로 각 개별 해석은 짧게, 종합 해석에서 깊이를 줍니다.`;
+
+  // 스프레드 구조 설명
+  const positionGuide = spread.positions.map((p) =>
+    `  - 위치 ${p.index} "${p.labelKo}": 이 위치에서 카드는 "${p.label}" 관점에서 해석합니다.`
+  ).join("\n");
+
   return `상담 주제: ${topicLabels[topic] ?? topic}
-스프레드: ${spread.nameKo} (${spread.name})${topicContext}
+스프레드: ${spread.nameKo} (${spread.name})
+스프레드 설명: ${spread.description}${topicContext}
+
+${depthGuide}
+
+스프레드 각 위치의 해석 관점:
+${positionGuide}
 
 선택된 카드:
 ${cardDescriptions}
 
-위 카드들을 해석해주세요. 각 카드의 핵심 의미와 카드 간 관계를 간결하게 분석해주세요.`;
+위 카드들을 해석해주세요.
+- 각 카드의 cardId와 position 값을 JSON 응답에 정확히 반환하세요.
+- 카드별 해석은 반드시 해당 위치의 관점에서 독립적으로 작성하세요.
+- 종합 해석에서 카드 간 상호작용과 전체 흐름을 분석하세요.`;
 }
 
 export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string; gender: string; birthHour: string } | null): string {
