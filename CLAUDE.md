@@ -59,7 +59,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
 - **애니메이션**: Framer Motion v12.38
 - **AI**: Grok API (xAI) — `src/services/core/grok-provider.ts`에서 추상화
-- **인증**: Supabase Auth Helpers (카카오/구글)
+- **인증**: Supabase Auth Helpers (구글)
 - **데이터베이스**: Supabase (PostgreSQL)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
