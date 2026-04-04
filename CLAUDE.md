@@ -316,7 +316,7 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ### GitHub Actions (`.github/workflows/deploy.yml`)
 
-- **PR → main / push → main**: 3단계 순차 실행
+- **PR → main 시에만** 실행 (push 트리거 제거 — Actions 시간 절약):
   1. `lint-and-typecheck`: ESLint + TypeScript 타입 체크
   2. `build`: 프로덕션 빌드 (환경변수 주입)
   3. `e2e`: Playwright E2E 테스트 (Chromium + WebKit, 실패 시 리포트 아티팩트 업로드)
@@ -332,7 +332,8 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ### QA 자동 재검증 (`.github/workflows/qa-recheck.yml`)
 
-- QA 실패 Issue(`🚨 주간 QA 실패`)가 열려있는 상태에서 main에 push 시 자동으로 주간 QA 재실행
+- QA 실패 Issue(`🚨 주간 QA 실패`)가 열려있는 상태에서 main에 코드 push 시 자동으로 주간 QA 재실행
+- 문서만 변경된 push(*.md, docs/, n8n/)는 스킵 (Actions 시간 절약)
 - 재실행 → 전체 통과 시 → QA Issue 자동 닫힘 (완전 자동 루프)
 
 ### QA 프로세스 전체 흐름
