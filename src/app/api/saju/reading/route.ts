@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { SajuService } from "@/services/saju/saju-service";
-import { GrokProvider } from "@/services/core/grok-provider";
+import { FallbackProvider } from "@/services/core/fallback-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
 const sajuService = new SajuService();
-const grokProvider = new GrokProvider();
+const grokProvider = new FallbackProvider();
 
 const VALID_TOPICS: Topic[] = [
   "saju-general", "saju-love-single", "saju-love-couple",
