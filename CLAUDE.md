@@ -302,7 +302,31 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 - **매주 토요일 오전 9시 (KST)** 자동 실행 + `workflow_dispatch`로 수동 실행 가능
 - 4개 job 병렬: quality-check → e2e-desktop / e2e-mobile-android / e2e-mobile-ios
 - 디바이스별 Playwright 리포트 30일 보존
-- **실패 시 자동 GitHub Issue 생성** (`🚨 주간 QA 실패` 라벨: bug, qa)
+- **실패 시**: 자동 GitHub Issue 생성 (실패 job 목록 + 로그 링크 + 수정 프로세스 안내)
+- **통과 시**: 열린 QA Issue 자동 닫기 + 검증 결과 코멘트
+
+### QA 자동 재검증 (`.github/workflows/qa-recheck.yml`)
+
+- QA 실패 Issue(`🚨 주간 QA 실패`)가 열려있는 상태에서 main에 push 시 자동으로 주간 QA 재실행
+- 재실행 → 전체 통과 시 → QA Issue 자동 닫힘 (완전 자동 루프)
+
+### QA 프로세스 전체 흐름
+
+```
+주간 QA 실행 (토요일 09:00)
+  ├─ 통과 → 열린 QA Issue 자동 닫기 → 끝
+  └─ 실패 → Issue 자동 생성 (실패 상세 + 수정 안내)
+       └─ fix/* 브랜치 수정 → PR CI 통과 → main 머지
+            └─ QA Issue 열림 감지 → 주간 QA 자동 재실행
+                 ├─ 통과 → Issue 자동 닫기 → 끝
+                 └─ 실패 → Issue 업데이트 → 수정 반복
+```
+
+### 브랜치 보호 규칙 (GitHub Settings에서 수동 설정 필요)
+
+- `main` 브랜치에 **branch protection rule** 적용
+- **Required status checks**: `Lint & Type Check`, `Build`, `E2E Tests` 통과 필수
+- CI 실패 시 main 머지 자체가 차단되어 Railway 배포도 자동으로 방어됨
 
 ### Railway 설정
 

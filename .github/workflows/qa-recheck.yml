@@ -1,0 +1,43 @@
+name: QA Recheck — 수정 후 자동 재검증
+
+# QA 실패 Issue가 열려있는 상태에서 main에 push되면 자동으로 주간 QA 재실행
+on:
+  push:
+    branches: [main]
+
+jobs:
+  check-open-qa-issues:
+    name: QA Issue 확인
+    runs-on: ubuntu-latest
+    outputs:
+      has_open_issues: ${{ steps.check.outputs.has_issues }}
+    steps:
+      - uses: actions/github-script@v7
+        id: check
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'qa',
+              state: 'open',
+            });
+            const hasIssues = issues.some(i => i.title.startsWith('🚨 주간 QA 실패'));
+            core.setOutput('has_issues', hasIssues ? 'true' : 'false');
+
+  trigger-recheck:
+    name: 주간 QA 재실행 트리거
+    runs-on: ubuntu-latest
+    needs: check-open-qa-issues
+    if: needs.check-open-qa-issues.outputs.has_open_issues == 'true'
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'weekly-qa.yml',
+              ref: 'main',
+            });
+            console.log('🔄 QA 실패 Issue가 열려있어 주간 QA를 자동 재실행합니다.');
