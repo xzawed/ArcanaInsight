@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
@@ -19,7 +19,6 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     const measure = () => {
@@ -79,41 +78,16 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
 
-  /** 컨테이너 클릭 → 클릭 좌표에 있는 가장 위(z-index 높은) 카드를 선택 */
-  const handleContainerClick = useCallback((e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const clickX = e.clientX - containerRect.left;
-    const clickY = e.clientY - containerRect.top;
-
-    // z-index가 높은 카드(인덱스 큰 카드)부터 역순으로 검사 → 첫 히트가 시각적 최상단
-    for (let i = displayCards.length - 1; i >= 0; i--) {
-      const el = cardRefs.current.get(i);
-      if (!el || selectedIndices.includes(i)) continue;
-
-      const rect = el.getBoundingClientRect();
-      const inX = clickX >= rect.left - containerRect.left && clickX <= rect.right - containerRect.left;
-      const inY = clickY >= rect.top - containerRect.top && clickY <= rect.bottom - containerRect.top;
-
-      if (inX && inY) {
-        onCardSelect(i);
-        return;
-      }
-    }
-  }, [displayCards.length, selectedIndices, onCardSelect]);
-
   return (
     <div
       ref={containerRef}
-      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full cursor-pointer"
-      onClick={handleContainerClick}
+      className="relative w-full flex items-center justify-center min-h-[160px] md:min-h-[280px] h-full"
     >
       {containerWidth > 0 && displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
         const totalCards = displayCards.length;
         const half = totalCards / 2;
-        // 아크 각도: 카드 수에 따라 조절 (많으면 총 각도 넓게, 개별 각도는 ��게)
-        const maxArc = Math.min(totalCards * 0.9, 40); // ��대 40도 범위 (겹침 방지)
+        const maxArc = Math.min(totalCards * 0.9, 40);
         const angle = isSpread ? (index - half) * (maxArc / totalCards) : 0;
         const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 1.5;
         const yOffset = isSpread
@@ -123,7 +97,6 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
         return (
           <motion.div
             key={card.id}
-            ref={(el) => { if (el) cardRefs.current.set(index, el); }}
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
             animate={{
               x: xOffset,
@@ -138,8 +111,9 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
               damping: 18,
               delay: isSpread ? index * 0.015 : 0,
             }}
-            className="absolute pointer-events-none"
+            className="absolute cursor-pointer"
             style={{ zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index }}
+            onClick={() => { if (!isSelected) onCardSelect(index); }}
             onPointerEnter={() => setHoveredIndex(index)}
             onPointerLeave={() => setHoveredIndex(null)}
           >
