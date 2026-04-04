@@ -2,8 +2,8 @@ name: Weekly QA — 주간 품질 테스트
 
 on:
   schedule:
-    # 매주 월요일 오전 9시 (KST) = 일요일 24:00 UTC
-    - cron: "0 0 * * 1"
+    # 매주 토요일 오전 9시 (KST) = 금요일 24:00 UTC
+    - cron: "0 0 * * 6"
   workflow_dispatch: # 수동 실행 가능
 
 jobs:

@@ -286,7 +286,7 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ### 주간 QA (`.github/workflows/weekly-qa.yml`)
 
-- **매주 월요일 오전 9시 (KST)** 자동 실행 + `workflow_dispatch`로 수동 실행 가능
+- **매주 토요일 오전 9시 (KST)** 자동 실행 + `workflow_dispatch`로 수동 실행 가능
 - 4개 job 병렬: quality-check → e2e-desktop / e2e-mobile-android / e2e-mobile-ios
 - 디바이스별 Playwright 리포트 30일 보존
 - **실패 시 자동 GitHub Issue 생성** (`🚨 주간 QA 실패` 라벨: bug, qa)
