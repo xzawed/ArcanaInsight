@@ -117,9 +117,11 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   setMode: (mode) => {
     const activeTheme = mode === "auto" ? getAutoTheme() : mode;
     set({ mode, activeTheme });
-    if (typeof window !== "undefined") {
-      localStorage.setItem("arcana-theme-mode", mode);
-    }
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("arcana-theme-mode", mode);
+      }
+    } catch { /* Safari Private 모드 등에서 localStorage 접근 실패 시 무시 */ }
   },
 
   refresh: () => {

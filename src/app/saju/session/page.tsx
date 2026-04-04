@@ -151,7 +151,7 @@ export default function SajuSessionPage() {
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 좌측 컬럼: 캐릭터 + 대사 */}
-        <div className={`w-full ${phase === "result" ? "h-[20%]" : "h-[30%]"} md:h-auto md:w-[50%] md:flex-shrink-0 flex flex-col transition-all duration-500`}>
+        <div className="w-full h-[25%] md:h-auto md:w-[50%] md:flex-shrink-0 flex flex-col transition-all duration-500">
           {character && (
             <div className="flex-1 relative overflow-hidden">
               <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />

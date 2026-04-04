@@ -74,19 +74,20 @@ src/
 ├── app/                        # Next.js App Router 페이지 & API
 │   ├── api/
 │   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + Supabase 캐시)
-│   │   ├── saju/               # 사주 API 라우트 (reading SSE)
+│   │   ├── saju/               # 사주 API 라우트 (session, reading SSE, result/[id])
 │   │   └── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
 │   ├── auth/                   # 로그인, OAuth 콜백
 │   ├── character/[id]/         # 캐릭터 상세 페이지
 │   ├── mypage/                 # 리딩 히스토리, 대시보드
 │   ├── privacy/                # 개인정보처리방침
-│   ├── saju/                   # 사주 메인 페이지, 세션
-│   │   └── session/
+│   ├── saju/                   # 사주 메인 페이지, 세션, 결과(/result/[id])
+│   │   ├── session/
+│   │   └── result/[id]/
 │   ├── tarot/                  # 타로 주제 선택, 상담 세션, 결과(/result/[id])
 │   │   ├── session/
 │   │   └── result/[id]/
 │   ├── terms/                  # 이용약관
-│   ├── page.tsx                # 홈 페이지 (10개 섹션)
+│   ├── page.tsx                # 홈 페이지 (7개 섹션)
 │   ├── layout.tsx              # 루트 레이아웃
 │   └── globals.css             # Tailwind v4 @theme 정의
 ├── components/
@@ -96,11 +97,11 @@ src/
 │   ├── effects/                # ParticleOverlay (배경 파티클), ScrollReveal (스크롤 페이드인)
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
-│   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (4탭), ThemeProvider
+│   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (4탭), ThemeProvider, FocusReset
 │   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의)
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
 │   ├── skin/                   # SkinSelector
-│   └── tarot/                  # (타로 전용 UI 컴포넌트)
+│   └── tarot/                  # (현재 비어있음 — 타로 전용 컴포넌트는 card/, components/home/ 등에 분산)
 ├── data/
 │   ├── cards/                  # 메이저 22장 (major-arcana.ts) + 마이너 56장 (minor-arcana.ts) + symbols.ts
 │   ├── characters/             # 12캐릭터 설정 (index.ts), 대기 대사 (waiting-lines.ts)
@@ -119,11 +120,11 @@ src/
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts)
 ├── services/
-│   ├── core/                   # ai-provider.ts (인터페이스), grok-provider.ts (구현체),
+│   ├── core/                   # ai-provider.ts (re-export), grok-provider.ts (구현체),
 │   │                           # prompt-builder.ts, text-cleaner.ts (cleanReadingText, parseJsonSafe)
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
-└── types/                      # card.ts, character.ts, session.ts, service.ts
+└── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
 
 public/images/
 ├── backgrounds/                # 페이지별 배경 이미지 (hero-bg, session-bg, result-bg 등)
@@ -132,11 +133,11 @@ public/images/
 │   ├── cups/wands/swords/pentacles/  # 마이너 아르카나 슈트별 SVG
 │   └── card-back.svg           # 카드 뒷면
 └── characters/
-    ├── arcana/                 # 6표정 JPG (루트 직접) + nukki/ (누끼 PNG) + sprites/
-    ├── miko/                   # 위와 동일 (초기 4캐릭터: JPG 루트 경로 사용)
-    ├── seonhwa/
-    ├── hoshi/
-    ├── luna/                   # nukki/ 폴더의 PNG만 사용 (신규 8캐릭터)
+    ├── arcana/                 # nukki/ PNG 사용 + sprites/
+    ├── miko/                   # JPG 루트 경로 사용 (레거시)
+    ├── seonhwa/                # JPG 루트 경로 사용 (레거시)
+    ├── hoshi/                  # nukki/ PNG 사용
+    ├── luna/                   # nukki/ PNG 사용
     ├── rei/                    # 위와 동일
     ├── cairn/
     ├── zero/
@@ -190,9 +191,11 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 
 ### 캐릭터 이미지 경로 규칙
 
-- **모든 12캐릭터**: PNG 누끼, `nukki/` 폴더 경로 (1408×768 통일)
+- **10캐릭터** (arcana, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan): PNG 누끼, `nukki/` 폴더 경로 (1408×768 통일)
   - 예: `/images/characters/arcana/nukki/default.png`
   - 예: `/images/characters/luna/nukki/default.png`
+- **2캐릭터** (miko, seonhwa): JPG 루트 경로 (레거시, 코드에서 직접 참조)
+  - 예: `/images/characters/miko/default.jpg`
 
 ## 핵심 아키텍처 패턴
 
@@ -233,7 +236,7 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 
 ### 이미지 리소스
 
-- 캐릭터 이미지: 모든 12캐릭터 PNG 누끼(nukki/ 폴더), 1408×768
+- 캐릭터 이미지: 10캐릭터 PNG 누끼(nukki/ 폴더), 2캐릭터(miko/seonhwa) JPG 루트 경로, 1408×768
 - 카드 이미지: SVG
 - 배경 이미지: JPG
 - 새 이미지 생성 시 `scripts/` 디렉토리의 생성 스크립트 활용
@@ -391,18 +394,17 @@ pnpm build             # 프로덕션 빌드 확인
 
 ## 홈 페이지 구성
 
-`src/app/page.tsx`에서 10개 섹션을 순서대로 조합:
+`src/app/page.tsx`에서 7개 섹션을 순서대로 조합:
 
 1. **HeroSection** — 풀스크린 히어로 (캐릭터 + 카피 + CTA)
-2. **CharacterGallery** — 12캐릭터 갤러리 (카드형, 성별 필터 포함)
-3. **GenderFilter** — 성별 필터 UI
-4. **ServiceFlow** — 서비스 이용 흐름 소개
-5. **DailyCard** — 캐릭터별 일일 운세 (탭 전환 + 카드 뒤집기 + 공유)
-6. **SkinGallery** — 카드 스킨 갤러리 (6종)
-7. **StatsCounter** — 서비스 통계 카운터
-8. **ReviewCarousel** — 사용자 후기 캐러셀
-9. **FAQ** — 아코디언 FAQ
-10. **BottomCTA** — 하단 행동 유도
+2. **CharacterGallery** — 12캐릭터 갤러리 (카드형, 성별 필터 내장)
+3. **DailyCard** — 캐릭터별 일일 운세 (탭 전환 + 카드 뒤집기 + 공유)
+4. **SkinGallery** — 카드 스킨 갤러리 (6종)
+5. **ServiceFlow** — 서비스 이용 흐름 소개
+6. **FAQ** — 아코디언 FAQ
+7. **BottomCTA** — 하단 행동 유도
+
+> 참고: GenderFilter, StatsCounter, ReviewCarousel 컴포넌트는 `components/home/`에 존재하지만 현재 `page.tsx`에서 미사용
 
 ## 작업 시 주의사항
 
@@ -412,4 +414,4 @@ pnpm build             # 프로덕션 빌드 확인
 - DB 스키마는 `supabase/migrations/`에서 관리 (번호 순서 유지, 002는 결번)
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
-- 캐릭터 이미지 규격: 1408×768 (모든 12캐릭터 PNG 누끼, grok-imagine-image-pro API 기본 출력 사이즈)
+- 캐릭터 이미지 규격: 1408×768 (10캐릭터 PNG 누끼, 2캐릭터 JPG 레거시, grok-imagine-image-pro API 기본 출력 사이즈)
