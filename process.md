@@ -512,3 +512,38 @@ flowchart TD
     style DEPLOY fill:#d97706,color:#fff
     style DONE fill:#16a34a,color:#fff
 ```
+
+---
+
+## SuperGrok + Claude CLI 운영 체계
+
+```mermaid
+flowchart LR
+    subgraph SuperGrok["SuperGrok (xAI)"]
+        PLAN["기획/설계 논의"]
+        GROK_API["Grok API<br/>타로·사주 리딩"]
+        GROK_IMG["Grok 이미지 API<br/>캐릭터·스킨·배경"]
+        ANALYSIS["운영 분석<br/>사용자 데이터"]
+    end
+
+    subgraph Claude["Claude CLI (Anthropic)"]
+        IMPL["코드 구현<br/>6단계 프로세스"]
+        QA["품질 관리<br/>E2E + 주간 QA"]
+        CICD["CI/CD + 배포<br/>Actions + Railway"]
+        DOCS["문서 관리<br/>CLAUDE.md 동기화"]
+    end
+
+    SPEC["CLAUDE.md<br/>(단일 진실 소스)"]
+
+    PLAN -->|스펙 확정| SPEC
+    SPEC -->|구현 지시| IMPL
+    IMPL --> QA --> CICD
+    IMPL --> DOCS --> SPEC
+    GROK_API -.->|프로덕션 서비스| CICD
+    GROK_IMG -.->|이미지 에셋| IMPL
+    ANALYSIS -.->|인사이트| PLAN
+
+    style SuperGrok fill:#1a1a2e,stroke:#e94560,color:#fff
+    style Claude fill:#1a1a2e,stroke:#7c3aed,color:#fff
+    style SPEC fill:#d97706,color:#fff
+```
