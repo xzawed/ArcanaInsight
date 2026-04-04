@@ -37,7 +37,9 @@ export default function TarotSessionPage() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
   const [readingError, setReadingError] = useState(false);
-  const [pendingConfirm, setPendingConfirm] = useState(false);
+  const [pendingConfirm, _setPendingConfirm] = useState(false);
+  const pendingConfirmRef = useRef(false);
+  const setPendingConfirm = (v: boolean) => { pendingConfirmRef.current = v; _setPendingConfirm(v); };
   const [confirmEachCard, setConfirmEachCard] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("arcana-confirm-each-card") !== "false";
@@ -97,9 +99,9 @@ export default function TarotSessionPage() {
   }, [topic]);
 
   const handleCardSelect = useCallback((index: number) => {
-    // 항상 fresh 스토어 상태를 읽어 stale closure 방지
+    // 항상 fresh 상태를 읽어 stale closure 방지
     const { selectedCards: currentCards, requiredCards: required } = useSessionStore.getState();
-    if (currentCards.length >= required || pendingConfirm) return;
+    if (currentCards.length >= required || pendingConfirmRef.current) return;
 
     const card = shuffledDeck[index];
     const isReversed = Math.random() > 0.5;
@@ -114,7 +116,8 @@ export default function TarotSessionPage() {
     const isLast = currentCount >= required;
 
     if (isLast && !confirmEachCard) {
-      // 확인 모드 OFF + 마지막 카드 → 자동으로 리딩 시작
+      // 확인 모드 OFF + 마지막 카드 → 자동으로 리딩 시작 (즉시 잠금으로 중복 방지)
+      setPendingConfirm(true);
       setTimeout(() => {
         const allCards = useSessionStore.getState().selectedCards;
         startReading(allCards);
@@ -133,7 +136,7 @@ export default function TarotSessionPage() {
       }, 500);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shuffledDeck, pendingConfirm, confirmEachCard, selectCard, setMood, addChatMessage]);
+  }, [shuffledDeck, confirmEachCard, selectCard, setMood, addChatMessage]);
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
