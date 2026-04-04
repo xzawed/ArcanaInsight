@@ -57,7 +57,7 @@ export class TarotService implements DivinationService {
     const cleanText = aiResponse
       .replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "")
       .replace(/```[\s\S]*?```/g, "")
-      .replace(/[{}[\]]/g, "")
+      .replace(/[{}]/g, "")
       .replace(/"[a-zA-Z_]+"\s*:/g, "")    // 모든 JSON 키 패턴 제거
       .replace(/"\s*,?\s*\n/g, "\n")
       .replace(/^\s*"/gm, "")

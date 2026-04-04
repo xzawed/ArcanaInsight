@@ -42,7 +42,9 @@ export class GrokProvider implements AIProvider {
       });
       if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
       const data = await response.json();
-      return data.choices[0].message.content;
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) throw new Error("Grok API가 빈 응답을 반환했습니다.");
+      return content;
     } finally {
       clearTimeout(timeout);
     }

@@ -50,8 +50,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Supabase 클라이언트를 스트림 시작 전에 미리 생성 (cookies()는 스트림 밖에서 호출해야 함)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let supabase: any = null;
+    let supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
     if (sessionId) {
       try {
         const { createClient } = await import("@/lib/supabase/server");
@@ -77,22 +76,23 @@ export async function POST(request: NextRequest) {
           let dbSaved = false;
           if (supabase && sessionId) {
             try {
-              // 세션 상태 업데이트는 항상 실행 (readings 성공 여부와 독립)
-              const [readingRes, sessionRes] = await Promise.all([
-                supabase.from("readings").insert({
-                  session_id: sessionId, card_interpretation: result.cardInterpretations,
-                  overall_reading: result.overallReading, advice: result.advice,
-                }).select("share_token").single(),
-                supabase.from("sessions").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", sessionId),
-              ]);
+              // readings 저장 → 성공 시에만 sessions 상태 업데이트 (데이터 일관성 보장)
+              const readingRes = await supabase.from("readings").insert({
+                session_id: sessionId, card_interpretation: result.cardInterpretations,
+                overall_reading: result.overallReading, advice: result.advice,
+              }).select("share_token").single();
 
-              if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
               if (readingRes.error) {
                 console.error("readings 저장 실패:", readingRes.error.message);
               } else {
                 shareToken = readingRes.data?.share_token ?? null;
                 dbSaved = true;
               }
+
+              const sessionRes = await supabase.from("sessions").update({
+                status: "completed", completed_at: new Date().toISOString(),
+              }).eq("id", sessionId);
+              if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
 
               // 부수 데이터: session_cards 저장
               const cardsRes = await supabase.from("session_cards").insert(

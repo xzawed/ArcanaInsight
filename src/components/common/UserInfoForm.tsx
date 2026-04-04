@@ -56,6 +56,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saveWarning, setSaveWarning] = useState(false);
 
   // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: localStorage)
   useEffect(() => {
@@ -125,7 +126,10 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
               birth_hour: data.birthHour,
               privacy_agreed_at: new Date().toISOString(),
             }).eq("id", user.id);
-            if (error) console.error("프로필 저장 실패:", error);
+            if (error) {
+              console.error("프로필 저장 실패:", error);
+              setSaveWarning(true);
+            }
           }
         } catch (e) {
           console.error("프로필 저장 오류:", e);
@@ -296,6 +300,10 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       >
         {submitLabel}
       </motion.button>
+
+      {saveWarning && (
+        <p className="text-xs text-yellow-400/70 text-center">프로필 저장에 실패했습니다. 리딩에는 영향이 없습니다.</p>
+      )}
 
       <PrivacyConsentModal
         isOpen={showPrivacyModal}

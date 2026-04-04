@@ -63,8 +63,7 @@ export async function POST(request: NextRequest) {
     const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo);
 
     // Supabase 클라이언트 (스트림 밖에서 미리 생성)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let supabase: any = null;
+    let supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
     if (sessionId) {
       try {
         const { createClient } = await import("@/lib/supabase/server");

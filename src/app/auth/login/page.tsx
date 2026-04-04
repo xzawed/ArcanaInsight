@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
@@ -9,8 +9,10 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const message = searchParams.get("message");
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleLogin = async (provider: "google" | "kakao") => {
+    setLoginError(null);
     const supabase = createClient();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     const { error: authError } = await supabase.auth.signInWithOAuth({
@@ -21,7 +23,7 @@ function LoginForm() {
     });
     if (authError) {
       console.error("Auth error:", authError);
-      alert(`로그인 오류: ${authError.message}`);
+      setLoginError(authError.message);
     }
   };
 
@@ -57,10 +59,10 @@ function LoginForm() {
             <p className="text-arcana-muted text-sm">리딩 히스토리를 저장하고 관리하세요</p>
           </div>
 
-          {error && (
+          {(error || loginError) && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
               <p className="font-bold">로그인 실패</p>
-              <p className="mt-1 text-xs">{message || error}</p>
+              <p className="mt-1 text-xs">{loginError || message || error}</p>
             </div>
           )}
 

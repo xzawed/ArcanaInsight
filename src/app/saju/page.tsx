@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,13 @@ export default function SajuPage() {
   const [selectedTime, setSelectedTime] = useState<SajuTimeRange | null>(null);
   const [selectedArea, setSelectedArea] = useState<Topic | null>(null);
   const [monthlyToggle, setMonthlyToggle] = useState(false);
+
+  // 스텝 전환 시 스크롤 최상단 초기화
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']")
+      .forEach((el) => { el.scrollTop = 0; });
+  }, [step]);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
@@ -125,7 +132,7 @@ export default function SajuPage() {
             {/* 좌측: 캐릭터 + 대사 */}
             <div className="flex flex-col md:relative w-full md:w-[50%] flex-shrink-0">
               {selectedCharacter && (
-                <div className="h-[25vh] md:h-auto md:absolute md:inset-0 overflow-hidden">
+                <div className="h-[25%] md:h-auto md:absolute md:inset-0 overflow-hidden">
                   <CharacterDisplay character={selectedCharacter} mood="mystical" className="w-full h-full" />
                 </div>
               )}
