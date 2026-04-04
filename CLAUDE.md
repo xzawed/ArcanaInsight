@@ -55,14 +55,15 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 ## 기술 스택
 
 - **언어**: TypeScript (strict)
-- **프레임워크**: Next.js 16.2 (App Router) / React 19.2
+- **프레임워크**: Next.js 16.2.1 (App Router) / React 19.2.4
 - **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
-- **애니메이션**: Framer Motion v12
+- **애니메이션**: Framer Motion v12.38
 - **AI**: Grok API (xAI) — `src/services/core/grok-provider.ts`에서 추상화
 - **인증**: Supabase Auth Helpers (카카오/구글)
 - **데이터베이스**: Supabase (PostgreSQL)
-- **상태관리**: Zustand v5
-- **패키지 매니저**: pnpm 10.33
+- **상태관리**: Zustand v5.0
+- **패키지 매니저**: pnpm 10.33.0
+- **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
 - **런타임**: Node.js >= 20
 - **CI/CD**: GitHub Actions → Railway 자동 배포
 - **호스팅**: Railway
@@ -248,8 +249,11 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ```bash
 pnpm dev              # 개발 서버 실행
 pnpm build            # 프로덕션 빌드
+pnpm start            # 프로덕션 서버 실행
 pnpm lint             # ESLint 실행
-pnpm tsc --noEmit     # TypeScript 타입 체크
+pnpm type-check       # TypeScript 타입 체크 (tsc --noEmit)
+pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스)
+pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 ```
 
 ## 환경 변수
@@ -274,8 +278,11 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ### GitHub Actions (`.github/workflows/deploy.yml`)
 
-- **PR → main**: lint + type-check + build 검증
-- **push → main**: lint + type-check + build + Railway 배포
+- **PR → main / push → main**: 3단계 순차 실행
+  1. `lint-and-typecheck`: ESLint + TypeScript 타입 체크
+  2. `build`: 프로덕션 빌드 (환경변수 주입)
+  3. `e2e`: Playwright E2E 테스트 (Chromium + WebKit, 실패 시 리포트 아티팩트 업로드)
+- Railway 배포는 별도 GitHub 연동이 담당 (이 워크플로우는 코드 품질 검증 전용)
 
 ### Railway 설정
 
@@ -291,9 +298,9 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 ### 1단계: 코드 변경
 - 요청된 수정 사항 구현
 
-### 2단계: 3단계 검증 (tsc + lint + build)
+### 2단계: 3단계 검증 (type-check + lint + build)
 ```bash
-pnpm tsc --noEmit      # TypeScript 타입 체크
+pnpm type-check        # TypeScript 타입 체크
 pnpm lint              # ESLint 코드 품질 검사
 pnpm build             # 프로덕션 빌드 확인
 ```
@@ -311,7 +318,7 @@ pnpm build             # 프로덕션 빌드 확인
 
 ### 자동화 (Claude Code 전용)
 - `.claude/settings.json`의 PreToolUse 훅으로 `git push` 시 자동 검증
-- `scripts/pre-push-checks.sh` 실행: tsc → lint → build 순서
+- `scripts/pre-push-checks.sh` 실행: type-check → lint → build 순서
 - 하나라도 실패하면 push 차단
 
 ## 레이아웃 규칙 (필수 준수)

@@ -110,7 +110,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 | 분류 | 기술 |
 |------|------|
 | 언어 | TypeScript (strict) |
-| 프레임워크 | Next.js 16.2 (App Router) · React 19.2 |
+| 프레임워크 | Next.js 16.2.1 (App Router) · React 19.2.4 |
 | 스타일링 | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 애니메이션 | Framer Motion v12 |
 | AI | Grok API (xAI) — SSE 스트리밍 |
@@ -154,8 +154,10 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 ```bash
 pnpm dev           # 개발 서버
 pnpm build         # 프로덕션 빌드
+pnpm start         # 프로덕션 서버
 pnpm lint          # ESLint
-pnpm tsc --noEmit  # 타입 체크
+pnpm type-check    # 타입 체크
+pnpm test:e2e      # E2E 테스트 (Desktop/Android/iOS)
 ```
 
 ---
