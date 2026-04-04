@@ -1,15 +1,20 @@
-name: CI — Lint, Type Check & Build
+name: CI — Lint, Type Check, Build & E2E
 
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'n8n/**'
+      - '.github/ISSUE_TEMPLATE/**'
 
 # 배포는 Railway 자체 GitHub 연동이 담당 (railway.toml 기준 자동 배포)
 # 이 워크플로우는 코드 품질 검증 전용
 
 jobs:
-  lint-and-typecheck:
-    name: Lint & Type Check
+  ci:
+    name: Lint → Build → E2E
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,24 +27,12 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      # 1단계: Lint + Type Check
       - run: pnpm lint
       - run: pnpm type-check
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: lint-and-typecheck
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+      # 2단계: Build
       - run: pnpm build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
@@ -49,24 +42,9 @@ jobs:
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
-  e2e:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-      - run: npx playwright install --with-deps chromium webkit
-
-      - run: pnpm test:e2e
+      # 3단계: E2E (Chromium만 — Desktop + Android, iOS는 주간 QA에서)
+      - run: npx playwright install --with-deps chromium
+      - run: pnpm test:e2e --project="Desktop Chrome" --project="Mobile Android"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
@@ -76,7 +54,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: failure()
         with:
           name: playwright-report
           path: playwright-report/
