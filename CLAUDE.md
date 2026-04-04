@@ -527,3 +527,50 @@ pnpm build             # 프로덕션 빌드 확인
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
 - 캐릭터 이미지 규격: 1408×768 (10캐릭터 PNG 누끼, 2캐릭터 JPG 레거시, grok-imagine-image-pro API 기본 출력 사이즈)
+
+## 운영 체계 — SuperGrok + Claude CLI 역할 분담
+
+### 역할 분담 원칙
+
+| 영역 | SuperGrok (xAI) | Claude CLI (Anthropic) |
+|------|-----------------|----------------------|
+| **서비스 기획/설계** | 기능 기획, UX/UI 설계 논의, 스펙 초안 | — |
+| **코드 구현** | — | 6단계 프로세스로 구현, 코드 리뷰, 리팩토링 |
+| **프로덕션 AI** | Grok API (타로/사주 리딩, SSE 스트리밍) | — |
+| **이미지 생성** | Grok 이미지 API (캐릭터, 카드 스킨, 배경) | 생성된 이미지를 코드에 통합 |
+| **품질 관리** | — | tsc + lint + build, Playwright E2E, 주간 QA |
+| **CI/CD + 배포** | — | GitHub Actions, Railway, 브랜치 보호 |
+| **운영 분석** | 사용자 데이터 분석, 리딩 품질 모니터링 | — |
+| **문서 관리** | 스펙 확정 시 내용 전달 | CLAUDE.md/README.md 반영 + 코드 동기화 |
+
+### 핵심 연결 지점: CLAUDE.md
+
+두 AI가 협업하는 **단일 진실 소스(Single Source of Truth)**는 이 CLAUDE.md 파일이다.
+
+- **SuperGrok → Claude CLI**: 기획/설계 논의 후 확정된 스펙을 CLAUDE.md에 반영하거나 대화 컨텍스트로 전달
+- **Claude CLI → SuperGrok**: 구현 결과를 CLAUDE.md에 문서화하여 프로젝트 상태를 항상 최신으로 유지
+
+### 워크플로우
+
+```
+기획 (SuperGrok)
+  └→ 기능/UX 설계 논의 → 스펙 확정
+       └→ Claude CLI에 전달: "이 스펙대로 구현해줘"
+
+구현 (Claude CLI)
+  └→ 6단계 프로세스: 브랜치 → 코드 → 검증 → PR → CI → 배포
+       └→ 문서 자동 동기화
+
+운영 (양쪽 협업)
+  ├─ 주간 QA 자동 실행 (Claude CLI) → 실패 시 자동 수정 루프
+  ├─ 사용자 이슈 → Claude CLI가 수정 (동일 6단계 프로세스)
+  └─ 운영 분석 (SuperGrok) → 인사이트 기반 기획 → 다시 구현 사이클
+```
+
+### n8n 연동 구상 (향후 확장)
+
+| 워크플로우 | 트리거 | 흐름 |
+|-----------|--------|------|
+| 리딩 품질 모니터링 | Cron (매일) | Supabase 쿼리 → Grok API 품질 평가 → 낮은 품질 알림 |
+| 사용자 행동 리포트 | Cron (주간) | Supabase 통계 → SuperGrok 분석 → Slack/Discord 리포트 |
+| 이미지 생성 파이프라인 | Webhook | Grok 이미지 API → Supabase Storage → 코드 참조 추가 |

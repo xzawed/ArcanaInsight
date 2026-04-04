@@ -163,6 +163,20 @@ pnpm test:e2e      # E2E 테스트 (Desktop/Android/iOS)
 
 ---
 
+## 개발 및 운영 체계
+
+| 역할 | 담당 | 설명 |
+|------|------|------|
+| 서비스 기획/설계 | SuperGrok (xAI) | 기능 기획, UX/UI 설계 논의, 스펙 확정 |
+| 프로덕션 AI | SuperGrok (xAI) | Grok API 타로·사주 리딩 + 이미지 생성 |
+| 코드 구현/QA | Claude CLI (Anthropic) | 6단계 프로세스, Playwright E2E, 주간 QA |
+| CI/CD + 배포 | Claude CLI (Anthropic) | GitHub Actions → Railway 자동 배포 |
+| 운영 분석 | SuperGrok (xAI) | 사용자 행동 분석, 리딩 품질 모니터링 |
+
+상세 운영 체계는 [CLAUDE.md](./CLAUDE.md) 참조.
+
+---
+
 ## 소유권
 
 이 프로젝트의 개발 및 소유권은 **xzawed**에게 있습니다.
