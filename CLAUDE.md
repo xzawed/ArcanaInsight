@@ -314,13 +314,21 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ## CI/CD 파이프라인
 
-### GitHub Actions (`.github/workflows/deploy.yml`)
+### GitHub Actions 무료 플랜 운영 정책
 
-- **PR → main 시에만** 실행 (push 트리거 제거 — Actions 시간 절약):
-  1. `lint-and-typecheck`: ESLint + TypeScript 타입 체크
-  2. `build`: 프로덕션 빌드 (환경변수 주입)
-  3. `e2e`: Playwright E2E 테스트 (Chromium + WebKit, 실패 시 리포트 아티팩트 업로드)
-- Railway 배포는 별도 GitHub 연동이 담당 (이 워크플로우는 코드 품질 검증 전용)
+- GitHub Free 플랜: **월 2,000분** 한도
+- 무료 시간 소진 시: CI 자동 차단 → **로컬 검증(type-check + lint + build)으로 대체** → 다음 달 1일에 자동 복구
+- 예상 월간 사용: ~100분 (한도의 5%)
+
+### PR CI (`.github/workflows/deploy.yml`)
+
+- **PR → main 시에만** 실행, 문서 변경(*.md, docs/, n8n/) 시 스킵
+- **1개 job으로 통합** (runner 1회, pnpm install 1회 — 시간 절약):
+  1. Lint + Type Check
+  2. Build
+  3. E2E (Chromium만 — Desktop Chrome + Mobile Android)
+- iOS E2E(WebKit)는 **주간 QA(토요일)에서만** 수행 — Chromium만 설치하여 시간 절약
+- Railway 배포는 별도 GitHub 연동이 담당
 
 ### 주간 QA (`.github/workflows/weekly-qa.yml`)
 
