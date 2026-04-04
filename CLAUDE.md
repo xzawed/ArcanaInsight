@@ -99,7 +99,7 @@ src/
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
 │   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (4탭), ThemeProvider, FocusReset
-│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의)
+│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링)
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
 │   ├── skin/                   # SkinSelector
 │   └── tarot/                  # (현재 비어있음 — 타로 전용 컴포넌트는 card/, components/home/ 등에 분산)
@@ -160,6 +160,17 @@ scripts/                        # 유틸리티 스크립트
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 └── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 
+e2e/                            # Playwright E2E 테스트 (9개 파일, 3개 디바이스 프로필)
+├── home.spec.ts                # 홈 페이지 섹션 검증
+├── tarot-flow.spec.ts          # 타로 풀 플로우 (5스텝 전환)
+├── saju-flow.spec.ts           # 사주 풀 플로우 (3스텝)
+├── character.spec.ts           # 캐릭터 상세 (12캐릭터 + 에러)
+├── auth.spec.ts                # 로그인 페이지
+├── mypage.spec.ts              # 마이페이지 리디렉트
+├── static-pages.spec.ts        # 약관/개인정보
+├── responsive.spec.ts          # 반응형 레이아웃 (3 뷰포트)
+└── cross-platform.spec.ts      # 크로스 플랫폼 (콘솔 에러, 이미지, 링크)
+
 supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 유지, 002는 미사용)
 ├── 001_initial_schema.sql      # 초기 스키마 (sessions, readings 등)
 ├── 003_daily_cards.sql         # daily_cards 테이블 + profiles.favorite_character_id
@@ -210,6 +221,19 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
   - 예: `/images/characters/luna/nukki/default.png`
 - **2캐릭터** (miko, seonhwa): JPG 루트 경로 (레거시, 코드에서 직접 참조)
   - 예: `/images/characters/miko/default.jpg`
+
+### 주제별 스프레드 노출 규칙
+
+카테고리 성격에 맞는 스프레드만 UI에 노출 (`src/app/tarot/page.tsx`의 `topicSpreads`):
+
+| 주제 | 노출 스프레드 |
+|------|-------------|
+| 연애 (솔로) | 원카드, 쓰리카드, 5장 켈틱, 10장 켈틱 |
+| 연애 (커플) | 원카드, 쓰리카드, 관계 스프레드, 10장 켈틱 |
+| 직장/진로 | 원카드, 쓰리카드, 5장 켈틱, 말굽, 10장 켈틱 |
+| 재정/금전 | 원카드, 쓰리카드, 말굽, 의사결정, 10장 켈틱 |
+| 건강 | 원카드, 쓰리카드, 5장 켈틱 |
+| 일반 상담 | 전체 10종 |
 
 ## 핵심 아키텍처 패턴
 
