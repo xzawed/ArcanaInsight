@@ -581,8 +581,8 @@ pnpm build             # 프로덕션 빌드 확인
 | 워크플로우 | 파일 | 방식 | 상태 |
 |-----------|------|------|------|
 | Spec Tracker | `workflow-spec-tracker.json` | GitHub Webhook (실시간) | **n8n Cloud 운영 중** ✅ |
-| Quality Monitor | `workflow-quality-monitor.json` | Cron 매일 09:00 | Grok API 등록 후 활성화 |
-| Weekly Report | `workflow-weekly-report.json` | Cron 금요일 18:00 | Grok API 등록 후 활성화 |
+| Quality Monitor | `workflow-quality-monitor.json` | Cron 매일 09:00 | **n8n Cloud 운영 중** ✅ |
+| Weekly Report | `workflow-weekly-report.json` | Cron 금요일 18:00 | **n8n Cloud 운영 중** ✅ |
 
 > n8n Cloud: https://xzawed.app.n8n.cloud
 > Webhook: `https://xzawed.app.n8n.cloud/webhook/arcana-spec`

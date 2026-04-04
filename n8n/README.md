@@ -10,8 +10,8 @@ ArcanaInsight 운영 자동화를 위한 n8n Cloud 워크플로우.
 | 워크플로우 | 파일 | 방식 | Credential | 상태 |
 |-----------|------|------|-----------|------|
 | **Spec Tracker** | `workflow-spec-tracker.json` | GitHub Webhook (실시간) | GitHub PAT | **운영 중** ✅ |
-| Quality Monitor | `workflow-quality-monitor.json` | Cron (매일 09:00) | GitHub PAT + Supabase + Grok API | Grok API 등록 후 활성화 |
-| Weekly Report | `workflow-weekly-report.json` | Cron (금요일 18:00) | GitHub PAT + Supabase + Grok API | Grok API 등록 후 활성화 |
+| **Quality Monitor** | `workflow-quality-monitor.json` | Cron (매일 09:00) | GitHub PAT + Supabase + Grok API | **운영 중** ✅ |
+| **Weekly Report** | `workflow-weekly-report.json` | Cron (금요일 18:00) | GitHub PAT + Supabase + Grok API | **운영 중** ✅ |
 
 ---
 
@@ -23,7 +23,7 @@ n8n Cloud → Credentials → Add Credential:
 |----------------|------|------|-------|------|
 | **GitHub PAT** | Header Auth | `Authorization` | `token ghp_xxxx` | 등록 완료 ✅ |
 | **Supabase DB** | Postgres | Host/DB/User/Password, SSL ON | | 등록 완료 ✅ |
-| **Grok API** | Header Auth | `Authorization` | `Bearer {GROK_API_KEY}` | 미등록 |
+| **Grok API** | Header Auth | `Authorization` | `Bearer {GROK_API_KEY}` | 등록 완료 ✅ |
 
 > GitHub PAT: `token ` 접두사 필수 (Bearer 아님)
 > Supabase: SSL ON + Reject Unauthorized OFF
@@ -73,9 +73,10 @@ GitHub Issue 생성 (spec 라벨)
 - [x] Supabase DB 등록
 - [x] Spec Tracker 워크플로우 Import + Publish + GitHub Webhook 등록
 - [x] 실시간 연동 테스트 통과 (Issue #44, #45)
-- [ ] Grok API Credential 등록
-- [ ] Quality Monitor Import + Publish
-- [ ] Weekly Report Import + Publish
+- [x] Grok API Credential 등록
+- [x] Quality Monitor Import + Publish
+- [x] Weekly Report Import + Publish
+- [x] **전체 파이프라인 운영 완료**
 
 ---
 
