@@ -16,8 +16,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   const { data: reading } = await supabase.from("readings").select("*, sessions(*)").eq("share_token", id).single();
   if (!reading) notFound();
   const session = reading.sessions;
-  const spread = spreads[session.spread_type as SpreadType];
-  const rawInterpretations = reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[];
+  const spreadType = session?.spread_type as SpreadType | undefined;
+  const spread = spreadType ? spreads[spreadType] : undefined;
+  const rawInterpretations = Array.isArray(reading.card_interpretation)
+    ? (reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[])
+    : [];
   const interpretations = rawInterpretations.map((interp) => ({
     ...interp,
     interpretation: cleanReadingText(interp.interpretation),
@@ -50,16 +53,22 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <div className="w-full md:w-[50%] space-y-4">
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-6">
               <h2 className="font-serif font-bold text-lg text-arcana-gold mb-4">{spread?.nameKo} 스프레드</h2>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className={
+                interpretations.length <= 5
+                  ? "flex flex-wrap justify-center gap-4"
+                  : interpretations.length <= 10
+                    ? "grid grid-cols-5 gap-2 justify-items-center"
+                    : "grid grid-cols-6 gap-2 justify-items-center"
+              }>
                 {interpretations.map((interp) => {
                   const card = deckManager.getCardById(interp.cardId);
                   const pos = spread?.positions[interp.position];
                   if (!card) return null;
                   return (
-                    <div key={interp.cardId} className="flex flex-col items-center gap-2">
+                    <div key={interp.cardId} className="flex flex-col items-center gap-1">
                       <ResultCardFace card={card} isReversed={!!interp.isReversed} />
-                      <span className="text-arcana-gold text-xs font-serif font-bold">{pos?.labelKo}</span>
-                      <span className="text-arcana-text text-xs text-center max-w-[80px] truncate">{card.nameKo}</span>
+                      <span className="text-arcana-gold text-[10px] font-serif font-bold text-center leading-tight">{pos?.labelKo}</span>
+                      <span className="text-arcana-text text-[10px] text-center max-w-[60px] truncate">{card.nameKo}</span>
                     </div>
                   );
                 })}
@@ -72,17 +81,22 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <span className="text-lg">🔮</span>
                 <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
               </div>
-              <p className="text-arcana-text reading-text">{overallReading}</p>
+              {overallReading
+                ? <p className="text-arcana-text reading-text">{overallReading}</p>
+                : <p className="text-arcana-muted text-sm">해석 결과를 불러올 수 없습니다.</p>
+              }
             </div>
 
             {/* 조언 */}
-            <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">✨</span>
-                <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
+            {advice && (
+              <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">✨</span>
+                  <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
+                </div>
+                <p className="text-arcana-text reading-text">{advice}</p>
               </div>
-              <p className="text-arcana-text reading-text">{advice}</p>
-            </div>
+            )}
           </div>
 
           {/* 오른쪽: 카드별 해석 */}
