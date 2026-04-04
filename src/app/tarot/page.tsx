@@ -80,6 +80,21 @@ const spreadOptions: { type: SpreadType; label: string; icon: string; cards: num
   },
 ];
 
+/** 주제별 사용 가능한 스프레드 매핑 — 성격이 맞지 않는 조합은 노출하지 않음 */
+const topicSpreads: Record<Topic, SpreadType[]> = {
+  "love-single": ["one-card", "three-card", "five-card", "celtic-cross"],
+  "love-couple": ["one-card", "three-card", "relationship", "celtic-cross"],
+  career: ["one-card", "three-card", "five-card", "horseshoe", "celtic-cross"],
+  finance: ["one-card", "three-card", "horseshoe", "decision", "celtic-cross"],
+  health: ["one-card", "three-card", "five-card"],
+  general: ["one-card", "three-card", "five-card", "celtic-cross", "week-ahead", "zodiac", "tree-of-life"],
+  // 사주 주제는 타로에서 사용하지 않지만 타입 안전성을 위해 빈 배열
+  "saju-general": [], "saju-love-single": [], "saju-love-couple": [],
+  "saju-career": [], "saju-health": [], "saju-personality": [],
+  "saju-compatibility": [], "saju-auspicious-date": [],
+  love: ["one-card", "three-card", "five-card", "relationship", "celtic-cross"],
+};
+
 type PageStep = "character-select" | "character-detail" | "topic-select" | "spread-select" | "user-info";
 
 function TarotPageContent() {
@@ -399,7 +414,7 @@ function TarotPageContent() {
               <p className="text-arcana-muted text-xs mb-4">카드 수가 많을수록 더 깊이 있는 해석을 받을 수 있어요</p>
 
               <div className="grid grid-cols-1 gap-3">
-                {spreadOptions.map((opt, index) => (
+                {spreadOptions.filter((opt) => !selectedTopic || topicSpreads[selectedTopic]?.includes(opt.type)).map((opt, index) => (
                   <motion.button
                     key={opt.type}
                     initial={{ opacity: 0, x: 20 }}
