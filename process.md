@@ -403,22 +403,20 @@ erDiagram
 
 ```mermaid
 flowchart TD
-    subgraph HomePage["홈 페이지 (page.tsx)"]
+    subgraph HomePage["홈 페이지 (page.tsx) — 7개 섹션"]
         H1["HeroSection<br/>풀스크린 히어로 + CTA"]
         H2["CharacterGallery<br/>12캐릭터 카드 갤러리"]
-        H3["ServiceFlow<br/>서비스 이용 흐름 소개"]
-        H4["DailyCard<br/>캐릭터별 일일 운세"]
-        H5["SkinGallery<br/>카드 스킨 6종"]
-        H6["StatsCounter<br/>서비스 통계"]
-        H7["ReviewCarousel<br/>사용자 후기"]
-        H8["FAQ<br/>자주 묻는 질문"]
-        H9["BottomCTA<br/>하단 행동 유도"]
+        H3["DailyCard<br/>캐릭터별 일일 운세"]
+        H4["SkinGallery<br/>카드 스킨 6종"]
+        H5["ServiceFlow<br/>서비스 이용 흐름 소개"]
+        H6["FAQ<br/>자주 묻는 질문"]
+        H7["BottomCTA<br/>하단 행동 유도"]
 
-        H1 --> H2 --> H3 --> H4 --> H5 --> H6 --> H7 --> H8 --> H9
+        H1 --> H2 --> H3 --> H4 --> H5 --> H6 --> H7
     end
 
     H1 --> |"타로 상담 시작"| TAROT["/tarot"]
-    H4 --> |"캐릭터 탭 클릭"| DAILY_API["POST /api/daily-card"]
+    H3 --> |"캐릭터 탭 클릭"| DAILY_API["POST /api/daily-card"]
     H2 --> |"캐릭터 클릭"| CHAR["/character/[id]"]
     CHAR --> TAROT & SAJU["/saju"]
 ```
