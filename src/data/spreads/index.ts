@@ -96,7 +96,7 @@ export const spreads: Record<SpreadType, SpreadDefinition> = {
     type: "zodiac", name: "Zodiac Wheel Spread", nameKo: "조디악 휠",
     description: "점성술 12하우스에 카드를 배치하여 인생 전반을 종합 분석합니다.",
     positions: [
-      { index: 0, label: "1st House — Self", labelKo: "1하우스 — 자아", x: 50, y: 5 },
+      { index: 0, label: "1st House — Self", labelKo: "1하우스 — 자아", x: 50, y: 2 },
       { index: 1, label: "2nd House — Finance", labelKo: "2하우스 — 재정", x: 73, y: 12 },
       { index: 2, label: "3rd House — Communication", labelKo: "3하우스 — 소통", x: 90, y: 30 },
       { index: 3, label: "4th House — Home", labelKo: "4하우스 — 가정", x: 95, y: 55 },
@@ -107,7 +107,7 @@ export const spreads: Record<SpreadType, SpreadDefinition> = {
       { index: 8, label: "9th House — Philosophy", labelKo: "9하우스 — 철학/여행", x: 5, y: 55 },
       { index: 9, label: "10th House — Career", labelKo: "10하우스 — 커리어", x: 10, y: 30 },
       { index: 10, label: "11th House — Community", labelKo: "11하우스 — 우정/커뮤니티", x: 27, y: 12 },
-      { index: 11, label: "12th House — Spirituality", labelKo: "12하우스 — 영성/카르마", x: 50, y: 5 },
+      { index: 11, label: "12th House — Spirituality", labelKo: "12하우스 — 영성/카르마", x: 30, y: 5 },
     ],
   },
   "tree-of-life": {
