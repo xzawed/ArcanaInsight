@@ -494,7 +494,7 @@ flowchart TD
     LOCAL -->|실패| CODE
     LOCAL -->|통과| REVIEW["3단계: 변경 사항 리뷰"]
     REVIEW --> PR["4단계: 커밋 + PR 생성"]
-    PR --> CI["5단계: CI 자동 검증<br/>lint → build → e2e (3 디바이스)"]
+    PR --> CI["5단계: CI 자동 검증<br/>lint → build → e2e (Chromium)"]
     CI -->|실패| CODE
     CI -->|통과| MERGE["6단계: PR 머지"]
     MERGE --> DEPLOY["Railway 자동 배포"]
