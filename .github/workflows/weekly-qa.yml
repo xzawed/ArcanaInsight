@@ -1,0 +1,164 @@
+name: Weekly QA — 주간 품질 테스트
+
+on:
+  schedule:
+    # 매주 월요일 오전 9시 (KST) = 일요일 24:00 UTC
+    - cron: "0 0 * * 1"
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  quality-check:
+    name: Lint & Type Check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: TypeScript 타입 체크
+        run: pnpm type-check
+
+      - name: ESLint 코드 품질
+        run: pnpm lint
+
+      - name: 프로덕션 빌드
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://example.com' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+  e2e-desktop:
+    name: E2E — Desktop Chrome
+    runs-on: ubuntu-latest
+    needs: quality-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npx playwright install --with-deps chromium
+
+      - name: E2E 테스트 (Desktop Chrome)
+        run: pnpm test:e2e --project="Desktop Chrome"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: report-desktop
+          path: playwright-report/
+          retention-days: 30
+
+  e2e-mobile-android:
+    name: E2E — Mobile Android
+    runs-on: ubuntu-latest
+    needs: quality-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npx playwright install --with-deps chromium
+
+      - name: E2E 테스트 (Mobile Android — Pixel 7)
+        run: pnpm test:e2e --project="Mobile Android"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: report-android
+          path: playwright-report/
+          retention-days: 30
+
+  e2e-mobile-ios:
+    name: E2E — Mobile iOS
+    runs-on: ubuntu-latest
+    needs: quality-check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npx playwright install --with-deps webkit
+
+      - name: E2E 테스트 (Mobile iOS — iPhone 14)
+        run: pnpm test:e2e --project="Mobile iOS"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: report-ios
+          path: playwright-report/
+          retention-days: 30
+
+  notify-on-failure:
+    name: 실패 시 Issue 생성
+    runs-on: ubuntu-latest
+    needs: [quality-check, e2e-desktop, e2e-mobile-android, e2e-mobile-ios]
+    if: failure()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: GitHub Issue 생성
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().split('T')[0];
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 주간 QA 실패 — ${date}`,
+              body: [
+                `## 주간 품질 테스트 실패`,
+                ``,
+                `**실행 일시**: ${date}`,
+                `**워크플로우**: [Weekly QA 실행 결과](${runUrl})`,
+                ``,
+                `위 링크에서 실패 상세 및 Playwright 리포트를 확인해주세요.`,
+                ``,
+                `---`,
+                `*이 이슈는 GitHub Actions에 의해 자동 생성되었습니다.*`,
+              ].join('\n'),
+              labels: ['bug', 'qa'],
+            });
