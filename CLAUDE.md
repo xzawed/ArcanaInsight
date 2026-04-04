@@ -284,6 +284,13 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
   3. `e2e`: Playwright E2E 테스트 (Chromium + WebKit, 실패 시 리포트 아티팩트 업로드)
 - Railway 배포는 별도 GitHub 연동이 담당 (이 워크플로우는 코드 품질 검증 전용)
 
+### 주간 QA (`.github/workflows/weekly-qa.yml`)
+
+- **매주 월요일 오전 9시 (KST)** 자동 실행 + `workflow_dispatch`로 수동 실행 가능
+- 4개 job 병렬: quality-check → e2e-desktop / e2e-mobile-android / e2e-mobile-ios
+- 디바이스별 Playwright 리포트 30일 보존
+- **실패 시 자동 GitHub Issue 생성** (`🚨 주간 QA 실패` 라벨: bug, qa)
+
 ### Railway 설정
 
 - `railway.toml`에 빌드/배포 설정 정의 (nixpacks 빌더)
