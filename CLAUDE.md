@@ -580,10 +580,10 @@ pnpm build             # 프로덕션 빌드 확인
 
 | 워크플로우 | 파일 | 방식 | 상태 |
 |-----------|------|------|------|
-| Spec Tracker | `workflow-spec-tracker.json` | 5분 Polling (localhost) | **운영 중** |
-| Quality Monitor | `workflow-quality-monitor.json` | Cron 매일 09:00 | Grok API 등록 후 사용 |
-| Weekly Report | `workflow-weekly-report.json` | Cron 금요일 18:00 | Grok API 등록 후 사용 |
-| Spec Tracker Cloud | `workflow-spec-tracker-cloud.json` | GitHub Webhook (실시간) | n8n Cloud 이전 후 교체 |
+| Spec Tracker | `workflow-spec-tracker.json` | GitHub Webhook (실시간) | **n8n Cloud 운영 중** ✅ |
+| Quality Monitor | `workflow-quality-monitor.json` | Cron 매일 09:00 | Grok API 등록 후 활성화 |
+| Weekly Report | `workflow-weekly-report.json` | Cron 금요일 18:00 | Grok API 등록 후 활성화 |
 
-> localhost에서는 Polling 방식 사용 (GitHub Webhook 수신 불가).
-> n8n Cloud 이전 시 Webhook 방식으로 교체하면 실시간 감지 + API 소모 0. 상세: `n8n/README.md`
+> n8n Cloud: https://xzawed.app.n8n.cloud
+> Webhook: `https://xzawed.app.n8n.cloud/webhook/arcana-spec`
+> 상세 가이드: `n8n/README.md`
