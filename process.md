@@ -474,3 +474,41 @@ sequenceDiagram
 | **카드 데이터** | `src/data/cards/*`, `src/data/spreads/*` |
 | **캐릭터 데이터** | `src/data/characters/*` |
 | **상태 관리** | `src/hooks/useSession.ts`, `src/hooks/useSajuSession.ts`, `src/hooks/useCharacter.ts` |
+
+---
+
+## 코드 변경 및 배포 프로세스 (표준)
+
+```mermaid
+flowchart TD
+    subgraph 이슈발생["이슈 발생"]
+        QA["주간 QA 실패<br/>(자동 Issue 생성)"]
+        USER["사용자 보고<br/>(대화 컨텍스트)"]
+        FEAT["신규 기능<br/>(기획 확정)"]
+    end
+
+    QA & USER & FEAT --> BRANCH["기능 브랜치 생성<br/>fix/* · feat/* · docs/*"]
+
+    BRANCH --> CODE["1단계: 코드 변경"]
+    CODE --> LOCAL["2단계: 로컬 검증<br/>type-check + lint + build"]
+    LOCAL -->|실패| CODE
+    LOCAL -->|통과| REVIEW["3단계: 변경 사항 리뷰"]
+    REVIEW --> PR["4단계: 커밋 + PR 생성"]
+    PR --> CI["5단계: CI 자동 검증<br/>lint → build → e2e (3 디바이스)"]
+    CI -->|실패| CODE
+    CI -->|통과| MERGE["6단계: PR 머지"]
+    MERGE --> DEPLOY["Railway 자동 배포"]
+    MERGE --> RECHECK{"QA Issue<br/>열려있음?"}
+    RECHECK -->|Yes| RERUN["주간 QA 자동 재실행"]
+    RECHECK -->|No| DONE["완료"]
+    RERUN -->|통과| CLOSE["Issue 자동 닫기"]
+    RERUN -->|실패| CODE
+    CLOSE --> DONE
+
+    style QA fill:#dc2626,color:#fff
+    style USER fill:#2563eb,color:#fff
+    style FEAT fill:#059669,color:#fff
+    style CI fill:#7c3aed,color:#fff
+    style DEPLOY fill:#d97706,color:#fff
+    style DONE fill:#16a34a,color:#fff
+```
