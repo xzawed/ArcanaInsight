@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { SajuResultClient } from "./SajuResultClient";
+import { ReadingText } from "@/components/common/ReadingText";
 import { SajuResultShareButton } from "./SajuResultShareButton";
 import type { SajuResult } from "@/services/saju/saju-types";
 
@@ -58,7 +59,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
                 <span className="text-lg">☯</span>
                 <h2 className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</h2>
               </div>
-              <p className="text-arcana-text reading-text">{overallReading}</p>
+              <ReadingText text={overallReading} />
             </div>
           )}
 
@@ -68,7 +69,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
                 <span className="text-lg">🔍</span>
                 <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</h2>
               </div>
-              <p className="text-arcana-text reading-text">{topicReading}</p>
+              <ReadingText text={topicReading} />
             </div>
           )}
 
@@ -78,7 +79,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
                 <span className="text-lg">✨</span>
                 <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</h2>
               </div>
-              <p className="text-arcana-text reading-text">{advice}</p>
+              <ReadingText text={advice} />
             </div>
           )}
         </div>
