@@ -36,22 +36,13 @@ n8n 대시보드 → Workflows → Import from File → 아래 JSON 파일 선�
 - `workflow-quality-monitor.json` — 일일 리딩 품질 모니터링
 - `workflow-weekly-report.json` — 주간 운영 리포트
 
-### 4. GitHub Webhook 설정
-
-`workflow-spec-tracker.json` import 후 n8n이 생성하는 Webhook URL을 GitHub에 등록:
-
-1. GitHub → Repository Settings → Webhooks → Add webhook
-2. Payload URL: n8n이 제공하는 Webhook URL
-3. Content type: `application/json`
-4. Events: "Issues" 선택
-5. Active 체크 → Add webhook
-
 ## 워크플로우 설명
 
 ### 1. Spec Tracker (`workflow-spec-tracker.json`)
-- **트리거**: GitHub Issue에 `spec` 라벨이 붙을 때
-- **동작**: Issue 본문을 파싱 → GitHub Actions `workflow_dispatch` 트리거 → Issue에 "구현 시작" 코멘트
-- **용도**: SuperGrok에서 확정한 스펙 → Claude CLI 자동 구현 연결
+- **트리거**: 5분마다 폴링 (localhost 환경 대응, Webhook/ngrok 불필요)
+- **동작**: `spec` 라벨 + `open` 상태 Issue 조회 → 미처리 Issue에 `in-progress` 라벨 추가 + 구현 안내 코멘트
+- **용도**: SuperGrok에서 확정한 스펙 → Claude CLI 구현 알림
+- **중복 방지**: `in-progress` 라벨이 이미 붙은 Issue는 건너뜀
 
 ### 2. Quality Monitor (`workflow-quality-monitor.json`)
 - **트리거**: 매일 오전 9시 (KST)
