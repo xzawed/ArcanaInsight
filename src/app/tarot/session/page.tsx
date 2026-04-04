@@ -81,8 +81,8 @@ export default function TarotSessionPage() {
     };
     initSession();
 
-    setMood("smile");
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "smile", timestamp: new Date() });
+    setMood("default");
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "default", timestamp: new Date() });
 
     setTimeout(() => {
       setAnimationPhase("spreading");
@@ -90,9 +90,8 @@ export default function TarotSessionPage() {
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
         content: `${requiredCards}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요`,
-        mood: "mystical", timestamp: new Date(),
+        mood: "default", timestamp: new Date(),
       });
-      setMood("mystical");
     }, 2000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
@@ -109,13 +108,12 @@ export default function TarotSessionPage() {
     selectCard(selected);
     setSelectedIndices((prev) => [...prev, index]);
     setRevealedPositions((prev) => [...prev, position]);
-    setMood("surprised");
+    setMood("mystical");
 
     const currentCount = currentCards.length + 1;
     const isLast = currentCount >= required;
 
     if (confirmEachCard || isLast) {
-      // 확인 모드 ON이거나 마지막 카드 → 확인 요청
       setPendingConfirm(true);
       setTimeout(() => {
         addChatMessage({
@@ -123,13 +121,9 @@ export default function TarotSessionPage() {
           content: isLast
             ? `${required}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
             : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${required})`,
-          mood: isLast ? "smile" : "default", timestamp: new Date(),
+          mood: "mystical", timestamp: new Date(),
         });
-        setMood(isLast ? "smile" : "default");
       }, 500);
-    } else {
-      // 확인 모드 OFF + 중간 카드 → 즉시 다음 카드 선택 계속
-      setTimeout(() => setMood("default"), 800);
     }
   }, [shuffledDeck, pendingConfirm, confirmEachCard, selectCard, setMood, addChatMessage]);
 
@@ -143,9 +137,9 @@ export default function TarotSessionPage() {
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
         content: `좋아요! 다음 카드를 골라주세요. (${currentCards.length}/${requiredCards})`,
-        mood: "mystical", timestamp: new Date(),
+        mood: "default", timestamp: new Date(),
       });
-      setMood("mystical");
+      setMood("default");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requiredCards, addChatMessage, setMood]);
@@ -163,9 +157,9 @@ export default function TarotSessionPage() {
     addChatMessage({
       id: crypto.randomUUID(), role: "character",
       content: "다른 카드를 골라주세요. 직감을 믿으세요!",
-      mood: "mystical", timestamp: new Date(),
+      mood: "default", timestamp: new Date(),
     });
-    setMood("mystical");
+    setMood("default");
   }, [addChatMessage, setMood]);
 
   // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
@@ -178,13 +172,11 @@ export default function TarotSessionPage() {
     cards.forEach((sc, i) => {
       timers.push(setTimeout(() => {
         setRevealedPositions((prev) => [...prev, sc.position]);
-        setMood(i % 2 === 0 ? "serious" : "mystical");
 
-        // 카드 키워드 미리보기 대사
         const posLabel = currentSpread?.positions[sc.position]?.labelKo || `위치 ${sc.position + 1}`;
         const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
         const preview = buildCardPreviewLine(charId, sc.card.nameKo, keywords, posLabel);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: preview, mood: "serious", timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
       }, (i + 1) * 2000));
     });
 
@@ -192,19 +184,19 @@ export default function TarotSessionPage() {
     const baseDelay = (cards.length + 1) * 2000;
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        setMood(line.mood);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: "mystical", timestamp: new Date() });
       }, baseDelay + i * 3000));
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [spreadType, addChatMessage, setMood]);
+  }, [spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     // 카드 뒤집기 초기화 (reading 시작 시 전부 뒷면으로)
     setRevealedPositions([]);
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요", mood: "mystical", timestamp: new Date() });
+    setMood("mystical");
 
     // 대기 연출 시작 (API 호출과 동시 실행)
     const stopSequence = startWaitingSequence(cards, characterId || "arcana");
@@ -234,8 +226,8 @@ export default function TarotSessionPage() {
         const message = errorDetail.includes("GROK_API_KEY")
           ? "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요."
           : "서버에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.";
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: message, mood: "surprised", timestamp: new Date() });
-        setMood("surprised");
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: message, mood: "default", timestamp: new Date() });
+        setMood("default");
         setReadingError(true);
         setLoading(false);
         return;
@@ -259,8 +251,8 @@ export default function TarotSessionPage() {
             if (data.error) {
               stopSequence();
               console.error("리딩 SSE 에러:", data.error);
-              addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-              setMood("surprised");
+              addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+              setMood("default");
               setReadingError(true);
               setLoading(false);
               streamDone = true;
@@ -281,7 +273,7 @@ export default function TarotSessionPage() {
                   addChatMessage({
                     id: crypto.randomUUID(), role: "character",
                     content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
-                    mood: "serious", timestamp: new Date(),
+                    mood: "smile", timestamp: new Date(),
                   });
                 }
               }
@@ -289,7 +281,7 @@ export default function TarotSessionPage() {
                 addChatMessage({
                   id: crypto.randomUUID(), role: "character",
                   content: `종합 해석\n\n${data.result.overallReading}`,
-                  mood: "mystical", timestamp: new Date(),
+                  mood: "smile", timestamp: new Date(),
                 });
               }
               if (data.result.advice) {
@@ -317,8 +309,8 @@ export default function TarotSessionPage() {
     } catch (e) {
       console.error("리딩 요청 실패:", e);
       stopSequence();
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-      setMood("surprised");
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+      setMood("default");
       setReadingError(true);
     }
     setLoading(false);

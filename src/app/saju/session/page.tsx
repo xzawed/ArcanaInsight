@@ -41,13 +41,13 @@ export default function SajuSessionPage() {
       if (data.session?.id) setSessionId(data.session.id);
     }).catch(() => {});
 
-    setMood("mystical");
+    setMood("default");
     const namePrefix = userInfo.name ? `${userInfo.name}님의` : "";
     const initMsg = characterId === "miko"
       ? `${namePrefix} 사주팔자를 읽어보겠습니다. 조용히 기다려주십시오.`
       : `${namePrefix} 사주를 살펴보고 있어요~ 잠시만 기다려주세요.`;
     addChatMessage({ id: crypto.randomUUID(), role: "character",
-      content: initMsg, mood: "mystical", timestamp: new Date(),
+      content: initMsg, mood: "default", timestamp: new Date(),
     });
 
     startReading();
@@ -65,8 +65,8 @@ export default function SajuSessionPage() {
     const timers: ReturnType<typeof setTimeout>[] = [];
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        setMood(line.mood);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
+        setMood("mystical");
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: "mystical", timestamp: new Date() });
       }, (i + 1) * 3000));
     });
     const stopTimers = () => timers.forEach(clearTimeout);
@@ -84,8 +84,8 @@ export default function SajuSessionPage() {
       if (!response.ok || !response.body) {
         stopTimers();
         addChatMessage({ id: crypto.randomUUID(), role: "character",
-          content: "서버에 문제가 있어요. 잠시 후 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-        setMood("surprised"); setReadingError(true); setLoading(false);
+          content: "서버에 문제가 있어요. 잠시 후 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+        setMood("default"); setReadingError(true); setLoading(false);
         return;
       }
 
@@ -107,8 +107,8 @@ export default function SajuSessionPage() {
             if (data.error) {
               stopTimers();
               addChatMessage({ id: crypto.randomUUID(), role: "character",
-                content: "사주 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-              setMood("surprised"); setReadingError(true); setLoading(false);
+                content: "사주 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+              setMood("default"); setReadingError(true); setLoading(false);
               streamDone = true; break;
             }
             if (data.done && data.result) {
@@ -130,8 +130,8 @@ export default function SajuSessionPage() {
       console.error("사주 리딩 요청 실패:", e);
       stopTimers();
       addChatMessage({ id: crypto.randomUUID(), role: "character",
-        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "surprised", timestamp: new Date() });
-      setMood("surprised"); setReadingError(true);
+        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+      setMood("default"); setReadingError(true);
     }
     setLoading(false);
   };
