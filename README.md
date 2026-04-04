@@ -119,6 +119,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 | 상태관리 | Zustand v5 |
 | 패키지 매니저 | pnpm 10.33 |
 | 호스팅 | Railway (GitHub Actions 자동 배포) |
+| E2E 테스트 | Playwright (Desktop Chrome · Pixel 7 · iPhone 14) |
 
 ---
 
@@ -126,13 +127,13 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 
 ### 캐릭터 이미지
 
-모든 12캐릭터는 PNG 누끼(배경 제거) 이미지를 사용합니다.
+10캐릭터는 PNG 누끼, 2캐릭터(miko · seonhwa)는 JPG 레거시 경로를 사용합니다.
 
 | 항목 | 규격 |
 |------|------|
 | 사이즈 | **1408×768** (grok-imagine-image-pro API 기본 출력) |
-| 포맷 | PNG (투명 배경) |
-| 경로 | `/images/characters/{id}/nukki/{mood}.png` |
+| 포맷 (10캐릭터) | PNG (투명 배경) — `/images/characters/{id}/nukki/{mood}.png` |
+| 포맷 (miko · seonhwa) | JPG (레거시) — `/images/characters/{id}/{mood}.jpg` |
 | 표정 종류 | default · smile · serious · surprised · wink · mystical |
 
 ### 테두리 투명도 (CSS mask)
