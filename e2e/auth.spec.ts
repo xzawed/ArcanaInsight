@@ -6,7 +6,6 @@ test.describe("로그인 페이지", () => {
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("text=Google")).toBeVisible();
-    await expect(page.locator("text=카카오")).toBeVisible();
     await expect(page.locator("text=로그인").first()).toBeVisible();
   });
 

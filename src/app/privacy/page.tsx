@@ -33,7 +33,7 @@ export default function PrivacyPage() {
                 <tbody>
                   <tr>
                     <td className="border border-arcana-border px-3 py-2">회원 가입 시</td>
-                    <td className="border border-arcana-border px-3 py-2">이메일, OAuth 인증 정보 (카카오/구글)</td>
+                    <td className="border border-arcana-border px-3 py-2">이메일, OAuth 인증 정보 (구글)</td>
                     <td className="border border-arcana-border px-3 py-2">닉네임, 프로필 이미지</td>
                   </tr>
                   <tr>

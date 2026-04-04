@@ -11,7 +11,7 @@ function LoginForm() {
   const message = searchParams.get("message");
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const handleLogin = async (provider: "google" | "kakao") => {
+  const handleLogin = async (provider: "google") => {
     setLoginError(null);
     const supabase = createClient();
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
@@ -70,10 +70,6 @@ function LoginForm() {
             <button onClick={() => handleLogin("google")}
               className="w-full px-6 py-2.5 rounded-full bg-white text-gray-800 font-serif font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors shadow-lg shadow-arcana-purple/20">
               <span>G</span> Google로 로그인
-            </button>
-            <button onClick={() => handleLogin("kakao")}
-              className="w-full px-6 py-2.5 rounded-full bg-[#FEE500] text-[#191919] font-serif font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#FDD835] transition-colors shadow-lg shadow-arcana-purple/20">
-              <span>💬</span> 카카오로 로그인
             </button>
           </div>
           <p className="text-arcana-muted text-xs text-center mt-6">로그인 없이도 타로 상담을 이용할 수 있습니다</p>
