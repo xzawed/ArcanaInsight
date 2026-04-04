@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ReadingText } from "@/components/common/ReadingText";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
@@ -500,7 +501,7 @@ export default function TarotSessionPage() {
                           <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
                           <span className="text-arcana-text font-bold text-sm md:text-base">{displayName}</span>
                         </div>
-                        <p className="text-arcana-text reading-text">{interp.interpretation}</p>
+                        <ReadingText text={interp.interpretation} />
                       </div>
                     );
                   })}
@@ -512,7 +513,7 @@ export default function TarotSessionPage() {
                         <span className="text-lg">🔮</span>
                         <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                       </div>
-                      <p className="text-arcana-text reading-text">{readingResult.overallReading}</p>
+                      <ReadingText text={readingResult.overallReading} />
                     </div>
                   )}
 
@@ -523,7 +524,7 @@ export default function TarotSessionPage() {
                         <span className="text-lg">✨</span>
                         <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                       </div>
-                      <p className="text-arcana-text reading-text">{readingResult.advice}</p>
+                      <ReadingText text={readingResult.advice} />
                     </div>
                   )}
 

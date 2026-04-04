@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ReadingText } from "@/components/common/ReadingText";
 import { motion } from "framer-motion";
 import { useSajuSessionStore } from "@/hooks/useSajuSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
@@ -182,7 +183,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">☯</span>
                       <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                     </div>
-                    <p className="text-arcana-text reading-text">{readingResult.overallReading}</p>
+                    <ReadingText text={readingResult.overallReading} />
                   </div>
                 )}
 
@@ -192,7 +193,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">🔍</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</span>
                     </div>
-                    <p className="text-arcana-text reading-text">{readingResult.topicReading}</p>
+                    <ReadingText text={readingResult.topicReading || ""} />
                   </div>
                 )}
 
@@ -204,7 +205,7 @@ export default function SajuSessionPage() {
                       <span className="text-lg">✨</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                     </div>
-                    <p className="text-arcana-text reading-text">{readingResult.advice}</p>
+                    <ReadingText text={readingResult.advice} />
                   </div>
                 )}
                 <div ref={resultBottomRef} />

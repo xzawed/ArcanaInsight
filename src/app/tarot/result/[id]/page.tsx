@@ -7,6 +7,7 @@ import { spreads } from "@/data/spreads";
 import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "./ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
+import { ReadingText } from "@/components/common/ReadingText";
 
 const deckManager = new DeckManager();
 
@@ -82,7 +83,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
               </div>
               {overallReading
-                ? <p className="text-arcana-text reading-text">{overallReading}</p>
+                ? <ReadingText text={overallReading} />
                 : <p className="text-arcana-muted text-sm">해석 결과를 불러올 수 없습니다.</p>
               }
             </div>
@@ -94,7 +95,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   <span className="text-lg">✨</span>
                   <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
                 </div>
-                <p className="text-arcana-text reading-text">{advice}</p>
+                <ReadingText text={advice} />
               </div>
             )}
           </div>
@@ -121,7 +122,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       </div>
                     </div>
                   </div>
-                  <p className="text-arcana-text reading-text">{interp.interpretation}</p>
+                  <ReadingText text={interp.interpretation} />
                 </div>
               );
             })}
