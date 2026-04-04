@@ -113,7 +113,14 @@ export default function TarotSessionPage() {
     const currentCount = currentCards.length + 1;
     const isLast = currentCount >= required;
 
-    if (confirmEachCard || isLast) {
+    if (isLast && !confirmEachCard) {
+      // 확인 모드 OFF + 마지막 카드 → 자동으로 리딩 시작
+      setTimeout(() => {
+        const allCards = useSessionStore.getState().selectedCards;
+        startReading(allCards);
+      }, 800);
+    } else if (confirmEachCard || isLast) {
+      // 확인 모드 ON 또는 마지막 카드(확인 모드 ON) → 확인 요청
       setPendingConfirm(true);
       setTimeout(() => {
         addChatMessage({
@@ -125,6 +132,7 @@ export default function TarotSessionPage() {
         });
       }, 500);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shuffledDeck, pendingConfirm, confirmEachCard, selectCard, setMood, addChatMessage]);
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
@@ -239,10 +247,28 @@ export default function TarotSessionPage() {
 
       while (!streamDone) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          // 스트림 종료 — 버퍼에 남은 마지막 데이터 처리
+          if (sseBuffer.trim()) {
+            const remaining = sseBuffer;
+            sseBuffer = "";
+            if (remaining.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(remaining.slice(6));
+                if (data.done && data.result) {
+                  stopSequence();
+                  setRevealedPositions(cards.map((c) => c.position));
+                  setReadingResult(data.result);
+                  setPhase("result"); setMood("smile");
+                }
+              } catch { /* 파싱 실패 무시 */ }
+            }
+          }
+          break;
+        }
         sseBuffer += decoder.decode(value, { stream: true });
         const sseLines = sseBuffer.split("\n");
-        sseBuffer = sseLines.pop() || ""; // 불완전한 마지막 줄은 버퍼에 유지
+        sseBuffer = sseLines.pop() || "";
         for (const line of sseLines) {
           if (!line.startsWith("data: ")) continue;
           try {
@@ -305,6 +331,14 @@ export default function TarotSessionPage() {
             }
           } catch (e) { console.warn("SSE 파싱 실패:", e); }
         }
+      }
+      // 스트림이 끝났는데 result phase로 전환되지 않은 경우 → 에러 처리
+      if (useSessionStore.getState().phase === "reading") {
+        stopSequence();
+        console.error("SSE 스트림 종료 후 결과 미수신");
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+        setMood("default");
+        setReadingError(true);
       }
     } catch (e) {
       console.error("리딩 요청 실패:", e);
