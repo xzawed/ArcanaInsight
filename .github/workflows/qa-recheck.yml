@@ -4,13 +4,17 @@ name: QA Recheck — 수정 후 자동 재검증
 on:
   push:
     branches: [main]
+    # 문서만 변경된 경우 재검증 스킵
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'n8n/**'
+      - '.github/ISSUE_TEMPLATE/**'
 
 jobs:
-  check-open-qa-issues:
-    name: QA Issue 확인
+  check-and-recheck:
+    name: QA Issue 확인 + 재검증
     runs-on: ubuntu-latest
-    outputs:
-      has_open_issues: ${{ steps.check.outputs.has_issues }}
     steps:
       - uses: actions/github-script@v7
         id: check
@@ -23,21 +27,14 @@ jobs:
               state: 'open',
             });
             const hasIssues = issues.some(i => i.title.startsWith('🚨 주간 QA 실패'));
-            core.setOutput('has_issues', hasIssues ? 'true' : 'false');
-
-  trigger-recheck:
-    name: 주간 QA 재실행 트리거
-    runs-on: ubuntu-latest
-    needs: check-open-qa-issues
-    if: needs.check-open-qa-issues.outputs.has_open_issues == 'true'
-    steps:
-      - uses: actions/github-script@v7
-        with:
-          script: |
+            if (!hasIssues) {
+              console.log('열린 QA 실패 Issue 없음 → 재검증 스킵');
+              return;
+            }
+            console.log('🔄 QA 실패 Issue 감지 → 주간 QA 자동 재실행');
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'weekly-qa.yml',
               ref: 'main',
             });
-            console.log('🔄 QA 실패 Issue가 열려있어 주간 QA를 자동 재실행합니다.');
