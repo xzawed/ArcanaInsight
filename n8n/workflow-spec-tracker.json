@@ -1,68 +1,108 @@
 {
-  "name": "ArcanaInsight — Spec Tracker",
+  "name": "ArcanaInsight — Spec Tracker (Polling)",
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "arcana-spec",
-        "responseMode": "responseNode"
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "*/5 * * * *" }]
+        }
       },
-      "id": "webhook-trigger",
-      "name": "GitHub Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "id": "cron-poll",
+      "name": "5분마다 폴링",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
       "position": [250, 300]
     },
     {
       "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/xzawed/ArcanaInsight/issues",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "labels", "value": "spec" },
+            { "name": "state", "value": "open" },
+            { "name": "sort", "value": "created" },
+            { "name": "direction", "value": "desc" },
+            { "name": "per_page", "value": "5" }
+          ]
+        }
+      },
+      "id": "fetch-issues",
+      "name": "GitHub: spec Issue 조회",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
+      }
+    },
+    {
+      "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true },
           "combinator": "and",
           "conditions": [
             {
-              "leftValue": "={{ $json.action }}",
-              "rightValue": "labeled",
-              "operator": { "type": "string", "operation": "equals" }
-            },
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "0",
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        }
+      },
+      "id": "check-exists",
+      "name": "Issue 존재 여부",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ $json }}",
+        "options": {}
+      },
+      "id": "split-issues",
+      "name": "Issue별 분리",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
             {
-              "leftValue": "={{ $json.label?.name }}",
-              "rightValue": "spec",
+              "leftValue": "={{ $json.labels?.some(l => l.name === 'in-progress') }}",
+              "rightValue": "false",
               "operator": { "type": "string", "operation": "equals" }
             }
           ]
         }
       },
-      "id": "filter-spec",
-      "name": "Filter: spec 라벨만",
+      "id": "filter-new",
+      "name": "미처리 Issue만",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [470, 300]
+      "position": [1130, 300]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://api.github.com/repos/{{ $json.repository.full_name }}/dispatches",
+        "url": "=https://api.github.com/repos/xzawed/ArcanaInsight/issues/{{ $json.number }}/labels",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "event_type",
-              "value": "spec-implementation"
-            },
-            {
-              "name": "client_payload",
-              "value": "={{ JSON.stringify({ issue_number: $json.issue.number, title: $json.issue.title, body: $json.issue.body }) }}"
-            }
-          ]
-        }
+        "specifyBody": "json",
+        "jsonBody": "={ \"labels\": [\"in-progress\"] }"
       },
-      "id": "trigger-implementation",
-      "name": "GitHub: Dispatch 트리거",
+      "id": "mark-progress",
+      "name": "GitHub: in-progress 라벨 추가",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [690, 200],
+      "position": [1350, 200],
       "credentials": {
         "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
       }
@@ -70,50 +110,35 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://api.github.com/repos/{{ $json.repository.full_name }}/issues/{{ $json.issue.number }}/comments",
+        "url": "=https://api.github.com/repos/xzawed/ArcanaInsight/issues/{{ $json.number }}/comments",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "body",
-              "value": "🤖 **자동 구현 트리거됨**\\n\\n이 스펙이 Claude CLI 구현 파이프라인에 전달되었습니다.\\n진행 상황은 [Actions 탭](../../actions)에서 확인하세요."
-            }
-          ]
-        }
+        "specifyBody": "json",
+        "jsonBody": "={ \"body\": \"🤖 **Spec 감지됨 — 구현 대기 중**\\n\\n이 스펙이 감지되었습니다. Claude CLI에서 구현을 시작해주세요:\\n\\n```\\nGitHub Issue #{{ $json.number }} 내용대로 구현해줘\\n```\\n\\n---\\n*n8n Spec Tracker에 의해 자동 생성된 코멘트입니다.*\" }"
       },
       "id": "comment-issue",
       "name": "GitHub: Issue 코멘트",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [690, 400],
+      "position": [1350, 400],
       "credentials": {
         "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
       }
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "id": "respond-ok",
-      "name": "Respond OK",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [910, 300]
     }
   ],
   "connections": {
-    "GitHub Webhook": { "main": [[{ "node": "Filter: spec 라벨만", "type": "main", "index": 0 }]] },
-    "Filter: spec 라벨만": {
+    "5분마다 폴링": { "main": [[{ "node": "GitHub: spec Issue 조회", "type": "main", "index": 0 }]] },
+    "GitHub: spec Issue 조회": { "main": [[{ "node": "Issue 존재 여부", "type": "main", "index": 0 }]] },
+    "Issue 존재 여부": { "main": [[{ "node": "Issue별 분리", "type": "main", "index": 0 }]] },
+    "Issue별 분리": { "main": [[{ "node": "미처리 Issue만", "type": "main", "index": 0 }]] },
+    "미처리 Issue만": {
       "main": [
         [
-          { "node": "GitHub: Dispatch 트리거", "type": "main", "index": 0 },
+          { "node": "GitHub: in-progress 라벨 추가", "type": "main", "index": 0 },
           { "node": "GitHub: Issue 코멘트", "type": "main", "index": 0 }
         ]
       ]
-    },
-    "GitHub: Dispatch 트리거": { "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]] },
-    "GitHub: Issue 코멘트": { "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]] }
+    }
   }
 }
