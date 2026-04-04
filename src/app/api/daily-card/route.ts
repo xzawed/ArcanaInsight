@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { GrokProvider } from "@/services/core/grok-provider";
+import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getCharacterById } from "@/data/characters";
 
-const grokProvider = new GrokProvider();
+const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
 
 function hashDateSeed(date: string, characterId: string): number {

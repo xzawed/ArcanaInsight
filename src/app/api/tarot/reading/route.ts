@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { TarotService } from "@/services/tarot/tarot-service";
-import { GrokProvider } from "@/services/core/grok-provider";
+import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
@@ -8,7 +8,7 @@ import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
 
 const tarotService = new TarotService();
-const grokProvider = new GrokProvider();
+const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
 

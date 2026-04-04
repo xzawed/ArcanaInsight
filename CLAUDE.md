@@ -238,8 +238,8 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ## 핵심 아키텍처 패턴
 
 - **DivinationService 인터페이스**: 모든 운세 서비스는 이 인터페이스를 구현. 새 서비스 추가 = 구현체 + 프롬프트 + API 라우트 + 페이지
-- **AIProvider 추상화**: Grok API를 직접 호출하지 않고 인터페이스 통해 호출. 모델 교체 용이
-- **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`에서 Grok 응답을 SSE로 클라이언트에 스트리밍
+- **AIProvider 추상화 + Fallback**: `FallbackProvider`가 Grok API 우선 호출 → 실패 시 Claude API로 자동 전환 (5분 쿨다운). `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용
+- **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/daily-card`에서 AI 응답을 SSE로 클라이언트에 스트리밍
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
 - **Path alias**: `@/*` → `./src/*` (tsconfig.json)
 - **동적 테마**: `useTheme.ts`에서 사용자 로컬 시간/계절 기반으로 7종 테마 자동 감지
@@ -296,8 +296,9 @@ pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 ## 환경 변수
 
 ```
-GROK_API_KEY=               # xAI Grok API 키
+GROK_API_KEY=               # xAI Grok API 키 (1순위 AI)
 GROK_MODEL=grok-3           # 텍스트 생성 모델
+ANTHROPIC_API_KEY=          # Anthropic Claude API 키 (Grok 장애 시 자동 fallback)
 NEXT_PUBLIC_SUPABASE_URL=   # Supabase 프로젝트 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase 익명 키
 SUPABASE_SERVICE_ROLE_KEY=  # Supabase 서비스 키 (서버 전용)
