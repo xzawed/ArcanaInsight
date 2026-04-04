@@ -102,7 +102,7 @@
 
 ### 3.2 Supabase Auth
 
-- 소셜 로그인 설정 (카카오/구글) — 네이버는 미구현 (향후 추가 예정)
+- 소셜 로그인 설정 (구글)
 - Supabase Auth Helpers for Next.js 연동
 - 인증 미들웨어 구현
 - 세션/토큰 관리

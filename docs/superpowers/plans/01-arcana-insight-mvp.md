@@ -3729,7 +3729,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function LoginPage() {
   const supabase = createClient();
 
-  const handleLogin = async (provider: "google" | "kakao") => {
+  const handleLogin = async (provider: "google") => {
     await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -3759,13 +3759,6 @@ export default function LoginPage() {
             Google로 로그인
           </button>
 
-          <button
-            onClick={() => handleLogin("kakao")}
-            className="w-full py-3 rounded-xl bg-[#FEE500] text-[#191919] font-medium flex items-center justify-center gap-2 hover:bg-[#FDD835] transition-colors"
-          >
-            <span>💬</span>
-            카카오로 로그인
-          </button>
         </div>
 
         <p className="text-arcana-muted text-xs text-center mt-6">

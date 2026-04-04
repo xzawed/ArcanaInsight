@@ -37,7 +37,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 점술 전문가 캐릭터�
 | 스타일링 | Tailwind CSS |
 | 애니메이션 | Framer Motion + CSS + Lottie |
 | AI | Grok API (xAI) — 추상화 레이어를 통해 호출 |
-| 인증 | Supabase Auth Helpers (카카오/구글/네이버) |
+| 인증 | Supabase Auth Helpers (구글) |
 | 데이터베이스 | Supabase (PostgreSQL) |
 | 상태관리 | Zustand (필요 시) |
 | 패키지 매니저 | pnpm |
@@ -221,7 +221,7 @@ users
 ├── email
 ├── nickname
 ├── avatar_url
-├── provider (kakao/google/naver)
+├── provider (google)
 ├── created_at
 └── last_login_at
 
