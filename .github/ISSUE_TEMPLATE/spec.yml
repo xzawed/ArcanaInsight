@@ -1,0 +1,53 @@
+name: "Feature Spec (SuperGrok → Claude CLI)"
+description: "SuperGrok에서 확정된 기능 스펙을 Claude CLI에 전달"
+labels: ["spec", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## SuperGrok 기획 → Claude CLI 구현 파이프라인
+        SuperGrok에서 확정된 기능 스펙을 아래에 작성해주세요.
+        `spec` 라벨이 자동으로 붙으며, Claude CLI가 이 Issue를 기반으로 구현합니다.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 기능 요약
+      description: 한 줄로 요약
+      placeholder: "예: 신점 서비스 추가"
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec
+    attributes:
+      label: 상세 스펙
+      description: SuperGrok에서 확정된 전체 스펙 (기능 요구사항, 화면 흐름, 데이터 구조 등)
+      placeholder: |
+        ## 기능 요구사항
+        - ...
+
+        ## 화면 흐름
+        1. ...
+
+        ## 데이터 구조
+        - ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - "높음 — 즉시 구현"
+        - "중간 — 이번 주 내"
+        - "낮음 — 백로그"
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 참고 사항 (선택)
+      description: 추가 맥락, 제약 조건, SuperGrok 논의 요약 등

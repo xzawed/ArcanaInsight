@@ -1,0 +1,97 @@
+{
+  "name": "ArcanaInsight — Daily Quality Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "0 0 * * *" }] }
+      },
+      "id": "cron-daily",
+      "name": "매일 09:00 KST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT r.id, r.overall_reading, r.advice, r.card_interpretation, r.created_at, s.topic, s.spread_type FROM readings r JOIN sessions s ON r.session_id = s.id WHERE r.created_at >= NOW() - INTERVAL '24 hours' ORDER BY r.created_at DESC LIMIT 10"
+      },
+      "id": "query-readings",
+      "name": "Supabase: 최근 24시간 리딩",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [470, 300],
+      "credentials": {
+        "postgres": { "id": "supabase-db", "name": "Supabase DB" }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        }
+      },
+      "id": "check-empty",
+      "name": "리딩 존재 여부",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.x.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'grok-3', messages: [{ role: 'system', content: '당신은 타로 리딩 품질 평가 전문가입니다. 각 리딩의 품질을 1-10 점수로 평가하고, 3점 이하인 항목이 있으면 지적해주세요. JSON으로 응답: { \"scores\": [{\"id\": \"...\", \"score\": N, \"issue\": \"...\"}], \"summary\": \"...\", \"hasLowQuality\": true/false }' }, { role: 'user', content: '다음 리딩들을 평가해주세요:\\n\\n' + JSON.stringify($json) }], temperature: 0.3, max_tokens: 1000 }) }}"
+      },
+      "id": "grok-evaluate",
+      "name": "Grok: 품질 평가",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": {
+        "httpHeaderAuth": { "id": "grok-api", "name": "Grok API" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/xzawed/ArcanaInsight/issues",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "title", "value": "=📊 일일 리딩 품질 리포트 — {{ new Date().toISOString().split('T')[0] }}" },
+            { "name": "body", "value": "={{ $json.choices[0].message.content }}" },
+            { "name": "labels", "value": "[\"qa\", \"quality-report\"]" }
+          ]
+        }
+      },
+      "id": "create-issue",
+      "name": "GitHub: 리포트 Issue 생성",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 200],
+      "credentials": {
+        "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
+      }
+    }
+  ],
+  "connections": {
+    "매일 09:00 KST": { "main": [[{ "node": "Supabase: 최근 24시간 리딩", "type": "main", "index": 0 }]] },
+    "Supabase: 최근 24시간 리딩": { "main": [[{ "node": "리딩 존재 여부", "type": "main", "index": 0 }]] },
+    "리딩 존재 여부": { "main": [[{ "node": "Grok: 품질 평가", "type": "main", "index": 0 }]] },
+    "Grok: 품질 평가": { "main": [[{ "node": "GitHub: 리포트 Issue 생성", "type": "main", "index": 0 }]] }
+  }
+}
