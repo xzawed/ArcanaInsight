@@ -1,0 +1,37 @@
+name: "Bug Report"
+description: "버그 리포트 — 사용자 보고 또는 QA 발견"
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 버그 설명
+      description: 어떤 문제가 발생하는지 설명해주세요
+      placeholder: "예: 7장 스프레드에서 카드 선택 후 리딩이 시작되지 않음"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      description: 버그를 재현하는 단계
+      placeholder: |
+        1. 타로 상담 → 연애(솔로) 선택
+        2. 관계 스프레드(7장) 선택
+        3. 카드 7장 선택
+        4. 리딩이 시작되지 않고 대기
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 발생 플랫폼
+      options:
+        - "Desktop Chrome"
+        - "Mobile Android"
+        - "Mobile iOS"
+        - "모든 플랫폼"
+    validations:
+      required: true

@@ -555,7 +555,8 @@ pnpm build             # 프로덕션 빌드 확인
 ```
 기획 (SuperGrok)
   └→ 기능/UX 설계 논의 → 스펙 확정
-       └→ Claude CLI에 전달: "이 스펙대로 구현해줘"
+       └→ GitHub Issue 생성 (spec 라벨, 템플릿 사용)
+            └→ n8n이 감지 → Claude CLI 구현 트리거
 
 구현 (Claude CLI)
   └→ 6단계 프로세스: 브랜치 → 코드 → 검증 → PR → CI → 배포
@@ -567,10 +568,18 @@ pnpm build             # 프로덕션 빌드 확인
   └─ 운영 분석 (SuperGrok) → 인사이트 기반 기획 → 다시 구현 사이클
 ```
 
-### n8n 연동 구상 (향후 확장)
+### GitHub Issue 기반 추적 (Phase 2)
 
-| 워크플로우 | 트리거 | 흐름 |
-|-----------|--------|------|
-| 리딩 품질 모니터링 | Cron (매일) | Supabase 쿼리 → Grok API 품질 평가 → 낮은 품질 알림 |
-| 사용자 행동 리포트 | Cron (주간) | Supabase 통계 → SuperGrok 분석 → Slack/Discord 리포트 |
-| 이미지 생성 파이프라인 | Webhook | Grok 이미지 API → Supabase Storage → 코드 참조 추가 |
+- `.github/ISSUE_TEMPLATE/spec.yml` — SuperGrok 스펙 전달 전용 Issue 템플릿
+- `.github/ISSUE_TEMPLATE/bug.yml` — 버그 리포트 템플릿
+- `spec` 라벨이 붙은 Issue = SuperGrok에서 확정된 기능 스펙
+
+### n8n 자동화 파이프라인 (Phase 3)
+
+워크플로우 JSON 파일: `n8n/` 디렉토리. 설치 가이드: `n8n/README.md`
+
+| 워크플로우 | 파일 | 트리거 | 동작 |
+|-----------|------|--------|------|
+| Spec Tracker | `workflow-spec-tracker.json` | GitHub Issue `spec` 라벨 | 구현 트리거 + Issue 코멘트 |
+| Quality Monitor | `workflow-quality-monitor.json` | Cron (매일 09:00) | 리딩 품질 평가 → 낮으면 Issue 생성 |
+| Weekly Report | `workflow-weekly-report.json` | Cron (금요일 18:00) | 주간 운영 인사이트 → Issue 리포트 |

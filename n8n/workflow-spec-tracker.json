@@ -1,0 +1,119 @@
+{
+  "name": "ArcanaInsight — Spec Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "arcana-spec",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-trigger",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "labeled",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "leftValue": "={{ $json.label?.name }}",
+              "rightValue": "spec",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ]
+        }
+      },
+      "id": "filter-spec",
+      "name": "Filter: spec 라벨만",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/{{ $json.repository.full_name }}/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "event_type",
+              "value": "spec-implementation"
+            },
+            {
+              "name": "client_payload",
+              "value": "={{ JSON.stringify({ issue_number: $json.issue.number, title: $json.issue.title, body: $json.issue.body }) }}"
+            }
+          ]
+        }
+      },
+      "id": "trigger-implementation",
+      "name": "GitHub: Dispatch 트리거",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 200],
+      "credentials": {
+        "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/{{ $json.repository.full_name }}/issues/{{ $json.issue.number }}/comments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "🤖 **자동 구현 트리거됨**\\n\\n이 스펙이 Claude CLI 구현 파이프라인에 전달되었습니다.\\n진행 상황은 [Actions 탭](../../actions)에서 확인하세요."
+            }
+          ]
+        }
+      },
+      "id": "comment-issue",
+      "name": "GitHub: Issue 코멘트",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 400],
+      "credentials": {
+        "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-ok",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [910, 300]
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": { "main": [[{ "node": "Filter: spec 라벨만", "type": "main", "index": 0 }]] },
+    "Filter: spec 라벨만": {
+      "main": [
+        [
+          { "node": "GitHub: Dispatch 트리거", "type": "main", "index": 0 },
+          { "node": "GitHub: Issue 코멘트", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GitHub: Dispatch 트리거": { "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]] },
+    "GitHub: Issue 코멘트": { "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]] }
+  }
+}
