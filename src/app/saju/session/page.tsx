@@ -4,6 +4,10 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
+import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { ERROR_MESSAGES } from "@/data/error-messages";
+import { ReadingResult } from "@/types/service";
+import { SajuResult } from "@/services/saju/saju-types";
 import { motion } from "framer-motion";
 import { useSajuSessionStore } from "@/hooks/useSajuSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
@@ -71,68 +75,35 @@ export default function SajuSessionPage() {
     });
     const stopTimers = () => timers.forEach(clearTimeout);
 
-    try {
-      const response = await fetch("/api/saju/reading", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: state.sessionId, topic: state.topic,
-          timeRange: state.timeRange, includeMonthly: state.includeMonthly,
-          characterId: state.characterId, userInfo: state.userInfo,
-        }),
-      });
-
-      if (!response.ok || !response.body) {
+    await fetchSSEStream({
+      url: "/api/saju/reading",
+      body: {
+        sessionId: state.sessionId, topic: state.topic,
+        timeRange: state.timeRange, includeMonthly: state.includeMonthly,
+        characterId: state.characterId, userInfo: state.userInfo,
+      },
+      onChunk: () => { /* 사주는 스트리밍 표시 불필요 — 대기 연출 사용 */ },
+      onDone: (data) => {
         stopTimers();
-        addChatMessage({ id: crypto.randomUUID(), role: "character",
-          content: "서버에 문제가 있어요. 잠시 후 다시 시도해주세요.", mood: "default", timestamp: new Date() });
-        setMood("default"); setReadingError(true); setLoading(false);
-        return;
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let sseBuffer = "";
-      let streamDone = false;
-
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        sseBuffer += decoder.decode(value, { stream: true });
-        const sseLines = sseBuffer.split("\n");
-        sseBuffer = sseLines.pop() || "";
-        for (const line of sseLines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.error) {
-              stopTimers();
-              addChatMessage({ id: crypto.randomUUID(), role: "character",
-                content: "사주 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
-              setMood("default"); setReadingError(true); setLoading(false);
-              streamDone = true; break;
-            }
-            if (data.done && data.result) {
-              stopTimers();
-              setReadingResult(data.result);
-              if (data.sajuData) setSajuData(data.sajuData);
-              setPhase("result"); setMood("smile");
-              const doneMsg = state.characterId === "miko"
-                ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
-                : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
-              addChatMessage({ id: crypto.randomUUID(), role: "character",
-                content: doneMsg, mood: "smile", timestamp: new Date() });
-              streamDone = true; break;
-            }
-          } catch (e) { console.warn("SSE 파싱 실패:", e); }
+        if (data.result) {
+          setReadingResult(data.result as ReadingResult);
+          if (data.sajuData) setSajuData(data.sajuData as SajuResult);
+          setPhase("result"); setMood("smile");
+          const doneMsg = state.characterId === "miko"
+            ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
+            : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
+          addChatMessage({ id: crypto.randomUUID(), role: "character",
+            content: doneMsg, mood: "smile", timestamp: new Date() });
         }
-      }
-    } catch (e) {
-      console.error("사주 리딩 요청 실패:", e);
-      stopTimers();
-      addChatMessage({ id: crypto.randomUUID(), role: "character",
-        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
-      setMood("default"); setReadingError(true);
-    }
+      },
+      onError: (msg) => {
+        stopTimers();
+        console.error("사주 리딩 실패:", msg);
+        addChatMessage({ id: crypto.randomUUID(), role: "character",
+          content: ERROR_MESSAGES.READING_FAIL, mood: "default", timestamp: new Date() });
+        setMood("default"); setReadingError(true);
+      },
+    });
     setLoading(false);
   };
 
