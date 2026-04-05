@@ -22,7 +22,9 @@ graph TB
     end
 
     subgraph Services["서비스 레이어"]
+        FALLBACK["FallbackProvider<br/>Grok 우선 → Claude fallback"]
         GROK["GrokProvider<br/>AI 스트리밍"]
+        CLAUDE["ClaudeProvider<br/>AI 스트리밍 (장애 대응)"]
         TAROT_SVC["TarotService<br/>프롬프트 + 파싱"]
         SAJU_SVC["SajuService<br/>프롬프트 + 파싱"]
         SAJU_CALC["SajuCalculator<br/>사주 계산"]
@@ -32,6 +34,7 @@ graph TB
 
     subgraph External["외부 서비스"]
         GROK_API["Grok API<br/>(xAI)"]
+        CLAUDE_API["Claude API<br/>(Anthropic)"]
         SUPABASE["Supabase<br/>PostgreSQL + Auth"]
     end
 
@@ -41,10 +44,12 @@ graph TB
     HOME --> API_DAILY
 
     API_TAROT_READING --> TAROT_SVC --> PROMPT
-    API_TAROT_READING --> GROK --> GROK_API
+    API_TAROT_READING --> FALLBACK
+    FALLBACK --> GROK --> GROK_API
+    FALLBACK -.->|장애 시| CLAUDE --> CLAUDE_API
     API_TAROT_READING --> CLEANER
     API_SAJU_READING --> SAJU_SVC --> SAJU_CALC
-    API_SAJU_READING --> GROK
+    API_SAJU_READING --> FALLBACK
     API_SAJU_READING --> CLEANER
 
     API_TAROT_SESSION --> SUPABASE

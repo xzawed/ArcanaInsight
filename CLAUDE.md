@@ -58,7 +58,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **프레임워크**: Next.js 16.2.1 (App Router) / React 19.2.4
 - **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
 - **애니메이션**: Framer Motion v12.38
-- **AI**: Grok API (xAI) — `src/services/core/grok-provider.ts`에서 추상화
+- **AI**: Grok API (xAI) 우선 + Claude API (Anthropic) 자동 fallback — `src/services/core/fallback-provider.ts`에서 관리
 - **인증**: Supabase Auth Helpers (구글)
 - **데이터베이스**: Supabase (PostgreSQL)
 - **상태관리**: Zustand v5.0
@@ -121,8 +121,10 @@ src/
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts)
 ├── services/
-│   ├── core/                   # ai-provider.ts (re-export), grok-provider.ts (구현체),
-│   │                           # prompt-builder.ts, text-cleaner.ts (cleanReadingText, parseJsonSafe)
+│   ├── core/                   # ai-provider.ts (re-export), grok-provider.ts (Grok API),
+│   │                           # claude-provider.ts (Claude API fallback),
+│   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
+│   │                           # prompt-builder.ts, text-cleaner.ts
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
 └── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
@@ -238,7 +240,11 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ## 핵심 아키텍처 패턴
 
 - **DivinationService 인터페이스**: 모든 운세 서비스는 이 인터페이스를 구현. 새 서비스 추가 = 구현체 + 프롬프트 + API 라우트 + 페이지
-- **AIProvider 추상화 + Fallback**: `FallbackProvider`가 Grok API 우선 호출 → 실패 시 Claude API로 자동 전환 (5분 쿨다운). `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용
+- **AIProvider 추상화 + Fallback**: `FallbackProvider`가 Grok API 우선 호출 → 실패 시 Claude API로 자동 전환. `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용
+  - 429 Rate Limit: Retry-After 기반 쿨다운 (기본 30초)
+  - 500 서버 에러 / 네트워크: 5분 쿨다운
+  - 401/403 인증 실패: 30분 쿨다운 (재시도 불가)
+  - Grok + Claude 둘 다 실패: "AI 서비스가 일시적으로 사용할 수 없습니다" 메시지
 - **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/daily-card`에서 AI 응답을 SSE로 클라이언트에 스트리밍
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
 - **Path alias**: `@/*` → `./src/*` (tsconfig.json)
