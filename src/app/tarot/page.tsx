@@ -223,8 +223,8 @@ function TarotPageContent() {
             className="max-w-4xl mx-auto px-4 py-8 relative z-20"
           >
             <div className="text-center mb-8">
-              <h2 className="text-xl md:text-2xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
-              <p className="text-arcana-muted drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
+              <p className="text-arcana-muted text-sm md:text-base drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
             </div>
 
             {/* 성별 필터 */}
@@ -309,7 +309,7 @@ function TarotPageContent() {
                     <Icon id={topic.iconId} size={24} />
                     <div>
                       <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
-                      <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
+                      <p className="text-arcana-muted text-xs md:text-sm mt-0.5">{topic.desc}</p>
                     </div>
                   </motion.button>
                 ))}

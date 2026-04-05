@@ -67,7 +67,7 @@ export default function SettingsPage() {
 
           {/* 테마 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base text-arcana-text mb-1">테마</h2>
+            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">테마</h2>
             <p className="text-arcana-muted text-xs mb-4">현재: {mode === "auto" ? `자동 (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}</p>
             <div className="grid grid-cols-4 gap-2">
               {themeOptions.map((t) => (
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                   }`}
                 >
                   <span className="text-lg">{t.icon}</span>
-                  <span className="font-serif text-[10px] leading-tight text-center">{t.label}</span>
+                  <span className="font-serif text-xs leading-tight text-center">{t.label}</span>
                 </button>
               ))}
             </div>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
           {/* 카드 스킨 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base text-arcana-text mb-1">카드 스킨</h2>
+            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">카드 스킨</h2>
             <p className="text-arcana-muted text-xs mb-4">현재: {cardSkins.find((s) => s.id === selectedSkinId)?.nameKo || "기본"}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {cardSkins.map((skin) => (
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                     />
                     <span className="font-serif font-bold text-xs text-arcana-text">{skin.nameKo}</span>
                   </div>
-                  <p className="text-arcana-muted text-[10px] leading-relaxed">{skin.description}</p>
+                  <p className="text-arcana-muted text-xs leading-relaxed">{skin.description}</p>
                 </button>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
 
           {/* 상담사 성별 필터 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base text-arcana-text mb-1">기본 상담사 필터</h2>
+            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">기본 상담사 필터</h2>
             <p className="text-arcana-muted text-xs mb-4">캐릭터 선택 시 기본 필터</p>
             <div className="flex gap-2">
               {genderOptions.map((opt) => (
@@ -138,7 +138,7 @@ export default function SettingsPage() {
 
           {/* 카드 선택 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base text-arcana-text mb-1">카드 선택 방식</h2>
+            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">카드 선택 방식</h2>
             <p className="text-arcana-muted text-xs mb-4">타로 카드 선택 시 동작</p>
             <button
               onClick={toggleConfirmMode}
@@ -146,7 +146,7 @@ export default function SettingsPage() {
             >
               <div>
                 <span className="text-arcana-text text-sm font-serif">카드 확인 모드</span>
-                <p className="text-arcana-muted text-[10px] mt-0.5">
+                <p className="text-arcana-muted text-xs mt-0.5">
                   {confirmEachCard ? "매 카드 선택 시 확인 요청" : "확인 없이 바로 선택 (기본)"}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export default function SettingsPage() {
 
           {/* 저장된 개인정보 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base text-arcana-text mb-1">저장된 개인정보</h2>
+            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">저장된 개인정보</h2>
             <p className="text-arcana-muted text-xs mb-4">브라우저에 저장된 정보 관리</p>
             {hasSavedInfo ? (
               <div className="flex items-center justify-between">

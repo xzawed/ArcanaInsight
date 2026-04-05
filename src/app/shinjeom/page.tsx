@@ -83,7 +83,7 @@ export default function ShinjeomPage() {
             exit={{ opacity: 0, x: -50 }}
             className="relative z-20 max-w-4xl mx-auto px-4 py-8"
           >
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-center mb-2 drop-shadow-md">
+            <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold text-center mb-2 drop-shadow-md">
               신점 상담사를 선택하세요
             </h2>
             <p className="text-arcana-muted text-sm text-center mb-6">영적 상담을 도와줄 캐릭터를 골라주세요</p>
