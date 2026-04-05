@@ -23,7 +23,6 @@ n8n Cloud → Credentials → Add Credential:
 |----------------|------|------|-------|------|
 | **GitHub PAT** | Header Auth | `Authorization` | `token ghp_xxxx` | 등록 완료 ✅ |
 | **Supabase DB** | Postgres | Host/DB/User/Password, SSL ON | | 등록 완료 ✅ |
-| ~~Grok API~~ | ~~Header Auth~~ | | | 불필요 (제거됨) |
 
 > GitHub PAT: `token ` 접두사 필수 (Bearer 아님)
 > Supabase: SSL ON + Reject Unauthorized OFF
@@ -51,17 +50,17 @@ GitHub Issue 생성 (spec 라벨)
 
 ```
 매일 09:00 KST
-  └→ Supabase: 최근 24시간 리딩 10건 샘플링
+  └→ Supabase: 최근 24시간 리딩 통계 조회
        ├→ 리딩 없음 → 종료
-       └→ Grok API: 1~10점 품질 평가 → GitHub Issue 리포트
+       └→ 통계 정리 → GitHub Issue 리포트
 ```
 
 ### 3. Weekly Report — `workflow-weekly-report.json`
 
 ```
 매주 금요일 18:00 KST
-  └→ Supabase: 주간 세션/리딩 통계
-       └→ Grok API: 운영 인사이트 → GitHub Issue 리포트
+  └→ Supabase: 주간 세션/리딩 통계 조회
+       └→ 통계 정리 → GitHub Issue 리포트
 ```
 
 ---
@@ -73,10 +72,10 @@ GitHub Issue 생성 (spec 라벨)
 - [x] Supabase DB 등록
 - [x] Spec Tracker 워크플로우 Import + Publish + GitHub Webhook 등록
 - [x] 실시간 연동 테스트 통과 (Issue #44, #45)
-- [x] Grok API Credential 등록
-- [x] Quality Monitor Import + Publish
-- [x] Weekly Report Import + Publish
+- [x] Quality Monitor Import + Publish (Grok 제거, Supabase 직접 조회)
+- [x] Weekly Report Import + Publish (Grok 제거, Supabase 직접 조회)
 - [x] **전체 파이프라인 운영 완료**
+- [x] Grok API 불필요 확인 → n8n에서 Grok Credential 제거 가능
 
 ---
 
