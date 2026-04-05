@@ -46,7 +46,7 @@ export default function TarotSessionPage() {
     }
     return false;
   });
-  const resultBottomRef = useRef<HTMLDivElement>(null);
+  const resultContainerRef = useRef<HTMLDivElement>(null);
 
   const toggleConfirmMode = () => {
     setConfirmEachCard((prev) => {
@@ -353,9 +353,11 @@ export default function TarotSessionPage() {
     setLoading(false);
   };
 
+  // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방지)
   useEffect(() => {
     if (phase === "result") {
-      resultBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      const container = resultContainerRef.current;
+      if (container) container.scrollTop = container.scrollHeight;
     }
   }, [chatMessages, phase]);
 
@@ -518,7 +520,7 @@ export default function TarotSessionPage() {
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
-                <div className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
+                <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
                   {/* 카드별 해석 */}
                   {readingResult.cardInterpretations?.map((interp, i) => {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);
@@ -559,7 +561,6 @@ export default function TarotSessionPage() {
                     </div>
                   )}
 
-                  <div ref={resultBottomRef} />
                 </div>
 
                 {/* 액션 버튼 */}
