@@ -13,6 +13,7 @@ const navItems: NavItem[] = [
   { href: "/", label: "홈", icon: "🏠" },
   { href: "/tarot", label: "타로", icon: "🃏" },
   { href: "/saju", label: "사주", icon: "☯" },
+  { href: "/shinjeom", label: "신점", icon: "🔮" },
   { href: "/mypage", label: "MY", icon: "👤" },
 ];
 
