@@ -62,29 +62,25 @@ flowchart TD
 
 ---
 
-## 3. 작업 흐름 — 모든 작업의 표준 프로세스
+## 3. 작업 흐름 — 6단계 표준 프로세스
 
-당신이 Claude CLI에 지시하면, 내부적으로 SuperGrok이 기획하고 검토합니다.
+당신이 Claude CLI에 지시하면, Claude CLI가 기획부터 배포까지 모두 수행합니다.
 
 ```mermaid
 flowchart TD
-    지시["① 당신 → Claude CLI에 지시<br/>'이런 기능 만들어줘' / '이 버그 수정해줘'"]
-    지시 --> 기획["② SuperGrok 기획<br/>Grok API가 구현 방향 제시"]
-    기획 --> 구현["③ Claude CLI가 구현"]
-    구현 --> 검증["④ 로컬 검증<br/>타입체크 + 린트 + 빌드"]
+    지시["당신 → Claude CLI에 지시<br/>'이런 기능 만들어줘' / '이 버그 수정해줘'"]
+    지시 --> 구현["① 코드 변경<br/>Claude CLI가 기획 + 구현"]
+    구현 --> 검증["② 로컬 검증<br/>타입체크 + 린트 + 빌드"]
     검증 -->|실패| 구현
-    검증 -->|통과| 리뷰["⑤ SuperGrok 검토<br/>Grok API가 품질 평가"]
-    리뷰 -->|❌ 수정 필요| 구현
-    리뷰 -->|✅ 승인| PR["⑥ PR 생성 + CI 검증"]
-    PR -->|실패| 구현
-    PR -->|통과| 배포["⑦ 머지 → Railway 자동 배포"]
-    배포 --> QA["⑧ QA 재검증 (자동)"]
-    QA --> 완료["완료 ✅"]
+    검증 -->|통과| 리뷰["③ 변경 사항 리뷰"]
+    리뷰 --> PR["④ 커밋 + PR 생성"]
+    PR --> CI["⑤ CI 자동 검증<br/>린트 + 빌드 + E2E"]
+    CI -->|실패| 구현
+    CI -->|통과| 배포["⑥ 머지 → 배포 + QA 재검증"]
+    배포 --> 완료["완료 ✅"]
 
     style 지시 fill:#2563eb,color:#fff
-    style 기획 fill:#e94560,color:#fff
     style 구현 fill:#7c3aed,color:#fff
-    style 리뷰 fill:#e94560,color:#fff
     style 배포 fill:#16a34a,color:#fff
 ```
 
@@ -93,11 +89,10 @@ flowchart TD
 2. 결과 확인
 
 **자동으로 되는 일** (전부):
-- SuperGrok이 기획 (구현 방향 제시)
-- Claude CLI가 구현
-- SuperGrok이 검토 (품질 평가)
+- Claude CLI가 기획 + 구현 + 리뷰
 - CI가 코드 품질 자동 검증
 - Railway가 자동 배포
+- QA Issue가 있으면 자동 재검증
 
 ---
 
