@@ -52,10 +52,14 @@ export default function ShinjeomSessionPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
 
-  // 자동 스크롤
+  // 새 메시지 추가 시에만 스크롤 (스트리밍 청크 업데이트 시에는 스크롤 안 함)
+  const messageCountRef = useRef(0);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+    if (chatMessages.length !== messageCountRef.current) {
+      messageCountRef.current = chatMessages.length;
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages.length]);
 
   const handleSend = async () => {
     const message = inputText.trim();
