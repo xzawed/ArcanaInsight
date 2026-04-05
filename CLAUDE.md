@@ -377,64 +377,66 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ## 코드 변경 프로세스 (필수 준수)
 
-모든 코드 변경은 발생 경로에 관계없이 동일한 6단계 프로세스를 따른다. 주간 QA에서 발견된 이슈, 사용자가 직접 보고한 이슈, 신규 기능 개발 모두 예외 없음.
+모든 코드 변경은 **8단계 프로세스**를 따른다. 진입점은 항상 **Claude CLI에 대한 사용자의 직접 지시**이며, SuperGrok(Grok API)이 기획과 검토를 담당한다.
 
-### 발생 경로별 진입점
+### 1단계: SuperGrok 기획/설계
+- 사용자가 Claude CLI에 지시하면, Claude CLI가 Grok API를 호출하여 구현 방향을 확인
+- **실행**: `npx tsx scripts/grok-review.ts plan "사용자 요청 내용"`
+- SuperGrok이 요청 분석, 구현 방향, 주의사항, 영향 범위를 제시
+- Grok API 장애 시: Claude CLI가 자체 판단으로 기획 (fallback)
 
-| 경로 | 진입 | 이후 프로세스 |
-|------|------|-------------|
-| **주간 QA 실패** | Issue 자동 생성 → `fix/*` 브랜치 | 1~6단계 동일 |
-| **사용자 보고 이슈** | 대화에서 이슈 확인 → `fix/*` 브랜치 | 1~6단계 동일 |
-| **신규 기능** | 기획 확정 → `feat/*` 브랜치 | 1~6단계 동일 |
-| **문서 수정** | `docs/*` 브랜치 | 1~6단계 동일 |
+### 2단계: 코드 변경
+- SuperGrok 기획 기반으로 `fix/*`, `feat/*`, `docs/*` 기능 브랜치에서 구현
+- main 직접 push 금지
 
-### 1단계: 코드 변경
-- `fix/*`, `feat/*`, `docs/*` 등 기능 브랜치에서 수정 (main 직접 push 금지)
-
-### 2단계: 로컬 검증
+### 3단계: 로컬 검증
 ```bash
 pnpm type-check        # TypeScript 타입 체크
 pnpm lint              # ESLint 코드 품질 검사
 pnpm build             # 프로덕션 빌드 확인
 ```
 - 3가지 모두 통과해야 다음 단계로 진행
-- **에러 발생 시**: 원인 파악 → 수정 → 재검증 반복
 
-### 3단계: 변경 사항 리뷰
-- **스펙 준수 확인**: 요청된 사항이 모두 반영되었는지 확인
-- **코드 품질 확인**: 미사용 변수, 불필요한 코드, 기존 패턴과의 일관성 확인
-- **레이아웃 규칙 확인**: 아래 레이아웃 규칙 전체 항목 준수 여부 점검
+### 4단계: SuperGrok 검토
+- Claude CLI가 Grok API를 호출하여 변경 사항을 검토 요청
+- **실행**: `npx tsx scripts/grok-review.ts review "변경 사항 요약"`
+- SuperGrok이 품질 평가 + 최종 판정 (✅ 승인 / ⚠️ 조건부 / ❌ 수정 필요)
+- ❌ 수정 필요 → 2단계로 복귀
+- ✅ 승인 → 5단계로 진행
+- Grok API 장애 시: Claude CLI가 자체 리뷰로 대체 (fallback)
 
-### 4단계: 커밋 + PR 생성
+### 5단계: 커밋 + PR 생성
 - 의미 있는 커밋 메시지 작성
 - `git push` → **PR 생성** (main 브랜치 대상)
 - Claude Code 전용: PreToolUse 훅이 `scripts/pre-push-checks.sh` 자동 실행
 
-### 5단계: CI 자동 검증 (PR → main)
-- GitHub Actions가 자동 실행: `lint → build → e2e` (3개 디바이스)
-- **브랜치 보호 규칙에 의해 CI 실패 시 머지 차단**
-- CI 실패 → 2단계로 복귀하여 수정 반복
-- CI 통과 → 6단계로 진행
+### 6단계: CI 자동 검증 (PR → main)
+- GitHub Actions 자동 실행: `lint → build → e2e` (Chromium)
+- CI 실패 → 2단계로 복귀
+- CI 통과 → 7단계로 진행
 
-### 6단계: 머지 + 자동 배포
+### 7단계: 머지 + 자동 배포
 - PR 머지 → main push → Railway 자동 배포
-- **QA 실패 Issue가 열려있으면**: 자동 재검증 트리거 (`qa-recheck.yml`)
+
+### 8단계: QA 재검증
+- QA 실패 Issue가 열려있으면 자동 재검증 트리거 (`qa-recheck.yml`)
 - 재검증 통과 시 QA Issue 자동 닫힘
 
 ### 전체 흐름도
 
 ```
-이슈 발생 (주간 QA / 사용자 보고 / 기획)
-  └─ 기능 브랜치 생성 (fix/feat/docs)
-       └─ 1단계: 코드 변경
-            └─ 2단계: 로컬 검증 (type-check + lint + build)
+사용자 → Claude CLI (직접 지시)
+  └─ 1단계: SuperGrok 기획 (Grok API 호출)
+       └─ 2단계: 코드 변경 (기능 브랜치)
+            └─ 3단계: 로컬 검증 (type-check + lint + build)
                  ├─ 실패 → 수정 → 재검증 반복
-                 └─ 통과 → 3단계: 리뷰
-                      └─ 4단계: 커밋 + PR 생성
-                           └─ 5단계: CI 자동 검증 (lint → build → e2e)
+                 └─ 통과 → 4단계: SuperGrok 검토 (Grok API 호출)
+                      ├─ ❌ 수정 필요 → 2단계로 복귀
+                      └─ ✅ 승인 → 5단계: 커밋 + PR 생성
+                           └─ 6단계: CI 자동 검증
                                 ├─ 실패 → 2단계로 복귀
-                                └─ 통과 → 6단계: 머지 + 배포
-                                     └─ QA Issue 열림 → 자동 재검증 → 통과 시 Issue 닫기
+                                └─ 통과 → 7단계: 머지 + 배포
+                                     └─ 8단계: QA Issue 열림 → 자동 재검증
 ```
 
 ### 자동화 (Claude Code 전용)
@@ -550,8 +552,9 @@ pnpm build             # 프로덕션 빌드 확인
 
 | 영역 | SuperGrok (xAI) | Claude CLI (Anthropic) |
 |------|-----------------|----------------------|
-| **서비스 기획/설계** | 기능 기획, UX/UI 설계 논의, 스펙 초안 | — |
-| **코드 구현** | — | 6단계 프로세스로 구현, 코드 리뷰, 리팩토링 |
+| **기획/설계** | 사용자 요청 분석, 구현 방향 제시 (1단계) | Grok API를 호출하여 기획 요청 |
+| **코드 구현** | — | 8단계 프로세스로 구현 (2단계) |
+| **검토** | 변경 사항 품질 평가, 최종 판정 (4단계) | Grok API를 호출하여 검토 요청 |
 | **프로덕션 AI** | Grok API (타로/사주 리딩, SSE 스트리밍) | — |
 | **이미지 생성** | Grok 이미지 API (캐릭터, 카드 스킨, 배경) | 생성된 이미지를 코드에 통합 |
 | **품질 관리** | — | tsc + lint + build, Playwright E2E, 주간 QA |
@@ -563,25 +566,21 @@ pnpm build             # 프로덕션 빌드 확인
 
 두 AI가 협업하는 **단일 진실 소스(Single Source of Truth)**는 이 CLAUDE.md 파일이다.
 
-- **SuperGrok → Claude CLI**: 기획/설계 논의 후 확정된 스펙을 CLAUDE.md에 반영하거나 대화 컨텍스트로 전달
-- **Claude CLI → SuperGrok**: 구현 결과를 CLAUDE.md에 문서화하여 프로젝트 상태를 항상 최신으로 유지
+- **진입점은 항상 Claude CLI**: 사용자가 Claude CLI에 직접 지시
+- **Claude CLI → SuperGrok**: 1단계 기획 요청 + 4단계 검토 요청 (Grok API 호출)
+- **SuperGrok → Claude CLI**: 기획 결과 + 검토 판정을 반환
 
 ### 워크플로우
 
 ```
-기획 (SuperGrok)
-  └→ 기능/UX 설계 논의 → 스펙 확정
-       └→ GitHub Issue 생성 (spec 라벨, 템플릿 사용)
-            └→ n8n이 감지 → Claude CLI 구현 트리거
+사용자 → Claude CLI (직접 지시)
+  └→ SuperGrok 기획 (1단계) → Claude CLI 구현 (2~3단계)
+       └→ SuperGrok 검토 (4단계) → ✅ 승인 시 커밋/PR/배포 (5~8단계)
 
-구현 (Claude CLI)
-  └→ 6단계 프로세스: 브랜치 → 코드 → 검증 → PR → CI → 배포
-       └→ 문서 자동 동기화
-
-운영 (양쪽 협업)
-  ├─ 주간 QA 자동 실행 (Claude CLI) → 실패 시 자동 수정 루프
-  ├─ 사용자 이슈 → Claude CLI가 수정 (동일 6단계 프로세스)
-  └─ 운영 분석 (SuperGrok) → 인사이트 기반 기획 → 다시 구현 사이클
+자동 운영:
+  ├─ 주간 QA (토요일) → 실패 시 자동 수정 루프
+  ├─ n8n: spec Issue 감지 → 구현 안내
+  └─ n8n: 리딩 품질 모니터링 + 주간 리포트
 ```
 
 ### GitHub Issue 기반 추적 (Phase 2)
