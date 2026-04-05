@@ -42,9 +42,9 @@ export default function TarotSessionPage() {
   const setPendingConfirm = (v: boolean) => { pendingConfirmRef.current = v; _setPendingConfirm(v); };
   const [confirmEachCard, setConfirmEachCard] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("arcana-confirm-each-card") !== "false";
+      return localStorage.getItem("arcana-confirm-each-card") === "true";
     }
-    return true;
+    return false;
   });
   const resultBottomRef = useRef<HTMLDivElement>(null);
 
@@ -419,17 +419,19 @@ export default function TarotSessionPage() {
               </button>
               <button
                 onClick={toggleConfirmMode}
-                className={`flex items-center gap-1.5 text-[10px] font-serif px-2.5 py-1 rounded-full border transition-colors ${
+                className={`flex items-center gap-2 text-xs font-serif px-3 py-1.5 rounded-full border transition-all ${
                   confirmEachCard
-                    ? "border-arcana-purple/40 bg-arcana-purple/10 text-arcana-purple"
-                    : "border-arcana-border text-arcana-muted hover:border-arcana-purple/30"
+                    ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple shadow-sm shadow-arcana-purple/10"
+                    : "border-arcana-border/50 text-arcana-muted/60 hover:border-arcana-border hover:text-arcana-muted"
                 }`}
                 type="button"
               >
-                <span className={`w-3 h-3 rounded-full border transition-colors ${
-                  confirmEachCard ? "bg-arcana-purple border-arcana-purple" : "border-arcana-muted"
-                }`} />
-                카드 확인
+                <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  confirmEachCard ? "border-arcana-purple bg-arcana-purple" : "border-arcana-muted/40"
+                }`}>
+                  {confirmEachCard && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                </span>
+                카드 확인 모드
               </button>
             </div>
           )}
