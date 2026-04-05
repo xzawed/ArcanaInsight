@@ -12,7 +12,6 @@ export function cleanReadingText(text: string): string {
     .replace(/\\r/g, "")
     .replace(/\\t/g, " ")
     .replace(/\\"/g, '"')
-    .replace(/\\/g, "")
     // 줄 정리
     .replace(/^["']+|["']+$/gm, "")
     .replace(/,\s*$/gm, "")
