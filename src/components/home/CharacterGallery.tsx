@@ -43,10 +43,10 @@ export function CharacterGallery() {
                     <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-arcana-card to-transparent" />
                   </div>
                   <div className="p-3">
-                    <h3 className="font-sans font-bold text-sm">{char.name}</h3>
-                    <p className="text-arcana-muted text-xs mt-0.5">{char.nameJp}</p>
-                    <div className="mt-1.5 inline-block px-2 py-0.5 bg-arcana-purple/10 border border-arcana-purple/30 rounded-full">
-                      <span className="text-arcana-purple text-xs font-sans">{char.speciality}</span>
+                    <h3 className="font-display font-bold text-sm truncate">{char.name}</h3>
+                    <p className="text-arcana-muted text-xs mt-0.5 truncate">{char.nameJp}</p>
+                    <div className="mt-1.5 inline-block max-w-full px-2 py-0.5 bg-arcana-purple/10 border border-arcana-purple/30 rounded-full">
+                      <span className="text-arcana-purple text-xs font-sans truncate block">{char.speciality}</span>
                     </div>
                   </div>
                 </motion.div>
