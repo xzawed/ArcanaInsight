@@ -18,8 +18,8 @@ export interface SessionContext {
 }
 
 export interface AIProvider {
-  generateReading(systemPrompt: string, userPrompt: string): Promise<string>;
-  streamReading(systemPrompt: string, userPrompt: string): AsyncGenerator<string, void, unknown>;
+  generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string>;
+  streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown>;
 }
 
 export interface DivinationService {

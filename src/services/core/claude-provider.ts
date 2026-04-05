@@ -21,7 +21,9 @@ export class ClaudeProvider implements AIProvider {
     return this._apiKey;
   }
 
-  async generateReading(systemPrompt: string, userPrompt: string): Promise<string> {
+  private static readonly DEFAULT_MAX_TOKENS = 4000;
+
+  async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), ClaudeProvider.TIMEOUT_MS);
     try {
@@ -34,7 +36,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: 8000,
+          max_tokens: maxTokens ?? ClaudeProvider.DEFAULT_MAX_TOKENS,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
         }),
@@ -50,7 +52,7 @@ export class ClaudeProvider implements AIProvider {
     }
   }
 
-  async *streamReading(systemPrompt: string, userPrompt: string): AsyncGenerator<string, void, unknown> {
+  async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), ClaudeProvider.TIMEOUT_MS);
     try {
@@ -63,7 +65,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: 8000,
+          max_tokens: maxTokens ?? ClaudeProvider.DEFAULT_MAX_TOKENS,
           stream: true,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],

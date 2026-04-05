@@ -65,7 +65,10 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt)) {
+          // 카드 수에 따라 max_tokens 조정 (비용 최적화)
+          const cardCount = cards.length;
+          const maxTokens = cardCount <= 3 ? 2000 : cardCount <= 7 ? 4000 : 6000;
+          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }

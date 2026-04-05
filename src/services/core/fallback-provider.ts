@@ -50,10 +50,10 @@ export class FallbackProvider implements AIProvider {
     return !!process.env.ANTHROPIC_API_KEY;
   }
 
-  async generateReading(systemPrompt: string, userPrompt: string): Promise<string> {
+  async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     if (this.isGrokAvailable()) {
       try {
-        return await this.grok.generateReading(systemPrompt, userPrompt);
+        return await this.grok.generateReading(systemPrompt, userPrompt, maxTokens);
       } catch (e) {
         console.error("[FallbackProvider] Grok generateReading 실패:", e);
         if (this.hasClaude()) {
@@ -70,17 +70,17 @@ export class FallbackProvider implements AIProvider {
     }
     console.log("[FallbackProvider] Claude API로 generateReading 실행");
     try {
-      return await this.getClaude().generateReading(systemPrompt, userPrompt);
+      return await this.getClaude().generateReading(systemPrompt, userPrompt, maxTokens);
     } catch (claudeError) {
       console.error("[FallbackProvider] Claude generateReading도 실패:", claudeError);
       throw new Error("AI 서비스가 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.");
     }
   }
 
-  async *streamReading(systemPrompt: string, userPrompt: string): AsyncGenerator<string, void, unknown> {
+  async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     if (this.isGrokAvailable()) {
       try {
-        yield* this.grok.streamReading(systemPrompt, userPrompt);
+        yield* this.grok.streamReading(systemPrompt, userPrompt, maxTokens);
         return;
       } catch (e) {
         console.error("[FallbackProvider] Grok streamReading 실패:", e);
@@ -98,7 +98,7 @@ export class FallbackProvider implements AIProvider {
     }
     console.log("[FallbackProvider] Claude API로 streamReading 실행");
     try {
-      yield* this.getClaude().streamReading(systemPrompt, userPrompt);
+      yield* this.getClaude().streamReading(systemPrompt, userPrompt, maxTokens);
     } catch (claudeError) {
       console.error("[FallbackProvider] Claude streamReading도 실패:", claudeError);
       throw new Error("AI 서비스가 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.");

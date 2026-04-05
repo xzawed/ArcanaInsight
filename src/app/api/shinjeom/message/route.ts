@@ -40,7 +40,9 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          for await (const chunk of aiProvider.streamReading(systemPrompt, userPrompt)) {
+          // 중간 대화는 짧게, 최종 결과는 길게
+          const shinjeomMaxTokens = isFinalTurn ? 3000 : 1000;
+          for await (const chunk of aiProvider.streamReading(systemPrompt, userPrompt, shinjeomMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
