@@ -14,10 +14,10 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT r.id, r.overall_reading, r.advice, r.card_interpretation, r.created_at, s.topic, s.spread_type FROM readings r JOIN sessions s ON r.session_id = s.id WHERE r.created_at >= NOW() - INTERVAL '24 hours' ORDER BY r.created_at DESC LIMIT 10"
+        "query": "SELECT COUNT(*) as total, COUNT(CASE WHEN card_interpretation IS NOT NULL AND array_length(card_interpretation, 1) > 0 THEN 1 END) as with_cards, AVG(CHAR_LENGTH(overall_reading)) as avg_reading_length, MIN(CHAR_LENGTH(overall_reading)) as min_reading_length FROM readings WHERE created_at >= NOW() - INTERVAL '24 hours'"
       },
-      "id": "query-readings",
-      "name": "Supabase: 최근 24시간 리딩",
+      "id": "query-stats",
+      "name": "Supabase: 24시간 리딩 ��계",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [470, 300],
@@ -31,8 +31,8 @@
           "combinator": "and",
           "conditions": [
             {
-              "leftValue": "={{ $json.length }}",
-              "rightValue": 0,
+              "leftValue": "={{ $json.total }}",
+              "rightValue": "0",
               "operator": { "type": "number", "operation": "gt" }
             }
           ]
@@ -47,51 +47,26 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.x.ai/v1/chat/completions",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'grok-3', messages: [{ role: 'system', content: '당신은 타로 리딩 품질 평가 전문가입니다. 각 리딩의 품질을 1-10 점수로 평가하고, 3점 이하인 항목이 있으면 지적해주세요. JSON으로 응답: { \"scores\": [{\"id\": \"...\", \"score\": N, \"issue\": \"...\"}], \"summary\": \"...\", \"hasLowQuality\": true/false }' }, { role: 'user', content: '다음 리딩들을 평가해주세요:\\n\\n' + JSON.stringify($json) }], temperature: 0.3, max_tokens: 1000 }) }}"
-      },
-      "id": "grok-evaluate",
-      "name": "Grok: 품질 평가",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [910, 200],
-      "credentials": {
-        "httpHeaderAuth": { "id": "grok-api", "name": "Grok API" }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
         "url": "https://api.github.com/repos/xzawed/ArcanaInsight/issues",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "title", "value": "=📊 일일 리딩 품질 리포트 — {{ new Date().toISOString().split('T')[0] }}" },
-            { "name": "body", "value": "={{ $json.choices[0].message.content }}" },
-            { "name": "labels", "value": "[\"qa\", \"quality-report\"]" }
-          ]
-        }
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: '📊 일일 리딩 통계 — ' + new Date().toISOString().split('T')[0], body: '## 최근 24시간 리딩 통계\\n\\n| 항목 | 값 |\\n|------|-----|\\n| 총 리딩 수 | ' + $json.total + ' |\\n| 카드 해석 포함 | ' + $json.with_cards + ' |\\n| 평균 해석 길이 | ' + Math.round($json.avg_reading_length || 0) + '자 |\\n| 최소 해석 길이 | ' + Math.round($json.min_reading_length || 0) + '자 |\\n\\n' + (($json.min_reading_length || 0) < 100 ? '⚠️ 최소 해석 길이가 100자 미만입니다. 품질 확인 필요.' : '✅ 정상 범위') + '\\n\\n---\\n*n8n Daily Monitor에 의해 자동 생성*', labels: ['qa', 'quality-report'] }) }}"
       },
       "id": "create-issue",
-      "name": "GitHub: 리포트 Issue 생성",
+      "name": "GitHub: 통계 Issue 생성",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1130, 200],
+      "position": [910, 300],
       "credentials": {
         "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
       }
     }
   ],
   "connections": {
-    "매일 09:00 KST": { "main": [[{ "node": "Supabase: 최근 24시간 리딩", "type": "main", "index": 0 }]] },
-    "Supabase: 최근 24시간 리딩": { "main": [[{ "node": "리딩 존재 여부", "type": "main", "index": 0 }]] },
-    "리딩 존재 여부": { "main": [[{ "node": "Grok: 품질 평가", "type": "main", "index": 0 }]] },
-    "Grok: 품질 평가": { "main": [[{ "node": "GitHub: 리포트 Issue 생성", "type": "main", "index": 0 }]] }
+    "매일 09:00 KST": { "main": [[{ "node": "Supabase: 24시간 리딩 통계", "type": "main", "index": 0 }]] },
+    "Supabase: 24시간 리딩 통계": { "main": [[{ "node": "리딩 존재 여부", "type": "main", "index": 0 }]] },
+    "리딩 존재 여부": { "main": [[{ "node": "GitHub: 통계 Issue 생성", "type": "main", "index": 0 }]] }
   }
 }

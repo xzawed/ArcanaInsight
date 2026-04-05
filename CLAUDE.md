@@ -377,19 +377,13 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ## 코드 변경 프로세스 (필수 준수)
 
-모든 코드 변경은 **8단계 프로세스**를 따른다. 진입점은 항상 **Claude CLI에 대한 사용자의 직접 지시**이며, SuperGrok(Grok API)이 기획과 검토를 담당한다.
+모든 코드 변경은 **6단계 프로세스**를 따른다. 진입점은 항상 **Claude CLI에 대한 사용자의 직접 지시**이며, Claude CLI가 기획/구현/검토를 모두 수행한다.
 
-### 1단계: SuperGrok 기획/설계
-- 사용자가 Claude CLI에 지시하면, Claude CLI가 Grok API를 호출하여 구현 방향을 확인
-- **실행**: `npx tsx scripts/grok-review.ts plan "사용자 요청 내용"`
-- SuperGrok이 요청 분석, 구현 방향, 주의사항, 영향 범위를 제시
-- Grok API 장애 시: Claude CLI가 자체 판단으로 기획 (fallback)
+### 1단계: 코드 변경
+- 사용자가 Claude CLI에 직접 지시 → Claude CLI가 기획 + 구현
+- `fix/*`, `feat/*`, `docs/*` 기능 브랜치에서 수정 (main 직접 push 금지)
 
-### 2단계: 코드 변경
-- SuperGrok 기획 기반으로 `fix/*`, `feat/*`, `docs/*` 기능 브랜치에서 구현
-- main 직접 push 금지
-
-### 3단계: 로컬 검증
+### 2단계: 로컬 검증
 ```bash
 pnpm type-check        # TypeScript 타입 체크
 pnpm lint              # ESLint 코드 품질 검사
@@ -397,28 +391,21 @@ pnpm build             # 프로덕션 빌드 확인
 ```
 - 3가지 모두 통과해야 다음 단계로 진행
 
-### 4단계: SuperGrok 검토
-- Claude CLI가 Grok API를 호출하여 변경 사항을 검토 요청
-- **실행**: `npx tsx scripts/grok-review.ts review "변경 사항 요약"`
-- SuperGrok이 품질 평가 + 최종 판정 (✅ 승인 / ⚠️ 조건부 / ❌ 수정 필요)
-- ❌ 수정 필요 → 2단계로 복귀
-- ✅ 승인 → 5단계로 진행
-- Grok API 장애 시: Claude CLI가 자체 리뷰로 대체 (fallback)
+### 3단계: 변경 사항 리뷰
+- Claude CLI가 자체 검토: 스펙 준수, 코드 품질, 레이아웃 규칙 점검
 
-### 5단계: 커밋 + PR 생성
+### 4단계: 커밋 + PR 생성
 - 의미 있는 커밋 메시지 작성
 - `git push` → **PR 생성** (main 브랜치 대상)
 - Claude Code 전용: PreToolUse 훅이 `scripts/pre-push-checks.sh` 자동 실행
 
-### 6단계: CI 자동 검증 (PR → main)
+### 5단계: CI 자동 검증 (PR → main)
 - GitHub Actions 자동 실행: `lint → build → e2e` (Chromium)
-- CI 실패 → 2단계로 복귀
-- CI 통과 → 7단계로 진행
+- CI 실패 → 1단계로 복귀
+- CI 통과 → 6단계로 진행
 
-### 7단계: 머지 + 자동 배포
+### 6단계: 머지 + 자동 배포 + QA 재검증
 - PR 머지 → main push → Railway 자동 배포
-
-### 8단계: QA 재검증
 - QA 실패 Issue가 열려있으면 자동 재검증 트리거 (`qa-recheck.yml`)
 - 재검증 통과 시 QA Issue 자동 닫힘
 
@@ -426,15 +413,13 @@ pnpm build             # 프로덕션 빌드 확인
 
 ```
 사용자 → Claude CLI (직접 지시)
-  └─ 1단계: SuperGrok 기획 (Grok API 호출)
-       └─ 2단계: 코드 변경 (기능 브랜치)
-            └─ 3단계: 로컬 검증 (type-check + lint + build)
-                 ├─ 실패 → 수정 → 재검증 반복
-                 └─ 통과 → 4단계: SuperGrok 검토 (Grok API 호출)
-                      ├─ ❌ 수정 필요 → 2단계로 복귀
-                      └─ ✅ 승인 → 5단계: 커밋 + PR 생성
-                           └─ 6단계: CI 자동 검증
-                                ├─ 실패 → 2단계로 복귀
+  └─ 1단계: 코드 변경 (기획 + 구현)
+       └─ 2단계: 로컬 검증 (type-check + lint + build)
+            ├─ 실패 → 수정 → 재검증 반복
+            └─ 통과 → 3단계: 리뷰
+                 └─ 4단계: 커밋 + PR 생성
+                      └─ 5단계: CI 자동 검증
+                           ├─ 실패 → 1단계로 복귀
                                 └─ 통과 → 7단계: 머지 + 배포
                                      └─ 8단계: QA Issue 열림 → 자동 재검증
 ```
@@ -552,9 +537,8 @@ pnpm build             # 프로덕션 빌드 확인
 
 | 영역 | SuperGrok (xAI) | Claude CLI (Anthropic) |
 |------|-----------------|----------------------|
-| **기획/설계** | 사용자 요청 분석, 구현 방향 제시 (1단계) | Grok API를 호출하여 기획 요청 |
-| **코드 구현** | — | 8단계 프로세스로 구현 (2단계) |
-| **검토** | 변경 사항 품질 평가, 최종 판정 (4단계) | Grok API를 호출하여 검토 요청 |
+| **기획/설계/검토** | — | Claude CLI가 자체 수행 (6단계 프로세스) |
+| **코드 구현** | — | Claude CLI가 수행 |
 | **프로덕션 AI** | Grok API (타로/사주 리딩, SSE 스트리밍) | — |
 | **이미지 생성** | Grok 이미지 API (캐릭터, 카드 스킨, 배경) | 생성된 이미지를 코드에 통합 |
 | **품질 관리** | — | tsc + lint + build, Playwright E2E, 주간 QA |
@@ -567,20 +551,19 @@ pnpm build             # 프로덕션 빌드 확인
 두 AI가 협업하는 **단일 진실 소스(Single Source of Truth)**는 이 CLAUDE.md 파일이다.
 
 - **진입점은 항상 Claude CLI**: 사용자가 Claude CLI에 직접 지시
-- **Claude CLI → SuperGrok**: 1단계 기획 요청 + 4단계 검토 요청 (Grok API 호출)
-- **SuperGrok → Claude CLI**: 기획 결과 + 검토 판정을 반환
+- **Claude CLI**: 기획 + 구현 + 검토 + 배포를 모두 수행
+- **Grok API**: 프로덕션 리딩 + 이미지 ���성에만 사용 (비용 최적화)
 
 ### 워크플로우
 
 ```
 사용자 → Claude CLI (직접 지시)
-  └→ SuperGrok 기획 (1단계) → Claude CLI 구현 (2~3단계)
-       └→ SuperGrok 검토 (4단계) → ✅ 승인 시 커밋/PR/배포 (5~8단계)
+  └→ Claude CLI가 기획 → 구현 → 검증 → 리뷰 → PR → 배포 (6단계)
 
 자동 운영:
   ├─ 주간 QA (토요일) → 실패 시 자동 수정 루프
   ├─ n8n: spec Issue 감지 → 구현 안내
-  └─ n8n: 리딩 품질 모니터링 + 주간 리포트
+  └─ n8n: 리딩 통계 모니터링 + 주간 리포트 (Supabase 직접 조회, Grok 미사용)
 ```
 
 ### GitHub Issue 기반 추적 (Phase 2)
