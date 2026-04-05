@@ -86,10 +86,16 @@ export async function POST(request: NextRequest) {
           }
           const result = sajuService.parseResult(fullResponse);
 
-          let shareToken: string | null = null;
+          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            done: true,
+            result,
+            sajuData: sajuResult,
+          })}\n\n`));
+
           if (supabase && sessionId) {
-            try {
-              const readingRes = await supabase.from("saju_readings").insert({
+            Promise.all([
+              supabase.from("saju_readings").insert({
                 session_id: sessionId,
                 birth_date: userInfo.birthDate,
                 birth_hour: userInfo.birthHour,
@@ -109,28 +115,12 @@ export async function POST(request: NextRequest) {
                 overall_reading: result.overallReading,
                 topic_reading: result.topicReading || "",
                 advice: result.advice,
-              }).select("share_token").single();
-
-              if (readingRes?.error) {
-                console.error("saju_readings 저장 실패:", readingRes.error.message);
-              } else {
-                shareToken = readingRes?.data?.share_token ?? null;
-              }
-
-              const sessionRes = await supabase.from("sessions").update({
+              }),
+              supabase.from("sessions").update({
                 status: "completed", completed_at: new Date().toISOString(),
-              }).eq("id", sessionId);
-              if (sessionRes.error) console.error("sessions 업데이트 실패:", sessionRes.error.message);
-            } catch (dbError) {
-              console.error("DB 저장 실패:", dbError);
-            }
+              }).eq("id", sessionId),
+            ]).catch((e) => console.error("사주 DB 저장 실패:", e));
           }
-
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-            done: true,
-            result: { ...result, shareToken },
-            sajuData: sajuResult,
-          })}\n\n`));
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
           console.error("사주 리딩 생성 실패:", errMsg);
