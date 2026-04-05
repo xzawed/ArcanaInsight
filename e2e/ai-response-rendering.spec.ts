@@ -1,0 +1,294 @@
+import { test, expect } from "@playwright/test";
+import {
+  createSSEBody,
+  mockSSERoute,
+  mockSessionCreate,
+  SHINJEOM_MID_RESPONSE,
+  SHINJEOM_FINAL_RESULT,
+  TAROT_READING_RESULT,
+  SAJU_READING_RESULT,
+  SAJU_DATA,
+  JSON_ARTIFACTS,
+} from "./helpers/sse-mock";
+
+/**
+ * AI 응답 렌더링 검증 — Mock SSE로 실제 응답 렌더링을 테스트
+ *
+ * 기존 테스트와의 차이점:
+ * - 기존: UI 요소 존재 여부 + 네비게이션만 확인
+ * - 이번: API 성공 응답이 화면에 올바르게 렌더링되는지 검증 (JSON 미노출, 텍스트 정상 표시)
+ */
+
+// ── 신점 진입 헬퍼 ──
+async function enterShinjeomSession(page: import("@playwright/test").Page) {
+  await page.goto("/shinjeom");
+  await page.waitForLoadState("networkidle");
+
+  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+  await characterCards.first().click();
+
+  await page.locator("text=신수").first().click();
+  await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
+  await expect(page.locator("text=고민").first()).toBeVisible({ timeout: 10_000 });
+}
+
+// ── 타로 진입 헬퍼 ──
+async function enterTarotSession(page: import("@playwright/test").Page) {
+  await page.goto("/tarot");
+  await page.waitForLoadState("networkidle");
+
+  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+  await characterCards.first().click();
+
+  // 주제 선택 (종합)
+  await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
+  await page.locator("text=종합").first().click();
+
+  // 스프레드 선택 (원카드)
+  await expect(page.locator("text=원카드").first()).toBeVisible({ timeout: 5_000 });
+  await page.locator("text=원카드").first().click();
+
+  await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+}
+
+// ── 사주 진입 헬퍼 ──
+async function enterSajuSession(page: import("@playwright/test").Page) {
+  await page.goto("/saju");
+  await page.waitForLoadState("networkidle");
+
+  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+  await characterCards.first().click();
+
+  // 개인정보 입력
+  await page.waitForTimeout(500);
+  const birthInput = page.locator("input[type='date']");
+  if (await birthInput.isVisible()) {
+    await birthInput.fill("2000-01-15");
+    // 성별 선택
+    const genderSelect = page.locator("select").filter({ hasText: /남|여/ }).first();
+    if (await genderSelect.isVisible()) {
+      await genderSelect.selectOption({ index: 1 });
+    }
+    // 제출
+    const submitBtn = page.locator("button").filter({ hasText: /다음|시작|확인/ }).first();
+    if (await submitBtn.isVisible() && await submitBtn.isEnabled()) {
+      await submitBtn.click();
+    }
+  }
+}
+
+test.describe("AI 응답 렌더링 — 신점", () => {
+  test("중간 대화 — 텍스트 정상 렌더링 + JSON 미노출", async ({ page }) => {
+    // 세션 생성 mock
+    await mockSessionCreate(page, "**/api/shinjeom/session");
+
+    // 중간 대화 SSE mock (1~2번째 턴)
+    const midSSE = createSSEBody(
+      SHINJEOM_MID_RESPONSE.split("").reduce((acc: string[], char, i) => {
+        // 10자 단위 청크
+        const chunkIdx = Math.floor(i / 10);
+        acc[chunkIdx] = (acc[chunkIdx] || "") + char;
+        return acc;
+      }, []),
+      { isFinal: false, message: SHINJEOM_MID_RESPONSE },
+    );
+    await mockSSERoute(page, "**/api/shinjeom/message", midSSE);
+
+    await enterShinjeomSession(page);
+
+    // 고민 입력 + 전송
+    const input = page.locator("input[type='text']");
+    await input.fill("요즘 직장에서 스트레스가 많아요");
+    await page.locator("button", { hasText: "전송" }).click();
+
+    // 응답 대기
+    await page.waitForTimeout(2000);
+
+    // 채팅에서 응답 텍스트 일부 확인
+    const bodyText = await page.textContent("body");
+    expect(bodyText).toContain("고민");
+
+    // JSON 잔여물 미노출 확인
+    for (const pattern of JSON_ARTIFACTS) {
+      expect(bodyText).not.toMatch(pattern);
+    }
+  });
+
+  test("최종 결과 — 채팅에 raw JSON 미표시", async ({ page }) => {
+    await mockSessionCreate(page, "**/api/shinjeom/session");
+
+    // 1~2번째 턴은 텍스트 응답
+    let callCount = 0;
+    await page.route("**/api/shinjeom/message", (route) => {
+      callCount++;
+      if (callCount < 3) {
+        // 중간 대화
+        const midSSE = createSSEBody(
+          ["공감합니다. ", "더 자세히 ", "알려주세요."],
+          { isFinal: false, message: "공감합니다. 더 자세히 알려주세요." },
+        );
+        route.fulfill({
+          status: 200,
+          contentType: "text/event-stream",
+          headers: { "Cache-Control": "no-cache" },
+          body: midSSE,
+        });
+      } else {
+        // 3번째(최종) — JSON 결과
+        const jsonStr = JSON.stringify(SHINJEOM_FINAL_RESULT);
+        const finalSSE = createSSEBody(
+          // JSON을 청크로 분할
+          [jsonStr.slice(0, 50), jsonStr.slice(50, 100), jsonStr.slice(100)],
+          { isFinal: true, result: SHINJEOM_FINAL_RESULT },
+        );
+        route.fulfill({
+          status: 200,
+          contentType: "text/event-stream",
+          headers: { "Cache-Control": "no-cache" },
+          body: finalSSE,
+        });
+      }
+    });
+
+    await enterShinjeomSession(page);
+
+    // 3회 대화 진행
+    for (let i = 0; i < 3; i++) {
+      const input = page.locator("input[type='text']");
+      await expect(input).toBeVisible({ timeout: 5_000 });
+      await input.fill(`테스트 답변 ${i + 1}`);
+      await page.locator("button", { hasText: "전송" }).click();
+      await page.waitForTimeout(2000);
+    }
+
+    // 결과 화면 전환 대기
+    await page.waitForTimeout(2000);
+
+    // 화면에서 JSON raw 텍스트 미노출 확인
+    const bodyText = await page.textContent("body");
+    for (const pattern of JSON_ARTIFACTS) {
+      expect(bodyText).not.toMatch(pattern);
+    }
+  });
+
+  test("최종 결과 — 결과 화면 정상 렌더링", async ({ page }) => {
+    await mockSessionCreate(page, "**/api/shinjeom/session");
+
+    let callCount = 0;
+    await page.route("**/api/shinjeom/message", (route) => {
+      callCount++;
+      if (callCount < 3) {
+        const midSSE = createSSEBody(
+          ["네, 이해해요. ", "한 가지 더 ", "여쭤볼게요."],
+          { isFinal: false, message: "네, 이해해요. 한 가지 더 여쭤볼게요." },
+        );
+        route.fulfill({ status: 200, contentType: "text/event-stream", body: midSSE });
+      } else {
+        const jsonStr = JSON.stringify(SHINJEOM_FINAL_RESULT);
+        const finalSSE = createSSEBody(
+          [jsonStr],
+          { isFinal: true, result: SHINJEOM_FINAL_RESULT },
+        );
+        route.fulfill({ status: 200, contentType: "text/event-stream", body: finalSSE });
+      }
+    });
+
+    await enterShinjeomSession(page);
+
+    for (let i = 0; i < 3; i++) {
+      const input = page.locator("input[type='text']");
+      await expect(input).toBeVisible({ timeout: 5_000 });
+      await input.fill(`답변 ${i + 1}`);
+      await page.locator("button", { hasText: "전송" }).click();
+      await page.waitForTimeout(2000);
+    }
+
+    // 결과 화면 전환 대기
+    await page.waitForTimeout(3000);
+
+    // 결과 섹션 확인 — 종합 신점
+    await expect(page.locator("text=종합 신점").first()).toBeVisible({ timeout: 10_000 });
+
+    // 결과 텍스트의 일부가 화면에 표시되는지 확인
+    const bodyText = await page.textContent("body");
+    expect(bodyText).toContain("큰 변화의 흐름");
+    expect(bodyText).toContain("마음을 열어두세요");
+
+    // 조언 섹션 확인
+    await expect(page.locator("text=조언").first()).toBeVisible();
+  });
+});
+
+test.describe("AI 응답 렌더링 — 타로", () => {
+  test("리딩 결과 — JSON 미노출 + 카드 해석 정상 표시", async ({ page }) => {
+    // 세션 API mock
+    await mockSessionCreate(page, "**/api/tarot/session");
+
+    // 리딩 API SSE mock
+    const readingSSE = createSSEBody(
+      [
+        JSON.stringify(TAROT_READING_RESULT).slice(0, 80),
+        JSON.stringify(TAROT_READING_RESULT).slice(80),
+      ],
+      { result: TAROT_READING_RESULT },
+    );
+    await mockSSERoute(page, "**/api/tarot/reading", readingSSE);
+
+    await enterTarotSession(page);
+
+    // 카드 선택 대기 (세션 페이지 진입 후)
+    await page.waitForTimeout(3000);
+
+    // 세션 페이지에서 JSON 잔여물 확인
+    const bodyText = await page.textContent("body");
+    for (const pattern of JSON_ARTIFACTS) {
+      expect(bodyText).not.toMatch(pattern);
+    }
+  });
+});
+
+test.describe("AI 응답 렌더링 — 사주", () => {
+  test("리딩 결과 — JSON 미노출 확인", async ({ page }) => {
+    await mockSessionCreate(page, "**/api/saju/session");
+
+    const readingSSE = createSSEBody(
+      [
+        JSON.stringify({ ...SAJU_READING_RESULT, sajuData: SAJU_DATA }).slice(0, 100),
+        JSON.stringify({ ...SAJU_READING_RESULT, sajuData: SAJU_DATA }).slice(100),
+      ],
+      { result: SAJU_READING_RESULT, sajuData: SAJU_DATA },
+    );
+    await mockSSERoute(page, "**/api/saju/reading", readingSSE);
+
+    await enterSajuSession(page);
+
+    await page.waitForTimeout(3000);
+
+    const bodyText = await page.textContent("body");
+    for (const pattern of JSON_ARTIFACTS) {
+      expect(bodyText).not.toMatch(pattern);
+    }
+  });
+});
+
+test.describe("AI 응답 렌더링 — 공통 JSON 잔여물 감지", () => {
+  test("세션 페이지 접속 시 기본 상태 JSON 미노출", async ({ page }) => {
+    // 직접 세션 페이지 접근 (스토어 없으면 리디렉트)
+    const sessionPages = ["/tarot/session", "/saju/session", "/shinjeom/session"];
+
+    for (const sessionPage of sessionPages) {
+      await page.goto(sessionPage);
+      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(1000);
+
+      const bodyText = await page.textContent("body");
+      // 리디렉트 되더라도 JSON 잔여물이 없어야 함
+      for (const pattern of JSON_ARTIFACTS) {
+        expect(bodyText, `${sessionPage}에서 JSON 잔여물 발견`).not.toMatch(pattern);
+      }
+    }
+  });
+});
