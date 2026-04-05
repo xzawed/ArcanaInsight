@@ -86,7 +86,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ cardId: card.id, isReversed, interpretation, keywords });
   } catch (error) {
-    console.error("Daily card error:", error);
-    return NextResponse.json({ error: "Failed to generate daily card" }, { status: 500 });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Daily card error:", errMsg);
+    const userMessage = errMsg.includes("API_KEY") || errMsg.includes("auth")
+      ? "AI 서비스 설정에 문제가 있습니다."
+      : errMsg.includes("rate limit") || errMsg.includes("429")
+      ? "요청이 많아 잠시 후 다시 시도해주세요."
+      : "일일 카드 생성에 실패했습니다. 잠시 후 다시 시도해주세요.";
+    return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }

@@ -1,12 +1,20 @@
 import { AIProvider } from "@/types/service";
 
-/** Grok API Rate Limit (429) 전용 에러 — Fallback Provider에서 짧은 쿨다운 적용 */
+/** Grok API Rate Limit (429) — Retry-After 기반 짧은 쿨다운 */
 export class RateLimitError extends Error {
   retryAfterMs: number;
   constructor(retryAfter: number) {
     super(`Grok API rate limit (429) — retry after ${retryAfter}ms`);
     this.name = "RateLimitError";
     this.retryAfterMs = retryAfter;
+  }
+}
+
+/** API 인증 실패 (401/403) — 재시도 불가, 장기 쿨다운 적용 */
+export class AuthError extends Error {
+  constructor(status: number, detail: string) {
+    super(`Grok API auth error (${status}): ${detail}`);
+    this.name = "AuthError";
   }
 }
 
@@ -50,6 +58,10 @@ export class GrokProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
+      if (response.status === 401 || response.status === 403) {
+        const error = await response.text();
+        throw new AuthError(response.status, error);
+      }
       if (response.status === 429) {
         const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
         throw new RateLimitError(retryAfter);
@@ -78,6 +90,10 @@ export class GrokProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
+      if (response.status === 401 || response.status === 403) {
+        const error = await response.text();
+        throw new AuthError(response.status, error);
+      }
       if (response.status === 429) {
         const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
         throw new RateLimitError(retryAfter);
