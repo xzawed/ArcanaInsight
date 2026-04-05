@@ -9,7 +9,7 @@ import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 const services = [
   { id: "tarot", label: "타로 리딩", icon: "🃏", desc: "카드로 운명을 읽어요" },
   { id: "saju", label: "사주 상담", icon: "☯", desc: "사주팔자로 인생을 봐요" },
-  { id: "shinjeom", label: "신점", icon: "🔮", desc: "신의 뜻을 전해드려요", disabled: true },
+  { id: "shinjeom", label: "신점", icon: "🔮", desc: "신의 뜻을 전해드려요" },
   { id: "fortune", label: "오늘의 운세", icon: "⭐", desc: "오늘 하루를 미리 봐요", disabled: true },
 ];
 
