@@ -63,11 +63,41 @@ const icons: IconDef[] = [
   { id: "theme-autumn", category: "theme", prompt: `${BASE_STYLE}, falling autumn maple leaves in warm colors, wisdom of seasons, amber and burnt orange` },
   { id: "theme-winter", category: "theme", prompt: `${BASE_STYLE}, elegant snowflake crystal with ice blue glow, winter serenity, ice blue and silver white` },
 
-  // ── 기타 UI (4개) ──
+  // ── 사주 분석영역 (4개 — 공통 아이콘은 타로 주제 재사용) ──
+  { id: "saju-general", category: "saju", prompt: `${BASE_STYLE}, a yin-yang symbol with glowing cosmic energy, four pillars of destiny, deep purple and blue tones` },
+  { id: "saju-personality", category: "saju", prompt: `${BASE_STYLE}, a glowing brain with constellation patterns inside, personality analysis, purple and cyan neural connections` },
+  { id: "saju-compatibility", category: "saju", prompt: `${BASE_STYLE}, two hands reaching toward each other with connecting energy threads, compatibility matching, warm purple glow` },
+  { id: "saju-date", category: "saju", prompt: `${BASE_STYLE}, a mystical calendar with a golden star marking the auspicious date, date selection, purple and gold highlight` },
+
+  // ── 사주 시간단위 (7개) ──
+  { id: "saju-week", category: "saju", prompt: `${BASE_STYLE}, a mystical weekly calendar with 7 glowing day markers, time cycle, purple and gold` },
+  { id: "saju-month", category: "saju", prompt: `${BASE_STYLE}, a crescent moon with calendar page, monthly fortune, silver and purple glow` },
+  { id: "saju-year", category: "saju", prompt: `${BASE_STYLE}, a mystical bar chart with rising energy columns, yearly analysis, purple and gold data visualization` },
+  { id: "saju-crystal", category: "saju", prompt: `${BASE_STYLE}, a crystal ball showing future vision with swirling mist, next year forecast, deep purple and gold` },
+  { id: "saju-trend", category: "saju", prompt: `${BASE_STYLE}, a glowing upward trend arrow with star trail, multi-year growth, purple and gold ascending energy` },
+  { id: "saju-calendar", category: "saju", prompt: `${BASE_STYLE}, a mystical torn calendar with glowing dates, five-year projection, purple and gold pages` },
+  { id: "saju-destiny", category: "saju", prompt: `${BASE_STYLE}, a grand cosmic wheel of fortune with glowing segments, life destiny map, brilliant purple and gold starfield` },
+
+  // ── 타로 스프레드 (10개) ──
+  { id: "spread-card", category: "spread", prompt: `${BASE_STYLE}, a single glowing tarot card with mystical symbols, one card spread, purple and gold card back` },
+  { id: "spread-three", category: "spread", prompt: `${BASE_STYLE}, three tarot cards fanned out with glowing edges, three card spread, purple and gold arrangement` },
+  { id: "spread-five", category: "spread", prompt: `${BASE_STYLE}, five cards arranged in a cross pattern with glowing connections, celtic cross mini, purple and gold layout` },
+  { id: "spread-celtic", category: "spread", prompt: `${BASE_STYLE}, ten cards arranged in full celtic cross pattern with intricate energy lines, traditional spread, purple and gold` },
+  { id: "spread-relationship", category: "spread", prompt: `${BASE_STYLE}, cards mirrored on two sides with connecting heart energy, relationship spread, pink and purple` },
+  { id: "spread-horseshoe", category: "spread", prompt: `${BASE_STYLE}, seven cards arranged in U shape horseshoe with flowing energy, horseshoe spread, purple and gold arc` },
+  { id: "spread-decision", category: "spread", prompt: `${BASE_STYLE}, scales of justice with tarot cards on each side, decision making, balanced purple and gold` },
+  { id: "spread-week", category: "spread", prompt: `${BASE_STYLE}, seven cards in a row representing days of week with sun cycle, weekly forecast, purple and gold timeline` },
+  { id: "spread-zodiac", category: "spread", prompt: `${BASE_STYLE}, twelve cards arranged in a zodiac circle with constellation symbols, astrology wheel, purple and gold cosmic` },
+  { id: "spread-tree", category: "spread", prompt: `${BASE_STYLE}, mystical tree of life with glowing nodes and cards at each position, kabbalistic tree, purple and gold branches` },
+
+  // ── 기타 UI (7개) ──
   { id: "ui-settings", category: "ui", prompt: `${BASE_STYLE}, a mystical gear/cog wheel with glowing inner mechanisms, settings and configuration, purple metallic` },
   { id: "ui-auto-theme", category: "ui", prompt: `${BASE_STYLE}, two circular arrows forming a cycle with day and night halves, auto-switching, purple and gold gradient` },
   { id: "ui-info", category: "ui", prompt: `${BASE_STYLE}, a glowing scroll or notepad with a quill pen, information input, purple and gold mystical` },
   { id: "ui-target", category: "ui", prompt: `${BASE_STYLE}, a glowing bullseye target with a mystical arrow hitting center, topic selection, purple and gold precision` },
+  { id: "ui-hourglass", category: "ui", prompt: `${BASE_STYLE}, a mystical hourglass with flowing purple sand and glowing energy, time selection, purple and gold frame` },
+  { id: "ui-book", category: "ui", prompt: `${BASE_STYLE}, an open mystical book with glowing pages and floating symbols, reading result, purple and gold ancient text` },
+  { id: "ui-person", category: "ui", prompt: `${BASE_STYLE}, a mystical person silhouette with glowing aura selecting from options, counselor choice, purple and gold profile` },
 ];
 
 // === 이미지 생성 ===
@@ -149,7 +179,7 @@ async function main() {
   } else {
     console.log("사용법:");
     console.log("  --all                모든 아이콘 생성 (28개)");
-    console.log("  --category=nav       카테고리별 생성 (nav|shinjeom|tarot|theme|ui)");
+    console.log("  --category=nav       카테고리별 생성 (nav|shinjeom|tarot|saju|spread|theme|ui)");
     console.log("  --id=nav-home        개별 아이콘 생성");
     console.log(`\n총 ${icons.length}개 아이콘 정의됨`);
     process.exit(0);
