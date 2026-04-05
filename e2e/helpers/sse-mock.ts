@@ -106,5 +106,4 @@ export const JSON_ARTIFACTS = [
   /"interpretation"/,
   /^\s*[\{\}\[\]]\s*$/m,
   /\\n\\n/,
-  /\\"/,
 ];

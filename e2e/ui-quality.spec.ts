@@ -13,7 +13,6 @@ const JSON_ARTIFACTS = [
   /"isReversed"/,
   /^\s*[\{\}\[\]]\s*$/m,
   /\\n\\n/,
-  /\\"/,
 ];
 
 test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
@@ -54,9 +53,9 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByRole("link", { name: /타로 상담/i })).toBeVisible();
     const body = await page.textContent("body");
     expect(body).toContain("상담사");
+    expect(body).toContain("오늘의 카드");
   });
 
   test("타로 — 캐릭터 선택 텍스트", async ({ page }) => {

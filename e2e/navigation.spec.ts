@@ -127,7 +127,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    const settingsIcon = page.locator("a[href='/settings']").first();
+    const settingsIcon = page.locator("a[href='/settings'][aria-label='설정']");
     await settingsIcon.click();
     await page.waitForURL("**/settings");
   });

@@ -24,7 +24,7 @@ async function enterShinjeomSession(page: import("@playwright/test").Page) {
   await page.goto("/shinjeom");
   await page.waitForLoadState("networkidle");
 
-  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
   await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
   await characterCards.first().click();
 
@@ -38,7 +38,7 @@ async function enterTarotSession(page: import("@playwright/test").Page) {
   await page.goto("/tarot");
   await page.waitForLoadState("networkidle");
 
-  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
   await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
   await characterCards.first().click();
 
@@ -58,7 +58,7 @@ async function enterSajuSession(page: import("@playwright/test").Page) {
   await page.goto("/saju");
   await page.waitForLoadState("networkidle");
 
-  const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
   await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
   await characterCards.first().click();
 

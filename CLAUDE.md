@@ -180,7 +180,7 @@ scripts/                        # 유틸리티 스크립트
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 └── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 
-e2e/                            # Playwright E2E 테스트 (19개 파일, 116개 테스트, 3개 디바이스)
+e2e/                            # Playwright E2E 테스트 (19개 파일, 141개 테스트, 3개 디바이스)
 ├── home.spec.ts                # 홈 페이지 섹션 검증
 ├── tarot-flow.spec.ts          # 타로 풀 플로우
 ├── saju-flow.spec.ts           # 사주 풀 플로우
