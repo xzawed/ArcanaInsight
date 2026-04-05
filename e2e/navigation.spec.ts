@@ -132,7 +132,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.waitForURL("**/settings");
   });
 
-  test("MobileNav 4탭 표시 + 클릭", async ({ page }) => {
+  test("MobileNav 5탭 표시 + 클릭", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await page.waitForLoadState("networkidle");
@@ -143,5 +143,79 @@ test.describe("네비게이션 — 모바일 Header", () => {
       await tarotTab.click();
       await page.waitForURL("**/tarot");
     }
+  });
+});
+
+test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초기화", () => {
+  test("MobileNav 탭 클릭 후 scrollY === 0 (모바일)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // 홈에서 아래로 스크롤
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.waitForTimeout(100);
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollBefore).toBeGreaterThan(0);
+
+    // 타로 탭 클릭 → 스크롤 최상단 확인
+    const tarotTab = page.locator("nav a[href='/tarot']").last();
+    await tarotTab.click();
+    await page.waitForURL("**/tarot");
+    await page.waitForTimeout(500); // AnimatePresence 전환 대기
+    const scrollAfterTarot = await page.evaluate(() => window.scrollY);
+    expect(scrollAfterTarot).toBe(0);
+
+    // 사주 탭 클릭 → 스크롤 최상단 확인
+    const sajuTab = page.locator("nav a[href='/saju']").last();
+    await sajuTab.click();
+    await page.waitForURL("**/saju");
+    await page.waitForTimeout(500);
+    const scrollAfterSaju = await page.evaluate(() => window.scrollY);
+    expect(scrollAfterSaju).toBe(0);
+
+    // 신점 탭 클릭 → 스크롤 최상단 확인
+    const shinjeomTab = page.locator("nav a[href='/shinjeom']").last();
+    await shinjeomTab.click();
+    await page.waitForURL("**/shinjeom");
+    await page.waitForTimeout(500);
+    const scrollAfterShinjeom = await page.evaluate(() => window.scrollY);
+    expect(scrollAfterShinjeom).toBe(0);
+  });
+
+  test("Header 데스크탑 링크 클릭 후 scrollY === 0", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // 홈에서 아래로 스크롤
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await page.waitForTimeout(100);
+
+    // 타로 링크 클릭
+    const tarotLink = page.locator("nav a[href='/tarot']").first();
+    await tarotLink.click();
+    await page.waitForURL("**/tarot");
+    await page.waitForTimeout(500);
+    const scrollAfter = await page.evaluate(() => window.scrollY);
+    expect(scrollAfter).toBe(0);
+  });
+
+  test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/tarot");
+    await page.waitForLoadState("networkidle");
+
+    // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await page.waitForTimeout(100);
+
+    // 홈으로 이동
+    const homeTab = page.locator("nav a[href='/']").last();
+    await homeTab.click();
+    await page.waitForURL(/\/$/);
+    await page.waitForTimeout(500);
+    const scrollAfter = await page.evaluate(() => window.scrollY);
+    expect(scrollAfter).toBe(0);
   });
 });
