@@ -62,37 +62,40 @@ flowchart TD
 
 ---
 
-## 3. 새 기능 개발 흐름 — SuperGrok → Claude CLI
+## 3. 작업 흐름 — 모든 작업의 표준 프로세스
 
-새 기능을 기획하고 구현하는 전체 과정입니다.
+당신이 Claude CLI에 지시하면, 내부적으로 SuperGrok이 기획하고 검토합니다.
 
 ```mermaid
 flowchart TD
-    기획["① SuperGrok에서 기획<br/>기능 논의 + 설계"]
-    기획 --> Issue["② GitHub Issue 생성<br/>(spec 템플릿 사용)"]
-    Issue --> 감지["③ n8n이 자동 감지<br/>in-progress 라벨 + 코멘트"]
-    감지 --> 구현["④ Claude CLI에서 구현<br/>'Issue #XX 내용대로 구현해줘'"]
-    구현 --> 검증["⑤ 로컬 검증<br/>타입체크 + 린트 + 빌드"]
+    지시["① 당신 → Claude CLI에 지시<br/>'이런 기능 만들어줘' / '이 버그 수정해줘'"]
+    지시 --> 기획["② SuperGrok 기획<br/>Grok API가 구현 방향 제시"]
+    기획 --> 구현["③ Claude CLI가 구현"]
+    구현 --> 검증["④ 로컬 검증<br/>타입체크 + 린트 + 빌드"]
     검증 -->|실패| 구현
-    검증 -->|통과| PR["⑥ PR 생성 + CI 검증"]
+    검증 -->|통과| 리뷰["⑤ SuperGrok 검토<br/>Grok API가 품질 평가"]
+    리뷰 -->|❌ 수정 필요| 구현
+    리뷰 -->|✅ 승인| PR["⑥ PR 생성 + CI 검증"]
     PR -->|실패| 구현
     PR -->|통과| 배포["⑦ 머지 → Railway 자동 배포"]
-    배포 --> 완료["⑧ 완료 ✅"]
+    배포 --> QA["⑧ QA 재검증 (자동)"]
+    QA --> 완료["완료 ✅"]
 
+    style 지시 fill:#2563eb,color:#fff
     style 기획 fill:#e94560,color:#fff
-    style 감지 fill:#d97706,color:#fff
     style 구현 fill:#7c3aed,color:#fff
+    style 리뷰 fill:#e94560,color:#fff
     style 배포 fill:#16a34a,color:#fff
 ```
 
 **당신이 하는 일**:
-1. SuperGrok에서 기능 기획/설계 논의
-2. GitHub에서 Issue 생성 (spec 템플릿 선택)
-3. Claude CLI에 "Issue #XX 내용대로 구현해줘"라고 전달
-4. 결과 확인
+1. Claude CLI에 직접 지시 (이것만 하면 됩니다)
+2. 결과 확인
 
-**자동으로 되는 일**:
-- n8n이 spec Issue를 감지하여 알림
+**자동으로 되는 일** (전부):
+- SuperGrok이 기획 (구현 방향 제시)
+- Claude CLI가 구현
+- SuperGrok이 검토 (품질 평가)
 - CI가 코드 품질 자동 검증
 - Railway가 자동 배포
 
