@@ -20,7 +20,12 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 3. **시간단위 × 분석영역 선택** → 시간단위(7) + 분석영역(8) 동시 선택, 년단위 시 "월별 상세" 토글 옵션
 4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 제공 → 결과 공유
 
-#### 주제(Topic) 목록 — 총 15개
+#### 신점 (3단계)
+1. **캐릭터 선택** → 12명의 캐릭터 중 상담사 선택 (성별 필터 지원)
+2. **주제 선택** → 신수(종합운), 연애/궁합, 재물/사업운, 건강/액막이
+3. **대화형 상담** → 3회 문답 (고민 입력 → AI 질문 → 답변 → AI 질문 → 답변 → 최종 신점 결과)
+
+#### 주제(Topic) 목록 — 총 19개
 
 | 구분 | Topic 값 | 한국어 |
 |------|---------|--------|
@@ -39,6 +44,10 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 | 사주 분석영역 | `saju-personality` | 성격·적성 |
 | 사주 분석영역 | `saju-compatibility` | 궁합 |
 | 사주 분석영역 | `saju-auspicious-date` | 택일 |
+| 신점 | `shinjeom-general` | 신수 (종합운) |
+| 신점 | `shinjeom-love` | 연애/궁합 |
+| 신점 | `shinjeom-wealth` | 재물/사업운 |
+| 신점 | `shinjeom-health` | 건강/액막이 |
 
 #### 사주 시간단위(`SajuTimeRange`) — 7개 (`src/types/session.ts`)
 
@@ -76,6 +85,7 @@ src/
 │   ├── api/
 │   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + Supabase 캐시)
 │   │   ├── saju/               # 사주 API 라우트 (session, reading SSE, result/[id])
+│   │   ├── shinjeom/           # 신점 API 라우트 (session, message SSE)
 │   │   └── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
 │   ├── auth/                   # 로그인, OAuth 콜백
 │   ├── character/[id]/         # 캐릭터 상세 페이지
@@ -84,6 +94,9 @@ src/
 │   ├── saju/                   # 사주 메인 페이지, 세션, 결과(/result/[id])
 │   │   ├── session/
 │   │   └── result/[id]/
+│   ├── shinjeom/               # 신점 메인 페이지 (캐릭터+주제 선택), 세션 (대화형)
+│   │   └── session/
+│   ├── settings/               # 통합 설정 페이지
 │   ├── tarot/                  # 타로 주제 선택, 상담 세션, 결과(/result/[id])
 │   │   ├── session/
 │   │   └── result/[id]/
@@ -117,7 +130,9 @@ src/
 │   ├── useGenderStore.ts       # 성별 필터 상태
 │   ├── useSajuSession.ts       # 사주 세션 상태
 │   ├── useSession.ts           # 타로 세션 상태
+│   ├── useShinjeomSession.ts   # 신점 세션 상태 (대화형)
 │   ├── useSkinStore.ts         # 카드 스킨 선택 상태 (persist)
+│   ├── useSSEStream.ts         # SSE 스트림 공통 유틸
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts)
 ├── services/
@@ -126,6 +141,7 @@ src/
 │   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
 │   │                           # prompt-builder.ts, text-cleaner.ts
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
+│   ├── shinjeom/               # shinjeom-service.ts (대화형 3회 문답)
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
 └── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
 
@@ -162,12 +178,21 @@ scripts/                        # 유틸리티 스크립트
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 └── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 
-e2e/                            # Playwright E2E 테스트 (9개 파일, 3개 디바이스 프로필)
+e2e/                            # Playwright E2E 테스트 (18개 파일, 121개 테스트, 3개 디바이스)
 ├── home.spec.ts                # 홈 페이지 섹션 검증
-├── tarot-flow.spec.ts          # 타로 풀 플로우 (5스텝 전환)
-├── saju-flow.spec.ts           # 사주 풀 플로우 (3스텝)
-├── character.spec.ts           # 캐릭터 상세 (12캐릭터 + 에러)
+├── tarot-flow.spec.ts          # 타로 풀 플로우
+├── saju-flow.spec.ts           # 사주 풀 플로우
+├── shinjeom-flow.spec.ts       # 신점 풀 플로우 (대화형)
+├── character.spec.ts           # 캐릭터 상세 (12캐릭터)
 ├── auth.spec.ts                # 로그인 페이지
+├── auth-session.spec.ts        # 인증 상태 테스트 (Supabase 로그인)
+├── settings.spec.ts            # 설정 페이지 5개 섹션
+├── navigation.spec.ts          # Header/Footer/MobileNav 링크 + 테마
+├── daily-card.spec.ts          # 오늘의 카드 탭 전환
+├── form-validation.spec.ts     # 폼 유효성 + 설정 교차 반영
+├── ui-quality.spec.ts          # JSON 잔여물, 콘솔 에러, 레이아웃 깨짐
+├── api-error-handling.spec.ts  # API 에러 mock (500/400/429/504)
+├── result-pages.spec.ts        # 결과 공유 페이지 404
 ├── mypage.spec.ts              # 마이페이지 리디렉트
 ├── static-pages.spec.ts        # 약관/개인정보
 ├── responsive.spec.ts          # 반응형 레이아웃 (3 뷰포트)
