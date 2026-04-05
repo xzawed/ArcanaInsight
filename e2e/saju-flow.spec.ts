@@ -4,7 +4,7 @@ test.describe("사주 서비스 플로우", () => {
   test("Step 1: 캐릭터 선택", async ({ page }) => {
     await page.goto("/saju");
 
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
 
     await characterCards.first().click();
@@ -17,7 +17,7 @@ test.describe("사주 서비스 플로우", () => {
     await page.goto("/saju");
 
     // 캐릭터 선택
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
@@ -47,7 +47,7 @@ test.describe("사주 서비스 플로우", () => {
     await page.goto("/saju");
 
     // 캐릭터 선택
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
@@ -73,7 +73,7 @@ test.describe("사주 서비스 플로우", () => {
     await page.goto("/saju");
 
     // 캐릭터 선택 + 폼 입력 + 제출
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 

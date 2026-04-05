@@ -4,7 +4,7 @@ test.describe("폼 유효성 — 사주 개인정보 입력", () => {
   /** 사주 캐릭터 선택 → 정보 입력 화면까지 진입 */
   async function navigateToSajuForm(page: import("@playwright/test").Page) {
     await page.goto("/saju");
-    const cards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const cards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(cards.first()).toBeVisible({ timeout: 10_000 });
     await cards.first().click();
     await expect(page.locator("text=생년월일").first()).toBeVisible({ timeout: 5_000 });
@@ -43,7 +43,7 @@ test.describe("폼 유효성 — 사주 개인정보 입력", () => {
 test.describe("폼 유효성 — 신점 메시지 입력", () => {
   async function navigateToShinjeomSession(page: import("@playwright/test").Page) {
     await page.goto("/shinjeom");
-    const cards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+    const cards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(cards.first()).toBeVisible({ timeout: 10_000 });
     await cards.first().click();
     await page.locator("text=신수").first().click();
@@ -105,7 +105,7 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
     await page.waitForLoadState("networkidle");
 
     // 캐릭터 수가 6개 이하인지 확인
-    const cards = page.locator("[class*='cursor-pointer']");
+    const cards = page.locator("button");
     await expect(cards.first()).toBeVisible({ timeout: 10_000 });
     const count = await cards.count();
     expect(count).toBeLessThanOrEqual(6);

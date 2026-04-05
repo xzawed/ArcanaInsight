@@ -5,7 +5,7 @@ test.describe("타로 서비스 플로우", () => {
     await page.goto("/tarot");
 
     // 캐릭터 그리드 로딩
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
 
     // 첫 번째 캐릭터 클릭
@@ -19,7 +19,7 @@ test.describe("타로 서비스 플로우", () => {
     await page.goto("/tarot");
 
     // 캐릭터 선택
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
@@ -34,7 +34,7 @@ test.describe("타로 서비스 플로우", () => {
     await page.goto("/tarot");
 
     // 캐릭터 선택 → 상담 시작
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
     await page.getByRole("button", { name: /상담 시작/i }).click();
@@ -50,7 +50,7 @@ test.describe("타로 서비스 플로우", () => {
     await page.goto("/tarot");
 
     // 풀 플로우: 캐릭터 → 상담 → 주제 → 스프레드
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
     await page.getByRole("button", { name: /상담 시작/i }).click();
@@ -67,18 +67,16 @@ test.describe("타로 서비스 플로우", () => {
   test("뒤로가기: 주제 선택에서 캐릭터 선택으로 복귀", async ({ page }) => {
     await page.goto("/tarot");
 
-    // 캐릭터 선택 → 상담 시작 → 주제 화면
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화/ });
+    // 캐릭터 선택 → 바로 주제 선택 (캐릭터 상세 단계 제거됨)
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
-    await page.getByRole("button", { name: /상담 시작/i }).click();
     await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
 
     // 뒤로가기 버튼 클릭
     const backBtn = page.locator("text=다른 상담사 선택").first();
     if (await backBtn.isVisible()) {
       await backBtn.click();
-      // 캐릭터 그리드 다시 표시
       await expect(characterCards.first()).toBeVisible({ timeout: 5_000 });
     }
   });

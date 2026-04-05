@@ -6,7 +6,7 @@ test.describe("신점 서비스 플로우", () => {
     await page.waitForLoadState("networkidle");
 
     // 캐릭터 그리드 존재
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
 
     // 캐릭터 선택
@@ -26,7 +26,7 @@ test.describe("신점 서비스 플로우", () => {
     await page.waitForLoadState("networkidle");
 
     // 캐릭터 선택
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
@@ -41,7 +41,7 @@ test.describe("신점 서비스 플로우", () => {
   test("세션 — 인사말 표시 + 입력 필드 존재", async ({ page }) => {
     await page.goto("/shinjeom");
 
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
     await page.locator("text=신수").first().click();
@@ -64,7 +64,7 @@ test.describe("신점 서비스 플로우", () => {
   test("뒤로가기 — 캐릭터 선택으로 복귀", async ({ page }) => {
     await page.goto("/shinjeom");
 
-    const characterCards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|루나|미코/ });
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
@@ -86,7 +86,7 @@ test.describe("신점 서비스 플로우", () => {
     await femaleBtn.click();
     await page.waitForTimeout(300);
 
-    const cards = page.locator("[class*='cursor-pointer']").filter({ hasText: /아르카나|미코|선화|호시|루나|레이/ });
+    const cards = page.locator("button").filter({ hasText: /아르카나|미코|선화|호시|루나|레이/ });
     expect(await cards.count()).toBeLessThanOrEqual(6);
   });
 });
