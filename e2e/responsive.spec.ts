@@ -26,9 +26,9 @@ test.describe("반응형 레이아웃", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 최소 4개의 네비 아이템 (홈/타로/사주/MY)
-    const navItems = page.locator("nav a, nav button").filter({ hasText: /홈|타로|사주|MY/ });
-    expect(await navItems.count()).toBeGreaterThanOrEqual(3);
+    // 최소 5개의 네비 아이템 (홈/타로/사주/신점/MY)
+    const navItems = page.locator("nav a, nav button").filter({ hasText: /홈|타로|사주|신점|MY/ });
+    expect(await navItems.count()).toBeGreaterThanOrEqual(4);
   });
 
   test("캐릭터 상세 — 데스크탑 좌우 50:50 분할", async ({ page }) => {
