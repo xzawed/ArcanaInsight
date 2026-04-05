@@ -113,7 +113,7 @@ src/
 │   ├── effects/                # ParticleOverlay (배경 파티클), ScrollReveal (스크롤 페이드인)
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
-│   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (4탭), ThemeProvider, FocusReset
+│   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (5탭), ThemeProvider, FocusReset
 │   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링)
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
 │   ├── skin/                   # SkinSelector
@@ -180,7 +180,7 @@ scripts/                        # 유틸리티 스크립트
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 └── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 
-e2e/                            # Playwright E2E 테스트 (18개 파일, 121개 테스트, 3개 디바이스)
+e2e/                            # Playwright E2E 테스트 (19개 파일, 116개 테스트, 3개 디바이스)
 ├── home.spec.ts                # 홈 페이지 섹션 검증
 ├── tarot-flow.spec.ts          # 타로 풀 플로우
 ├── saju-flow.spec.ts           # 사주 풀 플로우
@@ -206,7 +206,9 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 004_user_info.sql           # 사용자 정보 (생년월일, 성별, 혈액형 등)
 ├── 005_session_character_and_topics.sql # sessions 테이블 캐릭터/토픽 확장
 ├── 006_saju_readings.sql       # saju_readings 테이블 (사주 서비스)
-└── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
+├── 007_skin_selection.sql      # 스��� 선택 관련 컬럼
+├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
+└── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
 ```
 
 ## 캐릭터 시스템

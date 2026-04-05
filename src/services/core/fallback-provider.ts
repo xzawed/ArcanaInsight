@@ -68,7 +68,7 @@ export class FallbackProvider implements AIProvider {
         }
       }
     }
-    console.log("[FallbackProvider] Claude API로 generateReading 실행");
+    console.debug("[FallbackProvider] Claude API로 generateReading 실행");
     try {
       return await this.getClaude().generateReading(systemPrompt, userPrompt, maxTokens);
     } catch (claudeError) {
@@ -96,7 +96,7 @@ export class FallbackProvider implements AIProvider {
         }
       }
     }
-    console.log("[FallbackProvider] Claude API로 streamReading 실행");
+    console.debug("[FallbackProvider] Claude API로 streamReading 실행");
     try {
       yield* this.getClaude().streamReading(systemPrompt, userPrompt, maxTokens);
     } catch (claudeError) {
