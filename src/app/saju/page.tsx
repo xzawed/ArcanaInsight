@@ -98,13 +98,13 @@ export default function SajuPage() {
           <motion.div key="char-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="max-w-4xl mx-auto px-4 py-8 relative z-20">
             <div className="text-center mb-8">
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold mb-2">사주 상담사를 선택해주세요</h2>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2">사주 상담사를 선택해주세요</h2>
               <p className="text-arcana-muted text-sm md:text-base">사주명리학 전문 상담을 받아보세요</p>
             </div>
             <div className="flex justify-center gap-2 mb-6">
               {(["all", "female", "male"] as GenderFilter[]).map((f) => (
                 <button key={f} onClick={() => setGenderFilter(f)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-display font-bold border transition-colors ${
                     genderFilter === f
                       ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
                       : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
@@ -159,7 +159,7 @@ export default function SajuPage() {
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-2">
                   <Icon id="ui-hourglass" size={20} />
-                  <h3 className="font-serif font-bold text-sm md:text-base text-arcana-purple">시간단위</h3>
+                  <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">시간단위</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {sajuTimeOptions.map((opt) => (
@@ -167,7 +167,7 @@ export default function SajuPage() {
                       setSelectedTime(opt.id);
                       if (!opt.allowMonthly) setMonthlyToggle(false);
                     }}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-bold border transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-bold border transition-all ${
                         selectedTime === opt.id
                           ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple shadow-sm shadow-arcana-purple/20"
                           : "border-arcana-border text-arcana-muted hover:border-arcana-purple/60 bg-arcana-card/50"
@@ -191,7 +191,7 @@ export default function SajuPage() {
                       className={`w-9 h-5 rounded-full transition-colors relative ${monthlyToggle ? "bg-arcana-purple" : "bg-arcana-border"}`}>
                       <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${monthlyToggle ? "translate-x-4" : "translate-x-0.5"}`} />
                     </div>
-                    <span className="text-xs font-serif text-arcana-muted group-hover:text-arcana-text transition-colors">
+                    <span className="text-xs font-sans text-arcana-muted group-hover:text-arcana-text transition-colors">
                       월별 상세 포함
                     </span>
                   </label>
@@ -202,7 +202,7 @@ export default function SajuPage() {
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Icon id="saju-general" size={20} />
-                  <h3 className="font-serif font-bold text-sm md:text-base text-arcana-purple">분석영역</h3>
+                  <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">분석영역</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {sajuAreaOptions.map((opt) => (
@@ -214,7 +214,7 @@ export default function SajuPage() {
                       }`}>
                       <Icon id={opt.icon} size={22} className="flex-shrink-0" />
                       <div className="min-w-0">
-                        <p className={`text-xs md:text-sm font-serif font-bold truncate ${selectedArea === opt.id ? "text-arcana-purple" : "text-arcana-text"}`}>
+                        <p className={`text-xs md:text-sm font-display font-bold truncate ${selectedArea === opt.id ? "text-arcana-purple" : "text-arcana-text"}`}>
                           {opt.label}
                         </p>
                         <p className="text-arcana-muted text-xs truncate">{opt.desc}</p>
@@ -226,7 +226,7 @@ export default function SajuPage() {
 
               {/* 시작 버튼 */}
               <button onClick={handleStart} disabled={!canStart}
-                className={`w-full py-3 rounded-full font-serif font-bold text-sm transition-all ${
+                className={`w-full py-3 rounded-full font-sans font-bold text-sm transition-all ${
                   canStart
                     ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/30 hover:opacity-90"
                     : "bg-arcana-surface/50 text-arcana-muted border border-arcana-border cursor-not-allowed"

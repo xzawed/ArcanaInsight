@@ -16,7 +16,7 @@ export function CharacterGallery() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-6xl mx-auto">
         <ScrollReveal className="text-center mb-8">
-          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">당신의 상담사를 만나보세요</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">당신의 상담사를 만나보세요</h2>
           <p className="text-arcana-muted text-sm md:text-base max-w-lg mx-auto">
             각 상담사만의 특별한 리딩 스타일로 카드의 메시지를 전합니다
           </p>
@@ -43,10 +43,10 @@ export function CharacterGallery() {
                     <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-arcana-card to-transparent" />
                   </div>
                   <div className="p-3">
-                    <h3 className="font-serif font-bold text-sm">{char.name}</h3>
-                    <p className="text-arcana-muted text-[10px] mt-0.5">{char.nameJp}</p>
+                    <h3 className="font-sans font-bold text-sm">{char.name}</h3>
+                    <p className="text-arcana-muted text-xs mt-0.5">{char.nameJp}</p>
                     <div className="mt-1.5 inline-block px-2 py-0.5 bg-arcana-purple/10 border border-arcana-purple/30 rounded-full">
-                      <span className="text-arcana-purple text-[9px] font-serif">{char.speciality}</span>
+                      <span className="text-arcana-purple text-xs font-sans">{char.speciality}</span>
                     </div>
                   </div>
                 </motion.div>

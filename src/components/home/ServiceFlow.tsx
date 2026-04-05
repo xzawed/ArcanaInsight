@@ -15,7 +15,7 @@ export function ServiceFlow() {
     <section className="py-16 md:py-24 px-4 bg-arcana-surface/30">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">이렇게 진행됩니다</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">이렇게 진행됩니다</h2>
           <p className="text-arcana-muted text-sm md:text-base">간단한 4단계로 타로 상담을 받아보세요</p>
         </ScrollReveal>
 
@@ -29,8 +29,8 @@ export function ServiceFlow() {
                   <Icon id={step.iconId} size={24} />
                 </div>
                 <div>
-                  <span className="text-arcana-purple text-xs font-serif font-bold">STEP {step.num}</span>
-                  <h3 className="font-serif font-bold text-sm mt-1">{step.title}</h3>
+                  <span className="text-arcana-purple text-xs font-display font-bold">STEP {step.num}</span>
+                  <h3 className="font-sans font-bold text-sm mt-1">{step.title}</h3>
                   <p className="text-arcana-muted text-xs mt-1 leading-relaxed">{step.desc}</p>
                 </div>
               </div>

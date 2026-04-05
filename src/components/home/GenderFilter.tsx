@@ -12,7 +12,7 @@ export function GenderFilterToggle() {
         <button
           key={f}
           onClick={() => setGenderFilter(f)}
-          className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
+          className={`px-4 py-1.5 rounded-full text-xs font-display font-bold border transition-colors ${
             genderFilter === f
               ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
               : "border-arcana-border text-arcana-muted hover:border-arcana-purple"

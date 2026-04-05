@@ -42,7 +42,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           className="w-full md:w-[50%] flex flex-col items-center md:items-start justify-center px-4 md:px-12"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold mb-4 text-center md:text-left leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 text-center md:text-left leading-tight">
             <span className="bg-gradient-to-r from-arcana-purple via-arcana-indigo to-arcana-gold bg-clip-text text-transparent">
               카드가 속삭이는
             </span>
@@ -54,11 +54,11 @@ export function HeroSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/tarot"
-              className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20 text-center">
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-sans font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20 text-center">
               타로 상담 시작하기
             </Link>
             <button onClick={scrollToDaily} type="button"
-              className="px-8 py-3 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors text-center">
+              className="px-8 py-3 rounded-full border border-arcana-purple text-arcana-purple font-sans font-bold text-sm hover:bg-arcana-purple/10 transition-colors text-center">
               오늘의 카드 뽑기
             </button>
           </div>
