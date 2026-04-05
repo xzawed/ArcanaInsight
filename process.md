@@ -8,6 +8,7 @@ graph TB
         HOME["홈 페이지<br/>page.tsx"]
         TAROT["타로 서비스<br/>/tarot"]
         SAJU["사주 서비스<br/>/saju"]
+        SHINJEOM["신점 서비스<br/>/shinjeom"]
         AUTH["인증<br/>/auth/login"]
         MYPAGE["마이페이지<br/>/mypage"]
         CHAR["캐릭터 상세<br/>/character/[id]"]
@@ -18,6 +19,7 @@ graph TB
         API_TAROT_READING["/api/tarot/reading"]
         API_SAJU_SESSION["/api/saju/session"]
         API_SAJU_READING["/api/saju/reading"]
+        API_SHINJEOM_MSG["/api/shinjeom/message"]
         API_DAILY["/api/daily-card"]
     end
 
@@ -38,9 +40,10 @@ graph TB
         SUPABASE["Supabase<br/>PostgreSQL + Auth"]
     end
 
-    HOME --> TAROT & SAJU & AUTH & CHAR
+    HOME --> TAROT & SAJU & SHINJEOM & AUTH & CHAR
     TAROT --> API_TAROT_SESSION & API_TAROT_READING
     SAJU --> API_SAJU_SESSION & API_SAJU_READING
+    SHINJEOM --> API_SHINJEOM_MSG
     HOME --> API_DAILY
 
     API_TAROT_READING --> TAROT_SVC --> PROMPT
@@ -51,6 +54,7 @@ graph TB
     API_SAJU_READING --> SAJU_SVC --> SAJU_CALC
     API_SAJU_READING --> FALLBACK
     API_SAJU_READING --> CLEANER
+    API_SHINJEOM_MSG --> FALLBACK
 
     API_TAROT_SESSION --> SUPABASE
     API_TAROT_READING --> SUPABASE
