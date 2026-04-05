@@ -34,7 +34,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: 4096,
+          max_tokens: 8000,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
         }),
@@ -63,7 +63,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: 4096,
+          max_tokens: 8000,
           stream: true,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
