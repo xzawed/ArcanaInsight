@@ -101,10 +101,10 @@ export function Header() {
             사주 상담
           </Link>
           <Link
-            href="/#daily-card"
+            href="/shinjeom"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >
-            오늘의 운세
+            신점
           </Link>
           <Link
             href="/mypage"
