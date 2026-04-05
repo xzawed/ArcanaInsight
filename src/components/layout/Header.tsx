@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeStore, themes, type ThemeId } from "@/hooks/useTheme";
+import { Icon } from "@/components/common/Icon";
 import type { User } from "@supabase/supabase-js";
 
 const themeList = Object.values(themes);
@@ -127,7 +129,7 @@ export function Header() {
               aria-label="테마 변경"
               title={`현재: ${themes[activeTheme].nameKo}`}
             >
-              {themes[activeTheme].icon}
+              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
               <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden">
@@ -140,7 +142,7 @@ export function Header() {
                     mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                   }`}
                 >
-                  <span>🔄</span>
+                  <Icon id="ui-auto-theme" size={16} />
                   <span className="font-serif text-xs">자동 (시간/계절)</span>
                   {mode === "auto" && <span className="ml-auto text-[10px] text-arcana-muted">{themes[activeTheme].nameKo}</span>}
                 </button>
@@ -153,7 +155,7 @@ export function Header() {
                       mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                     }`}
                   >
-                    <span>{t.icon}</span>
+                    <Image src={t.iconPath} alt="" width={16} height={16} unoptimized />
                     <span className="font-serif text-xs">{t.nameKo}</span>
                     <span
                       className="ml-auto w-3 h-3 rounded-full border border-arcana-border"
@@ -210,7 +212,7 @@ export function Header() {
             className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="설정"
           >
-            ⚙️
+            <Icon id="ui-settings" size={20} />
           </Link>
           <div ref={themeRef} className="relative">
             <button
@@ -218,7 +220,7 @@ export function Header() {
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="테마 변경"
             >
-              {themes[activeTheme].icon}
+              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
               <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden z-50">
@@ -228,7 +230,7 @@ export function Header() {
                     mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                   }`}
                 >
-                  <span>🔄</span>
+                  <Icon id="ui-auto-theme" size={16} />
                   <span className="font-serif text-xs">자동 (시간/계절)</span>
                 </button>
                 {themeList.map((t) => (
@@ -239,7 +241,7 @@ export function Header() {
                       mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                     }`}
                   >
-                    <span>{t.icon}</span>
+                    <Image src={t.iconPath} alt="" width={16} height={16} unoptimized />
                     <span className="font-serif text-xs">{t.nameKo}</span>
                     <span className="ml-auto w-3 h-3 rounded-full border border-arcana-border" style={{ backgroundColor: t.colors.primary }} />
                   </button>
