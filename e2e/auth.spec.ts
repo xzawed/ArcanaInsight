@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("로그인 페이지", () => {
-  test("페이지 렌더링 — Google/Kakao 버튼", async ({ page }) => {
+  test("페이지 렌더링 — Google 버튼", async ({ page }) => {
     await page.goto("/auth/login");
     await page.waitForLoadState("networkidle");
 
