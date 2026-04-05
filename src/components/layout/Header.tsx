@@ -112,6 +112,12 @@ export function Header() {
           >
             마이페이지
           </Link>
+          <Link
+            href="/settings"
+            className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
+          >
+            설정
+          </Link>
 
           {/* 테마 선택 */}
           <div ref={themeRef} className="relative">
@@ -197,8 +203,15 @@ export function Header() {
           )}
         </nav>
 
-        {/* 모바일: 테마 버튼만 표시 */}
-        <div className="md:hidden">
+        {/* 모바일: 설정 + 테마 */}
+        <div className="md:hidden flex items-center gap-1">
+          <Link
+            href="/settings"
+            className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="설정"
+          >
+            ⚙️
+          </Link>
           <div ref={themeRef} className="relative">
             <button
               onClick={() => setIsThemeOpen(!isThemeOpen)}
