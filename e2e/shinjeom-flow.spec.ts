@@ -12,11 +12,13 @@ test.describe("신점 서비스 플로우", () => {
     // 캐릭터 선택
     await characterCards.first().click();
 
-    // 주제 선택 화면
+    // 주제 선택 화면 (6개 카테고리)
     await expect(page.locator("text=신수").first()).toBeVisible({ timeout: 5_000 });
     await expect(page.locator("text=연애").first()).toBeVisible();
     await expect(page.locator("text=재물").first()).toBeVisible();
+    await expect(page.locator("text=직장").first()).toBeVisible();
     await expect(page.locator("text=건강").first()).toBeVisible();
+    await expect(page.locator("text=택일").first()).toBeVisible();
   });
 
   test("주제 선택 → 세션 페이지 이동", async ({ page }) => {

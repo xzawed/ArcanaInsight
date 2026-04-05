@@ -16,7 +16,9 @@ const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
   { id: "shinjeom-general", label: "신수 (종합운)", icon: "🔮", desc: "전반적인 운세와 앞날의 길흉" },
   { id: "shinjeom-love", label: "연애/궁합", icon: "💕", desc: "인연, 만남, 관계의 운명" },
   { id: "shinjeom-wealth", label: "재물/사업운", icon: "💰", desc: "돈, 사업, 투자의 흐름" },
+  { id: "shinjeom-career", label: "직장/이직", icon: "💼", desc: "직장 운세, 이직·전직 시기와 방향" },
   { id: "shinjeom-health", label: "건강/액막이", icon: "🛡️", desc: "건강 운세, 액운 해소 조언" },
+  { id: "shinjeom-auspicious", label: "택일", icon: "📅", desc: "이사·결혼·개업 등 길일 선택" },
 ];
 
 type PageStep = "character-select" | "topic-select";

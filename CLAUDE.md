@@ -25,7 +25,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 2. **주제 선택** → 신수(종합운), 연애/궁합, 재물/사업운, 건강/액막이
 3. **대화형 상담** → 3회 문답 (고민 입력 → AI 질문 → 답변 → AI 질문 → 답변 → 최종 신점 결과)
 
-#### 주제(Topic) 목록 — 총 19개
+#### 주제(Topic) 목록 — 총 21개
 
 | 구분 | Topic 값 | 한국어 |
 |------|---------|--------|
@@ -47,7 +47,9 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 | 신점 | `shinjeom-general` | 신수 (종합운) |
 | 신점 | `shinjeom-love` | 연애/궁합 |
 | 신점 | `shinjeom-wealth` | 재물/사업운 |
+| 신점 | `shinjeom-career` | 직장/이직 |
 | 신점 | `shinjeom-health` | 건강/액막이 |
+| 신점 | `shinjeom-auspicious` | 택일 (날짜 선택) |
 
 #### 사주 시간단위(`SajuTimeRange`) — 7개 (`src/types/session.ts`)
 

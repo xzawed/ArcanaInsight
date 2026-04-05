@@ -9,6 +9,8 @@ const topicLabels: Record<string, string> = {
   "shinjeom-love": "연애/궁합",
   "shinjeom-wealth": "재물/사업운",
   "shinjeom-health": "건강/액막이",
+  "shinjeom-career": "직장/이직",
+  "shinjeom-auspicious": "택일 (날짜 선택)",
 };
 
 const MAX_TURNS = 3; // 사용자 질문 3회
