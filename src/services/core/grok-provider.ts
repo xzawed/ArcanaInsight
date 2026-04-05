@@ -1,5 +1,15 @@
 import { AIProvider } from "@/types/service";
 
+/** Grok API Rate Limit (429) 전용 에러 — Fallback Provider에서 짧은 쿨다운 적용 */
+export class RateLimitError extends Error {
+  retryAfterMs: number;
+  constructor(retryAfter: number) {
+    super(`Grok API rate limit (429) — retry after ${retryAfter}ms`);
+    this.name = "RateLimitError";
+    this.retryAfterMs = retryAfter;
+  }
+}
+
 export class GrokProvider implements AIProvider {
   private _apiKey: string | null = null;
   private _model: string | null = null;
@@ -40,6 +50,10 @@ export class GrokProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
+      if (response.status === 429) {
+        const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
+        throw new RateLimitError(retryAfter);
+      }
       if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content;
@@ -64,6 +78,10 @@ export class GrokProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
+      if (response.status === 429) {
+        const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
+        throw new RateLimitError(retryAfter);
+      }
       if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
       if (!response.body) throw new Error("Response body is null");
       const reader = response.body.getReader();

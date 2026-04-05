@@ -1,13 +1,13 @@
 import { AIProvider } from "@/types/service";
-import { GrokProvider } from "./grok-provider";
+import { GrokProvider, RateLimitError } from "./grok-provider";
 import { ClaudeProvider } from "./claude-provider";
 
 /**
  * Fallback AI Provider — Grok API 우선, 실패 시 Claude API로 자동 전환
  *
- * 헬스체크 결과를 캐시하여 반복 실패를 방지:
  * - Grok 정상: Grok 사용
- * - Grok 장애: Claude로 전환 + 5분간 Grok 스킵 (불필요한 타임아웃 방지)
+ * - Grok 장애 (500 등): Claude 전환 + 5분 쿨다운
+ * - Grok Rate Limit (429): Claude 전환 + Retry-After 헤더 기반 쿨다운 (기본 30초)
  */
 export class FallbackProvider implements AIProvider {
   private grok: GrokProvider;
@@ -36,10 +36,11 @@ export class FallbackProvider implements AIProvider {
     return false;
   }
 
-  private markGrokDown(): void {
+  private markGrokDown(cooldownMs?: number): void {
     this.grokDown = true;
-    this.grokDownUntil = Date.now() + FallbackProvider.COOLDOWN_MS;
-    console.warn(`[FallbackProvider] Grok API 장애 감지 → Claude로 전환 (${new Date(this.grokDownUntil).toLocaleTimeString()}까지)`);
+    const duration = cooldownMs ?? FallbackProvider.COOLDOWN_MS;
+    this.grokDownUntil = Date.now() + duration;
+    console.warn(`[FallbackProvider] Grok API 사용 불가 → Claude로 전환 (${Math.round(duration / 1000)}초 후 Grok 재시도)`);
   }
 
   private hasClaude(): boolean {
@@ -53,9 +54,10 @@ export class FallbackProvider implements AIProvider {
       } catch (e) {
         console.error("[FallbackProvider] Grok generateReading 실패:", e);
         if (this.hasClaude()) {
-          this.markGrokDown();
+          const cooldown = e instanceof RateLimitError ? e.retryAfterMs : undefined;
+          this.markGrokDown(cooldown);
         } else {
-          throw e; // Claude 없으면 원래 에러 그대로 전파
+          throw e;
         }
       }
     }
@@ -71,7 +73,8 @@ export class FallbackProvider implements AIProvider {
       } catch (e) {
         console.error("[FallbackProvider] Grok streamReading 실패:", e);
         if (this.hasClaude()) {
-          this.markGrokDown();
+          const cooldown = e instanceof RateLimitError ? e.retryAfterMs : undefined;
+          this.markGrokDown(cooldown);
         } else {
           throw e;
         }
