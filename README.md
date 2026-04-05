@@ -113,7 +113,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 | 프레임워크 | Next.js 16.2.1 (App Router) · React 19.2.4 |
 | 스타일링 | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 애니메이션 | Framer Motion v12.38 |
-| AI | Grok API (xAI) — SSE 스트리밍 |
+| AI | Grok API (xAI) — SSE 스트리밍 · Claude API (Anthropic) 자동 fallback |
 | 인증 | Supabase Auth Helpers (구글) |
 | 데이터베이스 | Supabase (PostgreSQL) |
 | 상태관리 | Zustand v5 |
