@@ -27,8 +27,15 @@ export default function ShinjeomPage() {
   const { genderFilter, setGenderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
 
+  const reset = useShinjeomSessionStore.getState().reset;
   const [step, setStep] = useState<PageStep>("character-select");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
+
+  // 페이지 진입 시 이전 세션 초기화
+  useEffect(() => {
+    reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
