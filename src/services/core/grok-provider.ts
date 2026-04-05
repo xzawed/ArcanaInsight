@@ -54,7 +54,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: 2000,
+          temperature: 0.7, max_tokens: 8000,
         }),
         signal: controller.signal,
       });
@@ -86,7 +86,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: 2000, stream: true,
+          temperature: 0.7, max_tokens: 8000, stream: true,
         }),
         signal: controller.signal,
       });
