@@ -128,11 +128,18 @@ function TarotPageContent() {
     }
   }, [preselectedChar, setCharacterId]);
 
-  // 스텝 전환 시 스크롤 최상단 초기화
+  // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']")
-      .forEach((el) => { el.scrollTop = 0; });
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']")
+        .forEach((el) => { el.scrollTop = 0; });
+    };
+    resetScroll();
+    requestAnimationFrame(() => {
+      resetScroll();
+      requestAnimationFrame(resetScroll);
+    });
   }, [step]);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
