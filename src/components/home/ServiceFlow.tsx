@@ -1,12 +1,13 @@
 "use client";
 
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
+import { Icon } from "@/components/common/Icon";
 
 const STEPS = [
-  { num: "01", icon: "👤", title: "상담사 선택", desc: "4명의 개성 있는 AI 상담사 중 선택" },
-  { num: "02", icon: "🎯", title: "주제 선택", desc: "연애, 직장, 재정, 건강, 일반 5가지 주제" },
-  { num: "03", icon: "🃏", title: "카드 리딩", desc: "직감으로 카드를 선택하면 실시간 AI 해석" },
-  { num: "04", icon: "📖", title: "결과 확인", desc: "상세 해석과 조언, 저장 및 공유 가능" },
+  { num: "01", iconId: "ui-person", title: "상담사 선택", desc: "12명의 개성 있는 AI 상담사 중 선택" },
+  { num: "02", iconId: "ui-target", title: "주제 선택", desc: "연애, 직장, 재정, 건강, 일반 등 다양한 주제" },
+  { num: "03", iconId: "nav-tarot", title: "카드 리딩", desc: "직감으로 카드를 선택하면 실시간 AI 해석" },
+  { num: "04", iconId: "ui-book", title: "결과 확인", desc: "상세 해석과 조언, 저장 및 공유 가능" },
 ];
 
 export function ServiceFlow() {
@@ -25,7 +26,7 @@ export function ServiceFlow() {
             <ScrollReveal key={step.num} delay={i * 0.2}>
               <div className="flex flex-row md:flex-col items-center md:text-center gap-4 md:gap-0">
                 <div className="relative z-10 w-14 h-14 md:w-16 md:h-16 rounded-full bg-arcana-card border-2 border-arcana-purple/50 flex items-center justify-center flex-shrink-0 md:mb-4">
-                  <span className="text-xl">{step.icon}</span>
+                  <Icon id={step.iconId} size={24} />
                 </div>
                 <div>
                   <span className="text-arcana-purple text-xs font-serif font-bold">STEP {step.num}</span>

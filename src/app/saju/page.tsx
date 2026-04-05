@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Icon } from "@/components/common/Icon";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSajuSessionStore } from "@/hooks/useSajuSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
@@ -157,7 +158,7 @@ export default function SajuPage() {
               {/* 시간단위 */}
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-base">⏳</span>
+                  <Icon id="ui-hourglass" size={20} />
                   <h3 className="font-serif font-bold text-sm text-arcana-purple">시간단위</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -171,7 +172,7 @@ export default function SajuPage() {
                           ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple shadow-sm shadow-arcana-purple/20"
                           : "border-arcana-border text-arcana-muted hover:border-arcana-purple/60 bg-arcana-card/50"
                       }`}>
-                      <span>{opt.icon}</span>
+                      <Icon id={opt.icon} size={18} />
                       <span>{opt.label}</span>
                     </button>
                   ))}
@@ -200,7 +201,7 @@ export default function SajuPage() {
               {/* 분석영역 */}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-base">🔮</span>
+                  <Icon id="saju-general" size={20} />
                   <h3 className="font-serif font-bold text-sm text-arcana-purple">분석영역</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -211,7 +212,7 @@ export default function SajuPage() {
                           ? "border-arcana-purple bg-arcana-purple/15 shadow-sm shadow-arcana-purple/20"
                           : "border-arcana-border bg-arcana-card/50 hover:border-arcana-purple/60"
                       }`}>
-                      <span className="text-lg flex-shrink-0">{opt.icon}</span>
+                      <Icon id={opt.icon} size={22} className="flex-shrink-0" />
                       <div className="min-w-0">
                         <p className={`text-xs font-serif font-bold truncate ${selectedArea === opt.id ? "text-arcana-purple" : "text-arcana-text"}`}>
                           {opt.label}
