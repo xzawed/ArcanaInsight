@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Icon } from "@/components/common/Icon";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: string;
+  iconId: string;
 }
 
 const navItems: NavItem[] = [
-  { href: "/", label: "홈", icon: "🏠" },
-  { href: "/tarot", label: "타로", icon: "🃏" },
-  { href: "/saju", label: "사주", icon: "☯" },
-  { href: "/shinjeom", label: "신점", icon: "🔮" },
-  { href: "/mypage", label: "MY", icon: "👤" },
+  { href: "/", label: "홈", iconId: "nav-home" },
+  { href: "/tarot", label: "타로", iconId: "nav-tarot" },
+  { href: "/saju", label: "사주", iconId: "nav-saju" },
+  { href: "/shinjeom", label: "신점", iconId: "nav-shinjeom" },
+  { href: "/mypage", label: "MY", iconId: "nav-mypage" },
 ];
 
 export function MobileNav() {
@@ -36,7 +37,7 @@ export function MobileNav() {
                   : "text-arcana-muted"
               }`}
             >
-              <span className="text-lg leading-none">{item.icon}</span>
+              <Icon id={item.iconId} size={20} />
               <span className={`text-[10px] font-sans leading-tight ${isActive ? "font-bold" : ""}`}>
                 {item.label}
               </span>

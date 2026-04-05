@@ -11,14 +11,15 @@ import { getCharactersByGender } from "@/data/characters";
 import { CharacterConfig } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
+import { Icon } from "@/components/common/Icon";
 
-const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
-  { id: "shinjeom-general", label: "신수 (종합운)", icon: "🔮", desc: "전반적인 운세와 앞날의 길흉" },
-  { id: "shinjeom-love", label: "연애/궁합", icon: "💕", desc: "인연, 만남, 관계의 운명" },
-  { id: "shinjeom-wealth", label: "재물/사업운", icon: "💰", desc: "돈, 사업, 투자의 흐름" },
-  { id: "shinjeom-career", label: "직장/이직", icon: "💼", desc: "직장 운세, 이직·전직 시기와 방향" },
-  { id: "shinjeom-health", label: "건강/액막이", icon: "🛡️", desc: "건강 운세, 액운 해소 조언" },
-  { id: "shinjeom-auspicious", label: "택일", icon: "📅", desc: "이사·결혼·개업 등 길일 선택" },
+const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
+  { id: "shinjeom-general", label: "신수 (종합운)", iconId: "shinjeom-general", desc: "전반적인 운세와 앞날의 길흉" },
+  { id: "shinjeom-love", label: "연애/궁합", iconId: "shinjeom-love", desc: "인연, 만남, 관계의 운명" },
+  { id: "shinjeom-wealth", label: "재물/사업운", iconId: "shinjeom-wealth", desc: "돈, 사업, 투자의 흐름" },
+  { id: "shinjeom-career", label: "직장/이직", iconId: "shinjeom-career", desc: "직장 운세, 이직·전직 시기와 방향" },
+  { id: "shinjeom-health", label: "건강/액막이", iconId: "shinjeom-health", desc: "건강 운세, 액운 해소 조언" },
+  { id: "shinjeom-auspicious", label: "택일", iconId: "shinjeom-auspicious", desc: "이사·결혼·개업 등 길일 선택" },
 ];
 
 type PageStep = "character-select" | "topic-select";
@@ -145,7 +146,7 @@ export default function ShinjeomPage() {
                   className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{t.icon}</span>
+                    <Icon id={t.iconId} size={28} />
                     <div>
                       <h4 className="font-serif font-bold text-sm">{t.label}</h4>
                       <p className="text-arcana-muted text-xs mt-0.5">{t.desc}</p>

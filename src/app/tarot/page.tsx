@@ -17,14 +17,15 @@ import { spreads } from "@/data/spreads";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage } from "@/types/session";
+import { Icon } from "@/components/common/Icon";
 
-const topics: { id: Topic; label: string; icon: string; desc: string }[] = [
-  { id: "love-single", label: "연애 (솔로)", icon: "💝", desc: "새로운 만남과 인연에 대한 상담" },
-  { id: "love-couple", label: "연애 (커플)", icon: "💑", desc: "현재 관계의 발전과 미래에 대한 상담" },
-  { id: "career", label: "직장/진로", icon: "💼", desc: "커리어와 진로에 대한 조언" },
-  { id: "finance", label: "재정/금전", icon: "💰", desc: "돈과 재정 상황에 대한 통찰" },
-  { id: "health", label: "건강", icon: "🌿", desc: "건강과 웰빙에 대한 가이드" },
-  { id: "general", label: "일반 상담", icon: "✨", desc: "자유로운 주제의 종합 상담" },
+const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
+  { id: "love-single", label: "연애 (솔로)", iconId: "topic-love-single", desc: "새로운 만남과 인연에 대한 상담" },
+  { id: "love-couple", label: "연애 (커플)", iconId: "topic-love-couple", desc: "현재 관계의 발전과 미래에 대한 상담" },
+  { id: "career", label: "직장/진로", iconId: "topic-career", desc: "커리어와 진로에 대한 조언" },
+  { id: "finance", label: "재정/금전", iconId: "topic-finance", desc: "돈과 재정 상황에 대한 통찰" },
+  { id: "health", label: "건강", iconId: "topic-health", desc: "건강과 웰빙에 대한 가이드" },
+  { id: "general", label: "일반 상담", iconId: "topic-general", desc: "자유로운 주제의 종합 상담" },
 ];
 
 const spreadOptions: { type: SpreadType; label: string; icon: string; cards: number; desc: string; detail: string }[] = [
@@ -305,7 +306,7 @@ function TarotPageContent() {
                     onClick={() => handleTopicSelect(topic.id)}
                     className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3 md:p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3"
                   >
-                    <span className="text-xl">{topic.icon}</span>
+                    <Icon id={topic.iconId} size={24} />
                     <div>
                       <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
                       <p className="text-arcana-muted text-xs mt-0.5">{topic.desc}</p>
