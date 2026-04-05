@@ -223,7 +223,7 @@ function TarotPageContent() {
             className="max-w-4xl mx-auto px-4 py-8 relative z-20"
           >
             <div className="text-center mb-8">
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
               <p className="text-arcana-muted text-sm md:text-base drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
             </div>
 
@@ -233,7 +233,7 @@ function TarotPageContent() {
                 <button
                   key={f}
                   onClick={() => setGenderFilter(f)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-serif font-bold border transition-colors ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-display font-bold border transition-colors ${
                     genderFilter === f
                       ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
                       : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
@@ -294,7 +294,7 @@ function TarotPageContent() {
               >
                 ← 다른 상담사 선택
               </button>
-              <h3 className="font-serif font-bold text-base md:text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+              <h3 className="font-sans font-bold text-base md:text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
               <div className="grid grid-cols-1 gap-2 md:gap-3">
                 {topics.map((topic, index) => (
                   <motion.button
@@ -308,7 +308,7 @@ function TarotPageContent() {
                   >
                     <Icon id={topic.iconId} size={24} />
                     <div>
-                      <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
+                      <h4 className="font-sans font-bold text-sm group-hover:text-arcana-purple transition-colors">{topic.label}</h4>
                       <p className="text-arcana-muted text-xs md:text-sm mt-0.5">{topic.desc}</p>
                     </div>
                   </motion.button>
@@ -345,7 +345,7 @@ function TarotPageContent() {
               <button onClick={handleBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
                 ← 주제 다시 선택
               </button>
-              <h3 className="font-serif font-bold text-base md:text-lg mb-2 drop-shadow-md">카드 리딩 방식을 선택해주세요</h3>
+              <h3 className="font-sans font-bold text-base md:text-lg mb-2 drop-shadow-md">카드 리딩 방식을 선택해주세요</h3>
               <p className="text-arcana-muted text-xs mb-4">카드 수가 많을수록 더 깊이 있는 해석을 받을 수 있어요</p>
 
               <div className="grid grid-cols-1 gap-3">
@@ -363,10 +363,10 @@ function TarotPageContent() {
                       <Icon id={opt.iconId} size={28} />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-serif font-bold text-sm group-hover:text-arcana-purple transition-colors">{opt.label}</h4>
+                          <h4 className="font-sans font-bold text-sm group-hover:text-arcana-purple transition-colors">{opt.label}</h4>
                           <span className="text-arcana-gold text-[10px] font-bold bg-arcana-gold/10 px-2 py-0.5 rounded-full">{opt.cards}장</span>
                         </div>
-                        <p className="text-arcana-purple text-xs font-serif mt-0.5">{opt.desc}</p>
+                        <p className="text-arcana-purple text-xs font-sans mt-0.5">{opt.desc}</p>
                       </div>
                     </div>
                     <p className="text-arcana-muted text-xs leading-relaxed">{opt.detail}</p>
@@ -378,7 +378,7 @@ function TarotPageContent() {
               <button
                 type="button"
                 onClick={handleOpenUserInfo}
-                className="mt-4 w-full py-2.5 rounded-full border border-arcana-border text-arcana-muted text-xs font-serif hover:border-arcana-purple hover:text-arcana-purple transition-colors"
+                className="mt-4 w-full py-2.5 rounded-full border border-arcana-border text-arcana-muted text-xs font-sans hover:border-arcana-purple hover:text-arcana-purple transition-colors"
               >
                 <span className="inline-flex items-center gap-1"><Icon id="ui-info" size={14} /> 개인정보 입력하고 더 정확한 리딩 받기 (선택)</span>
               </button>

@@ -27,7 +27,7 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
   }, [isInView, value]);
 
   return (
-    <span ref={ref} className="text-3xl md:text-4xl font-serif font-bold text-arcana-purple">
+    <span ref={ref} className="text-3xl md:text-4xl font-display font-bold text-arcana-purple">
       {display.toLocaleString()}{suffix}
     </span>
   );

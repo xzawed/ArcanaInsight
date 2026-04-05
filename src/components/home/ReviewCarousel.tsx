@@ -22,7 +22,7 @@ export function ReviewCarousel() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-3xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">상담 후기</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">상담 후기</h2>
           <p className="text-arcana-muted text-sm md:text-base">실제 사용자들의 리딩 경험</p>
         </ScrollReveal>
 
@@ -61,7 +61,7 @@ export function ReviewCarousel() {
                     </div>
                     <span className="text-arcana-muted text-sm">{reviews[current].name}</span>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-arcana-purple/10 text-arcana-purple">{reviews[current].topic}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-arcana-purple/10 text-arcana-purple">{reviews[current].topic}</span>
                 </div>
               </motion.div>
             </AnimatePresence>

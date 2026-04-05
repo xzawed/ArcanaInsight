@@ -34,7 +34,7 @@ export function SkinGallery() {
       <div className="max-w-5xl mx-auto">
         {/* 섹션 헤더 */}
         <ScrollReveal className="text-center mb-10">
-          <h2 className="text-xl md:text-2xl font-serif font-bold mb-3">나만의 카드 디자인</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">나만의 카드 디자인</h2>
           <p className="text-arcana-muted text-sm md:text-base max-w-lg mx-auto">
             취향에 맞는 카드 스킨을 선택해보세요
           </p>
@@ -62,7 +62,7 @@ export function SkinGallery() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-arcana-gold text-[#08081a] text-sm font-serif font-bold shadow-xl whitespace-nowrap pointer-events-none"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-arcana-gold text-[#08081a] text-sm font-display font-bold shadow-xl whitespace-nowrap pointer-events-none"
           >
             ✨ {toastName} 스킨이 적용되었습니다
           </motion.div>

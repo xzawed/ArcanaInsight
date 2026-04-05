@@ -39,7 +39,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
         <div className="absolute top-0 bottom-0 right-0 w-1/5 bg-gradient-to-l from-arcana-card/50 to-transparent" />
       </div>
 
-      <h3 className="font-serif font-bold text-sm md:text-base group-hover:text-arcana-purple transition-colors">
+      <h3 className="font-sans font-bold text-sm md:text-base group-hover:text-arcana-purple transition-colors">
         {character.name}
       </h3>
       <p className="text-arcana-muted text-[11px] mt-0.5">{character.nameJp}</p>

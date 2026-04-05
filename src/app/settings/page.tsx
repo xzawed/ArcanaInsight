@@ -59,7 +59,7 @@ export default function SettingsPage() {
           ← 홈으로
         </Link>
 
-        <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mt-4 mb-8 drop-shadow-md">
+        <h1 className="text-2xl md:text-3xl font-display font-bold text-arcana-purple mt-4 mb-8 drop-shadow-md">
           설정
         </h1>
 
@@ -67,7 +67,7 @@ export default function SettingsPage() {
 
           {/* 테마 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">테마</h2>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">테마</h2>
             <p className="text-arcana-muted text-xs mb-4">현재: {mode === "auto" ? `자동 (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}</p>
             <div className="grid grid-cols-4 gap-2">
               {themeOptions.map((t) => (
@@ -81,7 +81,7 @@ export default function SettingsPage() {
                   }`}
                 >
                   <span className="text-lg">{t.icon}</span>
-                  <span className="font-serif text-xs leading-tight text-center">{t.label}</span>
+                  <span className="font-sans text-xs leading-tight text-center">{t.label}</span>
                 </button>
               ))}
             </div>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
           {/* 카드 스킨 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">카드 스킨</h2>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">카드 스킨</h2>
             <p className="text-arcana-muted text-xs mb-4">현재: {cardSkins.find((s) => s.id === selectedSkinId)?.nameKo || "기본"}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {cardSkins.map((skin) => (
@@ -107,7 +107,7 @@ export default function SettingsPage() {
                       className="w-4 h-4 rounded-full border border-white/20"
                       style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
                     />
-                    <span className="font-serif font-bold text-xs text-arcana-text">{skin.nameKo}</span>
+                    <span className="font-sans font-bold text-xs text-arcana-text">{skin.nameKo}</span>
                   </div>
                   <p className="text-arcana-muted text-xs leading-relaxed">{skin.description}</p>
                 </button>
@@ -117,14 +117,14 @@ export default function SettingsPage() {
 
           {/* 상담사 성별 필터 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">기본 상담사 필터</h2>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">기본 상담사 필터</h2>
             <p className="text-arcana-muted text-xs mb-4">캐릭터 선택 시 기본 필터</p>
             <div className="flex gap-2">
               {genderOptions.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => setGenderFilter(opt.id)}
-                  className={`flex-1 py-2.5 rounded-full text-sm font-serif font-bold transition-all ${
+                  className={`flex-1 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
                     genderFilter === opt.id
                       ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/20"
                       : "bg-arcana-card/50 border border-arcana-border text-arcana-muted hover:border-arcana-purple"
@@ -138,14 +138,14 @@ export default function SettingsPage() {
 
           {/* 카드 선택 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">카드 선택 방식</h2>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">카드 선택 방식</h2>
             <p className="text-arcana-muted text-xs mb-4">타로 카드 선택 시 동작</p>
             <button
               onClick={toggleConfirmMode}
               className="w-full flex items-center justify-between p-3 rounded-xl border border-arcana-border/50 hover:border-arcana-border transition-colors"
             >
               <div>
-                <span className="text-arcana-text text-sm font-serif">카드 확인 모드</span>
+                <span className="text-arcana-text text-sm font-sans">카드 확인 모드</span>
                 <p className="text-arcana-muted text-xs mt-0.5">
                   {confirmEachCard ? "매 카드 선택 시 확인 요청" : "확인 없이 바로 선택 (기본)"}
                 </p>
@@ -162,14 +162,14 @@ export default function SettingsPage() {
 
           {/* 저장된 개인정보 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-serif font-bold text-base md:text-lg text-arcana-text mb-1">저장된 개인정보</h2>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">저장된 개인정보</h2>
             <p className="text-arcana-muted text-xs mb-4">브라우저에 저장된 정보 관리</p>
             {hasSavedInfo ? (
               <div className="flex items-center justify-between">
                 <span className="text-arcana-text text-sm">개인정보 저장됨</span>
                 <button
                   onClick={clearSavedInfo}
-                  className="px-4 py-1.5 rounded-full border border-red-500/30 text-red-400 text-xs font-serif hover:bg-red-500/10 transition-colors"
+                  className="px-4 py-1.5 rounded-full border border-red-500/30 text-red-400 text-xs font-sans hover:bg-red-500/10 transition-colors"
                 >
                   삭제
                 </button>
