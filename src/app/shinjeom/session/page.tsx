@@ -107,12 +107,14 @@ export default function ShinjeomSessionPage() {
       const decoder = new TextDecoder();
       let sseBuffer = "";
       let fullText = "";
+      const isFinalTurn = newTurn >= MAX_TURNS;
 
       // 스트리밍 메시지를 위한 임시 ID
       const msgId = crypto.randomUUID();
       addChatMessage({
         id: msgId, role: "character",
-        content: "", mood: "mystical", timestamp: new Date(),
+        content: isFinalTurn ? "신점 결과를 준비하고 있어요..." : "",
+        mood: "mystical", timestamp: new Date(),
       });
 
       while (true) {
@@ -136,14 +138,21 @@ export default function ShinjeomSessionPage() {
             }
             if (data.chunk) {
               fullText += data.chunk;
-              useShinjeomSessionStore.setState((state) => ({
-                chatMessages: state.chatMessages.map((m) =>
-                  m.id === msgId ? { ...m, content: fullText } : m
-                ),
-              }));
+              // 최종 턴에서는 JSON이 오므로 채팅에 표시하지 않음
+              if (!isFinalTurn) {
+                useShinjeomSessionStore.setState((state) => ({
+                  chatMessages: state.chatMessages.map((m) =>
+                    m.id === msgId ? { ...m, content: fullText } : m
+                  ),
+                }));
+              }
             }
             if (data.done) {
               if (data.isFinal && data.result) {
+                // 최종 결과 → 대기 메시지 제거 후 결과 화면 전환
+                useShinjeomSessionStore.setState((state) => ({
+                  chatMessages: state.chatMessages.filter((m) => m.id !== msgId),
+                }));
                 setReadingResult(data.result);
                 setPhase("result");
                 setMood("smile");
