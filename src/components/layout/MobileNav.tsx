@@ -38,7 +38,7 @@ export function MobileNav() {
               }`}
             >
               <Icon id={item.iconId} size={20} />
-              <span className={`text-[10px] font-sans leading-tight ${isActive ? "font-bold" : ""}`}>
+              <span className={`text-xs font-sans leading-tight ${isActive ? "font-bold" : ""}`}>
                 {item.label}
               </span>
             </span>
