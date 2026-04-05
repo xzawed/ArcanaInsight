@@ -23,7 +23,6 @@ export default function ShinjeomSessionPage() {
   const character = characterId ? getCharacterById(characterId) : null;
   const [inputText, setInputText] = useState("");
   const [sessionCreated, setSessionCreated] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 세션 생성
   useEffect(() => {
@@ -52,12 +51,16 @@ export default function ShinjeomSessionPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]);
 
-  // 새 메시지 추가 시에만 스크롤 (스트리밍 청크 업데이트 시에는 스크롤 안 함)
+  // 새 메시지 추가 시에만 컨테이너 내부 스크롤 (윈도우 스크롤 방지)
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
   useEffect(() => {
     if (chatMessages.length !== messageCountRef.current) {
       messageCountRef.current = chatMessages.length;
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      const container = chatContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
   }, [chatMessages.length]);
 
@@ -226,7 +229,7 @@ export default function ShinjeomSessionPage() {
           ) : (
             /* 대화 */
             <>
-              <div className="flex-1 overflow-y-auto py-3 space-y-3">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-3 space-y-3">
                 <AnimatePresence>
                   {chatMessages.map((msg) => (
                     <motion.div
@@ -255,7 +258,6 @@ export default function ShinjeomSessionPage() {
                     </div>
                   </div>
                 )}
-                <div ref={messagesEndRef} />
               </div>
 
               {/* 입력 */}

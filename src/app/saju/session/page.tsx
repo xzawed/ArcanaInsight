@@ -30,7 +30,7 @@ export default function SajuSessionPage() {
 
   const character = characterId ? getCharacterById(characterId) : null;
   const [readingError, setReadingError] = useState(false);
-  const resultBottomRef = useRef<HTMLDivElement>(null);
+  const resultContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!topic || !character || !userInfo || !timeRange) { router.push("/saju"); return; }
@@ -108,7 +108,11 @@ export default function SajuSessionPage() {
   };
 
   useEffect(() => {
-    if (phase === "result") resultBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방��)
+    if (phase === "result") {
+      const container = resultContainerRef.current;
+      if (container) container.scrollTop = container.scrollHeight;
+    }
   }, [chatMessages, phase]);
 
   const birthYear = userInfo ? parseInt(userInfo.birthDate.split("-")[0]) : 2000;
@@ -143,7 +147,7 @@ export default function SajuSessionPage() {
           {phase === "result" && readingResult && sajuData ? (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               className="w-full flex-1 flex flex-col overflow-hidden py-4">
-              <div className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
+              <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
                 <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
                   dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
                 <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
@@ -179,7 +183,6 @@ export default function SajuSessionPage() {
                     <ReadingText text={readingResult.advice} />
                   </div>
                 )}
-                <div ref={resultBottomRef} />
               </div>
 
               <div className="flex gap-3 pt-5 flex-shrink-0">
