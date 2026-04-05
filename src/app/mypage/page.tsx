@@ -21,6 +21,8 @@ interface SessionRow {
   created_at: string;
   character_id?: string | null;
   readings: ReadingData | ReadingData[] | null;
+  saju_readings: ReadingData | ReadingData[] | null;
+  shinjeom_readings: ReadingData | ReadingData[] | null;
 }
 
 interface SessionCard {
@@ -44,6 +46,20 @@ const topicLabels: Record<string, string> = {
   career: "직장/진로",
   health: "건강",
   general: "일반 상담",
+  "saju-general": "사주 종합",
+  "saju-love-single": "사주 연애(솔로)",
+  "saju-love-couple": "사주 연애(커플)",
+  "saju-career": "사주 직장·재물",
+  "saju-health": "사주 건강",
+  "saju-personality": "사주 성격·적성",
+  "saju-compatibility": "사주 궁합",
+  "saju-auspicious-date": "사주 택일",
+  "shinjeom-general": "신점 종합",
+  "shinjeom-love": "신점 연애/궁합",
+  "shinjeom-wealth": "신점 재물/사업",
+  "shinjeom-career": "신점 직장/이직",
+  "shinjeom-health": "신점 건강/액막이",
+  "shinjeom-auspicious": "신점 택일",
 };
 
 const topicColors: Record<string, string> = {
@@ -54,6 +70,12 @@ const topicColors: Record<string, string> = {
   career: "bg-blue-500/20 text-blue-300 border-blue-500/30",
   health: "bg-green-500/20 text-green-300 border-green-500/30",
   general: "bg-arcana-purple/20 text-arcana-purple border-arcana-purple/30",
+};
+
+const serviceColors: Record<string, string> = {
+  tarot: "text-arcana-purple",
+  saju: "text-cyan-400",
+  shinjeom: "text-amber-400",
 };
 
 const deckManager = new DeckManager();
@@ -81,6 +103,13 @@ function normalizeReading(readings: ReadingData | ReadingData[] | null | undefin
   if (!readings) return undefined;
   if (Array.isArray(readings)) return readings[0];
   return readings;
+}
+
+/** 3개 리딩 테이블 중 데이터가 있는 것 반환 */
+function getReadingFromSession(session: SessionRow): ReadingData | undefined {
+  return normalizeReading(session.readings)
+    ?? normalizeReading(session.saju_readings)
+    ?? normalizeReading(session.shinjeom_readings);
 }
 
 /** 카드 빈도 집계 → 가장 많이 뽑은 카드명 반환 */
@@ -111,7 +140,7 @@ export default async function MyPage() {
       .single<Profile>(),
     supabase
       .from("sessions")
-      .select("id, service_type, topic, status, created_at, character_id, readings(id, share_token, overall_reading)")
+      .select("id, service_type, topic, status, created_at, character_id, readings(id, share_token, overall_reading), saju_readings(id, share_token, overall_reading), shinjeom_readings(id, share_token, overall_reading)")
       .eq("user_id", user.id)
       .in("status", ["completed", "in_progress"])
       .order("created_at", { ascending: false })
@@ -126,8 +155,7 @@ export default async function MyPage() {
   // completed 세션 + 리딩이 있는 in_progress 세션 (상태 업데이트 누락 복구)
   const sessionList = rawSessions.filter((s) => {
     if (s.status === "completed") return true;
-    const reading = normalizeReading(s.readings);
-    return !!reading;
+    return !!getReadingFromSession(s);
   }).slice(0, 20);
 
   // 2. 세션 ID 목록으로 session_cards 조회 (별도 쿼리)
@@ -240,7 +268,7 @@ export default async function MyPage() {
         ) : (
           <div className="space-y-3">
             {sessionList.map((session) => {
-              const reading = normalizeReading(session.readings);
+              const reading = getReadingFromSession(session);
               const charName = getCharacterName(session.character_id);
               const topicColor = topicColors[session.topic] ?? topicColors.general;
               const overallText = reading?.overall_reading || "";
@@ -248,6 +276,8 @@ export default async function MyPage() {
                 ? overallText.slice(0, 80) + "..."
                 : overallText || null;
               const shareToken = reading?.share_token;
+              const serviceLabel = session.service_type === "saju" ? "사주" : session.service_type === "shinjeom" ? "신점" : "타로";
+              const resultPath = session.service_type === "saju" ? `/saju/result/${shareToken}` : `/tarot/result/${shareToken}`;
 
               const content = (
                 <>
@@ -258,8 +288,8 @@ export default async function MyPage() {
                       >
                         {topicLabels[session.topic] ?? session.topic}
                       </span>
-                      <span className="text-arcana-purple text-xs font-serif font-bold uppercase">
-                        {session.service_type}
+                      <span className={`text-xs font-display font-bold ${serviceColors[session.service_type] ?? "text-arcana-purple"}`}>
+                        {serviceLabel}
                       </span>
                       {charName && (
                         <span className="text-xs text-arcana-muted bg-arcana-surface/50 px-2 py-0.5 rounded-full">
@@ -282,7 +312,7 @@ export default async function MyPage() {
               return shareToken ? (
                 <Link
                   key={session.id}
-                  href={`/tarot/result/${shareToken}`}
+                  href={resultPath}
                   className="block bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 transition-colors hover:shadow-lg hover:shadow-arcana-purple/10 hover:border-arcana-purple cursor-pointer"
                 >
                   {content}
