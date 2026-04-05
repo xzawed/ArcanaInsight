@@ -7,6 +7,40 @@ import { Topic, ChatMessage } from "@/types/session";
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
 
+/** DB 저장 (fire-and-forget — 스트림을 블로킹하지 않음) */
+async function saveToDb(sessionId: string | null | undefined, params: {
+  isFinalTurn: boolean;
+  result?: { overallReading: string; topicReading?: string; advice: string };
+  currentMessage?: string;
+  fullResponse?: string;
+  turnNumber?: number;
+}) {
+  if (!sessionId) return;
+  try {
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+
+    if (params.isFinalTurn && params.result) {
+      await Promise.all([
+        supabase.from("shinjeom_readings").insert({
+          session_id: sessionId,
+          overall_reading: params.result.overallReading,
+          topic_reading: params.result.topicReading || "",
+          advice: params.result.advice,
+        }),
+        supabase.from("sessions").update({
+          status: "completed", completed_at: new Date().toISOString(),
+        }).eq("id", sessionId),
+      ]);
+    } else if (params.currentMessage && params.fullResponse && params.turnNumber) {
+      await supabase.from("shinjeom_messages").insert([
+        { session_id: sessionId, role: "user", content: params.currentMessage, message_index: (params.turnNumber - 1) * 2 },
+        { session_id: sessionId, role: "character", content: params.fullResponse, message_index: (params.turnNumber - 1) * 2 + 1 },
+      ]);
+    }
+  } catch (e) { console.error("신점 DB 저장 실패:", e); }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -27,20 +61,11 @@ export async function POST(request: NextRequest) {
     const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, turnNumber);
     const isFinalTurn = turnNumber >= MAX_TURNS;
 
-    let supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
-    if (sessionId) {
-      try {
-        const { createClient } = await import("@/lib/supabase/server");
-        supabase = await createClient();
-      } catch { /* 계속 진행 */ }
-    }
-
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         let fullResponse = "";
         try {
-          // 중간 대화는 짧게, 최종 결과는 길게 (JSON 3필드 풍부한 내용 보장)
           const shinjeomMaxTokens = isFinalTurn ? 4000 : 1000;
           for await (const chunk of aiProvider.streamReading(systemPrompt, userPrompt, shinjeomMaxTokens)) {
             fullResponse += chunk;
@@ -48,38 +73,15 @@ export async function POST(request: NextRequest) {
           }
 
           if (isFinalTurn) {
-            // 최종 결과 — JSON 파싱 시도
             const result = shinjeomService.parseResult(fullResponse);
 
-            // DB 저장
-            if (supabase && sessionId) {
-              try {
-                await supabase.from("shinjeom_readings").insert({
-                  session_id: sessionId,
-                  overall_reading: result.overallReading,
-                  topic_reading: result.topicReading || "",
-                  advice: result.advice,
-                });
-                await supabase.from("sessions").update({
-                  status: "completed", completed_at: new Date().toISOString(),
-                }).eq("id", sessionId);
-              } catch (e) { console.error("신점 결과 저장 실패:", e); }
-            }
-
+            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
+            saveToDb(sessionId, { isFinalTurn: true, result });
           } else {
-            // 중간 대화 — 텍스트 그대로
-            // DB에 메시지 저장
-            if (supabase && sessionId) {
-              try {
-                await supabase.from("shinjeom_messages").insert([
-                  { session_id: sessionId, role: "user", content: currentMessage, message_index: (turnNumber - 1) * 2 },
-                  { session_id: sessionId, role: "character", content: fullResponse, message_index: (turnNumber - 1) * 2 + 1 },
-                ]);
-              } catch (e) { console.error("신점 메시지 저장 실패:", e); }
-            }
-
+            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
+            saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, turnNumber });
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
