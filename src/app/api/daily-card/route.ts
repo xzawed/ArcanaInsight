@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
 
     const interpretation = await grokProvider.generateReading(
       `당신은 ${character.name}입니다. ${character.personality} ${character.speechStyle}`,
-      prompt
+      prompt,
+      1000 // 일일 카드는 짧은 해석
     );
 
     const keywords = meanings.keywords.slice(0, 3);

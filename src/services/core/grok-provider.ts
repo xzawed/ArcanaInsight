@@ -44,7 +44,9 @@ export class GrokProvider implements AIProvider {
 
   private static readonly TIMEOUT_MS = 60_000; // 60초 타임아웃
 
-  async generateReading(systemPrompt: string, userPrompt: string): Promise<string> {
+  private static readonly DEFAULT_MAX_TOKENS = 4000;
+
+  async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), GrokProvider.TIMEOUT_MS);
     try {
@@ -54,7 +56,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: 8000,
+          temperature: 0.7, max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS,
         }),
         signal: controller.signal,
       });
@@ -76,7 +78,7 @@ export class GrokProvider implements AIProvider {
     }
   }
 
-  async *streamReading(systemPrompt: string, userPrompt: string): AsyncGenerator<string, void, unknown> {
+  async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), GrokProvider.TIMEOUT_MS);
     try {
@@ -86,7 +88,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: 8000, stream: true,
+          temperature: 0.7, max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS, stream: true,
         }),
         signal: controller.signal,
       });

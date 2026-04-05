@@ -78,7 +78,9 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt)) {
+          // 월별 상세 포함 여부에 따라 max_tokens 조정
+          const sajuMaxTokens = includeMonthly ? 6000 : 4000;
+          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt, sajuMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
