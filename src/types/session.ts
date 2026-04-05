@@ -7,8 +7,9 @@ export type Topic =
   | "saju-general" | "saju-love-single" | "saju-love-couple"
   | "saju-career" | "saju-health" | "saju-personality"
   | "saju-compatibility" | "saju-auspicious-date"
-  // 신점 - 상담 주제 (4개)
-  | "shinjeom-general" | "shinjeom-love" | "shinjeom-wealth" | "shinjeom-health";
+  // 신점 - 상담 주제 (6개)
+  | "shinjeom-general" | "shinjeom-love" | "shinjeom-wealth" | "shinjeom-health"
+  | "shinjeom-career" | "shinjeom-auspicious";
 
 export type SajuTimeRange =
   | "this-week"      // 이번 주 (일운 7일)

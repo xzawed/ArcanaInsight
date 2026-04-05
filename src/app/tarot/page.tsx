@@ -93,6 +93,7 @@ const topicSpreads: Record<Topic, SpreadType[]> = {
   "saju-career": [], "saju-health": [], "saju-personality": [],
   "saju-compatibility": [], "saju-auspicious-date": [],
   "shinjeom-general": [], "shinjeom-love": [], "shinjeom-wealth": [], "shinjeom-health": [],
+  "shinjeom-career": [], "shinjeom-auspicious": [],
   love: ["one-card", "three-card", "five-card", "relationship", "celtic-cross"],
 };
 
