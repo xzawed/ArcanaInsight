@@ -178,11 +178,9 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph SuperGrok["SuperGrok (xAI)"]
+    subgraph SuperGrok["SuperGrok (xAI) — 프로덕션 전용"]
         direction TB
-        G1["🎯 기능 기획/설계"]
         G2["🖼️ 이미지 생성<br/>(캐릭터, 카드 스킨)"]
-        G3["📊 운영 데이터 분석"]
         G4["🔮 프로덕션 AI<br/>(타로/사주 리딩)"]
     end
 

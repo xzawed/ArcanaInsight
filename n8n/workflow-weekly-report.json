@@ -16,7 +16,7 @@
         "operation": "executeQuery",
         "query": "SELECT service_type, topic, spread_type, character_id, COUNT(*) as count, COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed FROM sessions WHERE created_at >= NOW() - INTERVAL '7 days' GROUP BY service_type, topic, spread_type, character_id ORDER BY count DESC"
       },
-      "id": "query-stats",
+      "id": "query-sessions",
       "name": "Supabase: 주간 세션 통계",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
@@ -28,9 +28,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT COUNT(*) as total_readings, COUNT(DISTINCT session_id) as total_sessions, AVG(CHAR_LENGTH(overall_reading)) as avg_reading_length FROM readings WHERE created_at >= NOW() - INTERVAL '7 days'"
+        "query": "SELECT COUNT(*) as total_readings, COUNT(DISTINCT session_id) as total_sessions, ROUND(AVG(CHAR_LENGTH(overall_reading))) as avg_length FROM readings WHERE created_at >= NOW() - INTERVAL '7 days'"
       },
-      "id": "query-readings-stats",
+      "id": "query-readings",
       "name": "Supabase: 주간 리딩 통계",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
@@ -41,55 +41,19 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combineBy": "combineAll",
-        "options": {}
-      },
-      "id": "merge-data",
-      "name": "데이터 병합",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3,
-      "position": [690, 300]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.x.ai/v1/chat/completions",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'grok-3', messages: [{ role: 'system', content: '당신은 ArcanaInsight 서비스 운영 분석가입니다. 주간 데이터를 분석하여 한국어로 운영 인사이트 리포트를 작성해주세요. 마크다운 형식으로: ## 주간 요약, ## 인기 서비스, ## 인기 캐릭터, ## 개선 제안' }, { role: 'user', content: '이번 주 운영 데이터:\\n\\n' + JSON.stringify($json) }], temperature: 0.5, max_tokens: 1500 }) }}"
-      },
-      "id": "grok-analyze",
-      "name": "Grok: 주간 인사이트 생성",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [910, 300],
-      "credentials": {
-        "httpHeaderAuth": { "id": "grok-api", "name": "Grok API" }
-      }
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "https://api.github.com/repos/xzawed/ArcanaInsight/issues",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "title", "value": "=📈 주간 운영 리포트 — {{ new Date().toISOString().split('T')[0] }}" },
-            { "name": "body", "value": "={{ $json.choices[0].message.content }}" },
-            { "name": "labels", "value": "[\"report\"]" }
-          ]
-        }
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: '📈 주간 운영 리포트 — ' + new Date().toISOString().split('T')[0], body: '## 주간 운영 통계\\n\\n### 리��� 현황\\n| 항목 | 값 |\\n|------|-----|\\n| 총 리딩 | ' + ($json.total_readings || 0) + '건 |\\n| 총 세션 | ' + ($json.total_sessions || 0) + '건 |\\n| 평균 해석 길이 | ' + ($json.avg_length || 0) + '자 |\\n\\n---\\n*n8n Weekly Report에 의해 자동 생성*', labels: ['report'] }) }}"
       },
       "id": "create-report",
       "name": "GitHub: 리포트 Issue 생성",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1130, 300],
+      "position": [910, 300],
       "credentials": {
         "httpHeaderAuth": { "id": "github-pat", "name": "GitHub PAT" }
       }
@@ -104,9 +68,6 @@
         ]
       ]
     },
-    "Supabase: 주간 세션 통계": { "main": [[{ "node": "데이터 병합", "type": "main", "index": 0 }]] },
-    "Supabase: 주간 리딩 통계": { "main": [[{ "node": "데이터 병합", "type": "main", "index": 1 }]] },
-    "데이터 병합": { "main": [[{ "node": "Grok: 주간 인사이트 생성", "type": "main", "index": 0 }]] },
-    "Grok: 주간 인사이트 생성": { "main": [[{ "node": "GitHub: 리포트 Issue 생성", "type": "main", "index": 0 }]] }
+    "Supabase: 주간 리딩 통계": { "main": [[{ "node": "GitHub: 리포트 Issue 생성", "type": "main", "index": 0 }]] }
   }
 }
