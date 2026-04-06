@@ -74,26 +74,29 @@ export async function POST(request: NextRequest) {
           }
           const result = tarotService.parseResult(fullResponse);
 
-          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬)
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
-
-          // DB 저장 — fire-and-forget (스트림 블로킹 없음)
+          // DB 저장 후 share_token 포함하여 done 이벤트 전송
           if (supabase && sessionId) {
-            Promise.all([
-              supabase.from("readings").insert({
-                session_id: sessionId, card_interpretation: result.cardInterpretations,
-                overall_reading: result.overallReading, advice: result.advice,
-              }),
-              supabase.from("sessions").update({
-                status: "completed", completed_at: new Date().toISOString(),
-              }).eq("id", sessionId),
-              supabase.from("session_cards").insert(
-                cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
-                  session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
-                }))
-              ),
-            ]).catch((e) => console.error("타로 DB 저장 실패:", e));
+            try {
+              const [readingRes] = await Promise.all([
+                supabase.from("readings").insert({
+                  session_id: sessionId, card_interpretation: result.cardInterpretations,
+                  overall_reading: result.overallReading, advice: result.advice,
+                }).select("share_token").single(),
+                supabase.from("sessions").update({
+                  status: "completed", completed_at: new Date().toISOString(),
+                }).eq("id", sessionId),
+                supabase.from("session_cards").insert(
+                  cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
+                    session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
+                  }))
+                ),
+              ]);
+              result.shareToken = readingRes.data?.share_token ?? null;
+            } catch (e) {
+              console.error("타로 DB 저장 실패:", e);
+            }
           }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
           console.error("리딩 생성 실패:", errMsg);

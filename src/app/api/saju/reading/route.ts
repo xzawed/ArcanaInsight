@@ -86,41 +86,45 @@ export async function POST(request: NextRequest) {
           }
           const result = sajuService.parseResult(fullResponse);
 
-          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
+          // DB 저장 후 share_token 포함하여 done 이벤트 전송
+          if (supabase && sessionId) {
+            try {
+              const [readingRes] = await Promise.all([
+                supabase.from("saju_readings").insert({
+                  session_id: sessionId,
+                  birth_date: userInfo.birthDate,
+                  birth_hour: userInfo.birthHour,
+                  gender: userInfo.gender,
+                  birth_name: userInfo.name || null,
+                  pillars: sajuResult.pillars,
+                  day_master: sajuResult.dayMaster,
+                  day_master_element: sajuResult.dayMasterElement,
+                  is_strong: sajuResult.isStrong,
+                  elements: sajuResult.elements,
+                  ten_stars: sajuResult.tenStars,
+                  twelve_stages: sajuResult.twelveStages,
+                  interactions: sajuResult.interactions,
+                  yongsin: sajuResult.yongsin,
+                  major_fortunes: sajuResult.majorFortunes,
+                  yearly_fortune: sajuResult.yearlyFortune,
+                  overall_reading: result.overallReading,
+                  topic_reading: result.topicReading || "",
+                  advice: result.advice,
+                }).select("share_token").single(),
+                supabase.from("sessions").update({
+                  status: "completed", completed_at: new Date().toISOString(),
+                }).eq("id", sessionId),
+              ]);
+              result.shareToken = readingRes.data?.share_token ?? null;
+            } catch (e) {
+              console.error("사주 DB 저장 실패:", e);
+            }
+          }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({
             done: true,
             result,
             sajuData: sajuResult,
           })}\n\n`));
-
-          if (supabase && sessionId) {
-            Promise.all([
-              supabase.from("saju_readings").insert({
-                session_id: sessionId,
-                birth_date: userInfo.birthDate,
-                birth_hour: userInfo.birthHour,
-                gender: userInfo.gender,
-                birth_name: userInfo.name || null,
-                pillars: sajuResult.pillars,
-                day_master: sajuResult.dayMaster,
-                day_master_element: sajuResult.dayMasterElement,
-                is_strong: sajuResult.isStrong,
-                elements: sajuResult.elements,
-                ten_stars: sajuResult.tenStars,
-                twelve_stages: sajuResult.twelveStages,
-                interactions: sajuResult.interactions,
-                yongsin: sajuResult.yongsin,
-                major_fortunes: sajuResult.majorFortunes,
-                yearly_fortune: sajuResult.yearlyFortune,
-                overall_reading: result.overallReading,
-                topic_reading: result.topicReading || "",
-                advice: result.advice,
-              }),
-              supabase.from("sessions").update({
-                status: "completed", completed_at: new Date().toISOString(),
-              }).eq("id", sessionId),
-            ]).catch((e) => console.error("사주 DB 저장 실패:", e));
-          }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
           console.error("사주 리딩 생성 실패:", errMsg);

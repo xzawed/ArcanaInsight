@@ -7,31 +7,32 @@ import { Topic, ChatMessage } from "@/types/session";
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
 
-/** DB 저장 (fire-and-forget — 스트림을 블로킹하지 않음) */
+/** DB 저장 — 최종 턴에서 share_token 반환 */
 async function saveToDb(sessionId: string | null | undefined, params: {
   isFinalTurn: boolean;
-  result?: { overallReading: string; topicReading?: string; advice: string };
+  result?: { overallReading: string; topicReading?: string; advice: string; shareToken?: string | null };
   currentMessage?: string;
   fullResponse?: string;
   turnNumber?: number;
-}) {
-  if (!sessionId) return;
+}): Promise<string | null> {
+  if (!sessionId) return null;
   try {
     const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
 
     if (params.isFinalTurn && params.result) {
-      await Promise.all([
+      const [readingRes] = await Promise.all([
         supabase.from("shinjeom_readings").insert({
           session_id: sessionId,
           overall_reading: params.result.overallReading,
           topic_reading: params.result.topicReading || "",
           advice: params.result.advice,
-        }),
+        }).select("share_token").single(),
         supabase.from("sessions").update({
           status: "completed", completed_at: new Date().toISOString(),
         }).eq("id", sessionId),
       ]);
+      return readingRes.data?.share_token ?? null;
     } else if (params.currentMessage && params.fullResponse && params.turnNumber) {
       await supabase.from("shinjeom_messages").insert([
         { session_id: sessionId, role: "user", content: params.currentMessage, message_index: (params.turnNumber - 1) * 2 },
@@ -39,6 +40,7 @@ async function saveToDb(sessionId: string | null | undefined, params: {
       ]);
     }
   } catch (e) { console.error("신점 DB 저장 실패:", e); }
+  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -75,13 +77,14 @@ export async function POST(request: NextRequest) {
           if (isFinalTurn) {
             const result = shinjeomService.parseResult(fullResponse);
 
-            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
+            // DB 저장 후 share_token 포함하여 done 이벤트 전송
+            const shareToken = await saveToDb(sessionId, { isFinalTurn: true, result });
+            result.shareToken = shareToken;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
-            saveToDb(sessionId, { isFinalTurn: true, result });
           } else {
-            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기
+            // 중간 대화 — 응답 전송 후 DB 저장
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
-            saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, turnNumber });
+            await saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, turnNumber });
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);

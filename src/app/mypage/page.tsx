@@ -277,7 +277,11 @@ export default async function MyPage() {
                 : overallText || null;
               const shareToken = reading?.share_token;
               const serviceLabel = session.service_type === "saju" ? "사주" : session.service_type === "shinjeom" ? "신점" : "타로";
-              const resultPath = session.service_type === "saju" ? `/saju/result/${shareToken}` : `/tarot/result/${shareToken}`;
+              const resultPath = session.service_type === "saju"
+                ? `/saju/result/${shareToken}`
+                : session.service_type === "shinjeom"
+                  ? `/shinjeom/result/${shareToken}`
+                  : `/tarot/result/${shareToken}`;
 
               const content = (
                 <>
