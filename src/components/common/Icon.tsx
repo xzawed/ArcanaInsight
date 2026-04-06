@@ -83,7 +83,6 @@ export function Icon({ id, size = 24, className }: IconProps) {
       width={size}
       height={size}
       className={`inline-block ${className ?? ""}`}
-      unoptimized
     />
   );
 }
