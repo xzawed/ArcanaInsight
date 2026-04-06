@@ -206,7 +206,7 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 004_user_info.sql           # 사용자 정보 (생년월일, 성별, 혈액형 등)
 ├── 005_session_character_and_topics.sql # sessions 테이블 캐릭터/토픽 확장
 ├── 006_saju_readings.sql       # saju_readings 테이블 (사주 서비스)
-├── 007_skin_selection.sql      # 스��� 선택 관련 컬럼
+├── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
 ├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
 └── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
 ```
@@ -312,6 +312,7 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 - 캐릭터 이미지: 10캐릭터 PNG 누끼(nukki/ 폴더), 2캐릭터(miko/seonhwa) JPG 루트 경로, 1408×768
 - 카드 이미지: SVG
 - 배경 이미지: JPG
+- **아이콘 이미지**: `public/images/icons/` — PNG RGBA (투명 배경). BFS 플러드 필로 어두운 배경 제거 + 콘텐츠 영역 크롭 처리됨. 새 아이콘 추가 시 동일하게 처리 필요
 - 새 이미지 생성 시 `scripts/` 디렉토리의 생성 스크립트 활용
   - 신규 캐릭터: `scripts/generate-character-images-v2.mjs`
   - 스킨 이미지: `scripts/generate-skin-images.ts` → `scripts/upload-skin-images.ts`
@@ -324,9 +325,40 @@ pnpm build            # 프로덕션 빌드
 pnpm start            # 프로덕션 서버 실행
 pnpm lint             # ESLint 실행
 pnpm type-check       # TypeScript 타입 체크 (tsc --noEmit)
-pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스)
+pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스) — Windows는 아래 Docker 방식 사용
 pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 ```
+
+### E2E 로컬 실행 — Windows (Docker 필수)
+
+Windows 환경에서는 Claude Code Bash 세션이 Playwright 브라우저 프로세스 stdout을 캡처하지 못하므로, Docker(Linux 컨테이너)로 실행해야 한다.
+
+```bash
+docker run --rm \
+  -v "D:/Source/ArcanaInsight/src:/work/src:ro" \
+  -v "D:/Source/ArcanaInsight/public:/work/public:ro" \
+  -v "D:/Source/ArcanaInsight/e2e:/work/e2e:ro" \
+  -v "D:/Source/ArcanaInsight/package.json:/work/package.json:ro" \
+  -v "D:/Source/ArcanaInsight/pnpm-lock.yaml:/work/pnpm-lock.yaml:ro" \
+  -v "D:/Source/ArcanaInsight/tsconfig.json:/work/tsconfig.json:ro" \
+  -v "D:/Source/ArcanaInsight/next.config.ts:/work/next.config.ts:ro" \
+  -v "D:/Source/ArcanaInsight/postcss.config.mjs:/work/postcss.config.mjs:ro" \
+  -v "D:/Source/ArcanaInsight/playwright.config.ts:/work/playwright.config.ts:ro" \
+  -v "D:/Source/ArcanaInsight/.env.local:/work/.env.local:ro" \
+  -w //work \
+  -e NEXT_TELEMETRY_DISABLED=1 \
+  mcr.microsoft.com/playwright:v1.59.1-noble \
+  bash -c '
+    corepack enable && corepack prepare pnpm@10.33.0 --activate 2>/dev/null &&
+    pnpm install --frozen-lockfile &&
+    pnpm build &&
+    npx next start -p 3000 &
+    for i in $(seq 1 20); do curl -s http://localhost:3000 >/dev/null 2>&1 && break; sleep 1; done &&
+    npx playwright test --project="Desktop Chrome" --reporter=list 2>&1
+  '
+```
+
+> **주의**: Docker 실행 후 `node_modules`가 Linux 바이너리로 교체되므로, 이후 `rm -rf node_modules && pnpm install` 필수
 
 ## 환경 변수
 
@@ -580,7 +612,7 @@ pnpm build             # 프로덕션 빌드 확인
 
 - **진입점은 항상 Claude CLI**: 사용자가 Claude CLI에 직접 지시
 - **Claude CLI**: 기획 + 구현 + 검토 + 배포를 모두 수행
-- **Grok API**: 프로덕션 리딩 + 이미지 ���성에만 사용 (비용 최적화)
+- **Grok API**: 프로덕션 리딩 + 이미지 생성에만 사용 (비용 최적화)
 
 ### 워크플로우
 
