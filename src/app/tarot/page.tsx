@@ -13,6 +13,7 @@ import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { UserInfo } from "@/types/user-info";
 import { getCharactersByGender, getCharacterById } from "@/data/characters";
+import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { spreads } from "@/data/spreads";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
@@ -129,6 +130,24 @@ function TarotPageContent() {
       setCharacterId(preselectedChar.id);
     }
   }, [preselectedChar, setCharacterId]);
+
+  // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
+  const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
+  useEffect(() => {
+    if (favoriteCharacter && !selectedCharacter) {
+      setSelectedCharacter(favoriteCharacter);
+      setCharacterId(favoriteCharacter.id);
+      setDialogueMessages([{
+        id: crypto.randomUUID(),
+        role: "character",
+        content: favoriteCharacter.greeting,
+        mood: "smile",
+        timestamp: new Date(),
+      }]);
+      setStep("topic-select");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favoriteCharacter]);
 
   // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {

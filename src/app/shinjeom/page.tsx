@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useShinjeomSessionStore } from "@/hooks/useShinjeomSession";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { getCharactersByGender } from "@/data/characters";
+import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { CharacterConfig } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
 import { Icon } from "@/components/common/Icon";
+import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 
 const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
   { id: "shinjeom-general", label: "신수 (종합운)", iconId: "shinjeom-general", desc: "전반적인 운세와 앞날의 길흉" },
@@ -24,21 +25,43 @@ const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
 
 type PageStep = "character-select" | "topic-select";
 
-export default function ShinjeomPage() {
+function ShinjeomPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setCharacterId, setTopic, setPhase } = useShinjeomSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
 
+  const preselectedCharId = searchParams.get("character");
+  const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
+
   const reset = useShinjeomSessionStore.getState().reset;
-  const [step, setStep] = useState<PageStep>("character-select");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
+  const [step, setStep] = useState<PageStep>(() => preselectedChar ? "topic-select" : "character-select");
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
 
   // 페이지 진입 시 이전 세션 초기화
   useEffect(() => {
     reset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // URL 파라미터로 캐릭터가 프리셀렉트된 경우 스토어에 반영
+  useEffect(() => {
+    if (preselectedChar) {
+      setCharacterId(preselectedChar.id);
+    }
+  }, [preselectedChar, setCharacterId]);
+
+  // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
+  const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
+  useEffect(() => {
+    if (favoriteCharacter && !selectedCharacter) {
+      setSelectedCharacter(favoriteCharacter);
+      setCharacterId(favoriteCharacter.id);
+      setStep("topic-select");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favoriteCharacter]);
 
   // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {
@@ -159,5 +182,17 @@ export default function ShinjeomPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function ShinjeomPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
+      </div>
+    }>
+      <ShinjeomPageContent />
+    </Suspense>
   );
 }

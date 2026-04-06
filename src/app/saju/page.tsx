@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Icon } from "@/components/common/Icon";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,27 +11,59 @@ import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
-import { getCharactersByGender } from "@/data/characters";
+import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
+import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 
 type PageStep = "character-select" | "info-input" | "saju-select";
 
-export default function SajuPage() {
+function SajuPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const sajuCharacters = getCharactersByGender(genderFilter);
 
-  const [step, setStep] = useState<PageStep>("character-select");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(null);
-  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
+  const preselectedCharId = searchParams.get("character");
+  const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
+
+  const [step, setStep] = useState<PageStep>(() => preselectedChar ? "info-input" : "character-select");
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
+  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>(() =>
+    preselectedChar ? [{
+      id: crypto.randomUUID(), role: "character" as const,
+      content: preselectedChar.greeting, mood: "smile", timestamp: new Date(),
+    }] : []
+  );
   const [selectedTime, setSelectedTime] = useState<SajuTimeRange | null>(null);
   const [selectedArea, setSelectedArea] = useState<Topic | null>(null);
   const [monthlyToggle, setMonthlyToggle] = useState(false);
+
+  // URL 파라미터로 캐릭터가 프리셀렉트된 경우 스토어에 반영
+  useEffect(() => {
+    if (preselectedChar) {
+      setCharacterId(preselectedChar.id);
+    }
+  }, [preselectedChar, setCharacterId]);
+
+  // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
+  const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
+  useEffect(() => {
+    if (favoriteCharacter && !selectedCharacter) {
+      setSelectedCharacter(favoriteCharacter);
+      setCharacterId(favoriteCharacter.id);
+      setDialogueMessages([{
+        id: crypto.randomUUID(), role: "character",
+        content: favoriteCharacter.greeting, mood: "smile", timestamp: new Date(),
+      }]);
+      setStep("info-input");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favoriteCharacter]);
 
   // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {
@@ -238,5 +270,17 @@ export default function SajuPage() {
         ) : null}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function SajuPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
+      </div>
+    }>
+      <SajuPageContent />
+    </Suspense>
   );
 }
