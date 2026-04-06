@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
+import { FavoriteCharacterSelector } from "./FavoriteCharacterSelector";
 
 /** readings는 1:1 관계(unique session_id)이므로 PostgREST가 단일 객체로 반환 */
 interface ReadingData {
@@ -229,12 +230,10 @@ export default async function MyPage() {
             </p>
             <p className="text-arcana-muted text-xs mt-1">자주 뽑은 카드</p>
           </div>
-          <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
-            <p className="text-sm font-serif font-bold text-arcana-indigo truncate">
-              {favoriteCharName ?? "미설정"}
-            </p>
-            <p className="text-arcana-muted text-xs mt-1">선호 상담사</p>
-          </div>
+          <FavoriteCharacterSelector
+            currentCharacterId={profile?.favorite_character_id}
+            currentCharacterName={favoriteCharName}
+          />
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
             <p className="text-sm font-serif font-bold text-arcana-text truncate">
               {lastReadingDate ? formatRelativeDate(lastReadingDate) : "없음"}
