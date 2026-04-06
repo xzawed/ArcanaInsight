@@ -11,10 +11,12 @@ export async function POST(request: NextRequest) {
     try {
       const { createClient } = await import("@/lib/supabase/server");
       const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
       const { data } = await supabase.from("sessions").insert({
         service_type: "shinjeom",
         topic,
         character_id: characterId,
+        user_id: user?.id || null,
         status: "in_progress",
       }).select("id").single();
       session = data;
