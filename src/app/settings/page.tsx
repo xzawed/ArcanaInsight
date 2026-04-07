@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useThemeStore, themes, ThemeId } from "@/hooks/useTheme";
@@ -8,6 +8,8 @@ import { useSkinStore } from "@/hooks/useSkinStore";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { cardSkins } from "@/data/skins";
 import { GenderFilter } from "@/types/character";
+import { getCharactersByGender, getCharacterById } from "@/data/characters";
+import { createClient } from "@/lib/supabase/client";
 
 export default function SettingsPage() {
   const { mode, activeTheme, setMode } = useThemeStore();
@@ -22,6 +24,45 @@ export default function SettingsPage() {
     if (typeof window !== "undefined") return !!localStorage.getItem("arcana_user_info");
     return false;
   });
+
+  // 선호 상담사
+  const [userId, setUserId] = useState<string | null>(null);
+  const [favoriteCharacterId, setFavoriteCharacterId] = useState<string | null>(null);
+  const [isSavingFavorite, setIsSavingFavorite] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        supabase.from("profiles").select("favorite_character_id").eq("id", user.id).single()
+          .then(({ data }) => setFavoriteCharacterId(data?.favorite_character_id ?? null));
+      } else {
+        const saved = localStorage.getItem("arcana-favorite-character");
+        if (saved) setFavoriteCharacterId(saved);
+      }
+    });
+  }, []);
+
+  const handleSelectFavorite = async (characterId: string) => {
+    const newValue = favoriteCharacterId === characterId ? null : characterId;
+    setFavoriteCharacterId(newValue);
+
+    if (userId) {
+      setIsSavingFavorite(true);
+      const supabase = createClient();
+      await supabase.from("profiles").update({ favorite_character_id: newValue }).eq("id", userId);
+      setIsSavingFavorite(false);
+    } else {
+      if (newValue) {
+        localStorage.setItem("arcana-favorite-character", newValue);
+      } else {
+        localStorage.removeItem("arcana-favorite-character");
+      }
+    }
+  };
+
+  const filteredCharacters = getCharactersByGender(genderFilter);
 
   const toggleConfirmMode = () => {
     const next = !confirmEachCard;
@@ -131,6 +172,49 @@ export default function SettingsPage() {
                   }`}
                 >
                   {opt.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* 선호 상담사 */}
+          <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">선호 상담사</h2>
+            <p className="text-arcana-muted text-xs mb-4">
+              {favoriteCharacterId
+                ? `현재: ${getCharacterById(favoriteCharacterId)?.name ?? "없음"}`
+                : "선택된 상담사 없음"}
+              {isSavingFavorite && " (저장 중...)"}
+            </p>
+
+            {!userId && (
+              <p className="text-amber-400/80 text-xs mb-3">
+                로그인하면 선호 상담사가 계정에 저장됩니다.
+              </p>
+            )}
+
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+              {filteredCharacters.map((char) => (
+                <button
+                  key={char.id}
+                  onClick={() => handleSelectFavorite(char.id)}
+                  className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-xs transition-all ${
+                    favoriteCharacterId === char.id
+                      ? "border-arcana-purple bg-arcana-purple/15 text-arcana-purple shadow-sm"
+                      : "border-arcana-border/50 text-arcana-muted hover:border-arcana-border"
+                  }`}
+                >
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-arcana-surface">
+                    <Image
+                      src={char.expressions.default}
+                      alt={char.name}
+                      fill
+                      className="object-cover object-top"
+                      sizes="48px"
+                    />
+                  </div>
+                  <span className="font-sans text-xs leading-tight text-center">{char.name}</span>
+                  <span className="text-[10px] text-arcana-muted/70 leading-tight text-center">{char.speciality}</span>
                 </button>
               ))}
             </div>
