@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { ShinjeomService, MAX_TURNS } from "@/services/shinjeom/shinjeom-service";
+import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 
@@ -13,7 +13,7 @@ async function saveToDb(sessionId: string | null | undefined, params: {
   result?: { overallReading: string; topicReading?: string; advice: string };
   currentMessage?: string;
   fullResponse?: string;
-  turnNumber?: number;
+  messageIndex?: number;
 }) {
   if (!sessionId) return;
   try {
@@ -32,10 +32,10 @@ async function saveToDb(sessionId: string | null | undefined, params: {
           status: "completed", completed_at: new Date().toISOString(),
         }).eq("id", sessionId),
       ]);
-    } else if (params.currentMessage && params.fullResponse && params.turnNumber) {
+    } else if (params.currentMessage && params.fullResponse && params.messageIndex !== undefined) {
       await supabase.from("shinjeom_messages").insert([
-        { session_id: sessionId, role: "user", content: params.currentMessage, message_index: (params.turnNumber - 1) * 2 },
-        { session_id: sessionId, role: "character", content: params.fullResponse, message_index: (params.turnNumber - 1) * 2 + 1 },
+        { session_id: sessionId, role: "user", content: params.currentMessage, message_index: params.messageIndex },
+        { session_id: sessionId, role: "character", content: params.fullResponse, message_index: params.messageIndex + 1 },
       ]);
     }
   } catch (e) { console.error("신점 DB 저장 실패:", e); }
@@ -44,22 +44,25 @@ async function saveToDb(sessionId: string | null | undefined, params: {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, topic, characterId, currentMessage, chatHistory, turnNumber } = body as {
+    const { sessionId, topic, characterId, currentMessage, chatHistory, isFinalTurn, messageIndex } = body as {
       sessionId?: string | null;
       topic: Topic;
       characterId?: string;
-      currentMessage: string;
+      currentMessage?: string;
       chatHistory: ChatMessage[];
-      turnNumber: number;
+      isFinalTurn: boolean;
+      messageIndex: number;
     };
 
-    if (!topic || !currentMessage) {
+    if (!topic) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    if (!isFinalTurn && !currentMessage) {
+      return new Response(JSON.stringify({ error: "Message required for non-final turns" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
     const systemPrompt = shinjeomService.getSystemPrompt(characterId);
-    const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, turnNumber);
-    const isFinalTurn = turnNumber >= MAX_TURNS;
+    const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest) {
           } else {
             // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
-            saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, turnNumber });
+            saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, messageIndex });
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
