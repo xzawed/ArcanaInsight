@@ -10,7 +10,6 @@ import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
-import { MAX_TURNS } from "@/services/shinjeom/shinjeom-service";
 
 export default function ShinjeomSessionPage() {
   const router = useRouter();
@@ -68,10 +67,12 @@ export default function ShinjeomSessionPage() {
     const message = inputText.trim();
     if (!message || isLoading) return;
 
-    const newTurn = turnCount + 1;
     setInputText("");
     setLoading(true);
     setMood("mystical");
+
+    // messageIndex: addChatMessage 호출 전 현재 길이를 캡처
+    const messageIndex = useShinjeomSessionStore.getState().chatMessages.length;
 
     // 사용자 메시지 추가
     addChatMessage({
@@ -88,7 +89,8 @@ export default function ShinjeomSessionPage() {
           topic, characterId,
           currentMessage: message,
           chatHistory: useShinjeomSessionStore.getState().chatMessages,
-          turnNumber: newTurn,
+          isFinalTurn: false,
+          messageIndex,
         }),
       });
 
@@ -107,13 +109,12 @@ export default function ShinjeomSessionPage() {
       const decoder = new TextDecoder();
       let sseBuffer = "";
       let fullText = "";
-      const isFinalTurn = newTurn >= MAX_TURNS;
 
       // 스트리밍 메시지를 위한 임시 ID
       const msgId = crypto.randomUUID();
       addChatMessage({
         id: msgId, role: "character",
-        content: isFinalTurn ? "신점 결과를 준비하고 있어요..." : "",
+        content: "",
         mood: "mystical", timestamp: new Date(),
       });
 
@@ -138,25 +139,95 @@ export default function ShinjeomSessionPage() {
             }
             if (data.chunk) {
               fullText += data.chunk;
-              // 최종 턴에서는 JSON이 오므로 채팅에 표시하지 않음
-              if (!isFinalTurn) {
-                useShinjeomSessionStore.setState((state) => ({
-                  chatMessages: state.chatMessages.map((m) =>
-                    m.id === msgId ? { ...m, content: fullText } : m
-                  ),
-                }));
-              }
+              useShinjeomSessionStore.setState((state) => ({
+                chatMessages: state.chatMessages.map((m) =>
+                  m.id === msgId ? { ...m, content: fullText } : m
+                ),
+              }));
             }
-            if (data.done) {
-              if (data.isFinal && data.result) {
-                // 최종 결과 → 대기 메시지 제거 후 결과 화면 전환
-                useShinjeomSessionStore.setState((state) => ({
-                  chatMessages: state.chatMessages.filter((m) => m.id !== msgId),
-                }));
-                setReadingResult(data.result);
-                setPhase("result");
-                setMood("smile");
-              }
+          } catch { /* 파싱 실패 */ }
+        }
+      }
+    } catch {
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.",
+        mood: "default", timestamp: new Date(),
+      });
+      setMood("default");
+    }
+    setLoading(false);
+  };
+
+  const handleEndConsultation = async () => {
+    if (turnCount < 1 || isLoading) return;
+
+    setLoading(true);
+    setMood("mystical");
+
+    try {
+      const currentChatMessages = useShinjeomSessionStore.getState().chatMessages;
+
+      const response = await fetch("/api/shinjeom/message", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: useShinjeomSessionStore.getState().sessionId,
+          topic, characterId,
+          currentMessage: undefined,
+          chatHistory: currentChatMessages,
+          isFinalTurn: true,
+          messageIndex: currentChatMessages.length,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        addChatMessage({
+          id: crypto.randomUUID(), role: "character",
+          content: "죄송해요, 결과를 가져오는 중 오류가 발생했어요. 다시 시도해주세요.",
+          mood: "default", timestamp: new Date(),
+        });
+        setMood("default");
+        setLoading(false);
+        return;
+      }
+
+      const msgId = crypto.randomUUID();
+      addChatMessage({
+        id: msgId, role: "character",
+        content: "신점 결과를 준비하고 있어요...",
+        mood: "mystical", timestamp: new Date(),
+      });
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let sseBuffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split("\n");
+        sseBuffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.error) {
+              useShinjeomSessionStore.setState((state) => ({
+                chatMessages: state.chatMessages.map((m) =>
+                  m.id === msgId ? { ...m, content: "문제가 발생했어요. 다시 시도해주세요." } : m
+                ),
+              }));
+              break;
+            }
+            if (data.done && data.isFinal && data.result) {
+              useShinjeomSessionStore.setState((state) => ({
+                chatMessages: state.chatMessages.filter((m) => m.id !== msgId),
+              }));
+              setReadingResult(data.result);
+              setPhase("result");
+              setMood("smile");
             }
           } catch { /* 파싱 실패 */ }
         }
@@ -270,31 +341,35 @@ export default function ShinjeomSessionPage() {
               </div>
 
               {/* 입력 */}
-              {turnCount < MAX_TURNS && (
-                <div className="flex-shrink-0 py-3">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSend(); }}
-                      placeholder={turnCount === 0 ? "고민을 말씀해주세요..." : "답변을 입력하세요..."}
-                      disabled={isLoading}
-                      className="flex-1 px-4 py-2.5 rounded-full bg-arcana-card/70 border border-arcana-border text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:outline-none focus:border-arcana-purple transition-colors"
-                    />
-                    <button
-                      onClick={handleSend}
-                      disabled={!inputText.trim() || isLoading}
-                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 transition-opacity"
-                    >
-                      전송
-                    </button>
-                  </div>
-                  <p className="text-arcana-muted text-[10px] text-center mt-1.5">
-                    {turnCount}/{MAX_TURNS}회 대화 · {MAX_TURNS - turnCount}회 남음
-                  </p>
+              <div className="flex-shrink-0 py-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSend(); }}
+                    placeholder={turnCount === 0 ? "고민을 말씀해주세요..." : "답변을 입력하세요..."}
+                    disabled={isLoading}
+                    className="flex-1 px-4 py-2.5 rounded-full bg-arcana-card/70 border border-arcana-border text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:outline-none focus:border-arcana-purple transition-colors"
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!inputText.trim() || isLoading}
+                    className="px-5 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 transition-opacity"
+                  >
+                    전송
+                  </button>
                 </div>
-              )}
+                {turnCount >= 1 && (
+                  <button
+                    onClick={handleEndConsultation}
+                    disabled={isLoading}
+                    className="w-full mt-2 py-2.5 rounded-full border border-arcana-gold/60 text-arcana-gold font-serif font-bold text-sm disabled:opacity-40 transition-opacity hover:bg-arcana-gold/10"
+                  >
+                    신점 결과 받기
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

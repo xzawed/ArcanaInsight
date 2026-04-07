@@ -13,8 +13,6 @@ const topicLabels: Record<string, string> = {
   "shinjeom-auspicious": "택일 (날짜 선택)",
 };
 
-const MAX_TURNS = 3; // 사용자 질문 3회
-
 export class ShinjeomService implements DivinationService {
   id = "shinjeom";
   name = "신점";
@@ -56,9 +54,9 @@ export class ShinjeomService implements DivinationService {
 - 구체적이고 실용적인 조언을 포함합니다.
 
 중요 규칙 — 대화 구조:
-- 사용자가 처음 고민을 말하면, 더 깊이 이해하기 위한 질문을 1개 던집니다.
-- 사용자가 답변하면, 한 번 더 핵심을 파악하는 질문을 합니다.
-- 3번째 사용자 답변 이후에는 최종 신점 결과를 제공합니다.
+- 사용자의 고민에 공감하며 핵심을 파악하기 위한 질문을 1개씩 이어갑니다.
+- 사용자가 충분히 털어놓았다고 느낄 때 자연스럽게 대화를 마무리합니다.
+- 최종 신점 결과는 사용자가 상담 종료를 요청할 때 제공합니다.
 - 질문은 짧고 명확하게, 답변은 풍부하고 깊이 있게 합니다.
 
 중요 규칙 — 가독성:
@@ -71,12 +69,11 @@ export class ShinjeomService implements DivinationService {
 - 최종이 아닌 중간 대화에서는 일반 텍스트로 응답합니다.`;
   }
 
-  /** 중간 대화 프롬프트 (1~2번째 답변) */
   buildConversationPrompt(
     topic: Topic,
-    currentMessage: string,
+    currentMessage: string | undefined,
     chatHistory: ChatMessage[],
-    turnNumber: number,
+    isFinalTurn: boolean,
   ): string {
     const topicLabel = topicLabels[topic] || topic;
     const historyText = chatHistory
@@ -84,7 +81,7 @@ export class ShinjeomService implements DivinationService {
       .map((m) => `${m.role === "user" ? "사용자" : "상담사"}: ${m.content}`)
       .join("\n\n");
 
-    if (turnNumber < MAX_TURNS) {
+    if (!isFinalTurn) {
       return `상담 주제: ${topicLabel}
 
 이전 대화:
@@ -98,15 +95,13 @@ ${historyText}
 - 일반 텍스트로 응답하세요 (JSON 아님)`;
     }
 
-    // 3번째 답변 → 최종 결과
+    // 사용자 종료 요청 → 전체 대화 종합하여 최종 결과
     return `상담 주제: ${topicLabel}
 
 전체 대화:
 ${historyText}
 
-사용자의 마지막 답변: ${currentMessage}
-
-이제 모든 대화를 종합하여 최종 신점 결과를 제공해주세요.
+지금까지의 모든 대화를 종합하여 최종 신점 결과를 제공해주세요.
 
 응답 형식 — 반드시 아래 JSON:
 {
@@ -124,7 +119,7 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
       context.topic,
       context.chatHistory[context.chatHistory.length - 1]?.content || "",
       context.chatHistory,
-      context.chatHistory.filter((m) => m.role === "user").length,
+      false,
     );
   }
 
@@ -150,5 +145,3 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
     };
   }
 }
-
-export { MAX_TURNS };
