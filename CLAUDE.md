@@ -380,10 +380,21 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ## Git 브랜치 전략
 
-- `main`/`master`: 프로덕션 브랜치 (Railway 자동 배포 트리거)
-- `dev`: 개발 브랜치
-- `feature/*`: 기능 개발 브랜치
+- `main`: 프로덕션 브랜치 (Railway 자동 배포 트리거, `master` 미사용)
+- `feat/*`: 기능 개발 브랜치
 - `fix/*`: 버그 수정 브랜치
+- `docs/*`: 문서 변경 브랜치
+- `chore/*`: 설정/정리 브랜치
+
+### 브랜치 일괄 정리 명령어
+
+```bash
+# 원격 브랜치 전체 삭제 (main 제외) — sed 앞 공백 2개 주의
+git branch -r | grep -v 'origin/main' | grep -v 'origin/HEAD' | sed 's|  origin/||' | xargs -I{} git push origin --delete {}
+
+# 로컬 브랜치 전체 삭제 (main 제외)
+git branch | grep -v '^\* main' | xargs git branch -D
+```
 
 ## CI/CD 파이프라인
 
@@ -648,7 +659,7 @@ git push origin main
 
 ```
 사용자 → Claude CLI (직접 지시)
-  └→ Claude CLI가 기획 → 구현 → 검증 → 리뷰 → PR → 배포 (6단계)
+  └→ Claude CLI가 기획 → 구현 → 검증 → 리뷰 → PR → 배포 → CLAUDE.md 최신화 (7단계)
 
 자동 운영:
   ├─ 주간 QA (토요일) → 실패 시 자동 수정 루프
