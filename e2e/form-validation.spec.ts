@@ -64,9 +64,12 @@ test.describe("폼 유효성 — 신점 메시지 입력", () => {
     await expect(sendBtn).toBeEnabled();
   });
 
-  test("대화 카운터 표시", async ({ page }) => {
+  test("입력 필드 항상 표시 + 첫 턴 전 결과 버튼 미노출", async ({ page }) => {
     await navigateToShinjeomSession(page);
-    await expect(page.locator("text=/0\\/3/")).toBeVisible();
+    // 입력 필드는 항상 표시
+    await expect(page.locator("input[type='text']")).toBeVisible();
+    // 첫 턴 전에는 "신점 결과 받기" 버튼 미노출
+    await expect(page.locator("text=신점 결과 받기")).not.toBeVisible();
   });
 });
 

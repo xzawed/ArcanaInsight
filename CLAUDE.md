@@ -148,7 +148,7 @@ src/
 │   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
 │   │                           # prompt-builder.ts, text-cleaner.ts
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
-│   ├── shinjeom/               # shinjeom-service.ts (대화형 3회 문답)
+│   ├── shinjeom/               # shinjeom-service.ts (무제한 대화형, isFinalTurn 플래그로 결과 요청)
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
 └── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
 
@@ -185,11 +185,12 @@ scripts/                        # 유틸리티 스크립트
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 └── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 
-e2e/                            # Playwright E2E 테스트 (19개 파일, 141개 테스트, 3개 디바이스)
+e2e/                            # Playwright E2E 테스트 (19개 파일, 3개 디바이스)
 ├── home.spec.ts                # 홈 페이지 섹션 검증
 ├── tarot-flow.spec.ts          # 타로 풀 플로우
 ├── saju-flow.spec.ts           # 사주 풀 플로우
-├── shinjeom-flow.spec.ts       # 신점 풀 플로우 (대화형)
+├── shinjeom-flow.spec.ts       # 신점 풀 플로우 (무제한 대화형, 결과 받기 버튼 검증)
+├── ai-response-rendering.spec.ts # AI 응답 렌더링 — 신점/타로/사주 결과 JSON 미노출 검증
 ├── character.spec.ts           # 캐릭터 상세 (12캐릭터)
 ├── auth.spec.ts                # 로그인 페이지
 ├── auth-session.spec.ts        # 인증 상태 테스트 (Supabase 로그인)

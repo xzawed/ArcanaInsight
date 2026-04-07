@@ -120,7 +120,7 @@ test.describe("AI 응답 렌더링 — 신점", () => {
   test("최종 결과 — 채팅에 raw JSON 미표시", async ({ page }) => {
     await mockSessionCreate(page, "**/api/shinjeom/session");
 
-    // 1~2번째 턴은 텍스트 응답
+    // 1~2번째 턴은 텍스트 응답, 3번째(버튼 클릭)는 최종 결과
     let callCount = 0;
     await page.route("**/api/shinjeom/message", (route) => {
       callCount++;
@@ -137,10 +137,9 @@ test.describe("AI 응답 렌더링 — 신점", () => {
           body: midSSE,
         });
       } else {
-        // 3번째(최종) — JSON 결과
+        // "신점 결과 받기" 버튼 클릭(최종) — JSON 결과
         const jsonStr = JSON.stringify(SHINJEOM_FINAL_RESULT);
         const finalSSE = createSSEBody(
-          // JSON을 청크로 분할
           [jsonStr.slice(0, 50), jsonStr.slice(50, 100), jsonStr.slice(100)],
           { isFinal: true, result: SHINJEOM_FINAL_RESULT },
         );
@@ -155,14 +154,18 @@ test.describe("AI 응답 렌더링 — 신점", () => {
 
     await enterShinjeomSession(page);
 
-    // 3회 대화 진행
-    for (let i = 0; i < 3; i++) {
+    // 2회 대화 진행 (중간 대화)
+    for (let i = 0; i < 2; i++) {
       const input = page.locator("input[type='text']");
       await expect(input).toBeVisible({ timeout: 5_000 });
       await input.fill(`테스트 답변 ${i + 1}`);
       await page.locator("button", { hasText: "전송" }).click();
       await page.waitForTimeout(2000);
     }
+
+    // "신점 결과 받기" 버튼 클릭으로 최종 결과 요청
+    await expect(page.locator("text=신점 결과 받기")).toBeVisible({ timeout: 5_000 });
+    await page.locator("text=신점 결과 받기").click();
 
     // 결과 화면 전환 대기
     await page.waitForTimeout(2000);
@@ -198,13 +201,18 @@ test.describe("AI 응답 렌더링 — 신점", () => {
 
     await enterShinjeomSession(page);
 
-    for (let i = 0; i < 3; i++) {
+    // 2회 대화 진행 (중간 대화)
+    for (let i = 0; i < 2; i++) {
       const input = page.locator("input[type='text']");
       await expect(input).toBeVisible({ timeout: 5_000 });
       await input.fill(`답변 ${i + 1}`);
       await page.locator("button", { hasText: "전송" }).click();
       await page.waitForTimeout(2000);
     }
+
+    // "신점 결과 받기" 버튼 클릭으로 최종 결과 요청
+    await expect(page.locator("text=신점 결과 받기")).toBeVisible({ timeout: 5_000 });
+    await page.locator("text=신점 결과 받기").click();
 
     // 결과 화면 전환 대기
     await page.waitForTimeout(3000);
