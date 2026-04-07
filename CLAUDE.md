@@ -342,7 +342,7 @@ NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 
 ## Git 브랜치 전략
 
-- `main`/`master`: 프로덕션 브랜치 (Railway 자동 배포 트리거)
+- `main`: 프로덕션 브랜치 (Railway 자동 배포 트리거)
 - `dev`: 개발 브랜치
 - `feature/*`: 기능 개발 브랜치
 - `fix/*`: 버그 수정 브랜치
