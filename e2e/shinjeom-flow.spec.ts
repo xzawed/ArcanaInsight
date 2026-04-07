@@ -57,8 +57,8 @@ test.describe("신점 서비스 플로우", () => {
     // 전송 버튼 존재
     await expect(page.locator("text=전송")).toBeVisible();
 
-    // 대화 카운터 존재
-    await expect(page.locator("text=/\\d+\\/3/")).toBeVisible();
+    // 첫 턴 전에는 "신점 결과 받기" 버튼 미노출
+    await expect(page.locator("text=신점 결과 받기")).not.toBeVisible();
   });
 
   test("뒤로가기 — 캐릭터 선택으로 복귀", async ({ page }) => {
