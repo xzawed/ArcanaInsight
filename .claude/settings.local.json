@@ -80,7 +80,9 @@
       "WebFetch(domain:science.howstuffworks.com)",
       "WebFetch(domain:www.modernwaytarot.com)",
       "Bash(grep -E \"\\\\.ts$\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(bash .scamanager/install-hook.sh)",
+      "Skill(claude-md-management:revise-claude-md)"
     ]
   }
 }
