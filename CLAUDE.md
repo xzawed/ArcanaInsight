@@ -172,6 +172,10 @@ public/images/
     ├── lix/
     └── ethan/
 
+.scamanager/                    # SCAManager AI 코드리뷰 훅 설정
+├── config.json              # 서버 URL, 리포 명, 인증 토큰
+└── install-hook.sh          # pre-push 훅 설치 스크립트 (최초 1회 실행)
+
 scripts/                        # 유틸리티 스크립트
 ├── pre-push-checks.sh          # git push 전 자동 검증 (tsc + lint + build)
 ├── generate-characters.ts      # 캐릭터 메타데이터 생성
@@ -530,6 +534,9 @@ git push origin main
 - `.claude/settings.json`의 PreToolUse 훅으로 `git push` 시 자동 검증
 - `scripts/pre-push-checks.sh` 실행: type-check → lint → build 순서
 - 하나라도 실패하면 push 차단
+- `.scamanager/install-hook.sh`로 설치된 `pre-push` 훅이 Claude CLI로 AI 코드리뷰 수행 후 결과를 SCAManager 서버(`scamanager-production.up.railway.app`)에 전송
+  - 초기 설치: `git pull && bash .scamanager/install-hook.sh` (1회)
+  - `claude`, `python3`, `curl` 미설치 시 훅 스킵 (push 차단 없음)
 
 ## 레이아웃 규칙 (필수 준수)
 
