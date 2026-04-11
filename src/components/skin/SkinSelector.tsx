@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { CardSkin } from "@/data/skins";
-import { getCardThumbnailUrl } from "@/lib/supabase/storage";
+import { getCardThumbnailUrl } from "@/lib/storage";
 
 interface SkinSelectorProps {
   skin: CardSkin;

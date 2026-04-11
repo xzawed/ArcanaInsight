@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { TarotCard } from "@/types/card";
 import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
-import { getCardImageUrl } from "@/lib/supabase/storage";
+import { getCardImageUrl } from "@/lib/storage";
 
 interface CardFaceProps {
   card: TarotCard;
