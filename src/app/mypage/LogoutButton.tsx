@@ -3,14 +3,20 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function LogoutButton() {
+export function LogoutButton({ useNextAuth }: { useNextAuth?: boolean }) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    if (useNextAuth) {
+      // NextAuth.js v5: signOut은 동적 import (next/headers 의존성 분리)
+      const { signOut } = await import("next-auth/react");
+      await signOut({ callbackUrl: "/" });
+    } else {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/");
+      router.refresh();
+    }
   };
 
   return (

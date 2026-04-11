@@ -39,6 +39,13 @@ function snakeToCamel(s: string): string {
   return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())
 }
 
+/** Drizzle가 반환하는 camelCase 키를 snake_case로 변환 (SupabaseAdapter와 일치) */
+function normalizeRow<T>(row: Record<string, unknown>): T {
+  return Object.fromEntries(
+    Object.entries(row).map(([k, v]) => [k.replace(/([A-Z])/g, '_$1').toLowerCase(), v])
+  ) as unknown as T
+}
+
 function buildConditions(table: PgTable, where: Record<string, unknown>) {
   return Object.entries(where).map(([k, v]) => {
     const col = (table as unknown as Record<string, unknown>)[k]
@@ -54,19 +61,20 @@ export class PostgresAdapter implements DbClient {
     const t = resolveTable(table)
     const conditions = buildConditions(t, where)
     const result = await db.select().from(t).where(and(...conditions)).limit(1)
-    return (result[0] as T) ?? null
+    return result[0] ? normalizeRow<T>(result[0] as Record<string, unknown>) : null
   }
 
   async findMany<T>(table: string, where?: Record<string, unknown>): Promise<T[]> {
     const db = getConnection()
     const t = resolveTable(table)
+    let rows: Record<string, unknown>[]
     if (!where || Object.keys(where).length === 0) {
-      const result = await db.select().from(t)
-      return result as T[]
+      rows = await db.select().from(t) as Record<string, unknown>[]
+    } else {
+      const conditions = buildConditions(t, where)
+      rows = await db.select().from(t).where(and(...conditions)) as Record<string, unknown>[]
     }
-    const conditions = buildConditions(t, where)
-    const result = await db.select().from(t).where(and(...conditions))
-    return result as T[]
+    return rows.map((r) => normalizeRow<T>(r))
   }
 
   async insert<T>(table: string, data: Record<string, unknown>): Promise<T> {
@@ -75,7 +83,7 @@ export class PostgresAdapter implements DbClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await db.insert(t).values(data as any).returning()
     if (!result[0]) throw new Error(`Insert failed for table: ${table}`)
-    return result[0] as T
+    return normalizeRow<T>(result[0] as Record<string, unknown>)
   }
 
   async insertMany<T>(table: string, data: Record<string, unknown>[]): Promise<T[]> {
@@ -83,7 +91,7 @@ export class PostgresAdapter implements DbClient {
     const t = resolveTable(table)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await db.insert(t).values(data as any).returning()
-    return result as T[]
+    return (result as Record<string, unknown>[]).map((r) => normalizeRow<T>(r))
   }
 
   async update<T>(table: string, where: Record<string, unknown>, data: Record<string, unknown>): Promise<T | null> {
@@ -92,7 +100,7 @@ export class PostgresAdapter implements DbClient {
     const conditions = buildConditions(t, where)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await db.update(t).set(data as any).where(and(...conditions)).returning()
-    return (result[0] as T) ?? null
+    return result[0] ? normalizeRow<T>(result[0] as Record<string, unknown>) : null
   }
 
   async upsert<T>(table: string, data: Record<string, unknown>, conflictOn: string): Promise<T> {
@@ -120,6 +128,6 @@ export class PostgresAdapter implements DbClient {
       })
       .returning()
     if (!result[0]) throw new Error(`Upsert failed for table: ${table}`)
-    return result[0] as T
+    return normalizeRow<T>(result[0] as Record<string, unknown>)
   }
 }
