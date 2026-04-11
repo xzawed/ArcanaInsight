@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const code = searchParams.get("code")
-  const next = searchParams.get("next") ?? "/"
+  const rawNext = searchParams.get("next") ?? "/"
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/"
   const error = searchParams.get("error")
   const errorDescription = searchParams.get("error_description")
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin

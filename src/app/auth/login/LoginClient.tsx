@@ -19,7 +19,11 @@ export default function LoginClient({ useNextAuth }: Props) {
   const handleLogin = async () => {
     setLoginError(null)
     if (useNextAuth) {
-      await signIn("google", { callbackUrl: "/" })
+      try {
+        await signIn("google", { callbackUrl: "/" })
+      } catch (e) {
+        setLoginError(e instanceof Error ? e.message : "로그인에 실패했습니다")
+      }
       return
     }
     const supabase = createClient()
