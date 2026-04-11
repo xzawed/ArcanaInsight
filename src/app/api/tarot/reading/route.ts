@@ -6,6 +6,7 @@ import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
+import { getDb } from "@/lib/db";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -49,16 +50,7 @@ export async function POST(request: NextRequest) {
       selectedCards, chatHistory: [], topic,
     });
 
-    // Supabase 클라이언트를 스트림 시작 전에 미리 생성 (cookies()는 스트림 밖에서 호출해야 함)
-    let supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
-    if (sessionId) {
-      try {
-        const { createClient } = await import("@/lib/supabase/server");
-        supabase = await createClient();
-      } catch (e) {
-        console.warn("Supabase 클라이언트 생성 실패 (리딩은 계속 진행):", e);
-      }
-    }
+    const db = sessionId ? getDb() : null
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -78,21 +70,27 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음)
-          if (supabase && sessionId) {
+          if (db && sessionId) {
             Promise.all([
-              supabase.from("readings").insert({
-                session_id: sessionId, card_interpretation: result.cardInterpretations,
-                overall_reading: result.overallReading, advice: result.advice,
+              db.insert("readings", {
+                session_id: sessionId,
+                card_interpretation: result.cardInterpretations,
+                overall_reading: result.overallReading,
+                advice: result.advice,
               }),
-              supabase.from("sessions").update({
-                status: "completed", completed_at: new Date().toISOString(),
-              }).eq("id", sessionId),
-              supabase.from("session_cards").insert(
+              db.update("sessions", { id: sessionId }, {
+                status: "completed",
+                completed_at: new Date().toISOString(),
+              }),
+              db.insertMany("session_cards",
                 cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
-                  session_id: sessionId, card_id: c.cardId, position: c.position, is_reversed: c.isReversed,
+                  session_id: sessionId,
+                  card_id: c.cardId,
+                  position: c.position,
+                  is_reversed: c.isReversed,
                 }))
               ),
-            ]).catch((e) => console.error("타로 DB 저장 실패:", e));
+            ]).catch((e) => console.error("타로 DB 저장 실패:", e))
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);

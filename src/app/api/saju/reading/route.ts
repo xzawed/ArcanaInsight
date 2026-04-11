@@ -4,6 +4,7 @@ import { FallbackProvider } from "@/services/core/fallback-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
+import { getDb } from "@/lib/db";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
@@ -62,16 +63,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = sajuService.getSystemPrompt(characterId);
     const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo);
 
-    // Supabase 클라이언트 (스트림 밖에서 미리 생성)
-    let supabase: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
-    if (sessionId) {
-      try {
-        const { createClient } = await import("@/lib/supabase/server");
-        supabase = await createClient();
-      } catch (e) {
-        console.warn("Supabase 클라이언트 생성 실패:", e);
-      }
-    }
+    const db = sessionId ? getDb() : null
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -93,9 +85,9 @@ export async function POST(request: NextRequest) {
             sajuData: sajuResult,
           })}\n\n`));
 
-          if (supabase && sessionId) {
+          if (db && sessionId) {
             Promise.all([
-              supabase.from("saju_readings").insert({
+              db.insert("saju_readings", {
                 session_id: sessionId,
                 birth_date: userInfo.birthDate,
                 birth_hour: userInfo.birthHour,
@@ -116,10 +108,11 @@ export async function POST(request: NextRequest) {
                 topic_reading: result.topicReading || "",
                 advice: result.advice,
               }),
-              supabase.from("sessions").update({
-                status: "completed", completed_at: new Date().toISOString(),
-              }).eq("id", sessionId),
-            ]).catch((e) => console.error("사주 DB 저장 실패:", e));
+              db.update("sessions", { id: sessionId }, {
+                status: "completed",
+                completed_at: new Date().toISOString(),
+              }),
+            ]).catch((e) => console.error("사주 DB 저장 실패:", e))
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);
