@@ -92,8 +92,9 @@ src/
 │   │   │   └── favorite-character/ # 선호 상담사 설정 API (POST)
 │   │   ├── saju/               # 사주 API 라우트 (session, reading SSE, result/[id])
 │   │   ├── shinjeom/           # 신점 API 라우트 (session, message SSE)
-│   │   └── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
-│   ├── auth/                   # 로그인, OAuth 콜백, NextAuth API 라우트 ([...nextauth]/)
+│   │   ├── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
+│   │   └── auth/[...nextauth]/ # NextAuth.js v5 API 라우트 (PostgreSQL 모드 전용)
+│   ├── auth/                   # 로그인, OAuth 콜백
 │   ├── character/[id]/         # 캐릭터 상세 페이지
 │   ├── mypage/                 # 리딩 히스토리, 대시보드, 선호 상담사 설정 (FavoriteCharacterSelector.tsx)
 │   ├── privacy/                # 개인정보처리방침
@@ -118,10 +119,9 @@ src/
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
 │   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (5탭), ThemeProvider, FocusReset
-│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링)
+│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링), Icon
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
-│   ├── skin/                   # SkinSelector
-│   └── tarot/                  # (현재 비어있음 — 타로 전용 컴포넌트는 card/, components/home/ 등에 분산)
+│   └── skin/                   # SkinSelector
 ├── data/
 │   ├── cards/                  # 메이저 22장 (major-arcana.ts) + 마이너 56장 (minor-arcana.ts) + symbols.ts
 │   ├── characters/             # 12캐릭터 설정 (index.ts), 대기 대사 (waiting-lines.ts)
@@ -129,7 +129,8 @@ src/
 │   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (시간단위 7개+분석영역 8개)
 │   ├── skins/                  # index.ts (6종 스킨 정의)
 │   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
-│   └── birth-hours.ts          # 12시진 데이터
+│   ├── birth-hours.ts          # 12시진 데이터
+│   └── error-messages.ts       # API 에러 메시지 상수
 ├── hooks/                      # Zustand 스토어 + 공통 훅
 │   ├── useCardAnimation.ts     # 카드 애니메이션 상태
 │   ├── useCharacter.ts         # 캐릭터 선택 상태
@@ -200,6 +201,7 @@ scripts/                        # 유틸리티 스크립트
 ├── generate-nukki-images.mjs   # 누끼(배경제거) 이미지 생성
 ├── generate-placeholders.sh    # 플레이스홀더 이미지 생성
 ├── generate-skin-images.ts     # 카드 스킨 이미지 생성 (Grok 이미지 API)
+├── generate-icons.ts           # 아이콘 이미지 생성 (BFS 배경 제거 + 콘텐츠 크롭)
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 ├── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 └── download-skin-images.ts     # Supabase Storage → public/images/skins/ 1회성 다운로드 (PostgreSQL 전환 시)
@@ -692,7 +694,7 @@ git push origin main
 
 | 영역 | SuperGrok (xAI) | Claude CLI (Anthropic) |
 |------|-----------------|----------------------|
-| **기획/설계/검토** | — | Claude CLI가 자체 수행 (6단계 프로세스) |
+| **기획/설계/검토** | — | Claude CLI가 자체 수행 (7단계 프로세스) |
 | **코드 구현** | — | Claude CLI가 수행 |
 | **프로덕션 AI** | Grok API (타로/사주 리딩, SSE 스트리밍) | — |
 | **이미지 생성** | Grok 이미지 API (캐릭터, 카드 스킨, 배경) | 생성된 이미지를 코드에 통합 |
