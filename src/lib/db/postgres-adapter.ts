@@ -98,13 +98,17 @@ export class PostgresAdapter implements DbClient {
   async upsert<T>(table: string, data: Record<string, unknown>, conflictOn: string): Promise<T> {
     const db = getConnection()
     const t = resolveTable(table)
-    const conflictCols = conflictOn.split(",").map((c) => {
-      const key = c.trim()
+    const conflictKeys = new Set(conflictOn.split(",").map((k) => k.trim()))
+    const conflictCols = Array.from(conflictKeys).map((key) => {
       const col = (t as unknown as Record<string, unknown>)[key]
         ?? (t as unknown as Record<string, unknown>)[snakeToCamel(key)]
       if (!col) throw new Error(`Unknown conflict column: ${key}`)
       return col as PgColumn<ColumnBaseConfig<ColumnDataType, string>>
     })
+    // conflict 컬럼은 SET 절에서 제외 (PostgreSQL 제약)
+    const updateValues = Object.fromEntries(
+      Object.entries(data).filter(([k]) => !conflictKeys.has(k))
+    )
     const result = await db
       .insert(t)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,7 +116,7 @@ export class PostgresAdapter implements DbClient {
       .onConflictDoUpdate({
         target: conflictCols,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        set: data as any,
+        set: updateValues as any,
       })
       .returning()
     if (!result[0]) throw new Error(`Upsert failed for table: ${table}`)

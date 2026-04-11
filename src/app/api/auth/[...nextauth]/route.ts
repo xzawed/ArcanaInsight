@@ -1,3 +1,17 @@
-import { handlers } from "@/lib/auth/nextauth"
+import { NextRequest, NextResponse } from "next/server"
 
-export const { GET, POST } = handlers
+export async function GET(req: NextRequest) {
+  if (process.env.DB_PROVIDER !== "postgres") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+  const { handlers } = await import("@/lib/auth/nextauth")
+  return handlers.GET(req)
+}
+
+export async function POST(req: NextRequest) {
+  if (process.env.DB_PROVIDER !== "postgres") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+  const { handlers } = await import("@/lib/auth/nextauth")
+  return handlers.POST(req)
+}

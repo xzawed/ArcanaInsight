@@ -11,29 +11,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    async signIn({ user }) {
-      if (!user.id || !user.email) return false
-      try {
-        const db = getDb()
-        await db.upsert(
-          "profiles",
-          {
-            id: user.id,
-            email: user.email,
-            nickname: user.name ?? user.email.split("@")[0],
-            avatar_url: user.image ?? null,
-            provider: "google",
-          },
-          "id"
-        )
-      } catch (e) {
-        console.error("profiles upsert 실패:", e)
-        // 프로필 저장 실패해도 로그인은 허용
+    // First sign-in: user and account are both present
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        try {
+          const db = getDb()
+          // 이메일로 기존 프로필 조회 — 재로그인 시 동일 UUID 재사용
+          const existing = await db.findOne<{ id: string }>("profiles", { email: user.email! })
+          const profileId = existing?.id ?? crypto.randomUUID()
+          await db.upsert(
+            "profiles",
+            {
+              id: profileId,
+              email: user.email,
+              nickname: user.name ?? user.email!.split("@")[0],
+              avatar_url: user.image ?? null,
+              provider: "google",
+            },
+            "id"
+          )
+          token.sub = profileId
+        } catch (e) {
+          console.error("profiles upsert 실패:", e)
+          // 프로필 저장 실패해도 로그인은 허용 — token.sub는 Google sub 유지
+        }
       }
-      return true
-    },
-    async jwt({ token, user }) {
-      if (user?.id) token.sub = user.id
       return token
     },
     async session({ session, token }) {
