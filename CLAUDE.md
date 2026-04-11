@@ -6,7 +6,7 @@
 
 ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 카드를 선택하거나 사주 정보를 입력하면, Grok AI가 해석을 제공하는 웹 애플리케이션입니다. 타로·사주·신점 3개 서비스를 운영 중이며, 오늘의 운세 등 추가 확장 가능한 모듈 구조입니다.
 
-> **선호 상담사 자동 선택**: 마이페이지에서 선호 상담사를 설정하면, 이후 타로·사주·신점 진입 시 character-select 단계를 자동으로 스킵합니다. 캐릭터 상세 페이지는 `?character=xxx` URL 파라미터로 이동하며, 홈 등 직접 접속 시에는 `useFavoriteCharacter` 훅이 Supabase에서 조회 후 fallback 처리합니다.
+> **선호 상담사 자동 선택**: 마이페이지에서 선호 상담사를 설정하면, 이후 타로·사주·신점 진입 시 character-select 단계를 자동으로 스킵합니다. 캐릭터 상세 페이지는 `?character=xxx` URL 파라미터로 이동하며, 홈 등 직접 접속 시에는 `useFavoriteCharacter` 훅이 DB에서 조회 후 fallback 처리합니다.
 
 ### 서비스 흐름
 
@@ -72,8 +72,8 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
 - **애니메이션**: Framer Motion v12.38
 - **AI**: Grok API (xAI) 우선 + Claude API (Anthropic) 자동 fallback — `src/services/core/fallback-provider.ts`에서 관리
-- **인증**: Supabase Auth Helpers (구글)
-- **데이터베이스**: Supabase (PostgreSQL)
+- **인증**: Supabase Auth Helpers (구글) / NextAuth.js v5 (DB_PROVIDER별 자동 전환)
+- **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
@@ -87,12 +87,13 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 src/
 ├── app/                        # Next.js App Router 페이지 & API
 │   ├── api/
-│   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + Supabase 캐시)
+│   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + DB 캐시)
 │   │   ├── profile/
 │   │   │   └── favorite-character/ # 선호 상담사 설정 API (POST)
 │   │   ├── saju/               # 사주 API 라우트 (session, reading SSE, result/[id])
 │   │   ├── shinjeom/           # 신점 API 라우트 (session, message SSE)
-│   │   └── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
+│   │   ├── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
+│   │   └── auth/[...nextauth]/ # NextAuth.js v5 API 라우트 (PostgreSQL 모드 전용)
 │   ├── auth/                   # 로그인, OAuth 콜백
 │   ├── character/[id]/         # 캐릭터 상세 페이지
 │   ├── mypage/                 # 리딩 히스토리, 대시보드, 선호 상담사 설정 (FavoriteCharacterSelector.tsx)
@@ -118,10 +119,9 @@ src/
 │   ├── home/                   # HeroSection, CharacterGallery, ServiceFlow, DailyCard,
 │   │                           # GenderFilter, SkinGallery, ReviewCarousel, StatsCounter, FAQ, BottomCTA
 │   ├── layout/                 # Header (스크롤/드롭다운), Footer, MobileNav (5탭), ThemeProvider, FocusReset
-│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링)
+│   ├── common/                 # UserInfoForm (개인정보 입력), PrivacyConsentModal (동의), ReadingText (단락 분리 렌더링), Icon
 │   ├── saju/                   # SajuChart, OhaengGraph, DaeunTimeline
-│   ├── skin/                   # SkinSelector
-│   └── tarot/                  # (현재 비어있음 — 타로 전용 컴포넌트는 card/, components/home/ 등에 분산)
+│   └── skin/                   # SkinSelector
 ├── data/
 │   ├── cards/                  # 메이저 22장 (major-arcana.ts) + 마이너 56장 (minor-arcana.ts) + symbols.ts
 │   ├── characters/             # 12캐릭터 설정 (index.ts), 대기 대사 (waiting-lines.ts)
@@ -129,11 +129,12 @@ src/
 │   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (시간단위 7개+분석영역 8개)
 │   ├── skins/                  # index.ts (6종 스킨 정의)
 │   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
-│   └── birth-hours.ts          # 12시진 데이터
+│   ├── birth-hours.ts          # 12시진 데이터
+│   └── error-messages.ts       # API 에러 메시지 상수
 ├── hooks/                      # Zustand 스토어 + 공통 훅
 │   ├── useCardAnimation.ts     # 카드 애니메이션 상태
 │   ├── useCharacter.ts         # 캐릭터 선택 상태
-│   ├── useFavoriteCharacter.ts # 선호 상담사 조회 훅 (Supabase, skip 파라미터로 fetch 생략 가능)
+│   ├── useFavoriteCharacter.ts # 선호 상담사 조회 훅 (클라이언트 Supabase 직접 조회, skip 파라미터로 fetch 생략 가능)
 │   ├── useGenderStore.ts       # 성별 필터 상태
 │   ├── useSajuSession.ts       # 사주 세션 상태
 │   ├── useSession.ts           # 타로 세션 상태
@@ -200,6 +201,7 @@ scripts/                        # 유틸리티 스크립트
 ├── generate-nukki-images.mjs   # 누끼(배경제거) 이미지 생성
 ├── generate-placeholders.sh    # 플레이스홀더 이미지 생성
 ├── generate-skin-images.ts     # 카드 스킨 이미지 생성 (Grok 이미지 API)
+├── generate-icons.ts           # 아이콘 이미지 생성 (BFS 배경 제거 + 콘텐츠 크롭)
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
 ├── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
 └── download-skin-images.ts     # Supabase Storage → public/images/skins/ 1회성 다운로드 (PostgreSQL 전환 시)
@@ -234,6 +236,9 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
 ├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
 └── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+# PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
+
+drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
 ```
 
 ## 캐릭터 시스템
@@ -300,7 +305,7 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
   - 모든 API 라우트는 `createClient()` 대신 `getDb()` + `getCurrentUser()` 사용 — 로직 변경 없음
   - 롤백: Railway 환경변수에서 `DB_PROVIDER=supabase`로 되돌리면 즉시 복귀 (재배포 불필요)
 
-- **선호 상담사 자동 선택 패턴**: `useFavoriteCharacter(skip)` 훅이 Supabase에서 `profiles.favorite_character_id` 조회. 캐릭터 상세 페이지 진입 시 `?character=xxx` URL 파라미터로 character-select 스킵(타로·사주·신점 모두 지원). 홈 직접 접속 시에는 `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략.
+- **선호 상담사 자동 선택 패턴**: `useFavoriteCharacter(skip)` 훅이 클라이언트 Supabase에서 `profiles.favorite_character_id` 조회 (현재 Supabase 직접 사용, DB_PROVIDER 미적용). 캐릭터 상세 페이지 진입 시 `?character=xxx` URL 파라미터로 character-select 스킵(타로·사주·신점 모두 지원). 홈 직접 접속 시에는 `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략.
 - **DivinationService 인터페이스**: 모든 운세 서비스는 이 인터페이스를 구현. 새 서비스 추가 = 구현체 + 프롬프트 + API 라우트 + 페이지
 - **AIProvider 추상화 + Fallback**: `FallbackProvider`가 Grok API 우선 호출 → 실패 시 Claude API로 자동 전환. `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용
   - 429 Rate Limit: Retry-After 기반 쿨다운 (기본 30초)
@@ -689,7 +694,7 @@ git push origin main
 
 | 영역 | SuperGrok (xAI) | Claude CLI (Anthropic) |
 |------|-----------------|----------------------|
-| **기획/설계/검토** | — | Claude CLI가 자체 수행 (6단계 프로세스) |
+| **기획/설계/검토** | — | Claude CLI가 자체 수행 (7단계 프로세스) |
 | **코드 구현** | — | Claude CLI가 수행 |
 | **프로덕션 AI** | Grok API (타로/사주 리딩, SSE 스트리밍) | — |
 | **이미지 생성** | Grok 이미지 API (캐릭터, 카드 스킨, 배경) | 생성된 이미지를 코드에 통합 |
