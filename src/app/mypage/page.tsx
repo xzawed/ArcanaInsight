@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
+import { getDb } from "@/lib/db";
 import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
@@ -126,48 +127,56 @@ function getMostFrequentCard(sessionCards: SessionCard[]): string | null {
 }
 
 export default async function MyPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  // 1. 프로필 + 세션 조회 (리딩이 있는 세션도 포함하기 위해 completed + in_progress 모두 조회)
-  const [profileRes, sessionsRes] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, email, nickname, avatar_url, provider, favorite_character_id")
-      .eq("id", user.id)
-      .single<Profile>(),
-    supabase
-      .from("sessions")
-      .select("id, service_type, topic, status, created_at, character_id, readings(id, share_token, overall_reading), saju_readings(id, share_token, overall_reading), shinjeom_readings(id, share_token, overall_reading)")
-      .eq("user_id", user.id)
-      .in("status", ["completed", "in_progress"])
-      .order("created_at", { ascending: false })
-      .limit(50),
+  const db = getDb();
+
+  // 1. 프로필 + 전체 세션 병렬 조회
+  const [profile, allRawSessions] = await Promise.all([
+    db.findOne<Profile>("profiles", { id: user.id }).catch(() => null),
+    db.findMany<SessionRow>("sessions", { user_id: user.id }).catch(() => [] as SessionRow[]),
   ]);
 
-  const profile = profileRes.data;
-  const profileError = profileRes.error;
-  const rawSessions = (sessionsRes.data ?? []) as SessionRow[];
-  const sessionsError = sessionsRes.error;
+  const profileError: { message: string } | null = !profile ? { message: "프로필을 불러올 수 없습니다" } : null;
+
+  // status 필터 + 최신순 정렬 (DB Provider별 ORDER BY 미지원이므로 JS에서 처리)
+  const filtered = (allRawSessions as SessionRow[])
+    .filter((s) => s.status === "completed" || s.status === "in_progress")
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 50);
+
+  // 2. 각 세션의 리딩 병렬 조회 (service_type별 테이블 분기)
+  const withReadings = await Promise.all(
+    filtered.map(async (session) => {
+      const table =
+        session.service_type === "saju" ? "saju_readings" :
+        session.service_type === "shinjeom" ? "shinjeom_readings" :
+        "readings";
+      const reading = await db.findOne<ReadingData>(table, { session_id: session.id }).catch(() => null);
+      return {
+        ...session,
+        readings: session.service_type === "tarot" ? (reading ?? null) : null,
+        saju_readings: session.service_type === "saju" ? (reading ?? null) : null,
+        shinjeom_readings: session.service_type === "shinjeom" ? (reading ?? null) : null,
+      } as SessionRow;
+    })
+  );
 
   // completed 세션 + 리딩이 있는 in_progress 세션 (상태 업데이트 누락 복구)
-  const sessionList = rawSessions.filter((s) => {
+  const sessionList = withReadings.filter((s) => {
     if (s.status === "completed") return true;
     return !!getReadingFromSession(s);
   }).slice(0, 20);
 
-  // 2. 세션 ID 목록으로 session_cards 조회 (별도 쿼리)
+  // 3. 세션 ID 목록으로 session_cards 병렬 조회 (DbClient IN 미지원 → 세션별 병렬)
   const sessionIds = sessionList.map((s) => s.id);
   let sessionCards: SessionCard[] = [];
   if (sessionIds.length > 0) {
-    const cardsRes = await supabase
-      .from("session_cards")
-      .select("card_id")
-      .in("session_id", sessionIds);
-    sessionCards = (cardsRes.data ?? []) as SessionCard[];
+    const cardsResults = await Promise.all(
+      sessionIds.map((id) => db.findMany<SessionCard>("session_cards", { session_id: id }).catch(() => []))
+    );
+    sessionCards = cardsResults.flat();
   }
 
   const totalReadings = sessionList.length;
@@ -188,14 +197,10 @@ export default async function MyPage() {
 
       <div className="max-w-2xl mx-auto px-4 py-8 relative">
         {/* DB 에러 안내 */}
-        {(profileError || sessionsError) && (
+        {profileError && (
           <div className="mb-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
             <p className="font-bold">데이터를 불러오는 중 문제가 발생했습니다</p>
-            <p className="mt-1 text-xs text-red-400/70">
-              {profileError && `프로필: ${profileError.message}`}
-              {profileError && sessionsError && " / "}
-              {sessionsError && `히스토리: ${sessionsError.message}`}
-            </p>
+            <p className="mt-1 text-xs text-red-400/70">{profileError.message}</p>
           </div>
         )}
 
@@ -214,7 +219,7 @@ export default async function MyPage() {
                 </p>
               )}
             </div>
-            <LogoutButton />
+            <LogoutButton useNextAuth={process.env.DB_PROVIDER === "postgres"} />
           </div>
         </div>
 

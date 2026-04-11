@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { getDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
@@ -9,12 +9,33 @@ import type { SajuResult } from "@/services/saju/saju-types";
 
 export default async function SajuResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: reading } = await supabase
-    .from("saju_readings")
-    .select("*")
-    .eq("share_token", id)
-    .single();
+  interface SajuReadingRow {
+    id: string;
+    session_id: string;
+    share_token: string | null;
+    birth_date: string;
+    birth_hour: string;
+    gender: string;
+    birth_name: string | null;
+    pillars: unknown;
+    day_master: string;
+    day_master_element: string;
+    is_strong: boolean;
+    elements: unknown;
+    ten_stars: unknown;
+    twelve_stages: unknown;
+    interactions: unknown;
+    yongsin: unknown;
+    major_fortunes: unknown;
+    yearly_fortune: unknown;
+    overall_reading: string;
+    topic_reading: string;
+    advice: string;
+    created_at: string;
+  }
+
+  const db = getDb();
+  const reading = await db.findOne<SajuReadingRow>("saju_readings", { share_token: id });
 
   if (!reading) notFound();
 
@@ -24,17 +45,17 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
   const birthYear = new Date(reading.birth_date).getFullYear();
 
   const sajuData: SajuResult = {
-    pillars: reading.pillars,
+    pillars: reading.pillars as SajuResult["pillars"],
     dayMaster: reading.day_master,
-    dayMasterElement: reading.day_master_element,
+    dayMasterElement: reading.day_master_element as unknown as SajuResult["dayMasterElement"],
     isStrong: reading.is_strong,
-    elements: reading.elements,
-    tenStars: reading.ten_stars,
-    twelveStages: reading.twelve_stages,
-    interactions: reading.interactions,
-    yongsin: reading.yongsin,
-    majorFortunes: reading.major_fortunes,
-    yearlyFortune: reading.yearly_fortune,
+    elements: reading.elements as SajuResult["elements"],
+    tenStars: reading.ten_stars as SajuResult["tenStars"],
+    twelveStages: reading.twelve_stages as SajuResult["twelveStages"],
+    interactions: reading.interactions as SajuResult["interactions"],
+    yongsin: reading.yongsin as SajuResult["yongsin"],
+    majorFortunes: reading.major_fortunes as SajuResult["majorFortunes"],
+    yearlyFortune: reading.yearly_fortune as SajuResult["yearlyFortune"],
   };
 
   return (

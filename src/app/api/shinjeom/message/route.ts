@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
+import { getDb } from "@/lib/db";
 
 
 const shinjeomService = new ShinjeomService();
@@ -17,23 +18,22 @@ async function saveToDb(sessionId: string | null | undefined, params: {
 }) {
   if (!sessionId) return;
   try {
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-
+    const db = getDb();
     if (params.isFinalTurn && params.result) {
       await Promise.all([
-        supabase.from("shinjeom_readings").insert({
+        db.insert("shinjeom_readings", {
           session_id: sessionId,
           overall_reading: params.result.overallReading,
           topic_reading: params.result.topicReading || "",
           advice: params.result.advice,
         }),
-        supabase.from("sessions").update({
-          status: "completed", completed_at: new Date().toISOString(),
-        }).eq("id", sessionId),
+        db.update("sessions", { id: sessionId }, {
+          status: "completed",
+          completed_at: new Date().toISOString(),
+        }),
       ]);
     } else if (params.currentMessage && params.fullResponse && params.messageIndex !== undefined) {
-      await supabase.from("shinjeom_messages").insert([
+      await db.insertMany("shinjeom_messages", [
         { session_id: sessionId, role: "user", content: params.currentMessage, message_index: params.messageIndex },
         { session_id: sessionId, role: "character", content: params.fullResponse, message_index: params.messageIndex + 1 },
       ]);

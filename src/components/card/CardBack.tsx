@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { getCardBackUrl } from "@/lib/supabase/storage";
+import { getCardBackUrl } from "@/lib/storage";
 
 interface CardBackProps {
   size?: "sm" | "md" | "lg";

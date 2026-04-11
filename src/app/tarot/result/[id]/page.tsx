@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { getDb } from "@/lib/db";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { spreads } from "@/data/spreads";
@@ -11,13 +11,28 @@ import { ReadingText } from "@/components/common/ReadingText";
 
 const deckManager = new DeckManager();
 
+interface ReadingRow {
+  id: string;
+  session_id: string;
+  share_token: string | null;
+  card_interpretation: unknown;
+  overall_reading: string | null;
+  advice: string | null;
+  created_at: string;
+}
+
+interface SessionRow {
+  id: string;
+  spread_type: string | null;
+}
+
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: reading } = await supabase.from("readings").select("*, sessions(*)").eq("share_token", id).single();
+  const db = getDb();
+  const reading = await db.findOne<ReadingRow>("readings", { share_token: id });
   if (!reading) notFound();
-  const session = reading.sessions;
-  const spreadType = session?.spread_type as SpreadType | undefined;
+  const session = await db.findOne<SessionRow>("sessions", { id: reading.session_id });
+  const spreadType = (session?.spread_type ?? undefined) as SpreadType | undefined;
   const spread = spreadType ? spreads[spreadType] : undefined;
   const rawInterpretations = Array.isArray(reading.card_interpretation)
     ? (reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[])
