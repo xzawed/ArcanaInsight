@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getDb } from "@/lib/db";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getCharacterById } from "@/data/characters";
@@ -32,13 +32,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 캐시 확인
-    const supabase = await createClient();
-    const { data: cached } = await supabase
-      .from("daily_cards")
-      .select("*")
-      .eq("date", date)
-      .eq("character_id", characterId)
-      .single();
+    const db = getDb()
+    const cached = await db.findOne<{
+      card_id: string; is_reversed: boolean; interpretation: string; keywords: string[]
+    }>("daily_cards", { date, character_id: characterId });
 
     if (cached) {
       return NextResponse.json({
@@ -76,14 +73,14 @@ export async function POST(request: NextRequest) {
     const keywords = meanings.keywords.slice(0, 3);
 
     // 캐시 저장 (동시 요청 시 중복 방지 — 충돌 무시)
-    await supabase.from("daily_cards").upsert({
+    await db.upsert("daily_cards", {
       date,
       character_id: characterId,
       card_id: card.id,
       is_reversed: isReversed,
       interpretation,
       keywords,
-    }, { onConflict: "date,character_id" });
+    }, "date,character_id");
 
     return NextResponse.json({ cardId: card.id, isReversed, interpretation, keywords });
   } catch (error) {
