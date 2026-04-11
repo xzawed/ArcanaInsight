@@ -5,11 +5,11 @@ import { getCharacterById } from "@/data/characters"
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireUser()
     const { characterId } = (await request.json()) as { characterId: string | null }
     if (characterId !== null && !getCharacterById(characterId)) {
       return NextResponse.json({ error: "Invalid character" }, { status: 400 })
     }
-    const user = await requireUser()
     const db = getDb()
     await db.update("profiles", { id: user.id }, { favorite_character_id: characterId })
     return NextResponse.json({ success: true })
