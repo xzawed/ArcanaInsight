@@ -6,7 +6,7 @@
 
 ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 카드를 선택하거나 사주 정보를 입력하면, Grok AI가 해석을 제공하는 웹 애플리케이션입니다. 타로·사주·신점 3개 서비스를 운영 중이며, 오늘의 운세 등 추가 확장 가능한 모듈 구조입니다.
 
-> **선호 상담사 자동 선택**: 마이페이지에서 선호 상담사를 설정하면, 이후 타로·사주·신점 진입 시 character-select 단계를 자동으로 스킵합니다. 캐릭터 상세 페이지는 `?character=xxx` URL 파라미터로 이동하며, 홈 등 직접 접속 시에는 `useFavoriteCharacter` 훅이 Supabase에서 조회 후 fallback 처리합니다.
+> **선호 상담사 자동 선택**: 마이페이지에서 선호 상담사를 설정하면, 이후 타로·사주·신점 진입 시 character-select 단계를 자동으로 스킵합니다. 캐릭터 상세 페이지는 `?character=xxx` URL 파라미터로 이동하며, 홈 등 직접 접속 시에는 `useFavoriteCharacter` 훅이 DB에서 조회 후 fallback 처리합니다.
 
 ### 서비스 흐름
 
@@ -72,8 +72,8 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **스타일링**: Tailwind CSS v4 (CSS-based `@theme` config)
 - **애니메이션**: Framer Motion v12.38
 - **AI**: Grok API (xAI) 우선 + Claude API (Anthropic) 자동 fallback — `src/services/core/fallback-provider.ts`에서 관리
-- **인증**: Supabase Auth Helpers (구글)
-- **데이터베이스**: Supabase (PostgreSQL)
+- **인증**: Supabase Auth Helpers (구글) / NextAuth.js v5 (DB_PROVIDER별 자동 전환)
+- **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
@@ -87,13 +87,13 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 src/
 ├── app/                        # Next.js App Router 페이지 & API
 │   ├── api/
-│   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + Supabase 캐시)
+│   │   ├── daily-card/         # 캐릭터별 일일 카드 API (Grok AI + DB 캐시)
 │   │   ├── profile/
 │   │   │   └── favorite-character/ # 선호 상담사 설정 API (POST)
 │   │   ├── saju/               # 사주 API 라우트 (session, reading SSE, result/[id])
 │   │   ├── shinjeom/           # 신점 API 라우트 (session, message SSE)
 │   │   └── tarot/              # 타로 API 라우트 (session, reading SSE, result/[id])
-│   ├── auth/                   # 로그인, OAuth 콜백
+│   ├── auth/                   # 로그인, OAuth 콜백, NextAuth API 라우트 ([...nextauth]/)
 │   ├── character/[id]/         # 캐릭터 상세 페이지
 │   ├── mypage/                 # 리딩 히스토리, 대시보드, 선호 상담사 설정 (FavoriteCharacterSelector.tsx)
 │   ├── privacy/                # 개인정보처리방침
@@ -133,7 +133,7 @@ src/
 ├── hooks/                      # Zustand 스토어 + 공통 훅
 │   ├── useCardAnimation.ts     # 카드 애니메이션 상태
 │   ├── useCharacter.ts         # 캐릭터 선택 상태
-│   ├── useFavoriteCharacter.ts # 선호 상담사 조회 훅 (Supabase, skip 파라미터로 fetch 생략 가능)
+│   ├── useFavoriteCharacter.ts # 선호 상담사 조회 훅 (클라이언트 Supabase 직접 조회, skip 파라미터로 fetch 생략 가능)
 │   ├── useGenderStore.ts       # 성별 필터 상태
 │   ├── useSajuSession.ts       # 사주 세션 상태
 │   ├── useSession.ts           # 타로 세션 상태
@@ -141,7 +141,20 @@ src/
 │   ├── useSkinStore.ts         # 카드 스킨 선택 상태 (persist)
 │   ├── useSSEStream.ts         # SSE 스트림 공통 유틸
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
-├── lib/supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts)
+├── lib/
+│   ├── supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts) — Supabase 모드 전용
+│   ├── db/                     # DB 추상화 레이어
+│   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
+│   │   ├── types.ts            # DbClient 공통 인터페이스
+│   │   ├── supabase-adapter.ts # Supabase DbClient 구현
+│   │   ├── postgres-adapter.ts # Drizzle ORM DbClient 구현
+│   │   └── schema/index.ts     # Drizzle 스키마 (9개 마이그레이션 변환)
+│   ├── auth/                   # Auth 추상화 레이어
+│   │   ├── index.ts            # getCurrentUser() / requireUser() 공통 함수
+│   │   ├── supabase-auth.ts    # Supabase Auth 래핑
+│   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
+│   └── storage/
+│       └── index.ts            # getCardImageUrl() 등 provider별 카드 이미지 URL
 ├── services/
 │   ├── core/                   # ai-provider.ts (re-export), grok-provider.ts (Grok API),
 │   │                           # claude-provider.ts (Claude API fallback),
@@ -150,7 +163,8 @@ src/
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
 │   ├── shinjeom/               # shinjeom-service.ts (무제한 대화형, isFinalTurn 플래그로 결과 요청)
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
-└── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
+├── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
+│   └── next-auth.d.ts          # NextAuth Session 타입 확장 (user.id 추가)
 
 public/images/
 ├── backgrounds/                # 페이지별 배경 이미지 (hero-bg, session-bg, result-bg 등)
@@ -187,7 +201,8 @@ scripts/                        # 유틸리티 스크립트
 ├── generate-placeholders.sh    # 플레이스홀더 이미지 생성
 ├── generate-skin-images.ts     # 카드 스킨 이미지 생성 (Grok 이미지 API)
 ├── regenerate-all-nukki.mjs    # 전체 캐릭터 누끼 재생성
-└── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
+├── upload-skin-images.ts       # 생성된 스킨 이미지를 Supabase Storage에 업로드
+└── download-skin-images.ts     # Supabase Storage → public/images/skins/ 1회성 다운로드 (PostgreSQL 전환 시)
 
 e2e/                            # Playwright E2E 테스트 (19개 파일, 3개 디바이스)
 ├── home.spec.ts                # 홈 페이지 섹션 검증
@@ -219,6 +234,9 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
 ├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
 └── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+# PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
+
+drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
 ```
 
 ## 캐릭터 시스템
@@ -278,7 +296,14 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 
 ## 핵심 아키텍처 패턴
 
-- **선호 상담사 자동 선택 패턴**: `useFavoriteCharacter(skip)` 훅이 Supabase에서 `profiles.favorite_character_id` 조회. 캐릭터 상세 페이지 진입 시 `?character=xxx` URL 파라미터로 character-select 스킵(타로·사주·신점 모두 지원). 홈 직접 접속 시에는 `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략.
+- **DB Provider 추상화 패턴**: `DB_PROVIDER` 환경변수 하나로 Supabase ↔ 온프레미스 PostgreSQL 즉시 전환.
+  - `getDb()` (`src/lib/db/index.ts`): `DB_PROVIDER=postgres` → `PostgresAdapter` (Drizzle ORM), 그 외 → `SupabaseAdapter`
+  - `getCurrentUser()` / `requireUser()` (`src/lib/auth/index.ts`): postgres 모드 → NextAuth.js v5 `auth()`, supabase 모드 → `supabase.auth.getUser()`
+  - `getCardImageUrl()` (`src/lib/storage/index.ts`): postgres 모드 → `/images/skins/...` 정적 파일, supabase 모드 → Supabase Storage URL
+  - 모든 API 라우트는 `createClient()` 대신 `getDb()` + `getCurrentUser()` 사용 — 로직 변경 없음
+  - 롤백: Railway 환경변수에서 `DB_PROVIDER=supabase`로 되돌리면 즉시 복귀 (재배포 불필요)
+
+- **선호 상담사 자동 선택 패턴**: `useFavoriteCharacter(skip)` 훅이 클라이언트 Supabase에서 `profiles.favorite_character_id` 조회 (현재 Supabase 직접 사용, DB_PROVIDER 미적용). 캐릭터 상세 페이지 진입 시 `?character=xxx` URL 파라미터로 character-select 스킵(타로·사주·신점 모두 지원). 홈 직접 접속 시에는 `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략.
 - **DivinationService 인터페이스**: 모든 운세 서비스는 이 인터페이스를 구현. 새 서비스 추가 = 구현체 + 프롬프트 + API 라우트 + 페이지
 - **AIProvider 추상화 + Fallback**: `FallbackProvider`가 Grok API 우선 호출 → 실패 시 Claude API로 자동 전환. `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용
   - 429 Rate Limit: Retry-After 기반 쿨다운 (기본 30초)
@@ -373,7 +398,10 @@ docker run --rm \
 
 ## 환경 변수
 
+### Supabase 모드 (현재 기본값)
+
 ```
+DB_PROVIDER=supabase        # 또는 미설정 시 supabase가 기본값
 GROK_API_KEY=               # xAI Grok API 키 (1순위 AI)
 GROK_MODEL=grok-3           # 텍스트 생성 모델
 ANTHROPIC_API_KEY=          # Anthropic Claude API 키 (Grok 장애 시 자동 fallback)
@@ -382,6 +410,24 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase 익명 키
 SUPABASE_SERVICE_ROLE_KEY=  # Supabase 서비스 키 (서버 전용)
 NEXT_PUBLIC_SITE_URL=       # 사이트 URL
 ```
+
+### PostgreSQL 모드 (온프레미스 전환 시)
+
+```
+DB_PROVIDER=postgres
+GROK_API_KEY=               # 동일
+GROK_MODEL=grok-3           # 동일
+ANTHROPIC_API_KEY=          # 동일
+POSTGRES_URL=postgresql://user:password@host:5432/arcana
+NEXTAUTH_SECRET=            # openssl rand -base64 32
+NEXTAUTH_URL=               # 프로덕션 사이트 URL (예: https://arcana.example.com)
+GOOGLE_CLIENT_ID=           # 기존 Google OAuth 클라이언트 ID 재사용
+GOOGLE_CLIENT_SECRET=       # 기존 Google OAuth 클라이언트 시크릿 재사용
+NEXT_PUBLIC_SITE_URL=       # 동일
+```
+
+> **전환 방법**: Railway 환경변수에서 `DB_PROVIDER=postgres`로 변경 후 저장 (재배포 불필요). 롤백도 동일.
+> **Google Cloud Console**: PostgreSQL 모드 사용 시 Authorized redirect URI에 `{NEXTAUTH_URL}/api/auth/callback/google` 추가 필요.
 
 ## Git 브랜치 전략
 
