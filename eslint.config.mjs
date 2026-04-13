@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Git worktrees 빌드 아티팩트 제외
+    ".worktrees/**",
   ]),
 ]);
 
