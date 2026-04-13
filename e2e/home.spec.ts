@@ -14,12 +14,14 @@ test.describe("홈 페이지", () => {
   });
 
   test("HeroSection — CTA 버튼 2개 가시성", async ({ page }) => {
-    await expect(page.getByRole("link", { name: /타로 상담/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /오늘의 카드/i })).toBeVisible();
+    // HeroSection: "타로 상담 시작하기" 링크 + "오늘의 카드 뽑기" 버튼
+    await expect(page.getByRole("link", { name: "타로 상담 시작하기" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /오늘의 카드/i })).toBeVisible();
   });
 
   test("CharacterGallery — 캐릭터 카드 표시", async ({ page }) => {
-    const gallery = page.locator("text=상담사를 선택하세요").first();
+    // CharacterGallery 실제 heading: "당신의 상담사를 만나보세요"
+    const gallery = page.locator("text=당신의 상담사를 만나보세요").first();
     await gallery.scrollIntoViewIfNeeded();
 
     // 최소 12개 캐릭터 카드 존재
@@ -29,7 +31,7 @@ test.describe("홈 페이지", () => {
   });
 
   test("CharacterGallery — 성별 필터 동작", async ({ page }) => {
-    const gallery = page.locator("text=상담사를 선택하세요").first();
+    const gallery = page.locator("text=당신의 상담사를 만나보세요").first();
     await gallery.scrollIntoViewIfNeeded();
 
     // "여자" 필터 클릭
@@ -68,7 +70,8 @@ test.describe("홈 페이지", () => {
   });
 
   test("BottomCTA — 버튼 존재", async ({ page }) => {
-    const cta = page.locator("text=지금 시작하기").last();
+    // BottomCTA 실제 텍스트: "상담 시작하기"
+    const cta = page.locator("text=상담 시작하기").last();
     await cta.scrollIntoViewIfNeeded();
     await expect(cta).toBeVisible();
   });

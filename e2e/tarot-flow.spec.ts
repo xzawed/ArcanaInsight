@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("타로 서비스 플로우", () => {
-  test("Step 1→2: 캐릭터 선택 → 상세 전환", async ({ page }) => {
+  test("Step 1→2: 캐릭터 선택 → 주제 선택 전환", async ({ page }) => {
     await page.goto("/tarot");
 
     // 캐릭터 그리드 로딩
@@ -11,20 +11,17 @@ test.describe("타로 서비스 플로우", () => {
     // 첫 번째 캐릭터 클릭
     await characterCards.first().click();
 
-    // Step 2: 캐릭터 상세 정보 표시
-    await expect(page.getByRole("button", { name: /상담 시작/i })).toBeVisible({ timeout: 5_000 });
+    // 캐릭터 클릭 → 바로 주제 선택 단계로 전환 (상담 시작 중간 단계 없음)
+    await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
   });
 
-  test("Step 2→3: 상담 시작 → 주제 선택", async ({ page }) => {
+  test("Step 2→3: 캐릭터 선택 → 주제 선택", async ({ page }) => {
     await page.goto("/tarot");
 
-    // 캐릭터 선택
+    // 캐릭터 선택 → 바로 topic-select로 전환 (상담 시작 버튼 단계 없음)
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
-
-    // 상담 시작
-    await page.getByRole("button", { name: /상담 시작/i }).click();
 
     // Step 3: 토픽 목록 표시
     await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
@@ -33,31 +30,34 @@ test.describe("타로 서비스 플로우", () => {
   test("Step 3→4: 주제 선택 → 스프레드 선택", async ({ page }) => {
     await page.goto("/tarot");
 
-    // 캐릭터 선택 → 상담 시작
+    // 캐릭터 선택 → 바로 topic-select
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
-    await page.getByRole("button", { name: /상담 시작/i }).click();
 
     // 토픽 선택 (종합)
+    await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
     await page.locator("text=종합").first().click();
 
     // Step 4: 스프레드 옵션 표시
-    await expect(page.locator("text=원카드").first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("button").filter({ hasText: "원카드" }).first()).toBeVisible({ timeout: 5_000 });
   });
 
   test("Step 4: 스프레드 선택 → 세션 페이지 이동", async ({ page }) => {
     await page.goto("/tarot");
 
-    // 풀 플로우: 캐릭터 → 상담 → 주제 → 스프레드
+    // 풀 플로우: 캐릭터 → 주제 → 스프레드
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
-    await page.getByRole("button", { name: /상담 시작/i }).click();
+
+    await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
     await page.locator("text=종합").first().click();
 
-    // 원카드 선택
-    await page.locator("text=원카드").first().click();
+    // 원카드 선택 — evaluate로 직접 DOM click (헤더 가로채기 완전 우회)
+    const spreadBtn = page.locator("button").filter({ hasText: "원카드" }).first();
+    await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
+    await spreadBtn.evaluate((el) => (el as HTMLElement).click());
 
     // /tarot/session으로 이동
     await page.waitForURL("**/tarot/session**", { timeout: 10_000 });

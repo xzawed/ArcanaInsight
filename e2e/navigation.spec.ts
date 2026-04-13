@@ -15,14 +15,14 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
   });
 
   test("타로 상담 링크", async ({ page }) => {
-    const link = page.locator("nav a[href='/tarot']");
+    const link = page.locator("nav a[href='/tarot']").first();
     await expect(link).toBeVisible();
     await link.click();
     await page.waitForURL("**/tarot");
   });
 
   test("사주 상담 링크", async ({ page }) => {
-    const link = page.locator("nav a[href='/saju']");
+    const link = page.locator("nav a[href='/saju']").first();
     await expect(link).toBeVisible();
     await link.click();
     await page.waitForURL("**/saju");
@@ -42,19 +42,19 @@ test.describe("네비게이션 — Header 테마 드롭다운", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 테마 버튼 클릭
-    const themeBtn = page.locator("button[aria-label='테마 변경']");
+    // 테마 버튼 클릭 (데스크탑 헤더 버튼만, 모바일 헤더 버튼 제외)
+    const themeBtn = page.locator("button[aria-label='테마 변경']").first();
     await expect(themeBtn).toBeVisible();
     await themeBtn.click();
 
-    // 드롭다운 표시
-    const dropdown = page.locator("text=자동 (시간/계절)");
+    // 드롭다운 표시 (strict mode: 2개 요소 → first)
+    const dropdown = page.locator("text=자동 (시간/계절)").first();
     await expect(dropdown).toBeVisible({ timeout: 3000 });
 
-    // 테마 선택 (한밤의 신비)
-    const midnightOption = page.locator("text=한밤의 신비");
+    // 테마 선택 (한밤의 신비) — evaluate로 nextjs-portal 가로채기 우회
+    const midnightOption = page.locator("text=한밤의 신비").first();
     if (await midnightOption.isVisible()) {
-      await midnightOption.click();
+      await midnightOption.evaluate((el) => (el as HTMLElement).click());
     }
   });
 
@@ -79,7 +79,8 @@ test.describe("네비게이션 — Footer 링크", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    const footer = page.locator("footer");
+    // 앱 Footer만 선택 (Next.js error-overlay footer 제외)
+    const footer = page.locator("footer").first();
     await footer.scrollIntoViewIfNeeded();
     await expect(footer).toBeVisible();
 
@@ -91,7 +92,7 @@ test.describe("네비게이션 — Footer 링크", () => {
 
   test("Footer 약관 링크 클릭", async ({ page }) => {
     await page.goto("/");
-    const footer = page.locator("footer");
+    const footer = page.locator("footer").first();
     await footer.scrollIntoViewIfNeeded();
 
     const termsLink = footer.locator("a[href='/terms']");
@@ -102,7 +103,7 @@ test.describe("네비게이션 — Footer 링크", () => {
 
   test("Footer 개인정보 링크 클릭", async ({ page }) => {
     await page.goto("/");
-    const footer = page.locator("footer");
+    const footer = page.locator("footer").first();
     await footer.scrollIntoViewIfNeeded();
 
     const privacyLink = footer.locator("a[href='/privacy']");
@@ -137,10 +138,10 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 타로 탭 클릭
+    // 타로 탭 클릭 — evaluate로 직접 DOM click (nextjs-portal 가로채기 우회)
     const tarotTab = page.locator("nav a[href='/tarot']").last();
     if (await tarotTab.isVisible()) {
-      await tarotTab.click();
+      await tarotTab.evaluate((el) => (el as HTMLElement).click());
       await page.waitForURL("**/tarot");
     }
   });
@@ -158,9 +159,9 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const scrollBefore = await page.evaluate(() => window.scrollY);
     expect(scrollBefore).toBeGreaterThan(0);
 
-    // 타로 탭 클릭 → 스크롤 최상단 확인
+    // 타로 탭 클릭 → 스크롤 최상단 확인 (evaluate로 nextjs-portal 우회)
     const tarotTab = page.locator("nav a[href='/tarot']").last();
-    await tarotTab.click();
+    await tarotTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/tarot");
     await page.waitForTimeout(500); // AnimatePresence 전환 대기
     const scrollAfterTarot = await page.evaluate(() => window.scrollY);
@@ -168,7 +169,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 사주 탭 클릭 → 스크롤 최상단 확인
     const sajuTab = page.locator("nav a[href='/saju']").last();
-    await sajuTab.click();
+    await sajuTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/saju");
     await page.waitForTimeout(500);
     const scrollAfterSaju = await page.evaluate(() => window.scrollY);
@@ -176,7 +177,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 신점 탭 클릭 → 스크롤 최상단 확인
     const shinjeomTab = page.locator("nav a[href='/shinjeom']").last();
-    await shinjeomTab.click();
+    await shinjeomTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/shinjeom");
     await page.waitForTimeout(500);
     const scrollAfterShinjeom = await page.evaluate(() => window.scrollY);
@@ -210,9 +211,9 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     await page.evaluate(() => window.scrollTo(0, 300));
     await page.waitForTimeout(100);
 
-    // 홈으로 이동
+    // 홈으로 이동 (evaluate로 nextjs-portal 우회)
     const homeTab = page.locator("nav a[href='/']").last();
-    await homeTab.click();
+    await homeTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL(/\/$/);
     await page.waitForTimeout(500);
     const scrollAfter = await page.evaluate(() => window.scrollY);

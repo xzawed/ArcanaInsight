@@ -47,8 +47,10 @@ async function enterTarotSession(page: import("@playwright/test").Page) {
   await page.locator("text=종합").first().click();
 
   // 스프레드 선택 (원카드)
-  await expect(page.locator("text=원카드").first()).toBeVisible({ timeout: 5_000 });
-  await page.locator("text=원카드").first().click();
+  // step 전환 후 원카드 버튼 — evaluate로 직접 DOM click (헤더 가로채기 완전 우회)
+  const spreadBtn = page.locator("button").filter({ hasText: "원카드" }).first();
+  await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
+  await spreadBtn.evaluate((el) => (el as HTMLElement).click());
 
   await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
 }

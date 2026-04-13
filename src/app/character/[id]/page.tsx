@@ -89,7 +89,7 @@ export default function CharacterPage() {
                 <motion.button
                   key={service.id}
                   initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  animate={{ opacity: service.disabled ? 0.4 : 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
                   onClick={() => {
                     if (!service.disabled) {
@@ -99,7 +99,7 @@ export default function CharacterPage() {
                   disabled={service.disabled}
                   className={`group bg-arcana-card/70 backdrop-blur-sm border rounded-xl p-4 text-left transition-all ${
                     service.disabled
-                      ? "border-arcana-border/50 opacity-40 cursor-not-allowed"
+                      ? "border-arcana-border/50 cursor-not-allowed"
                       : "border-arcana-border hover:border-arcana-purple hover:shadow-lg hover:shadow-arcana-purple/10"
                   }`}
                 >

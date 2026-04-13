@@ -23,10 +23,15 @@ test.describe("폼 유효성 — 사주 개인정보 입력", () => {
     await expect(submitBtn).toBeDisabled();
   });
 
-  test("생년월일 + 성별 입력 → 활성화", async ({ page }) => {
+  test("생년월일 + 성별 + 태어난 시 입력 → 활성화", async ({ page }) => {
     await navigateToSajuForm(page);
     await page.locator("input[type='date']").fill("1995-06-15");
     await page.getByRole("button", { name: "여성" }).click();
+    // 사주 모드는 태어난 시(birthHour)도 필수 (isValid = birthDate && birthHour && gender)
+    const hourSelect = page.locator("select");
+    if (await hourSelect.isVisible()) {
+      await hourSelect.selectOption({ index: 1 }); // 첫 번째 시진 선택 (index 0 = "선택하세요")
+    }
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
     await expect(submitBtn).toBeEnabled({ timeout: 3_000 });
   });
@@ -107,11 +112,13 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
     await page.goto("/tarot");
     await page.waitForLoadState("networkidle");
 
-    // 캐릭터 수가 6개 이하인지 확인
-    const cards = page.locator("button");
-    await expect(cards.first()).toBeVisible({ timeout: 10_000 });
-    const count = await cards.count();
-    expect(count).toBeLessThanOrEqual(6);
+    // 캐릭터 카드 수 확인 — 캐릭터 이름 텍스트가 포함된 버튼만 카운트 (필터 버튼 제외)
+    const characterCards = page.locator("button").filter({
+      hasText: /아르카나|미코|선화|호시|루나|레이|카이른|제로|하루|렌|릭스|에단/,
+    });
+    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+    const count = await characterCards.count();
+    expect(count).toBeLessThanOrEqual(6); // 여자 필터: 6명 이하
   });
 
   test("카드 확인 모드 토글 후 유지", async ({ page }) => {
