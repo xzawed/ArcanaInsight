@@ -65,6 +65,18 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 | `five-year` | 5년 | ✓ |
 | `full-fortune` | 전체 대운 | ✗ |
 
+## 세션 시작 시 컨텍스트 파악 순서
+
+새 대화가 시작되면 Claude는 다음 순서로 컨텍스트를 파악한다:
+
+1. **이 CLAUDE.md 전체 훑기** — 프로젝트 구조, 규칙, 아키텍처 전체 파악
+2. **`git log --oneline -10`** — 최근 변경사항 파악 (무엇이 바뀌었는지)
+3. **메모리 확인** — `~/.claude/projects/.../MEMORY.md` 열람 (사용자 선호, 피드백 이력)
+4. **요청 관련 파일만 Read** — 전체 코드베이스 탐색 금지, 필요한 파일만 선택적으로 읽기
+5. **불확실한 부분은 질문 전에 코드 확인** — 추측하지 않고 파일을 직접 확인 후 응답
+
+> 세션 시작마다 전체 코드베이스를 탐색하지 않는다. 요청 범위에 집중한다.
+
 ## 기술 스택
 
 - **언어**: TypeScript (strict)
@@ -345,6 +357,13 @@ drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
 - 다크 모드가 기본 테마 (점술/타로의 신비로운 분위기)
 - 커스텀 컬러: `arcana-bg`, `arcana-surface`, `arcana-card`, `arcana-border`, `arcana-purple`, `arcana-indigo`, `arcana-gold`, `arcana-text`, `arcana-muted`
 
+### 의존성 버전 관리
+
+- **메이저 버전 업그레이드 금지**: Next.js, React, Framer Motion, Tailwind CSS, Zustand의 메이저 버전은 사용자 명시적 승인 없이 변경하지 않는다
+- **마이너·패치는 허용**: 보안 패치, 버그 픽스 수준의 업데이트는 자율 적용 가능
+- **pnpm 버전 고정**: `pnpm@10.33.0` — `pnpm-lock.yaml`과 Docker 실행 스크립트에 버전이 고정됨, 임의 변경 금지
+- **Playwright 버전 고정**: Docker 이미지 `mcr.microsoft.com/playwright:v1.59.1-noble` — CI와 로컬 동기화를 위해 임의 변경 금지
+
 ### 이미지 리소스
 
 - 캐릭터 이미지: 10캐릭터 PNG 누끼(nukki/ 폴더), 2캐릭터(miko/seonhwa) JPG 루트 경로, 1408×768
@@ -526,9 +545,22 @@ pnpm build             # 프로덕션 빌드 확인
 - Claude CLI가 자체 검토: 스펙 준수, 코드 품질, 레이아웃 규칙 점검
 
 ### 4단계: 커밋 + PR 생성
-- 의미 있는 커밋 메시지 작성
+- 아래 prefix 규칙에 맞는 커밋 메시지 작성
 - `git push` → **PR 생성** (main 브랜치 대상)
 - Claude Code 전용: PreToolUse 훅이 `scripts/pre-push-checks.sh` 자동 실행
+
+**커밋 메시지 prefix 규칙** (반드시 준수):
+
+| prefix | 용도 |
+|--------|------|
+| `feat:` | 새 기능 추가 |
+| `fix:` | 버그 수정 |
+| `docs:` | 문서 변경 (CLAUDE.md, README 등) |
+| `chore:` | 빌드·설정·스크립트 변경 |
+| `refactor:` | 기능 변경 없는 코드 구조 개선 |
+| `style:` | UI/스타일 변경 (기능 무관) |
+| `test:` | 테스트 추가·수정 |
+| `merge:` | 브랜치 머지 커밋 |
 
 ### 5단계: CI 자동 검증 (PR → main)
 - GitHub Actions 자동 실행: `lint → build → e2e` (Chromium)
@@ -678,6 +710,140 @@ git push origin main
 
 > 참고: GenderFilter, StatsCounter, ReviewCarousel 컴포넌트는 `components/home/`에 존재하지만 현재 `page.tsx`에서 미사용
 
+## Claude CLI 자율 관리 규칙
+
+Claude CLI는 컨텍스트 업무를 정확하게 이해하고 효율적으로 수행하기 위해 다음 리소스를 **언제든 자율적으로 생성·수정·삭제**할 수 있다:
+
+| 리소스 | 경로 | 목적 |
+|--------|------|------|
+| **스킬(Skill)** | `~/.claude/skills/` 또는 superpowers 스킬 | 반복 작업 패턴, 전문 절차 자동화 |
+| **에이전트(Agent)** | `.claude/agents/*.md` | 전문화된 서브태스크 위임 |
+| **훅(Hook)** | `.claude/settings.json` `hooks` 섹션 | 도구 실행 전/후 자동 검증 및 자동화 |
+| **프로젝트 문서** | 프로젝트 내 모든 `.md` 및 문서 파일 | Claude가 정확히 이해하고 업무 수행하기 위한 컨텍스트 |
+
+### 자율 관리 원칙
+
+- **필요하면 즉시 생성**: 같은 절차를 2회 이상 반복하거나, 실수 위험이 있는 단계는 스킬/에이전트/훅으로 만든다
+- **불필요하면 즉시 정리**: 더 이상 사용되지 않거나 중복된 리소스는 삭제한다
+- **변경 후 사용자에게 보고**: 생성·수정·삭제 후 무엇을 왜 변경했는지 간단히 알린다
+- **파괴적 훅은 사전 확인**: `deny` 규칙 추가, 기존 훅 삭제 등 되돌리기 어려운 변경은 사용자에게 먼저 확인한다
+
+### 현재 등록된 에이전트 (`.claude/agents/`)
+
+| 파일 | 역할 |
+|------|------|
+| `character-add.md` | 새 캐릭터 데이터/이미지/대사 일괄 생성 |
+| `divination-scaffold.md` | 새 DivinationService 구현체 스캐폴딩 |
+| `page-builder.md` | 레이아웃 규칙에 맞는 새 페이지 생성 |
+| `quality-gate.md` | 코드 품질 강도 높은 검증 |
+| `skin-manager.md` | 카드 스킨 추가/관리/이미지 생성 |
+| `theme-creator.md` | 새 테마 추가 또는 색상 수정 |
+
+### 현재 등록된 훅 (`.claude/settings.json`)
+
+| 이벤트 | 조건 | 동작 |
+|--------|------|------|
+| `PreToolUse` → `Bash` | `git push*` | `pre-push-checks.sh` 실행 (tsc + lint + build) |
+
+## 문서 자율 관리 규칙
+
+Claude CLI는 프로젝트 내 문서의 **배치·명칭·내용**을 Claude가 이해하기 쉽고 업무를 정확하게 수행할 수 있도록 **언제든 자율적으로 생성·수정·삭제·이동**할 수 있다.
+
+### 관리 대상 문서 범위
+
+| 경로 | 유형 | 예시 |
+|------|------|------|
+| `CLAUDE.md` | 프로젝트 컨텍스트 | 아키텍처, 규칙, 흐름도 |
+| `.claude/agents/*.md` | 에이전트 지시서 | 스캐폴딩, 품질 게이트 |
+| `docs/` (필요 시 생성) | 심층 설계 문서 | API 스펙, 데이터 모델 |
+| `n8n/README.md` | 자동화 파이프라인 | 워크플로우 설명 |
+| `supabase/migrations/` | DB 변경 이력 | SQL 마이그레이션 |
+| `scripts/` 내 주석 | 스크립트 사용법 | 실행 방법, 전제조건 |
+
+### 문서 품질 기준
+
+Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
+
+1. **명확한 목적**: 문서 첫 단락에서 "이 문서는 X를 위해 존재한다"가 명확해야 한다
+2. **최신성**: 코드 변경이 발생하면 관련 문서를 동시에 업데이트한다 (7단계 프로세스와 연동)
+3. **중복 제거**: 같은 내용이 두 곳에 있으면 한 곳에 원본을 두고 나머지는 참조 링크로 대체한다
+4. **파일명 규칙**: `kebab-case.md`, 역할이 명확히 드러나는 이름 사용 (예: `auth-flow.md`, `db-migration-guide.md`)
+5. **배치 일관성**: 범위가 프로젝트 전체이면 루트 또는 `docs/`, 특정 모듈이면 해당 디렉토리 내
+
+### 문서 관리 트리거
+
+다음 상황이 발생하면 Claude는 **자동으로** 관련 문서를 점검·갱신한다:
+
+- 새 파일/컴포넌트/훅/API 라우트 추가 → `CLAUDE.md` 프로젝트 구조 업데이트
+- 아키텍처 패턴 변경 → 해당 섹션 수정
+- 에이전트 동작 변경 → `.claude/agents/*.md` 수정
+- 기능 제거 → 관련 설명 삭제 또는 `⚠️ 미구현` 표기로 전환
+- 문서와 코드가 불일치하는 것을 발견 → 코드 기준으로 문서 교정
+
+### 문서 변경 보고 형식
+
+문서를 변경한 후 사용자에게 다음 형식으로 간단히 보고한다:
+
+```
+📄 문서 변경: [파일명]
+  - 변경 이유: [이유]
+  - 변경 내용: [1줄 요약]
+```
+
+## 업무 유형별 파일 가이드
+
+반복 업무 시 불필요한 탐색 없이 바로 시작할 수 있도록 유형별 필수 파일을 정리한다. 에이전트가 있는 경우 에이전트를 우선 활용한다.
+
+### 새 캐릭터 추가
+1. `src/data/characters/index.ts` — 캐릭터 메타데이터 추가
+2. `src/data/characters/waiting-lines.ts` — 대기 대사 추가
+3. `src/types/character.ts` — 타입 확인
+4. `public/images/characters/[id]/nukki/` — 이미지 6종 배치
+5. → `.claude/agents/character-add.md` 에이전트 활용
+
+### 새 운세 서비스(DivinationService) 추가
+1. `src/services/core/ai-provider.ts` — 인터페이스 확인
+2. `src/services/tarot/tarot-service.ts` — 기존 구현체 참조 패턴
+3. `src/app/api/tarot/` — API 라우트 구조 참조
+4. → `.claude/agents/divination-scaffold.md` 에이전트 활용
+
+### 새 페이지 추가
+1. `src/app/layout.tsx` — 루트 레이아웃 확인
+2. `src/components/layout/Header.tsx` — 네비게이션 링크 추가
+3. `src/components/layout/MobileNav.tsx` — 모바일 탭 추가 여부 확인
+4. CLAUDE.md `## 레이아웃 규칙` 섹션 — 5:5 규칙 준수
+5. → `.claude/agents/page-builder.md` 에이전트 활용
+
+### 테마·스타일 변경
+1. `src/app/globals.css` — `@theme` 블록, `arcana-*` 커스텀 컬러
+2. `src/hooks/useTheme.ts` — 7종 테마 로직
+3. → `.claude/agents/theme-creator.md` 에이전트 활용
+
+### 카드 스킨 추가·변경
+1. `src/data/skins/index.ts` — 스킨 정의
+2. `src/lib/storage/index.ts` — `getCardImageUrl()` 경로 로직
+3. `scripts/generate-skin-images.ts` → `scripts/upload-skin-images.ts`
+4. → `.claude/agents/skin-manager.md` 에이전트 활용
+
+### AI 프롬프트 수정
+1. `src/services/core/prompt-builder.ts` — 공통 프롬프트 빌더
+2. `src/services/[service]/[service]-service.ts` — 서비스별 프롬프트
+3. `src/services/core/fallback-provider.ts` — Grok→Claude fallback 동작 확인
+
+### DB 스키마 변경
+1. `supabase/migrations/` — 마지막 번호 확인 후 다음 번호로 신규 파일 생성
+2. `src/lib/db/schema/index.ts` — Drizzle 스키마 동기화 (PostgreSQL 모드)
+3. `src/lib/db/types.ts` — DbClient 인터페이스 수정 여부 확인
+
+### 코드 품질 검증
+1. `pnpm type-check && pnpm lint && pnpm build` — 로컬 검증 3종
+2. → `.claude/agents/quality-gate.md` 에이전트 활용
+
+### E2E 테스트 추가·수정
+1. `e2e/` — 관련 spec 파일
+2. `playwright.config.ts` — 디바이스 프로필 확인
+3. CLAUDE.md `E2E 로컬 실행 — Windows(Docker)` 섹션 — 실행 방법
+
 ## 작업 시 주의사항
 
 - 타로 카드 데이터는 `src/data/` 디렉토리에 정적으로 관리
@@ -687,6 +853,28 @@ git push origin main
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
 - 캐릭터 이미지 규격: 1408×768 (10캐릭터 PNG 누끼, 2캐릭터 JPG 레거시, grok-imagine-image-pro API 기본 출력 사이즈)
+
+## 미구현 기능 목록
+
+알고 있지만 아직 구현하지 않은 기능. Claude가 실수로 구현하거나 사용자에게 "있다"고 잘못 안내하지 않도록 명시한다.
+
+| 기능 | 위치 | 현재 상태 | 비고 |
+|------|------|----------|------|
+| 신점 결과 공유 페이지 | `app/shinjeom/result/[id]/` | 미구현 | mypage에서 링크 비활성화됨 |
+| `useFavoriteCharacter` DB_PROVIDER 적용 | `hooks/useFavoriteCharacter.ts` | Supabase 직접 사용 | postgres 모드 전환 시 수정 필요 |
+| GenderFilter 홈 노출 | `components/home/GenderFilter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
+| StatsCounter 홈 노출 | `components/home/StatsCounter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
+| ReviewCarousel 홈 노출 | `components/home/ReviewCarousel.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
+
+## 알려진 기술 부채
+
+의도적으로 아직 처리하지 않은 기술적 한계. Claude가 실수로 수정하거나 이미 검토된 방법을 다시 제안하지 않도록 명시한다.
+
+| 항목 | 파일 | 현황 | 해결 조건 |
+|------|------|------|----------|
+| `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
+| miko·seonhwa JPG 레거시 경로 | `public/images/characters/miko/`, `seonhwa/` | nukki/ PNG 미전환 | 이미지 재생성 + 코드 수정 필요 |
+| `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
 
 ## 운영 체계 — SuperGrok + Claude CLI 역할 분담
 
