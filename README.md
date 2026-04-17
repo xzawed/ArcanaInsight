@@ -7,13 +7,12 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16.2-000000?style=flat&logo=nextdotjs&logoColor=white" alt="Next.js" />
-  <img src="https://img.shields.io/badge/React-19.2-61DAFB?style=flat&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Playwright-1.59-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat&logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Railway-deployed-0B0D0E?style=flat&logo=railway&logoColor=white" alt="Railway" />
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/status-v1.0.0%20Live-brightgreen?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
+  <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
+  <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
+  <img src="https://img.shields.io/badge/%F0%9F%A7%AA%20Tests-141%20passed-4CAF50?style=for-the-badge&labelColor=1a1a2e" alt="Tests" />
 </p>
 
 <p align="center">
