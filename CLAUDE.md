@@ -382,40 +382,13 @@ pnpm build            # 프로덕션 빌드
 pnpm start            # 프로덕션 서버 실행
 pnpm lint             # ESLint 실행
 pnpm type-check       # TypeScript 타입 체크 (tsc --noEmit)
-pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스) — Windows는 아래 Docker 방식 사용
+pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스)
 pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 ```
 
-### E2E 로컬 실행 — Windows (Docker 필수)
-
-Windows 환경에서는 Claude Code Bash 세션이 Playwright 브라우저 프로세스 stdout을 캡처하지 못하므로, Docker(Linux 컨테이너)로 실행해야 한다.
-
-```bash
-docker run --rm \
-  -v "D:/Source/ArcanaInsight/src:/work/src:ro" \
-  -v "D:/Source/ArcanaInsight/public:/work/public:ro" \
-  -v "D:/Source/ArcanaInsight/e2e:/work/e2e:ro" \
-  -v "D:/Source/ArcanaInsight/package.json:/work/package.json:ro" \
-  -v "D:/Source/ArcanaInsight/pnpm-lock.yaml:/work/pnpm-lock.yaml:ro" \
-  -v "D:/Source/ArcanaInsight/tsconfig.json:/work/tsconfig.json:ro" \
-  -v "D:/Source/ArcanaInsight/next.config.ts:/work/next.config.ts:ro" \
-  -v "D:/Source/ArcanaInsight/postcss.config.mjs:/work/postcss.config.mjs:ro" \
-  -v "D:/Source/ArcanaInsight/playwright.config.ts:/work/playwright.config.ts:ro" \
-  -v "D:/Source/ArcanaInsight/.env.local:/work/.env.local:ro" \
-  -w //work \
-  -e NEXT_TELEMETRY_DISABLED=1 \
-  mcr.microsoft.com/playwright:v1.59.1-noble \
-  bash -c '
-    corepack enable && corepack prepare pnpm@10.33.0 --activate 2>/dev/null &&
-    pnpm install --frozen-lockfile &&
-    pnpm build &&
-    npx next start -p 3000 &
-    for i in $(seq 1 20); do curl -s http://localhost:3000 >/dev/null 2>&1 && break; sleep 1; done &&
-    npx playwright test --project="Desktop Chrome" --reporter=list 2>&1
-  '
-```
-
-> **주의**: Docker 실행 후 `node_modules`가 Linux 바이너리로 교체되므로, 이후 `rm -rf node_modules && pnpm install` 필수
+> **Windows**: Claude Code Bash 세션은 Playwright stdout 캡처 불가 → Docker(Linux 컨테이너) 필수. Docker 실행 후 `node_modules`가 Linux 바이너리로 교체되므로 이후 `rm -rf node_modules && pnpm install` 필수.
+>
+> **상세 실행 가이드 + Docker 스크립트**: **[e2e/README.md](./e2e/README.md)** 참조
 
 ## 환경 변수
 
@@ -470,47 +443,12 @@ git branch | grep -v '^\* main' | xargs git branch -D
 
 ## CI/CD 파이프라인
 
-### GitHub Actions 무료 플랜 운영 정책
+- GitHub Free 플랜: **월 2,000분** 한도 (예상 사용 ~100분)
+- **PR CI** (`deploy.yml`): PR → main, lint → build → E2E (Desktop Chrome + Mobile Android)
+- **주간 QA** (`weekly-qa.yml`): 토요일 09:00 KST, 3개 디바이스(iOS 포함), artifact 30일 보존, 실패 시 Issue 자동 생성
+- **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
 
-- GitHub Free 플랜: **월 2,000분** 한도
-- 무료 시간 소진 시: CI 자동 차단 → **로컬 검증(type-check + lint + build)으로 대체** → 다음 달 1일에 자동 복구
-- 예상 월간 사용: ~100분 (한도의 5%)
-
-### PR CI (`.github/workflows/deploy.yml`)
-
-- **PR → main 시에만** 실행, 문서 변경(*.md, docs/, n8n/) 시 스킵
-- **1개 job으로 통합** (runner 1회, pnpm install 1회 — 시간 절약):
-  1. Lint + Type Check
-  2. Build
-  3. E2E (Chromium만 — Desktop Chrome + Mobile Android)
-- iOS E2E(WebKit)는 **주간 QA(토요일)에서만** 수행 — Chromium만 설치하여 시간 절약
-- Railway 배포는 별도 GitHub 연동이 담당
-
-### 주간 QA (`.github/workflows/weekly-qa.yml`)
-
-- **매주 토요일 오전 9시 (KST)** 자동 실행 + `workflow_dispatch`로 수동 실행 가능
-- 4개 job 병렬: quality-check → e2e-desktop / e2e-mobile-android / e2e-mobile-ios
-- 디바이스별 Playwright 리포트 30일 보존
-- **실패 시**: 자동 GitHub Issue 생성 (실패 job 목록 + 로그 링크 + 수정 프로세스 안내)
-- **통과 시**: 열린 QA Issue 자동 닫기 + 검증 결과 코멘트
-
-### QA 자동 재검증 (`.github/workflows/qa-recheck.yml`)
-
-- QA 실패 Issue(`🚨 주간 QA 실패`)가 열려있는 상태에서 main에 코드 push 시 자동으로 주간 QA 재실행
-- 문서만 변경된 push(*.md, docs/, n8n/)는 스킵 (Actions 시간 절약)
-- 재실행 → 전체 통과 시 → QA Issue 자동 닫힘 (완전 자동 루프)
-
-### QA 프로세스 전체 흐름
-
-```
-주간 QA 실행 (토요일 09:00)
-  ├─ 통과 → 열린 QA Issue 자동 닫기 → 끝
-  └─ 실패 → Issue 자동 생성 (실패 상세 + 수정 안내)
-       └─ fix/* 브랜치 수정 → PR CI 통과 → main 머지
-            └─ QA Issue 열림 감지 → 주간 QA 자동 재실행
-                 ├─ 통과 → Issue 자동 닫기 → 끝
-                 └─ 실패 → Issue 업데이트 → 수정 반복
-```
+> **E2E 파이프라인 상세 + QA 자동 루프 흐름도**: **[e2e/README.md §2](./e2e/README.md#2-ci-파이프라인)** 참조
 
 ### 브랜치 보호 규칙 (GitHub Settings에서 수동 설정 필요)
 

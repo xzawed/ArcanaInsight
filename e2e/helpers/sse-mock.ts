@@ -1,3 +1,4 @@
+// 사용 가이드: e2e/README.md#5-helper-사용-가이드
 import { Page } from "@playwright/test";
 
 /** SSE 스트리밍 응답 바디 생성 */

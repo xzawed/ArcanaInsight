@@ -127,7 +127,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 캐릭터와 상담하듯 �
 | 상태관리 | Zustand v5 |
 | 패키지 매니저 | pnpm 10.33 |
 | 호스팅 | Railway (GitHub Actions 자동 배포) |
-| E2E 테스트 | Playwright — 19개 파일, 141개 테스트 (Desktop · Android · iOS) |
+| E2E 테스트 | Playwright — 19개 파일, 141개 테스트 (Desktop · Android · iOS) · [가이드](./e2e/README.md) |
 
 ---
 
