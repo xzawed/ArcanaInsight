@@ -187,8 +187,8 @@ pnpm test:e2e      # E2E 테스트 (Desktop/Android/iOS)
 
 ## 소유권
 
-이 프로젝트의 개발 및 소유권은 **xzawed**에게 있습니다.
+이 프로젝트의 저작권 및 소유권은 **xzawed**에게 있습니다.
 
 무단 복제, 배포, 수정을 금지합니다.
 
-&copy; 2026 xzawed. All rights reserved.
+© 2026 xzawed. All rights reserved.
