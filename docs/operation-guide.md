@@ -62,9 +62,9 @@ flowchart TD
 
 ---
 
-## 3. 작업 흐름 — 6단계 표준 프로세스
+## 3. 작업 흐름 — 7단계 표준 프로세스
 
-당신이 Claude CLI에 지시하면, Claude CLI가 기획부터 배포까지 모두 수행합니다.
+당신이 Claude CLI에 지시하면, Claude CLI가 기획부터 배포 및 문서 최신화까지 모두 수행합니다.
 
 ```mermaid
 flowchart TD
@@ -77,11 +77,13 @@ flowchart TD
     PR --> CI["⑤ CI 자동 검증<br/>린트 + 빌드 + E2E"]
     CI -->|실패| 구현
     CI -->|통과| 배포["⑥ 머지 → 배포 + QA 재검증"]
-    배포 --> 완료["완료 ✅"]
+    배포 --> 문서["⑦ CLAUDE.md 최신화<br/>(필수)"]
+    문서 --> 완료["완료 ✅"]
 
     style 지시 fill:#2563eb,color:#fff
     style 구현 fill:#7c3aed,color:#fff
     style 배포 fill:#16a34a,color:#fff
+    style 문서 fill:#d97706,color:#fff
 ```
 
 **당신이 하는 일**:
@@ -93,6 +95,7 @@ flowchart TD
 - CI가 코드 품질 자동 검증
 - Railway가 자동 배포
 - QA Issue가 있으면 자동 재검증
+- Claude CLI가 CLAUDE.md 최신화 (7단계)
 
 ---
 
@@ -142,13 +145,10 @@ flowchart LR
     end
 
     subgraph 수동["👤 내가 하는 것"]
-        기획["SuperGrok에서 기획"]
-        Issue["GitHub Issue 생성"]
-        지시["Claude CLI에 지시"]
+        지시["Claude CLI에 직접 지시"]
         확인["결과 확인"]
     end
 
-    기획 --> Issue --> Spec
     지시 --> 배포
     QA -.-> 재검증
 

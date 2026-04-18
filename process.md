@@ -509,16 +509,18 @@ flowchart TD
     MERGE --> DEPLOY["Railway 자동 배포"]
     MERGE --> RECHECK{"QA Issue<br/>열려있음?"}
     RECHECK -->|Yes| RERUN["주간 QA 자동 재실행"]
-    RECHECK -->|No| DONE["완료"]
+    RECHECK -->|No| DOCS["7단계: CLAUDE.md 최신화<br/>(필수)"]
     RERUN -->|통과| CLOSE["Issue 자동 닫기"]
     RERUN -->|실패| CODE
-    CLOSE --> DONE
+    CLOSE --> DOCS
+    DOCS --> DONE["완료"]
 
     style QA fill:#dc2626,color:#fff
     style USER fill:#2563eb,color:#fff
     style FEAT fill:#059669,color:#fff
     style CI fill:#7c3aed,color:#fff
     style DEPLOY fill:#d97706,color:#fff
+    style DOCS fill:#d97706,color:#fff
     style DONE fill:#16a34a,color:#fff
 ```
 
@@ -536,7 +538,7 @@ flowchart LR
     end
 
     subgraph Claude["Claude CLI (Anthropic)"]
-        IMPL["코드 구현<br/>6단계 프로세스"]
+        IMPL["코드 구현<br/>7단계 프로세스"]
         QA["품질 관리<br/>E2E + 주간 QA"]
         CICD["CI/CD + 배포<br/>Actions + Railway"]
         DOCS["문서 관리<br/>CLAUDE.md 동기화"]

@@ -199,6 +199,13 @@ public/images/
     ├── lix/
     └── ethan/
 
+docs/                           # 프로젝트 문서
+├── operation-guide.md          # 운영자 가이드 (서비스 구조, 7단계 프로세스, 자동화 일정)
+├── skills.md                   # 기술 스킬 정의서 (초기 기획 문서, CLAUDE.md 우선)
+└── superpowers/                # superpowers 스킬 관련 문서
+
+process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
+
 .scamanager/                    # SCAManager AI 코드리뷰 훅 설정
 ├── config.json              # 서버 URL, 리포 명, 인증 토큰
 └── install-hook.sh          # pre-push 훅 설치 스크립트 (최초 1회 실행)
