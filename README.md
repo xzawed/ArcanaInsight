@@ -1,5 +1,7 @@
 # 🔮 ArcanaInsight
 
+<p align="right"><a href="README.en.md">🇺🇸 English</a></p>
+
 > **애니메이션 캐릭터와 대화하며 타로 리딩 · 사주 분석 · 신점 상담을 받는 운세 종합 플랫폼**
 
 <p align="center">
