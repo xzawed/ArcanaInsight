@@ -141,6 +141,7 @@ src/
 │   ├── saju/                   # constants.ts (천간·지지·오행 상수), categories.ts (시간단위 7개+분석영역 8개)
 │   ├── skins/                  # index.ts (6종 스킨 정의)
 │   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
+│   ├── topics.ts               # 타로/사주/신점 유효 토픽 목록 (TAROT_TOPICS, SAJU_TOPICS, SHINJEOM_TOPICS, ALL_TOPICS)
 │   ├── birth-hours.ts          # 12시진 데이터
 │   └── error-messages.ts       # API 에러 메시지 상수
 ├── hooks/                      # Zustand 스토어 + 공통 훅
@@ -155,6 +156,7 @@ src/
 │   ├── useSSEStream.ts         # SSE 스트림 공통 유틸
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/
+│   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·cooldown 12개, 하드코딩 방지)
 │   ├── supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts) — Supabase 모드 전용
 │   ├── db/                     # DB 추상화 레이어
 │   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
@@ -205,6 +207,8 @@ docs/                           # 프로젝트 문서
 └── superpowers/                # superpowers 스킬 관련 문서
 
 process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
+README.md                       # 프로젝트 소개 (한국어 기본)
+README.en.md                    # 프로젝트 소개 (영문)
 
 .scamanager/                    # SCAManager AI 코드리뷰 훅 설정
 ├── config.json              # 서버 URL, 리포 명, 인증 토큰
