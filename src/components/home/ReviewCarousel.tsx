@@ -5,13 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { reviews } from "@/data/home/reviews";
 
+const AUTO_SCROLL_INTERVAL_MS = 5000
+
 export function ReviewCarousel() {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % reviews.length);
-    }, 5000);
+    }, AUTO_SCROLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, []);
 

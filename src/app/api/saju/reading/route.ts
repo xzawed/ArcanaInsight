@@ -9,6 +9,10 @@ import { getDb } from "@/lib/db";
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
 
+// 월별 상세 포함 여부에 따른 max_tokens 상수
+const SAJU_TOKENS_WITH_MONTHLY = 8000;
+const SAJU_TOKENS_BASE = 4000;
+
 const VALID_TOPICS: Topic[] = [
   "saju-general", "saju-love-single", "saju-love-couple",
   "saju-career", "saju-health", "saju-personality",
@@ -71,7 +75,7 @@ export async function POST(request: NextRequest) {
         let fullResponse = "";
         try {
           // 월별 상세 포함 여부에 따라 max_tokens 조정 (월별 12개월 상세 보장)
-          const sajuMaxTokens = includeMonthly ? 8000 : 4000;
+          const sajuMaxTokens = includeMonthly ? SAJU_TOKENS_WITH_MONTHLY : SAJU_TOKENS_BASE;
           for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt, sajuMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
@@ -86,7 +90,7 @@ export async function POST(request: NextRequest) {
           })}\n\n`));
 
           if (db && sessionId) {
-            Promise.all([
+            void Promise.all([
               db.insert("saju_readings", {
                 session_id: sessionId,
                 birth_date: userInfo.birthDate,

@@ -1,6 +1,7 @@
 import { AIProvider } from "@/types/service";
 import { GrokProvider, RateLimitError, AuthError } from "./grok-provider";
 import { ClaudeProvider } from "./claude-provider";
+import { getAiFallbackCooldownMs, getAiAuthCooldownMs } from "@/lib/env";
 
 /**
  * Fallback AI Provider — Grok API 우선, 실패 시 Claude API로 자동 전환
@@ -15,8 +16,8 @@ export class FallbackProvider implements AIProvider {
   private claude: ClaudeProvider | null = null;
   private grokDown = false;
   private grokDownUntil = 0;
-  private static readonly COOLDOWN_MS = 5 * 60 * 1000; // 5분 (서버 에러)
-  private static readonly AUTH_COOLDOWN_MS = 30 * 60 * 1000; // 30분 (인증 에러, 재시도 불가)
+  private static readonly COOLDOWN_MS = getAiFallbackCooldownMs(); // 기본 5분 (서버 에러)
+  private static readonly AUTH_COOLDOWN_MS = getAiAuthCooldownMs(); // 기본 30분 (인증 에러, 재시도 불가)
 
   constructor() {
     this.grok = new GrokProvider();

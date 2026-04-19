@@ -1,4 +1,5 @@
 import { AIProvider } from "@/types/service";
+import { getGrokApiKey, getGrokModel, getGrokBaseUrl, getAiTimeoutMs, getDefaultMaxTokens, getAiTemperature } from "@/lib/env";
 
 /** Grok API Rate Limit (429) — Retry-After 기반 짧은 쿨다운 */
 export class RateLimitError extends Error {
@@ -18,15 +19,18 @@ export class AuthError extends Error {
   }
 }
 
+/** Retry-After 기본값 (초) — 헤더 미포함 시 사용 */
+const DEFAULT_RETRY_AFTER_SEC = 30;
+
 export class GrokProvider implements AIProvider {
   private _apiKey: string | null = null;
   private _model: string | null = null;
-  private baseUrl = "https://api.x.ai/v1";
+  private baseUrl = getGrokBaseUrl();
 
   /** 환경변수를 지연 로드 — 모듈 로드 시점이 아니라 첫 호출 시점에 확인 */
   private get apiKey(): string {
     if (!this._apiKey) {
-      const key = process.env.GROK_API_KEY;
+      const key = getGrokApiKey();
       if (!key || key === "your_grok_api_key") {
         throw new Error("GROK_API_KEY 환경변수가 설정되지 않았습니다. Railway 또는 .env.local에 실제 API 키를 설정해주세요.");
       }
@@ -37,14 +41,14 @@ export class GrokProvider implements AIProvider {
 
   private get model(): string {
     if (!this._model) {
-      this._model = process.env.GROK_MODEL || "grok-3";
+      this._model = getGrokModel();
     }
     return this._model;
   }
 
-  private static readonly TIMEOUT_MS = 60_000; // 60초 타임아웃
+  private static readonly TIMEOUT_MS = getAiTimeoutMs();
 
-  private static readonly DEFAULT_MAX_TOKENS = 4000;
+  private static readonly DEFAULT_MAX_TOKENS = getDefaultMaxTokens();
 
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
@@ -56,7 +60,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS,
+          temperature: getAiTemperature(), max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS,
         }),
         signal: controller.signal,
       });
@@ -65,7 +69,7 @@ export class GrokProvider implements AIProvider {
         throw new AuthError(response.status, error);
       }
       if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
+        const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
         throw new RateLimitError(retryAfter);
       }
       if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
@@ -88,7 +92,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: 0.7, max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS, stream: true,
+          temperature: getAiTemperature(), max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS, stream: true,
         }),
         signal: controller.signal,
       });
@@ -97,7 +101,7 @@ export class GrokProvider implements AIProvider {
         throw new AuthError(response.status, error);
       }
       if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("retry-after") || "30", 10) * 1000;
+        const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
         throw new RateLimitError(retryAfter);
       }
       if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }

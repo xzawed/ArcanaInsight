@@ -135,6 +135,7 @@ function TarotPageContent() {
   const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
   useEffect(() => {
     if (favoriteCharacter && !selectedCharacter) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCharacter(favoriteCharacter);
       setCharacterId(favoriteCharacter.id);
       setDialogueMessages([{
@@ -146,8 +147,7 @@ function TarotPageContent() {
       }]);
       setStep("topic-select");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favoriteCharacter]);
+  }, [favoriteCharacter, selectedCharacter, setCharacterId]);
 
   // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {

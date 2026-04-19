@@ -7,6 +7,8 @@ import { SkinSelector } from "@/components/skin/SkinSelector";
 import { cardSkins } from "@/data/skins";
 import { useSkinStore } from "@/hooks/useSkinStore";
 
+const TOAST_VISIBILITY_MS = 2000
+
 export function SkinGallery() {
   const { selectedSkinId, setSkin } = useSkinStore();
   const [toastVisible, setToastVisible] = useState(false);
@@ -25,7 +27,7 @@ export function SkinGallery() {
   // 2초 후 토스트 자동 숨김
   useEffect(() => {
     if (!toastVisible) return;
-    const timer = setTimeout(() => setToastVisible(false), 2000);
+    const timer = setTimeout(() => setToastVisible(false), TOAST_VISIBILITY_MS);
     return () => clearTimeout(timer);
   }, [toastVisible]);
 

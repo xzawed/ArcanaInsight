@@ -55,7 +55,7 @@ export function FAQ() {
 
         <div className="space-y-3">
           {faqItems.map((item, i) => (
-            <FAQItem key={i} question={item.question} answer={item.answer} index={i} />
+            <FAQItem key={item.question} question={item.question} answer={item.answer} index={i} />
           ))}
         </div>
       </div>

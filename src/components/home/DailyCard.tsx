@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
@@ -29,7 +29,7 @@ export function DailyCard() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const fetchDailyCard = async (characterId: string) => {
+  const fetchDailyCard = useCallback(async (characterId: string) => {
     if (data[characterId]) return;
     setLoading(characterId);
     try {
@@ -44,12 +44,12 @@ export function DailyCard() {
       }
     } catch { /* 네트워크 에러 무시 */ }
     setLoading(null);
-  };
+  }, [data, today]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDailyCard(activeTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, fetchDailyCard]);
 
   const handleFlip = (characterId: string) => {
     setFlipped((prev) => ({ ...prev, [characterId]: true }));

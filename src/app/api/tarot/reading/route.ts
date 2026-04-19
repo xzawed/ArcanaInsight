@@ -7,11 +7,18 @@ import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
 import { getDb } from "@/lib/db";
+import { TAROT_TOPICS } from "@/data/topics";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
+
+// 카드 수에 따른 max_tokens 상수
+const TOKENS_SINGLE_CARD = 2000;
+const TOKENS_FEW_CARDS = 3000;
+const TOKENS_MEDIUM_CARDS = 4000;
+const TOKENS_MANY_CARDS = 6000;
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +34,7 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const validTopics = ["love", "love-single", "love-couple", "finance", "career", "health", "general"];
-    if (!validTopics.includes(topic)) {
+    if (!TAROT_TOPICS.includes(topic)) {
       return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
         try {
           // 카드 수에 따라 max_tokens 조정 (JSON 구조 오버헤드 감안)
           const cardCount = cards.length;
-          const maxTokens = cardCount <= 1 ? 2000 : cardCount <= 3 ? 3000 : cardCount <= 7 ? 4000 : 6000;
+          const maxTokens = cardCount <= 1 ? TOKENS_SINGLE_CARD : cardCount <= 3 ? TOKENS_FEW_CARDS : cardCount <= 7 ? TOKENS_MEDIUM_CARDS : TOKENS_MANY_CARDS;
           for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
@@ -71,7 +77,7 @@ export async function POST(request: NextRequest) {
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음)
           if (db && sessionId) {
-            Promise.all([
+            void Promise.all([
               db.insert("readings", {
                 session_id: sessionId,
                 card_interpretation: result.cardInterpretations,

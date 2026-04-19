@@ -1,5 +1,6 @@
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const BUCKET_NAME = "card-skins";
+export const CARD_SKINS_BUCKET = "card-skins";
+const BUCKET_NAME = CARD_SKINS_BUCKET;
 
 function getStorageBaseUrl(): string {
   if (!SUPABASE_URL) {

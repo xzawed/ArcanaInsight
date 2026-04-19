@@ -3,17 +3,12 @@ import { getDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
-
-const VALID_TOPICS: string[] = [
-  "saju-general", "saju-love-single", "saju-love-couple",
-  "saju-career", "saju-health", "saju-personality",
-  "saju-compatibility", "saju-auspicious-date",
-]
+import { SAJU_TOPICS } from "@/data/topics"
 
 export async function POST(request: NextRequest) {
   try {
     const { topic, characterId } = (await request.json()) as { topic: Topic; characterId?: string }
-    if (!VALID_TOPICS.includes(topic)) {
+    if (!SAJU_TOPICS.includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null

@@ -51,7 +51,11 @@ export async function fetchSSEStream({ url, body, onChunk, onDone, onError }: SS
             if (data.done) {
               onDone(data);
             }
-          } catch { /* 파싱 실패 무시 */ }
+          } catch (_e) {
+            if (process.env.NODE_ENV === 'development') {
+              console.debug('[SSE] 파싱 실패:', _e)
+            }
+          }
         }
         break;
       }
@@ -81,7 +85,11 @@ export async function fetchSSEStream({ url, body, onChunk, onDone, onError }: SS
             streamDone = true;
             break;
           }
-        } catch { /* SSE 파싱 실패 무시 */ }
+        } catch (_e) {
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('[SSE] 파싱 실패:', _e)
+          }
+        }
       }
     }
   } catch (e) {

@@ -1,4 +1,5 @@
 import { AIProvider } from "@/types/service";
+import { getAnthropicApiKey, getClaudeBaseUrl, getClaudeModel, getAiTimeoutMs, getDefaultMaxTokens } from "@/lib/env";
 
 /**
  * Claude API (Anthropic) — Grok API 장애 시 fallback provider
@@ -6,13 +7,13 @@ import { AIProvider } from "@/types/service";
  */
 export class ClaudeProvider implements AIProvider {
   private _apiKey: string | null = null;
-  private baseUrl = "https://api.anthropic.com/v1";
-  private model = "claude-sonnet-4-20250514";
-  private static readonly TIMEOUT_MS = 60_000;
+  private baseUrl = getClaudeBaseUrl();
+  private model = getClaudeModel();
+  private static readonly TIMEOUT_MS = getAiTimeoutMs();
 
   private get apiKey(): string {
     if (!this._apiKey) {
-      const key = process.env.ANTHROPIC_API_KEY;
+      const key = getAnthropicApiKey();
       if (!key) {
         throw new Error("ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다.");
       }
@@ -21,7 +22,7 @@ export class ClaudeProvider implements AIProvider {
     return this._apiKey;
   }
 
-  private static readonly DEFAULT_MAX_TOKENS = 4000;
+  private static readonly DEFAULT_MAX_TOKENS = getDefaultMaxTokens();
 
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
@@ -42,7 +43,11 @@ export class ClaudeProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
-      if (!response.ok) { const error = await response.text(); throw new Error(`Claude API error (${response.status}): ${error}`); }
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`[ClaudeProvider] API 오류 (${response.status}):`, errorBody);
+        throw new Error(`Claude API 요청이 실패했습니다. (HTTP ${response.status})`);
+      }
       const data = await response.json();
       const content = data.content?.[0]?.text;
       if (!content) throw new Error("Claude API가 빈 응답을 반환했습니다.");
@@ -72,7 +77,11 @@ export class ClaudeProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
-      if (!response.ok) { const error = await response.text(); throw new Error(`Claude API error (${response.status}): ${error}`); }
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`[ClaudeProvider] 스트림 API 오류 (${response.status}):`, errorBody);
+        throw new Error(`Claude API 요청이 실패했습니다. (HTTP ${response.status})`);
+      }
       if (!response.body) throw new Error("Response body is null");
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
