@@ -4,12 +4,16 @@ import { minorArcana } from "@/data/cards/minor-arcana";
 
 export class DeckManager {
   private deck: TarotCard[];
+  private cardMap: Map<string, TarotCard>;
 
-  constructor() { this.deck = [...majorArcana, ...minorArcana]; }
+  constructor() {
+    this.deck = [...majorArcana, ...minorArcana];
+    this.cardMap = new Map(this.deck.map((card) => [card.id, card]));
+  }
 
   getAllCards(): TarotCard[] { return this.deck; }
 
-  getCardById(id: string): TarotCard | undefined { return this.deck.find((c) => c.id === id); }
+  getCardById(id: string): TarotCard | undefined { return this.cardMap.get(id); }
 
   shuffleAndDraw(count: number): SelectedCard[] {
     const shuffled = [...this.deck];

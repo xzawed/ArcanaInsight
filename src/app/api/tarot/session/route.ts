@@ -4,14 +4,14 @@ import { getCurrentUser } from "@/lib/auth"
 import { TarotService } from "@/services/tarot/tarot-service"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
+import { TAROT_TOPICS } from "@/data/topics"
 
 const tarotService = new TarotService()
-const VALID_TOPICS = ["love", "love-single", "love-couple", "finance", "career", "health", "general"]
 
 export async function POST(request: NextRequest) {
   try {
     const { topic, characterId, spreadType } = (await request.json()) as { topic: Topic; characterId?: string; spreadType?: string }
-    if (!VALID_TOPICS.includes(topic)) {
+    if (!TAROT_TOPICS.includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null

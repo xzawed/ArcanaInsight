@@ -1,4 +1,6 @@
-const BUCKET = "card-skins"
+import { CARD_SKINS_BUCKET } from "@/lib/supabase/storage"
+
+const BUCKET = CARD_SKINS_BUCKET
 
 function supabaseBase(): string {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL

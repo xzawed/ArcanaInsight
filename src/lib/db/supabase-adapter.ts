@@ -13,7 +13,11 @@ export class SupabaseAdapter implements DbClient {
       query = query.eq(key, value) as typeof query
     }
     const { data, error } = await query.single()
-    if (error) return null
+    if (error) {
+      // PGRST116 = no rows found (정상적인 null 케이스)
+      if (error.code === 'PGRST116') return null
+      throw new Error(`DB read error [${error.code}]: ${error.message}`)
+    }
     return data as T
   }
 
@@ -26,7 +30,7 @@ export class SupabaseAdapter implements DbClient {
       }
     }
     const { data, error } = await query
-    if (error) return []
+    if (error) throw new Error(`DB read error [${error.code}]: ${error.message}`)
     return (data ?? []) as T[]
   }
 
@@ -52,7 +56,11 @@ export class SupabaseAdapter implements DbClient {
       query = query.eq(key, value)
     }
     const { data: result, error } = await query.select().single()
-    if (error) return null
+    if (error) {
+      // PGRST116 = no rows matched (정상적인 null 케이스)
+      if (error.code === 'PGRST116') return null
+      throw new Error(`DB read error [${error.code}]: ${error.message}`)
+    }
     return result as T
   }
 

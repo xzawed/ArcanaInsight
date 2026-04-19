@@ -11,7 +11,7 @@ let _db: ReturnType<typeof drizzle> | null = null
 function getConnection() {
   if (!_db) {
     if (!process.env.POSTGRES_URL) throw new Error("POSTGRES_URL is required")
-    const client = postgres(process.env.POSTGRES_URL, { max: 10 })
+    const client = postgres(process.env.POSTGRES_URL, { max: parseInt(process.env.POSTGRES_POOL_SIZE ?? '10', 10) })
     _db = drizzle(client, { schema })
   }
   return _db

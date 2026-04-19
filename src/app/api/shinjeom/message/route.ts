@@ -8,6 +8,10 @@ import { getDb } from "@/lib/db";
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
 
+// 최종 턴(결과 요청) vs 일반 대화 max_tokens 상수
+const SHINJEOM_TOKENS_FINAL = 4000;
+const SHINJEOM_TOKENS_CHAT = 1000;
+
 /** DB 저장 (fire-and-forget — 스트림을 블로킹하지 않음) */
 async function saveToDb(sessionId: string | null | undefined, params: {
   isFinalTurn: boolean;
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          const shinjeomMaxTokens = isFinalTurn ? 4000 : 1000;
+          const shinjeomMaxTokens = isFinalTurn ? SHINJEOM_TOKENS_FINAL : SHINJEOM_TOKENS_CHAT;
           for await (const chunk of aiProvider.streamReading(systemPrompt, userPrompt, shinjeomMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
@@ -80,11 +84,11 @@ export async function POST(request: NextRequest) {
 
             // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
-            saveToDb(sessionId, { isFinalTurn: true, result });
+            void saveToDb(sessionId, { isFinalTurn: true, result });
           } else {
             // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
-            saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, messageIndex });
+            void saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, messageIndex });
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);

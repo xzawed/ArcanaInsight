@@ -47,8 +47,7 @@ export default function ShinjeomSessionPage() {
       content: character.greeting + "\n\n어떤 고민이 있으신가요? 편하게 말씀해 주세요.",
       mood: "default", timestamp: new Date(),
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topic]);
+  }, [topic, characterId, character, router, sessionCreated, setSessionId, setMood, addChatMessage]);
 
   // 새 메시지 추가 시에만 컨테이너 내부 스크롤 (윈도우 스크롤 방지)
   const chatContainerRef = useRef<HTMLDivElement>(null);
