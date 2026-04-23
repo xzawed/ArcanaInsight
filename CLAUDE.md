@@ -180,6 +180,11 @@ src/
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
 │   ├── validation/
 │   │   └── api-schemas.ts      # Zod 스키마 — TarotReadingSchema / SajuReadingSchema / ShinjeomMessageSchema
+│   ├── verum/                  # Verum SDK 인라인 모듈 — 타로 프롬프트 A/B 라우팅 + 트레이스 기록
+│   │   ├── client.ts           # VerumClient (chat/record), DeploymentConfig 캐시 포함
+│   │   ├── cache.ts            # TTL 기반 인메모리 캐시 (DeploymentConfigCache)
+│   │   ├── router.ts           # chooseVariant() — traffic_split 기반 variant/baseline 선택
+│   │   └── index.ts            # re-export
 │   └── storage/
 │       └── index.ts            # getCardImageUrl() 등 provider별 카드 이미지 URL
 ├── services/
@@ -439,6 +444,10 @@ NEXT_PUBLIC_SUPABASE_URL=   # Supabase 프로젝트 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase 익명 키
 SUPABASE_SERVICE_ROLE_KEY=  # Supabase 서비스 키 (서버 전용)
 NEXT_PUBLIC_SITE_URL=       # 사이트 URL
+# Verum (선택) — 미설정 시 로컬 프롬프트 사용 (안전한 기본값)
+VERUM_API_URL=              # https://verum-production.up.railway.app
+VERUM_API_KEY=              # Verum 대시보드 DEPLOY 후 발급
+VERUM_DEPLOYMENT_ID=        # Verum 대시보드 DEPLOY 후 발급
 ```
 
 ### PostgreSQL 모드 (온프레미스 전환 시)
