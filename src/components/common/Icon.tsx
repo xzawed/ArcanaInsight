@@ -68,9 +68,9 @@ const iconMap: Record<string, string> = {
 };
 
 interface IconProps {
-  id: string;
-  size?: number;
-  className?: string;
+  readonly id: string;
+  readonly size?: number;
+  readonly className?: string;
 }
 
 export function Icon({ id, size = 24, className }: IconProps) {

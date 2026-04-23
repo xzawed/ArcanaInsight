@@ -1,8 +1,8 @@
 "use client";
 
 interface ReadingTextProps {
-  text: string;
-  className?: string;
+  readonly text: string;
+  readonly className?: string;
 }
 
 /** AI 리딩 텍스트를 단락별로 분리하여 렌더링 */

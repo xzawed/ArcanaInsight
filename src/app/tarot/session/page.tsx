@@ -362,7 +362,8 @@ export default function TarotSessionPage() {
   }, [chatMessages, phase]);
 
   const spread = spreadType ? spreads[spreadType] : null;
-  const particleDensity = phase === "reading" ? "high" : phase === "result" ? "low" : "medium";
+  const particleDensityMap: Record<string, "low" | "medium" | "high"> = { reading: "high", result: "low" };
+  const particleDensity = particleDensityMap[phase] ?? "medium";
   const effectTheme = character?.effectTheme;
 
   return (

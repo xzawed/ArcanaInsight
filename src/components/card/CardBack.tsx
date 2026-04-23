@@ -5,11 +5,11 @@ import Image from "next/image";
 import { getCardBackUrl } from "@/lib/storage";
 
 interface CardBackProps {
-  size?: "sm" | "md" | "lg";
-  width?: number;
-  height?: number;
-  className?: string;
-  skinId?: string;
+  readonly size?: "sm" | "md" | "lg";
+  readonly width?: number;
+  readonly height?: number;
+  readonly className?: string;
+  readonly skinId?: string;
 }
 
 const sizeDimensions = {
@@ -28,9 +28,8 @@ export function CardBack({ size = "md", width, height, className = "", skinId }:
   const r1 = Math.min(w, h) * 0.3;
   const r2 = r1 * 0.65;
   const r3 = r1 * 0.35;
-  const starSize = size === "sm" ? 6 : size === "md" ? 8 : 10;
-  const cornerStarSize = size === "sm" ? 4 : size === "md" ? 5 : 6;
-  const inset = size === "sm" ? 4 : size === "md" ? 6 : 8;
+  const sizeDetails = { sm: { starSize: 6, cornerStarSize: 4, inset: 4 }, md: { starSize: 8, cornerStarSize: 5, inset: 6 }, lg: { starSize: 10, cornerStarSize: 6, inset: 8 } };
+  const { starSize, cornerStarSize, inset } = sizeDetails[size];
 
   if (skinId && !imageError) {
     return (

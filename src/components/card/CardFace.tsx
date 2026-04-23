@@ -7,13 +7,13 @@ import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
 import { getCardImageUrl } from "@/lib/storage";
 
 interface CardFaceProps {
-  card: TarotCard;
-  isReversed: boolean;
-  size?: "sm" | "md" | "lg";
-  width?: number;
-  height?: number;
-  className?: string;
-  skinId?: string;
+  readonly card: TarotCard;
+  readonly isReversed: boolean;
+  readonly size?: "sm" | "md" | "lg";
+  readonly width?: number;
+  readonly height?: number;
+  readonly className?: string;
+  readonly skinId?: string;
 }
 
 const sizeDimensions = {
@@ -31,8 +31,10 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
     ? majorSymbols[card.id]
     : card.suit ? suitSymbols[card.suit] : null;
 
-  const fontSize = size === "sm" ? 6 : size === "md" ? 8 : 10;
-  const numberSize = size === "sm" ? 7 : size === "md" ? 10 : 12;
+  const fontSizeMap = { sm: 6, md: 8, lg: 10 };
+  const numberSizeMap = { sm: 7, md: 10, lg: 12 };
+  const fontSize = fontSizeMap[size];
+  const numberSize = numberSizeMap[size];
 
   const cx = w / 2;
   const cy = h * 0.42;

@@ -4,21 +4,23 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 interface ScrollRevealProps {
-  children: React.ReactNode;
-  delay?: number;
-  direction?: "up" | "left" | "right" | "none";
-  className?: string;
+  readonly children: React.ReactNode;
+  readonly delay?: number;
+  readonly direction?: "up" | "left" | "right" | "none";
+  readonly className?: string;
 }
 
 export function ScrollReveal({ children, delay = 0, direction = "up", className = "" }: ScrollRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
+  const xOffsetMap: Record<string, number> = { left: -30, right: 30 };
+  const xOffset = xOffsetMap[direction] ?? 0;
   const variants = {
     hidden: {
       opacity: 0,
       y: direction === "up" ? 30 : 0,
-      x: direction === "left" ? -30 : direction === "right" ? 30 : 0,
+      x: xOffset,
     },
     visible: {
       opacity: 1,

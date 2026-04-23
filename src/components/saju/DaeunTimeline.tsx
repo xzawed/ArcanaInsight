@@ -4,9 +4,9 @@ import { OHAENG } from "@/data/saju/constants";
 import type { SajuResult } from "@/services/saju/saju-types";
 
 interface DaeunTimelineProps {
-  majorFortunes: SajuResult["majorFortunes"];
-  yearlyFortune: SajuResult["yearlyFortune"];
-  birthYear: number;
+  readonly majorFortunes: SajuResult["majorFortunes"];
+  readonly yearlyFortune: SajuResult["yearlyFortune"];
+  readonly birthYear: number;
 }
 
 export function DaeunTimeline({ majorFortunes, yearlyFortune, birthYear }: DaeunTimelineProps) {

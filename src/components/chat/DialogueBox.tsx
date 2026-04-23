@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChatMessage } from "@/types/session";
 
 interface DialogueBoxProps {
-  messages: ChatMessage[];
-  characterName?: string;
-  isTyping?: boolean;
-  className?: string;
+  readonly messages: ChatMessage[];
+  readonly characterName?: string;
+  readonly isTyping?: boolean;
+  readonly className?: string;
 }
 
 export function DialogueBox({ messages, characterName = "아르카나", isTyping = false, className = "" }: DialogueBoxProps) {

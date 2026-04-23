@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ChatMessage } from "@/types/session";
 
-interface ChatBubbleProps { message: ChatMessage; }
+interface ChatBubbleProps { readonly message: ChatMessage; }
 
 export function ChatBubble({ message }: ChatBubbleProps) {
   const isCharacter = message.role === "character";
