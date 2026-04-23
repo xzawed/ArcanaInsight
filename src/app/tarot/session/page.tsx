@@ -96,7 +96,7 @@ export default function TarotSessionPage() {
       });
     }, 2000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topic]);
+  }, [topic]); // NOSONAR
 
   const handleCardSelect = useCallback((index: number) => {
     // 항상 fresh 상태를 읽어 stale closure 방지
@@ -136,7 +136,7 @@ export default function TarotSessionPage() {
       }, 500);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shuffledDeck, confirmEachCard, selectCard, setMood, addChatMessage]);
+  }, [shuffledDeck, confirmEachCard, selectCard, setMood, addChatMessage]); // NOSONAR
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
@@ -153,7 +153,7 @@ export default function TarotSessionPage() {
       setMood("default");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requiredCards, addChatMessage, setMood]);
+  }, [requiredCards, addChatMessage, setMood]); // NOSONAR
 
   /** 취소 → 마지막 카드 제거, 다시 선택 가능 */
   const handleCancelLastCard = useCallback(() => {
@@ -232,7 +232,7 @@ export default function TarotSessionPage() {
         try {
           const errorBody = await response.json();
           errorDetail = errorBody?.error || "";
-        } catch { /* JSON 파싱 실패 무시 */ }
+        } catch (e) { console.warn("리딩 에러 응답 JSON 파싱 실패:", e); }
         console.error("리딩 API 응답 실패:", response.status, errorDetail);
         const message = errorDetail.includes("GROK_API_KEY")
           ? "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요."
@@ -264,7 +264,7 @@ export default function TarotSessionPage() {
                   setReadingResult(data.result);
                   setPhase("result"); setMood("smile");
                 }
-              } catch { /* 파싱 실패 무시 */ }
+              } catch (e) { console.warn("SSE 버퍼 파싱 실패:", e); }
             }
           }
           break;
@@ -586,12 +586,12 @@ export default function TarotSessionPage() {
                         const url = `${window.location.origin}/tarot/result/${shareToken}`;
                         const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
                         if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 취소 */ }
+                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
                         } else {
                           try {
                             await navigator.clipboard.writeText(`${text}\n${url}`);
                             alert("링크가 복사되었습니다!");
-                          } catch { /* 실패 */ }
+                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
                         }
                       } else {
                         // 공유 링크 없으면 결과 텍스트 직접 공유
@@ -599,12 +599,12 @@ export default function TarotSessionPage() {
                           ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
                           : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
                         if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 취소 */ }
+                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
                         } else {
                           try {
                             await navigator.clipboard.writeText(summary);
                             alert("결과가 복사되었습니다!");
-                          } catch { /* 실패 */ }
+                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
                         }
                       }
                     }}

@@ -133,7 +133,7 @@ export function ParticleOverlay({ density = "medium", colorScheme, particleStyle
   useEffect(() => {
     setParticles(generateParticles(DENSITY_COUNT[density], buildColors(colorScheme)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [density, primaryColor, secondaryColor, accentColor, particleStyle]);
+  }, [density, primaryColor, secondaryColor, accentColor, particleStyle]); // NOSONAR
 
   return (
     <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>

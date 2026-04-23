@@ -43,7 +43,7 @@ export default function SajuSessionPage() {
       if (!res.ok) return;
       const data = await res.json();
       if (data.session?.id) setSessionId(data.session.id);
-    }).catch(() => {});
+    }).catch((e) => console.warn("사주 세션 생성 실패 (리딩은 계속 진행):", e));
 
     setMood("default");
     const namePrefix = userInfo.name ? `${userInfo.name}님의` : "";
@@ -56,7 +56,7 @@ export default function SajuSessionPage() {
 
     startReading();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // NOSONAR
 
   const startReading = async () => {
     setLoading(true);
@@ -199,24 +199,24 @@ export default function SajuSessionPage() {
                     const url = `${window.location.origin}/saju/result/${shareToken}`;
                     const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${siteName}`;
                     if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text, url }); } catch { /* 취소 */ }
+                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
                     } else {
                       try {
                         await navigator.clipboard.writeText(`${text}\n${url}`);
                         alert("링크가 복사되었습니다!");
-                      } catch { /* 실패 */ }
+                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
                     }
                   } else {
                     const summary = r?.overallReading
                       ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${siteName}`
                       : `☯ 사주 분석을 받아보세요!\n\n- ${siteName}`;
                     if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text: summary }); } catch { /* 취소 */ }
+                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
                     } else {
                       try {
                         await navigator.clipboard.writeText(summary);
                         alert("결과가 복사되었습니다!");
-                      } catch { /* 실패 */ }
+                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
                     }
                   }
                 }}

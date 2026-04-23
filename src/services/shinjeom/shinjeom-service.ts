@@ -136,7 +136,7 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
           advice: cleanReadingText(String(parsed.advice || "")),
         };
       }
-    } catch { /* JSON 파싱 실패 → 텍스트로 처리 */ }
+    } catch (e) { console.warn("신점 결과 JSON 파싱 실패 (텍스트로 처리):", e); }
 
     // 중간 대화 또는 파싱 실패 → 텍스트 그대로
     return {

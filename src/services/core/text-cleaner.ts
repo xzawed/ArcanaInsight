@@ -48,7 +48,7 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
   // 1차 시도: 그대로 파싱
   try {
     return JSON.parse(text) as Record<string, unknown>;
-  } catch { /* 계속 */ }
+  } catch { /* 다음 파싱 방법으로 계속 */ } // NOSONAR
 
   // 2차 시도: 문자열 리터럴 내 개행·탭 이스케이프
   // "..." 패턴 내부의 비이스케이프 개행만 교체
@@ -57,7 +57,7 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
       m.replace(/\n/g, "\\n").replace(/\r/g, "").replace(/\t/g, "\\t")
     );
     return JSON.parse(sanitized) as Record<string, unknown>;
-  } catch { /* 계속 */ }
+  } catch { /* 다음 파싱 방법으로 계속 */ } // NOSONAR
 
   return null;
 }

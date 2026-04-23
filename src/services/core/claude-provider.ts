@@ -103,7 +103,7 @@ export class ClaudeProvider implements AIProvider {
             if (parsed.type === "content_block_delta" && parsed.delta?.text) {
               yield parsed.delta.text;
             }
-          } catch { /* 파싱 실패 무시 */ }
+          } catch (e) { console.warn("Claude SSE 파싱 실패:", e); }
         }
       }
     } finally {

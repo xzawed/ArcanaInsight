@@ -35,7 +35,7 @@ function saveLocalInfo(info: UserInfo): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
     localStorage.setItem(CONSENT_KEY, new Date().toISOString());
-  } catch { /* 시크릿 모드 등 localStorage 차단 시 무시 */ }
+  } catch { /* 시크릿 모드 등 localStorage 차단 시 무시 */ } // NOSONAR
 }
 
 /** localStorage에서 정보 삭제 (동의 철회) */
@@ -43,7 +43,7 @@ function clearLocalInfo(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(CONSENT_KEY);
-  } catch { /* 무시 */ }
+  } catch { /* localStorage 차단 시 무시 */ } // NOSONAR
 }
 
 export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {
