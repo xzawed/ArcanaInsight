@@ -3,6 +3,9 @@ import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 import { getDb } from "@/lib/db";
+import { assertSessionOwnership } from "@/lib/auth";
+import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 
 const shinjeomService = new ShinjeomService();
@@ -47,22 +50,33 @@ async function saveToDb(sessionId: string | null | undefined, params: {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { sessionId, topic, characterId, currentMessage, chatHistory, isFinalTurn, messageIndex } = body as {
-      sessionId?: string | null;
-      topic: Topic;
-      characterId?: string;
-      currentMessage?: string;
-      chatHistory: ChatMessage[];
-      isFinalTurn: boolean;
-      messageIndex: number;
-    };
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    if (!checkRateLimit(`shinjeom:${ip}`, 20, 60_000)) return rateLimitResponse();
 
-    if (!topic) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    const rawBody = await request.json();
+
+    // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)
+    const parsed = ShinjeomMessageSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
+    const { sessionId, characterId, currentMessage, isFinalTurn, messageIndex } = parsed.data;
+    const topic = parsed.data.topic as Topic;
+    // timestamp는 네트워크 전송 시 문자열/숫자로 직렬화되므로 Date로 복원
+    const chatHistory: ChatMessage[] = parsed.data.chatHistory.map((m) => ({
+      ...m,
+      timestamp: new Date(m.timestamp),
+    }));
+
     if (!isFinalTurn && !currentMessage) {
       return new Response(JSON.stringify({ error: "Message required for non-final turns" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    // 세션 소유권 검증 (sessionId 있을 때만)
+    if (sessionId) {
+      const ownerErr = await assertSessionOwnership(sessionId);
+      if (ownerErr) return ownerErr;
     }
 
     const systemPrompt = shinjeomService.getSystemPrompt(characterId);
