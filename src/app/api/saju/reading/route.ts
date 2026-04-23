@@ -5,6 +5,9 @@ import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
+import { assertSessionOwnership } from "@/lib/auth";
+import { SajuReadingSchema } from "@/lib/validation/api-schemas";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
@@ -35,8 +38,18 @@ function resolveCalcOptions(timeRange: SajuTimeRange, includeMonthly: boolean) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { sessionId, topic, timeRange, includeMonthly, characterId, userInfo } = body as {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    if (!checkRateLimit(`saju:${ip}`, 10, 60_000)) return rateLimitResponse();
+
+    const rawBody = await request.json();
+
+    // Zod 입력 검증
+    const parsed = SajuReadingSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    const { sessionId, topic, timeRange, includeMonthly, characterId, userInfo } = parsed.data as {
       sessionId?: string | null;
       topic: Topic;
       timeRange: SajuTimeRange;
@@ -45,14 +58,17 @@ export async function POST(request: NextRequest) {
       userInfo: { name?: string; birthDate: string; birthHour: string; gender: "male" | "female" | "other" };
     };
 
-    if (!topic || !timeRange || !userInfo?.birthDate || !userInfo?.birthHour || !userInfo?.gender) {
-      return new Response(JSON.stringify({ error: "생년월일, 출생시간, 성별, 분석 설정은 필수입니다." }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
     if (!VALID_TOPICS.includes(topic)) {
       return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
     if (!VALID_TIME_RANGES.includes(timeRange)) {
       return new Response(JSON.stringify({ error: "Invalid timeRange" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
+    if (sessionId) {
+      const ownerErr = await assertSessionOwnership(sessionId);
+      if (ownerErr) return ownerErr;
     }
 
     // 사주팔자 계산 (서버 사이드)

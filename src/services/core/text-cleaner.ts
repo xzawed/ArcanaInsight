@@ -40,10 +40,20 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
   const codeMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeMatch) text = codeMatch[1].trim();
 
-  // 가장 바깥 JSON 객체만 추출
-  const objMatch = text.match(/\{[\s\S]*\}/);
-  if (!objMatch) return null;
-  text = objMatch[0];
+  // 입력 길이 상한 (ReDoS 방어)
+  if (text.length > 50_000) return null;
+
+  // 가장 바깥 JSON 객체만 추출 — 괄호 카운터 기반으로 ReDoS 방지
+  const start = text.indexOf("{");
+  if (start === -1) return null;
+  let depth = 0;
+  let end = -1;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === "{") depth++;
+    else if (text[i] === "}") { depth--; if (depth === 0) { end = i; break; } }
+  }
+  if (end === -1) return null;
+  text = text.slice(start, end + 1);
 
   // 1차 시도: 그대로 파싱
   try {

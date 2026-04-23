@@ -230,4 +230,13 @@ describe("parseJsonSafe", () => {
     expect(result).not.toBeNull();
     expect(result?.value).toBe(123);
   });
+
+  it("50,000자 초과 입력은 null 반환 (ReDoS 방어)", () => {
+    const oversized = "x".repeat(50_001);
+    expect(parseJsonSafe(oversized)).toBeNull();
+  });
+
+  it("닫히지 않은 중괄호는 null 반환", () => {
+    expect(parseJsonSafe('{"key": "unclosed')).toBeNull();
+  });
 });

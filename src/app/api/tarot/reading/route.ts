@@ -7,7 +7,10 @@ import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
 import { getDb } from "@/lib/db";
+import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
+import { TarotReadingSchema } from "@/lib/validation/api-schemas";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -22,20 +25,32 @@ const TOKENS_MANY_CARDS = 6000;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { sessionId, topic, spreadType, characterId, userInfo, cards } = body as {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    if (!checkRateLimit(`tarot:${ip}`, 10, 60_000)) return rateLimitResponse();
+
+    const rawBody = await request.json();
+
+    // Zod 입력 검증
+    const parsed = TarotReadingSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    const { sessionId, topic, spreadType, characterId, userInfo, cards } = parsed.data as {
       sessionId?: string | null; topic: Topic; spreadType?: string; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
 
     // 입력 검증
-    if (!topic || !Array.isArray(cards) || cards.length === 0) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
-
     if (!TAROT_TOPICS.includes(topic)) {
       return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
+    if (sessionId) {
+      const ownerErr = await assertSessionOwnership(sessionId);
+      if (ownerErr) return ownerErr;
     }
 
     const selectedCards: SelectedCard[] = cards.map((c) => {
