@@ -162,6 +162,9 @@ src/
 ├── lib/
 │   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·cooldown 12개, 하드코딩 방지)
 │   ├── env.test.ts             # 단위 테스트 — 기본값·커스텀값·parseInt/parseFloat 파싱 (32개)
+│   ├── rate-limit.ts           # 메모리 기반 Rate Limiting (IP별 윈도우 카운터)
+│   ├── rate-limit.test.ts      # 단위 테스트 — 6개 (한도/윈도우/독립 키 검증)
+│   ├── share.ts                # shareOrCopy() — Web Share API / clipboard 공통 유틸
 │   ├── supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts) — Supabase 모드 전용
 │   ├── db/                     # DB 추상화 레이어
 │   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
@@ -169,11 +172,14 @@ src/
 │   │   ├── supabase-adapter.ts # Supabase DbClient 구현
 │   │   ├── supabase-adapter.test.ts # 단위 테스트 — findOne/findMany/insert/update/upsert (18개)
 │   │   ├── postgres-adapter.ts # Drizzle ORM DbClient 구현
+│   │   ├── reading-saver.ts    # saveReadingAsync() — fire-and-forget DB 저장 + 세션 완료 처리
 │   │   └── schema/index.ts     # Drizzle 스키마 (9개 마이그레이션 변환)
 │   ├── auth/                   # Auth 추상화 레이어
-│   │   ├── index.ts            # getCurrentUser() / requireUser() 공통 함수
+│   │   ├── index.ts            # getCurrentUser() / requireUser() / assertSessionOwnership() 공통 함수
 │   │   ├── supabase-auth.ts    # Supabase Auth 래핑
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
+│   ├── validation/
+│   │   └── api-schemas.ts      # Zod 스키마 — TarotReadingSchema / SajuReadingSchema / ShinjeomMessageSchema
 │   └── storage/
 │       └── index.ts            # getCardImageUrl() 등 provider별 카드 이미지 URL
 ├── services/
@@ -181,7 +187,7 @@ src/
 │   │                           # claude-provider.ts (Claude API fallback),
 │   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
 │   │                           # prompt-builder.ts, text-cleaner.ts
-│   │                           # *.test.ts — fallback-provider(11), prompt-builder(39), text-cleaner(33),
+│   │                           # *.test.ts — fallback-provider(11), prompt-builder(39), text-cleaner(35),
 │   │                           #             grok-provider(20), claude-provider(16)
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
 │   │                           # saju-service.test.ts (28개), saju-calculator.test.ts (36개)
@@ -347,6 +353,13 @@ drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
   - 401/403 인증 실패: 30분 쿨다운 (재시도 불가)
   - Grok + Claude 둘 다 실패: "AI 서비스가 일시적으로 사용할 수 없습니다" 메시지
 - **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/daily-card`에서 AI 응답을 SSE로 클라이언트에 스트리밍
+  - 클라이언트는 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`) 공통 유틸 사용 — 타로/사주/신점 페이지 모두 적용
+- **API 보안 패턴** (3개 AI API 라우트 공통):
+  - Rate Limiting: IP별 `checkRateLimit()` — 타로/사주 10req/min, 신점 20req/min, 초과 시 429
+  - 입력 검증: Zod 스키마 `safeParse()` — `src/lib/validation/api-schemas.ts`
+  - IDOR 방어: `assertSessionOwnership()` — `src/lib/auth/index.ts`, 세션 소유자 불일치 시 403
+- **DB 저장 패턴**: `saveReadingAsync(sessionId, serviceType, saves)` — fire-and-forget, 스트림 블로킹 없이 세션 완료 처리
+- **공유 유틸**: `shareOrCopy()` (`src/lib/share.ts`) — Web Share API 우선, fallback clipboard 복사
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
 - **Path alias**: `@/*` → `./src/*` (tsconfig.json)
 - **동적 테마**: `useTheme.ts`에서 사용자 로컬 시간/계절 기반으로 7종 테마 자동 감지
