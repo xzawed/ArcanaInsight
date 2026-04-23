@@ -142,6 +142,7 @@ src/
 │   ├── skins/                  # index.ts (6종 스킨 정의)
 │   ├── spreads/                # 스프레드 10종 정의 (원카드~생명의 나무)
 │   ├── topics.ts               # 타로/사주/신점 유효 토픽 목록 (TAROT_TOPICS, SAJU_TOPICS, SHINJEOM_TOPICS, ALL_TOPICS)
+│   ├── topics.test.ts          # 단위 테스트 — 토픽 배열 개수·prefix·ALL_TOPICS 무결성 (20개)
 │   ├── birth-hours.ts          # 12시진 데이터
 │   └── error-messages.ts       # API 에러 메시지 상수
 ├── hooks/                      # Zustand 스토어 + 공통 훅
@@ -157,6 +158,7 @@ src/
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/
 │   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·cooldown 12개, 하드코딩 방지)
+│   ├── env.test.ts             # 단위 테스트 — 기본값·커스텀값·parseInt/parseFloat 파싱 (32개)
 │   ├── supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts) — Supabase 모드 전용
 │   ├── db/                     # DB 추상화 레이어
 │   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
@@ -175,9 +177,13 @@ src/
 │   │                           # claude-provider.ts (Claude API fallback),
 │   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
 │   │                           # prompt-builder.ts, text-cleaner.ts
+│   │                           # *.test.ts — fallback-provider(11), prompt-builder(39), text-cleaner(33)
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
+│   │                           # saju-service.test.ts (28개)
 │   ├── shinjeom/               # shinjeom-service.ts (무제한 대화형, isFinalTurn 플래그로 결과 요청)
+│   │                           # shinjeom-service.test.ts (26개)
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
+│                               # *.test.ts — deck-manager(16), spread-resolver(39), tarot-service(26)
 ├── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
 │   └── next-auth.d.ts          # NextAuth Session 타입 확장 (user.id 추가)
 
@@ -262,6 +268,10 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 # PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
 
 drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
+vitest.config.ts               # Vitest 2.0 설정 (node env, @/ alias, v8 coverage, 임계값)
+vitest.setup.ts                # 전역 테스트 환경 (env vars, global.fetch mock)
+sonar-project.properties       # SonarCloud 프로젝트 설정 (lcov, junit XML 경로)
+.codecov.yml                   # Codecov 커버리지 임계값 설정 (project -2%, patch -5%)
 ```
 
 ## 캐릭터 시스템
@@ -454,8 +464,9 @@ git branch | grep -v '^\* main' | xargs git branch -D
 
 ## CI/CD 파이프라인
 
-- GitHub Free 플랜: **월 2,000분** 한도 (예상 사용 ~100분)
-- **PR CI** (`deploy.yml`): PR → main, lint → build → E2E (Desktop Chrome + Mobile Android)
+- GitHub Free 플랜: **월 2,000분** 한도 (예상 사용 ~120분)
+- **PR CI** (`deploy.yml`): PR → main, lint → type-check → **단위 테스트(Vitest)** → build → E2E (Desktop Chrome + Mobile Android)
+- **SonarCloud + Codecov** (`sonar.yml`): main push/PR, lint → type-check → **단위 테스트(커버리지)** → E2E → SonarCloud 분석 → Codecov 업로드
 - **주간 QA** (`weekly-qa.yml`): 토요일 09:00 KST, 3개 디바이스(iOS 포함), artifact 30일 보존, 실패 시 Issue 자동 생성
 - **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
 
