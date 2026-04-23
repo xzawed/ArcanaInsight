@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    reporters: ["default", ["junit", { outputFile: "./coverage/junit.xml" }]],
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.ts", "src/**/*.spec.ts"],
     exclude: [

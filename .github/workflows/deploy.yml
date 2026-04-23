@@ -35,6 +35,13 @@ jobs:
       # 2단계: 단위·통합 테스트 (Vitest)
       - run: pnpm test:coverage
 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-coverage
+          path: coverage/
+          retention-days: 7
+
       # 3단계: Build
       - run: pnpm build
         env:
