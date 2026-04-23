@@ -5,11 +5,11 @@ import type { SajuResult } from "@/services/saju/saju-types";
 import type { OhaengType } from "@/data/saju/constants";
 
 interface SajuChartProps {
-  pillars: SajuResult["pillars"];
-  dayMaster: string;
-  dayMasterElement: OhaengType;
-  isStrong: boolean;
-  yongsin: SajuResult["yongsin"];
+  readonly pillars: SajuResult["pillars"];
+  readonly dayMaster: string;
+  readonly dayMasterElement: OhaengType;
+  readonly isStrong: boolean;
+  readonly yongsin: SajuResult["yongsin"];
 }
 
 export function SajuChart({ pillars, dayMaster, dayMasterElement, isStrong, yongsin }: SajuChartProps) {

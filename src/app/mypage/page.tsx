@@ -280,7 +280,8 @@ export default async function MyPage() {
                 ? overallText.slice(0, 80) + "..."
                 : overallText || null;
               const shareToken = reading?.share_token;
-              const serviceLabel = session.service_type === "saju" ? "사주" : session.service_type === "shinjeom" ? "신점" : "타로";
+              const serviceLabelMap: Record<string, string> = { saju: "사주", shinjeom: "신점", tarot: "타로" };
+              const serviceLabel = serviceLabelMap[session.service_type] ?? "타로";
               const resultPath = session.service_type === "saju"
                 ? `/saju/result/${shareToken}`
                 : session.service_type === "shinjeom"

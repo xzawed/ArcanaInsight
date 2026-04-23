@@ -7,10 +7,10 @@ import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
 
 interface CardDeckProps {
-  cards: TarotCard[];
-  isSpread: boolean;
-  selectedIndices: number[];
-  onCardSelect: (index: number) => void;
+  readonly cards: TarotCard[];
+  readonly isSpread: boolean;
+  readonly selectedIndices: number[];
+  readonly onCardSelect: (index: number) => void;
 }
 
 export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {

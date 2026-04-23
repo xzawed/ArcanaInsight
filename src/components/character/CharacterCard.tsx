@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { CharacterConfig } from "@/types/character";
 
 interface CharacterCardProps {
-  character: CharacterConfig;
-  isSelected: boolean;
-  onClick: () => void;
-  index: number;
+  readonly character: CharacterConfig;
+  readonly isSelected: boolean;
+  readonly onClick: () => void;
+  readonly index: number;
 }
 
 export function CharacterCard({ character, isSelected, onClick, index }: CharacterCardProps) {

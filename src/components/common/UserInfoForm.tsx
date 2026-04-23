@@ -11,10 +11,10 @@ const STORAGE_KEY = "arcana_user_info";
 const CONSENT_KEY = "arcana_privacy_agreed";
 
 interface UserInfoFormProps {
-  mode: "tarot" | "saju";
-  onSubmit: (data: UserInfo) => void;
-  onBack: () => void;
-  characterName?: string;
+  readonly mode: "tarot" | "saju";
+  readonly onSubmit: (data: UserInfo) => void;
+  readonly onBack: () => void;
+  readonly characterName?: string;
 }
 
 /** localStorage에 저장된 정보 로드 (동의한 경우만) */
@@ -203,10 +203,11 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 이름 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
+        <label htmlFor="userinfo-name" className="text-arcana-muted text-xs font-serif mb-1.5 block">
           이름 {mode === "tarot" ? "*" : "(선택)"}
         </label>
         <input
+          id="userinfo-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -217,8 +218,9 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 생년월일 — 단일 date input */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 *</label>
+        <label htmlFor="userinfo-birthdate" className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 *</label>
         <input
+          id="userinfo-birthdate"
           type="date"
           value={birthDate}
           onChange={(e) => setBirthDate(e.target.value)}
@@ -251,11 +253,12 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 태어난 시 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
+        <label htmlFor="userinfo-birthhour" className="text-arcana-muted text-xs font-serif mb-1.5 block">
           태어난 시 {mode === "saju" ? "*" : "(선택)"}
         </label>
         <div className="relative">
         <select
+          id="userinfo-birthhour"
           value={birthHour}
           onChange={(e) => setBirthHour(e.target.value)}
           className={`${inputClasses} appearance-none pr-8`}

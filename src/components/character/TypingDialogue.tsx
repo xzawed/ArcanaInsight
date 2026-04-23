@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface TypingDialogueProps {
-  text: string; speed?: number; onComplete?: () => void;
-  className?: string; isStreaming?: boolean;
+  readonly text: string; speed?: number; onComplete?: () => void;
+  readonly className?: string; isStreaming?: boolean;
 }
 
 export function TypingDialogue({ text, speed = 30, onComplete, className = "", isStreaming = false }: TypingDialogueProps) {

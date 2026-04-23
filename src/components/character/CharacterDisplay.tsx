@@ -6,9 +6,9 @@ import { SpriteAnimator } from "./SpriteAnimator";
 import { useCharacterStore } from "@/hooks/useCharacter";
 
 interface CharacterDisplayProps {
-  character: CharacterConfig;
-  mood: Mood;
-  className?: string;
+  readonly character: CharacterConfig;
+  readonly mood: Mood;
+  readonly className?: string;
 }
 
 export function CharacterDisplay({ character, mood, className = "" }: CharacterDisplayProps) {

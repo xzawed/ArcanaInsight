@@ -4,9 +4,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PrivacyConsentModalProps {
-  isOpen: boolean;
-  onAgree: () => void;
-  onCancel: () => void;
+  readonly isOpen: boolean;
+  readonly onAgree: () => void;
+  readonly onCancel: () => void;
 }
 
 export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsentModalProps) {

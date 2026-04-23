@@ -8,10 +8,10 @@ import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
 
 interface CardSpreadProps {
-  selectedCards: SelectedCard[];
-  spread: SpreadDefinition;
-  revealedPositions: number[];
-  glowColor?: string;
+  readonly selectedCards: SelectedCard[];
+  readonly spread: SpreadDefinition;
+  readonly revealedPositions: number[];
+  readonly glowColor?: string;
 }
 
 function hexToRgbBase(hex: string): string {

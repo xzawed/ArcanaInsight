@@ -10,10 +10,10 @@ interface ColorScheme {
 }
 
 interface ParticleOverlayProps {
-  density?: "low" | "medium" | "high";
-  colorScheme?: ColorScheme;
-  particleStyle?: ParticleStyle;
-  className?: string;
+  readonly density?: "low" | "medium" | "high";
+  readonly colorScheme?: ColorScheme;
+  readonly particleStyle?: ParticleStyle;
+  readonly className?: string;
 }
 
 interface Particle {

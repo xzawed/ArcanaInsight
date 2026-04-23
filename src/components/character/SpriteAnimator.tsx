@@ -52,10 +52,10 @@ const ENTER_MOTION: Record<string, Record<string, number[]>> = {
 };
 
 interface SpriteAnimatorProps {
-  characterId: string;
-  mood: Mood;
-  onAnimationEnd?: () => void;
-  className?: string;
+  readonly characterId: string;
+  readonly mood: Mood;
+  readonly onAnimationEnd?: () => void;
+  readonly className?: string;
 }
 
 export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {

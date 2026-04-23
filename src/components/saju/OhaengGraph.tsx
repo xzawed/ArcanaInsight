@@ -4,8 +4,8 @@ import { OHAENG } from "@/data/saju/constants";
 import type { OhaengType } from "@/data/saju/constants";
 
 interface OhaengGraphProps {
-  elements: Record<OhaengType, number>;
-  yongsinElement: OhaengType;
+  readonly elements: Record<OhaengType, number>;
+  readonly yongsinElement: OhaengType;
 }
 
 export function OhaengGraph({ elements, yongsinElement }: OhaengGraphProps) {

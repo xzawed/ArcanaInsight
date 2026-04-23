@@ -7,9 +7,9 @@ import type { CardSkin } from "@/data/skins";
 import { getCardThumbnailUrl } from "@/lib/storage";
 
 interface SkinSelectorProps {
-  skin: CardSkin;
-  isSelected: boolean;
-  onSelect: (skinId: string) => void;
+  readonly skin: CardSkin;
+  readonly isSelected: boolean;
+  readonly onSelect: (skinId: string) => void;
 }
 
 // 카드 팬 배치: 3장 회전 오프셋

@@ -6,17 +6,17 @@ import { CardFace } from "./CardFace";
 import { CardBack } from "./CardBack";
 
 interface CardItemProps {
-  card: TarotCard;
-  isFlipped: boolean;
-  isSelected: boolean;
-  isReversed?: boolean;
-  onClick?: () => void;
-  size?: "sm" | "md" | "lg";
-  width?: number;
-  height?: number;
-  className?: string;
-  skinId?: string;
-  glowColor?: string;
+  readonly card: TarotCard;
+  readonly isFlipped: boolean;
+  readonly isSelected: boolean;
+  readonly isReversed?: boolean;
+  readonly onClick?: () => void;
+  readonly size?: "sm" | "md" | "lg";
+  readonly width?: number;
+  readonly height?: number;
+  readonly className?: string;
+  readonly skinId?: string;
+  readonly glowColor?: string;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
