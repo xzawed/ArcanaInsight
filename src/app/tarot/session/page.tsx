@@ -84,7 +84,7 @@ export default function TarotSessionPage() {
     initSession();
 
     setMood("default");
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character!.greeting, mood: "default", timestamp: new Date() });
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character.greeting, mood: "default", timestamp: new Date() });
 
     setTimeout(() => {
       setAnimationPhase("spreading");
