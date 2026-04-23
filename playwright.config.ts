@@ -7,7 +7,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [["html", { open: "never" }]],
+  reporter: process.env.CI
+    ? [
+        ["html", { open: "never" }],
+        ["junit", { outputFile: "coverage/junit.xml" }],
+        ["dot"],
+      ]
+    : [["html", { open: "never" }]],
   timeout: 30_000,
 
   use: {

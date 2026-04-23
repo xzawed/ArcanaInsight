@@ -1,0 +1,89 @@
+name: SonarCloud & Codecov — 코드 품질 분석
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'n8n/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - 'n8n/**'
+
+jobs:
+  sonar:
+    name: SonarCloud 정적 분석
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # SonarCloud는 전체 git 히스토리 필요 (blame, blame 기반 새 코드 감지)
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: 의존성 설치
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript 타입 체크
+        run: pnpm type-check
+
+      - name: ESLint (SonarCloud 참고용)
+        run: pnpm lint
+
+      # ── 단위/통합 테스트 + 커버리지 (Vitest) ──────────────────────────────
+      - name: 단위·통합 테스트 실행 (커버리지 포함)
+        run: pnpm test:coverage
+
+      # ── E2E 실행 + JUnit XML ──────────────────────────────────────────────
+      - name: Playwright 설치 (Chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E 테스트 실행 (Desktop Chrome)
+        run: pnpm test:e2e --project="Desktop Chrome"
+        env:
+          CI: "true"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      # ── SonarCloud 분석 ──────────────────────────────────────────────────
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # ── Codecov 업로드 ───────────────────────────────────────────────────
+      - name: Codecov 업로드
+        uses: codecov/codecov-action@v4
+        if: always()   # 테스트 실패해도 업로드 시도
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          flags: e2e
+          name: arcana-e2e
+          fail_ci_if_error: false
+          verbose: false
+
+      # ── 아티팩트 보존 ────────────────────────────────────────────────────
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonar-playwright-report
+          path: |
+            playwright-report/
+            coverage/junit.xml
+          retention-days: 14

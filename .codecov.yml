@@ -1,0 +1,40 @@
+codecov:
+  require_ci_to_pass: false
+
+coverage:
+  precision: 2
+  round: down
+  range: "40...80"
+
+  status:
+    project:
+      default:
+        target: auto        # 이전 커밋 대비 자동 기준
+        threshold: 2%       # 2% 이상 하락 시 fail
+        if_not_found: success
+        if_ci_failed: success
+    patch:
+      default:
+        target: auto
+        threshold: 5%
+        if_not_found: success
+
+comment:
+  layout: "reach,diff,flags,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+
+ignore:
+  - "e2e/**"
+  - "scripts/**"
+  - "src/types/**"
+  - "**/*.d.ts"
+  - ".next/**"
+  - "public/**"
+
+flags:
+  e2e:
+    paths:
+      - src/
+    carryforward: true
