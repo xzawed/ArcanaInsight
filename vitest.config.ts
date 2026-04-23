@@ -20,18 +20,19 @@ export default defineConfig({
       reporter: ["text", "json", "lcov", "html"],
       reportsDirectory: "./coverage",
       include: [
-        "src/data/topics.ts",   // 유효 토픽 목록 — 테스트 있음
-        "src/lib/env.ts",
-        "src/lib/db/supabase-adapter.ts",
-        "src/hooks/useSSEStream.ts",
-        "src/services/**/*.ts",
+        "src/data/topics.ts",        // 유효 토픽 목록 — 테스트 있음
+        "src/lib/env.ts",            // 환경변수 getter — 테스트 있음
+        "src/lib/db/supabase-adapter.ts", // DB 어댑터 — 테스트 있음
+        "src/lib/rate-limit.ts",     // Rate Limiter — 테스트 있음 (Phase 2)
+        "src/hooks/useSSEStream.ts", // SSE 공통 유틸 — 테스트 있음
+        "src/services/**/*.ts",      // 모든 서비스 계층 — 테스트 있음
       ],
       exclude: [
         "src/**/*.test.ts",
         "src/**/*.spec.ts",
         "src/types/**",
         "**/*.d.ts",
-        // 정적 사전·상수 데이터 — 로직 없음, 커버리지 분모에서 제외
+        // 정적 사전·상수 데이터 — 로직 없음
         "src/data/characters/**",
         "src/data/skins/**",
         "src/data/cards/**",
@@ -51,10 +52,11 @@ export default defineConfig({
         "src/hooks/useShinjeomSession.ts",
         "src/hooks/useSkinStore.ts",
         "src/hooks/useTheme.ts",
-        // lib 계층 — Phase C-4 완료 전까지 제외
+        // lib 계층 — 테스트 미작성 (auth/storage는 Phase C-4 완료 전까지 제외)
         "src/lib/supabase/**",
         "src/lib/auth/**",
         "src/lib/storage/**",
+        "src/lib/validation/**",     // Zod 스키마 정의 — 테스트 미작성
         "src/lib/db/schema/**",
         "src/lib/db/types.ts",
         "src/lib/db/index.ts",
