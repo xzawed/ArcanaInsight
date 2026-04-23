@@ -26,6 +26,7 @@ export default defineConfig({
         "src/lib/rate-limit.ts",     // Rate Limiter — 테스트 있음 (Phase 2)
         "src/hooks/useSSEStream.ts", // SSE 공통 유틸 — 테스트 있음
         "src/services/**/*.ts",      // 모든 서비스 계층 — 테스트 있음
+        "src/lib/verum/**/*.ts",     // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
       ],
       exclude: [
         "src/**/*.test.ts",
@@ -74,6 +75,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "server-only": path.resolve(__dirname, "./vitest-mocks/server-only.ts"),
     },
   },
 });

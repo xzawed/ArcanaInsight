@@ -11,22 +11,8 @@ import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { VerumClient } from "@/lib/verum";
-import { getVerumApiUrl, getVerumApiKey, getVerumDeploymentId, getGrokModel } from "@/lib/env";
-
-const _verum = new VerumClient({ apiUrl: getVerumApiUrl(), apiKey: getVerumApiKey() });
-
-async function resolveSystemPrompt(fallback: string): Promise<{ systemPrompt: string; routedTo: "variant" | "baseline"; deploymentId: string | null }> {
-  const deploymentId = getVerumDeploymentId();
-  if (!deploymentId) return { systemPrompt: fallback, routedTo: "baseline", deploymentId: null };
-  try {
-    const result = await _verum.chat([{ role: "system", content: fallback }], deploymentId);
-    return { systemPrompt: result.messages[0]?.content ?? fallback, routedTo: result.routed_to, deploymentId };
-  } catch (e) {
-    console.warn("[Verum] prompt routing failed, using local prompt:", e instanceof Error ? e.message : e);
-    return { systemPrompt: fallback, routedTo: "baseline", deploymentId: null };
-  }
-}
+import { resolveSystemPrompt, recordTrace } from "@/lib/verum";
+import { getGrokModel } from "@/lib/env";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -113,16 +99,13 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
 
           // Verum trace 기록 — fire-and-forget
-          if (verumdepId) {
-            void _verum.record({
-              deploymentId: verumdepId,
-              variant: routedTo,
-              model: getGrokModel(),
-              inputTokens: 0,
-              outputTokens: Math.ceil(fullResponse.length / 4),
-              latencyMs: Date.now() - startTime,
-            }).catch((e) => console.warn("[Verum] record failed:", e instanceof Error ? e.message : e));
-          }
+          recordTrace({
+            deploymentId: verumdepId,
+            routedTo,
+            model: getGrokModel(),
+            outputLength: fullResponse.length,
+            latencyMs: Date.now() - startTime,
+          });
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음)
           if (db && sessionId) {

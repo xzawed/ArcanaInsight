@@ -160,8 +160,8 @@ src/
 │   ├── useSSEStream.test.ts    # 단위 테스트 — fetchSSEStream chunk/done/error/버퍼 처리 (11개)
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/
-│   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·cooldown 12개, 하드코딩 방지)
-│   ├── env.test.ts             # 단위 테스트 — 기본값·커스텀값·parseInt/parseFloat 파싱 (32개)
+│   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·Verum cooldown 16개, 하드코딩 방지)
+│   ├── env.test.ts             # 단위 테스트 — 기본값·커스텀값·parseInt/parseFloat 파싱 (44개)
 │   ├── rate-limit.ts           # 메모리 기반 Rate Limiting (IP별 윈도우 카운터)
 │   ├── rate-limit.test.ts      # 단위 테스트 — 6개 (한도/윈도우/독립 키 검증)
 │   ├── share.ts                # shareOrCopy() — Web Share API / clipboard 공통 유틸
@@ -180,10 +180,14 @@ src/
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
 │   ├── validation/
 │   │   └── api-schemas.ts      # Zod 스키마 — TarotReadingSchema / SajuReadingSchema / ShinjeomMessageSchema
-│   ├── verum/                  # Verum SDK 인라인 모듈 — 타로 프롬프트 A/B 라우팅 + 트레이스 기록
-│   │   ├── client.ts           # VerumClient (chat/record), DeploymentConfig 캐시 포함
-│   │   ├── cache.ts            # TTL 기반 인메모리 캐시 (DeploymentConfigCache)
+│   ├── verum/                  # Verum SDK 인라인 모듈 — 타로 프롬프트 A/B 라우팅 + 트레이스 기록 (graceful degradation 적용)
+│   │   ├── client.ts           # VerumClient — AbortController 타임아웃, 서킷 브레이커, Zod 검증
+│   │   ├── cache.ts            # TTL 기반 인메모리 캐시 (DeploymentConfigCache) + getOrFetch stampede 방지
+│   │   ├── resolver.ts         # resolveSystemPrompt / recordTrace / resetVerumClientForTests — lazy singleton, server-only
+│   │   ├── errors.ts           # VerumAuthError / VerumRateLimitError / VerumTimeoutError / VerumSchemaError
+│   │   ├── schemas.ts          # DeploymentConfigSchema / TraceResponseSchema (Zod)
 │   │   ├── router.ts           # chooseVariant() — traffic_split 기반 variant/baseline 선택
+│   │   ├── *.test.ts           # 단위 테스트 — client(13), cache(9), resolver(7), router(4)
 │   │   └── index.ts            # re-export
 │   └── storage/
 │       └── index.ts            # getCardImageUrl() 등 provider별 카드 이미지 URL
@@ -235,6 +239,9 @@ README.en.md                    # 프로젝트 소개 (영문)
 .scamanager/                    # SCAManager AI 코드리뷰 훅 설정
 ├── config.json              # 서버 URL, 리포 명, 인증 토큰
 └── install-hook.sh          # pre-push 훅 설치 스크립트 (최초 1회 실행)
+
+vitest-mocks/
+└── server-only.ts              # Next.js server-only 패키지 Vitest 모킹 (빈 모듈)
 
 scripts/                        # 유틸리티 스크립트
 ├── pre-push-checks.sh          # git push 전 자동 검증 (tsc + lint + build)
@@ -363,6 +370,11 @@ drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
   - Rate Limiting: IP별 `checkRateLimit()` — 타로/사주 10req/min, 신점 20req/min, 초과 시 429
   - 입력 검증: Zod 스키마 `safeParse()` — `src/lib/validation/api-schemas.ts`
   - IDOR 방어: `assertSessionOwnership()` — `src/lib/auth/index.ts`, 세션 소유자 불일치 시 403
+- **Verum 격리 패턴**: `resolveSystemPrompt()` / `recordTrace()` (`src/lib/verum/resolver.ts`) — Verum 실패 시 fallback 프롬프트 유지, 서킷 오픈 시 즉시 baseline 반환. 예외는 절대 타로 스트림 밖으로 새지 않는다.
+  - 타임아웃: config 3s(`VERUM_TIMEOUT_MS`), record 5s(`VERUM_RECORD_TIMEOUT_MS`) — AbortController + setTimeout
+  - 서킷 쿨다운: 401/403→30분, 429→retry-after, 5xx/timeout→60초(`VERUM_FAILURE_COOLDOWN_MS`)
+  - stampede 방지: `cache.getOrFetch()` — 동시 캐시 미스 시 fetcher 1회 호출
+  - 테스트 격리: `resetVerumClientForTests()` 각 beforeEach 호출
 - **DB 저장 패턴**: `saveReadingAsync(sessionId, serviceType, saves)` — fire-and-forget, 스트림 블로킹 없이 세션 완료 처리
 - **공유 유틸**: `shareOrCopy()` (`src/lib/share.ts`) — Web Share API 우선, fallback clipboard 복사
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
@@ -444,10 +456,14 @@ NEXT_PUBLIC_SUPABASE_URL=   # Supabase 프로젝트 URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY= # Supabase 익명 키
 SUPABASE_SERVICE_ROLE_KEY=  # Supabase 서비스 키 (서버 전용)
 NEXT_PUBLIC_SITE_URL=       # 사이트 URL
-# Verum (선택) — 미설정 시 로컬 프롬프트 사용 (안전한 기본값)
+# Verum (선택) — 미설정 시 로컬 프롬프트 사용 (안전한 기본값). 장애 시 서킷 브레이커가 자동 격리
 VERUM_API_URL=              # https://verum-production.up.railway.app
 VERUM_API_KEY=              # Verum 대시보드 DEPLOY 후 발급
 VERUM_DEPLOYMENT_ID=        # Verum 대시보드 DEPLOY 후 발급
+VERUM_TIMEOUT_MS=           # config 조회 타임아웃 (기본 3000ms)
+VERUM_RECORD_TIMEOUT_MS=    # trace 기록 타임아웃 (기본 5000ms)
+VERUM_FAILURE_COOLDOWN_MS=  # 5xx/timeout 후 서킷 쿨다운 (기본 60000ms)
+VERUM_AUTH_COOLDOWN_MS=     # 401/403 후 서킷 쿨다운 (기본 1800000ms=30분)
 ```
 
 ### PostgreSQL 모드 (온프레미스 전환 시)
