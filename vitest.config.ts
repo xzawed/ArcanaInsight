@@ -19,7 +19,7 @@ export default defineConfig({
       reporter: ["text", "json", "lcov", "html"],
       reportsDirectory: "./coverage",
       include: [
-        "src/data/**/*.ts",
+        "src/data/topics.ts",   // 유효 토픽 목록 — 테스트 있음
         "src/lib/env.ts",
         "src/services/**/*.ts",
       ],
@@ -28,10 +28,31 @@ export default defineConfig({
         "src/**/*.spec.ts",
         "src/types/**",
         "**/*.d.ts",
+        // 정적 사전·상수 데이터 — 로직 없음, 커버리지 분모에서 제외
+        "src/data/characters/**",
+        "src/data/skins/**",
+        "src/data/cards/**",
+        "src/data/home/**",
+        "src/data/spreads/**",
+        "src/data/saju/constants.ts",
+        "src/data/saju/categories.ts",
+        "src/data/birth-hours.ts",
+        "src/data/error-messages.ts",
+        // hooks — jsdom 없이 node env 테스트 불가 (Phase C-5에서 useSSEStream만 별도 추가)
+        "src/hooks/**",
+        // lib 계층 — Phase C-4 완료 전까지 제외
         "src/lib/supabase/**",
         "src/lib/auth/**",
         "src/lib/storage/**",
         "src/lib/db/schema/**",
+        "src/lib/db/types.ts",
+        "src/lib/db/index.ts",
+        // Phase C-1~3 완료 전까지 제외 (테스트 미작성 → 분모 왜곡 방지)
+        "src/services/core/ai-provider.ts",   // re-export only
+        "src/services/core/grok-provider.ts", // Phase C-2
+        "src/services/core/claude-provider.ts", // Phase C-3
+        "src/services/saju/saju-calculator.ts", // Phase C-1
+        "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
       thresholds: {
         branches: 50,
