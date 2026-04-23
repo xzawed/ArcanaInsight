@@ -19,3 +19,8 @@ export function getAiAuthCooldownMs(): number { return parseInt(process.env.AI_A
 
 // DB
 export function getPostgresPoolSize(): number { return parseInt(process.env.POSTGRES_POOL_SIZE ?? "10", 10) }
+
+// Verum
+export function getVerumApiUrl(): string { return process.env.VERUM_API_URL ?? "" }
+export function getVerumApiKey(): string { return process.env.VERUM_API_KEY ?? "" }
+export function getVerumDeploymentId(): string { return process.env.VERUM_DEPLOYMENT_ID ?? "" }

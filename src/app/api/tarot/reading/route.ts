@@ -11,6 +11,22 @@ import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { VerumClient } from "@/lib/verum";
+import { getVerumApiUrl, getVerumApiKey, getVerumDeploymentId, getGrokModel } from "@/lib/env";
+
+const _verum = new VerumClient({ apiUrl: getVerumApiUrl(), apiKey: getVerumApiKey() });
+
+async function resolveSystemPrompt(fallback: string): Promise<{ systemPrompt: string; routedTo: "variant" | "baseline"; deploymentId: string | null }> {
+  const deploymentId = getVerumDeploymentId();
+  if (!deploymentId) return { systemPrompt: fallback, routedTo: "baseline", deploymentId: null };
+  try {
+    const result = await _verum.chat([{ role: "system", content: fallback }], deploymentId);
+    return { systemPrompt: result.messages[0]?.content ?? fallback, routedTo: result.routed_to, deploymentId };
+  } catch (e) {
+    console.warn("[Verum] prompt routing failed, using local prompt:", e instanceof Error ? e.message : e);
+    return { systemPrompt: fallback, routedTo: "baseline", deploymentId: null };
+  }
+}
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -60,7 +76,8 @@ export async function POST(request: NextRequest) {
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
 
-    const systemPrompt = tarotService.getSystemPrompt(characterId);
+    const rawSystemPrompt = tarotService.getSystemPrompt(characterId);
+    const { systemPrompt, routedTo, deploymentId: verumdepId } = await resolveSystemPrompt(rawSystemPrompt);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
       ? spreadType
@@ -77,6 +94,7 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         let fullResponse = "";
+        const startTime = Date.now();
         try {
           // 카드 수에 따라 max_tokens 조정 (JSON 구조 오버헤드 감안)
           const cardCount = cards.length;
@@ -93,6 +111,18 @@ export async function POST(request: NextRequest) {
 
           // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
+
+          // Verum trace 기록 — fire-and-forget
+          if (verumdepId) {
+            void _verum.record({
+              deploymentId: verumdepId,
+              variant: routedTo,
+              model: getGrokModel(),
+              inputTokens: 0,
+              outputTokens: Math.ceil(fullResponse.length / 4),
+              latencyMs: Date.now() - startTime,
+            }).catch((e) => console.warn("[Verum] record failed:", e instanceof Error ? e.message : e));
+          }
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음)
           if (db && sessionId) {
