@@ -40,11 +40,15 @@ jobs:
       - name: ESLint (SonarCloud 참고용)
         run: pnpm lint
 
-      # ── E2E 실행 + JUnit XML + V8 커버리지 수집 ─────────────────────────
+      # ── 단위/통합 테스트 + 커버리지 (Vitest) ──────────────────────────────
+      - name: 단위·통합 테스트 실행 (커버리지 포함)
+        run: pnpm test:coverage
+
+      # ── E2E 실행 + JUnit XML ──────────────────────────────────────────────
       - name: Playwright 설치 (Chromium)
         run: npx playwright install --with-deps chromium
 
-      - name: E2E 테스트 실행 (Desktop Chrome — 커버리지 수집)
+      - name: E2E 테스트 실행 (Desktop Chrome)
         run: pnpm test:e2e --project="Desktop Chrome"
         env:
           CI: "true"
