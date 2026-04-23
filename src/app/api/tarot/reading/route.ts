@@ -65,7 +65,11 @@ export async function POST(request: NextRequest) {
         try {
           // 카드 수에 따라 max_tokens 조정 (JSON 구조 오버헤드 감안)
           const cardCount = cards.length;
-          const maxTokens = cardCount <= 1 ? TOKENS_SINGLE_CARD : cardCount <= 3 ? TOKENS_FEW_CARDS : cardCount <= 7 ? TOKENS_MEDIUM_CARDS : TOKENS_MANY_CARDS;
+          let maxTokens: number;
+          if (cardCount <= 1) maxTokens = TOKENS_SINGLE_CARD;
+          else if (cardCount <= 3) maxTokens = TOKENS_FEW_CARDS;
+          else if (cardCount <= 7) maxTokens = TOKENS_MEDIUM_CARDS;
+          else maxTokens = TOKENS_MANY_CARDS;
           for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
@@ -99,9 +103,8 @@ export async function POST(request: NextRequest) {
             ]).catch((e) => console.error("타로 DB 저장 실패:", e))
           }
         } catch (e) {
-          const errMsg = e instanceof Error ? e.message : String(e);
-          console.error("리딩 생성 실패:", errMsg);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`));
+          console.error("리딩 생성 실패:", e instanceof Error ? e.message : String(e));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "리딩 생성 중 오류가 발생했습니다." })}\n\n`));
         }
         controller.close();
       },
@@ -110,8 +113,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
     });
   } catch (e) {
-    const errMsg = e instanceof Error ? e.message : String(e);
-    console.error("리딩 API 오류:", errMsg);
-    return new Response(JSON.stringify({ error: errMsg }), { status: 500, headers: { "Content-Type": "application/json" } });
+    console.error("리딩 API 오류:", e instanceof Error ? e.message : String(e));
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

@@ -53,7 +53,7 @@ export const readings = pgTable("readings", {
   cardInterpretation: jsonb("card_interpretation").notNull().default([]),
   overallReading: text("overall_reading").notNull().default(""),
   advice: text("advice").notNull().default(""),
-  shareToken: text("share_token").unique().default(""),
+  shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
   index("idx_readings_share_token").on(t.shareToken),

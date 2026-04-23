@@ -43,7 +43,7 @@ function ShinjeomPageContent() {
   useEffect(() => {
     reset();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // NOSONAR
 
   // URL 파라미터로 캐릭터가 프리셀렉트된 경우 스토어에 반영
   useEffect(() => {
@@ -61,7 +61,7 @@ function ShinjeomPageContent() {
       setStep("topic-select");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favoriteCharacter]);
+  }, [favoriteCharacter]); // NOSONAR
 
   // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
   useEffect(() => {

@@ -37,7 +37,7 @@ export default function ShinjeomSessionPage() {
         });
         const data = await res.json();
         if (data.session?.id) setSessionId(data.session.id);
-      } catch { /* 계속 진행 */ }
+      } catch (e) { console.warn("신점 세션 생성 실패 (상담은 계속 진행):", e); }
     };
     initSession();
 
@@ -144,7 +144,7 @@ export default function ShinjeomSessionPage() {
                 ),
               }));
             }
-          } catch { /* 파싱 실패 */ }
+          } catch (e) { console.warn("SSE 파싱 실패:", e); }
         }
       }
     } catch {
@@ -228,7 +228,7 @@ export default function ShinjeomSessionPage() {
               setPhase("result");
               setMood("smile");
             }
-          } catch { /* 파싱 실패 */ }
+          } catch (e) { console.warn("SSE 파싱 실패:", e); }
         }
       }
     } catch {

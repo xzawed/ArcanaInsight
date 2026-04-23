@@ -42,7 +42,7 @@ export function DailyCard() {
         const result = await res.json();
         setData((prev) => ({ ...prev, [characterId]: result }));
       }
-    } catch { /* 네트워크 에러 무시 */ }
+    } catch (e) { console.warn("일일 카드 로드 실패:", e); }
     setLoading(null);
   }, [data, today]);
 

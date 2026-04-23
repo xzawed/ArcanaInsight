@@ -119,9 +119,8 @@ export async function POST(request: NextRequest) {
             ]).catch((e) => console.error("사주 DB 저장 실패:", e))
           }
         } catch (e) {
-          const errMsg = e instanceof Error ? e.message : String(e);
-          console.error("사주 리딩 생성 실패:", errMsg);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`));
+          console.error("사주 리딩 생성 실패:", e instanceof Error ? e.message : String(e));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "리딩 생성 중 오류가 발생했습니다." })}\n\n`));
         }
         controller.close();
       },
@@ -131,8 +130,7 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
     });
   } catch (e) {
-    const errMsg = e instanceof Error ? e.message : String(e);
-    console.error("사주 API 오류:", errMsg);
-    return new Response(JSON.stringify({ error: errMsg }), { status: 500, headers: { "Content-Type": "application/json" } });
+    console.error("사주 API 오류:", e instanceof Error ? e.message : String(e));
+    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

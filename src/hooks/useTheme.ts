@@ -122,7 +122,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
       if (typeof window !== "undefined") {
         localStorage.setItem("arcana-theme-mode", mode);
       }
-    } catch { /* Safari Private 모드 등에서 localStorage 접근 실패 시 무시 */ }
+    } catch { /* Safari Private 모드 등에서 localStorage 접근 실패 시 무시 */ } // NOSONAR
   },
 
   refresh: () => {
