@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { shareOrCopy } from "@/lib/share";
 import { ERROR_MESSAGES } from "@/data/error-messages";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
@@ -194,30 +195,12 @@ export default function SajuSessionPage() {
                   const r = useSajuSessionStore.getState().readingResult;
                   const shareToken = r?.shareToken;
                   const siteName = "ArcanaInsight";
-
                   if (shareToken) {
                     const url = `${window.location.origin}/saju/result/${shareToken}`;
-                    const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${siteName}`;
-                    if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                    } else {
-                      try {
-                        await navigator.clipboard.writeText(`${text}\n${url}`);
-                        alert("링크가 복사되었습니다!");
-                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                    }
+                    await shareOrCopy({ title: `사주 분석 결과 - ${siteName}`, text: `☯ 사주 분석 결과를 확인해보세요!\n\n- ${siteName}`, url, onCopied: () => alert("링크가 복사되었습니다!") });
                   } else {
-                    const summary = r?.overallReading
-                      ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${siteName}`
-                      : `☯ 사주 분석을 받아보세요!\n\n- ${siteName}`;
-                    if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                    } else {
-                      try {
-                        await navigator.clipboard.writeText(summary);
-                        alert("결과가 복사되었습니다!");
-                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                    }
+                    const text = r?.overallReading ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${siteName}` : `☯ 사주 분석을 받아보세요!\n\n- ${siteName}`;
+                    await shareOrCopy({ title: `사주 분석 결과 - ${siteName}`, text, onCopied: () => alert("결과가 복사되었습니다!") });
                   }
                 }}
                   className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">

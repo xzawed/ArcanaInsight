@@ -7,6 +7,7 @@ import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
 import { getDb } from "@/lib/db";
+import { saveReadingAsync } from "@/lib/db/reading-saver";
 import { TAROT_TOPICS } from "@/data/topics";
 
 const tarotService = new TarotService();
@@ -81,16 +82,12 @@ export async function POST(request: NextRequest) {
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음)
           if (db && sessionId) {
-            void Promise.all([
+            saveReadingAsync(sessionId, "tarot", [
               db.insert("readings", {
                 session_id: sessionId,
                 card_interpretation: result.cardInterpretations,
                 overall_reading: result.overallReading,
                 advice: result.advice,
-              }),
-              db.update("sessions", { id: sessionId }, {
-                status: "completed",
-                completed_at: new Date().toISOString(),
               }),
               db.insertMany("session_cards",
                 cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
@@ -100,7 +97,7 @@ export async function POST(request: NextRequest) {
                   is_reversed: c.isReversed,
                 }))
               ),
-            ]).catch((e) => console.error("타로 DB 저장 실패:", e))
+            ]);
           }
         } catch (e) {
           console.error("리딩 생성 실패:", e instanceof Error ? e.message : String(e));

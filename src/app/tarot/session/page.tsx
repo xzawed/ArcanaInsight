@@ -18,6 +18,8 @@ import { waitingLines, defaultWaitingLines, buildCardPreviewLine } from "@/data/
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
+import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { shareOrCopy } from "@/lib/share";
 
 const deckManager = new DeckManager();
 
@@ -221,132 +223,53 @@ export default function TarotSessionPage() {
         if (sessionId) break;
       }
     }
-    try {
-      const response = await fetch("/api/tarot/reading", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, topic, spreadType, characterId, userInfo: useSessionStore.getState().userInfo, cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })) }),
-      });
-      if (!response.ok || !response.body) {
+    const currentSpread = spreadType ? spreads[spreadType] : null;
+
+    await fetchSSEStream({
+      url: "/api/tarot/reading",
+      body: {
+        sessionId, topic, spreadType, characterId,
+        userInfo: useSessionStore.getState().userInfo,
+        cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })),
+      },
+      onChunk: () => {},
+      onDone: (data) => {
         stopSequence();
-        let errorDetail = "";
-        try {
-          const errorBody = await response.json();
-          errorDetail = errorBody?.error || "";
-        } catch (e) { console.warn("리딩 에러 응답 JSON 파싱 실패:", e); }
-        console.error("리딩 API 응답 실패:", response.status, errorDetail);
-        const message = errorDetail.includes("GROK_API_KEY")
+        setRevealedPositions(cards.map((c) => c.position));
+        const result = data.result as unknown as import("@/types/service").ReadingResult | undefined;
+        if (!result) return;
+        setReadingResult(result);
+        if (Array.isArray(result.cardInterpretations)) {
+          for (const interp of result.cardInterpretations as { cardId: string; position: number; interpretation: string }[]) {
+            const card = cards.find((c) => c.card.id === interp.cardId);
+            const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
+            addChatMessage({ id: crypto.randomUUID(), role: "character", content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`, mood: "smile", timestamp: new Date() });
+          }
+        }
+        if (result.overallReading) {
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: `종합 해석\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
+        }
+        if (result.advice) {
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: `조언\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
+        }
+        setPhase("result"); setMood("smile");
+      },
+      onError: (msg) => {
+        stopSequence();
+        console.error("리딩 SSE 에러:", msg);
+        const message = msg.includes("GROK_API_KEY")
           ? "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요."
-          : "서버에 일시적인 문제가 있어요. 잠시 후 다시 시도해주세요.";
+          : "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.";
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: message, mood: "default", timestamp: new Date() });
         setMood("default");
         setReadingError(true);
-        setLoading(false);
-        return;
-      }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let sseBuffer = "";
-      let streamDone = false;
+      },
+    });
 
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) {
-          // 스트림 종료 — 버퍼에 남은 마지막 데이터 처리
-          if (sseBuffer.trim()) {
-            const remaining = sseBuffer;
-            sseBuffer = "";
-            if (remaining.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(remaining.slice(6));
-                if (data.done && data.result) {
-                  stopSequence();
-                  setRevealedPositions(cards.map((c) => c.position));
-                  setReadingResult(data.result);
-                  setPhase("result"); setMood("smile");
-                }
-              } catch (e) { console.warn("SSE 버퍼 파싱 실패:", e); }
-            }
-          }
-          break;
-        }
-        sseBuffer += decoder.decode(value, { stream: true });
-        const sseLines = sseBuffer.split("\n");
-        sseBuffer = sseLines.pop() || "";
-        for (const line of sseLines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            // SSE 에러 처리 — Grok API 실패 등
-            if (data.error) {
-              stopSequence();
-              console.error("리딩 SSE 에러:", data.error);
-              addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
-              setMood("default");
-              setReadingError(true);
-              setLoading(false);
-              streamDone = true;
-              break;
-            }
-            if (data.done && data.result) {
-              // 연출 중단 — 결과 도착
-              stopSequence();
-              // 모든 카드 뒤집기 완료
-              setRevealedPositions(cards.map((c) => c.position));
-
-              setReadingResult(data.result);
-              const currentSpread = spreadType ? spreads[spreadType] : null;
-              if (data.result.cardInterpretations) {
-                for (const interp of data.result.cardInterpretations) {
-                  const card = cards.find(c => c.card.id === interp.cardId);
-                  const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
-                  addChatMessage({
-                    id: crypto.randomUUID(), role: "character",
-                    content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
-                    mood: "smile", timestamp: new Date(),
-                  });
-                }
-              }
-              if (data.result.overallReading) {
-                addChatMessage({
-                  id: crypto.randomUUID(), role: "character",
-                  content: `종합 해석\n\n${data.result.overallReading}`,
-                  mood: "smile", timestamp: new Date(),
-                });
-              }
-              if (data.result.advice) {
-                addChatMessage({
-                  id: crypto.randomUUID(), role: "character",
-                  content: `조언\n\n${data.result.advice}`,
-                  mood: "smile", timestamp: new Date(),
-                });
-              }
-              // DB 저장 실패 알림
-              if (data.dbSaved === false && sessionId) {
-                addChatMessage({
-                  id: crypto.randomUUID(), role: "system",
-                  content: "리딩 결과가 저장되지 않았습니다. 결과를 스크린샷으로 보관해주세요.",
-                  timestamp: new Date(),
-                });
-              }
-              setPhase("result"); setMood("smile");
-              streamDone = true;
-              break;
-            }
-          } catch (e) { console.warn("SSE 파싱 실패:", e); }
-        }
-      }
-      // 스트림이 끝났는데 result phase로 전환되지 않은 경우 → 에러 처리
-      if (useSessionStore.getState().phase === "reading") {
-        stopSequence();
-        console.error("SSE 스트림 종료 후 결과 미수신");
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
-        setMood("default");
-        setReadingError(true);
-      }
-    } catch (e) {
-      console.error("리딩 요청 실패:", e);
+    // 스트림이 끝났는데 result phase로 전환되지 않은 경우 → 에러 처리
+    if (useSessionStore.getState().phase === "reading") {
       stopSequence();
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드의 메시지를 읽는 데 문제가 생겼어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
       setMood("default");
       setReadingError(true);
     }
@@ -580,32 +503,12 @@ export default function TarotSessionPage() {
                       const result = useSessionStore.getState().readingResult;
                       const shareToken = result?.shareToken;
                       const siteName = "ArcanaInsight";
-
                       if (shareToken) {
-                        // 공유 링크가 있으면 URL 공유
                         const url = `${window.location.origin}/tarot/result/${shareToken}`;
-                        const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
-                        if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                        } else {
-                          try {
-                            await navigator.clipboard.writeText(`${text}\n${url}`);
-                            alert("링크가 복사되었습니다!");
-                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                        }
+                        await shareOrCopy({ title: `타로 리딩 결과 - ${siteName}`, text: `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`, url, onCopied: () => alert("링크가 복사되었습니다!") });
                       } else {
-                        // 공유 링크 없으면 결과 텍스트 직접 공유
-                        const summary = result?.overallReading
-                          ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
-                          : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
-                        if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                        } else {
-                          try {
-                            await navigator.clipboard.writeText(summary);
-                            alert("결과가 복사되었습니다!");
-                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                        }
+                        const text = result?.overallReading ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}` : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
+                        await shareOrCopy({ title: `타로 리딩 결과 - ${siteName}`, text, onCopied: () => alert("결과가 복사되었습니다!") });
                       }
                     }}
                     className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"

@@ -5,6 +5,7 @@ import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
+import { saveReadingAsync } from "@/lib/db/reading-saver";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
           })}\n\n`));
 
           if (db && sessionId) {
-            void Promise.all([
+            saveReadingAsync(sessionId, "saju", [
               db.insert("saju_readings", {
                 session_id: sessionId,
                 birth_date: userInfo.birthDate,
@@ -112,11 +113,7 @@ export async function POST(request: NextRequest) {
                 topic_reading: result.topicReading || "",
                 advice: result.advice,
               }),
-              db.update("sessions", { id: sessionId }, {
-                status: "completed",
-                completed_at: new Date().toISOString(),
-              }),
-            ]).catch((e) => console.error("사주 DB 저장 실패:", e))
+            ]);
           }
         } catch (e) {
           console.error("사주 리딩 생성 실패:", e instanceof Error ? e.message : String(e));
