@@ -48,11 +48,7 @@ export default defineConfig({
         "src/lib/db/schema/**",
         "src/lib/db/types.ts",
         "src/lib/db/index.ts",
-        // Phase C-1~3 완료 전까지 제외 (테스트 미작성 → 분모 왜곡 방지)
         "src/services/core/ai-provider.ts",   // re-export only
-        "src/services/core/grok-provider.ts", // Phase C-2
-        "src/services/core/claude-provider.ts", // Phase C-3
-        "src/services/saju/saju-calculator.ts", // Phase C-1
         "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
       thresholds: {
