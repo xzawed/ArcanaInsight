@@ -88,7 +88,9 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
+- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 380개 테스트, 95%+ 커버리지)
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
+- **코드 품질**: SonarCloud (정적 분석) + Codecov (커버리지 추적, unit flag)
 - **런타임**: Node.js >= 20
 - **CI/CD**: GitHub Actions → Railway 자동 배포
 - **호스팅**: Railway
@@ -155,6 +157,7 @@ src/
 │   ├── useShinjeomSession.ts   # 신점 세션 상태 (대화형)
 │   ├── useSkinStore.ts         # 카드 스킨 선택 상태 (persist)
 │   ├── useSSEStream.ts         # SSE 스트림 공통 유틸
+│   ├── useSSEStream.test.ts    # 단위 테스트 — fetchSSEStream chunk/done/error/버퍼 처리 (11개)
 │   └── useTheme.ts             # 동적 테마 (7종, 시간/계절 자동 감지)
 ├── lib/
 │   ├── env.ts                  # 환경변수 getter 함수 모음 (AI 설정·DB pool·cooldown 12개, 하드코딩 방지)
@@ -164,6 +167,7 @@ src/
 │   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
 │   │   ├── types.ts            # DbClient 공통 인터페이스
 │   │   ├── supabase-adapter.ts # Supabase DbClient 구현
+│   │   ├── supabase-adapter.test.ts # 단위 테스트 — findOne/findMany/insert/update/upsert (18개)
 │   │   ├── postgres-adapter.ts # Drizzle ORM DbClient 구현
 │   │   └── schema/index.ts     # Drizzle 스키마 (9개 마이그레이션 변환)
 │   ├── auth/                   # Auth 추상화 레이어
@@ -177,9 +181,10 @@ src/
 │   │                           # claude-provider.ts (Claude API fallback),
 │   │                           # fallback-provider.ts (Grok→Claude 자동 전환),
 │   │                           # prompt-builder.ts, text-cleaner.ts
-│   │                           # *.test.ts — fallback-provider(11), prompt-builder(39), text-cleaner(33)
+│   │                           # *.test.ts — fallback-provider(11), prompt-builder(39), text-cleaner(33),
+│   │                           #             grok-provider(20), claude-provider(16)
 │   ├── saju/                   # saju-service.ts, saju-calculator.ts, saju-types.ts
-│   │                           # saju-service.test.ts (28개)
+│   │                           # saju-service.test.ts (28개), saju-calculator.test.ts (36개)
 │   ├── shinjeom/               # shinjeom-service.ts (무제한 대화형, isFinalTurn 플래그로 결과 요청)
 │   │                           # shinjeom-service.test.ts (26개)
 │   └── tarot/                  # tarot-service.ts, deck-manager.ts, spread-resolver.ts
@@ -268,10 +273,6 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 # PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
 
 drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
-vitest.config.ts               # Vitest 2.0 설정 (node env, @/ alias, v8 coverage, 임계값)
-vitest.setup.ts                # 전역 테스트 환경 (env vars, global.fetch mock)
-sonar-project.properties       # SonarCloud 프로젝트 설정 (lcov, junit XML 경로)
-.codecov.yml                   # Codecov 커버리지 임계값 설정 (project -2%, patch -5%)
 ```
 
 ## 캐릭터 시스템
@@ -403,6 +404,7 @@ pnpm build            # 프로덕션 빌드
 pnpm start            # 프로덕션 서버 실행
 pnpm lint             # ESLint 실행
 pnpm type-check       # TypeScript 타입 체크 (tsc --noEmit)
+pnpm test:coverage    # Vitest 단위 테스트 + 커버리지 리포트 (임계값: statements 60%)
 pnpm test:e2e         # Playwright E2E 테스트 (3개 디바이스)
 pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 ```
@@ -464,9 +466,8 @@ git branch | grep -v '^\* main' | xargs git branch -D
 
 ## CI/CD 파이프라인
 
-- GitHub Free 플랜: **월 2,000분** 한도 (예상 사용 ~120분)
-- **PR CI** (`deploy.yml`): PR → main, lint → type-check → **단위 테스트(Vitest)** → build → E2E (Desktop Chrome + Mobile Android)
-- **SonarCloud + Codecov** (`sonar.yml`): main push/PR, lint → type-check → **단위 테스트(커버리지)** → E2E → SonarCloud 분석 → Codecov 업로드
+- GitHub Free 플랜: **월 2,000분** 한도 (예상 사용 ~100분)
+- **PR CI** (`deploy.yml`): PR → main, lint → build → E2E (Desktop Chrome + Mobile Android)
 - **주간 QA** (`weekly-qa.yml`): 토요일 09:00 KST, 3개 디바이스(iOS 포함), artifact 30일 보존, 실패 시 Issue 자동 생성
 - **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
 
@@ -497,9 +498,11 @@ git branch | grep -v '^\* main' | xargs git branch -D
 ```bash
 pnpm type-check        # TypeScript 타입 체크
 pnpm lint              # ESLint 코드 품질 검사
+pnpm test:coverage     # 단위 테스트 + 커버리지 임계값 확인 (statements 60%)
 pnpm build             # 프로덕션 빌드 확인
 ```
-- 3가지 모두 통과해야 다음 단계로 진행
+- 4가지 모두 통과해야 다음 단계로 진행
+- 커버리지 임계값 변경 시 PR 설명에 근거 명시 필수 (예: "Phase C 완료로 60→70 상향")
 
 ### 3단계: 변경 사항 리뷰
 - Claude CLI가 자체 검토: 스펙 준수, 코드 품질, 레이아웃 규칙 점검

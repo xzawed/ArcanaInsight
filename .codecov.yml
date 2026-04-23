@@ -34,7 +34,7 @@ ignore:
   - "public/**"
 
 flags:
-  e2e:
+  unit:
     paths:
       - src/
     carryforward: true

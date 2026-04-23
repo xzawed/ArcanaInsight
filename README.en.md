@@ -14,7 +14,13 @@
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
-  <img src="https://img.shields.io/badge/%F0%9F%A7%AA%20Tests-141%20passed-4CAF50?style=for-the-badge&labelColor=1a1a2e" alt="Tests" />
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=alert_status" alt="Quality Gate" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=coverage" alt="Coverage" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=bugs" alt="Bugs" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=security_rating" alt="Security Rating" /></a>
+  <a href="https://codecov.io/gh/xzawed31/ArcanaInsight"><img src="https://codecov.io/gh/xzawed31/ArcanaInsight/branch/main/graph/badge.svg" alt="Codecov" /></a>
 </p>
 
 <p align="center">
