@@ -1,10 +1,11 @@
 import { defineConfig } from "vitest/config";
-import path from "path";
+import path from "node:path";
 
 export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    reporters: ["default", ["junit", { outputFile: "./coverage/junit.xml" }]],
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.ts", "src/**/*.spec.ts"],
     exclude: [
@@ -21,6 +22,8 @@ export default defineConfig({
       include: [
         "src/data/topics.ts",   // 유효 토픽 목록 — 테스트 있음
         "src/lib/env.ts",
+        "src/lib/db/supabase-adapter.ts",
+        "src/hooks/useSSEStream.ts",
         "src/services/**/*.ts",
       ],
       exclude: [
@@ -38,8 +41,16 @@ export default defineConfig({
         "src/data/saju/categories.ts",
         "src/data/birth-hours.ts",
         "src/data/error-messages.ts",
-        // hooks — jsdom 없이 node env 테스트 불가 (Phase C-5에서 useSSEStream만 별도 추가)
-        "src/hooks/**",
+        // hooks — useSSEStream 제외한 나머지 (jsdom 필요)
+        "src/hooks/useCardAnimation.ts",
+        "src/hooks/useCharacter.ts",
+        "src/hooks/useFavoriteCharacter.ts",
+        "src/hooks/useGenderStore.ts",
+        "src/hooks/useSajuSession.ts",
+        "src/hooks/useSession.ts",
+        "src/hooks/useShinjeomSession.ts",
+        "src/hooks/useSkinStore.ts",
+        "src/hooks/useTheme.ts",
         // lib 계층 — Phase C-4 완료 전까지 제외
         "src/lib/supabase/**",
         "src/lib/auth/**",
@@ -47,11 +58,7 @@ export default defineConfig({
         "src/lib/db/schema/**",
         "src/lib/db/types.ts",
         "src/lib/db/index.ts",
-        // Phase C-1~3 완료 전까지 제외 (테스트 미작성 → 분모 왜곡 방지)
         "src/services/core/ai-provider.ts",   // re-export only
-        "src/services/core/grok-provider.ts", // Phase C-2
-        "src/services/core/claude-provider.ts", // Phase C-3
-        "src/services/saju/saju-calculator.ts", // Phase C-1
         "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
       thresholds: {
