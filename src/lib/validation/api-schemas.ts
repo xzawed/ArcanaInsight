@@ -2,19 +2,19 @@ import { z } from "zod";
 
 const uuidOrNull = z.string().max(36).nullish();
 const topicStr = z.string().max(60);
-const charIdStr = z.string().max(50).optional();
+const charIdStr = z.string().max(50).nullish();
 
 export const TarotReadingSchema = z.object({
   sessionId: uuidOrNull,
   topic: topicStr,
-  spreadType: z.enum(["one-card", "three-card", "five-card", "seven-card", "ten-card", "relationship", "horseshoe", "decision", "weekly", "zodiac", "tree-of-life"]).optional(),
+  spreadType: z.enum(["one-card", "three-card", "five-card", "seven-card", "ten-card", "relationship", "horseshoe", "decision", "weekly", "zodiac", "tree-of-life"]).nullish(),
   characterId: charIdStr,
   userInfo: z.object({
     name: z.string().max(50),
     birthDate: z.string().max(20),
     gender: z.string().max(10),
     birthHour: z.string().max(20),
-  }).optional(),
+  }).nullish(),
   cards: z.array(z.object({
     cardId: z.string().max(50),
     position: z.number().int().min(0).max(21),
