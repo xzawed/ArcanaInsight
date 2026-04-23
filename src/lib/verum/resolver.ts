@@ -1,4 +1,3 @@
-import "server-only";
 import { VerumClient } from "./client";
 import { getVerumDeploymentId, getVerumApiUrl, getVerumApiKey, getGrokModel } from "@/lib/env";
 
