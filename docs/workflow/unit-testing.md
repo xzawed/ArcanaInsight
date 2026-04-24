@@ -6,7 +6,7 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **539개 테스트** / 95%+ 커버리지
+- **558개 테스트** / 95%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
 - 임계값: `statements 60%` (PR E에서 상향 예정)
 
@@ -44,7 +44,7 @@ import { POST } from "@/app/api/tarot/reading/route";
 현재 `src/__tests__/api/` 파일 목록 (10개):
 - `tarot-session.test.ts` (13개), `saju-session.test.ts` (11개), `shinjeom-session.test.ts` (11개)
 - `tarot-result.test.ts` (4개), `saju-result.test.ts` (4개)
-- `tarot-reading.test.ts` (6개), `saju-reading.test.ts` (5개), `shinjeom-message.test.ts` (5개)
+- `tarot-reading.test.ts` (7개), `saju-reading.test.ts` (5개), `shinjeom-message.test.ts` (5개)
 - `favorite-character.test.ts` (5개), `daily-card.test.ts` (6개)
 
 ---

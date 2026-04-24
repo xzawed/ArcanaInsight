@@ -22,10 +22,14 @@ export default function ShinjeomSessionPage() {
   const character = characterId ? getCharacterById(characterId) : null;
   const [inputText, setInputText] = useState("");
   const [sessionCreated, setSessionCreated] = useState(false);
+  const redirectedRef = useRef(false);
 
   // 세션 생성
   useEffect(() => {
-    if (!topic || !character) { router.push("/shinjeom"); return; }
+    if (!topic || !character) {
+      if (!redirectedRef.current) { redirectedRef.current = true; router.push("/shinjeom"); }
+      return;
+    }
     if (sessionCreated) return;
     setSessionCreated(true);
 

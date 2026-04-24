@@ -21,13 +21,19 @@ vi.mock("drizzle-orm/postgres-js", () => ({
 
 // ─── 헬퍼: 플루언트 체인 구성 ─────────────────────────────────────────────
 
-/** select().from(t)[.where(...)][.limit(1)] 체인을 rows로 응답 */
+/** select().from(t)[.where(...)][.limit(N)][.offset(N)] 체인을 rows로 응답 */
 function mockSelectWith(rows: Record<string, unknown>[]) {
+  const withOffset = {
+    then: (resolve: (v: unknown) => unknown) => Promise.resolve(rows).then(resolve),
+    catch: (onRejected: (e: unknown) => unknown) => Promise.resolve(rows).catch(onRejected),
+    offset: vi.fn().mockResolvedValue(rows),
+  };
   const thenable = {
     then: (resolve: (v: unknown) => unknown) => Promise.resolve(rows).then(resolve),
     catch: (onRejected: (e: unknown) => unknown) => Promise.resolve(rows).catch(onRejected),
     where: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue(rows),
+    limit: vi.fn().mockReturnValue(withOffset),
+    offset: vi.fn().mockResolvedValue(rows),
   };
   mockDb.select = vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue(thenable) });
 }
@@ -113,6 +119,20 @@ describe("PostgresAdapter", () => {
       const adapter = new PostgresAdapter();
       const result = await adapter.findMany("sessions", { user_id: "nobody" });
       expect(result).toEqual([]);
+    });
+
+    it("limit 옵션 적용 시 limit() 호출", async () => {
+      mockSelectWith([{ id: "1" }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findMany("sessions", undefined, { limit: 5 });
+      expect(result).toHaveLength(1);
+    });
+
+    it("limit + offset 옵션 적용 시 offset() 까지 호출", async () => {
+      mockSelectWith([{ id: "2" }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findMany("sessions", undefined, { limit: 10, offset: 5 });
+      expect(result).toHaveLength(1);
     });
   });
 

@@ -7,7 +7,8 @@ import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { saveSajuReading } from "@/lib/db/reading-saver";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
@@ -105,34 +106,29 @@ export async function POST(request: NextRequest) {
             sajuData: sajuResult,
           })}\n\n`));
 
+          // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
           if (db && sessionId) {
-            void Promise.all([
-              db.insert("saju_readings", {
-                session_id: sessionId,
-                birth_date: userInfo.birthDate,
-                birth_hour: userInfo.birthHour,
-                gender: userInfo.gender,
-                birth_name: userInfo.name || null,
-                pillars: sajuResult.pillars,
-                day_master: sajuResult.dayMaster,
-                day_master_element: sajuResult.dayMasterElement,
-                is_strong: sajuResult.isStrong,
-                elements: sajuResult.elements,
-                ten_stars: sajuResult.tenStars,
-                twelve_stages: sajuResult.twelveStages,
-                interactions: sajuResult.interactions,
-                yongsin: sajuResult.yongsin,
-                major_fortunes: sajuResult.majorFortunes,
-                yearly_fortune: sajuResult.yearlyFortune,
-                overall_reading: result.overallReading,
-                topic_reading: result.topicReading || "",
-                advice: result.advice,
-              }),
-              db.update("sessions", { id: sessionId }, {
-                status: "completed",
-                completed_at: new Date().toISOString(),
-              }),
-            ]).catch((e) => console.error("사주 DB 저장 실패:", e))
+            void saveSajuReading(db, sessionId, {
+              session_id: sessionId,
+              birth_date: userInfo.birthDate,
+              birth_hour: userInfo.birthHour,
+              gender: userInfo.gender,
+              birth_name: userInfo.name || null,
+              pillars: sajuResult.pillars,
+              day_master: sajuResult.dayMaster,
+              day_master_element: sajuResult.dayMasterElement,
+              is_strong: sajuResult.isStrong,
+              elements: sajuResult.elements,
+              ten_stars: sajuResult.tenStars,
+              twelve_stages: sajuResult.twelveStages,
+              interactions: sajuResult.interactions,
+              yongsin: sajuResult.yongsin,
+              major_fortunes: sajuResult.majorFortunes,
+              yearly_fortune: sajuResult.yearlyFortune,
+              overall_reading: result.overallReading,
+              topic_reading: result.topicReading || "",
+              advice: result.advice,
+            }).catch((e) => console.error("사주 DB 저장 최종 실패:", e))
           }
         } catch (e) {
           console.error("사주 리딩 생성 실패:", e instanceof Error ? e.message : String(e));
