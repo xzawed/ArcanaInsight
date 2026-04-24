@@ -6,7 +6,7 @@ test.describe("로그인 페이지", () => {
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator("text=Google")).toBeVisible();
-    await expect(page.locator("text=로그인").first()).toBeVisible();
+    await expect(page.locator("h1", { hasText: "로그인" })).toBeVisible();
   });
 
   test("에러 파라미터 시 에러 메시지 표시", async ({ page }) => {
