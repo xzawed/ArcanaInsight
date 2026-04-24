@@ -1,12 +1,21 @@
 import type { DbClient } from "./types";
 
-/** 최대 3회 재시도, 실패 간격 200ms * (시도 횟수) */
+/** PostgreSQL 23xxx (무결성 제약 위반) 등 재시도해도 동일하게 실패하는 영구 에러 판별 */
+function isPermanentError(e: unknown): boolean {
+  if (!(e instanceof Error)) return false;
+  const code = (e as Error & { code?: string }).code;
+  if (code && /^(22|23|42)/.test(code)) return true; // data exception / constraint / syntax
+  return /duplicate key|violates|unique constraint/i.test(e.message);
+}
+
+/** 최대 3회 재시도, 실패 간격 200ms * (시도 횟수). 영구 에러는 즉시 throw. */
 async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
     try {
       return await fn();
     } catch (e) {
+      if (isPermanentError(e)) throw e;
       lastErr = e;
       if (i < attempts - 1) await new Promise((r) => setTimeout(r, 200 * (i + 1)));
     }
