@@ -1,11 +1,8 @@
-name: 문서 정합성 검사 (경고 전용)
+name: 문서 정합성 검사
 
 on:
   pull_request:
     branches: [main]
-
-# PR-1~4 기간: 경고만 출력 (continue-on-error: true)
-# PR-5에서 continue-on-error를 제거해 실패 시 PR 차단으로 전환
 
 jobs:
   docs-sync:
@@ -27,11 +24,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 환경변수-문서 정합성 검사
-        continue-on-error: true
         run: pnpm exec tsx scripts/check-env-docs.ts
 
       - name: 문서 링크 존재성 검사
-        continue-on-error: true
         run: pnpm exec tsx scripts/check-doc-links.ts
 
       # sync-test-count --check 은 테스트 실행이 너무 느려 PR CI에서 제외.
