@@ -7,13 +7,15 @@ import { useThemeStore, themes } from "@/hooks/useTheme";
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { mode, activeTheme, setMode, refresh } = useThemeStore();
 
-  // localStorage에서 저장된 모드 복원 (최초 1회)
+  // localStorage에서 저장된 모드 복원, 없으면 클라이언트 시간 기반 테마 보정 (SSR 초기값 "midnight" 덮어쓰기)
   useEffect(() => {
     const saved = localStorage.getItem("arcana-theme-mode");
     if (saved) {
       setMode(saved as typeof mode);
+    } else {
+      refresh();
     }
-  }, [setMode]);
+  }, [setMode, refresh]);
 
   // 활성 테마 색상을 CSS 변수로 자동 적용
   useEffect(() => {

@@ -11,11 +11,31 @@ import { getAiFallbackCooldownMs, getAiAuthCooldownMs } from "@/lib/env";
  * - Grok Rate Limit (429): Claude 전환 + Retry-After 기반 쿨다운 (기본 30초)
  * - Grok 인증 실패 (401/403): Claude 전환 + 30분 쿨다운 (재시도 불가 에러)
  */
+
+// 서킷브레이커 상태를 globalThis에 저장 — 서버리스 콜드 스타트로 인스턴스가 교체되어도 동일 Node 프로세스 내에서 상태 유지
+const CIRCUIT_KEY = "__arcanaFallbackCircuit__";
+
+interface CircuitState {
+  grokDown: boolean;
+  grokDownUntil: number;
+}
+
+function getCircuit(): CircuitState {
+  const g = globalThis as Record<string, unknown>;
+  if (!g[CIRCUIT_KEY]) {
+    g[CIRCUIT_KEY] = { grokDown: false, grokDownUntil: 0 };
+  }
+  return g[CIRCUIT_KEY] as CircuitState;
+}
+
+/** 테스트 전용 리셋 — 프로덕션 코드에서 호출 금지 */
+export function __resetFallbackCircuitForTests(): void {
+  (globalThis as Record<string, unknown>)[CIRCUIT_KEY] = { grokDown: false, grokDownUntil: 0 };
+}
+
 export class FallbackProvider implements AIProvider {
   private grok: GrokProvider;
   private claude: ClaudeProvider | null = null;
-  private grokDown = false;
-  private grokDownUntil = 0;
   private static readonly COOLDOWN_MS = getAiFallbackCooldownMs(); // 기본 5분 (서버 에러)
   private static readonly AUTH_COOLDOWN_MS = getAiAuthCooldownMs(); // 기본 30분 (인증 에러, 재시도 불가)
 
@@ -31,18 +51,20 @@ export class FallbackProvider implements AIProvider {
   }
 
   private isGrokAvailable(): boolean {
-    if (!this.grokDown) return true;
-    if (Date.now() > this.grokDownUntil) {
-      this.grokDown = false;
+    const circuit = getCircuit();
+    if (!circuit.grokDown) return true;
+    if (Date.now() > circuit.grokDownUntil) {
+      circuit.grokDown = false;
       return true;
     }
     return false;
   }
 
   private markGrokDown(cooldownMs?: number, reason?: string): void {
-    this.grokDown = true;
+    const circuit = getCircuit();
+    circuit.grokDown = true;
     const duration = cooldownMs ?? FallbackProvider.COOLDOWN_MS;
-    this.grokDownUntil = Date.now() + duration;
+    circuit.grokDownUntil = Date.now() + duration;
     const reasonText = reason || "에러";
     console.warn(`[FallbackProvider] Grok ${reasonText} → Claude 전환 (${Math.round(duration / 1000)}초 후 Grok 재시도)`);
   }

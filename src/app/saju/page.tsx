@@ -33,28 +33,27 @@ function SajuPageContent() {
 
   const [step, setStep] = useState<PageStep>(() => preselectedChar ? "info-input" : "character-select");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
-  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>(() =>
-    preselectedChar ? [{
-      id: crypto.randomUUID(), role: "character" as const,
-      content: preselectedChar.greeting, mood: "smile", timestamp: new Date(),
-    }] : []
-  );
+  const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
   const [selectedTime, setSelectedTime] = useState<SajuTimeRange | null>(null);
   const [selectedArea, setSelectedArea] = useState<Topic | null>(null);
   const [monthlyToggle, setMonthlyToggle] = useState(false);
 
-  // URL 파라미터로 캐릭터가 프리셀렉트된 경우 스토어에 반영
+  // 프리셀렉트된 캐릭터: 스토어 반영 + 인사 메시지 생성 (클라이언트 마운트 후 — new Date() SSR 비결정 방지)
   useEffect(() => {
     if (preselectedChar) {
       setCharacterId(preselectedChar.id);
+      setDialogueMessages([{
+        id: crypto.randomUUID(), role: "character" as const,
+        content: preselectedChar.greeting, mood: "smile", timestamp: new Date(),
+      }]);
     }
-  }, [preselectedChar, setCharacterId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
   const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
   useEffect(() => {
     if (favoriteCharacter && !selectedCharacter) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedCharacter(favoriteCharacter);
       setCharacterId(favoriteCharacter.id);
       setDialogueMessages([{
