@@ -122,9 +122,18 @@ ${cardDescriptions}
 - 종합 해석에서 카드 간 상호작용과 전체 흐름을 분석하세요.`;
 }
 
+/** 사용자 입력값에서 줄바꿈 문자를 제거해 프롬프트 인젝션 차단 */
+function sanitizeField(value: string, maxLength = 100): string {
+  return value.replace(/[\r\n]/g, " ").slice(0, maxLength);
+}
+
 export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string; gender: string; birthHour: string } | null): string {
   if (!userInfo) return "";
   const genderMap: Record<string, string> = { male: "남성", female: "여성", other: "기타" };
   const birthHourMap: Record<string, string> = { unknown: "모름" };
-  return `\n\n상담자 정보:\n- 이름: ${userInfo.name}\n- 생년월일: ${userInfo.birthDate}\n- 성별: ${genderMap[userInfo.gender] || userInfo.gender}\n- 태어난 시: ${birthHourMap[userInfo.birthHour] || userInfo.birthHour}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
+  const name = sanitizeField(userInfo.name, 50);
+  const birthDate = sanitizeField(userInfo.birthDate, 20);
+  const gender = sanitizeField(genderMap[userInfo.gender] || userInfo.gender, 10);
+  const birthHour = sanitizeField(birthHourMap[userInfo.birthHour] || userInfo.birthHour, 20);
+  return `\n\n상담자 정보:\n- 이름: ${name}\n- 생년월일: ${birthDate}\n- 성별: ${gender}\n- 태어난 시: ${birthHour}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
 }

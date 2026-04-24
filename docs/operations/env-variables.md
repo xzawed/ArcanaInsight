@@ -77,9 +77,9 @@
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
 | `GROK_BASE_URL` | Grok API 엔드포인트 | `https://api.x.ai/v1` |
-| `CLAUDE_MODEL` | Claude 모델 ID | `claude-opus-4-5` |
+| `CLAUDE_MODEL` | Claude 모델 ID | `claude-opus-4-7` |
 | `CLAUDE_BASE_URL` | Claude API 엔드포인트 오버라이드 | SDK 내장값 |
-| `AI_TIMEOUT_MS` | AI 스트림 타임아웃 | `30000` |
+| `AI_TIMEOUT_MS` | AI 스트림 타임아웃 | `60000` |
 | `AI_DEFAULT_MAX_TOKENS` | AI 응답 최대 토큰 | `16000` |
 | `AI_TEMPERATURE` | AI 온도 파라미터 | `0.7` |
 | `AI_FALLBACK_COOLDOWN_MS` | Fallback 쿨다운 — 5xx/network | `300000` (5분) |

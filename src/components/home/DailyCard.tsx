@@ -26,16 +26,18 @@ export function DailyCard() {
   const [data, setData] = useState<Record<string, DailyCardData>>({});
   const [loading, setLoading] = useState<string | null>(null);
   const [flipped, setFlipped] = useState<Record<string, boolean>>({});
+  const [today, setToday] = useState("");
   const [todayLabel, setTodayLabel] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
-
   useEffect(() => {
+    const d = new Date();
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTodayLabel(new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" }));
+    setToday(d.toISOString().split("T")[0]);
+    setTodayLabel(d.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" }));
   }, []);
 
   const fetchDailyCard = useCallback(async (characterId: string) => {
+    if (!today) return;
     if (data[characterId]) return;
     setLoading(characterId);
     try {

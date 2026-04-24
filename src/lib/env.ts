@@ -4,7 +4,7 @@
 export function getGrokApiKey(): string { return process.env.GROK_API_KEY ?? "" }
 export function getGrokModel(): string { return process.env.GROK_MODEL ?? "grok-3" }
 export function getAnthropicApiKey(): string { return process.env.ANTHROPIC_API_KEY ?? "" }
-export function getClaudeModel(): string { return process.env.CLAUDE_MODEL ?? "claude-sonnet-4-20250514" }
+export function getClaudeModel(): string { return process.env.CLAUDE_MODEL ?? "claude-opus-4-7" }
 export function getClaudeBaseUrl(): string { return process.env.CLAUDE_BASE_URL ?? "https://api.anthropic.com/v1" }
 export function getGrokBaseUrl(): string { return process.env.GROK_BASE_URL ?? "https://api.x.ai/v1" }
 
