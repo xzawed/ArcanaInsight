@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import { eq, and } from "drizzle-orm"
+import { eq, and, inArray } from "drizzle-orm"
 import type { PgTable, PgColumn } from "drizzle-orm/pg-core"
 import type { ColumnBaseConfig, ColumnDataType } from "drizzle-orm"
 import * as schema from "./schema/index"
@@ -82,6 +82,18 @@ export class PostgresAdapter implements DbClient {
     if (options?.offset !== undefined) q = q.offset(options.offset)
     const rows = await q as Record<string, unknown>[]
     return rows.map((r) => normalizeRow<T>(r))
+  }
+
+  async findManyIn<T>(table: string, column: string, values: unknown[]): Promise<T[]> {
+    if (values.length === 0) return []
+    const db = getConnection()
+    const t = resolveTable(table)
+    const col = (t as unknown as Record<string, unknown>)[column]
+      ?? (t as unknown as Record<string, unknown>)[snakeToCamel(column)]
+    if (!col) throw new Error(`Unknown column: ${column}`)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await db.select().from(t).where(inArray(col as any, values as any[]))
+    return (result as Record<string, unknown>[]).map((r) => normalizeRow<T>(r))
   }
 
   async insert<T>(table: string, data: Record<string, unknown>): Promise<T> {

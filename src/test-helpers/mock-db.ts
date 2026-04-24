@@ -7,6 +7,7 @@ export function makeMockDb(overrides: Partial<MockDbClient> = {}): MockDbClient 
   return {
     findOne: vi.fn(),
     findMany: vi.fn(),
+    findManyIn: vi.fn(),
     insert: vi.fn(),
     insertMany: vi.fn(),
     update: vi.fn(),

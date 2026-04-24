@@ -251,7 +251,7 @@ export default function ShinjeomSessionPage() {
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority />
+        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density="low" className="z-10" />

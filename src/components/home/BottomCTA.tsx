@@ -8,7 +8,7 @@ export function BottomCTA() {
   return (
     <section className="relative py-20 md:py-28 px-4 overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" />
+        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-gradient-to-r from-arcana-purple/80 to-arcana-indigo/80" />
       </div>
 

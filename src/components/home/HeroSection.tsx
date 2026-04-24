@@ -17,7 +17,7 @@ export function HeroSection() {
   return (
     <section className="relative h-[100dvh] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" priority />
+        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",

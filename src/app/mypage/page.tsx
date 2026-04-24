@@ -8,9 +8,9 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
 import { FavoriteCharacterSelector } from "./FavoriteCharacterSelector";
 
-/** readings는 1:1 관계(unique session_id)이므로 PostgREST가 단일 객체로 반환 */
 interface ReadingData {
   id: string;
+  session_id?: string;
   share_token?: string | null;
   overall_reading?: string | null;
 }
@@ -146,22 +146,27 @@ export default async function MyPage() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 50);
 
-  // 2. 각 세션의 리딩 병렬 조회 (service_type별 테이블 분기)
-  const withReadings = await Promise.all(
-    filtered.map(async (session) => {
-      const table =
-        session.service_type === "saju" ? "saju_readings" :
-        session.service_type === "shinjeom" ? "shinjeom_readings" :
-        "readings";
-      const reading = await db.findOne<ReadingData>(table, { session_id: session.id }).catch(() => null);
-      return {
-        ...session,
-        readings: session.service_type === "tarot" ? (reading ?? null) : null,
-        saju_readings: session.service_type === "saju" ? (reading ?? null) : null,
-        shinjeom_readings: session.service_type === "shinjeom" ? (reading ?? null) : null,
-      } as SessionRow;
-    })
-  );
+  // 2. 서비스 타입별 ID 분류 → 3개 테이블 일괄 조회 (N+1 → 3 queries)
+  const tarotIds = filtered.filter((s) => s.service_type === "tarot").map((s) => s.id);
+  const sajuIds = filtered.filter((s) => s.service_type === "saju").map((s) => s.id);
+  const shinjeomIds = filtered.filter((s) => s.service_type === "shinjeom").map((s) => s.id);
+
+  const [tarotReadings, sajuReadings, shinjeomReadings] = await Promise.all([
+    db.findManyIn<ReadingData>("readings", "session_id", tarotIds).catch(() => [] as ReadingData[]),
+    db.findManyIn<ReadingData>("saju_readings", "session_id", sajuIds).catch(() => [] as ReadingData[]),
+    db.findManyIn<ReadingData>("shinjeom_readings", "session_id", shinjeomIds).catch(() => [] as ReadingData[]),
+  ]);
+
+  const tarotMap = new Map(tarotReadings.map((r) => [r.session_id, r]));
+  const sajuMap = new Map(sajuReadings.map((r) => [r.session_id, r]));
+  const shinjeomMap = new Map(shinjeomReadings.map((r) => [r.session_id, r]));
+
+  const withReadings = filtered.map((session) => ({
+    ...session,
+    readings: session.service_type === "tarot" ? (tarotMap.get(session.id) ?? null) : null,
+    saju_readings: session.service_type === "saju" ? (sajuMap.get(session.id) ?? null) : null,
+    shinjeom_readings: session.service_type === "shinjeom" ? (shinjeomMap.get(session.id) ?? null) : null,
+  })) as SessionRow[];
 
   // completed 세션 + 리딩이 있는 in_progress 세션 (상태 업데이트 누락 복구)
   const sessionList = withReadings.filter((s) => {
@@ -169,15 +174,11 @@ export default async function MyPage() {
     return !!getReadingFromSession(s);
   }).slice(0, 20);
 
-  // 3. 세션 ID 목록으로 session_cards 병렬 조회 (DbClient IN 미지원 → 세션별 병렬)
+  // 3. session_cards 일괄 조회 (N+1 → 1 query)
   const sessionIds = sessionList.map((s) => s.id);
-  let sessionCards: SessionCard[] = [];
-  if (sessionIds.length > 0) {
-    const cardsResults = await Promise.all(
-      sessionIds.map((id) => db.findMany<SessionCard>("session_cards", { session_id: id }).catch(() => []))
-    );
-    sessionCards = cardsResults.flat();
-  }
+  const sessionCards: SessionCard[] = sessionIds.length > 0
+    ? await db.findManyIn<SessionCard>("session_cards", "session_id", sessionIds).catch(() => [])
+    : [];
 
   const totalReadings = sessionList.length;
   const lastReadingDate = sessionList.length > 0 ? sessionList[0].created_at : null;
@@ -190,7 +191,7 @@ export default async function MyPage() {
     <div className="relative min-h-screen overflow-hidden">
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/mypage-bg.jpg" alt="" fill className="object-cover" />
+        <Image src="/images/backgrounds/mypage-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)]" />
       </div>
@@ -258,7 +259,7 @@ export default async function MyPage() {
                 alt=""
                 fill
                 className="object-contain rounded-full opacity-60"
-              />
+               sizes="100vw" />
             </div>
             <p className="text-arcana-muted text-lg font-serif mb-2">아직 리딩 기록이 없습니다</p>
             <p className="text-arcana-muted/60 text-sm mb-6">카드가 당신의 이야기를 기다리고 있어요</p>
