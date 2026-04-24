@@ -28,6 +28,9 @@ export default defineConfig({
         "src/hooks/useSSEStream.ts",   // SSE 공통 유틸 — 테스트 있음
         "src/services/**/*.ts",        // 모든 서비스 계층 — 테스트 있음
         "src/lib/verum/**/*.ts",       // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
+        "src/app/api/tarot/session/route.ts",    // 세션 라우트 — PR B 테스트 추가
+        "src/app/api/saju/session/route.ts",     // 세션 라우트 — PR B 테스트 추가
+        "src/app/api/shinjeom/session/route.ts", // 세션 라우트 — PR B 테스트 추가
       ],
       exclude: [
         "src/**/*.test.ts",
