@@ -3,11 +3,36 @@ import { z } from "zod";
 const uuidOrNull = z.string().max(36).nullish();
 const topicStr = z.string().max(60);
 const charIdStr = z.string().max(50).nullish();
+const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).max(10);
+const spreadTypeEnum = z.enum(["one-card", "three-card", "five-card", "seven-card", "ten-card", "relationship", "horseshoe", "decision", "weekly", "zodiac", "tree-of-life"]);
+
+// 세션 생성 스키마
+export const TarotSessionSchema = z.object({
+  topic: topicStr,
+  characterId: charIdStr,
+  spreadType: spreadTypeEnum.nullish(),
+});
+
+export const SajuSessionSchema = z.object({
+  topic: topicStr,
+  characterId: charIdStr,
+});
+
+export const ShinjeomSessionSchema = z.object({
+  topic: topicStr,
+  characterId: z.string().max(50),
+});
+
+// 일일 카드 스키마
+export const DailyCardSchema = z.object({
+  characterId: z.string().min(1).max(50),
+  date: dateStr,
+});
 
 export const TarotReadingSchema = z.object({
   sessionId: uuidOrNull,
   topic: topicStr,
-  spreadType: z.enum(["one-card", "three-card", "five-card", "seven-card", "ten-card", "relationship", "horseshoe", "decision", "weekly", "zodiac", "tree-of-life"]).nullish(),
+  spreadType: spreadTypeEnum.nullish(),
   characterId: charIdStr,
   userInfo: z.object({
     name: z.string().max(50),

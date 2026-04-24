@@ -4,10 +4,15 @@ import { getCurrentUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { SAJU_TOPICS } from "@/data/topics"
+import { SajuSessionSchema } from "@/lib/validation/api-schemas"
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, characterId } = (await request.json()) as { topic: Topic; characterId?: string }
+    const parsed = SajuSessionSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    }
+    const { topic, characterId } = parsed.data as { topic: Topic; characterId?: string | null }
     if (!SAJU_TOPICS.includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
