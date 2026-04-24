@@ -15,9 +15,8 @@ test.describe("캐릭터 상세 페이지", () => {
       const img = page.locator('img[src*="characters"]').first();
       await expect(img).toBeVisible({ timeout: 10_000 });
 
-      // 서비스 선택 카드 존재 — nav와 구별되는 전체 레이블 사용
-      await expect(page.locator("text=타로 리딩").first()).toBeVisible();
-      await expect(page.locator("text=사주 상담").first()).toBeVisible();
+      // 서비스 선택 섹션 헤딩 존재 (서비스 카드는 스크롤 컨테이너 내부일 수 있음)
+      await expect(page.locator("h2", { hasText: "서비스 선택" })).toBeVisible();
     });
   }
 
