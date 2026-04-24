@@ -16,11 +16,11 @@
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=alert_status" alt="Quality Gate" /></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=coverage" alt="Coverage" /></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=bugs" alt="Bugs" /></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=xzawed31_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed31_ArcanaInsight&metric=security_rating" alt="Security Rating" /></a>
-  <a href="https://codecov.io/gh/xzawed31/ArcanaInsight"><img src="https://codecov.io/gh/xzawed31/ArcanaInsight/branch/main/graph/badge.svg" alt="Codecov" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed_ArcanaInsight&metric=alert_status" alt="Quality Gate" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed_ArcanaInsight&metric=coverage" alt="Coverage" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed_ArcanaInsight&metric=bugs" alt="Bugs" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=xzawed_ArcanaInsight"><img src="https://sonarcloud.io/api/project_badges/measure?project=xzawed_ArcanaInsight&metric=security_rating" alt="Security Rating" /></a>
+  <a href="https://codecov.io/gh/xzawed/ArcanaInsight"><img src="https://codecov.io/gh/xzawed/ArcanaInsight/branch/main/graph/badge.svg" alt="Codecov" /></a>
 </p>
 
 <p align="center">
@@ -140,7 +140,7 @@ ArcanaInsight is a web application where users have natural conversations with *
 
 ```bash
 # 1. Clone
-git clone https://github.com/xzawed31/ArcanaInsight.git
+git clone https://github.com/xzawed/ArcanaInsight.git
 cd ArcanaInsight
 
 # 2. Install dependencies (pnpm required)
