@@ -38,6 +38,7 @@ export function CharacterGallery() {
                       src={`/images/characters/${char.id}/nukki/idle.png`}
                       alt={`${char.name} - ${char.personality}`}
                       fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"
                       className="object-cover object-top"
                     />
                     <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-arcana-card to-transparent" />
