@@ -25,7 +25,7 @@ const DEFAULT_RETRY_AFTER_SEC = 30;
 export class GrokProvider implements AIProvider {
   private _apiKey: string | null = null;
   private _model: string | null = null;
-  private baseUrl = getGrokBaseUrl();
+  private _baseUrl: string | null = null;
 
   /** 환경변수를 지연 로드 — 모듈 로드 시점이 아니라 첫 호출 시점에 확인 */
   private get apiKey(): string {
@@ -40,19 +40,18 @@ export class GrokProvider implements AIProvider {
   }
 
   private get model(): string {
-    if (!this._model) {
-      this._model = getGrokModel();
-    }
+    if (!this._model) this._model = getGrokModel();
     return this._model;
   }
 
-  private static readonly TIMEOUT_MS = getAiTimeoutMs();
-
-  private static readonly DEFAULT_MAX_TOKENS = getDefaultMaxTokens();
+  private get baseUrl(): string {
+    if (!this._baseUrl) this._baseUrl = getGrokBaseUrl();
+    return this._baseUrl;
+  }
 
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), GrokProvider.TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
@@ -60,7 +59,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: getAiTemperature(), max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS,
+          temperature: getAiTemperature(), max_tokens: maxTokens ?? getDefaultMaxTokens(),
         }),
         signal: controller.signal,
       });
@@ -84,7 +83,7 @@ export class GrokProvider implements AIProvider {
 
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), GrokProvider.TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
@@ -92,7 +91,7 @@ export class GrokProvider implements AIProvider {
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-          temperature: getAiTemperature(), max_tokens: maxTokens ?? GrokProvider.DEFAULT_MAX_TOKENS, stream: true,
+          temperature: getAiTemperature(), max_tokens: maxTokens ?? getDefaultMaxTokens(), stream: true,
         }),
         signal: controller.signal,
       });

@@ -7,9 +7,8 @@ import { getAnthropicApiKey, getClaudeBaseUrl, getClaudeModel, getAiTimeoutMs, g
  */
 export class ClaudeProvider implements AIProvider {
   private _apiKey: string | null = null;
-  private baseUrl = getClaudeBaseUrl();
-  private model = getClaudeModel();
-  private static readonly TIMEOUT_MS = getAiTimeoutMs();
+  private _baseUrl: string | null = null;
+  private _model: string | null = null;
 
   private get apiKey(): string {
     if (!this._apiKey) {
@@ -22,11 +21,19 @@ export class ClaudeProvider implements AIProvider {
     return this._apiKey;
   }
 
-  private static readonly DEFAULT_MAX_TOKENS = getDefaultMaxTokens();
+  private get baseUrl(): string {
+    if (!this._baseUrl) this._baseUrl = getClaudeBaseUrl();
+    return this._baseUrl;
+  }
+
+  private get model(): string {
+    if (!this._model) this._model = getClaudeModel();
+    return this._model;
+  }
 
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), ClaudeProvider.TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: "POST",
@@ -37,7 +44,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: maxTokens ?? ClaudeProvider.DEFAULT_MAX_TOKENS,
+          max_tokens: maxTokens ?? getDefaultMaxTokens(),
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
         }),
@@ -59,7 +66,7 @@ export class ClaudeProvider implements AIProvider {
 
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), ClaudeProvider.TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: "POST",
@@ -70,7 +77,7 @@ export class ClaudeProvider implements AIProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          max_tokens: maxTokens ?? ClaudeProvider.DEFAULT_MAX_TOKENS,
+          max_tokens: maxTokens ?? getDefaultMaxTokens(),
           stream: true,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
