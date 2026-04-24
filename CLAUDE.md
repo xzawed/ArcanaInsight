@@ -901,6 +901,13 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 2. `playwright.config.ts` — 디바이스 프로필 확인
 3. CLAUDE.md `E2E 로컬 실행 — Windows(Docker)` 섹션 — 실행 방법
 
+**Mobile Android 셀렉터 주의사항** (오탐 패턴):
+- `page.locator("img").first()` → Header 아이콘(hidden)을 먼저 resolve할 수 있음. `img[src*="keyword"]` 사용
+- Next.js `<Image>`는 DOM에서 `/_next/image?url=%2Fpath` 형태로 렌더링 → `src*="/path/"` 슬래시 포함 매칭 불가, `src*="keyword"`로 한정
+- `text=타로` 등 짧은 텍스트 → Header/MobileNav hidden 링크를 먼저 resolve. `h1`, `h2` 또는 전체 레이블(`text=타로 리딩`) 사용
+- `overflow-y-auto` 스크롤 컨테이너 내 요소 → 스크롤 밖에 있으면 `toBeVisible()` hidden 판정. 상단 헤딩을 체크하거나 `scrollIntoViewIfNeeded()` 호출
+- lazy-loaded 이미지 off-viewport → `naturalWidth === 0`이지만 실제 문제 아님. `getBoundingClientRect`으로 viewport 교차 여부 확인 후 판단
+
 ## 작업 시 주의사항
 
 - 타로 카드 데이터는 `src/data/` 디렉토리에 정적으로 관리
@@ -912,6 +919,8 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 - 캐릭터 이미지 규격: 1408×768 (10캐릭터 PNG 누끼, 2캐릭터 JPG 레거시, grok-imagine-image-pro API 기본 출력 사이즈)
 - **Zod 스키마 `null` vs `undefined` 규칙**: `JSON.stringify`는 `null`을 직렬화하고 `undefined`는 제거한다. Zustand store 초기값이 `null`인 필드는 반드시 `.nullish()` 사용. `undefined`만 올 수 있는 필드만 `.optional()` 사용. 위반 시 프로덕션 400 오류 발생하지만 로컬 빌드·lint·tsc는 모두 통과 → **2026-04-24 타로 리딩 전체 불능 장애 원인**
 - **SSR 비결정 값 금지**: `"use client"` 컴포넌트에서 `new Date()`, `Math.random()` 등 비결정 값을 JSX 렌더 또는 `useState` 초기값에 직접 사용 금지. 반드시 `useEffect` 내에서만 호출하고 초기값은 `""` / `0` / `[]` 등 안전한 상수로 설정 — React error #418(hydration mismatch) 방지
+- **`<Image fill>` sizes prop 필수**: Next.js `<Image fill>`에 `sizes` 미설정 시 기본값 `100vw`로 Mobile Android CI에서 이미지 로드 타임아웃 발생. 그리드 내 이미지는 `sizes="(max-width: 640px) 50vw, ..."` 형태로 반드시 지정
+- **SonarCloud 테스트 리포트**: `sonar.testExecutionReportPaths`는 SonarCloud 전용 `<testExecutions version="1">` XML 형식만 허용 — Vitest/Playwright의 표준 JUnit `<testsuites>` 포맷과 비호환. 커버리지는 lcov(`sonar.javascript.lcov.reportPaths`)만 사용
 - **API 스키마 필수 적용**: 새 API 라우트 추가 시 `src/lib/validation/api-schemas.ts`에 Zod 스키마 먼저 정의, `safeParse` 검증 후 로직 진행. 타입 단언(`as { ... }`) 사용 금지
 
 ## 미구현 기능 목록
