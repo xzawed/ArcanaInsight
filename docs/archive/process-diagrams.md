@@ -1,4 +1,9 @@
-# ArcanaInsight — 내부 프로세스 흐름도
+# ArcanaInsight — 내부 프로세스 흐름도 (아카이브)
+
+> **원본 위치**: 프로젝트 루트 `process.md` (PR-4에서 분해 후 삭제됨)
+> **최신 아키텍처 설명**: [`../architecture/system-overview.md`](../architecture/system-overview.md), [`../architecture/ai-infrastructure.md`](../architecture/ai-infrastructure.md)
+
+---
 
 ## 전체 서비스 아키텍처
 
@@ -463,30 +468,7 @@ sequenceDiagram
 
 ---
 
-## 파일 구조 → 흐름 매핑
-
-| 흐름 단계 | 주요 파일 |
-|---|---|
-| **홈 페이지** | `src/app/page.tsx`, `src/components/home/*` |
-| **인증** | `src/app/auth/login/page.tsx`, `src/lib/supabase/*` |
-| **타로 선택** | `src/app/tarot/page.tsx` |
-| **타로 세션** | `src/app/tarot/session/page.tsx` |
-| **타로 API** | `src/app/api/tarot/session/route.ts`, `src/app/api/tarot/reading/route.ts` |
-| **타로 결과 공유** | `src/app/tarot/result/[id]/page.tsx` |
-| **사주 선택** | `src/app/saju/page.tsx` |
-| **사주 세션** | `src/app/saju/session/page.tsx` |
-| **사주 API** | `src/app/api/saju/session/route.ts`, `src/app/api/saju/reading/route.ts` |
-| **AI 프롬프트** | `src/services/core/prompt-builder.ts`, `src/services/saju/saju-service.ts` |
-| **AI 호출** | `src/services/core/grok-provider.ts` |
-| **응답 정리** | `src/services/core/text-cleaner.ts` |
-| **사주 계산** | `src/services/saju/saju-calculator.ts` |
-| **카드 데이터** | `src/data/cards/*`, `src/data/spreads/*` |
-| **캐릭터 데이터** | `src/data/characters/*` |
-| **상태 관리** | `src/hooks/useSession.ts`, `src/hooks/useSajuSession.ts`, `src/hooks/useCharacter.ts` |
-
----
-
-## 코드 변경 및 배포 프로세스 (표준)
+## 코드 변경 및 배포 프로세스
 
 ```mermaid
 flowchart TD
@@ -558,3 +540,26 @@ flowchart LR
     style Claude fill:#1a1a2e,stroke:#7c3aed,color:#fff
     style SPEC fill:#d97706,color:#fff
 ```
+
+---
+
+## 파일 구조 → 흐름 매핑
+
+| 흐름 단계 | 주요 파일 |
+|---|---|
+| **홈 페이지** | `src/app/page.tsx`, `src/components/home/*` |
+| **인증** | `src/app/auth/login/page.tsx`, `src/lib/supabase/*` |
+| **타로 선택** | `src/app/tarot/page.tsx` |
+| **타로 세션** | `src/app/tarot/session/page.tsx` |
+| **타로 API** | `src/app/api/tarot/session/route.ts`, `src/app/api/tarot/reading/route.ts` |
+| **타로 결과 공유** | `src/app/tarot/result/[id]/page.tsx` |
+| **사주 선택** | `src/app/saju/page.tsx` |
+| **사주 세션** | `src/app/saju/session/page.tsx` |
+| **사주 API** | `src/app/api/saju/session/route.ts`, `src/app/api/saju/reading/route.ts` |
+| **AI 프롬프트** | `src/services/core/prompt-builder.ts`, `src/services/saju/saju-service.ts` |
+| **AI 호출** | `src/services/core/grok-provider.ts` |
+| **응답 정리** | `src/services/core/text-cleaner.ts` |
+| **사주 계산** | `src/services/saju/saju-calculator.ts` |
+| **카드 데이터** | `src/data/cards/*`, `src/data/spreads/*` |
+| **캐릭터 데이터** | `src/data/characters/*` |
+| **상태 관리** | `src/hooks/useSession.ts`, `src/hooks/useSajuSession.ts`, `src/hooks/useCharacter.ts` |

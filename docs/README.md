@@ -26,6 +26,8 @@ CLAUDE.md는 포인터(≤250줄)만 유지하며, 각 주제의 정본은 이 �
 | 운영자 가이드 | [operations/operation-guide.md](operations/operation-guide.md) |
 | 미구현/기술부채 | [operations/known-issues.md](operations/known-issues.md) |
 | 배포/롤백 절차 | [operations/deployment.md](operations/deployment.md) |
+| 모니터링·QA·n8n | [operations/monitoring.md](operations/monitoring.md) |
+| 내부 흐름도 아카이브 | [archive/process-diagrams.md](archive/process-diagrams.md) |
 
 ## 폴더 구조
 
@@ -38,20 +40,29 @@ docs/
 │   ├── db-abstraction.md
 │   ├── auth-abstraction.md
 │   └── data-model.md
-├── workflow/                   # "어떻게 변경하는가" (PR-3 일부, PR-4에서 완성)
-│   ├── e2e-testing.md          # ✅ PR-2
-│   ├── unit-testing.md         # ✅ PR-3
-│   └── task-playbooks.md       # ✅ PR-3
+├── workflow/                   # "어떻게 변경하는가" ✅ PR-4 완성
+│   ├── e2e-testing.md          # PR-2
+│   ├── unit-testing.md         # PR-3
+│   ├── task-playbooks.md       # PR-3
+│   ├── code-change-process.md  # PR-4
+│   └── ci-cd.md                # PR-4
 ├── conventions/                # "어떻게 작성하는가" ✅ PR-3 완성
 │   ├── coding-style.md
 │   ├── layout-rules.md
 │   ├── cross-platform.md
 │   ├── zod-schemas.md
 │   └── image-assets.md
-├── operations/                 # "운영하는 법"
-│   └── known-issues.md         # 미구현 기능 + 기술 부채 (PR-1에서 신설)
-└── archive/                    # "역사적 자료" (PR-2/4에서 채움)
+├── operations/                 # "운영하는 법" ✅ PR-4 완성
+│   ├── known-issues.md         # PR-1
+│   ├── operation-guide.md      # PR-2 (이동)
+│   ├── env-variables.md        # PR-4
+│   ├── deployment.md           # PR-4
+│   └── monitoring.md           # PR-4
+└── archive/                    # "역사적 자료" ✅ PR-4 완성
+    ├── skills-original.md      # PR-2 (이동)
+    ├── ai-quality-roadmap.md   # PR-2 (이동)
+    └── process-diagrams.md     # PR-4 (process.md 분해)
 ```
 
-> **채움 일정**: PR-1(known-issues) → PR-2(archive 이동) → PR-3(architecture/conventions/workflow 분할)
-> → PR-4(workflow/operations 완성) → PR-5(CLAUDE.md 250줄 축약)
+> **완성 현황**: PR-1(known-issues) → PR-2(archive 이동) → PR-3(architecture/conventions 분할)
+> → PR-4(workflow/operations 완성 + process.md 분해) → PR-5(CLAUDE.md 250줄 축약)
