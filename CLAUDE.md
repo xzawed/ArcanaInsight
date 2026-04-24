@@ -245,10 +245,13 @@ public/images/
     ├── lix/
     └── ethan/
 
-docs/                           # 프로젝트 문서
-├── operation-guide.md          # 운영자 가이드 (서비스 구조, 7단계 프로세스, 자동화 일정)
-├── skills.md                   # 기술 스킬 정의서 (초기 기획 문서, CLAUDE.md 우선)
-├── ai-quality-roadmap.md       # AI 품질 개선 로드맵 (Phase 1→2→3 전환 기준)
+docs/                           # 프로젝트 문서 (PR-1~5 재편 진행 중)
+├── README.md                   # 업무 유형별 문서 인덱스 (→ architecture/workflow/conventions/operations)
+├── operation-guide.md          # 운영자 가이드 (PR-2에서 docs/operations/ 로 이동 예정)
+├── skills.md                   # 기술 스킬 정의서 (PR-2에서 docs/archive/ 로 이동 예정)
+├── ai-quality-roadmap.md       # AI 품질 개선 로드맵 (PR-2에서 docs/archive/ 로 이동 예정)
+├── operations/
+│   └── known-issues.md         # 미구현 기능 + 기술 부채 단일 정본
 └── superpowers/                # superpowers 스킬 관련 문서
 
 process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
@@ -264,6 +267,9 @@ vitest-mocks/
 
 scripts/                        # 유틸리티 스크립트
 ├── pre-push-checks.sh          # git push 전 자동 검증 (tsc + lint + build)
+├── sync-test-count.ts          # CLAUDE.md 테스트 수 자동 동기화 (--check 모드 지원)
+├── check-env-docs.ts           # src/lib/env.ts ↔ docs/operations/env-variables.md 정합성 검사
+├── check-doc-links.ts          # docs/**/*.md 상대 링크 존재성 검증
 ├── generate-characters.ts      # 캐릭터 메타데이터 생성
 ├── generate-backgrounds.ts     # 배경 이미지 생성
 ├── generate-card-images.ts     # 카드 이미지 생성
@@ -582,6 +588,7 @@ git branch | grep -v '^\* main' | xargs git branch -D
 - **PR CI** (`deploy.yml`): PR → main, lint → build → E2E (Desktop Chrome + Mobile Android)
 - **주간 QA** (`weekly-qa.yml`): 토요일 09:00 KST, 3개 디바이스(iOS 포함), artifact 30일 보존, 실패 시 Issue 자동 생성
 - **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
+- **문서 정합성** (`docs-sync.yml`): PR마다 env-문서 정합성·docs 링크 검사 (현재 경고 전용, PR-5에서 차단으로 전환)
 
 > **E2E 파이프라인 상세 + QA 자동 루프 흐름도**: **[e2e/README.md §2](./e2e/README.md#2-ci-파이프라인)** 참조
 
@@ -945,6 +952,8 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 
 ## 미구현 기능 목록
 
+> **정본 위치**: [`docs/operations/known-issues.md`](docs/operations/known-issues.md) — 아래는 요약. 최신 상태는 해당 파일 참조.
+
 알고 있지만 아직 구현하지 않은 기능. Claude가 실수로 구현하거나 사용자에게 "있다"고 잘못 안내하지 않도록 명시한다.
 
 | 기능 | 위치 | 현재 상태 | 비고 |
@@ -956,6 +965,8 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 | ReviewCarousel 홈 노출 | `components/home/ReviewCarousel.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
 
 ## 알려진 기술 부채
+
+> **정본 위치**: [`docs/operations/known-issues.md`](docs/operations/known-issues.md) — 아래는 요약.
 
 의도적으로 아직 처리하지 않은 기술적 한계. Claude가 실수로 수정하거나 이미 검토된 방법을 다시 제안하지 않도록 명시한다.
 
