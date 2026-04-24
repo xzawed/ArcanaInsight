@@ -95,4 +95,26 @@ describe("POST /api/tarot/reading", () => {
     const text = await readSSEStream(res);
     expect(text).toContain("error");
   });
+
+  it("타인 세션에 reading 요청 → 403 (IDOR 차단)", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => ({
+      ...makeAuthMock(),
+      assertSessionOwnership: vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        })
+      ),
+    }));
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    vi.doMock("@/lib/verum", () => makeMockVerum());
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "session-other-user" }));
+    expect(res.status).toBe(403);
+  });
 });

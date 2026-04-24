@@ -48,12 +48,11 @@ jobs:
 **트리거**: PR마다 실행
 
 ```
-pnpm exec tsx scripts/sync-test-count.ts --check   # CLAUDE.md 테스트 수
-pnpm exec tsx scripts/check-env-docs.ts             # env-variables.md 정합성
-pnpm exec tsx scripts/check-doc-links.ts            # docs 상대 링크 검증
+pnpm exec tsx scripts/check-env-docs.ts   # env-variables.md 정합성
+pnpm exec tsx scripts/check-doc-links.ts  # docs 상대 링크 검증
 ```
 
-> **현재 상태**: 경고 전용 (실패해도 PR 차단 안 함). PR-5에서 차단 모드로 전환 예정.
+> **sync-test-count**: 테스트 실행이 너무 느려 PR CI에서 제외. 로컬 수동 실행만: `pnpm exec tsx scripts/sync-test-count.ts --check`
 
 ---
 

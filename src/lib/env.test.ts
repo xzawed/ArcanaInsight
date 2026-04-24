@@ -98,8 +98,8 @@ describe("getAnthropicApiKey", () => {
 });
 
 describe("getClaudeModel", () => {
-  it("env 미설정 시 기본값 'claude-sonnet-4-20250514'을 반환한다", () => {
-    expect(getClaudeModel()).toBe("claude-sonnet-4-20250514");
+  it("env 미설정 시 기본값 'claude-opus-4-7'을 반환한다", () => {
+    expect(getClaudeModel()).toBe("claude-opus-4-7");
   });
 
   it("env 설정 시 해당 값을 반환한다", () => {
