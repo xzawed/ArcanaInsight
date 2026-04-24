@@ -176,7 +176,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 - `app/shinjeom/result/[id]/` 결과 공유 페이지 미구현 (mypage 링크 비활성화)
 - `useFavoriteCharacter` DB_PROVIDER 추상화 미적용 (Supabase 직접)
-- 커버리지 임계값 상향 미완료 (PR E 예정)
+- 커버리지 임계값 상향 미완료 (branches 65/functions 75/lines 75 — 별도 PR 예정)
 - rate-limit 메모리 저장 — 서버 재시작 시 초기화됨 (Redis 기반 전환 고려)
 
 ## Claude 자율 관리 규칙

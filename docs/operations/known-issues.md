@@ -41,5 +41,5 @@
 | **B** | `feat/pr-b-api-unit-test-infra` / PR #122 | ✅ merged | vitest exclude 완화, mock 헬퍼 4개, 세션 라우트 3개 테스트 (469→504) |
 | **C** | `feat/pr-c-api-smoke-tests` / PR #123 | ✅ merged | API 스모크 테스트 8개 라우트 추가 (504→539) |
 | **D** | `fix/sonar-badge-followup` | ✅ merged | reading-saver.ts 신설·retry 3회, tarot·saju·shinjeom 라우트 위임 (539→558) |
-| **E** | (미시작) | pending | coverage.include 확장, 임계값 branches 65/functions 75/lines 75 |
+| **E** | (미시작) | **pending** | coverage.include 확장, 임계값 branches 65/functions 75/lines 75 (현재 572개) |
 | **F** | (미시작) | 선택 | 93개 우회 주석 태깅 |
