@@ -39,10 +39,17 @@ function snakeToCamel(s: string): string {
   return s.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase())
 }
 
-/** Drizzle가 반환하는 camelCase 키를 snake_case로 변환 (SupabaseAdapter와 일치) */
+/** Drizzle가 반환하는 camelCase 키를 snake_case로 변환 (SupabaseAdapter와 일치)
+ * 연속 대문자 처리: JSONData → json_data, shareToken → share_token */
 function normalizeRow<T>(row: Record<string, unknown>): T {
   return Object.fromEntries(
-    Object.entries(row).map(([k, v]) => [k.replace(/([A-Z])/g, '_$1').toLowerCase(), v])
+    Object.entries(row).map(([k, v]) => [
+      k
+        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2") // JSONData → JSON_Data
+        .replace(/([a-z\d])([A-Z])/g, "$1_$2")     // shareToken → share_Token
+        .toLowerCase(),
+      v,
+    ])
   ) as unknown as T
 }
 
