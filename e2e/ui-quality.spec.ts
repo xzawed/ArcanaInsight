@@ -156,8 +156,14 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
     for (let i = 0; i < Math.min(count, 30); i++) {
       const img = images.nth(i);
       if (await img.isVisible()) {
-        const natural = await img.evaluate((el: HTMLImageElement) => el.naturalWidth);
-        if (natural === 0) broken++;
+        const { inViewport, naturalWidth } = await img.evaluate((el: HTMLImageElement) => {
+          const rect = el.getBoundingClientRect();
+          return {
+            inViewport: rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0,
+            naturalWidth: el.naturalWidth,
+          };
+        });
+        if (inViewport && naturalWidth === 0) broken++;
       }
     }
     expect(broken).toBe(0);

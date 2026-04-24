@@ -11,8 +11,8 @@ test.describe("캐릭터 상세 페이지", () => {
       await page.goto(`/character/${id}`);
       await page.waitForLoadState("networkidle");
 
-      // 캐릭터 이미지 존재
-      const img = page.locator("img").first();
+      // 캐릭터 이미지 존재 (img.first()는 Header의 hidden 아이콘을 선택할 수 있으므로 캐릭터 경로로 한정)
+      const img = page.locator(`img[src*="/characters/"]`).first();
       await expect(img).toBeVisible({ timeout: 10_000 });
 
       // 서비스 선택 카드 존재 (타로/사주)
