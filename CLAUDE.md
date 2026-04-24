@@ -179,14 +179,16 @@ src/
 │   │   ├── supabase-auth.ts    # Supabase Auth 래핑
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
 │   ├── validation/
-│   │   └── api-schemas.ts      # Zod 스키마 — TarotReadingSchema / SajuReadingSchema / ShinjeomMessageSchema
-│   ├── verum/                  # Verum SDK 인라인 모듈 — 타로 프롬프트 A/B 라우팅 + 트레이스 기록 (graceful degradation 적용)
+│   │   ├── api-schemas.ts      # Zod 스키마 — 7종 (TarotReading/SajuReading/ShinjeomMessage/TarotSession/SajuSession/ShinjeomSession/DailyCard)
+│   │   └── api-schemas.test.ts # 단위 테스트 — null/undefined 경계 케이스 포함 (36케이스)
+│   ├── verum/                  # [LLM 품질 향상] 프롬프트 A/B 라우팅 + 트레이스 기록 — README.md 참조
+│   │   ├── README.md           # 모듈 개요, 사용법, 장애격리 표, 환경변수, 확장 로드맵 ★ 여기부터 읽기
 │   │   ├── client.ts           # VerumClient — AbortController 타임아웃, 서킷 브레이커, Zod 검증
-│   │   ├── cache.ts            # TTL 기반 인메모리 캐시 (DeploymentConfigCache) + getOrFetch stampede 방지
-│   │   ├── resolver.ts         # resolveSystemPrompt / recordTrace / resetVerumClientForTests — lazy singleton, server-only
-│   │   ├── errors.ts           # VerumAuthError / VerumRateLimitError / VerumTimeoutError / VerumSchemaError
-│   │   ├── schemas.ts          # DeploymentConfigSchema / TraceResponseSchema (Zod)
+│   │   ├── cache.ts            # TTL 기반 인메모리 캐시 + getOrFetch stampede 방지
+│   │   ├── resolver.ts         # resolveSystemPrompt / recordTrace / resetVerumClientForTests (공개 API)
 │   │   ├── router.ts           # chooseVariant() — traffic_split 기반 variant/baseline 선택
+│   │   ├── schemas.ts          # DeploymentConfigSchema / TraceResponseSchema (Zod)
+│   │   ├── errors.ts           # VerumAuthError / VerumRateLimitError / VerumTimeoutError / VerumSchemaError
 │   │   ├── *.test.ts           # 단위 테스트 — client(13), cache(9), resolver(7), router(4)
 │   │   └── index.ts            # re-export
 │   └── storage/
@@ -349,6 +351,46 @@ drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
 | 일반 상담 | 원카드, 쓰리카드, 5장 켈틱, 10장 켈틱, 한 주 전망, 조디악 휠, 생명의 나무 (7종) |
 
 ## 핵심 아키텍처 패턴
+
+### AI/LLM 인프라 레이어 구조
+
+ArcanaInsight의 AI 관련 인프라는 **두 개의 독립된 관심사**로 분리됩니다:
+
+```
+API Route (route.ts)
+    │
+    ├─ [1단계] 어떤 프롬프트를 쓸까? ─── src/lib/verum/
+    │   resolveSystemPrompt(fallback)       A/B 테스트 라우팅
+    │       ├─ variant  → Verum 실험 프롬프트    서킷 브레이커
+    │       └─ baseline → 로컬 기본 프롬프트     TTL 캐시
+    │
+    ├─ [2단계] 어떤 AI를 쓸까? ────────── src/services/core/
+    │   FallbackProvider.streamReading()    Grok 우선
+    │       ├─ GrokProvider (X.ai)          장애 시 Claude로 자동 전환
+    │       └─ ClaudeProvider (Anthropic)   쿨다운 관리
+    │
+    └─ [3단계] 결과 메트릭 기록 ─────────  src/lib/verum/
+        recordTrace(...)                    fire-and-forget
+```
+
+> **레이어 구분 원칙**:
+> - `lib/verum/` = **"무엇을 말할까"** — 프롬프트 내용·품질 (A/B 테스트)
+> - `services/core/` = **"누가 말할까"** — AI 공급자 선택·신뢰성 (Fallback)
+>
+> 두 레이어는 완전히 독립적으로 실패해도 서비스에 영향을 주지 않습니다.
+> 상세 내용: [`src/lib/verum/README.md`](src/lib/verum/README.md)
+
+### AI 인프라 폴더 구조 로드맵
+
+현재는 `src/lib/verum/`에 단독 위치합니다. 사용 범위 확장에 따라 점진적으로 이전합니다:
+
+| Phase | 기준 | 구조 |
+|---|---|---|
+| **Phase 1 (현재)** | 타로만 A/B 테스트 | `src/lib/verum/` |
+| **Phase 2** | 사주·신점으로 Verum 확장 | `src/lib/ai/experiment/verum/` |
+| **Phase 3** | 복수 실험 도구 추가 시 | `src/platform/experiment/` |
+
+---
 
 - **DB Provider 추상화 패턴**: `DB_PROVIDER` 환경변수 하나로 Supabase ↔ 온프레미스 PostgreSQL 즉시 전환.
   - `getDb()` (`src/lib/db/index.ts`): `DB_PROVIDER=postgres` → `PostgresAdapter` (Drizzle ORM), 그 외 → `SupabaseAdapter`
