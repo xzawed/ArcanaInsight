@@ -1,5 +1,9 @@
 /** 환경변수 중앙화 래퍼 — 모든 env var 접근은 이 모듈을 통해 수행 */
 
+// 인프라
+export function getDbProvider(): string { return process.env.DB_PROVIDER ?? "supabase" }
+export function getPostgresUrl(): string { return process.env.POSTGRES_URL ?? "" }
+
 // AI 공통
 export function getGrokApiKey(): string { return process.env.GROK_API_KEY ?? "" }
 export function getGrokModel(): string { return process.env.GROK_MODEL ?? "grok-3" }

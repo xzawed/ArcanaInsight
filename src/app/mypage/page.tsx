@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { getDbProvider } from "@/lib/env";
 import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { LogoutButton } from "./LogoutButton";
@@ -219,7 +220,7 @@ export default async function MyPage() {
                 </p>
               )}
             </div>
-            <LogoutButton useNextAuth={process.env.DB_PROVIDER === "postgres"} />
+            <LogoutButton useNextAuth={getDbProvider() === "postgres"} />
           </div>
         </div>
 

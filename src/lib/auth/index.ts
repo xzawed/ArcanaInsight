@@ -1,10 +1,12 @@
+import { getDbProvider } from "@/lib/env"
+
 export interface AuthUser {
   id: string
   email: string
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     const { auth } = await import("./nextauth")
     const session = await auth()
     if (!session?.user?.id) return null

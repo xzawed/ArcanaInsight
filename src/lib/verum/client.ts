@@ -1,4 +1,6 @@
 import {
+  getVerumApiUrl,
+  getVerumApiKey,
   getVerumTimeoutMs,
   getVerumRecordTimeoutMs,
   getVerumFailureCooldownMs,
@@ -35,8 +37,8 @@ export class VerumClient {
   private downUntil = 0;
 
   constructor(options?: { apiUrl?: string; apiKey?: string; cacheTtlMs?: number }) {
-    this.apiUrl = (options?.apiUrl ?? process.env.VERUM_API_URL ?? "").replace(/\/$/, "");
-    this.apiKey = options?.apiKey ?? process.env.VERUM_API_KEY ?? "";
+    this.apiUrl = (options?.apiUrl ?? getVerumApiUrl()).replace(/\/$/, "");
+    this.apiKey = options?.apiKey ?? getVerumApiKey();
     this.cache = new DeploymentConfigCache(options?.cacheTtlMs ?? 60_000);
   }
 

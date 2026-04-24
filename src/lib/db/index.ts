@@ -1,7 +1,8 @@
 import type { DbClient } from "./types"
+import { getDbProvider } from "@/lib/env"
 
 export function getDb(): DbClient {
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PostgresAdapter } = require("./postgres-adapter") as typeof import("./postgres-adapter")
     return new PostgresAdapter()

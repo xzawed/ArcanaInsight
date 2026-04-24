@@ -1,8 +1,9 @@
 import { Suspense } from "react"
 import LoginClient from "./LoginClient"
+import { getDbProvider } from "@/lib/env"
 
 export default function LoginPage() {
-  const useNextAuth = process.env.DB_PROVIDER === "postgres"
+  const useNextAuth = getDbProvider() === "postgres"
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">

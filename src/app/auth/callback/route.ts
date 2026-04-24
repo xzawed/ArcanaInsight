@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { getDbProvider } from "@/lib/env"
 
 export async function GET(request: NextRequest) {
   // DB_PROVIDER=postgres 모드에서는 NextAuth가 /api/auth/callback/google을 처리
   // 이 라우트는 Supabase 모드 전용
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin
     return NextResponse.redirect(`${siteUrl}/`)
   }
