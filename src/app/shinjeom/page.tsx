@@ -25,6 +25,80 @@ const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
 
 type PageStep = "character-select" | "topic-select";
 
+// ─── Step sub-components ────────────────────────────────────────────────────
+
+function CharacterSelectStep({ characters, genderFilter, setGenderFilter, selectedCharacter, onSelect }: Readonly<{
+  characters: CharacterConfig[];
+  genderFilter: "all" | "female" | "male";
+  setGenderFilter: (f: "all" | "female" | "male") => void;
+  selectedCharacter: CharacterConfig | null;
+  onSelect: (c: CharacterConfig) => void;
+}>) {
+  return (
+    <motion.div key="character-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -50 }}
+      className="relative z-20 max-w-4xl mx-auto px-4 py-8">
+      <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-center mb-2 drop-shadow-md">
+        신점 상담사를 선택하세요
+      </h2>
+      <p className="text-arcana-muted text-sm text-center mb-6">영적 상담을 도와줄 캐릭터를 골라주세요</p>
+      <div className="flex justify-center gap-2 mb-6">
+        {(["all", "female", "male"] as const).map((g) => (
+          <button key={g} onClick={() => setGenderFilter(g)}
+            className={`px-4 py-1.5 rounded-full text-xs font-display font-bold transition-all ${
+              genderFilter === g
+                ? "bg-arcana-purple/20 text-arcana-purple border border-arcana-purple"
+                : "border border-arcana-border text-arcana-muted hover:border-arcana-purple"
+            }`}>
+            {{ all: "전부", female: "여자", male: "남자" }[g]}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {characters.map((char, index) => (
+          <CharacterCard key={char.id} character={char} isSelected={selectedCharacter?.id === char.id}
+            onClick={() => onSelect(char)} index={index} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<{
+  selectedCharacter: CharacterConfig | null;
+  onBack: () => void;
+  onTopicSelect: (t: Topic) => void;
+}>) {
+  return (
+    <motion.div key="topic-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+      className="relative z-20 max-w-lg mx-auto px-4 py-8">
+      <button onClick={onBack} className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors mb-6">
+        ← 다른 상담사 선택
+      </button>
+      <h3 className="font-display font-bold text-lg mb-2 drop-shadow-md">어떤 점을 봐드릴까요?</h3>
+      <p className="text-arcana-muted text-xs mb-6">상담 주제를 선택하면 대화가 시작됩니다</p>
+      <div className="grid grid-cols-1 gap-3">
+        {topics.map((t, index) => (
+          <motion.button key={t.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }} whileTap={{ scale: 0.97 }}
+            onClick={() => onTopicSelect(t.id)}
+            className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10">
+            <div className="flex items-center gap-3">
+              <Icon id={t.iconId} size={28} />
+              <div>
+                <h4 className="font-sans font-bold text-sm">{t.label}</h4>
+                <p className="text-arcana-muted text-xs mt-0.5">{t.desc}</p>
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+      {selectedCharacter && <p className="sr-only">{selectedCharacter.name}</p>}
+    </motion.div>
+  );
+}
+
+// ─── Page state + routing ───────────────────────────────────────────────────
+
 function ShinjeomPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,14 +141,10 @@ function ShinjeomPageContent() {
   useEffect(() => {
     const resetScroll = () => {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']")
-        .forEach((el) => { el.scrollTop = 0; });
+      document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']").forEach((el) => { el.scrollTop = 0; });
     };
     resetScroll();
-    requestAnimationFrame(() => {
-      resetScroll();
-      requestAnimationFrame(resetScroll);
-    });
+    requestAnimationFrame(() => { resetScroll(); requestAnimationFrame(resetScroll); });
   }, [step]);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
@@ -89,6 +159,11 @@ function ShinjeomPageContent() {
     router.push("/shinjeom/session");
   };
 
+  const handleBack = () => {
+    setStep("character-select");
+    setSelectedCharacter(null);
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 -z-10">
@@ -96,89 +171,13 @@ function ShinjeomPageContent() {
         <div className="absolute inset-0 bg-arcana-bg/60" />
       </div>
       <ParticleOverlay density="low" className="z-10" />
-
       <AnimatePresence mode="wait">
-        {step === "character-select" ? (
-          <motion.div
-            key="character-select"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, x: -50 }}
-            className="relative z-20 max-w-4xl mx-auto px-4 py-8"
-          >
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-center mb-2 drop-shadow-md">
-              신점 상담사를 선택하세요
-            </h2>
-            <p className="text-arcana-muted text-sm text-center mb-6">영적 상담을 도와줄 캐릭터를 골라주세요</p>
-
-            <div className="flex justify-center gap-2 mb-6">
-              {(["all", "female", "male"] as const).map((g) => (
-                <button
-                  key={g}
-                  onClick={() => setGenderFilter(g)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-display font-bold transition-all ${
-                    genderFilter === g
-                      ? "bg-arcana-purple/20 text-arcana-purple border border-arcana-purple"
-                      : "border border-arcana-border text-arcana-muted hover:border-arcana-purple"
-                  }`}
-                >
-                  {{ all: "전부", female: "여자", male: "남자" }[g]}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {characters.map((char, index) => (
-                <CharacterCard
-                  key={char.id}
-                  character={char}
-                  isSelected={selectedCharacter?.id === char.id}
-                  onClick={() => handleCharacterSelect(char)}
-                  index={index}
-                />
-              ))}
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="topic-select"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            className="relative z-20 max-w-lg mx-auto px-4 py-8"
-          >
-            <button
-              onClick={() => { setStep("character-select"); setSelectedCharacter(null); }}
-              className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors mb-6"
-            >
-              ← 다른 상담사 선택
-            </button>
-
-            <h3 className="font-display font-bold text-lg mb-2 drop-shadow-md">어떤 점을 봐드릴까요?</h3>
-            <p className="text-arcana-muted text-xs mb-6">상담 주제를 선택하면 대화가 시작됩니다</p>
-
-            <div className="grid grid-cols-1 gap-3">
-              {topics.map((t, index) => (
-                <motion.button
-                  key={t.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => handleTopicSelect(t.id)}
-                  className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10"
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon id={t.iconId} size={28} />
-                    <div>
-                      <h4 className="font-sans font-bold text-sm">{t.label}</h4>
-                      <p className="text-arcana-muted text-xs mt-0.5">{t.desc}</p>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
+        {step === "character-select" && (
+          <CharacterSelectStep characters={characters} genderFilter={genderFilter} setGenderFilter={setGenderFilter}
+            selectedCharacter={selectedCharacter} onSelect={handleCharacterSelect} />
+        )}
+        {step === "topic-select" && (
+          <TopicSelectStep selectedCharacter={selectedCharacter} onBack={handleBack} onTopicSelect={handleTopicSelect} />
         )}
       </AnimatePresence>
     </div>
