@@ -1,3 +1,6 @@
+> **📦 아카이브 문서** — AI 품질 인프라 확장 로드맵입니다.
+> 이전 위치: `docs/ai-quality-roadmap.md` (PR-2에서 이동)
+
 # AI 품질 인프라 구조 및 확장 로드맵
 
 > 이 문서는 ArcanaInsight의 LLM 품질 향상 인프라(`src/lib/verum/`)의
@@ -147,6 +150,6 @@ src/platform/             ← 신규 최상위 레이어
 
 ## 6. 참고 문서
 
-- [`src/lib/verum/README.md`](../src/lib/verum/README.md) — Verum SDK 상세 사용 가이드
-- [`CLAUDE.md` — AI/LLM 인프라 레이어 구조](../CLAUDE.md#ai-llm-인프라-레이어-구조) — 아키텍처 다이어그램
-- [`CLAUDE.md` — 핵심 아키텍처 패턴](../CLAUDE.md#핵심-아키텍처-패턴) — 전체 패턴 목록
+- [`src/lib/verum/README.md`](../../src/lib/verum/README.md) — Verum SDK 상세 사용 가이드
+- [`CLAUDE.md` — AI/LLM 인프라 레이어 구조](../../CLAUDE.md#ai-llm-인프라-레이어-구조) — 아키텍처 다이어그램
+- [`CLAUDE.md` — 핵심 아키텍처 패턴](../../CLAUDE.md#핵심-아키텍처-패턴) — 전체 패턴 목록

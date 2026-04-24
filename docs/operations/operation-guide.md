@@ -1,3 +1,5 @@
+> 이전 위치: `docs/operation-guide.md` (PR-2에서 이동)
+
 # ArcanaInsight 운영 가이드
 
 운영자가 알아야 할 전체 흐름을 쉽게 정리한 문서입니다.
