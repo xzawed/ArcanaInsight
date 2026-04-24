@@ -15,9 +15,9 @@ test.describe("캐릭터 상세 페이지", () => {
       const img = page.locator('img[src*="characters"]').first();
       await expect(img).toBeVisible({ timeout: 10_000 });
 
-      // 서비스 선택 카드 존재 (타로/사주)
-      await expect(page.locator("text=타로").first()).toBeVisible();
-      await expect(page.locator("text=사주").first()).toBeVisible();
+      // 서비스 선택 카드 존재 — nav와 구별되는 전체 레이블 사용
+      await expect(page.locator("text=타로 리딩").first()).toBeVisible();
+      await expect(page.locator("text=사주 상담").first()).toBeVisible();
     });
   }
 
