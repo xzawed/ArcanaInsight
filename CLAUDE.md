@@ -88,7 +88,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
-- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 380개 테스트, 95%+ 커버리지)
+- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 469개 테스트, 95%+ 커버리지)
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
 - **코드 품질**: SonarCloud (정적 분석) + Codecov (커버리지 추적, unit flag)
 - **런타임**: Node.js >= 20
@@ -172,10 +172,9 @@ src/
 │   │   ├── supabase-adapter.ts # Supabase DbClient 구현
 │   │   ├── supabase-adapter.test.ts # 단위 테스트 — findOne/findMany/insert/update/upsert (18개)
 │   │   ├── postgres-adapter.ts # Drizzle ORM DbClient 구현
-│   │   ├── reading-saver.ts    # saveReadingAsync() — fire-and-forget DB 저장 + 세션 완료 처리
-│   │   └── schema/index.ts     # Drizzle 스키마 (9개 마이그레이션 변환)
+│   │   └── schema/index.ts     # Drizzle 스키마 (10개 마이그레이션 변환)
 │   ├── auth/                   # Auth 추상화 레이어
-│   │   ├── index.ts            # getCurrentUser() / requireUser() / assertSessionOwnership() 공통 함수
+│   │   ├── index.ts            # getCurrentUser() / requireUser() / assertSessionOwnership() / assertReadingAccess() 공통 함수
 │   │   ├── supabase-auth.ts    # Supabase Auth 래핑
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
 │   ├── validation/
@@ -421,7 +420,7 @@ API Route (route.ts)
   - 서킷 쿨다운: 401/403→30분, 429→retry-after, 5xx/timeout→60초(`VERUM_FAILURE_COOLDOWN_MS`)
   - stampede 방지: `cache.getOrFetch()` — 동시 캐시 미스 시 fetcher 1회 호출
   - 테스트 격리: `resetVerumClientForTests()` 각 beforeEach 호출
-- **DB 저장 패턴**: `saveReadingAsync(sessionId, serviceType, saves)` — fire-and-forget, 스트림 블로킹 없이 세션 완료 처리
+- **DB 저장 패턴**: fire-and-forget 비동기 DB 저장. 현재는 tarot/saju/shinjeom reading 라우트에 inline 구현. `src/lib/db/reading-saver.ts`(`saveReadingAsync`)로 통합 예정 (PR D)
 - **공유 유틸**: `shareOrCopy()` (`src/lib/share.ts`) — Web Share API 우선, fallback clipboard 복사
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
 - **Path alias**: `@/*` → `./src/*` (tsconfig.json)
@@ -925,6 +924,9 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 | `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
 | miko·seonhwa JPG 레거시 경로 | `public/images/characters/miko/`, `seonhwa/` | nukki/ PNG 미전환 | 이미지 재생성 + 코드 수정 필요 |
 | `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
+| `reading-saver.ts` 미구현 — inline fire-and-forget 산재 | `app/api/tarot/reading/route.ts` 외 2곳 | DB 저장 로직 3곳에 inline 산재, 추상화 미완료 | PR D에서 `src/lib/db/reading-saver.ts` 신설 후 통합 |
+| API 라우트 단위 테스트 공백 | `src/app/api/**` 11개 라우트 | vitest.config.ts가 `src/app/**` 전수 제외 → 0% | PR B에서 인프라 신설 + 3개 세션 라우트 테스트 작성 |
+| 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
 
 ## 운영 체계 — SuperGrok + Claude CLI 역할 분담
 
