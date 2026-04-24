@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (556개, statements 60%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (558개, statements 60%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -176,8 +176,6 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 - `app/shinjeom/result/[id]/` 결과 공유 페이지 미구현 (mypage 링크 비활성화)
 - `useFavoriteCharacter` DB_PROVIDER 추상화 미적용 (Supabase 직접)
-- `reading-saver.ts` 미구현 — inline fire-and-forget 3곳 산재 (PR D 예정) ⚠️ DB 저장 실패 시 데이터 유실 위험
-- miko·seonhwa JPG 레거시 경로 (nukki PNG 미전환 — 코드만 수정하면 완료)
 - 커버리지 임계값 상향 미완료 (PR E 예정)
 - rate-limit 메모리 저장 — 서버 재시작 시 초기화됨 (Redis 기반 전환 고려)
 
