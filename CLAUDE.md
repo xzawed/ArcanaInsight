@@ -245,16 +245,13 @@ public/images/
     ├── lix/
     └── ethan/
 
-docs/                           # 프로젝트 문서 (PR-1~5 재편 진행 중)
-├── README.md                   # 업무 유형별 문서 인덱스 (→ architecture/workflow/conventions/operations)
-├── archive/
-│   ├── skills-original.md      # 초기 기획 기술 스킬 정의서 (역사 기록)
-│   └── ai-quality-roadmap.md   # AI 품질 인프라 확장 로드맵 (역사 기록)
-├── operations/
-│   ├── known-issues.md         # 미구현 기능 + 기술 부채 단일 정본
-│   └── operation-guide.md      # 운영자 가이드 (서비스 흐름·자동화·빠른 참조)
-├── workflow/
-│   └── e2e-testing.md          # E2E 테스트 실행·작성·검증 가이드 (Single Source of Truth)
+docs/                           # 프로젝트 문서 (PR-4~5 진행 중)
+├── README.md                   # 업무 유형별 문서 인덱스
+├── architecture/               # 시스템 이해 — system-overview, ai-infrastructure, db-abstraction, auth-abstraction, data-model
+├── conventions/                # 코드 작성 규칙 — coding-style, layout-rules, cross-platform, zod-schemas, image-assets
+├── workflow/                   # 변경 절차 — e2e-testing, unit-testing, task-playbooks (+ PR-4: code-change-process, ci-cd)
+├── operations/                 # 운영 — known-issues, operation-guide (+ PR-4: env-variables, deployment, monitoring)
+├── archive/                    # 역사 기록 — skills-original, ai-quality-roadmap (+ PR-4: process-diagrams)
 └── superpowers/                # superpowers 스킬 관련 문서
 
 process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
