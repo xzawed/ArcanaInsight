@@ -28,9 +28,16 @@ export default defineConfig({
         "src/hooks/useSSEStream.ts",   // SSE 공통 유틸 — 테스트 있음
         "src/services/**/*.ts",        // 모든 서비스 계층 — 테스트 있음
         "src/lib/verum/**/*.ts",       // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
-        "src/app/api/tarot/session/route.ts",    // 세션 라우트 — PR B 테스트 추가
-        "src/app/api/saju/session/route.ts",     // 세션 라우트 — PR B 테스트 추가
-        "src/app/api/shinjeom/session/route.ts", // 세션 라우트 — PR B 테스트 추가
+        "src/app/api/tarot/session/route.ts",         // PR B
+        "src/app/api/saju/session/route.ts",          // PR B
+        "src/app/api/shinjeom/session/route.ts",      // PR B
+        "src/app/api/tarot/result/[id]/route.ts",     // PR C
+        "src/app/api/saju/result/[id]/route.ts",      // PR C
+        "src/app/api/profile/favorite-character/route.ts", // PR C
+        "src/app/api/daily-card/route.ts",            // PR C
+        "src/app/api/tarot/reading/route.ts",         // PR C
+        "src/app/api/saju/reading/route.ts",          // PR C
+        "src/app/api/shinjeom/message/route.ts",      // PR C
       ],
       exclude: [
         "src/**/*.test.ts",
