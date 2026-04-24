@@ -249,12 +249,10 @@ docs/                           # 프로젝트 문서 (PR-4~5 진행 중)
 ├── README.md                   # 업무 유형별 문서 인덱스
 ├── architecture/               # 시스템 이해 — system-overview, ai-infrastructure, db-abstraction, auth-abstraction, data-model
 ├── conventions/                # 코드 작성 규칙 — coding-style, layout-rules, cross-platform, zod-schemas, image-assets
-├── workflow/                   # 변경 절차 — e2e-testing, unit-testing, task-playbooks (+ PR-4: code-change-process, ci-cd)
-├── operations/                 # 운영 — known-issues, operation-guide (+ PR-4: env-variables, deployment, monitoring)
-├── archive/                    # 역사 기록 — skills-original, ai-quality-roadmap (+ PR-4: process-diagrams)
+├── workflow/                   # 변경 절차 — e2e-testing, unit-testing, task-playbooks, code-change-process, ci-cd
+├── operations/                 # 운영 — known-issues, operation-guide, env-variables, deployment, monitoring
+├── archive/                    # 역사 기록 — skills-original, ai-quality-roadmap, process-diagrams
 └── superpowers/                # superpowers 스킬 관련 문서
-
-process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
 README.md                       # 프로젝트 소개 (한국어 기본)
 README.en.md                    # 프로젝트 소개 (영문)
 
@@ -590,7 +588,8 @@ git branch | grep -v '^\* main' | xargs git branch -D
 - **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
 - **문서 정합성** (`docs-sync.yml`): PR마다 env-문서 정합성·docs 링크 검사 (현재 경고 전용, PR-5에서 차단으로 전환)
 
-> **E2E 파이프라인 상세 + QA 자동 루프 흐름도**: **[docs/workflow/e2e-testing.md §2](./docs/workflow/e2e-testing.md#2-ci-파이프라인)** 참조
+> **CI/CD 상세 + QA 자동 루프 흐름도**: **[docs/workflow/ci-cd.md](./docs/workflow/ci-cd.md)** 참조
+> **E2E 실행 가이드**: **[docs/workflow/e2e-testing.md](./docs/workflow/e2e-testing.md)** 참조
 
 ### 브랜치 보호 규칙 (GitHub Settings에서 수동 설정 필요)
 
@@ -608,6 +607,8 @@ git branch | grep -v '^\* main' | xargs git branch -D
 ## 코드 변경 프로세스 (필수 준수)
 
 모든 코드 변경은 **7단계 프로세스**를 따른다. 진입점은 항상 **Claude CLI에 대한 사용자의 직접 지시**이며, Claude CLI가 기획/구현/검토를 모두 수행한다.
+
+> **상세**: [`docs/workflow/code-change-process.md`](./docs/workflow/code-change-process.md) — 커밋 prefix 규칙, 자동화, 브랜치 전략, 의존성 버전 관리
 
 ### 1단계: 코드 변경
 - 사용자가 Claude CLI에 직접 지시 → Claude CLI가 기획 + 구현
