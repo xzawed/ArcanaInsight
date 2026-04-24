@@ -92,7 +92,7 @@ function ShinjeomPageContent() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority />
+        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
       </div>
       <ParticleOverlay density="low" className="z-10" />

@@ -222,7 +222,7 @@ function TarotPageContent() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover" />
+        <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",

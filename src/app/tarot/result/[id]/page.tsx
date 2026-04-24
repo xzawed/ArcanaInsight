@@ -48,14 +48,14 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
     <div className="relative min-h-screen overflow-hidden">
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover" />
+        <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative">
         {/* 장식 - 떠다니는 카드 */}
         <div className="absolute -top-4 -right-8 w-32 h-32 opacity-20 pointer-events-none">
-          <Image src="/images/backgrounds/deco-floating-cards.jpg" alt="" fill className="object-contain" />
+          <Image src="/images/backgrounds/deco-floating-cards.jpg" alt="" fill className="object-contain"  sizes="100vw" />
         </div>
 
         <div className="text-center mb-8">

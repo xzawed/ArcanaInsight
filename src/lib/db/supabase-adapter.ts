@@ -48,6 +48,20 @@ export class SupabaseAdapter implements DbClient {
     return (data ?? []) as T[]
   }
 
+  async findManyIn<T>(table: string, column: string, values: unknown[]): Promise<T[]> {
+    if (values.length === 0) return []
+    const supabase = await this.client()
+    const { data, error } = await supabase.from(table).select("*").in(column, values)
+    if (error) {
+      if (!error.code) {
+        console.warn(`DB findManyIn [${table}] unavailable: ${error.message}`)
+        return []
+      }
+      throw new Error(`DB read error [${error.code}]: ${error.message}`)
+    }
+    return (data ?? []) as T[]
+  }
+
   async insert<T>(table: string, data: Record<string, unknown>): Promise<T> {
     const supabase = await this.client()
     const { data: result, error } = await supabase.from(table).insert(data).select().single()

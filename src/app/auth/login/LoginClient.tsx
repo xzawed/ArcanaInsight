@@ -39,7 +39,7 @@ export default function LoginClient({ useNextAuth }: Props) {
     <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/login-bg.jpg" alt="" fill className="object-cover" />
+        <Image src="/images/backgrounds/login-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
       </div>
       <div className="w-full max-w-sm relative">
@@ -47,7 +47,7 @@ export default function LoginClient({ useNextAuth }: Props) {
           {/* 장식 이미지 */}
           <div className="flex justify-center mb-6">
             <div className="relative w-20 h-20 animate-float">
-              <Image src="/images/backgrounds/deco-crystal-ball.jpg" alt="" fill className="object-contain rounded-full" />
+              <Image src="/images/backgrounds/deco-crystal-ball.jpg" alt="" fill className="object-contain rounded-full"  sizes="100vw" />
             </div>
           </div>
           <div className="text-center mb-8">
