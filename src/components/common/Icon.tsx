@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 const iconMap: Record<string, string> = {
-  // 네비��이션
+  // 네비게이션
   "nav-home": "/images/icons/nav-home.png",
   "nav-tarot": "/images/icons/nav-tarot.png",
   "nav-saju": "/images/icons/nav-saju.png",

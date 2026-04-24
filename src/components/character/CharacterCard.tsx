@@ -31,6 +31,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
           src={`/images/characters/${character.id}/nukki/idle.png`}
           alt={character.name}
           fill
+          sizes="(max-width: 768px) 33vw, (max-width: 1024px) 13vw, 9vw"
           className="object-cover object-top"
         />
         <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-arcana-card/60 to-transparent" />
