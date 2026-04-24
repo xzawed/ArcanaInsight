@@ -31,9 +31,13 @@ export default function SajuSessionPage() {
   const character = characterId ? getCharacterById(characterId) : null;
   const [readingError, setReadingError] = useState(false);
   const resultContainerRef = useRef<HTMLDivElement>(null);
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
-    if (!topic || !character || !userInfo || !timeRange) { router.push("/saju"); return; }
+    if (!topic || !character || !userInfo || !timeRange) {
+      if (!redirectedRef.current) { redirectedRef.current = true; router.push("/saju"); }
+      return;
+    }
 
     // 세션 생성
     fetch("/api/saju/session", {

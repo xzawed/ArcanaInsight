@@ -12,7 +12,8 @@ import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { resolveSystemPrompt, recordTrace } from "@/lib/verum";
-import { getGrokModel } from "@/lib/env";
+import { getGrokModel } from "@/lib/env"
+import { saveTarotReading } from "@/lib/db/reading-saver";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -107,28 +108,11 @@ export async function POST(request: NextRequest) {
             latencyMs: Date.now() - startTime,
           });
 
-          // DB 저장 — fire-and-forget (스트림 블로킹 없음)
+          // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
           if (db && sessionId) {
-            void Promise.all([
-              db.insert("readings", {
-                session_id: sessionId,
-                card_interpretation: result.cardInterpretations,
-                overall_reading: result.overallReading,
-                advice: result.advice,
-              }),
-              db.update("sessions", { id: sessionId }, {
-                status: "completed",
-                completed_at: new Date().toISOString(),
-              }),
-              db.insertMany("session_cards",
-                cards.map((c: { cardId: string; position: number; isReversed: boolean }) => ({
-                  session_id: sessionId,
-                  card_id: c.cardId,
-                  position: c.position,
-                  is_reversed: c.isReversed,
-                }))
-              ),
-            ]).catch((e) => console.error("타로 DB 저장 실패:", e))
+            void saveTarotReading(db, sessionId, result, cards).catch(
+              (e) => console.error("타로 DB 저장 최종 실패:", e)
+            )
           }
         } catch (e) {
           console.error("리딩 생성 실패:", e instanceof Error ? e.message : String(e));

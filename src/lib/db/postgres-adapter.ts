@@ -64,16 +64,16 @@ export class PostgresAdapter implements DbClient {
     return result[0] ? normalizeRow<T>(result[0] as Record<string, unknown>) : null
   }
 
-  async findMany<T>(table: string, where?: Record<string, unknown>): Promise<T[]> {
+  async findMany<T>(table: string, where?: Record<string, unknown>, options?: { limit?: number; offset?: number }): Promise<T[]> {
     const db = getConnection()
     const t = resolveTable(table)
-    let rows: Record<string, unknown>[]
-    if (!where || Object.keys(where).length === 0) {
-      rows = await db.select().from(t) as Record<string, unknown>[]
-    } else {
-      const conditions = buildConditions(t, where)
-      rows = await db.select().from(t).where(and(...conditions)) as Record<string, unknown>[]
-    }
+    const conditions = (where && Object.keys(where).length > 0) ? buildConditions(t, where) : null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q: any = db.select().from(t)
+    if (conditions) q = q.where(and(...conditions))
+    if (options?.limit !== undefined) q = q.limit(options.limit)
+    if (options?.offset !== undefined) q = q.offset(options.offset)
+    const rows = await q as Record<string, unknown>[]
     return rows.map((r) => normalizeRow<T>(r))
   }
 

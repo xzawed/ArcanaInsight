@@ -17,12 +17,12 @@ interface UserInfoFormProps {
   readonly characterName?: string;
 }
 
-/** localStorage에 저장된 정보 로드 (동의한 경우만) */
+/** sessionStorage에 저장된 정보 로드 (동의한 경우만, 탭 종료 시 자동 삭제) */
 function loadLocalInfo(): UserInfo | null {
   try {
-    const consent = localStorage.getItem(CONSENT_KEY);
+    const consent = sessionStorage.getItem(CONSENT_KEY);
     if (!consent) return null;
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw) as UserInfo;
   } catch {
@@ -30,20 +30,20 @@ function loadLocalInfo(): UserInfo | null {
   }
 }
 
-/** localStorage에 정보 저장 */
+/** sessionStorage에 정보 저장 (탭 종료 시 자동 삭제) */
 function saveLocalInfo(info: UserInfo): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
-    localStorage.setItem(CONSENT_KEY, new Date().toISOString());
-  } catch { /* 시크릿 모드 등 localStorage 차단 시 무시 */ } // NOSONAR
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+    sessionStorage.setItem(CONSENT_KEY, new Date().toISOString());
+  } catch { /* 시크릿 모드 등 sessionStorage 차단 시 무시 */ } // NOSONAR
 }
 
-/** localStorage에서 정보 삭제 (동의 철회) */
+/** sessionStorage에서 정보 삭제 (동의 철회) */
 function clearLocalInfo(): void {
   try {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(CONSENT_KEY);
-  } catch { /* localStorage 차단 시 무시 */ } // NOSONAR
+    sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(CONSENT_KEY);
+  } catch { /* sessionStorage 차단 시 무시 */ } // NOSONAR
 }
 
 export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {

@@ -4,8 +4,10 @@ import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
+
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
 
 
 const shinjeomService = new ShinjeomService();
@@ -15,38 +17,6 @@ const aiProvider = new FallbackProvider();
 const SHINJEOM_TOKENS_FINAL = 4000;
 const SHINJEOM_TOKENS_CHAT = 1000;
 
-/** DB 저장 (fire-and-forget — 스트림을 블로킹하지 않음) */
-async function saveToDb(sessionId: string | null | undefined, params: {
-  isFinalTurn: boolean;
-  result?: { overallReading: string; topicReading?: string; advice: string };
-  currentMessage?: string;
-  fullResponse?: string;
-  messageIndex?: number;
-}) {
-  if (!sessionId) return;
-  try {
-    const db = getDb();
-    if (params.isFinalTurn && params.result) {
-      await Promise.all([
-        db.insert("shinjeom_readings", {
-          session_id: sessionId,
-          overall_reading: params.result.overallReading,
-          topic_reading: params.result.topicReading || "",
-          advice: params.result.advice,
-        }),
-        db.update("sessions", { id: sessionId }, {
-          status: "completed",
-          completed_at: new Date().toISOString(),
-        }),
-      ]);
-    } else if (params.currentMessage && params.fullResponse && params.messageIndex !== undefined) {
-      await db.insertMany("shinjeom_messages", [
-        { session_id: sessionId, role: "user", content: params.currentMessage, message_index: params.messageIndex },
-        { session_id: sessionId, role: "character", content: params.fullResponse, message_index: params.messageIndex + 1 },
-      ]);
-    }
-  } catch (e) { console.error("신점 DB 저장 실패:", e); }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,6 +52,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = shinjeomService.getSystemPrompt(characterId ?? undefined);
     const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
 
+    const db = sessionId ? getDb() : null;
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -96,13 +67,21 @@ export async function POST(request: NextRequest) {
           if (isFinalTurn) {
             const result = shinjeomService.parseResult(fullResponse);
 
-            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
+            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
-            void saveToDb(sessionId, { isFinalTurn: true, result });
+            if (db && sessionId) {
+              saveShinjeomFinalReading(db, sessionId, result).catch(
+                (e) => console.error("신점 최종 DB 저장 최종 실패:", e)
+              );
+            }
           } else {
-            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기
+            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 (3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
-            void saveToDb(sessionId, { isFinalTurn: false, currentMessage, fullResponse, messageIndex });
+            if (db && sessionId && currentMessage && messageIndex !== undefined) {
+              saveShinjeomMessages(db, sessionId, currentMessage, fullResponse, messageIndex).catch(
+                (e) => console.error("신점 메시지 DB 저장 최종 실패:", e)
+              );
+            }
           }
         } catch (e) {
           const errMsg = e instanceof Error ? e.message : String(e);

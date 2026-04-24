@@ -47,6 +47,7 @@ export default function TarotSessionPage() {
     return false;
   });
   const resultContainerRef = useRef<HTMLDivElement>(null);
+  const redirectedRef = useRef(false);
 
   const toggleConfirmMode = () => {
     setConfirmEachCard((prev) => {
@@ -57,7 +58,10 @@ export default function TarotSessionPage() {
   };
 
   useEffect(() => {
-    if (!topic || !character || !spreadType) { router.push("/tarot"); return; }
+    if (!topic || !character || !spreadType) {
+      if (!redirectedRef.current) { redirectedRef.current = true; router.push("/tarot"); }
+      return;
+    }
     const allCards = deckManager.getAllCards();
     const shuffled = [...allCards];
     for (let i = shuffled.length - 1; i > 0; i--) {
