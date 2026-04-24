@@ -37,9 +37,10 @@ API Route
 ```
 src/lib/db/
 ├── index.ts            # getDb() 팩토리
-├── types.ts            # DbClient 공통 인터페이스
+├── types.ts            # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
 ├── supabase-adapter.ts # Supabase 구현체
 ├── postgres-adapter.ts # Drizzle ORM 구현체
+├── reading-saver.ts    # DB 저장 추상화 — 3회 retry + 지수 백오프
 └── schema/index.ts     # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
 ```
 
@@ -77,9 +78,18 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 
 ## 6. DB 저장 패턴
 
-현재: tarot/saju/shinjeom reading 라우트에 **fire-and-forget inline 구현** (3곳 산재)
+`src/lib/db/reading-saver.ts` — tarot/saju/shinjeom reading 라우트의 DB 저장 공통 모듈 (PR D에서 구현 완료)
 
-예정: `src/lib/db/reading-saver.ts`(`saveReadingAsync`)로 통합 — PR D
+- **3회 retry + 지수 백오프** (200ms, 400ms, 600ms)
+- 모든 저장 실패는 `console.error`로 로깅 (SSE 스트림에 영향 없음)
+- 제공 함수: `saveTarotReading`, `saveSajuReading`, `saveShinjeomFinalReading`, `saveShinjeomMessages`
+
+```typescript
+// 호출 패턴 (fire-and-forget, 스트림 차단 없음)
+void saveTarotReading(db, sessionId, result, cards).catch(
+  (e) => console.error("타로 DB 저장 최종 실패:", e)
+)
+```
 
 ---
 

@@ -1,6 +1,6 @@
 # 미구현 기능 및 기술 부채
 
-> **정본 위치**: 이 파일이 단일 정본. `CLAUDE.md`의 관련 섹션은 이 파일을 링크로 대체할 예정(PR-5).
+> **정본 위치**: 이 파일이 단일 정본. `CLAUDE.md`의 관련 섹션은 이 파일을 링크로 참조.
 
 ---
 
@@ -25,10 +25,11 @@
 | 항목 | 파일 | 현황 | 해결 조건 |
 |------|------|------|----------|
 | `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
-| miko·seonhwa JPG 레거시 경로 | `public/images/characters/miko/`, `seonhwa/` | nukki/ PNG 미전환 | 이미지 재생성 + 코드 수정 필요 |
+| miko·seonhwa 이미지 파일 레거시 | `public/images/characters/miko/`, `seonhwa/` | 코드 경로는 nukki/*.png로 수정 완료, 루트 .jpg 파일만 남아있음 | 루트 .jpg 파일 삭제(선택) |
 | `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
-| `reading-saver.ts` 미구현 — inline fire-and-forget 산재 | `app/api/tarot/reading/route.ts` 외 2곳 | DB 저장 로직 3곳에 inline 산재, 추상화 미완료 | PR D에서 `src/lib/db/reading-saver.ts` 신설 후 통합 |
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
+| rate-limit 메모리 저장 | `src/lib/rate-limit.ts` | 서버 재시작 시 초기화됨 | Redis 기반 전환 고려 (별도 기획) |
+| SupabaseAdapter 통합 테스트 부재 | `src/lib/db/supabase-adapter.ts` | mock 체인이 자기충족적, 실제 Supabase 응답 미검증 | 통합 테스트 환경 구축 후 처리 |
 
 ---
 
@@ -39,6 +40,6 @@
 | **A** | `fix/security-share-token-auth` / PR #119 | ✅ merged | Drizzle $defaultFn 2곳, migration 011, assertReadingAccess() |
 | **B** | `feat/pr-b-api-unit-test-infra` / PR #122 | ✅ merged | vitest exclude 완화, mock 헬퍼 4개, 세션 라우트 3개 테스트 (469→504) |
 | **C** | `feat/pr-c-api-smoke-tests` / PR #123 | ✅ merged | API 스모크 테스트 8개 라우트 추가 (504→539) |
-| **D** | (미시작) | pending B+C | reading-saver.ts 신설, inline 3곳 통합 |
-| **E** | (미시작) | pending B+C+D | coverage.include 확장, 임계값 branches 65/functions 75/lines 75 |
+| **D** | `fix/sonar-badge-followup` | ✅ merged | reading-saver.ts 신설·retry 3회, tarot·saju·shinjeom 라우트 위임 (539→558) |
+| **E** | (미시작) | pending | coverage.include 확장, 임계값 branches 65/functions 75/lines 75 |
 | **F** | (미시작) | 선택 | 93개 우회 주석 태깅 |

@@ -48,14 +48,13 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 
 | 구분 | 형식 | 경로 패턴 | 해당 캐릭터 |
 |------|------|---------|------------|
-| nukki PNG | PNG (투명 배경) | `[id]/nukki/[mood].png` | arcana, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan (10명) |
-| 레거시 JPG | JPG (배경 포함) | `[id]/[mood].jpg` | miko, seonhwa (2명) |
+| nukki PNG | PNG (투명 배경) | `[id]/nukki/[mood].png` | 12명 전체 (arcana, miko, seonhwa 포함) |
 
 - 이미지 규격: **1408×768** (grok-imagine-image-pro API 기본 출력)
 - 예: `/images/characters/arcana/nukki/default.png`
-- 예: `/images/characters/miko/default.jpg`
+- 예: `/images/characters/miko/nukki/default.png`
 
-> ⚠️ miko·seonhwa JPG 레거시 — nukki PNG 미전환 (재생성 + 코드 수정 필요)
+> miko·seonhwa 루트 `.jpg` 파일이 `public/images/characters/` 에 잔존하지만 코드에서는 참조하지 않음. 삭제 가능 (선택 사항). → [`docs/operations/known-issues.md`](../operations/known-issues.md)
 
 ---
 
