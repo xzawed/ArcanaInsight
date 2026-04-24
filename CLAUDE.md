@@ -32,7 +32,7 @@ src/
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
 ├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
 ├── lib/
-│   ├── env.ts       # 환경변수 getter 16개 (하드코딩 금지)
+│   ├── env.ts       # 환경변수 getter 18개 (하드코딩 금지)
 │   ├── rate-limit.ts
 │   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기)
 │   ├── auth/        # getCurrentUser() / requireUser() / assertSessionOwnership()

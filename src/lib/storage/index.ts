@@ -1,4 +1,5 @@
 import { CARD_SKINS_BUCKET } from "@/lib/supabase/storage"
+import { getDbProvider } from "@/lib/env"
 
 const BUCKET = CARD_SKINS_BUCKET
 
@@ -9,14 +10,14 @@ function supabaseBase(): string {
 }
 
 export function getCardImageUrl(skinId: string, cardId: string): string {
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     return `/images/skins/${skinId}/front/${cardId}.png`
   }
   return `${supabaseBase()}/${skinId}/front/${cardId}.png`
 }
 
 export function getCardBackUrl(skinId: string): string {
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     return `/images/skins/${skinId}/back.png`
   }
   return `${supabaseBase()}/${skinId}/back.png`
@@ -28,7 +29,7 @@ export function getCardThumbnailUrl(
   width = 200,
   height = 320
 ): string {
-  if (process.env.DB_PROVIDER === "postgres") {
+  if (getDbProvider() === "postgres") {
     return `/images/skins/${skinId}/front/${cardId}.png`
   }
   return `${supabaseBase()}/${skinId}/front/${cardId}.png?width=${width}&height=${height}&resize=contain`

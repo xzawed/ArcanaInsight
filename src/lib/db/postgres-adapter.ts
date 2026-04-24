@@ -5,13 +5,15 @@ import type { PgTable, PgColumn } from "drizzle-orm/pg-core"
 import type { ColumnBaseConfig, ColumnDataType } from "drizzle-orm"
 import * as schema from "./schema/index"
 import type { DbClient } from "./types"
+import { getPostgresUrl, getPostgresPoolSize } from "@/lib/env"
 
 let _db: ReturnType<typeof drizzle> | null = null
 
 function getConnection() {
   if (!_db) {
-    if (!process.env.POSTGRES_URL) throw new Error("POSTGRES_URL is required")
-    const client = postgres(process.env.POSTGRES_URL, { max: parseInt(process.env.POSTGRES_POOL_SIZE ?? '10', 10) })
+    const url = getPostgresUrl()
+    if (!url) throw new Error("POSTGRES_URL is required")
+    const client = postgres(url, { max: getPostgresPoolSize() })
     _db = drizzle(client, { schema })
   }
   return _db
