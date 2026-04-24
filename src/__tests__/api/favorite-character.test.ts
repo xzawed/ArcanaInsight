@@ -1,0 +1,58 @@
+import { describe, it, expect, vi } from "vitest";
+import { setupDoMock } from "@/test-helpers/reset-modules";
+import { makeMockDb } from "@/test-helpers/mock-db";
+import { makeAuthMock, MOCK_USER } from "@/test-helpers/mock-auth";
+import { makePostRequest } from "@/test-helpers/mock-request";
+
+setupDoMock();
+
+async function setup(options: { user?: typeof MOCK_USER | null } = {}) {
+  const mockDb = makeMockDb();
+  mockDb.update.mockResolvedValue({ id: MOCK_USER.id, favorite_character_id: "arcana" });
+
+  const user = "user" in options ? options.user : MOCK_USER;
+  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+  vi.doMock("@/lib/auth", () => makeAuthMock(user));
+
+  const { POST } = await import("@/app/api/profile/favorite-character/route");
+  return { POST, mockDb };
+}
+
+describe("POST /api/profile/favorite-character", () => {
+  it("유효한 characterId → success 반환", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ characterId: "arcana" }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).success).toBe(true);
+  });
+
+  it("characterId: null → 선호 상담사 해제 (success)", async () => {
+    const { POST, mockDb } = await setup();
+    mockDb.update.mockResolvedValue({ id: MOCK_USER.id, favorite_character_id: null });
+    const res = await POST(makePostRequest({ characterId: null }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).success).toBe(true);
+    expect(mockDb.update).toHaveBeenCalledWith("profiles", { id: MOCK_USER.id }, { favorite_character_id: null });
+  });
+
+  it("존재하지 않는 characterId → 400", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ characterId: "nonexistent-char" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Invalid character");
+  });
+
+  it("미인증 사용자 → 401", async () => {
+    const { POST } = await setup({ user: null });
+    const res = await POST(makePostRequest({ characterId: "arcana" }));
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("Unauthorized");
+  });
+
+  it("DB update 실패 → 500", async () => {
+    const { POST, mockDb } = await setup();
+    mockDb.update.mockRejectedValue(new Error("DB error"));
+    const res = await POST(makePostRequest({ characterId: "arcana" }));
+    expect(res.status).toBe(500);
+  });
+});
