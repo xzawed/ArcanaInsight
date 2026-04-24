@@ -117,4 +117,28 @@ describe("POST /api/tarot/reading", () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "session-other-user" }));
     expect(res.status).toBe(403);
   });
+
+  it("스트림 완료 후 saveTarotReading fire-and-forget 호출", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveTarotReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    vi.doMock("@/lib/verum", () => makeMockVerum());
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-existing" }));
+    await readSSEStream(res);
+    await Promise.resolve(); // 마이크로태스크 플러시
+    expect(mockSave).toHaveBeenCalledWith(
+      mockDb,
+      "sess-existing",
+      expect.objectContaining({ overallReading: expect.any(String) }),
+      expect.any(Array)
+    );
+  });
 });

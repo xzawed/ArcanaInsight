@@ -78,4 +78,22 @@ describe("POST /api/saju/reading", () => {
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(429);
   });
+
+  it("스트림 완료 후 saveSajuReading fire-and-forget 호출", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-saju" }));
+    await readSSEStream(res);
+    await Promise.resolve();
+    expect(mockSave).toHaveBeenCalledWith(mockDb, "sess-saju", expect.any(Object));
+  });
 });
