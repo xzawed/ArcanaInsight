@@ -93,7 +93,7 @@ export const sajuReadings = pgTable("saju_readings", {
   overallReading: text("overall_reading").notNull().default(""),
   topicReading: text("topic_reading").notNull().default(""),
   advice: text("advice").notNull().default(""),
-  shareToken: text("share_token").unique(),
+  shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
   index("idx_saju_readings_session_id").on(t.sessionId),
@@ -118,7 +118,7 @@ export const shinjeomReadings = pgTable("shinjeom_readings", {
   overallReading: text("overall_reading").notNull().default(""),
   topicReading: text("topic_reading").notNull().default(""),
   advice: text("advice").notNull().default(""),
-  shareToken: text("share_token").unique(),
+  shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 })
 

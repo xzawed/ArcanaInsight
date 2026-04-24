@@ -88,7 +88,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
-- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 380개 테스트, 95%+ 커버리지)
+- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 469개 테스트, 95%+ 커버리지)
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
 - **코드 품질**: SonarCloud (정적 분석) + Codecov (커버리지 추적, unit flag)
 - **런타임**: Node.js >= 20
@@ -164,7 +164,6 @@ src/
 │   ├── env.test.ts             # 단위 테스트 — 기본값·커스텀값·parseInt/parseFloat 파싱 (44개)
 │   ├── rate-limit.ts           # 메모리 기반 Rate Limiting (IP별 윈도우 카운터)
 │   ├── rate-limit.test.ts      # 단위 테스트 — 6개 (한도/윈도우/독립 키 검증)
-│   ├── share.ts                # shareOrCopy() — Web Share API / clipboard 공통 유틸
 │   ├── supabase/               # Supabase 클라이언트 (client.ts, server.ts, middleware.ts, storage.ts) — Supabase 모드 전용
 │   ├── db/                     # DB 추상화 레이어
 │   │   ├── index.ts            # getDb() 팩토리 (DB_PROVIDER 분기)
@@ -172,10 +171,9 @@ src/
 │   │   ├── supabase-adapter.ts # Supabase DbClient 구현
 │   │   ├── supabase-adapter.test.ts # 단위 테스트 — findOne/findMany/insert/update/upsert (18개)
 │   │   ├── postgres-adapter.ts # Drizzle ORM DbClient 구현
-│   │   ├── reading-saver.ts    # saveReadingAsync() — fire-and-forget DB 저장 + 세션 완료 처리
-│   │   └── schema/index.ts     # Drizzle 스키마 (9개 마이그레이션 변환)
+│   │   └── schema/index.ts     # Drizzle 스키마 (10개 마이그레이션 변환)
 │   ├── auth/                   # Auth 추상화 레이어
-│   │   ├── index.ts            # getCurrentUser() / requireUser() / assertSessionOwnership() 공통 함수
+│   │   ├── index.ts            # getCurrentUser() / requireUser() / assertSessionOwnership() / assertReadingAccess() 공통 함수
 │   │   ├── supabase-auth.ts    # Supabase Auth 래핑
 │   │   └── nextauth.ts         # NextAuth.js v5 Google Provider 설정
 │   ├── validation/
@@ -232,6 +230,7 @@ public/images/
 docs/                           # 프로젝트 문서
 ├── operation-guide.md          # 운영자 가이드 (서비스 구조, 7단계 프로세스, 자동화 일정)
 ├── skills.md                   # 기술 스킬 정의서 (초기 기획 문서, CLAUDE.md 우선)
+├── ai-quality-roadmap.md       # AI 품질 개선 로드맵 (Phase 1→2→3 전환 기준)
 └── superpowers/                # superpowers 스킬 관련 문서
 
 process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
@@ -289,7 +288,9 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 006_saju_readings.sql       # saju_readings 테이블 (사주 서비스)
 ├── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
 ├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
-└── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+├── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+├── 010_share_token_default_fix.sql # readings share_token NULL 백필 + DB DEFAULT
+└── 011_saju_shinjeom_share_token_defaults.sql # saju_readings/shinjeom_readings share_token NULL 백필 + DB DEFAULT
 # PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
 
 drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
@@ -406,19 +407,22 @@ API Route (route.ts)
   - 500 서버 에러 / 네트워크: 5분 쿨다운
   - 401/403 인증 실패: 30분 쿨다운 (재시도 불가)
   - Grok + Claude 둘 다 실패: "AI 서비스가 일시적으로 사용할 수 없습니다" 메시지
-- **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/daily-card`에서 AI 응답을 SSE로 클라이언트에 스트리밍
+- **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/shinjeom/message`에서 AI 응답을 SSE로 클라이언트에 스트리밍
   - 클라이언트는 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`) 공통 유틸 사용 — 타로/사주/신점 페이지 모두 적용
+  - `/api/daily-card`는 SSE가 아닌 JSON 응답 (`NextResponse.json()`) — 비스트리밍 단일 호출
+- **share_token 공개 정책**: 타로/사주 결과 페이지(`/*/result/[id]`)는 `share_token`을 URL로 사용하는 공개 공유 링크. share_token을 가진 누구나 결과 열람 가능 (공유 링크 생성 = 공개 의도). 소유자 전용 쓰기·삭제에는 `assertReadingAccess("owner")` 사용. share_token은 insert 시 Drizzle `$defaultFn(() => crypto.randomUUID())` + DB DEFAULT `gen_random_uuid()`로 이중 보장 — NULL 절대 불가.
 - **API 보안 패턴** (3개 AI API 라우트 공통):
   - Rate Limiting: IP별 `checkRateLimit()` — 타로/사주 10req/min, 신점 20req/min, 초과 시 429
   - 입력 검증: Zod 스키마 `safeParse()` — `src/lib/validation/api-schemas.ts`
   - IDOR 방어: `assertSessionOwnership()` — `src/lib/auth/index.ts`, 세션 소유자 불일치 시 403
+  - 공유 결과 열람: `assertReadingAccess("public")` — 항상 허용 (share_token이 인증 수단)
 - **Verum 격리 패턴**: `resolveSystemPrompt()` / `recordTrace()` (`src/lib/verum/resolver.ts`) — Verum 실패 시 fallback 프롬프트 유지, 서킷 오픈 시 즉시 baseline 반환. 예외는 절대 타로 스트림 밖으로 새지 않는다.
   - 타임아웃: config 3s(`VERUM_TIMEOUT_MS`), record 5s(`VERUM_RECORD_TIMEOUT_MS`) — AbortController + setTimeout
   - 서킷 쿨다운: 401/403→30분, 429→retry-after, 5xx/timeout→60초(`VERUM_FAILURE_COOLDOWN_MS`)
   - stampede 방지: `cache.getOrFetch()` — 동시 캐시 미스 시 fetcher 1회 호출
   - 테스트 격리: `resetVerumClientForTests()` 각 beforeEach 호출
-- **DB 저장 패턴**: `saveReadingAsync(sessionId, serviceType, saves)` — fire-and-forget, 스트림 블로킹 없이 세션 완료 처리
-- **공유 유틸**: `shareOrCopy()` (`src/lib/share.ts`) — Web Share API 우선, fallback clipboard 복사
+- **DB 저장 패턴**: fire-and-forget 비동기 DB 저장. 현재는 tarot/saju/shinjeom reading 라우트에 inline 구현. `src/lib/db/reading-saver.ts`(`saveReadingAsync`)로 통합 예정 (PR D)
+- **공유 유틸**: Web Share API → clipboard fallback. 별도 공통 파일 없음. `ResultShareButton.tsx`, `SajuResultShareButton.tsx`에 각각 inline 구현
 - **Tailwind v4**: CSS `@theme` 블록(`globals.css`)에서 커스텀 컬러 정의 (`arcana-*` 계열)
 - **Path alias**: `@/*` → `./src/*` (tsconfig.json)
 - **동적 테마**: `useTheme.ts`에서 사용자 로컬 시간/계절 기반으로 7종 테마 자동 감지
@@ -506,6 +510,15 @@ VERUM_TIMEOUT_MS=           # config 조회 타임아웃 (기본 3000ms)
 VERUM_RECORD_TIMEOUT_MS=    # trace 기록 타임아웃 (기본 5000ms)
 VERUM_FAILURE_COOLDOWN_MS=  # 5xx/timeout 후 서킷 쿨다운 (기본 60000ms)
 VERUM_AUTH_COOLDOWN_MS=     # 401/403 후 서킷 쿨다운 (기본 1800000ms=30분)
+# AI 공급자 튜닝 (선택) — 미설정 시 기본값 사용
+GROK_BASE_URL=              # Grok API 엔드포인트 (기본 https://api.x.ai/v1)
+CLAUDE_MODEL=               # Claude 모델 ID (기본 claude-opus-4-5)
+CLAUDE_BASE_URL=            # Claude API 엔드포인트 오버라이드 (기본값 SDK 내장)
+AI_TIMEOUT_MS=              # AI 스트림 타임아웃 (기본 30000ms)
+AI_DEFAULT_MAX_TOKENS=      # AI 응답 최대 토큰 (기본 16000)
+AI_TEMPERATURE=             # AI 온도 파라미터 (기본 0.7)
+AI_FALLBACK_COOLDOWN_MS=    # Fallback 쿨다운 — 5xx/network (기본 300000ms=5분)
+AI_AUTH_COOLDOWN_MS=        # Fallback 쿨다운 — 401/403 (기본 1800000ms=30분)
 ```
 
 ### PostgreSQL 모드 (온프레미스 전환 시)
@@ -516,6 +529,7 @@ GROK_API_KEY=               # 동일
 GROK_MODEL=grok-3           # 동일
 ANTHROPIC_API_KEY=          # 동일
 POSTGRES_URL=postgresql://user:password@host:5432/arcana
+POSTGRES_POOL_SIZE=         # DB 커넥션 풀 크기 (기본 10)
 NEXTAUTH_SECRET=            # openssl rand -base64 32
 NEXTAUTH_URL=               # 프로덕션 사이트 URL (예: https://arcana.example.com)
 GOOGLE_CLIENT_ID=           # 기존 Google OAuth 클라이언트 ID 재사용
@@ -921,6 +935,9 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 | `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
 | miko·seonhwa JPG 레거시 경로 | `public/images/characters/miko/`, `seonhwa/` | nukki/ PNG 미전환 | 이미지 재생성 + 코드 수정 필요 |
 | `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
+| `reading-saver.ts` 미구현 — inline fire-and-forget 산재 | `app/api/tarot/reading/route.ts` 외 2곳 | DB 저장 로직 3곳에 inline 산재, 추상화 미완료 | PR D에서 `src/lib/db/reading-saver.ts` 신설 후 통합 |
+| API 라우트 단위 테스트 공백 | `src/app/api/**` 11개 라우트 | vitest.config.ts가 `src/app/**` 전수 제외 → 0% | PR B에서 인프라 신설 + 3개 세션 라우트 테스트 작성 |
+| 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
 
 ## 운영 체계 — SuperGrok + Claude CLI 역할 분담
 
