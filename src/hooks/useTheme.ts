@@ -113,7 +113,7 @@ interface ThemeState {
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
   mode: "auto",
-  activeTheme: getAutoTheme(),
+  activeTheme: "midnight" as ThemeId, // SSR 초기값 — ThemeProvider에서 클라이언트 마운트 후 보정
 
   setMode: (mode) => {
     const activeTheme = mode === "auto" ? getAutoTheme() : mode;
