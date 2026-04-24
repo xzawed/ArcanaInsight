@@ -1,0 +1,93 @@
+# 코딩 컨벤션
+
+ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙입니다.
+
+---
+
+## 1. 일반 규칙
+
+- **주석·커밋 메시지**: 한국어 사용
+- **함수·변수명**: 영어 camelCase
+- **컴포넌트명**: PascalCase
+- **파일명**: kebab-case (컴포넌트 파일은 PascalCase)
+
+---
+
+## 2. TypeScript
+
+- `any` 타입 사용 금지 — 명시적 타입 정의 필수
+- `interface` 우선 사용 (`type alias`는 유니온/인터섹션에만)
+- `strict` 모드 활성화
+
+---
+
+## 3. React / Next.js
+
+- **서버 컴포넌트 기본** — 클라이언트 상태·이벤트가 필요할 때만 `'use client'` 명시
+- **named export** 사용 (default export 지양)
+- **Props**: `interface`로 정의
+
+---
+
+## 4. 스타일링
+
+- Tailwind CSS 유틸리티 클래스 우선
+- 복잡한 애니메이션: Framer Motion 사용
+- **다크 모드 기본** (점술/타로의 신비로운 분위기)
+- **커스텀 컬러** (`globals.css` `@theme` 블록):
+  - `arcana-bg`, `arcana-surface`, `arcana-card`, `arcana-border`
+  - `arcana-purple`, `arcana-indigo`, `arcana-gold`
+  - `arcana-text`, `arcana-muted`
+
+---
+
+## 5. 의존성 버전 관리
+
+| 규칙 | 대상 |
+|------|------|
+| **메이저 업그레이드 금지** (사용자 승인 필요) | Next.js, React, Framer Motion, Tailwind CSS, Zustand |
+| **마이너·패치 허용** | 보안 패치, 버그 픽스 |
+| **버전 고정** | `pnpm@10.33.0` — lock 파일 및 Docker 스크립트 동기화 |
+| **버전 고정** | `playwright:v1.59.1-noble` — CI Docker 이미지 동기화 |
+
+---
+
+## 6. 커밋 메시지 Prefix 규칙
+
+| prefix | 용도 |
+|--------|------|
+| `feat:` | 새 기능 추가 |
+| `fix:` | 버그 수정 |
+| `docs:` | 문서 변경 (CLAUDE.md, README 등) |
+| `chore:` | 빌드·설정·스크립트 변경 |
+| `refactor:` | 기능 변경 없는 코드 구조 개선 |
+| `style:` | UI/스타일 변경 (기능 무관) |
+| `test:` | 테스트 추가·수정 |
+| `merge:` | 브랜치 머지 커밋 |
+
+---
+
+## 7. Git 브랜치 전략
+
+- `main`: 프로덕션 브랜치 (Railway 자동 배포, `master` 미사용)
+- `feat/*`: 기능 개발
+- `fix/*`: 버그 수정
+- `docs/*`: 문서 변경
+- `chore/*`: 설정·정리
+
+**`main` 직접 push 금지** — PR을 통해 머지
+
+---
+
+## 8. Path Alias
+
+`@/*` → `./src/*` (`tsconfig.json`)
+
+---
+
+## 9. 작업 시 추가 주의사항
+
+- 타로 카드 데이터: `src/data/` 정적 관리 (DB 조회 금지)
+- 홈 페이지 데이터: `src/data/home/` 정적 관리
+- `.env` 파일 절대 커밋 금지 (Railway 환경변수로 관리)
+- DB 마이그레이션: `supabase/migrations/` 번호 순서 유지 (002 결번)
