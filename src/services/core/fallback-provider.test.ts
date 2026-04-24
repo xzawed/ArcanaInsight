@@ -19,7 +19,7 @@ vi.mock("./claude-provider", () => ({
   ClaudeProvider: vi.fn(),
 }));
 
-import { FallbackProvider } from "./fallback-provider";
+import { FallbackProvider, __resetFallbackCircuitForTests } from "./fallback-provider";
 import { GrokProvider } from "./grok-provider";
 import { ClaudeProvider } from "./claude-provider";
 
@@ -54,6 +54,7 @@ describe("FallbackProvider", () => {
   };
 
   beforeEach(() => {
+    __resetFallbackCircuitForTests();
     vi.useFakeTimers();
 
     mockGrokInstance = {
@@ -255,6 +256,26 @@ describe("FallbackProvider", () => {
       await expect(collectStream(provider.streamReading("s", "u"))).rejects.toThrow(
         "AI 서비스가 일시적으로 사용할 수 없습니다"
       );
+    });
+  });
+
+  // ─── 크로스 인스턴스 상태 공유 ──────────────────────────────────────────────
+
+  describe("globalThis 상태 공유 — 서버리스 인스턴스 재생성 대응", () => {
+    it("인스턴스1에서 Grok가 다운되면 인스턴스2도 즉시 Claude를 사용한다", async () => {
+      mockGrokInstance.generateReading.mockRejectedValueOnce(new Error("Grok 장애"));
+      mockClaudeInstance.generateReading.mockResolvedValue("Claude 응답");
+
+      const provider1 = new FallbackProvider();
+      await provider1.generateReading("s", "u"); // Grok 실패 → grokDown=true (globalThis)
+
+      // 새 인스턴스 — 이미 globalThis에 grokDown=true이므로 Grok 호출 없이 Claude 직행
+      const provider2 = new FallbackProvider();
+      const result = await provider2.generateReading("s", "u");
+
+      expect(result).toBe("Claude 응답");
+      expect(mockGrokInstance.generateReading).toHaveBeenCalledOnce(); // provider1에서 1회만
+      expect(mockClaudeInstance.generateReading).toHaveBeenCalledTimes(2);
     });
   });
 });
