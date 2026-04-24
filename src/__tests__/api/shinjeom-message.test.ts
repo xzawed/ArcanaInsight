@@ -80,4 +80,25 @@ describe("POST /api/shinjeom/message", () => {
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(429);
   });
+
+  it("중간 메시지 → saveShinjeomMessages fire-and-forget 호출", async () => {
+    const mockSaveMsg = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({
+      saveShinjeomMessages: mockSaveMsg,
+      saveShinjeomFinalReading: vi.fn().mockResolvedValue(undefined),
+    }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/shinjeom/message/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-sh", isFinalTurn: false }));
+    await readSSEStream(res);
+    await Promise.resolve();
+    expect(mockSaveMsg).toHaveBeenCalledWith(mockDb, "sess-sh", "요즘 연애가 걱정돼요", expect.any(String), 0);
+  });
 });
