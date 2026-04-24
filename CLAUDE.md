@@ -88,7 +88,7 @@ ArcanaInsight는 애니메이션 캐릭터와 상담하듯 대화하며 타로 �
 - **데이터베이스**: Supabase (PostgreSQL) / 온프레미스 PostgreSQL + Drizzle ORM (DB_PROVIDER별 자동 전환)
 - **상태관리**: Zustand v5.0
 - **패키지 매니저**: pnpm 10.33.0
-- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 469개 테스트, 95%+ 커버리지)
+- **단위 테스트**: Vitest 2.0 (node env, v8 coverage, 539개 테스트, 95%+ 커버리지)
 - **E2E 테스트**: Playwright (Chromium + WebKit, 3개 디바이스 프로필)
 - **코드 품질**: SonarCloud (정적 분석) + Codecov (커버리지 추적, unit flag)
 - **런타임**: Node.js >= 20
@@ -206,6 +206,24 @@ src/
 │                               # *.test.ts — deck-manager(16), spread-resolver(39), tarot-service(26)
 ├── types/                      # card.ts, character.ts, session.ts, service.ts, user-info.ts
 │   └── next-auth.d.ts          # NextAuth Session 타입 확장 (user.id 추가)
+├── test-helpers/               # Vitest 단위 테스트 공통 헬퍼 (vi.doMock 패턴)
+│   ├── mock-db.ts              # makeMockDb() — DbClient 목 팩토리 (findOne/insert/update 등)
+│   ├── mock-auth.ts            # makeAuthMock() — getCurrentUser/requireUser/assertReadingAccess 목
+│   ├── mock-request.ts         # makePostRequest() — NextRequest POST 헬퍼
+│   ├── mock-ai.ts              # makeMockAiModule() / makeMockVerum() / readSSEStream() — FallbackProvider·Verum 목
+│   └── reset-modules.ts        # setupDoMock() — beforeEach(vi.resetModules) 등록 유틸
+├── __tests__/
+│   └── api/                    # API 라우트 단위 스모크 테스트 (vitest.config.ts exclude 우회, @/app/api 임포트)
+│       ├── tarot-session.test.ts    # 13개
+│       ├── saju-session.test.ts     # 11개
+│       ├── shinjeom-session.test.ts # 11개
+│       ├── tarot-result.test.ts     # 4개
+│       ├── saju-result.test.ts      # 4개
+│       ├── favorite-character.test.ts # 5개
+│       ├── daily-card.test.ts       # 6개
+│       ├── tarot-reading.test.ts    # 6개
+│       ├── saju-reading.test.ts     # 5개
+│       └── shinjeom-message.test.ts # 5개
 
 public/images/
 ├── backgrounds/                # 페이지별 배경 이미지 (hero-bg, session-bg, result-bg 등)
@@ -922,6 +940,8 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 - **`<Image fill>` sizes prop 필수**: Next.js `<Image fill>`에 `sizes` 미설정 시 기본값 `100vw`로 Mobile Android CI에서 이미지 로드 타임아웃 발생. 그리드 내 이미지는 `sizes="(max-width: 640px) 50vw, ..."` 형태로 반드시 지정
 - **SonarCloud 테스트 리포트**: `sonar.testExecutionReportPaths`는 SonarCloud 전용 `<testExecutions version="1">` XML 형식만 허용 — Vitest/Playwright의 표준 JUnit `<testsuites>` 포맷과 비호환. 커버리지는 lcov(`sonar.javascript.lcov.reportPaths`)만 사용
 - **API 스키마 필수 적용**: 새 API 라우트 추가 시 `src/lib/validation/api-schemas.ts`에 Zod 스키마 먼저 정의, `safeParse` 검증 후 로직 진행. 타입 단언(`as { ... }`) 사용 금지
+- **API 라우트 단위 테스트 경로**: `vitest.config.ts`의 `exclude: ["src/app/**"]`가 테스트 파일도 제외함. API 라우트 테스트는 반드시 `src/__tests__/api/`에 배치하고 `@/app/api/*/route` 절대 경로로 import. `src/app/api/*/route.test.ts` 패턴은 수집 불가
+- **`vi.doMock` factory 누출 방지**: `vi.doMock`으로 등록한 mock factory는 `vi.resetModules()` 후에도 유지된다. 이전 테스트가 rate-limit mock을 false로 설정하면 다음 테스트로 누출됨. `setup()` 내부에 rate-limit 통과 mock(`checkRateLimit: true`)을 반드시 포함해야 함
 
 ## 미구현 기능 목록
 
@@ -945,8 +965,7 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 | miko·seonhwa JPG 레거시 경로 | `public/images/characters/miko/`, `seonhwa/` | nukki/ PNG 미전환 | 이미지 재생성 + 코드 수정 필요 |
 | `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
 | `reading-saver.ts` 미구현 — inline fire-and-forget 산재 | `app/api/tarot/reading/route.ts` 외 2곳 | DB 저장 로직 3곳에 inline 산재, 추상화 미완료 | PR D에서 `src/lib/db/reading-saver.ts` 신설 후 통합 |
-| API 라우트 단위 테스트 공백 | `src/app/api/**` 11개 라우트 | vitest.config.ts가 `src/app/**` 전수 제외 → 0% | PR B에서 인프라 신설 + 3개 세션 라우트 테스트 작성 |
-| 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
+| 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | API 라우트 10개 포함(PR B+C), 임계값 상향 미완료 | PR E에서 임계값 branches 65/functions 75/lines 75 상향 |
 
 ## 운영 체계 — SuperGrok + Claude CLI 역할 분담
 
