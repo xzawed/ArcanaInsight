@@ -126,9 +126,7 @@ export function ParticleOverlay({ density = "medium", colorScheme, particleStyle
   const secondaryColor = colorScheme?.secondary;
   const accentColor = colorScheme?.accent;
 
-  const [particles, setParticles] = useState<Particle[]>(() =>
-    generateParticles(DENSITY_COUNT[density], buildColors(colorScheme))
-  );
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
     setParticles(generateParticles(DENSITY_COUNT[density], buildColors(colorScheme)));
