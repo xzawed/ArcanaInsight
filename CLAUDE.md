@@ -247,11 +247,14 @@ public/images/
 
 docs/                           # 프로젝트 문서 (PR-1~5 재편 진행 중)
 ├── README.md                   # 업무 유형별 문서 인덱스 (→ architecture/workflow/conventions/operations)
-├── operation-guide.md          # 운영자 가이드 (PR-2에서 docs/operations/ 로 이동 예정)
-├── skills.md                   # 기술 스킬 정의서 (PR-2에서 docs/archive/ 로 이동 예정)
-├── ai-quality-roadmap.md       # AI 품질 개선 로드맵 (PR-2에서 docs/archive/ 로 이동 예정)
+├── archive/
+│   ├── skills-original.md      # 초기 기획 기술 스킬 정의서 (역사 기록)
+│   └── ai-quality-roadmap.md   # AI 품질 인프라 확장 로드맵 (역사 기록)
 ├── operations/
-│   └── known-issues.md         # 미구현 기능 + 기술 부채 단일 정본
+│   ├── known-issues.md         # 미구현 기능 + 기술 부채 단일 정본
+│   └── operation-guide.md      # 운영자 가이드 (서비스 흐름·자동화·빠른 참조)
+├── workflow/
+│   └── e2e-testing.md          # E2E 테스트 실행·작성·검증 가이드 (Single Source of Truth)
 └── superpowers/                # superpowers 스킬 관련 문서
 
 process.md                      # 내부 아키텍처 흐름도 모음 (Mermaid — 타로/사주/신점/DB 흐름)
@@ -511,7 +514,7 @@ pnpm test:e2e:ui      # Playwright UI 모드 (시각적 디버깅)
 
 > **Windows**: Claude Code Bash 세션은 Playwright stdout 캡처 불가 → Docker(Linux 컨테이너) 필수. Docker 실행 후 `node_modules`가 Linux 바이너리로 교체되므로 이후 `rm -rf node_modules && pnpm install` 필수.
 >
-> **상세 실행 가이드 + Docker 스크립트**: **[e2e/README.md](./e2e/README.md)** 참조
+> **상세 실행 가이드 + Docker 스크립트**: **[docs/workflow/e2e-testing.md](./docs/workflow/e2e-testing.md)** 참조
 
 ## 환경 변수
 
@@ -590,7 +593,7 @@ git branch | grep -v '^\* main' | xargs git branch -D
 - **QA 재검증** (`qa-recheck.yml`): main push 시 열린 QA Issue 감지 → QA 자동 재실행 → 통과 시 Issue 자동 닫기
 - **문서 정합성** (`docs-sync.yml`): PR마다 env-문서 정합성·docs 링크 검사 (현재 경고 전용, PR-5에서 차단으로 전환)
 
-> **E2E 파이프라인 상세 + QA 자동 루프 흐름도**: **[e2e/README.md §2](./e2e/README.md#2-ci-파이프라인)** 참조
+> **E2E 파이프라인 상세 + QA 자동 루프 흐름도**: **[docs/workflow/e2e-testing.md §2](./docs/workflow/e2e-testing.md#2-ci-파이프라인)** 참조
 
 ### 브랜치 보호 규칙 (GitHub Settings에서 수동 설정 필요)
 
