@@ -5,12 +5,17 @@ import { TarotService } from "@/services/tarot/tarot-service"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { TAROT_TOPICS } from "@/data/topics"
+import { TarotSessionSchema } from "@/lib/validation/api-schemas"
 
 const tarotService = new TarotService()
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, characterId, spreadType } = (await request.json()) as { topic: Topic; characterId?: string; spreadType?: string }
+    const parsed = TarotSessionSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    }
+    const { topic, characterId, spreadType } = parsed.data as { topic: Topic; characterId?: string | null; spreadType?: string | null }
     if (!TAROT_TOPICS.includes(topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }

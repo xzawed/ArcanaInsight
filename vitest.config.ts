@@ -23,10 +23,11 @@ export default defineConfig({
         "src/data/topics.ts",        // 유효 토픽 목록 — 테스트 있음
         "src/lib/env.ts",            // 환경변수 getter — 테스트 있음
         "src/lib/db/supabase-adapter.ts", // DB 어댑터 — 테스트 있음
-        "src/lib/rate-limit.ts",     // Rate Limiter — 테스트 있음 (Phase 2)
-        "src/hooks/useSSEStream.ts", // SSE 공통 유틸 — 테스트 있음
-        "src/services/**/*.ts",      // 모든 서비스 계층 — 테스트 있음
-        "src/lib/verum/**/*.ts",     // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
+        "src/lib/rate-limit.ts",          // Rate Limiter — 테스트 있음
+        "src/lib/validation/api-schemas.ts", // Zod 스키마 — null/undefined 경계 테스트 있음
+        "src/hooks/useSSEStream.ts",   // SSE 공통 유틸 — 테스트 있음
+        "src/services/**/*.ts",        // 모든 서비스 계층 — 테스트 있음
+        "src/lib/verum/**/*.ts",       // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
       ],
       exclude: [
         "src/**/*.test.ts",
@@ -57,7 +58,6 @@ export default defineConfig({
         "src/lib/supabase/**",
         "src/lib/auth/**",
         "src/lib/storage/**",
-        "src/lib/validation/**",     // Zod 스키마 정의 — 테스트 미작성
         "src/lib/db/schema/**",
         "src/lib/db/types.ts",
         "src/lib/db/index.ts",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { OHAENG } from "@/data/saju/constants";
 import type { SajuResult } from "@/services/saju/saju-types";
 
@@ -10,7 +11,12 @@ interface DaeunTimelineProps {
 }
 
 export function DaeunTimeline({ majorFortunes, yearlyFortune, birthYear }: DaeunTimelineProps) {
-  const currentAge = new Date().getFullYear() - birthYear;
+  const [currentAge, setCurrentAge] = useState(0);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentAge(new Date().getFullYear() - birthYear);
+  }, [birthYear]);
 
   return (
     <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">

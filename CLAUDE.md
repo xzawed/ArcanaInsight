@@ -854,6 +854,9 @@ Claude가 문서를 작성·수정할 때 반드시 준수하는 기준:
 - `main` 브랜치에 직접 push 금지, PR을 통해 머지
 - `.env` 파일은 절대 커밋하지 않음 (Railway 환경변수로 관리)
 - 캐릭터 이미지 규격: 1408×768 (10캐릭터 PNG 누끼, 2캐릭터 JPG 레거시, grok-imagine-image-pro API 기본 출력 사이즈)
+- **Zod 스키마 `null` vs `undefined` 규칙**: `JSON.stringify`는 `null`을 직렬화하고 `undefined`는 제거한다. Zustand store 초기값이 `null`인 필드는 반드시 `.nullish()` 사용. `undefined`만 올 수 있는 필드만 `.optional()` 사용. 위반 시 프로덕션 400 오류 발생하지만 로컬 빌드·lint·tsc는 모두 통과 → **2026-04-24 타로 리딩 전체 불능 장애 원인**
+- **SSR 비결정 값 금지**: `"use client"` 컴포넌트에서 `new Date()`, `Math.random()` 등 비결정 값을 JSX 렌더 또는 `useState` 초기값에 직접 사용 금지. 반드시 `useEffect` 내에서만 호출하고 초기값은 `""` / `0` / `[]` 등 안전한 상수로 설정 — React error #418(hydration mismatch) 방지
+- **API 스키마 필수 적용**: 새 API 라우트 추가 시 `src/lib/validation/api-schemas.ts`에 Zod 스키마 먼저 정의, `safeParse` 검증 후 로직 진행. 타입 단언(`as { ... }`) 사용 금지
 
 ## 미구현 기능 목록
 

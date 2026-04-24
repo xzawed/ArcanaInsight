@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
+import { ShinjeomSessionSchema } from "@/lib/validation/api-schemas"
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, characterId } = await request.json()
-    if (!topic || !characterId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    const parsed = ShinjeomSessionSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
+    const { topic, characterId } = parsed.data
 
     let session = null
     try {

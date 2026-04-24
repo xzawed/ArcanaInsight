@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getCharacterById } from "@/data/characters";
+import { DailyCardSchema } from "@/lib/validation/api-schemas";
 
 const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
@@ -20,11 +21,11 @@ function hashDateSeed(date: string, characterId: string): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const { characterId, date } = (await request.json()) as { characterId: string; date: string };
-
-    if (!characterId || !date) {
-      return NextResponse.json({ error: "characterId and date are required" }, { status: 400 });
+    const parsed = DailyCardSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
+    const { characterId, date } = parsed.data;
 
     const character = getCharacterById(characterId);
     if (!character) {
