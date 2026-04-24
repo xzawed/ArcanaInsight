@@ -289,7 +289,9 @@ supabase/migrations/            # DB 마이그레이션 파일 (번호 순서 �
 ├── 006_saju_readings.sql       # saju_readings 테이블 (사주 서비스)
 ├── 007_skin_selection.sql      # 스킨 선택 관련 컬럼
 ├── 008_shinjeom.sql            # 신점 테이블 (shinjeom_messages, shinjeom_readings)
-└── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+├── 009_shinjeom_topics_expand.sql # 신점 직장/이직 + 택일 토픽 확장
+├── 010_share_token_default_fix.sql # readings share_token NULL 백필 + DB DEFAULT
+└── 011_saju_shinjeom_share_token_defaults.sql # saju_readings/shinjeom_readings share_token NULL 백필 + DB DEFAULT
 # PostgreSQL 모드 시 동일 스키마가 src/lib/db/schema/index.ts (Drizzle) 에도 정의됨
 
 drizzle.config.ts              # Drizzle ORM 설정 (PostgreSQL 모드 전용)
@@ -408,10 +410,12 @@ API Route (route.ts)
   - Grok + Claude 둘 다 실패: "AI 서비스가 일시적으로 사용할 수 없습니다" 메시지
 - **SSE 스트리밍**: `/api/tarot/reading`, `/api/saju/reading`, `/api/daily-card`에서 AI 응답을 SSE로 클라이언트에 스트리밍
   - 클라이언트는 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`) 공통 유틸 사용 — 타로/사주/신점 페이지 모두 적용
+- **share_token 공개 정책**: 타로/사주 결과 페이지(`/*/result/[id]`)는 `share_token`을 URL로 사용하는 공개 공유 링크. share_token을 가진 누구나 결과 열람 가능 (공유 링크 생성 = 공개 의도). 소유자 전용 쓰기·삭제에는 `assertReadingAccess("owner")` 사용. share_token은 insert 시 Drizzle `$defaultFn(() => crypto.randomUUID())` + DB DEFAULT `gen_random_uuid()`로 이중 보장 — NULL 절대 불가.
 - **API 보안 패턴** (3개 AI API 라우트 공통):
   - Rate Limiting: IP별 `checkRateLimit()` — 타로/사주 10req/min, 신점 20req/min, 초과 시 429
   - 입력 검증: Zod 스키마 `safeParse()` — `src/lib/validation/api-schemas.ts`
   - IDOR 방어: `assertSessionOwnership()` — `src/lib/auth/index.ts`, 세션 소유자 불일치 시 403
+  - 공유 결과 열람: `assertReadingAccess("public")` — 항상 허용 (share_token이 인증 수단)
 - **Verum 격리 패턴**: `resolveSystemPrompt()` / `recordTrace()` (`src/lib/verum/resolver.ts`) — Verum 실패 시 fallback 프롬프트 유지, 서킷 오픈 시 즉시 baseline 반환. 예외는 절대 타로 스트림 밖으로 새지 않는다.
   - 타임아웃: config 3s(`VERUM_TIMEOUT_MS`), record 5s(`VERUM_RECORD_TIMEOUT_MS`) — AbortController + setTimeout
   - 서킷 쿨다운: 401/403→30분, 429→retry-after, 5xx/timeout→60초(`VERUM_FAILURE_COOLDOWN_MS`)

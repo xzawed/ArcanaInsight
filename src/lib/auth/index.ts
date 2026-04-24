@@ -23,6 +23,19 @@ export async function requireUser(): Promise<AuthUser> {
 const JSON_HEADER = { "Content-Type": "application/json" };
 
 /**
+ * 리딩 접근 권한 검증.
+ * mode="public" — share_token으로 열람하는 공개 결과 페이지. 항상 허용 (공유 링크 생성 = 공개 의도).
+ * mode="owner"  — 소유자 전용 쓰기·삭제 경로. 로그인 + session 소유자만 허용.
+ */
+export async function assertReadingAccess(
+  sessionId: string,
+  mode: "public" | "owner" = "public"
+): Promise<Response | null> {
+  if (mode === "public") return null
+  return assertSessionOwnership(sessionId)
+}
+
+/**
  * 세션 소유권 검증.
  * 로그인 사용자가 다른 사람의 세션에 쓰기 요청하는 IDOR를 차단.
  * 익명 사용자(user=null)는 허용, 미인증 로그인 사용자도 허용.
