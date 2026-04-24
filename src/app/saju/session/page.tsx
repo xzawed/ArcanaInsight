@@ -108,7 +108,7 @@ export default function SajuSessionPage() {
   };
 
   useEffect(() => {
-    // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방��)
+    // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방지)
     if (phase === "result") {
       const container = resultContainerRef.current;
       if (container) container.scrollTop = container.scrollHeight;
