@@ -79,6 +79,16 @@ resetVerumClientForTests(): void  // 테스트 전용
 
 `cache.getOrFetch()` — 동시 캐시 미스 시 fetcher 1회 호출 (thundering herd 방지)
 
+### 현황 & 한계 (2026-04-25 기준)
+
+| 항목 | 상태 |
+|------|------|
+| 타로 리딩 (`/api/tarot/reading`) | ✅ 적용 |
+| 사주·신점 | 🔲 미적용 (Phase 2 예정) |
+| `VERUM_API_URL` 미설정 시 | 전체 모듈 비활성화 — baseline만 반환 |
+| 서킷 브레이커 상태 | 프로세스 메모리 (서버리스 재시작 시 초기화) |
+| 단일 배포 ID | `VERUM_DEPLOYMENT_ID` 1개만 지원 — 다중 실험 동시 운영 불가 |
+
 상세: [`src/lib/verum/README.md`](../../src/lib/verum/README.md)
 
 ---
