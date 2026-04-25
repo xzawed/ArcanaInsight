@@ -83,7 +83,7 @@ async function setup() {
 | `mock-db.ts` | `makeMockDb()` — DbClient mock 팩토리 |
 | `mock-auth.ts` | `makeAuthMock()` — getCurrentUser/requireUser/assertReadingAccess mock |
 | `mock-request.ts` | `makePostRequest()` — NextRequest POST 헬퍼 |
-| `mock-ai.ts` | `makeMockAiModule()`, `makeMockVerum()`, `readSSEStream()` |
+| `mock-ai.ts` | `makeMockAiModule()`, `readSSEStream()` |
 | `reset-modules.ts` | `setupDoMock()` — `beforeEach(vi.resetModules)` 등록 유틸 |
 | `api-route-setup.ts` | `makeSessionRouteSetup()` / `makeResultRouteSetup()` / `makeStreamingRouteSetup()` — API 라우트 setup 보일러플레이트 |
 
@@ -105,21 +105,7 @@ describe("API 테스트", () => {
 
 ---
 
-## 5. Verum 테스트 격리
-
-`src/lib/verum/` 테스트에서는 반드시 `beforeEach`에서 `resetVerumClientForTests()` 호출:
-
-```ts
-import { resetVerumClientForTests } from "@/lib/verum/resolver";
-
-beforeEach(() => {
-  resetVerumClientForTests();
-});
-```
-
----
-
-## 6. 커버리지 임계값
+## 5. 커버리지 임계값
 
 `vitest.config.ts`:
 ```ts
@@ -137,7 +123,7 @@ coverage: {
 
 ---
 
-## 7. CLAUDE.md 테스트 수 동기화
+## 6. CLAUDE.md 테스트 수 동기화
 
 테스트가 추가/삭제될 때마다 CLAUDE.md의 테스트 수를 동기화합니다:
 

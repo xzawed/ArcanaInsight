@@ -12,10 +12,6 @@ import {
   getAiFallbackCooldownMs,
   getAiAuthCooldownMs,
   getPostgresPoolSize,
-  getVerumTimeoutMs,
-  getVerumRecordTimeoutMs,
-  getVerumFailureCooldownMs,
-  getVerumAuthCooldownMs,
 } from "./env";
 
 /** 각 테스트 전 관련 env 키를 모두 제거하고, 종료 후 복원 */
@@ -34,10 +30,6 @@ const ENV_KEYS = [
   "AI_FALLBACK_COOLDOWN_MS",
   "AI_AUTH_COOLDOWN_MS",
   "POSTGRES_POOL_SIZE",
-  "VERUM_TIMEOUT_MS",
-  "VERUM_RECORD_TIMEOUT_MS",
-  "VERUM_FAILURE_COOLDOWN_MS",
-  "VERUM_AUTH_COOLDOWN_MS",
 ] as const;
 
 let snapshot: EnvSnapshot = {};
@@ -232,64 +224,3 @@ describe("getPostgresPoolSize", () => {
   });
 });
 
-// ─────────────────────────── Verum 타임아웃 & 서킷 ───────────────────────────
-
-describe("getVerumTimeoutMs", () => {
-  it("env 미설정 시 기본값 3000을 반환한다", () => {
-    expect(getVerumTimeoutMs()).toBe(3000);
-  });
-
-  it("env 설정 시 정수로 파싱하여 반환한다", () => {
-    process.env.VERUM_TIMEOUT_MS = "5000";
-    expect(getVerumTimeoutMs()).toBe(5000);
-  });
-
-  it("반환값이 number 타입이다", () => {
-    expect(typeof getVerumTimeoutMs()).toBe("number");
-  });
-});
-
-describe("getVerumRecordTimeoutMs", () => {
-  it("env 미설정 시 기본값 5000을 반환한다", () => {
-    expect(getVerumRecordTimeoutMs()).toBe(5000);
-  });
-
-  it("env 설정 시 정수로 파싱하여 반환한다", () => {
-    process.env.VERUM_RECORD_TIMEOUT_MS = "8000";
-    expect(getVerumRecordTimeoutMs()).toBe(8000);
-  });
-
-  it("반환값이 number 타입이다", () => {
-    expect(typeof getVerumRecordTimeoutMs()).toBe("number");
-  });
-});
-
-describe("getVerumFailureCooldownMs", () => {
-  it("env 미설정 시 기본값 60000(1분)을 반환한다", () => {
-    expect(getVerumFailureCooldownMs()).toBe(60000);
-  });
-
-  it("env 설정 시 정수로 파싱하여 반환한다", () => {
-    process.env.VERUM_FAILURE_COOLDOWN_MS = "30000";
-    expect(getVerumFailureCooldownMs()).toBe(30000);
-  });
-
-  it("반환값이 number 타입이다", () => {
-    expect(typeof getVerumFailureCooldownMs()).toBe("number");
-  });
-});
-
-describe("getVerumAuthCooldownMs", () => {
-  it("env 미설정 시 기본값 1800000(30분)을 반환한다", () => {
-    expect(getVerumAuthCooldownMs()).toBe(1800000);
-  });
-
-  it("env 설정 시 정수로 파싱하여 반환한다", () => {
-    process.env.VERUM_AUTH_COOLDOWN_MS = "900000";
-    expect(getVerumAuthCooldownMs()).toBe(900000);
-  });
-
-  it("반환값이 number 타입이다", () => {
-    expect(typeof getVerumAuthCooldownMs()).toBe("number");
-  });
-});

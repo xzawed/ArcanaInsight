@@ -20,17 +20,6 @@ export function makeMockAiModule(provider = makeMockAiProvider()) {
   return { FallbackProvider: vi.fn().mockImplementation(() => provider) };
 }
 
-export function makeMockVerum() {
-  return {
-    resolveSystemPrompt: vi.fn().mockResolvedValue({
-      systemPrompt: "테스트 시스템 프롬프트",
-      routedTo: "baseline" as const,
-      deploymentId: null,
-    }),
-    recordTrace: vi.fn(),
-  };
-}
-
 /** SSE 스트림 바디를 전부 읽어 문자열로 반환 */
 export async function readSSEStream(res: Response): Promise<string> {
   if (!res.body) return "";

@@ -28,7 +28,6 @@ export default defineConfig({
         "src/lib/validation/api-schemas.ts", // Zod 스키마 — null/undefined 경계 테스트 있음
         "src/hooks/useSSEStream.ts",   // SSE 공통 유틸 — 테스트 있음
         "src/services/**/*.ts",        // 모든 서비스 계층 — 테스트 있음
-        "src/lib/verum/**/*.ts",       // Verum SDK — 타임아웃·서킷·resolver 테스트 있음
         "src/app/api/tarot/session/route.ts",         // PR B
         "src/app/api/saju/session/route.ts",          // PR B
         "src/app/api/shinjeom/session/route.ts",      // PR B
