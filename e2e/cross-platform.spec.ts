@@ -88,7 +88,8 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     const testPaths = [
       "/images/characters/arcana/nukki/default.png",
       "/images/characters/luna/nukki/default.png",
-      "/images/characters/miko/default.jpg",
+      "/images/characters/miko/nukki/default.png",
+      "/images/characters/seonhwa/nukki/default.png",
     ];
 
     for (const path of testPaths) {
