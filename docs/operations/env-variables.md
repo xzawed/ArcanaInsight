@@ -54,6 +54,19 @@
 
 ---
 
+## Rate-Limit (선택 — Upstash Redis)
+
+미설정 시 서버 메모리 Map 기반 fallback 사용 (단일 인스턴스·로컬 개발 호환).
+
+| 변수 | 설명 | 비고 |
+|------|------|------|
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST URL | `https://xxx.upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST 토큰 | Upstash 콘솔에서 발급 |
+
+> 다중 서버 인스턴스 운영 시 Redis 전환 권장. 무료 티어 10K req/day.
+
+---
+
 ## Verum (선택 — AI 프롬프트 A/B 테스트)
 
 미설정 시 로컬 기본 프롬프트 사용 (안전한 기본값). 장애 시 서킷 브레이커가 자동 격리합니다.

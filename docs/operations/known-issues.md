@@ -25,7 +25,7 @@
 |------|------|------|----------|
 | `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
-| rate-limit 메모리 저장 | `src/lib/rate-limit.ts` | 서버 재시작 시 초기화됨 | Redis 기반 전환 고려 (별도 기획) |
+| rate-limit Redis 미설정 | `src/lib/rate-limit.ts` | `UPSTASH_REDIS_REST_URL` 미설정 시 in-memory fallback 동작 | Railway에서 Upstash 연결 설정 시 분산 처리 활성화 |
 | SupabaseAdapter 통합 테스트 부재 | `src/lib/db/supabase-adapter.ts` | mock 체인이 자기충족적, 실제 Supabase 응답 미검증 | 통합 테스트 환경 구축 후 처리 |
 
 ---
