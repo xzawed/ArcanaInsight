@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (582개, statements 88%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (587개, statements 88%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -174,7 +174,6 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 → **정본**: [`docs/operations/known-issues.md`](docs/operations/known-issues.md)
 
-- `useFavoriteCharacter` DB_PROVIDER 추상화 미적용 (Supabase 직접)
 - rate-limit: UPSTASH_REDIS_REST_URL 미설정 시 in-memory fallback (분산 처리 미활성화)
 
 ## Claude 자율 관리 규칙
