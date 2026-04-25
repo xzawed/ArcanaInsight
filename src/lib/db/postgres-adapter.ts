@@ -47,7 +47,7 @@ function normalizeRow<T>(row: Record<string, unknown>): T {
   return Object.fromEntries(
     Object.entries(row).map(([k, v]) => [
       k
-        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1_$2") // JSONData → JSON_Data
+        .replace(/([A-Z])([A-Z][a-z])/g, "$1_$2") // JSONData → JSON_Data
         .replace(/([a-z\d])([A-Z])/g, "$1_$2")     // shareToken → share_Token
         .toLowerCase(),
       v,
