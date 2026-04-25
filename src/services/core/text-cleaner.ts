@@ -1,3 +1,20 @@
+/** JSON 파싱 완전 실패 시 raw 텍스트에서 의미 있는 내용만 추출 */
+export function extractFallbackText(raw: string): string {
+  return raw
+    .replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/[{}[\]]/g, "")
+    .replace(/"[a-zA-Z_]+"\s*:/g, "")
+    .replace(/"[, \t]*\n/g, "\n")
+    .replace(/^[ \t]*"/gm, "")
+    .replace(/",?\s*$/gm, "")
+    .replace(/\\n/g, "\n")
+    .replace(/\\"/g, '"')
+    .replace(/,\s*\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 /** AI 응답 텍스트에서 이스케이프/JSON 잔여물을 정리 */
 export function cleanReadingText(text: string): string {
   return text

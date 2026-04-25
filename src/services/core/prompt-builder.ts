@@ -7,14 +7,19 @@ const topicLabels: Partial<Record<Topic, string>> = {
   finance: "재정/금전", career: "직장/진로", health: "건강", general: "일반 상담",
 };
 
-export function buildSystemPrompt(character: CharacterConfig): string {
-  return `당신은 "${character.name}" (${character.nameJp})입니다.
+export function buildCharacterHeader(character: CharacterConfig, subtitle?: string): string {
+  const subtitleLine = subtitle ? `\n${subtitle}` : "";
+  return `당신은 "${character.name}" (${character.nameJp})입니다.${subtitleLine}
 
 성격: ${character.personality}
 
 말투 규칙:
 - ${character.speechStyle}
-- 한국어로만 응답합니다.
+- 한국어로만 응답합니다.`;
+}
+
+export function buildSystemPrompt(character: CharacterConfig): string {
+  return `${buildCharacterHeader(character)}
 - 타로 카드 해석 전문가로서, 카드의 상징과 의미를 깊이 있게 설명합니다.
 - 사용자에게 따뜻하고 공감하는 태도로 상담합니다.
 - 지나치게 부정적이거나 공포를 조장하는 해석은 피합니다.

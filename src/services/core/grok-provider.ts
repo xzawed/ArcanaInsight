@@ -1,5 +1,6 @@
 import { AIProvider } from "@/types/service";
 import { getGrokApiKey, getGrokModel, getGrokBaseUrl, getAiTimeoutMs, getDefaultMaxTokens, getAiTemperature } from "@/lib/env";
+import { withAbortTimeout, readSseLines } from "./http-utils";
 
 /** Grok API Rate Limit (429) — Retry-After 기반 짧은 쿨다운 */
 export class RateLimitError extends Error {
@@ -49,10 +50,19 @@ export class GrokProvider implements AIProvider {
     return this._baseUrl;
   }
 
+  private handleErrorResponse(response: Response): Promise<never> {
+    if (response.status === 401 || response.status === 403) {
+      return response.text().then((e) => { throw new AuthError(response.status, e); });
+    }
+    if (response.status === 429) {
+      const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
+      return Promise.reject(new RateLimitError(retryAfter));
+    }
+    return response.text().then((e) => { throw new Error(`Grok API error (${response.status}): ${e}`); });
+  }
+
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
-    try {
+    return withAbortTimeout(async (signal) => {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` },
@@ -61,29 +71,19 @@ export class GrokProvider implements AIProvider {
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
           temperature: getAiTemperature(), max_tokens: maxTokens ?? getDefaultMaxTokens(),
         }),
-        signal: controller.signal,
+        signal,
       });
-      if (response.status === 401 || response.status === 403) {
-        const error = await response.text();
-        throw new AuthError(response.status, error);
-      }
-      if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
-        throw new RateLimitError(retryAfter);
-      }
-      if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
-      const data = await response.json();
+      if (!response.ok) return this.handleErrorResponse(response);
+      const data = await response.json() as { choices?: [{ message?: { content?: string } }] };
       const content = data.choices?.[0]?.message?.content;
       if (!content) throw new Error("Grok API가 빈 응답을 반환했습니다.");
       return content;
-    } finally {
-      clearTimeout(timeout);
-    }
+    }, getAiTimeoutMs());
   }
 
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), getAiTimeoutMs());
+    const timer = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: "POST",
@@ -95,39 +95,14 @@ export class GrokProvider implements AIProvider {
         }),
         signal: controller.signal,
       });
-      if (response.status === 401 || response.status === 403) {
-        const error = await response.text();
-        throw new AuthError(response.status, error);
-      }
-      if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
-        throw new RateLimitError(retryAfter);
-      }
-      if (!response.ok) { const error = await response.text(); throw new Error(`Grok API error (${response.status}): ${error}`); }
-      if (!response.body) throw new Error("Response body is null");
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || !trimmed.startsWith("data: ")) continue;
-          const data = trimmed.slice(6);
-          if (data === "[DONE]") return;
-          try {
-            const parsed = JSON.parse(data);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) yield content;
-          } catch (e) { console.warn("Grok SSE 청크 파싱 실패:", data.slice(0, 100), e); }
-        }
-      }
+      if (!response.ok) { await this.handleErrorResponse(response); return; }
+      yield* readSseLines(
+        response,
+        (p) => (p as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content ?? null,
+        "Grok"
+      );
     } finally {
-      clearTimeout(timeout);
+      clearTimeout(timer);
     }
   }
 }

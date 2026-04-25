@@ -4,7 +4,8 @@ import { Session, Topic, SajuTimeRange } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
-import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
+import { buildCharacterHeader } from "@/services/core/prompt-builder";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
 export class SajuService implements DivinationService {
@@ -26,13 +27,7 @@ export class SajuService implements DivinationService {
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
 
-    return `당신은 "${character.name}" (${character.nameJp})입니다.
-
-성격: ${character.personality}
-
-말투 규칙:
-- ${character.speechStyle}
-- 한국어로만 응답합니다.
+    return `${buildCharacterHeader(character)}
 - 사주명리학 전문가로서, 제공된 사주 데이터만 기반으로 해석합니다.
 - 부정적 내용도 긍정적 조언으로 전환합니다.
 
@@ -202,19 +197,7 @@ ${instruction}
 
     // JSON 파싱 완전 실패 — 텍스트에서 의미 있는 내용만 추출
     console.error("사주 AI 응답 JSON 파싱 실패 (최종 fallback)\n원본 응답:", aiResponse.slice(0, 500));
-    const cleanText = aiResponse
-      .replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "")
-      .replace(/```[\s\S]*?```/g, "")
-      .replace(/[{}[\]]/g, "")
-      .replace(/"[a-zA-Z_]+"\s*:/g, "")    // 모든 JSON 키 패턴 제거
-      .replace(/"\s*,?\s*\n/g, "\n")
-      .replace(/^\s*"/gm, "")
-      .replace(/",?\s*$/gm, "")
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/,\s*\n/g, "\n")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+    const cleanText = extractFallbackText(aiResponse);
     return { overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.", advice: "" };
   }
 
