@@ -34,3 +34,12 @@
 | **D** | `fix/sonar-badge-followup` | ✅ merged | reading-saver.ts 신설·retry 3회, tarot·saju·shinjeom 라우트 위임 (539→558) |
 | **E** | PR-N (임계값 상향) | ✅ merged | branches 75/functions 85/lines 88/statements 88, 587개 |
 | **F** | (미시작) | 선택 | 우회 주석 태깅 |
+
+---
+
+## SonarCloud Quality Gate 수정 이력
+
+| PR | 번호 | 상태 | 내용 |
+|----|------|------|------|
+| **Q1** | PR #148 | ✅ merged | E2E cross-platform.spec.ts testPaths miko/default.jpg → nukki/*.png (PR-K 누락 수정) |
+| **Q3** | PR #149 | ✅ merged | Reliability Bug 2개(접근성), Security Hotspot 2개(ReDoS regex·Math.random) 해소 → Quality Gate Passed |

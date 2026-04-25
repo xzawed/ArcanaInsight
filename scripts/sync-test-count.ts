@@ -20,16 +20,17 @@ function getActualTestCount(): number {
       "pnpm exec vitest run --reporter=verbose 2>&1 || true",
       { cwd: ROOT, encoding: "utf-8", timeout: 120_000 }
     );
-    // "Tests  539 passed" or "539 passed" 형태 파싱
-    const match = output.match(/(\d+)\s+passed/);
-    if (match) return parseInt(match[1], 10);
-
-    // fallback: "Test Files  31 passed" 다음에 나오는 "Tests" 라인
+    // "Tests  587 passed" 라인을 우선 탐색 (Test Files N passed 오탐 방지)
     const testsLine = output.split("\n").find((l) => /^\s*Tests\s+\d+/.test(l));
     if (testsLine) {
       const m = testsLine.match(/(\d+)\s+passed/);
-      if (m) return parseInt(m[1], 10);
+      if (m) return Number.parseInt(m[1], 10);
     }
+
+    // fallback: 마지막 "N passed" 패턴
+    const allMatches = [...output.matchAll(/(\d+)\s+passed/g)];
+    const last = allMatches.at(-1);
+    if (last) return Number.parseInt(last[1], 10);
     throw new Error("테스트 수 파싱 실패:\n" + output.slice(-500));
   } catch (e) {
     console.error("[sync-test-count] 테스트 실행 오류:", e);
@@ -38,9 +39,9 @@ function getActualTestCount(): number {
 }
 
 function getDocumentedCount(content: string): number | null {
-  // "Vitest 2.0 (node env, v8 coverage, 539개 테스트" 패턴
-  const match = content.match(/Vitest[^(]*\(node env[^,]*,\s*v8 coverage[^,]*,\s*(\d+)개\s*테스트/);
-  if (match) return parseInt(match[1], 10);
+  // "Vitest 2.0 (587개, statements 88%)" 패턴
+  const match = content.match(/Vitest[^(]*\(\s*(\d+)개,?\s*statements/);
+  if (match) return Number.parseInt(match[1], 10);
   return null;
 }
 
@@ -72,8 +73,8 @@ if (CHECK_MODE) {
 }
 
 const updated = claudeMd.replace(
-  /(Vitest[^(]*\(node env[^,]*,\s*v8 coverage[^,]*,\s*)\d+(개\s*테스트)/,
-  `$1${actual}$2`
+  /(Vitest[^(]*\(\s*)(\d+)(개,?\s*statements)/,
+  `$1${actual}$3`
 );
 fs.writeFileSync(CLAUDE_MD, updated, "utf-8");
 console.log(`[sync-test-count] CLAUDE.md 갱신 완료: ${documented}개 → ${actual}개`);
