@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
 
-    const rawSystemPrompt = tarotService.getSystemPrompt(characterId);
-    const systemPrompt = rawSystemPrompt;
+    const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
       ? spreadType
