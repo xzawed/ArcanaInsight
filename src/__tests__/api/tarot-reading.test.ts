@@ -7,6 +7,11 @@ import { makeMockAiModule, readSSEStream } from "@/test-helpers/mock-ai";
 
 setupDoMock();
 
+async function* failingStreamGenerator(): AsyncGenerator<string, void, unknown> {
+  for (const chunk of [] as string[]) yield chunk;
+  throw new Error("AI error");
+}
+
 const VALID_BODY = {
   sessionId: null,
   topic: "love",
@@ -23,9 +28,7 @@ async function setup(options: { aiError?: boolean } = {}) {
   const mockAiModule = makeMockAiModule();
   if (options.aiError) {
     const provider = {
-      streamReading: vi.fn().mockImplementation(async function* () {
-        throw new Error("AI error");
-      }),
+      streamReading: vi.fn().mockReturnValue(failingStreamGenerator()),
     };
     mockAiModule.FallbackProvider.mockImplementation(() => provider);
   }
@@ -126,6 +129,52 @@ describe("POST /api/tarot/reading", () => {
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
+  });
+
+  it("spreadType='three-card' 제공 시 그대로 사용한다", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ ...VALID_BODY, spreadType: "three-card" }));
+    expect(res.headers.get("Content-Type")).toBe("text/event-stream");
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
+  });
+
+  it("cards 2장 → TOKENS_FEW_CARDS 분기 통과", async () => {
+    const { POST } = await setup();
+    const twoCards = [
+      { cardId: "major-00", position: 0, isReversed: false },
+      { cardId: "major-01", position: 1, isReversed: true },
+    ];
+    const res = await POST(makePostRequest({ ...VALID_BODY, cards: twoCards }));
+    expect(res.status).toBe(200);
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
+  });
+
+  it("cards 5장 → TOKENS_MEDIUM_CARDS 분기 통과", async () => {
+    const { POST } = await setup();
+    const fiveCards = Array.from({ length: 5 }, (_, i) => ({
+      cardId: `major-0${i}`,
+      position: i,
+      isReversed: false,
+    }));
+    const res = await POST(makePostRequest({ ...VALID_BODY, cards: fiveCards }));
+    expect(res.status).toBe(200);
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
+  });
+
+  it("cards 8장 → TOKENS_MANY_CARDS 분기 통과", async () => {
+    const { POST } = await setup();
+    const eightCards = Array.from({ length: 8 }, (_, i) => ({
+      cardId: `major-0${i}`,
+      position: i,
+      isReversed: false,
+    }));
+    const res = await POST(makePostRequest({ ...VALID_BODY, cards: eightCards }));
+    expect(res.status).toBe(200);
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
   });
 
   it("스트림 완료 후 saveTarotReading fire-and-forget 호출", async () => {
