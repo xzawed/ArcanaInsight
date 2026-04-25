@@ -67,22 +67,6 @@
 
 ---
 
-## Verum (선택 — AI 프롬프트 A/B 테스트)
-
-미설정 시 로컬 기본 프롬프트 사용 (안전한 기본값). 장애 시 서킷 브레이커가 자동 격리합니다.
-
-| 변수 | 설명 | 예시/기본값 |
-|------|------|-------------|
-| `VERUM_API_URL` | Verum 서버 URL | `https://verum-production.up.railway.app` |
-| `VERUM_API_KEY` | Verum 대시보드 DEPLOY 후 발급 | — |
-| `VERUM_DEPLOYMENT_ID` | Verum 대시보드 DEPLOY 후 발급 | — |
-| `VERUM_TIMEOUT_MS` | config 조회 타임아웃 | `3000` |
-| `VERUM_RECORD_TIMEOUT_MS` | trace 기록 타임아웃 | `5000` |
-| `VERUM_FAILURE_COOLDOWN_MS` | 5xx/timeout 후 서킷 쿨다운 | `60000` |
-| `VERUM_AUTH_COOLDOWN_MS` | 401/403 후 서킷 쿨다운 | `1800000` (30분) |
-
----
-
 ## AI 공급자 튜닝 (선택)
 
 미설정 시 기본값을 사용합니다.

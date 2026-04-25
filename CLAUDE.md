@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (620개, statements 88%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (575개, statements 88%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -38,7 +38,6 @@ src/
 │   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기)
 │   ├── auth/        # getCurrentUser() / requireUser() / assertSessionOwnership()
 │   ├── validation/  # api-schemas.ts (Zod 7종)
-│   ├── verum/       # 프롬프트 A/B 라우팅 + 서킷 브레이커 (README.md 참조)
 │   └── storage/     # getCardImageUrl() — provider별 이미지 URL
 ├── services/        # core/ (FallbackProvider·PromptBuilder·CircuitBreaker·http-utils), tarot/, saju/, shinjeom/
 ├── types/           # card.ts, character.ts, session.ts, service.ts, user-info.ts
@@ -82,7 +81,7 @@ scripts/             # sync-test-count.ts, check-env-docs.ts, check-doc-links.ts
 
 ## 핵심 아키텍처
 
-**AI 2-레이어**: `lib/verum/` = "무엇을 말할까" (프롬프트 A/B) + `services/core/` = "누가 말할까" (Grok→Claude fallback). 두 레이어는 독립적으로 실패해도 서비스에 영향 없음. → [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md)
+**AI 신뢰성**: `services/core/` = Grok 우선 + Claude 자동 fallback. → [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md)
 
 **DB_PROVIDER**: `supabase`(기본) ↔ `postgres` 즉시 전환. `getDb()` / `getCurrentUser()` / `getCardImageUrl()` 자동 분기. → [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md)
 
