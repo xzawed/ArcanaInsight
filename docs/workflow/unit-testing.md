@@ -8,7 +8,7 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 - **618개 테스트** / statements 88%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
-- 임계값: `branches 75 / functions 85 / lines 88 / statements 88`
+- 임계값: `branches 92 / functions 98 / lines 98 / statements 98`
 
 ```bash
 pnpm test:coverage    # 테스트 실행 + 커버리지 리포트
