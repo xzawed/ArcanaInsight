@@ -62,4 +62,21 @@ describe("CircuitBreaker — globalKey 공유 상태", () => {
     shared.markDown(60_000, "shared 다운");
     expect(local.isAvailable()).toBe(true);
   });
+
+  it("globalKey 위치에 손상된 값이 있을 때 graceful 복구 후 정상 동작", () => {
+    (globalThis as Record<string, unknown>)[KEY] = "corrupted-string";
+    const cb = new CircuitBreaker({ prefix: "test", globalKey: KEY });
+    expect(cb.isAvailable()).toBe(true);
+    cb.markDown(60_000, "복구 후 다운");
+    expect(cb.isAvailable()).toBe(false);
+    cb.resetForTests();
+    expect(cb.isAvailable()).toBe(true);
+  });
+
+  it("markDown 시점에 globalKey 값이 null이면 새 State로 재생성", () => {
+    const cb = new CircuitBreaker({ prefix: "test", globalKey: KEY });
+    (globalThis as Record<string, unknown>)[KEY] = null;
+    cb.markDown(60_000, "null 상태에서 다운");
+    expect(cb.isAvailable()).toBe(false);
+  });
 });

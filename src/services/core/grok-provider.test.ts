@@ -152,6 +152,16 @@ describe("GrokProvider", () => {
       expect((error as RateLimitError).retryAfterMs).toBe(30000);
     });
 
+    it("429 + retry-after 헤더가 비숫자이면 기본 30초로 fallback한다", async () => {
+      mockFetch.mockResolvedValue(
+        makeErrorResponse(429, "rate limited", { "retry-after": "not-a-number" })
+      );
+
+      const error = await provider.generateReading("s", "u").catch((e) => e);
+      expect(error).toBeInstanceOf(RateLimitError);
+      expect((error as RateLimitError).retryAfterMs).toBe(30000);
+    });
+
     it("500 응답 시 일반 Error를 던진다", async () => {
       mockFetch.mockResolvedValue(makeErrorResponse(500, "server error"));
 

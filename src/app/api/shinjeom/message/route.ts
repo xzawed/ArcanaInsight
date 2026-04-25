@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
             if (db && sessionId) {
-              saveShinjeomFinalReading(db, sessionId, result).catch(
+              void saveShinjeomFinalReading(db, sessionId, result).catch(
                 (e) => console.error("신점 최종 DB 저장 최종 실패:", e)
               );
             }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
             // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 (3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
             if (db && sessionId && currentMessage && messageIndex !== undefined) {
-              saveShinjeomMessages(db, sessionId, currentMessage, fullResponse, messageIndex).catch(
+              void saveShinjeomMessages(db, sessionId, currentMessage, fullResponse, messageIndex).catch(
                 (e) => console.error("신점 메시지 DB 저장 최종 실패:", e)
               );
             }
@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
     });
 
     return new Response(stream, { headers: SSE_HEADERS });
-  } catch {
+  } catch (err) {
+    console.error("[shinjeom-message] internal error:", err instanceof Error ? err.message : String(err));
     return jsonError("Internal server error", 500);
   }
 }

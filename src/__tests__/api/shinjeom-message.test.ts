@@ -88,6 +88,30 @@ describe("POST /api/shinjeom/message", () => {
     expect(res.status).toBe(500);
   });
 
+  it("DB 저장 실패해도 SSE 응답 정상 완료 (fire-and-forget 비블로킹)", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const mockSaveFail = vi.fn().mockRejectedValue(new Error("DB connection lost"));
+    vi.doMock("@/lib/db/reading-saver", () => ({
+      saveShinjeomMessages: mockSaveFail,
+      saveShinjeomFinalReading: vi.fn().mockResolvedValue(undefined),
+    }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/shinjeom/message/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-sh", isFinalTurn: false }));
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
+    await Promise.resolve();
+    expect(mockSaveFail).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
+
   it("중간 메시지 → saveShinjeomMessages fire-and-forget 호출", async () => {
     const mockSaveMsg = vi.fn().mockResolvedValue(undefined);
     vi.doMock("@/lib/db/reading-saver", () => ({

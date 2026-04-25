@@ -16,15 +16,27 @@ export class CircuitBreaker {
   }
 
   private getState(): State {
-    if (this.globalKey) return (globalThis as Record<string, unknown>)[this.globalKey] as State;
+    if (this.globalKey) {
+      const g = globalThis as Record<string, unknown>;
+      const val = g[this.globalKey];
+      if (typeof val === "object" && val !== null && "down" in val) return val as State;
+      g[this.globalKey] = { down: false, downUntil: 0 };
+      return g[this.globalKey] as State;
+    }
     return { down: this._down, downUntil: this._downUntil };
   }
 
   private setState(down: boolean, downUntil: number): void {
     if (this.globalKey) {
-      const s = (globalThis as Record<string, unknown>)[this.globalKey] as State;
-      s.down = down;
-      s.downUntil = downUntil;
+      const g = globalThis as Record<string, unknown>;
+      const val = g[this.globalKey];
+      if (typeof val === "object" && val !== null) {
+        const s = val as State;
+        s.down = down;
+        s.downUntil = downUntil;
+      } else {
+        g[this.globalKey] = { down, downUntil };
+      }
     } else {
       this._down = down;
       this._downUntil = downUntil;
