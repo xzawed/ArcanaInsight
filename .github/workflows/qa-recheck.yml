@@ -11,6 +11,11 @@ on:
       - 'n8n/**'
       - '.github/ISSUE_TEMPLATE/**'
 
+permissions:
+  contents: read
+  issues: read     # QA 실패 Issue 목록 조회
+  actions: write   # weekly-qa.yml dispatch 트리거
+
 jobs:
   check-and-recheck:
     name: QA Issue 확인 + 재검증

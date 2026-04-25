@@ -36,7 +36,7 @@ export const TarotReadingSchema = z.object({
   characterId: charIdStr,
   userInfo: z.object({
     name: z.string().max(50),
-    birthDate: z.string().max(20),
+    birthDate: dateStr,
     gender: z.string().max(10),
     birthHour: z.string().max(20),
   }).nullish(),
@@ -55,7 +55,7 @@ export const SajuReadingSchema = z.object({
   characterId: charIdStr,
   userInfo: z.object({
     name: z.string().max(50).optional(),
-    birthDate: z.string().max(20),
+    birthDate: dateStr,
     birthHour: z.string().max(20),
     gender: z.enum(["male", "female", "other"]),
   }),

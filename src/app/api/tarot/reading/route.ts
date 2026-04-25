@@ -10,7 +10,8 @@ import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
-import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/request-utils";
 import { resolveSystemPrompt, recordTrace } from "@/lib/verum";
 import { getGrokModel } from "@/lib/env"
 import { saveTarotReading } from "@/lib/db/reading-saver";
@@ -29,7 +30,7 @@ const TOKENS_MANY_CARDS = 6000;
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`tarot:${ip}`, 10, 60_000))) return rateLimitResponse();
 
     const rawBody = await request.json();
