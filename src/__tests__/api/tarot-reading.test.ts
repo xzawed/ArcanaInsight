@@ -118,6 +118,20 @@ describe("POST /api/tarot/reading", () => {
     expect(res.status).toBe(403);
   });
 
+  it("내부 예외 → 500", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue(new Error("unexpected")),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    vi.doMock("@/lib/verum", () => makeMockVerum());
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(500);
+  });
+
   it("스트림 완료 후 saveTarotReading fire-and-forget 호출", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
     vi.doMock("@/lib/db/reading-saver", () => ({ saveTarotReading: mockSave }));
