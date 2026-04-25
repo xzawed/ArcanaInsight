@@ -12,6 +12,7 @@ import * as path from "node:path";
 
 const ROOT = path.resolve(__dirname, "..");
 const CLAUDE_MD = path.join(ROOT, "CLAUDE.md");
+const UNIT_TESTING_MD = path.join(ROOT, "docs", "workflow", "unit-testing.md");
 const CHECK_MODE = process.argv.includes("--check");
 
 function getActualTestCount(): number {
@@ -45,6 +46,13 @@ function getDocumentedCount(content: string): number | null {
   return null;
 }
 
+function getUnitTestingCount(content: string): number | null {
+  // "- **575개 테스트** / statements 88%+" 패턴
+  const match = content.match(/\*\*(\d+)개 테스트\*\*/);
+  if (match) return Number.parseInt(match[1], 10);
+  return null;
+}
+
 const claudeMd = fs.readFileSync(CLAUDE_MD, "utf-8");
 const documented = getDocumentedCount(claudeMd);
 
@@ -53,28 +61,51 @@ if (documented === null) {
   process.exit(0);
 }
 
+const unitTestingMd = fs.readFileSync(UNIT_TESTING_MD, "utf-8");
+const unitTestingDocumented = getUnitTestingCount(unitTestingMd);
+
 console.log(`[sync-test-count] CLAUDE.md 기록: ${documented}개`);
+if (unitTestingDocumented !== null) {
+  console.log(`[sync-test-count] unit-testing.md 기록: ${unitTestingDocumented}개`);
+}
 console.log("[sync-test-count] Vitest 실행 중...");
 
 const actual = getActualTestCount();
 console.log(`[sync-test-count] 실제 테스트 수: ${actual}개`);
 
-if (documented === actual) {
+const claudeMatch = documented === actual;
+const unitMatch = unitTestingDocumented === null || unitTestingDocumented === actual;
+
+if (claudeMatch && unitMatch) {
   console.log("[sync-test-count] 일치. 변경 불필요.");
   process.exit(0);
 }
 
 if (CHECK_MODE) {
+  const msgs: string[] = [];
+  if (!claudeMatch) msgs.push(`CLAUDE.md: ${documented}개 / 실제: ${actual}개`);
+  if (!unitMatch) msgs.push(`unit-testing.md: ${unitTestingDocumented}개 / 실제: ${actual}개`);
   console.error(
-    `[sync-test-count] 불일치! CLAUDE.md: ${documented}개 / 실제: ${actual}개\n` +
+    `[sync-test-count] 불일치!\n  ${msgs.join("\n  ")}\n` +
     `  다음 명령으로 자동 갱신하세요: pnpm exec tsx scripts/sync-test-count.ts`
   );
   process.exit(1);
 }
 
-const updated = claudeMd.replace(
-  /(Vitest[^(]*\(\s*)(\d+)(개,?\s*statements)/,
-  `$1${actual}$3`
-);
-fs.writeFileSync(CLAUDE_MD, updated, "utf-8");
-console.log(`[sync-test-count] CLAUDE.md 갱신 완료: ${documented}개 → ${actual}개`);
+if (!claudeMatch) {
+  const updated = claudeMd.replace(
+    /(Vitest[^(]*\(\s*)(\d+)(개,?\s*statements)/,
+    `$1${actual}$3`
+  );
+  fs.writeFileSync(CLAUDE_MD, updated, "utf-8");
+  console.log(`[sync-test-count] CLAUDE.md 갱신 완료: ${documented}개 → ${actual}개`);
+}
+
+if (!unitMatch && unitTestingDocumented !== null) {
+  const updated = unitTestingMd.replace(
+    /(\*\*)(\d+)(개 테스트\*\*)/,
+    `$1${actual}$3`
+  );
+  fs.writeFileSync(UNIT_TESTING_MD, updated, "utf-8");
+  console.log(`[sync-test-count] unit-testing.md 갱신 완료: ${unitTestingDocumented}개 → ${actual}개`);
+}
