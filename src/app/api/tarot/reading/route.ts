@@ -12,8 +12,6 @@ import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
-import { resolveSystemPrompt, recordTrace } from "@/lib/verum";
-import { getGrokModel } from "@/lib/env"
 import { saveTarotReading } from "@/lib/db/reading-saver";
 
 const tarotService = new TarotService();
@@ -61,7 +59,7 @@ export async function POST(request: NextRequest) {
     });
 
     const rawSystemPrompt = tarotService.getSystemPrompt(characterId);
-    const { systemPrompt, routedTo, deploymentId: verumdepId } = await resolveSystemPrompt(rawSystemPrompt);
+    const systemPrompt = rawSystemPrompt;
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
       ? spreadType
@@ -78,7 +76,6 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         let fullResponse = "";
-        const startTime = Date.now();
         try {
           // 카드 수에 따라 max_tokens 조정 (JSON 구조 오버헤드 감안)
           const cardCount = cards.length;
@@ -95,15 +92,6 @@ export async function POST(request: NextRequest) {
 
           // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
-
-          // Verum trace 기록 — fire-and-forget
-          recordTrace({
-            deploymentId: verumdepId,
-            routedTo,
-            model: getGrokModel(),
-            outputLength: fullResponse.length,
-            latencyMs: Date.now() - startTime,
-          });
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
           if (db && sessionId) {

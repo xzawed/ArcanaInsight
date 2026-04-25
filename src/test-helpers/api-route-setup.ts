@@ -60,7 +60,7 @@ export async function makeResultRouteSetup(
 
 /**
  * POST SSE streaming 라우트 (saju-reading / shinjeom-message) 공통 setup.
- * rate-limit·DB·Auth·FallbackProvider 모킹. verum 미포함 (tarot-reading만 verum 사용).
+ * rate-limit·DB·Auth·FallbackProvider 모킹.
  */
 export async function makeStreamingRouteSetup(
   routeImport: () => Promise<{ POST: unknown }>,

@@ -3,7 +3,7 @@ import { setupDoMock } from "@/test-helpers/reset-modules";
 import { makeMockDb } from "@/test-helpers/mock-db";
 import { makeAuthMock } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
-import { makeMockAiModule, makeMockVerum, readSSEStream } from "@/test-helpers/mock-ai";
+import { makeMockAiModule, readSSEStream } from "@/test-helpers/mock-ai";
 
 setupDoMock();
 
@@ -37,7 +37,6 @@ async function setup(options: { aiError?: boolean } = {}) {
   vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
   vi.doMock("@/lib/auth", () => makeAuthMock());
   vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
-  vi.doMock("@/lib/verum", () => makeMockVerum());
 
   const { POST } = await import("@/app/api/tarot/reading/route");
   return { POST, mockDb };
@@ -81,7 +80,6 @@ describe("POST /api/tarot/reading", () => {
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
-    vi.doMock("@/lib/verum", () => makeMockVerum());
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(429);
@@ -112,7 +110,6 @@ describe("POST /api/tarot/reading", () => {
       ),
     }));
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
-    vi.doMock("@/lib/verum", () => makeMockVerum());
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "session-other-user" }));
     expect(res.status).toBe(403);
@@ -126,7 +123,6 @@ describe("POST /api/tarot/reading", () => {
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
-    vi.doMock("@/lib/verum", () => makeMockVerum());
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
@@ -143,7 +139,6 @@ describe("POST /api/tarot/reading", () => {
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
-    vi.doMock("@/lib/verum", () => makeMockVerum());
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-existing" }));
     await readSSEStream(res);
