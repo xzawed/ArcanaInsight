@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limiting
     const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
-    if (!checkRateLimit(`tarot:${ip}`, 10, 60_000)) return rateLimitResponse();
+    if (!(await checkRateLimit(`tarot:${ip}`, 10, 60_000))) return rateLimitResponse();
 
     const rawBody = await request.json();
 

@@ -24,6 +24,10 @@ export function getAiAuthCooldownMs(): number { return parseInt(process.env.AI_A
 // DB
 export function getPostgresPoolSize(): number { return parseInt(process.env.POSTGRES_POOL_SIZE ?? "10", 10) }
 
+// Rate-limit (Upstash Redis)
+export function getUpstashRedisRestUrl(): string { return process.env.UPSTASH_REDIS_REST_URL ?? "" }
+export function getUpstashRedisRestToken(): string { return process.env.UPSTASH_REDIS_REST_TOKEN ?? "" }
+
 // Verum
 export function getVerumApiUrl(): string { return process.env.VERUM_API_URL ?? "" }
 export function getVerumApiKey(): string { return process.env.VERUM_API_KEY ?? "" }
