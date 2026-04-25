@@ -12,6 +12,11 @@ async function* failingStreamGenerator(): AsyncGenerator<string, void, unknown> 
   throw new Error("AI error");
 }
 
+async function* failingStreamNonError(): AsyncGenerator<string, void, unknown> {
+  for (const chunk of [] as string[]) yield chunk;
+  throw "non-error string throw"; // non-Error to trigger String(e) catch branch
+}
+
 const VALID_BODY = {
   sessionId: null,
   topic: "love",
@@ -198,5 +203,54 @@ describe("POST /api/tarot/reading", () => {
       expect.objectContaining({ overallReading: expect.any(String) }),
       expect.any(Array)
     );
+  });
+
+  it("존재하지 않는 cardId → Card not found 에러 → 500", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      cards: [{ cardId: "invalid-card-xyz-9999", position: 0, isReversed: false }],
+    }));
+    expect(res.status).toBe(500);
+  });
+
+  it("카드 position이 음수 → Zod min(0) 검증 실패 → 400", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      cards: [{ cardId: "major-00", position: -1, isReversed: false }],
+    }));
+    expect(res.status).toBe(400);
+  });
+
+  it("AI 스트림이 non-Error throw → 스트림 catch String(e) 분기 커버", async () => {
+    const mockAiModule = makeMockAiModule();
+    const provider = { streamReading: vi.fn().mockReturnValue(failingStreamNonError()) };
+    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(200);
+    const text = await readSSEStream(res);
+    expect(text).toContain("error");
+  });
+
+  it("outer catch non-Error → String(e) 분기 커버", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue("string-throw"),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(500);
   });
 });
