@@ -62,7 +62,7 @@ jobs:
       # ── SonarCloud 분석 ──────────────────────────────────────────────────
       - name: SonarCloud Scan
         if: always()   # E2E 실패 여부와 무관하게 항상 스캔 — Coverage 뱃지 보장
-        uses: SonarSource/sonarqube-scan-action@v4.2.1
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
