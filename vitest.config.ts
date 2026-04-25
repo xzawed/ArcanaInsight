@@ -76,10 +76,10 @@ export default defineConfig({
         "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
       thresholds: {
-        branches: 75,
-        functions: 85,
-        lines: 88,
-        statements: 88,
+        branches: 92,
+        functions: 98,
+        lines: 98,
+        statements: 98,
       },
     },
   },

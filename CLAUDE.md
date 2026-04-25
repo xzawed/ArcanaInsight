@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (618개, statements 88%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (656개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -98,7 +98,7 @@ pnpm dev           # 개발 서버
 pnpm build         # 프로덕션 빌드
 pnpm lint          # ESLint
 pnpm type-check    # tsc --noEmit
-pnpm test:coverage # Vitest + 커버리지 (statements 88%)
+pnpm test:coverage # Vitest + 커버리지 (statements 98%)
 pnpm test:e2e      # Playwright (3 디바이스)
 pnpm exec tsx scripts/sync-test-count.ts       # CLAUDE.md 테스트 수 동기화
 pnpm exec tsx scripts/check-env-docs.ts        # env.ts ↔ env-variables.md 정합성

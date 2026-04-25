@@ -40,6 +40,7 @@ vi.mock("@/data/characters", () => ({
 
 // 모킹 후에 TarotService를 import (모킹이 먼저 적용되어야 함)
 import { TarotService } from "./tarot-service";
+import { getCharacterById } from "@/data/characters";
 
 describe("TarotService", () => {
   let service: TarotService;
@@ -112,6 +113,13 @@ describe("TarotService", () => {
     });
   });
 
+  describe("getCharacter()", () => {
+    it("arcana 캐릭터를 찾을 수 없으면 Error를 던진다", () => {
+      vi.mocked(getCharacterById).mockReturnValueOnce(undefined);
+      expect(() => service.getCharacter()).toThrow("Arcana character not found");
+    });
+  });
+
   describe("getSystemPrompt(characterId)", () => {
     it('"arcana" characterId로 비어있지 않은 시스템 프롬프트를 반환한다', () => {
       const prompt = service.getSystemPrompt("arcana");
@@ -156,6 +164,18 @@ describe("TarotService", () => {
       expect(prompt.length).toBeGreaterThan(0);
     });
 
+    it("session.spreadType이 알 수 없는 값이면 topic으로 fallback한다 (?? 분기)", () => {
+      const context = {
+        session: { spreadType: "unknown-spread-type-xyz", selectedCards: [] },
+        topic: "love",
+        chatHistory: [],
+        selectedCards: [],
+      };
+      const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
+      expect(typeof prompt).toBe("string");
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+
     it("session.spreadType이 null이면 topic으로 spreadType을 결정한다", () => {
       // spreadType이 null → resolveForTopic() 분기
       const context = {
@@ -163,6 +183,18 @@ describe("TarotService", () => {
         topic: "health",
         chatHistory: [],
         selectedCards: [],
+      };
+      const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
+      expect(typeof prompt).toBe("string");
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+
+    it("context.selectedCards가 null이면 ?? []로 빈 배열을 사용한다", () => {
+      const context = {
+        session: { spreadType: "three-card", selectedCards: [] },
+        topic: "love",
+        chatHistory: [],
+        selectedCards: null,
       };
       const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
       expect(typeof prompt).toBe("string");
@@ -254,6 +286,17 @@ describe("TarotService", () => {
       expect(result.overallReading).toBeTruthy();
     });
 
+    it("cardInterpretations가 배열이 아닌 값이면 빈 배열로 처리한다 (else 분기)", () => {
+      const json = JSON.stringify({
+        cardInterpretations: "not-an-array",
+        overallReading: "전반 결과",
+        advice: "조언",
+      });
+      const result = service.parseResult(json);
+      expect(Array.isArray(result.cardInterpretations)).toBe(true);
+      expect(result.cardInterpretations).toHaveLength(0);
+    });
+
     it("cardInterpretations 없는 JSON도 처리한다 (undefined → 빈 배열)", () => {
       const jsonWithoutCards = JSON.stringify({
         overallReading: "종합 운세 결과입니다",
@@ -287,6 +330,18 @@ describe("TarotService", () => {
       // 빈 문자열 → extractFallbackText("") = "" → cleanText || "해석 결과..." fallback
       const result = service.parseResult("");
       expect(result.overallReading).toContain("해석 결과를 처리하는 중 문제가 발생했습니다");
+    });
+
+    it("interpretation/overallReading/advice가 falsy이면 || '' 빈 문자열로 처리한다", () => {
+      const json = JSON.stringify({
+        cardInterpretations: [{ cardId: "major-00", position: 0, interpretation: "" }],
+        overallReading: "",
+        advice: null,
+      });
+      const result = service.parseResult(json);
+      expect(result.cardInterpretations).toHaveLength(1);
+      expect(result.overallReading).toBeDefined();
+      expect(result.advice).toBeDefined();
     });
   });
 });
