@@ -6,9 +6,9 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **558개 테스트** / 95%+ 커버리지
+- **587개 테스트** / statements 88%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
-- 임계값: `statements 60%` (PR E에서 상향 예정)
+- 임계값: `branches 75 / functions 85 / lines 88 / statements 88`
 
 ```bash
 pnpm test:coverage    # 테스트 실행 + 커버리지 리포트
@@ -124,7 +124,10 @@ beforeEach(() => {
 ```ts
 coverage: {
   thresholds: {
-    statements: 60,  // PR E에서 branches 65/functions 75/lines 75로 상향 예정
+    branches: 75,
+    functions: 85,
+    lines: 88,
+    statements: 88,
   }
 }
 ```

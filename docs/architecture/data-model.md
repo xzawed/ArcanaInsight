@@ -25,6 +25,8 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 
 각 캐릭터는 6가지 표정(Mood): `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 
+> `idle.png` 파일도 존재하며 `CharacterGallery` 컴포넌트에서 하드코딩으로 사용. `Mood` 타입에는 포함되지 않음.
+
 ---
 
 ## 2. 세션 중 캐릭터 표정 규칙
