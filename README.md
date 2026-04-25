@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-xzawed-blue?style=for-the-badge" alt="License" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
   <img src="https://img.shields.io/badge/status-v1.0.0%20Live-brightgreen?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
@@ -280,10 +280,10 @@ pnpm test:e2e:ui   # 🖥️  Playwright UI 모드 (시각적 디버깅)
 
 ---
 
-## 📜 소유권
+## 📄 라이선스
 
-이 프로젝트의 저작권 및 소유권은 **xzawed**에게 있습니다.
+이 프로젝트는 **[MIT 라이선스](LICENSE)** 하에 오픈소스로 공개됩니다.
 
-무단 복제, 배포, 수정을 금지합니다.
+누구나 자유롭게 사용, 수정, 배포할 수 있습니다. 단, 저작권 표시와 라이선스 전문을 함께 포함해야 합니다.
 
-© 2026 xzawed. All rights reserved.
+© 2026 **xzawed**

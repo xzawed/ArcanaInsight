@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-xzawed-blue?style=for-the-badge" alt="License" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
   <img src="https://img.shields.io/badge/status-v1.0.0%20Live-brightgreen?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
@@ -280,10 +280,10 @@ Full operations system and 7-step development process: [CLAUDE.md](./CLAUDE.md)
 
 ---
 
-## 📜 Ownership
+## 📄 License
 
-Copyright and ownership of this project belong to **xzawed**.
+This project is open source, released under the **[MIT License](LICENSE)**.
 
-Unauthorized reproduction, distribution, or modification is prohibited.
+You are free to use, modify, and distribute this software. Please include the copyright notice and the full license text in any copies or substantial portions of the software.
 
-© 2026 xzawed. All rights reserved.
+© 2026 **xzawed**
