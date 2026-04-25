@@ -10,9 +10,7 @@
 
 | 기능 | 위치 | 현재 상태 | 비고 |
 |------|------|----------|------|
-| GenderFilter 홈 노출 | `components/home/GenderFilter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
-| StatsCounter 홈 노출 | `components/home/StatsCounter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
-| ReviewCarousel 홈 노출 | `components/home/ReviewCarousel.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
+| (없음) | — | — | — |
 
 ---
 
