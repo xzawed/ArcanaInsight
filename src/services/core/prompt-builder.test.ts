@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt } from "./prompt-builder";
+import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader } from "./prompt-builder";
 import type { CharacterConfig } from "@/types/character";
 import type { SelectedCard, TarotCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
@@ -402,5 +402,40 @@ describe("buildReadingPrompt", () => {
   it("string 타입을 반환한다", () => {
     const selected = [makeSelectedCard(dummyCard, 0, false)];
     expect(typeof buildReadingPrompt("general", selected, dummySpread)).toBe("string");
+  });
+});
+
+describe("buildCharacterHeader", () => {
+  it("캐릭터 이름과 일본어 이름을 포함한다", () => {
+    const result = buildCharacterHeader(dummyCharacter);
+    expect(result).toContain(dummyCharacter.name);
+    expect(result).toContain(dummyCharacter.nameJp);
+  });
+
+  it("성격(personality)을 포함한다", () => {
+    const result = buildCharacterHeader(dummyCharacter);
+    expect(result).toContain(dummyCharacter.personality);
+  });
+
+  it("말투(speechStyle)를 포함한다", () => {
+    const result = buildCharacterHeader(dummyCharacter);
+    expect(result).toContain(dummyCharacter.speechStyle);
+  });
+
+  it("'한국어로만 응답합니다' 공통 규칙을 포함한다", () => {
+    expect(buildCharacterHeader(dummyCharacter)).toContain("한국어로만 응답합니다");
+  });
+
+  it("subtitle 없이 호출하면 subtitle 줄이 없다", () => {
+    const result = buildCharacterHeader(dummyCharacter);
+    expect(result).not.toContain("\n신점");
+  });
+
+  it("subtitle 전달 시 첫 줄 바로 뒤에 포함된다", () => {
+    const subtitle = "신점(영적 상담)을 제공하는 무속 상담사입니다.";
+    const result = buildCharacterHeader(dummyCharacter, subtitle);
+    expect(result).toContain(subtitle);
+    const lines = result.split("\n");
+    expect(lines[1]).toBe(subtitle);
   });
 });

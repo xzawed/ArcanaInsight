@@ -3,6 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText } from "@/services/core/text-cleaner";
+import { buildCharacterHeader } from "@/services/core/prompt-builder";
 
 const topicLabels: Record<string, string> = {
   "shinjeom-general": "신수 (종합운)",
@@ -40,14 +41,7 @@ export class ShinjeomService implements DivinationService {
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
 
-    return `당신은 "${character.name}" (${character.nameJp})입니다.
-신점(영적 상담)을 제공하는 무속 상담사입니다.
-
-성격: ${character.personality}
-
-말투 규칙:
-- ${character.speechStyle}
-- 한국어로만 응답합니다.
+    return `${buildCharacterHeader(character, "신점(영적 상담)을 제공하는 무속 상담사입니다.")}
 - 영적 직관과 무속적 지혜를 바탕으로 상담합니다.
 - 사용자의 고민에 공감하며 따뜻하게 대합니다.
 - 지나치게 부정적이거나 공포를 조장하지 않습니다.

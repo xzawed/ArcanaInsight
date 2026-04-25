@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanReadingText, parseJsonSafe } from "./text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "./text-cleaner";
 
 describe("cleanReadingText", () => {
   it("빈 문자열 입력 시 빈 문자열을 반환한다", () => {
@@ -238,5 +238,51 @@ describe("parseJsonSafe", () => {
 
   it("닫히지 않은 중괄호는 null 반환", () => {
     expect(parseJsonSafe('{"key": "unclosed')).toBeNull();
+  });
+});
+
+describe("extractFallbackText", () => {
+  it("빈 문자열 입력 시 빈 문자열을 반환한다", () => {
+    expect(extractFallbackText("")).toBe("");
+  });
+
+  it("<think>...</think> thinking 토큰을 제거한다", () => {
+    const input = `<think>내부 사고</think>\n실제 내용`;
+    expect(extractFallbackText(input)).toBe("실제 내용");
+  });
+
+  it("마크다운 코드블록을 제거한다", () => {
+    const input = "```json\n{...}\n```\n유용한 텍스트";
+    expect(extractFallbackText(input)).toContain("유용한 텍스트");
+    expect(extractFallbackText(input)).not.toContain("```");
+  });
+
+  it("중괄호·대괄호를 모두 제거한다 (tarot+saju 통합)", () => {
+    const input = `{"overallReading": "해석"}\n[항목]`;
+    const result = extractFallbackText(input);
+    expect(result).not.toContain("{");
+    expect(result).not.toContain("}");
+    expect(result).not.toContain("[");
+    expect(result).not.toContain("]");
+  });
+
+  it("JSON 키 패턴 '\"key\":' 를 제거한다", () => {
+    const input = `"overallReading": 결과 텍스트`;
+    expect(extractFallbackText(input)).not.toContain('"overallReading":');
+    expect(extractFallbackText(input)).toContain("결과 텍스트");
+  });
+
+  it(String.raw`\n 이스케이프를 실제 개행으로 변환한다`, () => {
+    const input = String.raw`문단1\n\n문단2`;
+    expect(extractFallbackText(input)).toBe("문단1\n\n문단2");
+  });
+
+  it("3개 이상 연속 개행을 2개로 축소한다", () => {
+    const input = "문단1\n\n\n\n문단2";
+    expect(extractFallbackText(input)).not.toMatch(/\n{3,}/);
+  });
+
+  it("일반 텍스트는 trim 후 그대로 반환한다", () => {
+    expect(extractFallbackText("  해석 결과  ")).toBe("해석 결과");
   });
 });

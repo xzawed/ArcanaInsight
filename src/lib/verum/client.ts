@@ -6,6 +6,7 @@ import {
   getVerumFailureCooldownMs,
   getVerumAuthCooldownMs,
 } from "@/lib/env";
+import { CircuitBreaker } from "@/services/core/circuit-breaker";
 import { DeploymentConfigCache } from "./cache";
 import { chooseVariant } from "./router";
 import {
@@ -32,9 +33,7 @@ export class VerumClient {
   private readonly apiUrl: string;
   private readonly apiKey: string;
   private readonly cache: DeploymentConfigCache<DeploymentConfig>;
-
-  private down = false;
-  private downUntil = 0;
+  private readonly circuit = new CircuitBreaker({ prefix: "Verum" });
 
   constructor(options?: { apiUrl?: string; apiKey?: string; cacheTtlMs?: number }) {
     this.apiUrl = (options?.apiUrl ?? getVerumApiUrl()).replace(/\/$/, "");
@@ -42,24 +41,12 @@ export class VerumClient {
     this.cache = new DeploymentConfigCache(options?.cacheTtlMs ?? 60_000);
   }
 
-  private isAvailable(): boolean {
-    if (!this.down) return true;
-    if (Date.now() > this.downUntil) { this.down = false; return true; }
-    return false;
-  }
-
-  private markDown(cooldownMs: number, reason: string): void {
-    this.down = true;
-    this.downUntil = Date.now() + cooldownMs;
-    console.warn(`[Verum] circuit open for ${cooldownMs}ms — ${reason}`);
-  }
-
   async chat(messages: ChatMessage[], deploymentId?: string): Promise<ChatResult> {
     if (!deploymentId) {
       return { messages, routed_to: "baseline", deployment_id: null };
     }
 
-    if (!this.isAvailable()) {
+    if (!this.circuit.isAvailable()) {
       return { messages, routed_to: "baseline", deployment_id: null };
     }
 
@@ -87,7 +74,7 @@ export class VerumClient {
     latencyMs: number;
     error?: string | null;
   }): Promise<string> {
-    if (!this.isAvailable()) return "";
+    if (!this.circuit.isAvailable()) return "";
 
     const timeoutMs = getVerumRecordTimeoutMs();
     const controller = new AbortController();
@@ -111,7 +98,7 @@ export class VerumClient {
 
       if (res.status === 401 || res.status === 403) {
         res.body?.cancel();
-        this.markDown(getVerumAuthCooldownMs(), `record auth error ${res.status}`);
+        this.circuit.markDown(getVerumAuthCooldownMs(), `record auth error ${res.status}`);
         throw new VerumAuthError(res.status);
       }
 
@@ -130,10 +117,10 @@ export class VerumClient {
     } catch (err) {
       if (err instanceof VerumAuthError) throw err;
       if (err instanceof DOMException && err.name === "AbortError") {
-        this.markDown(getVerumFailureCooldownMs(), `record timeout ${timeoutMs}ms`);
+        this.circuit.markDown(getVerumFailureCooldownMs(), `record timeout ${timeoutMs}ms`);
         throw new VerumTimeoutError(timeoutMs);
       }
-      this.markDown(getVerumFailureCooldownMs(), `record network error`);
+      this.circuit.markDown(getVerumFailureCooldownMs(), `record network error`);
       throw err;
     } finally {
       clearTimeout(timer);
@@ -157,7 +144,7 @@ export class VerumClient {
 
       if (res.status === 401 || res.status === 403) {
         res.body?.cancel();
-        this.markDown(getVerumAuthCooldownMs(), `config auth error ${res.status}`);
+        this.circuit.markDown(getVerumAuthCooldownMs(), `config auth error ${res.status}`);
         throw new VerumAuthError(res.status);
       }
 
@@ -165,19 +152,19 @@ export class VerumClient {
         const retryAfter = parseInt(res.headers.get("retry-after") ?? "30", 10);
         const retryMs = retryAfter * 1000;
         res.body?.cancel();
-        this.markDown(retryMs, `config rate limited`);
+        this.circuit.markDown(retryMs, `config rate limited`);
         throw new VerumRateLimitError(retryMs);
       }
 
       if (!res.ok) {
         res.body?.cancel();
-        this.markDown(getVerumFailureCooldownMs(), `config error ${res.status}`);
+        this.circuit.markDown(getVerumFailureCooldownMs(), `config error ${res.status}`);
         throw new Error(`Verum config fetch failed: ${res.status}`);
       }
 
       const parsed = DeploymentConfigSchema.safeParse(await res.json());
       if (!parsed.success) {
-        this.markDown(getVerumFailureCooldownMs(), `config schema invalid`);
+        this.circuit.markDown(getVerumFailureCooldownMs(), `config schema invalid`);
         throw new VerumSchemaError(parsed.error.message);
       }
       return parsed.data;
@@ -190,10 +177,10 @@ export class VerumClient {
         throw err;
       }
       if (err instanceof DOMException && err.name === "AbortError") {
-        this.markDown(getVerumFailureCooldownMs(), `config timeout ${timeoutMs}ms`);
+        this.circuit.markDown(getVerumFailureCooldownMs(), `config timeout ${timeoutMs}ms`);
         throw new VerumTimeoutError(timeoutMs);
       }
-      this.markDown(getVerumFailureCooldownMs(), `config network error`);
+      this.circuit.markDown(getVerumFailureCooldownMs(), `config network error`);
       throw err;
     } finally {
       clearTimeout(timer);
@@ -202,7 +189,6 @@ export class VerumClient {
 
   /** 테스트 전용 — 서킷 브레이커 상태 초기화 */
   resetForTests(): void {
-    this.down = false;
-    this.downUntil = 0;
+    this.circuit.resetForTests();
   }
 }
