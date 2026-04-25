@@ -19,7 +19,7 @@ export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsen
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
         >
-          <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+          <button type="button" aria-label="모달 닫기" onClick={onCancel} className="absolute inset-0 bg-black/60 cursor-default" />
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

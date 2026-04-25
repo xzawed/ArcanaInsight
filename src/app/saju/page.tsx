@@ -134,10 +134,14 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
         {selectedTimeOption?.allowMonthly && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-5">
             <label className="flex items-center gap-2 cursor-pointer group w-fit">
-              <div onClick={onMonthlyToggle}
+              <button
+                type="button"
+                onClick={onMonthlyToggle}
+                role="switch"
+                aria-checked={monthlyToggle}
                 className={`w-9 h-5 rounded-full transition-colors relative ${monthlyToggle ? "bg-arcana-purple" : "bg-arcana-border"}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${monthlyToggle ? "translate-x-4" : "translate-x-0.5"}`} />
-              </div>
+              </button>
               <span className="text-xs font-sans text-arcana-muted group-hover:text-arcana-text transition-colors">월별 상세 포함</span>
             </label>
           </motion.div>
