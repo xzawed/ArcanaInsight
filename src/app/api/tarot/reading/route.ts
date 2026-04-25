@@ -11,7 +11,7 @@ import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
-import { getClientIp } from "@/lib/request-utils";
+import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
 import { resolveSystemPrompt, recordTrace } from "@/lib/verum";
 import { getGrokModel } from "@/lib/env"
 import { saveTarotReading } from "@/lib/db/reading-saver";
@@ -37,9 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Zod 입력 검증
     const parsed = TarotReadingSchema.safeParse(rawBody);
-    if (!parsed.success) {
-      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!parsed.success) return jsonError("Invalid request");
     const { sessionId, topic, spreadType, characterId, userInfo, cards } = parsed.data as {
       sessionId?: string | null; topic: Topic; spreadType?: string; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
@@ -47,9 +45,7 @@ export async function POST(request: NextRequest) {
     };
 
     // 입력 검증
-    if (!TAROT_TOPICS.includes(topic)) {
-      return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!TAROT_TOPICS.includes(topic)) return jsonError("Invalid topic");
 
     // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
     if (sessionId) {
@@ -122,11 +118,9 @@ export async function POST(request: NextRequest) {
         controller.close();
       },
     });
-    return new Response(stream, {
-      headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
-    });
+    return new Response(stream, { headers: SSE_HEADERS });
   } catch (e) {
     console.error("리딩 API 오류:", e instanceof Error ? e.message : String(e));
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return jsonError("Internal server error", 500);
   }
 }

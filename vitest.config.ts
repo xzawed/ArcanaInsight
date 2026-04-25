@@ -22,7 +22,7 @@ export default defineConfig({
       include: [
         "src/data/topics.ts",        // 유효 토픽 목록 — 테스트 있음
         "src/lib/env.ts",            // 환경변수 getter — 테스트 있음
-        "src/lib/request-utils.ts",       // IP 추출·필드 선택 유틸 — 테스트 있음
+        "src/lib/request-utils.ts",       // IP 추출·pickFields·jsonError·SSE_HEADERS — 테스트 있음
         "src/lib/db/supabase-adapter.ts", // DB 어댑터 — 테스트 있음
         "src/lib/rate-limit.ts",          // Rate Limiter — 테스트 있음
         "src/lib/validation/api-schemas.ts", // Zod 스키마 — null/undefined 경계 테스트 있음

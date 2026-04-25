@@ -21,6 +21,7 @@
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | whitelist 방식, 전체 코드의 일부만 측정 | include 확장 또는 exclude 방식 전환 시 처리 |
 | rate-limit Redis 미설정 | `src/lib/rate-limit.ts` | `UPSTASH_REDIS_REST_URL` 미설정 시 in-memory fallback 동작 | Railway에서 Upstash 연결 설정 시 분산 처리 활성화 |
 | SupabaseAdapter 통합 테스트 부재 | `src/lib/db/supabase-adapter.ts` | mock 체인이 자기충족적, 실제 Supabase 응답 미검증 | 통합 테스트 환경 구축 후 처리 |
+| **Google Fonts CDN 로컬 빌드 실패** | `src/app/layout.tsx` | Windows 개발환경에서 `next/font/google` 빌드 시 fonts.gstatic.com 접속 불가 → `pnpm build` 항상 실패 | 로컬 폰트(self-hosted) 전환 또는 Next.js `localFont` 사용. 현재 임시 조치: pre-push 빌드 실패 경고만 출력, CI 빌드로 최종 검증 |
 
 ---
 

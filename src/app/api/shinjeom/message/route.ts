@@ -4,12 +4,10 @@ import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
-
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
-import { getClientIp } from "@/lib/request-utils"
+import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
-
 
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
@@ -29,9 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)
     const parsed = ShinjeomMessageSchema.safeParse(rawBody);
-    if (!parsed.success) {
-      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!parsed.success) return jsonError("Invalid request");
     const { sessionId, characterId, currentMessage, isFinalTurn, messageIndex } = parsed.data;
     const topic = parsed.data.topic as Topic;
     // timestamp는 네트워크 전송 시 문자열/숫자로 직렬화되므로 Date로 복원
@@ -40,9 +36,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date(m.timestamp),
     }));
 
-    if (!isFinalTurn && !currentMessage) {
-      return new Response(JSON.stringify({ error: "Message required for non-final turns" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!isFinalTurn && !currentMessage) return jsonError("Message required for non-final turns");
 
     // 세션 소유권 검증 (sessionId 있을 때만)
     if (sessionId) {
@@ -92,10 +86,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return new Response(stream, {
-      headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
-    });
+    return new Response(stream, { headers: SSE_HEADERS });
   } catch {
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return jsonError("Internal server error", 500);
   }
 }

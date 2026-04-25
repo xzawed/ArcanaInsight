@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getClientIp, pickFields } from "./request-utils"
+import { getClientIp, pickFields, jsonError, SSE_HEADERS } from "./request-utils"
 
 function makeHeaders(entries: Record<string, string>): Headers {
   return new Headers(entries)
@@ -62,5 +62,34 @@ describe("pickFields", () => {
     const safe = pickFields(reading, ["id", "overall_reading"])
     expect(safe).toEqual({ id: "r-1", overall_reading: "text" })
     expect(safe.session_id).toBeUndefined()
+  })
+})
+
+describe("jsonError", () => {
+  it("기본 status 400으로 JSON 에러 응답 생성", async () => {
+    const res = jsonError("Invalid request")
+    expect(res.status).toBe(400)
+    expect(res.headers.get("Content-Type")).toBe("application/json")
+    expect(await res.json()).toEqual({ error: "Invalid request" })
+  })
+
+  it("커스텀 status 코드 지원", async () => {
+    const res = jsonError("Not found", 404)
+    expect(res.status).toBe(404)
+    expect(await res.json()).toEqual({ error: "Not found" })
+  })
+
+  it("500 에러", async () => {
+    const res = jsonError("Internal server error", 500)
+    expect(res.status).toBe(500)
+    expect(await res.json()).toEqual({ error: "Internal server error" })
+  })
+})
+
+describe("SSE_HEADERS", () => {
+  it("SSE 스트리밍에 필요한 헤더 3개 포함", () => {
+    expect(SSE_HEADERS["Content-Type"]).toBe("text/event-stream")
+    expect(SSE_HEADERS["Cache-Control"]).toBe("no-cache")
+    expect(SSE_HEADERS["Connection"]).toBe("keep-alive")
   })
 })

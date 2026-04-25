@@ -10,3 +10,16 @@ export function pickFields(
 ): Record<string, unknown> {
   return Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]))
 }
+
+export function jsonError(error: string, status = 400): Response {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  })
+}
+
+export const SSE_HEADERS = {
+  "Content-Type": "text/event-stream",
+  "Cache-Control": "no-cache",
+  Connection: "keep-alive",
+} as const

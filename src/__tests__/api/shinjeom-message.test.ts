@@ -75,6 +75,19 @@ describe("POST /api/shinjeom/message", () => {
     expect(res.status).toBe(429);
   });
 
+  it("내부 예외 → 500", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue(new Error("unexpected")),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/shinjeom/message/route");
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(500);
+  });
+
   it("중간 메시지 → saveShinjeomMessages fire-and-forget 호출", async () => {
     const mockSaveMsg = vi.fn().mockResolvedValue(undefined);
     vi.doMock("@/lib/db/reading-saver", () => ({
