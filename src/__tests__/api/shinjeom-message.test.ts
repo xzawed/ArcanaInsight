@@ -4,6 +4,7 @@ import { makeMockDb } from "@/test-helpers/mock-db";
 import { makeAuthMock } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
 import { makeMockAiModule, readSSEStream } from "@/test-helpers/mock-ai";
+import { makeStreamingRouteSetup } from "@/test-helpers/api-route-setup";
 
 setupDoMock();
 
@@ -18,21 +19,14 @@ const VALID_BODY = {
 };
 
 async function setup() {
-  const mockDb = makeMockDb();
-  mockDb.insert.mockResolvedValue({ id: "sm-1" });
-  mockDb.insertMany.mockResolvedValue([]);
-  mockDb.update.mockResolvedValue(null);
-
-  vi.doMock("@/lib/rate-limit", () => ({
-    checkRateLimit: vi.fn().mockReturnValue(true),
-    rateLimitResponse: vi.fn(),
-  }));
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
-  vi.doMock("@/lib/auth", () => makeAuthMock());
-  vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
-
-  const { POST } = await import("@/app/api/shinjeom/message/route");
-  return { POST, mockDb };
+  return makeStreamingRouteSetup(
+    () => import("@/app/api/shinjeom/message/route"),
+    (db) => {
+      db.insert.mockResolvedValue({ id: "sm-1" });
+      db.insertMany.mockResolvedValue([]);
+      db.update.mockResolvedValue(null);
+    }
+  );
 }
 
 describe("POST /api/shinjeom/message", () => {
