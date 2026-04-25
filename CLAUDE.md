@@ -192,7 +192,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 **자율 관리 원칙**: 필요하면 즉시 생성, 불필요하면 즉시 삭제, 변경 후 보고. 파괴적 변경(deny 규칙·훅 삭제)만 사전 확인.
 
-**문서 관리**: 코드 변경 시 관련 문서 동시 업데이트. 중복은 링크로 대체. 변경 보고:
+**문서 관리**: 코드 변경 시 관련 문서 동시 업데이트. 중복은 링크로 대체. **High 등급(CLAUDE.md, README*, docs/architecture/*, known-issues.md, LICENSE) 변경 시 multi-agent ≥2 분리 검증 필수** (정합성·누락·구조). 변경 보고:
 ```
 📄 문서 변경: [파일명] — 변경 이유: [이유] — 변경 내용: [1줄 요약]
 ```
