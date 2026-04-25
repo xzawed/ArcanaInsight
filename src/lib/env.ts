@@ -28,13 +28,3 @@ export function getPostgresPoolSize(): number { return parseInt(process.env.POST
 export function getUpstashRedisRestUrl(): string { return process.env.UPSTASH_REDIS_REST_URL ?? "" }
 export function getUpstashRedisRestToken(): string { return process.env.UPSTASH_REDIS_REST_TOKEN ?? "" }
 
-// Verum
-export function getVerumApiUrl(): string { return process.env.VERUM_API_URL ?? "" }
-export function getVerumApiKey(): string { return process.env.VERUM_API_KEY ?? "" }
-export function getVerumDeploymentId(): string { return process.env.VERUM_DEPLOYMENT_ID ?? "" }
-
-// Verum 타임아웃 & 서킷 브레이커
-export function getVerumTimeoutMs(): number { return parseInt(process.env.VERUM_TIMEOUT_MS ?? "3000", 10) }
-export function getVerumRecordTimeoutMs(): number { return parseInt(process.env.VERUM_RECORD_TIMEOUT_MS ?? "5000", 10) }
-export function getVerumFailureCooldownMs(): number { return parseInt(process.env.VERUM_FAILURE_COOLDOWN_MS ?? "60000", 10) }
-export function getVerumAuthCooldownMs(): number { return parseInt(process.env.VERUM_AUTH_COOLDOWN_MS ?? "1800000", 10) }
