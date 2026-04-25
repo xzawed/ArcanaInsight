@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (582개, statements 60%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (582개, statements 88%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -98,7 +98,7 @@ pnpm dev           # 개발 서버
 pnpm build         # 프로덕션 빌드
 pnpm lint          # ESLint
 pnpm type-check    # tsc --noEmit
-pnpm test:coverage # Vitest + 커버리지 (statements 60%)
+pnpm test:coverage # Vitest + 커버리지 (statements 88%)
 pnpm test:e2e      # Playwright (3 디바이스)
 pnpm exec tsx scripts/sync-test-count.ts       # CLAUDE.md 테스트 수 동기화
 pnpm exec tsx scripts/check-env-docs.ts        # env.ts ↔ env-variables.md 정합성
@@ -174,10 +174,8 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 → **정본**: [`docs/operations/known-issues.md`](docs/operations/known-issues.md)
 
-- `app/shinjeom/result/[id]/` 결과 공유 페이지 미구현 (mypage 링크 비활성화)
 - `useFavoriteCharacter` DB_PROVIDER 추상화 미적용 (Supabase 직접)
-- 커버리지 임계값 상향 미완료 (branches 65/functions 75/lines 75 — 별도 PR 예정)
-- rate-limit 메모리 저장 — 서버 재시작 시 초기화됨 (Redis 기반 전환 고려)
+- rate-limit: UPSTASH_REDIS_REST_URL 미설정 시 in-memory fallback (분산 처리 미활성화)
 
 ## Claude 자율 관리 규칙
 
