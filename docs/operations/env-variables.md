@@ -105,7 +105,7 @@ DB_PROVIDER=supabase
 
 ## 관련 파일
 
-- `src/lib/env.ts` — 모든 getter 함수 정의 (23개)
+- `src/lib/env.ts` — 모든 getter 함수 정의 (16개)
 - `src/lib/auth/index.ts` — DB_PROVIDER 기반 auth 전환
 - `src/lib/db/index.ts` — DB_PROVIDER 기반 DB 전환
 - `src/lib/storage/index.ts` — DB_PROVIDER 기반 이미지 URL 전환

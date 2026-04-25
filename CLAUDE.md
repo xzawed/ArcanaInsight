@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (575개, statements 88%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (592개, statements 88%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -32,7 +32,7 @@ src/
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
 ├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
 ├── lib/
-│   ├── env.ts       # 환경변수 getter 23개 (하드코딩 금지)
+│   ├── env.ts       # 환경변수 getter 16개 (하드코딩 금지)
 │   ├── request-utils.ts  # getClientIp / pickFields / jsonError / SSE_HEADERS
 │   ├── rate-limit.ts
 │   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기)

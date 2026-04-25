@@ -52,6 +52,18 @@
 
 ---
 
+## Verum 침투적 통합 제거 이력
+
+비침투적 재도입 준비를 위해 `src/lib/verum/` SDK 및 모든 관련 코드를 제거한 작업 (2026-04-25).
+
+| PR | 브랜치/번호 | 상태 | 완료 기준 |
+|----|------------|------|----------|
+| **Verum 제거** | `refactor/remove-verum-invasive-integration` / PR #163 | ✅ merged | `src/lib/verum/` 삭제, route.ts·env.ts·테스트·문서 전체 정리, CI 빌드·SonarCloud·Codecov 통과 (620→575) |
+
+**배경**: Verum 자동 생성 PR #161 이 침투적 방식으로 코드베이스를 수정해 SonarCloud/Codecov 실패. 사용자 직접 운영 서비스이므로 향후 비침투적(외부 프록시/사이드카) 방식으로 재도입 예정. git tag `verum-removal-base`(`780bb04`) — 롤백 기준점.
+
+---
+
 ## SonarCloud Quality Gate 수정 이력
 
 | PR | 번호 | 상태 | 내용 |
