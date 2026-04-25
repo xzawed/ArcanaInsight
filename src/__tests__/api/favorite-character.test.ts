@@ -3,13 +3,8 @@ import { setupDoMock } from "@/test-helpers/reset-modules";
 import { makeMockDb } from "@/test-helpers/mock-db";
 import { makeAuthMock, MOCK_USER } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
-import { NextRequest } from "next/server";
 
 setupDoMock();
-
-function makeGetRequest(url = "http://localhost/api/profile/favorite-character"): NextRequest {
-  return new NextRequest(url, { method: "GET" });
-}
 
 async function setup(options: { user?: typeof MOCK_USER | null } = {}) {
   const mockDb = makeMockDb();
@@ -27,7 +22,7 @@ async function setup(options: { user?: typeof MOCK_USER | null } = {}) {
 describe("GET /api/profile/favorite-character", () => {
   it("선호 상담사 있음 → characterId 반환", async () => {
     const { GET } = await setup();
-    const res = await GET(makeGetRequest());
+    const res = await GET();
     expect(res.status).toBe(200);
     expect((await res.json()).characterId).toBe("arcana");
   });
@@ -35,7 +30,7 @@ describe("GET /api/profile/favorite-character", () => {
   it("선호 상담사 없음 → characterId: null", async () => {
     const { GET, mockDb } = await setup();
     mockDb.findOne.mockResolvedValue({ favorite_character_id: null });
-    const res = await GET(makeGetRequest());
+    const res = await GET();
     expect(res.status).toBe(200);
     expect((await res.json()).characterId).toBeNull();
   });
@@ -43,21 +38,21 @@ describe("GET /api/profile/favorite-character", () => {
   it("프로필 없음 → characterId: null", async () => {
     const { GET, mockDb } = await setup();
     mockDb.findOne.mockResolvedValue(null);
-    const res = await GET(makeGetRequest());
+    const res = await GET();
     expect(res.status).toBe(200);
     expect((await res.json()).characterId).toBeNull();
   });
 
   it("미인증 사용자 → 401", async () => {
     const { GET } = await setup({ user: null });
-    const res = await GET(makeGetRequest());
+    const res = await GET();
     expect(res.status).toBe(401);
   });
 
   it("DB 조회 실패 → 500", async () => {
     const { GET, mockDb } = await setup();
     mockDb.findOne.mockRejectedValue(new Error("DB error"));
-    const res = await GET(makeGetRequest());
+    const res = await GET();
     expect(res.status).toBe(500);
   });
 });
