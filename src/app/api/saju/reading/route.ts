@@ -8,7 +8,7 @@ import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
-import { getClientIp } from "@/lib/request-utils"
+import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveSajuReading } from "@/lib/db/reading-saver";
 
 const sajuService = new SajuService();
@@ -48,9 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Zod 입력 검증
     const parsed = SajuReadingSchema.safeParse(rawBody);
-    if (!parsed.success) {
-      return new Response(JSON.stringify({ error: "Invalid request" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!parsed.success) return jsonError("Invalid request");
     const { sessionId, topic, timeRange, includeMonthly, characterId, userInfo } = parsed.data as {
       sessionId?: string | null;
       topic: Topic;
@@ -60,12 +58,8 @@ export async function POST(request: NextRequest) {
       userInfo: { name?: string; birthDate: string; birthHour: string; gender: "male" | "female" | "other" };
     };
 
-    if (!VALID_TOPICS.includes(topic)) {
-      return new Response(JSON.stringify({ error: "Invalid topic" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
-    if (!VALID_TIME_RANGES.includes(timeRange)) {
-      return new Response(JSON.stringify({ error: "Invalid timeRange" }), { status: 400, headers: { "Content-Type": "application/json" } });
-    }
+    if (!VALID_TOPICS.includes(topic)) return jsonError("Invalid topic");
+    if (!VALID_TIME_RANGES.includes(timeRange)) return jsonError("Invalid timeRange");
 
     // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
     if (sessionId) {
@@ -139,11 +133,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return new Response(stream, {
-      headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
-    });
+    return new Response(stream, { headers: SSE_HEADERS });
   } catch (e) {
     console.error("사주 API 오류:", e instanceof Error ? e.message : String(e));
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return jsonError("Internal server error", 500);
   }
 }
