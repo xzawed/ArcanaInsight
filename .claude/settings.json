@@ -21,7 +21,7 @@
     ],
     "deny": [
       "Bash(rm -rf /)",
-      "Bash(git push --force*)",
+      "Bash(git push --force origin*)",
       "Bash(git reset --hard*)"
     ]
   },
