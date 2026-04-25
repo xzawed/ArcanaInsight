@@ -9,14 +9,53 @@ setupDoMock();
 async function setup(options: { user?: typeof MOCK_USER | null } = {}) {
   const mockDb = makeMockDb();
   mockDb.update.mockResolvedValue({ id: MOCK_USER.id, favorite_character_id: "arcana" });
+  mockDb.findOne.mockResolvedValue({ favorite_character_id: "arcana" });
 
   const user = "user" in options ? options.user : MOCK_USER;
   vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
   vi.doMock("@/lib/auth", () => makeAuthMock(user));
 
-  const { POST } = await import("@/app/api/profile/favorite-character/route");
-  return { POST, mockDb };
+  const { GET, POST } = await import("@/app/api/profile/favorite-character/route");
+  return { GET, POST, mockDb };
 }
+
+describe("GET /api/profile/favorite-character", () => {
+  it("선호 상담사 있음 → characterId 반환", async () => {
+    const { GET } = await setup();
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).characterId).toBe("arcana");
+  });
+
+  it("선호 상담사 없음 → characterId: null", async () => {
+    const { GET, mockDb } = await setup();
+    mockDb.findOne.mockResolvedValue({ favorite_character_id: null });
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).characterId).toBeNull();
+  });
+
+  it("프로필 없음 → characterId: null", async () => {
+    const { GET, mockDb } = await setup();
+    mockDb.findOne.mockResolvedValue(null);
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).characterId).toBeNull();
+  });
+
+  it("미인증 사용자 → 401", async () => {
+    const { GET } = await setup({ user: null });
+    const res = await GET();
+    expect(res.status).toBe(401);
+  });
+
+  it("DB 조회 실패 → 500", async () => {
+    const { GET, mockDb } = await setup();
+    mockDb.findOne.mockRejectedValue(new Error("DB error"));
+    const res = await GET();
+    expect(res.status).toBe(500);
+  });
+});
 
 describe("POST /api/profile/favorite-character", () => {
   it("유효한 characterId → success 반환", async () => {
