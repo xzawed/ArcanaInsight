@@ -12,6 +12,8 @@ import {
   getAiFallbackCooldownMs,
   getAiAuthCooldownMs,
   getPostgresPoolSize,
+  getPostgresUrl,
+  getUpstashRedisRestToken,
 } from "./env";
 
 /** 각 테스트 전 관련 env 키를 모두 제거하고, 종료 후 복원 */
@@ -30,6 +32,8 @@ const ENV_KEYS = [
   "AI_FALLBACK_COOLDOWN_MS",
   "AI_AUTH_COOLDOWN_MS",
   "POSTGRES_POOL_SIZE",
+  "POSTGRES_URL",
+  "UPSTASH_REDIS_REST_TOKEN",
 ] as const;
 
 let snapshot: EnvSnapshot = {};
@@ -221,6 +225,28 @@ describe("getPostgresPoolSize", () => {
 
   it("반환값이 number 타입이다", () => {
     expect(typeof getPostgresPoolSize()).toBe("number");
+  });
+});
+
+describe("getPostgresUrl", () => {
+  it("env 미설정 시 빈 문자열을 반환한다", () => {
+    expect(getPostgresUrl()).toBe("");
+  });
+
+  it("env 설정 시 해당 URL을 반환한다", () => {
+    process.env.POSTGRES_URL = "postgresql://localhost:5432/test";
+    expect(getPostgresUrl()).toBe("postgresql://localhost:5432/test");
+  });
+});
+
+describe("getUpstashRedisRestToken", () => {
+  it("env 미설정 시 빈 문자열을 반환한다", () => {
+    expect(getUpstashRedisRestToken()).toBe("");
+  });
+
+  it("env 설정 시 해당 토큰을 반환한다", () => {
+    process.env.UPSTASH_REDIS_REST_TOKEN = "test-upstash-token";
+    expect(getUpstashRedisRestToken()).toBe("test-upstash-token");
   });
 });
 

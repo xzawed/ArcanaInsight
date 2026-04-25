@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { checkRateLimit } from "./rate-limit";
+import { checkRateLimit, rateLimitResponse } from "./rate-limit";
 
 // UPSTASH 환경변수 미설정 → in-memory fallback 경로 테스트
 describe("checkRateLimit (in-memory fallback)", () => {
@@ -105,5 +105,15 @@ describe("checkRateLimit (Upstash Redis)", () => {
       "https://upstash.test/pipeline",
       expect.objectContaining({ method: "POST" })
     );
+  });
+});
+
+describe("rateLimitResponse()", () => {
+  it("429 상태와 Retry-After 헤더를 포함한 Response를 반환한다", async () => {
+    const res = rateLimitResponse();
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
+    const body = await res.json() as { error: string };
+    expect(body.error).toContain("요청이 너무 많습니다");
   });
 });

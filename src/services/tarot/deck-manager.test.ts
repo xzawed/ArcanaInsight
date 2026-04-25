@@ -107,6 +107,27 @@ describe("DeckManager", () => {
     });
   });
 
+  describe("drawSpecificCards(cardIds, reversed)", () => {
+    it("지정한 카드 ID 순서대로 SelectedCard를 반환한다", () => {
+      const result = deckManager.drawSpecificCards(["major-00", "major-01"], [false, true]);
+      expect(result).toHaveLength(2);
+      expect(result[0].card.id).toBe("major-00");
+      expect(result[0].isReversed).toBe(false);
+      expect(result[1].card.id).toBe("major-01");
+      expect(result[1].isReversed).toBe(true);
+    });
+
+    it("reversed 배열이 짧으면 나머지는 false로 처리", () => {
+      const result = deckManager.drawSpecificCards(["major-00", "major-01"], []);
+      expect(result[0].isReversed).toBe(false);
+      expect(result[1].isReversed).toBe(false);
+    });
+
+    it("존재하지 않는 카드 ID → Error 던진다", () => {
+      expect(() => deckManager.drawSpecificCards(["non-existent-id"], [false])).toThrow("Card not found: non-existent-id");
+    });
+  });
+
   describe("내부 구조 (O(1) 조회)", () => {
     it("cardMap 필드가 Map 인스턴스로 존재한다", () => {
       const internal = deckManager as unknown as Record<string, unknown>;

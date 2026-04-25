@@ -10,6 +10,7 @@ function makeChain(result: { data?: unknown; error?: { code?: string; message: s
   const chain = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    range: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue(outcome),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
@@ -20,6 +21,15 @@ function makeChain(result: { data?: unknown; error?: { code?: string; message: s
     catch: (reject: any) => promise.catch(reject),
   };
   return chain;
+}
+
+/** findManyIn용 체인 — .select().in() 패턴 */
+function makeChainIn(result: { data?: unknown; error?: { code?: string; message: string } | null }) {
+  const outcome: ChainOutcome = { data: result.data ?? null, error: result.error ?? null };
+  const promise = Promise.resolve(outcome);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const thenable = { then: (r: any, rj?: any) => promise.then(r, rj), catch: (rj: any) => promise.catch(rj) };
+  return { select: vi.fn().mockReturnThis(), in: vi.fn().mockReturnValue(thenable) };
 }
 
 // @/lib/supabase/server 모킹
@@ -74,6 +84,17 @@ describe("SupabaseAdapter", () => {
       await adapter.findOne("sessions", { user_id: "u1", session_type: "tarot" });
       expect(chain.eq).toHaveBeenCalledTimes(2);
     });
+
+    it("네트워크 에러(code 없음) → console.warn 후 null 반환", async () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const chain = makeChain({ error: { message: "fetch failed" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findOne("profiles", { id: "1" });
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("unavailable"));
+      consoleSpy.mockRestore();
+    });
   });
 
   // ─── findMany ─────────────────────────────────────────────────────────────
@@ -111,6 +132,82 @@ describe("SupabaseAdapter", () => {
       mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
 
       await expect(adapter.findMany("sessions")).rejects.toThrow("DB connection failed");
+    });
+
+    it("네트워크 에러(code 없음) → console.warn 후 빈 배열 반환", async () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const chain = makeChain({ error: { message: "network unavailable" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findMany("sessions");
+      expect(result).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("unavailable"));
+      consoleSpy.mockRestore();
+    });
+
+    it("options.limit 제공 시 range() 호출 — offset 기본값 0", async () => {
+      const rows = [{ id: "1" }];
+      const chain = makeChain({ data: rows });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findMany("sessions", undefined, { limit: 3 });
+      expect(result).toEqual(rows);
+      expect(chain.range).toHaveBeenCalledWith(0, 2);
+    });
+
+    it("options.limit + offset 함께 제공 시 range()에 올바른 범위 전달", async () => {
+      const rows = [{ id: "2" }];
+      const chain = makeChain({ data: rows });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findMany("sessions", undefined, { limit: 5, offset: 10 });
+      expect(result).toEqual(rows);
+      expect(chain.range).toHaveBeenCalledWith(10, 14);
+    });
+  });
+
+  // ─── findManyIn ───────────────────────────────────────────────────────────
+
+  describe("findManyIn", () => {
+    it("values가 빈 배열이면 DB 호출 없이 빈 배열 반환", async () => {
+      const result = await adapter.findManyIn("readings", "id", []);
+      expect(result).toEqual([]);
+      expect(mockCreateClient).not.toHaveBeenCalled();
+    });
+
+    it("values가 있으면 데이터를 반환한다", async () => {
+      const rows = [{ id: "1" }, { id: "2" }];
+      const chain = makeChainIn({ data: rows });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findManyIn("readings", "id", ["1", "2"]);
+      expect(result).toEqual(rows);
+    });
+
+    it("data가 null이면 빈 배열 반환", async () => {
+      const chain = makeChainIn({ data: null });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findManyIn("readings", "id", ["1"]);
+      expect(result).toEqual([]);
+    });
+
+    it("네트워크 에러(code 없음) → console.warn 후 빈 배열 반환", async () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const chain = makeChainIn({ error: { message: "network error" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      const result = await adapter.findManyIn("readings", "id", ["1"]);
+      expect(result).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+
+    it("DB 에러(code 있음) → Error 던진다", async () => {
+      const chain = makeChainIn({ error: { code: "42P01", message: "table not found" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+
+      await expect(adapter.findManyIn("readings", "id", ["1"])).rejects.toThrow("42P01");
     });
   });
 
