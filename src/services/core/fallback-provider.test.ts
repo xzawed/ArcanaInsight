@@ -43,6 +43,12 @@ async function* makeStream(chunks: string[]): AsyncGenerator<string, void, unkno
   }
 }
 
+/** 청크를 일부 yield 후 throw하는 Grok 부분 스트림 시뮬레이터 */
+async function* makePartialThenFailStream(chunks: string[], errorMsg: string): AsyncGenerator<string, void, unknown> {
+  for (const chunk of chunks) yield chunk;
+  throw new Error(errorMsg);
+}
+
 describe("FallbackProvider", () => {
   let mockGrokInstance: {
     generateReading: ReturnType<typeof vi.fn>;
@@ -276,6 +282,44 @@ describe("FallbackProvider", () => {
       expect(result).toBe("Claude 응답");
       expect(mockGrokInstance.generateReading).toHaveBeenCalledOnce(); // provider1에서 1회만
       expect(mockClaudeInstance.generateReading).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  // ─── streamReading — ANTHROPIC_API_KEY 미설정 + Grok 실패 ─────────────────
+
+  describe("streamReading — ANTHROPIC_API_KEY 미설정 + Grok 실패", () => {
+    it("Claude 키 없이 Grok 스트림이 실패하면 원래 에러를 throw한다", async () => {
+      process.env.ANTHROPIC_API_KEY = "";
+      mockGrokInstance.streamReading = vi.fn().mockReturnValue(makePartialThenFailStream([], "Grok 스트림 에러"));
+
+      const provider = new FallbackProvider();
+      await expect(collectStream(provider.streamReading("s", "u"))).rejects.toThrow("Grok 스트림 에러");
+      expect(mockClaudeInstance.streamReading).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── streamReading — 부분 yield 후 throw → Claude fallback 차단 ──────────
+
+  describe("streamReading — 부분 yield 후 Grok throw → Claude fallback 차단", () => {
+    it("Grok가 청크를 일부 yield한 뒤 throw하면 Claude로 fallback하지 않는다", async () => {
+      mockGrokInstance.streamReading = vi.fn().mockReturnValue(
+        makePartialThenFailStream(["청크1", "청크2"], "중간에 스트림 끊김")
+      );
+      mockClaudeInstance.streamReading = vi.fn().mockReturnValue(makeStream(["Claude 청크"]));
+
+      const provider = new FallbackProvider();
+      await expect(collectStream(provider.streamReading("s", "u"))).rejects.toThrow("중간에 스트림 끊김");
+      expect(mockClaudeInstance.streamReading).not.toHaveBeenCalled();
+    });
+
+    it("Grok가 청크를 yield하지 않고 즉시 throw하면 Claude로 fallback된다", async () => {
+      mockGrokInstance.streamReading = vi.fn().mockReturnValue(makePartialThenFailStream([], "즉시 실패"));
+      mockClaudeInstance.streamReading = vi.fn().mockReturnValue(makeStream(["Claude 응답"]));
+
+      const provider = new FallbackProvider();
+      const result = await collectStream(provider.streamReading("s", "u"));
+      expect(result).toEqual(["Claude 응답"]);
+      expect(mockClaudeInstance.streamReading).toHaveBeenCalledOnce();
     });
   });
 });

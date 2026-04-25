@@ -167,7 +167,7 @@ describe("calculateSaju", () => {
       // 합/충/형 문자열이 있다면 포맷을 검증
       for (const s of allInteractions) {
         expect(s).toMatch(/^(연지|월지|일지|시지)/);
-        expect(s).toMatch(/(합|충|형)$/);
+        expect(s).toMatch(/[합충형]$/);
       }
     });
   });
@@ -276,6 +276,11 @@ describe("calculateSaju", () => {
 
     it("yearlyMulti 없으면 yearlyFortunes가 undefined다", () => {
       const result = calculateSaju(MALE_1990);
+      expect(result.yearlyFortunes).toBeUndefined();
+    });
+
+    it("yearlyMulti가 음수이면 yearlyFortunes가 undefined다 (0 이하 조건)", () => {
+      const result = calculateSaju(MALE_1990, { yearlyMulti: -1 });
       expect(result.yearlyFortunes).toBeUndefined();
     });
   });
