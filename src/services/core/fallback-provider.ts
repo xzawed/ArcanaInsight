@@ -74,11 +74,16 @@ export class FallbackProvider implements AIProvider {
 
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     if (grokCircuit.isAvailable()) {
+      let hasYielded = false;
       try {
-        yield* this.grok.streamReading(systemPrompt, userPrompt, maxTokens);
+        for await (const chunk of this.grok.streamReading(systemPrompt, userPrompt, maxTokens)) {
+          hasYielded = true;
+          yield chunk;
+        }
         return;
       } catch (e) {
         console.error("[FallbackProvider] Grok streamReading 실패:", e);
+        if (hasYielded) throw e;
         if (this.hasClaude()) {
           this.handleGrokError(e);
         } else {

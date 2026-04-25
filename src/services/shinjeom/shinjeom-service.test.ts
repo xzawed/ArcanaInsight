@@ -243,6 +243,22 @@ describe("ShinjeomService", () => {
     });
   });
 
+  // ─── getReadingPrompt ─────────────────────────────────────────────────────
+
+  describe("getReadingPrompt", () => {
+    it("chatHistory가 비어있으면 currentMessage가 빈 문자열로 처리된다", () => {
+      const context = {
+        topic: "shinjeom-general",
+        chatHistory: [],
+        session: { spreadType: null, selectedCards: [] },
+        selectedCards: [],
+      };
+      const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
+      expect(typeof prompt).toBe("string");
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+  });
+
   // ─── topicLabels 매핑 ─────────────────────────────────────────────────────
 
   describe("topicLabels 매핑 — buildConversationPrompt 프롬프트 반영", () => {
@@ -263,6 +279,16 @@ describe("ShinjeomService", () => {
         false
       );
       expect(prompt).toContain(label);
+    });
+
+    it("등록되지 않은 topic이면 topic 문자열 자체가 프롬프트에 포함된다", () => {
+      const prompt = service.buildConversationPrompt(
+        "unknown-topic" as Parameters<typeof service.buildConversationPrompt>[0],
+        "메시지",
+        [],
+        false
+      );
+      expect(prompt).toContain("unknown-topic");
     });
   });
 
@@ -309,6 +335,22 @@ describe("ShinjeomService", () => {
 
       const result = service.parseResult(partialJson);
       expect(result.overallReading).toContain("종합 운세");
+    });
+
+    it("overallReading 필드가 없는 빈 JSON이면 빈 문자열로 처리한다", () => {
+      // parsed.overallReading || "" 에서 || "" 분기 (L128)
+      const result = service.parseResult("{}");
+      expect(typeof result.overallReading).toBe("string");
+    });
+
+    it("중괄호가 포함됐지만 JSON.parse가 실패하면 경고 후 텍스트 fallback 반환", () => {
+      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      // 중괄호는 있지만 유효하지 않은 JSON — match() 는 성공하나 JSON.parse 실패
+      const brokenJson = "결과는 다음과 같습니다: {invalid json here}";
+      const result = service.parseResult(brokenJson);
+      expect(result.overallReading).toBeTruthy();
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 });

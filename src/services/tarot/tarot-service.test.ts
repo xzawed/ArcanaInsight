@@ -142,6 +142,34 @@ describe("TarotService", () => {
     });
   });
 
+  describe("getReadingPrompt(context)", () => {
+    it("session.spreadType이 있으면 그 spreadType을 우선 사용한다", () => {
+      // spreadType이 있을 때 → getSpreadByType() 호출 분기
+      const context = {
+        session: { spreadType: "three-card", selectedCards: [] },
+        topic: "love",
+        chatHistory: [],
+        selectedCards: [],
+      };
+      const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
+      expect(typeof prompt).toBe("string");
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+
+    it("session.spreadType이 null이면 topic으로 spreadType을 결정한다", () => {
+      // spreadType이 null → resolveForTopic() 분기
+      const context = {
+        session: { spreadType: null, selectedCards: [] },
+        topic: "health",
+        chatHistory: [],
+        selectedCards: [],
+      };
+      const prompt = service.getReadingPrompt(context as unknown as Parameters<typeof service.getReadingPrompt>[0]);
+      expect(typeof prompt).toBe("string");
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("parseResult(aiResponse)", () => {
     it("유효한 JSON 응답을 파싱해 cardInterpretations 배열을 반환한다", () => {
       const validJson = JSON.stringify({
@@ -253,6 +281,12 @@ describe("TarotService", () => {
 
     it("빈 문자열 입력 시 Error를 던지지 않는다", () => {
       expect(() => service.parseResult("")).not.toThrow();
+    });
+
+    it("JSON 파싱 실패 + extractFallbackText 결과 빈 문자열이면 기본 에러 메시지를 반환한다", () => {
+      // 빈 문자열 → extractFallbackText("") = "" → cleanText || "해석 결과..." fallback
+      const result = service.parseResult("");
+      expect(result.overallReading).toContain("해석 결과를 처리하는 중 문제가 발생했습니다");
     });
   });
 });

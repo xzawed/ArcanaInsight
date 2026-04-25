@@ -238,6 +238,80 @@ describe("SajuService", () => {
     });
   });
 
+  describe("buildSajuPrompt — 추가 fortune 섹션", () => {
+    it("'this-month' + monthlyFortunes 제공 시 이번 달 운세 섹션이 포함된다", () => {
+      const thisMonth = new Date().getMonth() + 1;
+      const monthlyFortunes = Array.from({ length: 12 }, (_, i) => ({
+        month: i + 1,
+        stem: "갑",
+        branch: "자",
+        element: "wood" as const,
+        description: `${i + 1}월 운세`,
+      }));
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "this-month",
+        makeSajuResult({ monthlyFortunes }),
+      );
+      expect(prompt).toContain(`${thisMonth}월`);
+      expect(prompt).toContain("이번 달 월운");
+    });
+
+    it("yearlyFortunes 제공 시 세운 전망 섹션이 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "next-year",
+        makeSajuResult({
+          yearlyFortunes: [
+            { year: 2025, stem: "을", branch: "사", element: "wood", description: "2025년 운세" },
+            { year: 2026, stem: "병", branch: "오", element: "fire", description: "2026년 운세" },
+          ],
+        })
+      );
+      expect(prompt).toContain("세운 전망");
+    });
+
+    it("dailyFortunes 제공 시 이번 주 일운 섹션이 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "this-week",
+        makeSajuResult({
+          dailyFortunes: [
+            { date: "2026-04-26", stem: "갑", branch: "자", element: "wood", description: "일요일 운세" },
+          ],
+        })
+      );
+      expect(prompt).toContain("이번 주 일운");
+    });
+
+    it("'three-year' timeRange 시 향후 3년 컨텍스트가 포함된다", () => {
+      const prompt = service.buildSajuPrompt("saju-general", "three-year", makeSajuResult());
+      expect(prompt).toContain("3년");
+    });
+  });
+
+  describe("buildSajuPrompt — 알 수 없는 topic fallback", () => {
+    it("등록되지 않은 topic이면 topic 문자열 자체가 프롬프트에 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "unknown-topic" as Parameters<typeof service.buildSajuPrompt>[0],
+        "this-year",
+        makeSajuResult()
+      );
+      expect(prompt).toContain("unknown-topic");
+    });
+  });
+
+  describe("buildSajuPrompt — isStrong false(신약)", () => {
+    it("isStrong false 시 프롬프트에 '신약'이 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "this-year",
+        makeSajuResult({ isStrong: false })
+      );
+      expect(prompt).toContain("신약");
+    });
+  });
+
   // ─── parseResult ──────────────────────────────────────────────────────────
 
   describe("parseResult", () => {
