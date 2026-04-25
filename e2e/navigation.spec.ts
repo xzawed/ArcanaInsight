@@ -63,7 +63,7 @@ test.describe("네비게이션 — Header 테마 드롭다운", () => {
     await page.waitForLoadState("networkidle");
 
     // 다른 테마 클릭 (황혼의 노을) → 에러 없이 전환되면 성공
-    const sunsetBtn = page.locator("text=황혼의 노을");
+    const sunsetBtn = page.locator("button:has-text('황혼의 노을')").first();
     if (await sunsetBtn.isVisible()) {
       await sunsetBtn.click();
       await page.waitForTimeout(500);

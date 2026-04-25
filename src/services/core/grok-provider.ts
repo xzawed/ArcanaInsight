@@ -55,7 +55,8 @@ export class GrokProvider implements AIProvider {
       return response.text().then((e) => { throw new AuthError(response.status, e); });
     }
     if (response.status === 429) {
-      const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
+      const raw = Number.parseInt(response.headers.get("retry-after") ?? "", 10);
+      const retryAfter = (Number.isNaN(raw) ? DEFAULT_RETRY_AFTER_SEC : raw) * 1000;
       return Promise.reject(new RateLimitError(retryAfter));
     }
     return response.text().then((e) => { throw new Error(`Grok API error (${response.status}): ${e}`); });
