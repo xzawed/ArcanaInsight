@@ -38,6 +38,7 @@ export default defineConfig({
         "src/app/api/tarot/reading/route.ts",         // PR C
         "src/app/api/saju/reading/route.ts",          // PR C
         "src/app/api/shinjeom/message/route.ts",      // PR C
+        "src/app/api/shinjeom/result/[id]/route.ts",  // PR-L
       ],
       exclude: [
         "src/**/*.test.ts",
@@ -75,10 +76,10 @@ export default defineConfig({
         "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
       thresholds: {
-        branches: 50,
-        functions: 60,
-        lines: 60,
-        statements: 60,
+        branches: 75,
+        functions: 85,
+        lines: 88,
+        statements: 88,
       },
     },
   },
