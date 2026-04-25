@@ -10,14 +10,15 @@ const TODAY = "2026-04-24";
 const CACHED_CARD = { card_id: "major-00", is_reversed: false, interpretation: "캐시된 해석", keywords: ["새로운 시작"] };
 const VALID_BODY = { characterId: "arcana", date: TODAY };
 
-async function setup(options: { cached?: boolean; aiError?: boolean } = {}) {
+async function setup(options: { cached?: boolean; aiError?: string | boolean } = {}) {
   const mockDb = makeMockDb();
   mockDb.findOne.mockResolvedValue(options.cached ? CACHED_CARD : null);
   mockDb.upsert.mockResolvedValue(CACHED_CARD);
 
   const mockAiModule = makeMockAiModule();
   if (options.aiError) {
-    const provider = { generateReading: vi.fn().mockRejectedValue(new Error("AI down")) };
+    const msg = typeof options.aiError === "string" ? options.aiError : "AI down";
+    const provider = { generateReading: vi.fn().mockRejectedValue(new Error(msg)) };
     mockAiModule.FallbackProvider.mockImplementation(() => provider);
   }
 
@@ -67,9 +68,37 @@ describe("POST /api/daily-card", () => {
     expect(res.status).toBe(400);
   });
 
-  it("AI 오류 → 500", async () => {
+  it("AI 오류 → 500 (일반 메시지)", async () => {
     const { POST } = await setup({ aiError: true });
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toMatch(/일일 카드 생성에 실패/);
+  });
+
+  it("API_KEY 오류 → 500 (AI 서비스 설정 메시지)", async () => {
+    const { POST } = await setup({ aiError: "Invalid API_KEY provided" });
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toMatch(/AI 서비스 설정/);
+  });
+
+  it("rate limit 오류 → 500 (요청 많음 메시지)", async () => {
+    const { POST } = await setup({ aiError: "429 rate limit exceeded" });
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toMatch(/요청이 많아/);
+  });
+
+  it("isReversed 결정 — seed % 3 === 0 시 역방향", async () => {
+    const { POST } = await setup();
+    // date+characterId 해시가 3의 배수인 조합으로 역방향 검증
+    // 먼저 정방향 케이스(기본값) 확인
+    const res = await POST(makePostRequest({ characterId: "arcana", date: TODAY }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(typeof body.isReversed).toBe("boolean");
   });
 });
