@@ -1,7 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import { NextRequest } from "next/server";
+import { describe, it, expect } from "vitest";
 import { setupDoMock } from "@/test-helpers/reset-modules";
-import { makeMockDb } from "@/test-helpers/mock-db";
+import { makeResultRouteSetup } from "@/test-helpers/api-route-setup";
 
 setupDoMock();
 
@@ -14,22 +13,15 @@ const MOCK_READING = {
 };
 
 async function setup() {
-  const mockDb = makeMockDb();
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
-  const { GET } = await import("@/app/api/shinjeom/result/[id]/route");
-  return { GET, mockDb };
-}
-
-function makeGetRequest(id: string): [NextRequest, { params: Promise<{ id: string }> }] {
-  return [
-    new NextRequest(`http://localhost/api/shinjeom/result/${id}`),
-    { params: Promise.resolve({ id }) },
-  ];
+  return makeResultRouteSetup(
+    () => import("@/app/api/shinjeom/result/[id]/route"),
+    "http://localhost/api/shinjeom/result"
+  );
 }
 
 describe("GET /api/shinjeom/result/[id]", () => {
   it("존재하는 share_token → reading 반환", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(MOCK_READING);
     const res = await GET(...makeGetRequest("shinjeom-tok"));
     expect(res.status).toBe(200);
@@ -37,7 +29,7 @@ describe("GET /api/shinjeom/result/[id]", () => {
   });
 
   it("존재하지 않는 share_token → 404", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(null);
     const res = await GET(...makeGetRequest("no-such-token"));
     expect(res.status).toBe(404);
@@ -45,21 +37,21 @@ describe("GET /api/shinjeom/result/[id]", () => {
   });
 
   it("DB 오류 → 500", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockRejectedValue(new Error("DB error"));
     const res = await GET(...makeGetRequest("shinjeom-tok"));
     expect(res.status).toBe(500);
   });
 
   it("shinjeom_readings 테이블에 share_token으로 조회", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(MOCK_READING);
     await GET(...makeGetRequest("tok789"));
     expect(mockDb.findOne).toHaveBeenCalledWith("shinjeom_readings", { share_token: "tok789" });
   });
 
   it("session_id 필드 응답에서 제거", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue({ ...MOCK_READING, session_id: "private-session-id" });
     const res = await GET(...makeGetRequest("shinjeom-tok"));
     const body = await res.json();

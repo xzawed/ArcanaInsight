@@ -1,23 +1,15 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { setupDoMock } from "@/test-helpers/reset-modules";
-import { makeMockDb } from "@/test-helpers/mock-db";
-import { makeAuthMock, MOCK_USER } from "@/test-helpers/mock-auth";
+import { MOCK_USER } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
+import { makeSessionRouteSetup } from "@/test-helpers/api-route-setup";
 
 setupDoMock();
 
 const MOCK_SESSION = { id: "saju-session-abc", service_type: "saju", topic: "saju-general", status: "in_progress" };
 
 async function setup(options: { user?: typeof MOCK_USER | null } = {}) {
-  const mockDb = makeMockDb();
-  mockDb.insert.mockResolvedValue(MOCK_SESSION);
-
-  const user = "user" in options ? options.user : MOCK_USER;
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
-  vi.doMock("@/lib/auth", () => makeAuthMock(user));
-
-  const { POST } = await import("@/app/api/saju/session/route");
-  return { POST, mockDb };
+  return makeSessionRouteSetup(() => import("@/app/api/saju/session/route"), MOCK_SESSION, options);
 }
 
 describe("POST /api/saju/session", () => {

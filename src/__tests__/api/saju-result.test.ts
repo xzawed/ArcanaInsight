@@ -1,29 +1,21 @@
-import { describe, it, expect, vi } from "vitest";
-import { NextRequest } from "next/server";
+import { describe, it, expect } from "vitest";
 import { setupDoMock } from "@/test-helpers/reset-modules";
-import { makeMockDb } from "@/test-helpers/mock-db";
+import { makeResultRouteSetup } from "@/test-helpers/api-route-setup";
 
 setupDoMock();
 
 const MOCK_READING = { id: "r-2", share_token: "saju-tok", overall_reading: "사주 테스트" };
 
 async function setup() {
-  const mockDb = makeMockDb();
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
-  const { GET } = await import("@/app/api/saju/result/[id]/route");
-  return { GET, mockDb };
-}
-
-function makeGetRequest(id: string): [NextRequest, { params: Promise<{ id: string }> }] {
-  return [
-    new NextRequest(`http://localhost/api/saju/result/${id}`),
-    { params: Promise.resolve({ id }) },
-  ];
+  return makeResultRouteSetup(
+    () => import("@/app/api/saju/result/[id]/route"),
+    "http://localhost/api/saju/result"
+  );
 }
 
 describe("GET /api/saju/result/[id]", () => {
   it("존재하는 share_token → reading 반환", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(MOCK_READING);
     const res = await GET(...makeGetRequest("saju-tok"));
     expect(res.status).toBe(200);
@@ -31,7 +23,7 @@ describe("GET /api/saju/result/[id]", () => {
   });
 
   it("존재하지 않는 share_token → 404", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(null);
     const res = await GET(...makeGetRequest("no-such-token"));
     expect(res.status).toBe(404);
@@ -39,14 +31,14 @@ describe("GET /api/saju/result/[id]", () => {
   });
 
   it("DB 오류 → 500", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockRejectedValue(new Error("DB error"));
     const res = await GET(...makeGetRequest("saju-tok"));
     expect(res.status).toBe(500);
   });
 
   it("saju_readings 테이블에 share_token으로 조회", async () => {
-    const { GET, mockDb } = await setup();
+    const { GET, mockDb, makeGetRequest } = await setup();
     mockDb.findOne.mockResolvedValue(MOCK_READING);
     await GET(...makeGetRequest("tok456"));
     expect(mockDb.findOne).toHaveBeenCalledWith("saju_readings", { share_token: "tok456" });
