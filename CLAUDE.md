@@ -20,7 +20,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (587개, statements 88%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (599개, statements 88%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -33,15 +33,16 @@ src/
 ├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
 ├── lib/
 │   ├── env.ts       # 환경변수 getter 23개 (하드코딩 금지)
+│   ├── request-utils.ts  # getClientIp / pickFields / jsonError / SSE_HEADERS
 │   ├── rate-limit.ts
 │   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기)
 │   ├── auth/        # getCurrentUser() / requireUser() / assertSessionOwnership()
 │   ├── validation/  # api-schemas.ts (Zod 7종)
 │   ├── verum/       # 프롬프트 A/B 라우팅 + 서킷 브레이커 (README.md 참조)
 │   └── storage/     # getCardImageUrl() — provider별 이미지 URL
-├── services/        # core/ (FallbackProvider·PromptBuilder), tarot/, saju/, shinjeom/
+├── services/        # core/ (FallbackProvider·PromptBuilder·CircuitBreaker·http-utils), tarot/, saju/, shinjeom/
 ├── types/           # card.ts, character.ts, session.ts, service.ts, user-info.ts
-├── test-helpers/    # mock-db, mock-auth, mock-request, mock-ai, reset-modules
+├── test-helpers/    # mock-db, mock-auth, mock-request, mock-ai, reset-modules, api-route-setup
 └── __tests__/api/   # API 라우트 단위 테스트 (vitest.config.ts exclude 우회)
 
 docs/                # → docs/README.md 인덱스
@@ -87,7 +88,7 @@ scripts/             # sync-test-count.ts, check-env-docs.ts, check-doc-links.ts
 
 **API 보안**: Rate Limit → Zod safeParse → requireUser → assertSessionOwnership. → [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md)
 
-**SSE 스트리밍**: tarot/saju/shinjeom reading API. 클라이언트 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`). `/api/daily-card`는 JSON (비스트리밍).
+**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버 공통 헤더 `SSE_HEADERS` + `jsonError()` (`src/lib/request-utils.ts`), Provider 공통 SSE 리더 `readSseLines` + `withAbortTimeout` (`src/services/core/http-utils.ts`). 클라이언트 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`). `/api/daily-card`는 JSON (비스트리밍).
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 

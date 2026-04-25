@@ -6,7 +6,7 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **587개 테스트** / statements 88%+ 커버리지
+- **599개 테스트** / statements 88%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
 - 임계값: `branches 75 / functions 85 / lines 88 / statements 88`
 
@@ -85,6 +85,7 @@ async function setup() {
 | `mock-request.ts` | `makePostRequest()` — NextRequest POST 헬퍼 |
 | `mock-ai.ts` | `makeMockAiModule()`, `makeMockVerum()`, `readSSEStream()` |
 | `reset-modules.ts` | `setupDoMock()` — `beforeEach(vi.resetModules)` 등록 유틸 |
+| `api-route-setup.ts` | `makeSessionRouteSetup()` / `makeResultRouteSetup()` / `makeStreamingRouteSetup()` — API 라우트 setup 보일러플레이트 |
 
 ### setupDoMock() 패턴
 

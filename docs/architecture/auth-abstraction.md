@@ -48,6 +48,7 @@
   │      세션 소유자 불일치 시 403
   │
   └─ 5. AI 처리 → SSE 스트리밍 응답
+         SSE_HEADERS / jsonError() (src/lib/request-utils.ts)
 ```
 
 ---
@@ -60,12 +61,18 @@
 // 공유 결과 조회 라우트 패턴
 await assertReadingAccess("public");  // 항상 통과
 const result = await getDb().findOne("readings", { share_token });
+// whitelist 직렬화 — 새 컬럼이 추가돼도 명시하지 않으면 응답에서 자동 제외
+return Response.json(pickFields(result, READING_PUBLIC_FIELDS));
 ```
 
 소유자 전용 쓰기·삭제:
 ```ts
 await assertReadingAccess("owner");   // 소유자만 통과
 ```
+
+**응답 whitelist 패턴** (`src/lib/request-utils.ts`):
+- blacklist 방식(`delete result.user_id`)은 새 민감 컬럼 추가 시 누출 위험
+- `pickFields(obj, allowedKeys)` — 허용 필드만 추출해 IDOR/PII 회귀 방지
 
 ---
 

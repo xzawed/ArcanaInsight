@@ -22,7 +22,11 @@
 1. `src/services/core/ai-provider.ts` — 인터페이스 확인
 2. `src/services/tarot/tarot-service.ts` — 기존 구현체 참조 패턴
 3. `src/app/api/tarot/` — API 라우트 구조 참조
-4. → `.claude/agents/divination-scaffold.md` 에이전트 활용
+4. `src/services/core/prompt-builder.ts` — `buildCharacterHeader()` 재사용
+5. `src/services/core/text-cleaner.ts` — `extractFallbackText()` JSON-recovery 재사용
+6. `src/services/core/http-utils.ts` — `withAbortTimeout` / `readSseLines` Provider 공통 유틸
+7. `src/services/core/circuit-breaker.ts` — fallback 서킷 (필요 시)
+8. → `.claude/agents/divination-scaffold.md` 에이전트 활용
 
 ---
 
@@ -56,8 +60,11 @@
 ## AI 프롬프트 수정
 
 1. `src/services/core/prompt-builder.ts` — 공통 프롬프트 빌더
+   - `buildCharacterHeader(character, subtitle?)` — 타로·사주·신점 공통 캐릭터 헤더
 2. `src/services/[service]/[service]-service.ts` — 서비스별 프롬프트
 3. `src/services/core/fallback-provider.ts` — Grok→Claude fallback 동작 확인
+   - `CircuitBreaker` (`circuit-breaker.ts`) — 서킷 상태 공유
+4. `src/services/core/text-cleaner.ts` — `extractFallbackText()` JSON 파싱 실패 회수
 
 참고: [`docs/architecture/ai-infrastructure.md`](../architecture/ai-infrastructure.md)
 
@@ -107,7 +114,12 @@ Next.js `<Image>` DOM 렌더링: `/_next/image?url=%2Fpath` → `src*="/path/"` 
 1. [`docs/conventions/zod-schemas.md`](../conventions/zod-schemas.md) — Zod 스키마 먼저 정의 필수
 2. [`docs/architecture/auth-abstraction.md`](../architecture/auth-abstraction.md) — API 보안 패턴 (Rate Limit → Zod → Auth → IDOR)
 3. `src/lib/validation/api-schemas.ts` — 스키마 추가
-4. `src/__tests__/api/` — 단위 테스트 배치 (주의: `src/app/api/` 내 테스트 파일은 수집 불가)
+4. `src/lib/request-utils.ts` — 공통 헬퍼 재사용:
+   - `jsonError(msg, status)` — JSON 오류 응답
+   - `SSE_HEADERS` — SSE 스트리밍 헤더
+   - `getClientIp(headers)` — rate-limit IP 추출
+   - `pickFields(obj, keys)` — 응답 whitelist 직렬화
+5. `src/__tests__/api/` — 단위 테스트 배치 (`src/test-helpers/api-route-setup.ts` 헬퍼 활용)
 
 ---
 
