@@ -24,6 +24,7 @@ export class ClaudeProvider implements AIProvider {
     if (!this._baseUrl) this._baseUrl = getClaudeBaseUrl();
     return this._baseUrl;
   }
+// TODO: [Verum] Wrap this anthropic call (ClaudeProvider.generateReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
 
   private get model(): string {
     if (!this._model) this._model = getClaudeModel();
@@ -57,6 +58,7 @@ export class ClaudeProvider implements AIProvider {
         throw new Error(`Claude API 요청이 실패했습니다. (HTTP ${response.status})`);
       }
       const data = await response.json() as { content?: [{ text?: string }] };
+// TODO: [Verum] Wrap this anthropic call (ClaudeProvider.streamReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
       const content = data.content?.[0]?.text;
       if (!content) throw new Error("Claude API가 빈 응답을 반환했습니다.");
       return content;

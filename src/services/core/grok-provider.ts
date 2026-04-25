@@ -50,10 +50,12 @@ export class GrokProvider implements AIProvider {
     return this._baseUrl;
   }
 
+// TODO: [Verum] Wrap this grok call (GrokProvider.generateReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
   private handleErrorResponse(response: Response): Promise<never> {
     if (response.status === 401 || response.status === 403) {
       return response.text().then((e) => { throw new AuthError(response.status, e); });
     }
+// TODO: [Verum] Wrap this grok call (fetch-><this.baseUrl>/chat/completions) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
     if (response.status === 429) {
       const retryAfter = parseInt(response.headers.get("retry-after") ?? String(DEFAULT_RETRY_AFTER_SEC), 10) * 1000;
       return Promise.reject(new RateLimitError(retryAfter));
@@ -82,10 +84,12 @@ export class GrokProvider implements AIProvider {
   }
 
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
+// TODO: [Verum] Wrap this grok call (GrokProvider.streamReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), getAiTimeoutMs());
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
+// TODO: [Verum] Wrap this grok call (fetch-><this.baseUrl>/chat/completions) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${this.apiKey}` },
         body: JSON.stringify({

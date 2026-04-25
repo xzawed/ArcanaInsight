@@ -51,6 +51,7 @@ export class FallbackProvider implements AIProvider {
   }
 
   async generateReading(systemPrompt: string, userPrompt: string, maxTokens?: number): Promise<string> {
+// TODO: [Verum] Wrap this raw-fetch call (FallbackProvider.generateReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
     if (grokCircuit.isAvailable()) {
       try {
         return await this.grok.generateReading(systemPrompt, userPrompt, maxTokens);
@@ -78,6 +79,7 @@ export class FallbackProvider implements AIProvider {
         yield* this.grok.streamReading(systemPrompt, userPrompt, maxTokens);
         return;
       } catch (e) {
+// TODO: [Verum] Wrap this raw-fetch call (FallbackProvider.streamReading) with VerumClient for A/B prompt optimization. See: https://verum.dev/docs/sdk-integration
         console.error("[FallbackProvider] Grok streamReading 실패:", e);
         if (this.hasClaude()) {
           this.handleGrokError(e);
