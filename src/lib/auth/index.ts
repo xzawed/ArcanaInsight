@@ -39,18 +39,26 @@ export async function assertReadingAccess(
 
 /**
  * 세션 소유권 검증.
- * 로그인 사용자가 다른 사람의 세션에 쓰기 요청하는 IDOR를 차단.
- * 익명 사용자(user=null)는 허용, 미인증 로그인 사용자도 허용.
+ * - 소유자 없는 세션(user_id=null) → 누구나 허용
+ * - 소유자 있는 세션 + 미인증 요청 → 403
+ * - 소유자 있는 세션 + 다른 사용자 → 403
  * 반환값: 에러 Response(403/404) 또는 null(통과)
  */
 export async function assertSessionOwnership(sessionId: string): Promise<Response | null> {
   const { getDb } = await import("@/lib/db")
-  const user = await getCurrentUser()
-  if (!user) return null
   const db = getDb()
-  const session = await db.findOne<{ user_id: string | null }>("sessions", { id: sessionId })
+  const [user, session] = await Promise.all([
+    getCurrentUser(),
+    db.findOne<{ user_id: string | null }>("sessions", { id: sessionId }),
+  ])
   if (!session) return new Response(JSON.stringify({ error: "Session not found" }), { status: 404, headers: JSON_HEADER })
-  if (session.user_id && session.user_id !== user.id) {
+  if (!session.user_id) return null
+  if (!user) {
+    console.warn("[security] 비인증 요청이 소유된 세션에 접근 시도:", sessionId)
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: JSON_HEADER })
+  }
+  if (session.user_id !== user.id) {
+    console.warn("[security] IDOR 시도: user=%s session=%s owner=%s", user.id, sessionId, session.user_id)
     return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: JSON_HEADER })
   }
   return null

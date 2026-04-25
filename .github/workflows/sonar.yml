@@ -14,6 +14,11 @@ on:
       - 'docs/**'
       - 'n8n/**'
 
+permissions:
+  contents: read
+  pull-requests: write   # SonarCloud PR 코멘트·데코레이션
+  statuses: write        # 커밋 상태 업데이트
+
 jobs:
   sonar:
     name: SonarCloud 정적 분석

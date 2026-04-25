@@ -12,6 +12,9 @@ on:
 # 배포는 Railway 자체 GitHub 연동이 담당 (railway.toml 기준 자동 배포)
 # 이 워크플로우는 코드 품질 검증 전용
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     name: Lint → Build → E2E

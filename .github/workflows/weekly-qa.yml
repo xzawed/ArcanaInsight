@@ -6,6 +6,11 @@ on:
     - cron: "0 0 * * 6"
   workflow_dispatch: # 수동 실행 가능
 
+permissions:
+  contents: read
+  issues: write    # QA 실패 Issue 생성·닫기
+  actions: read    # listJobsForWorkflowRun
+
 jobs:
   quality-check:
     name: Lint & Type Check & Build

@@ -7,6 +7,7 @@ import { assertSessionOwnership } from "@/lib/auth";
 
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
 
 
@@ -21,7 +22,7 @@ const SHINJEOM_TOKENS_CHAT = 1000;
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`shinjeom:${ip}`, 20, 60_000))) return rateLimitResponse();
 
     const rawBody = await request.json();

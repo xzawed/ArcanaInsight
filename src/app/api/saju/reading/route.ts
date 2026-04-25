@@ -8,6 +8,7 @@ import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/request-utils"
 import { saveSajuReading } from "@/lib/db/reading-saver";
 
 const sajuService = new SajuService();
@@ -40,7 +41,7 @@ function resolveCalcOptions(timeRange: SajuTimeRange, includeMonthly: boolean) {
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const ip = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "anon";
+    const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`saju:${ip}`, 10, 60_000))) return rateLimitResponse();
 
     const rawBody = await request.json();
