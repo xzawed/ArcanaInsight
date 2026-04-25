@@ -3,7 +3,7 @@ import { getDb } from "@/lib/db"
 import { requireUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const user = await requireUser()
     const db = getDb()
