@@ -287,7 +287,7 @@ export default async function MyPage() {
               const resultPath = session.service_type === "saju"
                 ? `/saju/result/${shareToken}`
                 : session.service_type === "shinjeom"
-                ? null
+                ? `/shinjeom/result/${shareToken}`
                 : `/tarot/result/${shareToken}`;
 
               const content = (

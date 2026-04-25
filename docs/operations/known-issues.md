@@ -10,7 +10,6 @@
 
 | 기능 | 위치 | 현재 상태 | 비고 |
 |------|------|----------|------|
-| 신점 결과 공유 페이지 | `app/shinjeom/result/[id]/` | 미구현 | mypage에서 링크 비활성화됨 |
 | `useFavoriteCharacter` DB_PROVIDER 적용 | `hooks/useFavoriteCharacter.ts` | Supabase 직접 사용 | postgres 모드 전환 시 수정 필요 |
 | GenderFilter 홈 노출 | `components/home/GenderFilter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
 | StatsCounter 홈 노출 | `components/home/StatsCounter.tsx` | 컴포넌트 존재, `page.tsx` 미사용 | — |
