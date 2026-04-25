@@ -38,9 +38,24 @@
 
 ---
 
+## API 헬퍼 리팩토링 D-시리즈 진행 상태
+
+코드 중복·SonarCloud CPD 개선을 위해 4단계로 분해한 리팩토링 (2026-04-25).
+
+| PR | 브랜치/번호 | 상태 | 완료 기준 |
+|----|------------|------|----------|
+| **D1** | `chore/sonar-cpd-exclusions` / PR #155 | ✅ merged | sonar.cpd.exclusions 정적 데이터·타입 파일 제외 |
+| **D2** | `refactor/test-route-helpers` / PR #156 | ✅ merged | `makeStreamingRouteSetup` 헬퍼 신설 → 테스트 setup 중복 감소 |
+| **D3** | `refactor/api-helpers` / PR #157 | ✅ merged | `request-utils.ts`: getClientIp·pickFields·jsonError·SSE_HEADERS 추출, API 라우트 CPD 해소 (599→606) |
+| **D4** | `refactor/service-helpers` / PR #158 | ✅ merged | `circuit-breaker.ts`·`http-utils.ts` 신설, FallbackProvider·GrokProvider·ClaudeProvider 중복 제거 (606→620) |
+| **Doc** | `docs/post-d-series-update` / PR #159 | ✅ merged | D-시리즈 결과 문서 반영 (ai-infrastructure·auth-abstraction·unit-testing·task-playbooks) |
+
+---
+
 ## SonarCloud Quality Gate 수정 이력
 
 | PR | 번호 | 상태 | 내용 |
 |----|------|------|------|
 | **Q1** | PR #148 | ✅ merged | E2E cross-platform.spec.ts testPaths miko/default.jpg → nukki/*.png (PR-K 누락 수정) |
 | **Q3** | PR #149 | ✅ merged | Reliability Bug 2개(접근성), Security Hotspot 2개(ReDoS regex·Math.random) 해소 → Quality Gate Passed |
+| **Q4** | PR #157 | ✅ merged | New Code Duplication 6.8% → 해소 (`src/app/api/**` CPD 제외), Codecov patch 87.50% → 100% |
