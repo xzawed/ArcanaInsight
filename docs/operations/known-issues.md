@@ -25,8 +25,6 @@
 | 항목 | 파일 | 현황 | 해결 조건 |
 |------|------|------|----------|
 | `useFavoriteCharacter` Supabase 직접 사용 | `hooks/useFavoriteCharacter.ts` | DB_PROVIDER 추상화 미적용 | postgres 모드 전환 시 처리 |
-| miko·seonhwa 이미지 파일 레거시 | `public/images/characters/miko/`, `seonhwa/` | 코드 경로는 nukki/*.png로 수정 완료, 루트 .jpg 파일만 남아있음 | 루트 .jpg 파일 삭제(선택) |
-| `generate-character-images.mjs` 구버전 잔존 | `scripts/` | v2로 대체됨, 삭제 미완료 | 정리 작업 시 삭제 가능 |
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | 전체 코드의 22.2%만 측정 대상 | PR E에서 include 확장 + 임계값 상향 |
 | rate-limit 메모리 저장 | `src/lib/rate-limit.ts` | 서버 재시작 시 초기화됨 | Redis 기반 전환 고려 (별도 기획) |
 | SupabaseAdapter 통합 테스트 부재 | `src/lib/db/supabase-adapter.ts` | mock 체인이 자기충족적, 실제 Supabase 응답 미검증 | 통합 테스트 환경 구축 후 처리 |

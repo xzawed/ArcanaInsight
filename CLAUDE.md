@@ -77,7 +77,7 @@ scripts/             # sync-test-count.ts, check-env-docs.ts, check-doc-links.ts
 
 **표정 규칙 (3단계만)**: `default` → 세션 진입/대기 | `mystical` → 카드 선택/리딩 대기 | `smile` → 결과 도착. 에러 시 `default` 복귀. 대기 대사 중 표정 변경 금지.
 
-**이미지 경로**: 10캐릭터 `nukki/[mood].png` (1408×768), 2캐릭터(miko·seonhwa) `[mood].jpg` (레거시)
+**이미지 경로**: 12캐릭터 모두 `nukki/[mood].png` (1408×768)
 
 ## 핵심 아키텍처
 

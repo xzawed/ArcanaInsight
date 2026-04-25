@@ -9,7 +9,6 @@
 | 유형 | 형식 | 위치 | 규격 |
 |------|------|------|------|
 | 캐릭터 (10명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 1408×768 |
-| 캐릭터 레거시 파일 (2명) | JPG (파일만 잔존) | `characters/[id]/[mood].jpg` | 1408×768 |
 | 카드 | SVG | `cards/major/`, `cards/cups/` 등 | — |
 | 배경 | JPG | `backgrounds/` | — |
 | 아이콘 | PNG RGBA (투명 배경) | `images/icons/` | 콘텐츠 크롭 |
@@ -23,11 +22,6 @@
 - PNG 누끼, `nukki/` 폴더 경로
 - 예: `/images/characters/arcana/nukki/default.png`
 - 6가지 mood: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
-
-**2캐릭터 레거시 파일** (miko, seonhwa):
-- 코드 경로: `nukki/*.png` (10캐릭터와 동일하게 수정 완료)
-- 예: `/images/characters/miko/nukki/default.png`
-- 루트 `.jpg` 파일이 남아있으나 코드에서 참조하지 않음 (삭제 가능)
 
 ---
 
@@ -79,4 +73,3 @@
 | `scripts/generate-icons.ts` | 아이콘 이미지 생성 (BFS 배경 제거 + 크롭) |
 | `scripts/generate-placeholders.sh` | 플레이스홀더 이미지 생성 |
 
-> `scripts/generate-character-images.mjs` — 구버전, v2로 대체됨 (삭제 예정)
