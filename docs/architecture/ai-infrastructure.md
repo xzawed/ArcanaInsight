@@ -45,6 +45,23 @@ API Route (route.ts)
 - `ANTHROPIC_API_KEY` 미설정 시 Grok 단독 사용 (fallback 없음)
 - 쿨다운 중 새 요청은 즉시 Claude로 라우팅 (retry 없음)
 
+### CircuitBreaker 클래스
+
+서킷 상태는 `CircuitBreaker` (`src/services/core/circuit-breaker.ts`) 로 관리:
+
+```ts
+new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "grok_circuit" })
+```
+
+| 메서드 | 역할 |
+|--------|------|
+| `isAvailable()` | 서킷 열림 여부 확인 |
+| `markDown(ms, reason)` | 서킷 오픈 + 쿨다운 설정 |
+| `resetForTests()` | 테스트용 상태 초기화 |
+
+- `globalKey` 옵션: `globalThis`에 상태 공유 → 서버리스 warm instance 간 쿨다운 보존
+- Verum 클라이언트(`src/lib/verum/client.ts`)도 동일 클래스를 인스턴스 단위로 사용
+
 ---
 
 ## 3. Verum — A/B 프롬프트 라우팅
@@ -103,6 +120,24 @@ resetVerumClientForTests(): void  // 테스트 전용
 | `/api/daily-card` | JSON 단일 응답 | `NextResponse.json()` |
 
 클라이언트 공통 유틸: `src/hooks/useSSEStream.ts` — `fetchSSEStream()`
+
+### 서버 공통 유틸
+
+| 유틸 | 위치 | 역할 |
+|------|------|------|
+| `withAbortTimeout(fn, ms)` | `src/services/core/http-utils.ts` | AbortController + setTimeout 래퍼 (Grok/Claude 공용) |
+| `readSseLines(response, extractDelta)` | `src/services/core/http-utils.ts` | OpenAI·Anthropic SSE 공통 reader — `extractDelta` 콜백으로 포맷 차이 흡수 |
+| `SSE_HEADERS` | `src/lib/request-utils.ts` | API 라우트 SSE 응답 표준 헤더 상수 |
+| `jsonError(msg, status)` | `src/lib/request-utils.ts` | JSON 오류 응답 헬퍼 |
+| `getClientIp(headers)` | `src/lib/request-utils.ts` | x-forwarded-for 첫 IP 추출 (rate-limit 용) |
+| `pickFields(obj, keys)` | `src/lib/request-utils.ts` | 응답 직렬화 whitelist — 새 컬럼 자동 제외로 IDOR 방지 |
+
+### 텍스트·프롬프트 공통 유틸
+
+| 유틸 | 위치 | 역할 |
+|------|------|------|
+| `extractFallbackText(raw)` | `src/services/core/text-cleaner.ts` | JSON 파싱 실패 시 본문 회수 (tarot/saju 공용, ReDoS-safe) |
+| `buildCharacterHeader(character, subtitle?)` | `src/services/core/prompt-builder.ts` | 3 서비스 공통 캐릭터 system-prompt 헤더 |
 
 ---
 
