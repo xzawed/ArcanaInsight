@@ -155,6 +155,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 3. **`<Image fill>` sizes 필수**: 미설정 시 Mobile Android CI 타임아웃. `sizes="(max-width: 640px) 50vw, ..."` 필수.
 4. **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
 5. **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
+6. **API 라우트 outer catch 커버리지**: `POST` 핸들러 최외부 `} catch {` 블록은 `checkRateLimit: vi.fn().mockRejectedValue(new Error(...))` 패턴으로 커버. 미커버 시 Codecov patch 실패.
 
 ## 업무 유형별 가이드
 
