@@ -21,7 +21,7 @@ vi.mock("drizzle-orm/postgres-js", () => ({
 
 // ─── 헬퍼: 플루언트 체인 구성 ─────────────────────────────────────────────
 
-/** select().from(t)[.where(...)][.limit(N)][.offset(N)] 체인을 rows로 응답 */
+/** select().from(t).$dynamic()[.where(...)][.limit(N)][.offset(N)] 체인을 rows로 응답 */
 function mockSelectWith(rows: Record<string, unknown>[]) {
   const withOffset = {
     then: (resolve: (v: unknown) => unknown) => Promise.resolve(rows).then(resolve),
@@ -35,7 +35,15 @@ function mockSelectWith(rows: Record<string, unknown>[]) {
     limit: vi.fn().mockReturnValue(withOffset),
     offset: vi.fn().mockResolvedValue(rows),
   };
-  mockDb.select = vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue(thenable) });
+  const fromChain = {
+    $dynamic: vi.fn().mockReturnValue(thenable),
+    where: thenable.where,
+    limit: thenable.limit,
+    offset: thenable.offset,
+    then: thenable.then,
+    catch: thenable.catch,
+  };
+  mockDb.select = vi.fn().mockReturnValue({ from: vi.fn().mockReturnValue(fromChain) });
 }
 
 /** insert(t).values(d).returning() 체인을 rows로 응답 */

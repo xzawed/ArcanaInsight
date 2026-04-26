@@ -60,6 +60,35 @@ git push origin main
 
 ---
 
+## Rate-Limit Redis 활성화 (Upstash)
+
+현재 rate-limit은 서버 메모리 기반 fallback으로 동작합니다 (단일 인스턴스에서는 정상).
+다중 인스턴스 또는 서버 재시작 시 카운터가 초기화되는 문제를 방지하려면 Upstash Redis를 연결합니다.
+
+### 1단계 — Upstash 데이터베이스 생성
+
+1. [console.upstash.com](https://console.upstash.com) 접속 → 새 Redis 데이터베이스 생성
+2. **Region**: 서비스 지역에 가장 가까운 곳 선택 (지연 최소화)
+3. **Type**: Regional (무료 티어: 10,000 req/day)
+
+### 2단계 — Railway 환경변수 등록
+
+Railway 대시보드 → 서비스 → Variables 탭:
+
+```
+UPSTASH_REDIS_REST_URL   = https://xxx-xxxxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN = AXxx...
+```
+
+Upstash 콘솔의 **REST API** 탭에서 두 값을 복사합니다.
+
+### 3단계 — 반영 확인
+
+Railway 변수 저장 → 자동 재배포 완료 후, `/api/tarot/reading` 엔드포인트에 연속 요청 시
+Redis INCR 카운터가 누적되면 정상. `railway logs --tail`로 rate-limit 관련 에러가 없으면 완료.
+
+---
+
 ## 빌드 실패 대응
 
 1. Railway 대시보드 → Build Logs 확인
