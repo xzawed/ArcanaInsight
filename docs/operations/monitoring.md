@@ -86,4 +86,35 @@ PR마다 자동 실행:
 
 - PR마다 커버리지 변화 코멘트 자동 게시
 - `unit` flag로 단위 테스트 커버리지만 추적
-- 임계값: statements 60% (PR E에서 상향 예정)
+- 임계값: branches 92% / lines·statements·functions 98%
+
+---
+
+## MCP 자율 진단
+
+Claude가 작업 중 이상 감지 시 사용자 개입 없이 직접 진단 데이터를 수집한다. `~/.claude/settings.json`의 `mcpServers`에 railway(npx)·sonarcloud(Docker) 등록.
+
+### SonarCloud (REST API 기본)
+
+MCP 툴이 세션에 로드되지 않는 경우가 있으므로 REST API를 기본으로 사용한다.
+
+| 트리거 | 호출 |
+|---|---|
+| PR 머지·CI 결과 확인 | `qualitygates/project_status` + `issues/search?severities=BLOCKER,CRITICAL` |
+| Quality Gate Fail 감지 | `measures/component` + `issues/search` |
+| push 전 베이스라인 확인 | `qualitygates/project_status` |
+
+- org: `xzawed` / 프로젝트 키: `xzawed_ArcanaInsight`
+
+### Railway (CLI 링크 후 조회)
+
+MCP 툴 사용 전 세션마다 `railway link` 선행 필요:
+
+```bash
+railway link --project 24bdc6b7-db99-4487-896e-d4bd68dbb6b3 --environment production --service ArcanaInsight
+railway deployment list --json   # MCP 미동작 시 대체
+```
+
+| 트리거 | 호출 |
+|---|---|
+| 배포 이상 의심 | `railway deployment list --json` → `mcp__railway__get-logs` |
