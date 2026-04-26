@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import { eq, and, inArray } from "drizzle-orm"
+import { eq, and, inArray, getTableColumns } from "drizzle-orm"
 import type { PgTable, PgColumn } from "drizzle-orm/pg-core"
 import type { ColumnBaseConfig, ColumnDataType } from "drizzle-orm"
 import * as schema from "./schema/index"
@@ -56,11 +56,11 @@ function normalizeRow<T>(row: Record<string, unknown>): T {
 }
 
 function buildConditions(table: PgTable, where: Record<string, unknown>) {
+  const cols = getTableColumns(table)
   return Object.entries(where).map(([k, v]) => {
-    const col = (table as unknown as Record<string, unknown>)[k]
-      ?? (table as unknown as Record<string, unknown>)[snakeToCamel(k)]
+    const col = cols[k] ?? cols[snakeToCamel(k)]
     if (!col) throw new Error(`Unknown column: ${k}`)
-    return eq(col as Parameters<typeof eq>[0], v)
+    return eq(col, v)
   })
 }
 
@@ -77,8 +77,7 @@ export class PostgresAdapter implements DbClient {
     const db = getConnection()
     const t = resolveTable(table)
     const conditions = (where && Object.keys(where).length > 0) ? buildConditions(t, where) : null
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q: any = db.select().from(t)
+    let q = db.select().from(t).$dynamic()
     if (conditions) q = q.where(and(...conditions))
     if (options?.limit !== undefined) q = q.limit(options.limit)
     if (options?.offset !== undefined) q = q.offset(options.offset)
@@ -90,11 +89,10 @@ export class PostgresAdapter implements DbClient {
     if (values.length === 0) return []
     const db = getConnection()
     const t = resolveTable(table)
-    const col = (t as unknown as Record<string, unknown>)[column]
-      ?? (t as unknown as Record<string, unknown>)[snakeToCamel(column)]
+    const cols = getTableColumns(t)
+    const col = cols[column] ?? cols[snakeToCamel(column)]
     if (!col) throw new Error(`Unknown column: ${column}`)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await db.select().from(t).where(inArray(col as any, values as any[]))
+    const result = await db.select().from(t).where(inArray(col, values))
     return (result as Record<string, unknown>[]).map((r) => normalizeRow<T>(r))
   }
 
@@ -128,9 +126,9 @@ export class PostgresAdapter implements DbClient {
     const db = getConnection()
     const t = resolveTable(table)
     const conflictKeys = new Set(conflictOn.split(",").map((k) => k.trim()))
+    const tableCols = getTableColumns(t)
     const conflictCols = Array.from(conflictKeys).map((key) => {
-      const col = (t as unknown as Record<string, unknown>)[key]
-        ?? (t as unknown as Record<string, unknown>)[snakeToCamel(key)]
+      const col = tableCols[key] ?? tableCols[snakeToCamel(key)]
       if (!col) throw new Error(`Unknown conflict column: ${key}`)
       return col as PgColumn<ColumnBaseConfig<ColumnDataType, string>>
     })
