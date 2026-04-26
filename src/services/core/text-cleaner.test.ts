@@ -239,6 +239,45 @@ describe("parseJsonSafe", () => {
   it("닫히지 않은 중괄호는 null 반환", () => {
     expect(parseJsonSafe('{"key": "unclosed')).toBeNull();
   });
+
+  it("문자열 값 안에 { } 가 있어도 올바르게 파싱한다 (bracket counting 버그 재현)", () => {
+    // 핵심 버그: "현재는 {도전의 시기}입니다" 에서 문자열 내 } 를 JSON 끝으로 오인
+    const input = JSON.stringify({
+      overallReading: "현재는 {도전의 시기}이지만 곧 좋아집니다",
+      advice: "인내하세요",
+    });
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toContain("도전의 시기");
+    expect(result?.advice).toBe("인내하세요");
+  });
+
+  it("문자열 값 안에 중첩 { } 표현이 있어도 파싱한다", () => {
+    const input = JSON.stringify({
+      overallReading: "운세: {길흉 {대소}를 살피면}",
+      advice: "조언입니다",
+    });
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toContain("길흉");
+  });
+
+  it("이스케이프된 큰따옴표가 포함된 문자열 값을 올바르게 파싱한다", () => {
+    const raw = `{"overallReading": "그는 \\"행운\\"이라 했다", "advice": "믿으세요"}`;
+    const result = parseJsonSafe(raw);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toContain("행운");
+    expect(result?.advice).toBe("믿으세요");
+  });
+
+  it("thinking 토큰 뒤에 { } 포함 JSON 값이 있어도 파싱한다", () => {
+    const input =
+      `<think>내부 사고</think>` +
+      JSON.stringify({ overallReading: "현재 {변화의 기로}입니다", advice: "결단하세요" });
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toContain("변화의 기로");
+  });
 });
 
 describe("extractFallbackText", () => {

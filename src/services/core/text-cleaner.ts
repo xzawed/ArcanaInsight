@@ -37,12 +37,32 @@ export function cleanReadingText(text: string): string {
 }
 
 /**
+ * 문자열 리터럴 내부의 { } 를 무시하면서 가장 바깥 JSON 객체의 끝 인덱스를 반환.
+ * 닫히지 않은 경우 -1 반환.
+ */
+function findOutermostObjectEnd(text: string, start: number): number {
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (escape) { escape = false; continue; }
+    if (ch === "\\") { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === "{") depth++;
+    else if (ch === "}") { depth--; if (depth === 0) return i; }
+  }
+  return -1;
+}
+
+/**
  * AI 응답 raw 문자열에서 JSON 객체를 안전하게 추출·파싱.
  *
  * 처리 순서:
  * 1. <think>...</think> 등 thinking 토큰 제거
  * 2. 마크다운 코드블록 제거
- * 3. 가장 바깥 { ... } 추출
+ * 3. 가장 바깥 { ... } 추출 (문자열 내부 { } 무시)
  * 4. JSON.parse 1차 시도
  * 5. 문자열 값 내 리터럴 개행·탭 이스케이프 후 2차 시도
  * 6. 실패 시 null 반환
@@ -51,24 +71,18 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
   let text = raw.trim();
 
   // thinking 토큰 제거 (일부 Grok 버전이 <think>...</think> 붙임)
-  text = text.replace(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "").trim();
+  text = text.replaceAll(/<think(?:ing)?[\s\S]*?<\/think(?:ing)?>/gi, "").trim();
 
   // 마크다운 코드블록에서 추출
-  const codeMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const codeMatch = /```(?:json)?\s*([\s\S]*?)```/.exec(text);
   if (codeMatch) text = codeMatch[1].trim();
 
   // 입력 길이 상한 (ReDoS 방어)
   if (text.length > 50_000) return null;
 
-  // 가장 바깥 JSON 객체만 추출 — 괄호 카운터 기반으로 ReDoS 방지
   const start = text.indexOf("{");
   if (start === -1) return null;
-  let depth = 0;
-  let end = -1;
-  for (let i = start; i < text.length; i++) {
-    if (text[i] === "{") depth++;
-    else if (text[i] === "}") { depth--; if (depth === 0) { end = i; break; } }
-  }
+  const end = findOutermostObjectEnd(text, start);
   if (end === -1) return null;
   text = text.slice(start, end + 1);
 

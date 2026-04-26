@@ -343,14 +343,34 @@ describe("ShinjeomService", () => {
       expect(typeof result.overallReading).toBe("string");
     });
 
-    it("중괄호가 포함됐지만 JSON.parse가 실패하면 경고 후 텍스트 fallback 반환", () => {
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-      // 중괄호는 있지만 유효하지 않은 JSON — match() 는 성공하나 JSON.parse 실패
+    it("유효하지 않은 JSON이면 텍스트 fallback으로 반환한다 (경고 없음)", () => {
       const brokenJson = "결과는 다음과 같습니다: {invalid json here}";
       const result = service.parseResult(brokenJson);
       expect(result.overallReading).toBeTruthy();
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(result.advice).toBe("");
+    });
+
+    it("문자열 값 안에 한국어 중괄호 표현이 있어도 JSON을 올바르게 파싱한다", () => {
+      // 버그 재현: "현재는 {도전의 시기}입니다" 처럼 {} 를 포함한 값이 있으면
+      // 이전 탐욕적 정규식은 마지막 } 를 JSON 끝으로 인식해 잘못된 JSON을 추출했음
+      const jsonWithBracesInValue = JSON.stringify({
+        overallReading: "현재는 {도전의 시기}이지만 곧 나아집니다",
+        topicReading: "재물운은 {상승세}를 탈 것입니다",
+        advice: "인내심을 가지고 기다리세요",
+      });
+      const result = service.parseResult(jsonWithBracesInValue);
+      expect(result.overallReading).toContain("도전의 시기");
+      expect(result.topicReading).toContain("상승세");
+      expect(result.advice).toContain("인내심을 가지고 기다리세요");
+    });
+
+    it("두 JSON 구조가 연달아 있을 때 첫 번째 JSON만 파싱한다 (탐욕적 정규식 버그 재현)", () => {
+      // 이전 /\{[\s\S]*\}/ 는 첫 { 부터 마지막 } 까지 잡아 두 JSON을 합쳐 파싱 실패
+      const twoJsonBlocks =
+        `{"overallReading":"첫 번째 결과","advice":"조언"} ` +
+        `{"overallReading":"두 번째 블록","advice":"다른 조언"}`;
+      const result = service.parseResult(twoJsonBlocks);
+      expect(result.overallReading).toContain("첫 번째 결과");
     });
   });
 });
