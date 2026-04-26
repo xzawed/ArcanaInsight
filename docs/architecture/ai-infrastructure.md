@@ -71,6 +71,63 @@ new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "grok_circuit" 
 
 | 유틸 | 위치 | 역할 |
 |------|------|------|
-| `extractFallbackText(raw)` | `src/services/core/text-cleaner.ts` | JSON 파싱 실패 시 본문 회수 (tarot/saju 공용, ReDoS-safe) |
+| `parseJsonSafe(raw)` | `src/services/core/text-cleaner.ts` | thinking 토큰 제거 → 코드블록 추출 → 문자열-aware 괄호 카운터로 JSON 추출 → 2차 파싱 시도 |
+| `extractFallbackText(raw)` | `src/services/core/text-cleaner.ts` | JSON 파싱 완전 실패 시 본문 회수 (tarot/saju 공용, ReDoS-safe) |
+| `cleanReadingText(text)` | `src/services/core/text-cleaner.ts` | 파싱 후 JSON 잔여물·이스케이프 정리 |
 | `buildCharacterHeader(character, subtitle?)` | `src/services/core/prompt-builder.ts` | 3 서비스 공통 캐릭터 system-prompt 헤더 |
+
+---
+
+## 3. JSON 파싱 파이프라인
+
+타로·사주·신점 리딩 결과는 AI가 JSON 문자열로 응답하며 서버에서 파싱한다.
+
+```
+AI 스트리밍 응답 (fullResponse 누적)
+    │
+    ├─ parseJsonSafe(fullResponse)
+    │      1. thinking 토큰 제거 (<think>...</think>)
+    │      2. 마크다운 코드블록 추출 (```json ... ```)
+    │      3. findOutermostObjectEnd() — 문자열-aware 괄호 카운팅
+    │      4. JSON.parse 1차 시도
+    │      5. 문자열 내 리터럴 개행 이스케이프 후 2차 시도
+    │      → 성공: Record<string, unknown>
+    │      → 실패: null
+    │
+    ├─ 성공 → cleanReadingText(field) 후 ReadingResult 반환
+    └─ 실패 → extractFallbackText(raw) 또는 원문 텍스트 반환
+```
+
+### 핵심 주의사항 — 문자열 내 중괄호
+
+AI 응답에 `"현재는 {도전의 시기}입니다"` 처럼 한국어 표현이 JSON 문자열 값
+안에 `{}`를 포함하는 경우가 빈번하다.
+
+**잘못된 패턴 (단순 괄호 카운터)**:
+```ts
+// ❌ 문자열 내 } 를 JSON 끝으로 오인 → 조기 종료
+for (let i = start; i < text.length; i++) {
+  if (text[i] === "{") depth++;
+  else if (text[i] === "}") { depth--; if (!depth) { end = i; break; } }
+}
+```
+
+**올바른 패턴 (`findOutermostObjectEnd`)**:
+```ts
+// ✅ inString + escape 상태로 문자열 내부의 { } 는 카운트 제외
+let inString = false, escape = false;
+for (let i = start; i < text.length; i++) {
+  const ch = text[i];
+  if (escape)        { escape = false; continue; }
+  if (ch === "\\")   { escape = true;  continue; }
+  if (ch === '"')    { inString = !inString; continue; }
+  if (inString)      continue;
+  if (ch === "{")    depth++;
+  else if (ch === "}") { depth--; if (!depth) return i; }
+}
+```
+
+**탐욕적 정규식도 동일 문제** — `/\{[\s\S]*\}/`는 첫 `{`부터 마지막 `}`까지
+잡기 때문에 여러 JSON 블록이 있거나 값에 `}`가 포함되면 오파싱된다.
+`shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
