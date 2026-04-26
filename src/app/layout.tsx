@@ -1,32 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Noto_Sans_KR, Gothic_A1, Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { FocusReset } from "@/components/layout/FocusReset";
-
-const notoSansKr = Noto_Sans_KR({
-  subsets: ["latin"],
-  variable: "--font-noto-sans-kr",
-  display: "swap",
-});
-
-const gothicA1 = Gothic_A1({
-  weight: ["400", "700", "900"],
-  subsets: ["latin"],
-  variable: "--font-gothic-a1",
-  display: "swap",
-});
-
-const notoSerifKr = Noto_Serif_KR({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-noto-serif-kr",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -46,10 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="ko"
-      className={`dark ${notoSansKr.variable} ${gothicA1.variable} ${notoSerifKr.variable}`}
-    >
+    <html lang="ko" className="dark">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Gothic+A1:wght@400;700;900&family=Noto+Serif+KR:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="bg-arcana-bg text-arcana-text font-sans min-h-screen antialiased flex flex-col">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-arcana-purple focus:text-white focus:rounded-lg">
           메인 콘텐츠로 이동
