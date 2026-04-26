@@ -7,8 +7,19 @@
 1. **이 CLAUDE.md 전체** — 프로젝트 구조·규칙·아키텍처 파악
 2. **`git log --oneline -10`** — 최근 변경사항
 3. **메모리 확인** — `~/.claude/projects/.../MEMORY.md`
-4. **요청 관련 파일만 Read** — 전체 코드베이스 탐색 금지
-5. **불확실하면 질문 전에 코드 확인** — 추측 금지
+4. **MCP 연동** — SonarCloud Quality Gate + Railway 배포 상태 확인 (작업 전 필수)
+   - SonarCloud: REST API 직접 호출 (MCP 툴 세션 미로드 시 대체)
+     ```
+     curl -s -u "SONARQUBE_TOKEN:" "https://sonarcloud.io/api/qualitygates/project_status?projectKey=xzawed_ArcanaInsight"
+     curl -s -u "SONARQUBE_TOKEN:" "https://sonarcloud.io/api/issues/search?componentKeys=xzawed_ArcanaInsight&types=BUG,VULNERABILITY,CODE_SMELL&statuses=OPEN&severities=BLOCKER,CRITICAL&ps=20"
+     ```
+   - Railway: MCP 툴 사용 전 반드시 CLI 링크 선행 필요
+     ```
+     railway link --project 24bdc6b7-db99-4487-896e-d4bd68dbb6b3 --environment production --service ArcanaInsight
+     railway deployment list --json   # MCP 툴 미동작 시 대체
+     ```
+5. **요청 관련 파일만 Read** — 전체 코드베이스 탐색 금지
+6. **불확실하면 질문 전에 코드 확인** — 추측 금지
 
 ## 기술 스택
 
@@ -210,11 +221,14 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 **단일 진실 소스**: 이 CLAUDE.md + `docs/` 체계. → [`docs/README.md`](docs/README.md) 인덱스
 
-**MCP 자율 진단 규칙**: 아래 트리거 발생 시 사용자 요청 없이 해당 MCP 툴을 자동 호출하여 컨텍스트를 수집한다. MCP 툴은 `~/.claude/settings.json`의 `mcpServers`에 등록된 `railway`(npx)와 `sonarcloud`(Docker) 서버를 통해 제공된다.
+**MCP 자율 진단 규칙**: 아래 트리거 발생 시 사용자 요청 없이 컨텍스트를 수집한다. MCP 툴이 세션에 로드되지 않으면 REST API / CLI로 대체한다.
 
-| 트리거 | 호출 툴 | 목적 |
+| 트리거 | 수집 방법 | 목적 |
 |---|---|---|
-| PR 생성·머지 후 CI 결과 확인 시 | `get_project_quality_gate_status` → `search_sonar_issues_in_projects` | 신규 이슈 직접 파악 |
-| SonarCloud Quality Gate Fail 감지 | `search_files_by_coverage` + `get_component_measures` | 커버리지·버그·취약점 원인 수집 |
-| Railway 배포 이상 의심 시 | `list-services` → `get-logs` | 런타임 에러 로그 직접 수집 |
-| 로컬 검증 통과 후 push 전 | `get_project_quality_gate_status` | 직전 분석 베이스라인 확인 |
+| PR 생성·머지 후 CI 결과 확인 시 | SonarCloud REST API `qualitygates/project_status` + `issues/search` | 신규 이슈 직접 파악 |
+| SonarCloud Quality Gate Fail 감지 | REST API `measures/component` + `issues/search?severities=BLOCKER,CRITICAL` | 커버리지·버그·취약점 원인 수집 |
+| Railway 배포 이상 의심 시 | `railway link` 후 `railway deployment list --json` 또는 `mcp__railway__get-logs` | 런타임 에러 로그 직접 수집 |
+| 로컬 검증 통과 후 push 전 | SonarCloud REST API `qualitygates/project_status` | 직전 분석 베이스라인 확인 |
+
+> **Railway MCP 주의**: `mcp__railway__*` 툴은 세션마다 `railway link` CLI 선행 필요. 링크 명령: `railway link --project 24bdc6b7-db99-4487-896e-d4bd68dbb6b3 --environment production --service ArcanaInsight`
+> **SonarCloud MCP 주의**: `mcp/sonarqube` Docker 컨테이너가 실행 중이어도 MCP 툴이 세션에 로드되지 않는 경우 있음 → REST API로 대체.

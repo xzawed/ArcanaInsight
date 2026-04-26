@@ -20,6 +20,26 @@
 |------|------|------|----------|
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | whitelist 방식, 전체 코드의 일부만 측정 | include 확장 또는 exclude 방식 전환 시 처리 |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 4건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)` — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) |
+| SonarCloud CRITICAL Cognitive Complexity 12건 | 아래 표 참조 | Quality Gate는 통과 상태. 버그·취약점 없음. 모두 함수 인지 복잡도 초과 (허용 15). | 해당 함수 리팩터링 시 처리 |
+
+### SonarCloud CRITICAL 이슈 현황 (2026-04-26 기준)
+
+Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | Coverage: 95.8% | Code Smells: 179
+
+| 파일 | 라인 | 복잡도 | debt |
+|------|------|--------|------|
+| `src/app/tarot/session/page.tsx` | 209 | **75** (허용 15) | 1h5min |
+| `src/hooks/useSSEStream.ts` | 19 | **47** | 37min |
+| `src/services/saju/saju-service.ts` | 57 | **33** | 23min |
+| `src/components/common/UserInfoForm.tsx` | 63 | **30** | 20min |
+| `src/app/tarot/session/page.tsx` | 189 | 함수 중첩 4단계 초과 | 20min |
+| `src/app/saju/session/page.tsx` | 197 | **22** | 12min |
+| `src/app/tarot/session/page.tsx` | 584 | **22** | 12min |
+| `src/app/shinjeom/session/page.tsx` | 165 | **21** | 11min |
+| `src/app/shinjeom/session/page.tsx` | 69 | **20** | 10min |
+| `src/services/core/http-utils.ts` | 19 | **18** | 8min |
+| `src/components/common/ReadingText.tsx` | 9 | **18** | 8min |
+| `src/components/home/DailyCard.tsx` | 22 | **17** | 7min |
 
 ### 파기 확정 항목 (재제안 금지)
 
@@ -32,33 +52,6 @@
 
 ---
 
-## 테스트 개선 6-PR 계획 진행 상태
-
-| PR | 브랜치/번호 | 상태 | 완료 기준 |
-|----|------------|------|----------|
-| **A** | `fix/security-share-token-auth` / PR #119 | ✅ merged | Drizzle $defaultFn 2곳, migration 011, assertReadingAccess() |
-| **B** | `feat/pr-b-api-unit-test-infra` / PR #122 | ✅ merged | vitest exclude 완화, mock 헬퍼 4개, 세션 라우트 3개 테스트 (469→504) |
-| **C** | `feat/pr-c-api-smoke-tests` / PR #123 | ✅ merged | API 스모크 테스트 8개 라우트 추가 (504→539) |
-| **D** | `fix/sonar-badge-followup` | ✅ merged | reading-saver.ts 신설·retry 3회, tarot·saju·shinjeom 라우트 위임 (539→558) |
-| **E** | PR-N (임계값 상향) | ✅ merged | branches 75/functions 85/lines 88/statements 88, 587개 |
-| **F** | (미시작) | 선택 | 우회 주석 태깅 |
-
----
-
-## API 헬퍼 리팩토링 D-시리즈 진행 상태
-
-코드 중복·SonarCloud CPD 개선을 위해 4단계로 분해한 리팩토링 (2026-04-25).
-
-| PR | 브랜치/번호 | 상태 | 완료 기준 |
-|----|------------|------|----------|
-| **D1** | `chore/sonar-cpd-exclusions` / PR #155 | ✅ merged | sonar.cpd.exclusions 정적 데이터·타입 파일 제외 |
-| **D2** | `refactor/test-route-helpers` / PR #156 | ✅ merged | `makeStreamingRouteSetup` 헬퍼 신설 → 테스트 setup 중복 감소 |
-| **D3** | `refactor/api-helpers` / PR #157 | ✅ merged | `request-utils.ts`: getClientIp·pickFields·jsonError·SSE_HEADERS 추출, API 라우트 CPD 해소 (599→606) |
-| **D4** | `refactor/service-helpers` / PR #158 | ✅ merged | `circuit-breaker.ts`·`http-utils.ts` 신설, FallbackProvider·GrokProvider·ClaudeProvider 중복 제거 (606→620) |
-| **Doc** | `docs/post-d-series-update` / PR #159 | ✅ merged | D-시리즈 결과 문서 반영 (ai-infrastructure·auth-abstraction·unit-testing·task-playbooks) |
-
----
-
 ## Verum 침투적 통합 제거 이력
 
 비침투적 재도입 준비를 위해 `src/lib/verum/` SDK 및 모든 관련 코드를 제거한 작업 (2026-04-25).
@@ -68,13 +61,3 @@
 | **Verum 제거** | `refactor/remove-verum-invasive-integration` / PR #163 | ✅ merged | `src/lib/verum/` 삭제, route.ts·env.ts·테스트·문서 전체 정리, CI 빌드·SonarCloud·Codecov 통과 (620→575) |
 
 **배경**: Verum 자동 생성 PR #161 이 침투적 방식으로 코드베이스를 수정해 SonarCloud/Codecov 실패. 사용자 직접 운영 서비스이므로 향후 비침투적(외부 프록시/사이드카) 방식으로 재도입 예정. git tag `verum-removal-base`(`780bb04`) — 롤백 기준점.
-
----
-
-## SonarCloud Quality Gate 수정 이력
-
-| PR | 번호 | 상태 | 내용 |
-|----|------|------|------|
-| **Q1** | PR #148 | ✅ merged | E2E cross-platform.spec.ts testPaths miko/default.jpg → nukki/*.png (PR-K 누락 수정) |
-| **Q3** | PR #149 | ✅ merged | Reliability Bug 2개(접근성), Security Hotspot 2개(ReDoS regex·Math.random) 해소 → Quality Gate Passed |
-| **Q4** | PR #157 | ✅ merged | New Code Duplication 6.8% → 해소 (`src/app/api/**` CPD 제외), Codecov patch 87.50% → 100% |
