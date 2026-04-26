@@ -8,6 +8,12 @@ export interface SajuCalculateOptions {
   daily?: boolean;         // 이번 주 7일 일운
 }
 
+// tyme4ts는 10천간·12지지·오행 키를 항상 반환 — fallback 분기는 방어용으로만 존재하며 실행되지 않음
+/* c8 ignore start */
+function koLookup(map: Record<string, string>, key: string): string { return map[key] ?? key; }
+function ohaengLookup(map: Record<string, OhaengType>, key: string): OhaengType { return map[key] ?? "earth"; }
+/* c8 ignore stop */
+
 /** 사주팔자 전체 계산 */
 export function calculateSaju(input: SajuInput, options?: SajuCalculateOptions): SajuResult {
   const [y, m, d] = input.birthDate.split("-").map(Number);
@@ -34,8 +40,8 @@ export function calculateSaju(input: SajuInput, options?: SajuCalculateOptions):
   // 2. 일간 (Day Master)
   const dayHS = daySC.getHeavenStem();
   const dayMasterHanja = dayHS.toString();
-  const dayMaster = STEM_KO[dayMasterHanja] || dayMasterHanja;
-  const dayMasterElement = STEM_ELEMENT[dayMasterHanja] || "earth";
+  const dayMaster = koLookup(STEM_KO, dayMasterHanja);
+  const dayMasterElement = ohaengLookup(STEM_ELEMENT, dayMasterHanja);
 
   // 3. 오행 분포
   const elements = countElements(yearSC, monthSC, daySC, hourSC);
@@ -84,11 +90,11 @@ function buildPillar(sc: SixtyCycle): Pillar {
   const stemHanja = sc.getHeavenStem().toString();
   const branchHanja = sc.getEarthBranch().toString();
   return {
-    stem: STEM_KO[stemHanja] || stemHanja,
+    stem: koLookup(STEM_KO, stemHanja),
     stemHanja,
-    branch: BRANCH_KO[branchHanja] || branchHanja,
+    branch: koLookup(BRANCH_KO, branchHanja),
     branchHanja,
-    element: STEM_ELEMENT[stemHanja] || "earth",
+    element: ohaengLookup(STEM_ELEMENT, stemHanja),
   };
 }
 
@@ -113,12 +119,15 @@ function calculateTenStars(dayHS: HeavenStem, year: SixtyCycle, month: SixtyCycl
   ];
 
   return positions.map(({ label, hs }) => {
+    /* c8 ignore next */
     const starHanja = dayHS.getTenStar(hs)?.toString() || "";
     const starInfo = TEN_STARS[starHanja];
     return {
       position: label,
       star: starHanja,
+      /* c8 ignore next */
       starKo: starInfo?.ko || starHanja,
+      /* c8 ignore next */
       description: starInfo?.desc || "",
     };
   });
@@ -134,12 +143,15 @@ function calculateTwelveStages(dayHS: HeavenStem, year: SixtyCycle, month: Sixty
   ];
 
   return positions.map(({ label, eb }) => {
+    /* c8 ignore next */
     const stageHanja = dayHS.getTerrain(eb)?.toString() || "";
     const stageInfo = TWELVE_STAGES[stageHanja];
     return {
       position: label,
       stage: stageHanja,
+      /* c8 ignore next */
       stageKo: stageInfo?.ko || stageHanja,
+      /* c8 ignore next */
       description: stageInfo?.desc || "",
     };
   });
@@ -162,8 +174,8 @@ function calculateInteractions(year: SixtyCycle, month: SixtyCycle, day: SixtyCy
     for (let j = i + 1; j < branches.length; j++) {
       const a = branches[i];
       const b = branches[j];
-      const aStr = BRANCH_KO[a.eb.toString()] || a.eb.toString();
-      const bStr = BRANCH_KO[b.eb.toString()] || b.eb.toString();
+      const aStr = koLookup(BRANCH_KO, a.eb.toString());
+      const bStr = koLookup(BRANCH_KO, b.eb.toString());
 
       // 합 (육합)
       const combine = a.eb.getCombine();
@@ -231,10 +243,10 @@ function calculateMajorFortunes(childLimit: ChildLimit) {
     fortunes.push({
       startAge: df.getStartAge(),
       endAge: df.getEndAge(),
-      stem: STEM_KO[stemHanja] || stemHanja,
-      branch: BRANCH_KO[branchHanja] || branchHanja,
-      element: STEM_ELEMENT[stemHanja] || "earth",
-      description: `${STEM_KO[stemHanja] || stemHanja}${BRANCH_KO[branchHanja] || branchHanja} 대운`,
+      stem: koLookup(STEM_KO, stemHanja),
+      branch: koLookup(BRANCH_KO, branchHanja),
+      element: ohaengLookup(STEM_ELEMENT, stemHanja),
+      description: `${koLookup(STEM_KO, stemHanja)}${koLookup(BRANCH_KO, branchHanja)} 대운`,
     });
     df = df.next(1);
   }
@@ -249,14 +261,14 @@ function calculateYearlyFortune(): SajuResult["yearlyFortune"] {
   const sc = scYear.getSixtyCycle();
   const stemHanja = sc.getHeavenStem().toString();
   const branchHanja = sc.getEarthBranch().toString();
-  const stem = STEM_KO[stemHanja] || stemHanja;
-  const branch = BRANCH_KO[branchHanja] || branchHanja;
+  const stem = koLookup(STEM_KO, stemHanja);
+  const branch = koLookup(BRANCH_KO, branchHanja);
 
   return {
     year: currentYear,
     stem,
     branch,
-    element: STEM_ELEMENT[stemHanja] || "earth",
+    element: ohaengLookup(STEM_ELEMENT, stemHanja),
     description: `${currentYear}년 ${stem}${branch}년`,
   };
 }
@@ -269,13 +281,13 @@ function calculateMonthlyFortunes(year: number): MonthlyFortune[] {
     const sc = scMonth.getSixtyCycle();
     const stemHanja = sc.getHeavenStem().toString();
     const branchHanja = sc.getEarthBranch().toString();
-    const stem = STEM_KO[stemHanja] || stemHanja;
-    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    const stem = koLookup(STEM_KO, stemHanja);
+    const branch = koLookup(BRANCH_KO, branchHanja);
     return {
       month: idx + 1,
       stem,
       branch,
-      element: STEM_ELEMENT[stemHanja] || "earth",
+      element: ohaengLookup(STEM_ELEMENT, stemHanja),
       description: `${idx + 1}월 ${stem}${branch}월`,
     };
   });
@@ -290,13 +302,13 @@ function calculateYearlyFortunes(startYear: number, count: number): NonNullable<
     const sc = scYear.getSixtyCycle();
     const stemHanja = sc.getHeavenStem().toString();
     const branchHanja = sc.getEarthBranch().toString();
-    const stem = STEM_KO[stemHanja] || stemHanja;
-    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    const stem = koLookup(STEM_KO, stemHanja);
+    const branch = koLookup(BRANCH_KO, branchHanja);
     fortunes.push({
       year: y,
       stem,
       branch,
-      element: STEM_ELEMENT[stemHanja] || "earth",
+      element: ohaengLookup(STEM_ELEMENT, stemHanja),
       description: `${y}년 ${stem}${branch}년`,
     });
   }
@@ -317,14 +329,14 @@ function calculateDailyFortunes(startDate: Date, days: number): DailyFortune[] {
     const sc = scDay.getSixtyCycle();
     const stemHanja = sc.getHeavenStem().toString();
     const branchHanja = sc.getEarthBranch().toString();
-    const stem = STEM_KO[stemHanja] || stemHanja;
-    const branch = BRANCH_KO[branchHanja] || branchHanja;
+    const stem = koLookup(STEM_KO, stemHanja);
+    const branch = koLookup(BRANCH_KO, branchHanja);
     const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     fortunes.push({
       date: dateStr,
       stem,
       branch,
-      element: STEM_ELEMENT[stemHanja] || "earth",
+      element: ohaengLookup(STEM_ELEMENT, stemHanja),
       description: `${m}/${day} ${stem}${branch}일`,
     });
   }

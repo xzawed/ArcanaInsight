@@ -190,6 +190,29 @@ describe("calculateSaju", () => {
         }
       }
     });
+
+    it("신약(isStrong=false) 케이스 → determineYongsin else 분기 커버", () => {
+      // 기존 4개 픽스처는 모두 신강 → 신약 케이스를 다양한 날짜에서 탐색
+      const candidates: SajuInput[] = [
+        { birthDate: "1986-05-20", birthHour: "o", gender: "male" },
+        { birthDate: "1976-07-15", birthHour: "o", gender: "female" },
+        { birthDate: "2004-08-10", birthHour: "o", gender: "male" },
+        { birthDate: "1962-03-28", birthHour: "o", gender: "female" },
+        { birthDate: "1999-08-25", birthHour: "o", gender: "male" },
+        { birthDate: "2016-06-18", birthHour: "o", gender: "female" },
+        { birthDate: "1971-09-09", birthHour: "o", gender: "male" },
+        { birthDate: "1955-07-22", birthHour: "o", gender: "female" },
+        { birthDate: "2008-04-05", birthHour: "o", gender: "male" },
+        { birthDate: "1943-11-11", birthHour: "o", gender: "female" },
+      ];
+      const sinYak = candidates.find(input => calculateSaju(input).isStrong === false);
+      expect(sinYak, "신약 케이스를 찾을 수 없음 — 후보 날짜 추가 필요").toBeDefined();
+      if (sinYak) {
+        const result = calculateSaju(sinYak);
+        expect(result.isStrong).toBe(false);
+        expect(result.yongsin.reason).toContain("신약");
+      }
+    });
   });
 
   describe("대운(Major Fortunes)", () => {
