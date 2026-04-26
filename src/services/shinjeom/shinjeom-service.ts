@@ -2,7 +2,7 @@ import { DivinationService, ReadingResult, SessionContext } from "@/types/servic
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
-import { cleanReadingText } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
 import { buildCharacterHeader } from "@/services/core/prompt-builder";
 
 const topicLabels: Record<string, string> = {
@@ -118,19 +118,14 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
   }
 
   parseResult(aiResponse: string): ReadingResult {
-    // 최종 결과인 경우 JSON 파싱 시도
-    try {
-      // JSON 추출
-      const match = aiResponse.match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        return {
-          overallReading: cleanReadingText(String(parsed.overallReading || "")),
-          topicReading: cleanReadingText(String(parsed.topicReading || "")),
-          advice: cleanReadingText(String(parsed.advice || "")),
-        };
-      }
-    } catch (e) { console.warn("신점 결과 JSON 파싱 실패 (텍스트로 처리):", e); }
+    const parsed = parseJsonSafe(aiResponse);
+    if (parsed) {
+      return {
+        overallReading: cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : ""),
+        topicReading: cleanReadingText(typeof parsed.topicReading === "string" ? parsed.topicReading : ""),
+        advice: cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : ""),
+      };
+    }
 
     // 중간 대화 또는 파싱 실패 → 텍스트 그대로
     return {
