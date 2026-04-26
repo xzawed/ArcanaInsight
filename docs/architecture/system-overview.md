@@ -26,7 +26,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 2. **주제 선택** → 신수(종합운), 연애/궁합, 재물/사업운, 직장/이직, 건강/액막이, 택일
 3. **대화형 상담** → 무제한 문답 → "신점 결과 받기" 버튼으로 종료 (1턴 이상 후 활성화)
 
-> ⚠️ 신점 결과 공유 페이지(`/shinjeom/result/[id]`) 미구현 — mypage에서 링크 비활성화
+> 신점 결과 공유 페이지(`/shinjeom/result/[id]`) 구현 완료 (PR #142) — mypage 링크 활성화
 
 ---
 
@@ -96,11 +96,10 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 ## 5. 선호 상담사 자동 선택
 
 - 마이페이지에서 선호 상담사를 설정하면 이후 서비스 진입 시 캐릭터 선택 단계 자동 스킵
-- `useFavoriteCharacter(skip)` 훅이 Supabase에서 `profiles.favorite_character_id` 조회
+- `useFavoriteCharacter(skip)` 훅이 `/api/profile/favorite-character`를 통해 `profiles.favorite_character_id` 조회
+- API 라우트가 `getDb()`를 사용하므로 `DB_PROVIDER` 추상화 완전 적용
 - 캐릭터 상세 페이지 진입: `?character=xxx` URL 파라미터로 스킵 (타로·사주·신점 모두 지원)
 - 홈 직접 접속: `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략
-
-> ⚠️ 현재 `useFavoriteCharacter`는 Supabase 직접 사용 — `DB_PROVIDER` 추상화 미적용
 
 ---
 

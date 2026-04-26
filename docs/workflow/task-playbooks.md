@@ -121,10 +121,13 @@ Next.js `<Image>` DOM 렌더링: `/_next/image?url=%2Fpath` → `src*="/path/"` 
    - `pickFields(obj, keys)` — 응답 whitelist 직렬화
 5. `src/__tests__/api/` — 단위 테스트 배치 (`src/test-helpers/api-route-setup.ts` 헬퍼 활용)
 
+> **테스트 파일 위치 필수**: `src/app/api/*/route.test.ts`는 vitest가 수집하지 않음 → 반드시 `src/__tests__/api/` 아래 배치.
+
 ---
 
 ## 환경변수 추가
 
 1. `src/lib/env.ts` — getter 함수 추가 (하드코딩 금지)
-2. `docs/operations/env-variables.md` — 문서화 (미생성 시 PR-4에서 생성 예정)
-3. `scripts/check-env-docs.ts` — 정합성 자동 검증
+2. `docs/operations/env-variables.md` — 문서화
+3. `scripts/check-env-docs.ts` — 정합성 자동 검증 (`pnpm exec tsx scripts/check-env-docs.ts`)
+4. **Railway 대시보드** — 서비스 → Variables 탭에서 실제 환경변수 등록 (코드 변경만으론 배포 미반영)

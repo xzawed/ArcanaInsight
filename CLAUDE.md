@@ -155,6 +155,8 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 4. **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
 5. **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
 6. **API 라우트 outer catch 커버리지**: `POST` 핸들러 최외부 `} catch {` 블록은 `checkRateLimit: vi.fn().mockRejectedValue(new Error(...))` 패턴으로 커버. 미커버 시 Codecov patch 실패.
+7. **SSE 라우트 fire-and-forget 패턴**: 스트림 전송 완료 후 DB 저장은 `void saveFn(args).catch(e => console.error("[tag]", e))` 패턴 필수. `await` 금지 (스트림 블로킹). tarot·saju·shinjeom reading 라우트 모두 동일 패턴 적용.
+8. **DB 어댑터 동적 require**: `src/lib/db/index.ts`의 `getDb()`는 런타임에 `DB_PROVIDER`에 따라 `require()`로 어댑터 로드. 새 어댑터 추가 시 정적 `import` 금지 — 번들에 항상 포함되어 불필요한 의존성 로드 발생.
 
 ## 업무 유형별 가이드
 
