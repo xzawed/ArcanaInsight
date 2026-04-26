@@ -209,3 +209,12 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 **n8n Cloud** (`xzawed.app.n8n.cloud`): Spec Tracker / Quality Monitor / Weekly Report 운영 중. → [`docs/operations/monitoring.md`](docs/operations/monitoring.md)
 
 **단일 진실 소스**: 이 CLAUDE.md + `docs/` 체계. → [`docs/README.md`](docs/README.md) 인덱스
+
+**MCP 자율 진단 규칙**: 아래 트리거 발생 시 사용자 요청 없이 해당 MCP 툴을 자동 호출하여 컨텍스트를 수집한다. MCP 툴은 `~/.claude/settings.json`의 `mcpServers`에 등록된 `railway`(npx)와 `sonarcloud`(Docker) 서버를 통해 제공된다.
+
+| 트리거 | 호출 툴 | 목적 |
+|---|---|---|
+| PR 생성·머지 후 CI 결과 확인 시 | `get_project_quality_gate_status` → `search_sonar_issues_in_projects` | 신규 이슈 직접 파악 |
+| SonarCloud Quality Gate Fail 감지 | `search_files_by_coverage` + `get_component_measures` | 커버리지·버그·취약점 원인 수집 |
+| Railway 배포 이상 의심 시 | `list-services` → `get-logs` | 런타임 에러 로그 직접 수집 |
+| 로컬 검증 통과 후 push 전 | `get_project_quality_gate_status` | 직전 분석 베이스라인 확인 |
