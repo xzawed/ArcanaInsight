@@ -14,11 +14,11 @@
   --color-arcana-muted: #94a3b8;
 
   /* Fonts */
-  --font-sans: var(--font-noto-sans-kr), sans-serif;
-  --font-display: var(--font-gothic-a1), sans-serif;
+  --font-sans: 'Noto Sans KR', sans-serif;
+  --font-display: 'Gothic A1', sans-serif;
 
   /* Serif font */
-  --font-serif: var(--font-noto-serif-kr), serif;
+  --font-serif: 'Noto Serif KR', serif;
 
   /* Animations */
   --animate-float: float 3s ease-in-out infinite;
