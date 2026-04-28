@@ -50,7 +50,7 @@ export function HeroSection() {
             <span className="text-arcana-text">당신의 이야기</span>
           </h1>
           <p className="text-arcana-muted text-sm md:text-base mb-8 text-center md:text-left max-w-md">
-            AI 타로 상담사와 함께하는 신비로운 운세 체험. 4명의 개성 있는 캐릭터가 카드의 메시지를 전합니다.
+            AI 타로 상담사와 함께하는 신비로운 운세 체험. 12명의 개성 있는 캐릭터가 카드의 메시지를 전합니다.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/tarot"
