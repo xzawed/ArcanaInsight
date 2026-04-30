@@ -19,11 +19,21 @@ const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
 
-// 카드 수에 따른 max_tokens 상수
-const TOKENS_SINGLE_CARD = 2000;
-const TOKENS_FEW_CARDS = 3000;
-const TOKENS_MEDIUM_CARDS = 4000;
-const TOKENS_MANY_CARDS = 6000;
+/**
+ * 카드 수에 비례한 max_tokens 정책.
+ *
+ * 한국어는 영어 대비 토큰 효율이 약 1.3배 낮고, JSON 구조 오버헤드(~10%)도 더해진다.
+ * 이전 정책(4단)에서는 5장 이상에서 잘림이 발생해 cardInterpretations가 누락되었음.
+ * 출력 토큰만 과금되므로 max_tokens 상한 자체는 비용을 늘리지 않는다.
+ */
+function computeReadingMaxTokens(cardCount: number): number {
+  if (cardCount <= 1) return 2000;
+  if (cardCount <= 3) return 3500;
+  if (cardCount <= 5) return 5000;
+  if (cardCount <= 7) return 6500;
+  if (cardCount <= 9) return 8000;
+  return 9500;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,18 +86,23 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          // 카드 수에 따라 max_tokens 조정 (JSON 구조 오버헤드 감안)
           const cardCount = cards.length;
-          let maxTokens: number;
-          if (cardCount <= 1) maxTokens = TOKENS_SINGLE_CARD;
-          else if (cardCount <= 3) maxTokens = TOKENS_FEW_CARDS;
-          else if (cardCount <= 7) maxTokens = TOKENS_MEDIUM_CARDS;
-          else maxTokens = TOKENS_MANY_CARDS;
+          const maxTokens = computeReadingMaxTokens(cardCount);
           for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
-          const result = tarotService.parseResult(fullResponse);
+          const result = tarotService.parseResult(fullResponse, cardCount);
+
+          // 부분 파싱(누락/잘림)은 운영 로그로 명시 추적
+          if (result.parseError) {
+            console.warn("[tarot-reading] 부분 파싱:", {
+              parseError: result.parseError,
+              expected: cardCount,
+              got: result.cardInterpretations?.length ?? 0,
+              sessionId: sessionId ?? null,
+            });
+          }
 
           // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));

@@ -212,6 +212,27 @@ describe("fetchSSEStream", () => {
     expect(doneData).toMatchObject({ done: true, result: "완료" });
   });
 
+  it("done 페이로드의 result.parseError를 onDone에 그대로 전달한다 (truncated 시그널)", async () => {
+    const lines = [
+      'data: {"done":true,"result":{"cardInterpretations":[],"overallReading":"부분","advice":"","parseError":"truncated","expectedCardCount":5}}',
+    ];
+    mockFetch.mockResolvedValue(makeSseResponse(lines));
+
+    let doneData: Record<string, unknown> | null = null;
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone: (d) => { doneData = d; },
+      onError: vi.fn(),
+    });
+
+    expect(doneData).toBeTruthy();
+    const result = (doneData as unknown as { result: Record<string, unknown> }).result;
+    expect(result.parseError).toBe("truncated");
+    expect(result.expectedCardCount).toBe(5);
+  });
+
   it("POST 요청 body를 JSON으로 직렬화해서 전송한다", async () => {
     mockFetch.mockResolvedValue(makeSseResponse(['data: {"done":true}']));
 

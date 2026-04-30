@@ -343,5 +343,70 @@ describe("TarotService", () => {
       expect(result.overallReading).toBeDefined();
       expect(result.advice).toBeDefined();
     });
+
+    describe("parseError 시그널 (truncated/invalid_json)", () => {
+      it("expectedCardCount보다 cardInterpretations가 적으면 parseError='truncated'를 반환한다", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [
+            { cardId: "major-00", position: 0, interpretation: "해석1" },
+            { cardId: "major-01", position: 1, interpretation: "해석2" },
+          ],
+          overallReading: "종합",
+          advice: "조언",
+        });
+        const result = service.parseResult(json, 5);
+        expect(result.parseError).toBe("truncated");
+        expect(result.expectedCardCount).toBe(5);
+        expect(result.cardInterpretations).toHaveLength(2);
+      });
+
+      it("cardInterpretations 길이가 expectedCardCount와 같으면 parseError가 없다", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [
+            { cardId: "major-00", position: 0, interpretation: "해석1" },
+            { cardId: "major-01", position: 1, interpretation: "해석2" },
+            { cardId: "major-02", position: 2, interpretation: "해석3" },
+          ],
+          overallReading: "종합",
+          advice: "조언",
+        });
+        const result = service.parseResult(json, 3);
+        expect(result.parseError).toBeUndefined();
+        expect(result.expectedCardCount).toBe(3);
+        expect(result.cardInterpretations).toHaveLength(3);
+      });
+
+      it("JSON 파싱 완전 실패 시 parseError='invalid_json'을 반환한다", () => {
+        const result = service.parseResult("완전히 망가진 응답", 3);
+        expect(result.parseError).toBe("invalid_json");
+        expect(result.expectedCardCount).toBe(3);
+        expect(result.cardInterpretations).toEqual([]);
+      });
+
+      it("expectedCardCount 미전달 시 parseError와 expectedCardCount 모두 미설정 (하위호환)", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [
+            { cardId: "major-00", position: 0, interpretation: "해석1" },
+          ],
+          overallReading: "종합",
+          advice: "조언",
+        });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBeUndefined();
+        expect(result.expectedCardCount).toBeUndefined();
+      });
+
+      it("expectedCardCount=0일 때 truncated 판정하지 않는다 (분기 가드)", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [],
+          overallReading: "종합",
+          advice: "조언",
+        });
+        const result = service.parseResult(json, 0);
+        expect(result.parseError).toBeUndefined();
+        // expectedCardCount 자체는 그대로 보존
+        expect(result.expectedCardCount).toBe(0);
+      });
+    });
   });
 });

@@ -241,6 +241,71 @@ describe("POST /api/tarot/reading", () => {
     expect(text).toContain("error");
   });
 
+  it("computeReadingMaxTokens 정책 — 1장→2000, 5장→5000, 10장→9500이 streamReading에 전달", async () => {
+    const cases: { count: number; expected: number }[] = [
+      { count: 1, expected: 2000 },
+      { count: 5, expected: 5000 },
+      { count: 10, expected: 9500 },
+    ];
+    for (const { count, expected } of cases) {
+      vi.resetModules();
+      const streamSpy = vi.fn().mockImplementation(async function* () {
+        yield JSON.stringify({
+          cardInterpretations: [],
+          overallReading: "ok",
+          advice: "ok",
+        });
+      });
+      const provider = { streamReading: streamSpy, generateReading: vi.fn() };
+      vi.doMock("@/services/core/fallback-provider", () => ({
+        FallbackProvider: vi.fn().mockImplementation(() => provider),
+      }));
+      vi.doMock("@/lib/rate-limit", () => ({
+        checkRateLimit: vi.fn().mockReturnValue(true),
+        rateLimitResponse: vi.fn(),
+      }));
+      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+      vi.doMock("@/lib/auth", () => makeAuthMock());
+      const { POST } = await import("@/app/api/tarot/reading/route");
+      const cardsArr = Array.from({ length: count }, (_, i) => ({
+        cardId: `major-${String(i).padStart(2, "0")}`,
+        position: i,
+        isReversed: false,
+      }));
+      const res = await POST(makePostRequest({ ...VALID_BODY, cards: cardsArr }));
+      await readSSEStream(res);
+      expect(streamSpy).toHaveBeenCalledTimes(1);
+      expect(streamSpy.mock.calls[0][2]).toBe(expected);
+    }
+  });
+
+  it("정상 케이스(1장) → done 페이로드에 expectedCardCount=1 포함, parseError 없음", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest(VALID_BODY));
+    const text = await readSSEStream(res);
+    const doneLine = text.split("\n").find((l) => l.startsWith("data:") && l.includes("\"done\":true"));
+    expect(doneLine).toBeDefined();
+    const payload = JSON.parse(doneLine!.slice(5).trim());
+    expect(payload.result.expectedCardCount).toBe(1);
+    expect(payload.result.parseError).toBeUndefined();
+  });
+
+  it("AI 응답이 카드 수 부족 → done 페이로드에 parseError='truncated' 포함", async () => {
+    // mock-ai의 MOCK_JSON_RESPONSE는 cardInterpretations 1장 → 5장 요청 시 truncated
+    const { POST } = await setup();
+    const fiveCards = Array.from({ length: 5 }, (_, i) => ({
+      cardId: `major-0${i}`,
+      position: i,
+      isReversed: false,
+    }));
+    const res = await POST(makePostRequest({ ...VALID_BODY, cards: fiveCards }));
+    const text = await readSSEStream(res);
+    const doneLine = text.split("\n").find((l) => l.startsWith("data:") && l.includes("\"done\":true"));
+    const payload = JSON.parse(doneLine!.slice(5).trim());
+    expect(payload.result.expectedCardCount).toBe(5);
+    expect(payload.result.parseError).toBe("truncated");
+  });
+
   it("outer catch non-Error → String(e) 분기 커버", async () => {
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockRejectedValue("string-throw"),
