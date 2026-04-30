@@ -36,19 +36,26 @@ export class TarotService implements DivinationService {
     return buildReadingPrompt(context.topic, context.selectedCards ?? [], spread);
   }
 
-  parseResult(aiResponse: string): ReadingResult {
+  parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult {
     const parsed = parseJsonSafe(aiResponse);
 
     if (parsed) {
+      const cardInterpretations = (Array.isArray(parsed.cardInterpretations) ? parsed.cardInterpretations : []).map(
+        (interp: { cardId: string; position: number; interpretation: string; isReversed?: boolean }) => ({
+          ...interp,
+          interpretation: cleanReadingText(String(interp.interpretation || "")),
+        })
+      );
+      // 카드 수 부족 = AI 응답이 도중에 잘렸을 가능성 높음
+      const isTruncated = typeof expectedCardCount === "number"
+        && expectedCardCount > 0
+        && cardInterpretations.length < expectedCardCount;
       return {
-        cardInterpretations: (Array.isArray(parsed.cardInterpretations) ? parsed.cardInterpretations : []).map(
-          (interp: { cardId: string; position: number; interpretation: string; isReversed?: boolean }) => ({
-            ...interp,
-            interpretation: cleanReadingText(String(interp.interpretation || "")),
-          })
-        ),
+        cardInterpretations,
         overallReading: cleanReadingText(String(parsed.overallReading || "")),
         advice: cleanReadingText(String(parsed.advice || "")),
+        ...(isTruncated ? { parseError: "truncated" as const } : {}),
+        ...(typeof expectedCardCount === "number" ? { expectedCardCount } : {}),
       };
     }
 
@@ -59,6 +66,8 @@ export class TarotService implements DivinationService {
       cardInterpretations: [],
       overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.",
       advice: "",
+      parseError: "invalid_json",
+      ...(typeof expectedCardCount === "number" ? { expectedCardCount } : {}),
     };
   }
 
