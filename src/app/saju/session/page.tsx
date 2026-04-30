@@ -20,6 +20,45 @@ import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
 import { sajuWaitingLines } from "@/data/characters/waiting-lines";
 
+const SITE_NAME = "ArcanaInsight";
+
+async function shareWithUrl(title: string, text: string, url: string): Promise<void> {
+  if (navigator.share) {
+    try { await navigator.share({ title, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+  } else {
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert("링크가 복사되었습니다!");
+    } catch (e) { console.warn("클립보드 복사 실패:", e); }
+  }
+}
+
+async function shareWithText(title: string, text: string): Promise<void> {
+  if (navigator.share) {
+    try { await navigator.share({ title, text }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+  } else {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("결과가 복사되었습니다!");
+    } catch (e) { console.warn("클립보드 복사 실패:", e); }
+  }
+}
+
+async function handleSajuShare(r: { shareToken?: string | null; overallReading?: string | null } | null): Promise<void> {
+  const shareToken = r?.shareToken;
+  const title = `사주 분석 결과 - ${SITE_NAME}`;
+  if (shareToken) {
+    const url = `${globalThis.location.origin}/saju/result/${shareToken}`;
+    const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${SITE_NAME}`;
+    await shareWithUrl(title, text, url);
+  } else {
+    const summary = r?.overallReading
+      ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${SITE_NAME}`
+      : `☯ 사주 분석을 받아보세요!\n\n- ${SITE_NAME}`;
+    await shareWithText(title, summary);
+  }
+}
+
 export default function SajuSessionPage() {
   const router = useRouter();
   const { currentMood, setMood } = useCharacterStore();
@@ -194,36 +233,7 @@ export default function SajuSessionPage() {
                   className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
                   새로운 상담
                 </button>
-                <button onClick={async () => {
-                  const r = useSajuSessionStore.getState().readingResult;
-                  const shareToken = r?.shareToken;
-                  const siteName = "ArcanaInsight";
-
-                  if (shareToken) {
-                    const url = `${window.location.origin}/saju/result/${shareToken}`;
-                    const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${siteName}`;
-                    if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                    } else {
-                      try {
-                        await navigator.clipboard.writeText(`${text}\n${url}`);
-                        alert("링크가 복사되었습니다!");
-                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                    }
-                  } else {
-                    const summary = r?.overallReading
-                      ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${siteName}`
-                      : `☯ 사주 분석을 받아보세요!\n\n- ${siteName}`;
-                    if (navigator.share) {
-                      try { await navigator.share({ title: `사주 분석 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                    } else {
-                      try {
-                        await navigator.clipboard.writeText(summary);
-                        alert("결과가 복사되었습니다!");
-                      } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                    }
-                  }
-                }}
+                <button onClick={() => handleSajuShare(useSajuSessionStore.getState().readingResult)}
                   className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
                   결과 공유하기
                 </button>
