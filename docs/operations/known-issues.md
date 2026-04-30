@@ -20,23 +20,23 @@
 |------|------|------|----------|
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | whitelist 방식, 전체 코드의 일부만 측정 | include 확장 또는 exclude 방식 전환 시 처리 |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 4건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)` — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) |
-| SonarCloud CRITICAL Cognitive Complexity 12건 | 아래 표 참조 | Quality Gate는 통과 상태. 버그·취약점 없음. 모두 함수 인지 복잡도 초과 (허용 15). | 해당 함수 리팩터링 시 처리 |
+| SonarCloud CRITICAL Cognitive Complexity 10건 | 아래 표 참조 | Quality Gate는 통과 상태. 버그·취약점 없음. 모두 함수 인지 복잡도 초과 (허용 15). PR #184 타로 리팩터링으로 3건 해소 (CC=75, 중첩 4단계, CC=22). | 해당 함수 리팩터링 시 처리 |
 
-### SonarCloud CRITICAL 이슈 현황 (2026-04-26 기준)
+### SonarCloud CRITICAL 이슈 현황 (2026-04-30 기준)
 
 Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | Coverage: 95.8% | Code Smells: 179
 
+> **PR #184 타로 세션 리팩터링 반영**: `tarot/session/page.tsx` CC=75 및 중첩 4단계 항목 해소 확인. `startReading` 함수(구 CC=22 포함) 재측정 결과 ~17-18로 감소. 아래 표는 PR #184 이후 현황.
+
 | 파일 | 라인 | 복잡도 | debt |
 |------|------|--------|------|
-| `src/app/tarot/session/page.tsx` | 209 | **75** (허용 15) | 1h5min |
 | `src/hooks/useSSEStream.ts` | 19 | **47** | 37min |
 | `src/services/saju/saju-service.ts` | 57 | **33** | 23min |
 | `src/components/common/UserInfoForm.tsx` | 63 | **30** | 20min |
-| `src/app/tarot/session/page.tsx` | 189 | 함수 중첩 4단계 초과 | 20min |
 | `src/app/saju/session/page.tsx` | 197 | **22** | 12min |
-| `src/app/tarot/session/page.tsx` | 584 | **22** | 12min |
 | `src/app/shinjeom/session/page.tsx` | 165 | **21** | 11min |
 | `src/app/shinjeom/session/page.tsx` | 69 | **20** | 10min |
+| `src/app/tarot/session/page.tsx` | 211 | **~18** (추정, 재측정 필요) | 8min |
 | `src/services/core/http-utils.ts` | 19 | **18** | 8min |
 | `src/components/common/ReadingText.tsx` | 9 | **18** | 8min |
 | `src/components/home/DailyCard.tsx` | 22 | **17** | 7min |
