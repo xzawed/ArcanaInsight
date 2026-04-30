@@ -19,6 +19,118 @@ interface DailyCardData {
   keywords: string[];
 }
 
+interface CardSlotProps {
+  isLoading: boolean;
+  currentCard: ReturnType<typeof deckManager.getCardById>;
+  currentData: DailyCardData | undefined;
+  isFlipped: boolean;
+  selectedSkinId: string;
+  onFlip: () => void;
+}
+
+function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, selectedSkinId, onFlip }: CardSlotProps) {
+  if (isLoading) {
+    return (
+      <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-arcana-border flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (currentCard && currentData) {
+    return (
+      <motion.div
+        onClick={onFlip}
+        className="cursor-pointer"
+        style={{ perspective: "1000px" }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <motion.div
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ transformStyle: "preserve-3d" }}
+          className="relative w-32 h-48"
+        >
+          <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
+            <CardBack size="lg" className="w-full h-full" skinId={selectedSkinId} />
+          </div>
+          <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
+            <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} />
+          </div>
+        </motion.div>
+        {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">탭하여 카드 확인</p>}
+      </motion.div>
+    );
+  }
+  return (
+    <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-dashed border-arcana-border flex items-center justify-center">
+      <span className="text-arcana-muted text-xs">카드 로딩 중...</span>
+    </div>
+  );
+}
+
+interface InterpretationPanelProps {
+  currentData: DailyCardData | undefined;
+  currentCard: ReturnType<typeof deckManager.getCardById>;
+  isFlipped: boolean;
+  isLoading: boolean;
+  characterName: string | undefined;
+  onShare: () => void;
+}
+
+function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoading, characterName, onShare }: InterpretationPanelProps) {
+  if (currentData && currentCard && isFlipped) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <div>
+          <h3 className="font-display font-bold text-lg">{currentCard.nameKo}</h3>
+          <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? "(역방향)" : "(정방향)"}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {currentData.keywords.map((kw) => (
+            <span key={kw} className="px-2 py-0.5 text-xs rounded-full bg-arcana-purple/10 text-arcana-purple border border-arcana-purple/20">
+              {kw}
+            </span>
+          ))}
+        </div>
+        <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="px-2 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">
+              <span className="text-white text-xs font-display font-bold">{characterName}</span>
+            </div>
+          </div>
+          <p className="text-arcana-text text-sm leading-relaxed">{currentData.interpretation}</p>
+        </div>
+        <button onClick={onShare} type="button"
+          className="px-4 py-2 text-xs rounded-full border border-arcana-purple text-arcana-purple font-display font-bold hover:bg-arcana-purple/10 transition-colors">
+          공유하기
+        </button>
+      </motion.div>
+    );
+  }
+  if (currentData && !isFlipped) {
+    return (
+      <div className="flex flex-col items-center md:items-start justify-center h-full">
+        <p className="text-arcana-muted text-sm font-sans">카드를 탭하여 오늘의 운세를 확인해보세요</p>
+      </div>
+    );
+  }
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        <div className="h-6 bg-arcana-card/60 rounded w-1/3 animate-pulse" />
+        <div className="h-4 bg-arcana-card/60 rounded w-1/4 animate-pulse" />
+        <div className="h-24 bg-arcana-card/60 rounded animate-pulse" />
+      </div>
+    );
+  }
+  return null;
+}
+
 export function DailyCard() {
   const characters = getAvailableCharacters();
   const { selectedSkinId } = useSkinStore();
@@ -64,13 +176,13 @@ export function DailyCard() {
   };
 
   const currentData = data[activeTab];
-  const currentCard = currentData ? deckManager.getCardById(currentData.cardId) : null;
+  const currentCard = currentData ? deckManager.getCardById(currentData.cardId) : undefined;
   const isFlipped = flipped[activeTab] || false;
+  const activeCharacter = characters.find((c) => c.id === activeTab);
 
   const handleShare = async () => {
     if (!currentData || !currentCard) return;
-    const character = characters.find((c) => c.id === activeTab);
-    const text = `🔮 오늘의 카드: ${currentCard.nameKo}\n\n${currentData.interpretation}\n\n- ${character?.name}의 해석 | ArcanaInsight`;
+    const text = `🔮 오늘의 카드: ${currentCard.nameKo}\n\n${currentData.interpretation}\n\n- ${activeCharacter?.name}의 해석 | ArcanaInsight`;
     if (navigator.share) {
       await navigator.share({ title: "오늘의 카드 - ArcanaInsight", text });
     } else {
@@ -115,88 +227,26 @@ export function DailyCard() {
           >
             {/* 카드 */}
             <div className="flex-shrink-0 flex justify-center">
-              {loading === activeTab ? (
-                <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-arcana-border flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-                </div>
-              ) : currentCard ? (
-                <motion.div
-                  onClick={() => handleFlip(activeTab)}
-                  className="cursor-pointer"
-                  style={{ perspective: "1000px" }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <motion.div
-                    animate={{ rotateY: isFlipped ? 180 : 0 }}
-                    transition={{ duration: 0.6 }}
-                    style={{ transformStyle: "preserve-3d" }}
-                    className="relative w-32 h-48"
-                  >
-                    <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
-                      <CardBack size="lg" className="w-full h-full" skinId={selectedSkinId} />
-                    </div>
-                    <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
-                      <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} />
-                    </div>
-                  </motion.div>
-                  {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">탭하여 카드 확인</p>}
-                </motion.div>
-              ) : (
-                <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-dashed border-arcana-border flex items-center justify-center">
-                  <span className="text-arcana-muted text-xs">카드 로딩 중...</span>
-                </div>
-              )}
+              {renderCardSlot({
+                isLoading: loading === activeTab,
+                currentCard,
+                currentData,
+                isFlipped,
+                selectedSkinId,
+                onFlip: () => handleFlip(activeTab),
+              })}
             </div>
 
             {/* 해석 — 카드를 뒤집은 후에만 표시 */}
             <div className="flex-1 min-w-0">
-              {currentData && currentCard && isFlipped ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <h3 className="font-display font-bold text-lg">{currentCard.nameKo}</h3>
-                    <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? "(역방향)" : "(정방향)"}</p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {currentData.keywords.map((kw) => (
-                      <span key={kw} className="px-2 py-0.5 text-xs rounded-full bg-arcana-purple/10 text-arcana-purple border border-arcana-purple/20">
-                        {kw}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="px-2 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">
-                        <span className="text-white text-xs font-display font-bold">
-                          {characters.find((c) => c.id === activeTab)?.name}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-arcana-text text-sm leading-relaxed">{currentData.interpretation}</p>
-                  </div>
-
-                  <button onClick={handleShare} type="button"
-                    className="px-4 py-2 text-xs rounded-full border border-arcana-purple text-arcana-purple font-display font-bold hover:bg-arcana-purple/10 transition-colors">
-                    공유하기
-                  </button>
-                </motion.div>
-              ) : currentData && !isFlipped ? (
-                <div className="flex flex-col items-center md:items-start justify-center h-full">
-                  <p className="text-arcana-muted text-sm font-sans">카드를 탭하여 오늘의 운세를 확인해보세요</p>
-                </div>
-              ) : loading === activeTab ? (
-                <div className="space-y-3">
-                  <div className="h-6 bg-arcana-card/60 rounded w-1/3 animate-pulse" />
-                  <div className="h-4 bg-arcana-card/60 rounded w-1/4 animate-pulse" />
-                  <div className="h-24 bg-arcana-card/60 rounded animate-pulse" />
-                </div>
-              ) : null}
+              {renderInterpretationPanel({
+                currentData,
+                currentCard,
+                isFlipped,
+                isLoading: loading === activeTab,
+                characterName: activeCharacter?.name,
+                onShare: handleShare,
+              })}
             </div>
           </motion.div>
         </AnimatePresence>
