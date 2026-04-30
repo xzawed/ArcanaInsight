@@ -19,9 +19,44 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
+import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 
 const deckManager = new DeckManager();
+
+/** SSE 에러 메시지에서 사용자 표시 텍스트를 결정한다 */
+function getReadingErrorText(msg: string): string {
+  if (msg.includes("GROK_API_KEY")) {
+    return "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요.";
+  }
+  return "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.";
+}
+
+/** 정상 리딩 결과를 채팅 메시지로 변환하여 addChatMessage를 호출한다 */
+function addReadingResultMessages(
+  result: ReadingResult,
+  cards: SelectedCard[],
+  currentSpread: SpreadDefinition | null,
+  addChatMessage: (msg: ChatMessage) => void,
+): void {
+  if (Array.isArray(result.cardInterpretations) && result.cardInterpretations.length > 0) {
+    for (const interp of result.cardInterpretations) {
+      const card = cards.find((c) => c.card.id === interp.cardId);
+      const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
+        mood: "smile", timestamp: new Date(),
+      });
+    }
+  }
+  if (result.overallReading) {
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `종합 해석\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
+  }
+  if (result.advice) {
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `조언\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
+  }
+}
 
 export default function TarotSessionPage() {
   const router = useRouter();
@@ -256,34 +291,14 @@ export default function TarotSessionPage() {
         // 정상 흐름 — 카드 뒤집기 완료 + 결과 phase 진입
         setRevealedPositions(cards.map((c) => c.position));
         setReadingResult(result);
-
         const currentSpread = spreadType ? spreads[spreadType] : null;
-        if (Array.isArray(result.cardInterpretations) && result.cardInterpretations.length > 0) {
-          for (const interp of result.cardInterpretations) {
-            const card = cards.find((c) => c.card.id === interp.cardId);
-            const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
-            addChatMessage({
-              id: crypto.randomUUID(), role: "character",
-              content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
-              mood: "smile", timestamp: new Date(),
-            });
-          }
-        }
-        if (result.overallReading) {
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: `종합 해석\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
-        }
-        if (result.advice) {
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: `조언\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
-        }
+        addReadingResultMessages(result, cards, currentSpread, addChatMessage);
         setPhase("result"); setMood("smile");
       },
       onError: (msg) => {
         stopSequence();
         console.error("리딩 SSE 에러:", msg);
-        const text = msg.includes("GROK_API_KEY")
-          ? "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요."
-          : "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.";
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: text, mood: "default", timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getReadingErrorText(msg), mood: "default", timestamp: new Date() });
         setMood("default"); setReadingError(true);
       },
     });
