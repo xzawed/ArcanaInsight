@@ -11,6 +11,50 @@ import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
 
+function updateMessageContent(msgId: string, content: string) {
+  useShinjeomSessionStore.setState((state) => ({
+    chatMessages: state.chatMessages.map((m) =>
+      m.id === msgId ? { ...m, content } : m
+    ),
+  }));
+}
+
+function removeMessage(msgId: string) {
+  useShinjeomSessionStore.setState((state) => ({
+    chatMessages: state.chatMessages.filter((m) => m.id !== msgId),
+  }));
+}
+
+function parseSseLine(line: string): Record<string, unknown> | null {
+  if (!line.startsWith("data: ")) return null;
+  try {
+    return JSON.parse(line.slice(6)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+async function drainSseChunks(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  onChunk: (data: Record<string, unknown>) => boolean
+): Promise<void> {
+  const decoder = new TextDecoder();
+  let sseBuffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    sseBuffer += decoder.decode(value, { stream: true });
+    const lines = sseBuffer.split("\n");
+    sseBuffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const data = parseSseLine(line);
+      if (data === null) continue;
+      const stop = onChunk(data);
+      if (stop) return;
+    }
+  }
+}
+
 export default function ShinjeomSessionPage() {
   const router = useRouter();
   const {
@@ -77,11 +121,7 @@ export default function ShinjeomSessionPage() {
     // messageIndex: addChatMessage 호출 전 현재 길이를 캡처
     const messageIndex = useShinjeomSessionStore.getState().chatMessages.length;
 
-    // 사용자 메시지 추가
-    addChatMessage({
-      id: crypto.randomUUID(), role: "user",
-      content: message, timestamp: new Date(),
-    });
+    addChatMessage({ id: crypto.randomUUID(), role: "user", content: message, timestamp: new Date() });
     incrementTurn();
 
     try {
@@ -98,65 +138,23 @@ export default function ShinjeomSessionPage() {
       });
 
       if (!response.ok || !response.body) {
-        addChatMessage({
-          id: crypto.randomUUID(), role: "character",
-          content: "죄송해요, 연결에 문제가 있어요. 다시 시도해주세요.",
-          mood: "default", timestamp: new Date(),
-        });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "죄송해요, 연결에 문제가 있어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
         setMood("default");
         setLoading(false);
         return;
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let sseBuffer = "";
-      let fullText = "";
-
-      // 스트리밍 메시지를 위한 임시 ID
       const msgId = crypto.randomUUID();
-      addChatMessage({
-        id: msgId, role: "character",
-        content: "",
-        mood: "mystical", timestamp: new Date(),
+      addChatMessage({ id: msgId, role: "character", content: "", mood: "mystical", timestamp: new Date() });
+
+      let fullText = "";
+      await drainSseChunks(response.body.getReader(), (data) => {
+        if (data.error) { updateMessageContent(msgId, "문제가 발생했어요. 다시 시도해주세요."); return true; }
+        if (data.chunk) { fullText += data.chunk as string; updateMessageContent(msgId, fullText); }
+        return false;
       });
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        sseBuffer += decoder.decode(value, { stream: true });
-        const lines = sseBuffer.split("\n");
-        sseBuffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.error) {
-              useShinjeomSessionStore.setState((state) => ({
-                chatMessages: state.chatMessages.map((m) =>
-                  m.id === msgId ? { ...m, content: "문제가 발생했어요. 다시 시도해주세요." } : m
-                ),
-              }));
-              break;
-            }
-            if (data.chunk) {
-              fullText += data.chunk;
-              useShinjeomSessionStore.setState((state) => ({
-                chatMessages: state.chatMessages.map((m) =>
-                  m.id === msgId ? { ...m, content: fullText } : m
-                ),
-              }));
-            }
-          } catch (e) { console.warn("SSE 파싱 실패:", e); }
-        }
-      }
     } catch {
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.",
-        mood: "default", timestamp: new Date(),
-      });
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
       setMood("default");
     }
     setLoading(false);
@@ -184,63 +182,27 @@ export default function ShinjeomSessionPage() {
       });
 
       if (!response.ok || !response.body) {
-        addChatMessage({
-          id: crypto.randomUUID(), role: "character",
-          content: "죄송해요, 결과를 가져오는 중 오류가 발생했어요. 다시 시도해주세요.",
-          mood: "default", timestamp: new Date(),
-        });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "죄송해요, 결과를 가져오는 중 오류가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
         setMood("default");
         setLoading(false);
         return;
       }
 
       const msgId = crypto.randomUUID();
-      addChatMessage({
-        id: msgId, role: "character",
-        content: "신점 결과를 준비하고 있어요...",
-        mood: "mystical", timestamp: new Date(),
-      });
+      addChatMessage({ id: msgId, role: "character", content: "신점 결과를 준비하고 있어요...", mood: "mystical", timestamp: new Date() });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let sseBuffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        sseBuffer += decoder.decode(value, { stream: true });
-        const lines = sseBuffer.split("\n");
-        sseBuffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.error) {
-              useShinjeomSessionStore.setState((state) => ({
-                chatMessages: state.chatMessages.map((m) =>
-                  m.id === msgId ? { ...m, content: "문제가 발생했어요. 다시 시도해주세요." } : m
-                ),
-              }));
-              break;
-            }
-            if (data.done && data.isFinal && data.result) {
-              useShinjeomSessionStore.setState((state) => ({
-                chatMessages: state.chatMessages.filter((m) => m.id !== msgId),
-              }));
-              setReadingResult(data.result);
-              setPhase("result");
-              setMood("smile");
-            }
-          } catch (e) { console.warn("SSE 파싱 실패:", e); }
+      await drainSseChunks(response.body.getReader(), (data) => {
+        if (data.error) { updateMessageContent(msgId, "문제가 발생했어요. 다시 시도해주세요."); return true; }
+        if (data.done && data.isFinal && data.result) {
+          removeMessage(msgId);
+          setReadingResult(data.result as Parameters<typeof setReadingResult>[0]);
+          setPhase("result");
+          setMood("smile");
         }
-      }
-    } catch {
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: "네트워크 문제가 발생했어요. 다시 시도해주세요.",
-        mood: "default", timestamp: new Date(),
+        return false;
       });
+    } catch {
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
       setMood("default");
     }
     setLoading(false);
