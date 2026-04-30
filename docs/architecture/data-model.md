@@ -118,5 +118,5 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 | 사주 카테고리 | `src/data/saju/categories.ts` |
 | 스킨 | `src/data/skins/index.ts` |
 | 출생시간(12시진) | `src/data/birth-hours.ts` |
-| 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts, reviews.ts, stats.ts) |
+| 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
 | 에러 메시지 상수 | `src/data/error-messages.ts` |
