@@ -54,6 +54,7 @@ export const SajuReadingSchema = z.object({
   timeRange: z.string().max(30),
   includeMonthly: z.boolean(),
   characterId: charIdStr,
+  freeQuestion: z.string().max(200).nullish(),
   userInfo: z.object({
     name: z.string().max(50).optional(),
     birthDate: dateStr,

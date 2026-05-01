@@ -124,6 +124,7 @@ export default function SajuSessionPage() {
         sessionId: state.sessionId, topic: state.topic,
         timeRange: state.timeRange, includeMonthly: state.includeMonthly,
         characterId: state.characterId, userInfo: state.userInfo,
+        freeQuestion: state.freeQuestion,
       },
       onChunk: () => { /* 사주는 스트리밍 표시 불필요 — 대기 연출 사용 */ },
       onDone: (data) => {

@@ -7,7 +7,7 @@ import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
 import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
 import { getRecentCharacterMemory } from "@/lib/db/character-context";
-import { buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
+import { buildCharacterMemoryPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
@@ -63,12 +63,13 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증
     const parsed = SajuReadingSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, topic, timeRange, includeMonthly, characterId, userInfo } = parsed.data as {
+    const { sessionId, topic, timeRange, includeMonthly, characterId, freeQuestion, userInfo } = parsed.data as {
       sessionId?: string | null;
       topic: Topic;
       timeRange: SajuTimeRange;
       includeMonthly: boolean;
       characterId?: string;
+      freeQuestion?: string | null;
       userInfo: { name?: string; birthDate: string; birthHour: string; gender: "male" | "female" | "other" };
     };
 
@@ -91,7 +92,8 @@ export async function POST(request: NextRequest) {
     }, calcOptions);
 
     const systemPrompt = sajuService.getSystemPrompt(characterId);
-    const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo);
+    const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo)
+      + buildFreeQuestionPrompt(freeQuestion);
 
     const db = sessionId ? getDb() : null
 

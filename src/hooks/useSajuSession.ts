@@ -20,6 +20,7 @@ interface SajuSessionState {
   readingResult: ReadingResult | null;
   sajuData: SajuResult | null;
   isLoading: boolean;
+  freeQuestion: string | null;
 
   setPhase: (phase: SajuPhase) => void;
   setSessionId: (id: string) => void;
@@ -32,6 +33,7 @@ interface SajuSessionState {
   setReadingResult: (result: ReadingResult) => void;
   setSajuData: (data: SajuResult) => void;
   setLoading: (loading: boolean) => void;
+  setFreeQuestion: (q: string | null) => void;
   reset: () => void;
 }
 
@@ -47,6 +49,7 @@ const initialState = {
   readingResult: null,
   sajuData: null,
   isLoading: false,
+  freeQuestion: null,
 };
 
 export const useSajuSessionStore = create<SajuSessionState>((set) => ({
@@ -62,5 +65,6 @@ export const useSajuSessionStore = create<SajuSessionState>((set) => ({
   setReadingResult: (result) => set({ readingResult: result }),
   setSajuData: (data) => set({ sajuData: data }),
   setLoading: (loading) => set({ isLoading: loading }),
+  setFreeQuestion: (q) => set({ freeQuestion: q }),
   reset: () => set(initialState),
 }));

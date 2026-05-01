@@ -81,6 +81,7 @@ function InfoInputStep({ selectedCharacter, onSubmit, onBack }: Readonly<{
 }
 
 function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, selectedArea, monthlyToggle, canStart,
+  freeQuestion, onFreeQuestionChange,
   onBack, onTimeSelect, onAreaSelect, onMonthlyToggle, onStart }: Readonly<{
   selectedCharacter: CharacterConfig | null;
   dialogueMessages: ChatMessage[];
@@ -88,6 +89,8 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
   selectedArea: Topic | null;
   monthlyToggle: boolean;
   canStart: boolean;
+  freeQuestion: string;
+  onFreeQuestionChange: (q: string) => void;
   onBack: () => void;
   onTimeSelect: (t: SajuTimeRange, allowMonthly: boolean) => void;
   onAreaSelect: (a: Topic) => void;
@@ -171,6 +174,21 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
             ))}
           </div>
         </div>
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-arcana-purple text-sm">✦</span>
+            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">추가 질문 (선택)</h3>
+          </div>
+          <textarea
+            value={freeQuestion}
+            onChange={(e) => onFreeQuestionChange(e.target.value)}
+            placeholder="구체적으로 궁금한 점이 있다면 적어주세요. (최대 200자)"
+            maxLength={200}
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl bg-arcana-card/70 border border-arcana-border text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:outline-none focus:border-arcana-purple transition-colors resize-none"
+          />
+          <p className="text-right text-arcana-muted text-xs mt-1">{freeQuestion.length}/200</p>
+        </div>
         <button onClick={onStart} disabled={!canStart}
           className={`w-full py-3 rounded-full font-sans font-bold text-sm transition-all ${
             canStart
@@ -189,7 +207,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
 function SajuPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase } = useSajuSessionStore();
+  const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase, setFreeQuestion } = useSajuSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const sajuCharacters = getCharactersByGender(genderFilter);
 
@@ -202,6 +220,7 @@ function SajuPageContent() {
   const [selectedTime, setSelectedTime] = useState<SajuTimeRange | null>(null);
   const [selectedArea, setSelectedArea] = useState<Topic | null>(null);
   const [monthlyToggle, setMonthlyToggle] = useState(false);
+  const [freeQuestion, setFreeQuestionLocal] = useState("");
 
   // 프리셀렉트된 캐릭터: 스토어 반영 + 인사 메시지 생성 (클라이언트 마운트 후 — new Date() SSR 비결정 방지)
   useEffect(() => {
@@ -260,6 +279,7 @@ function SajuPageContent() {
     setTopic(selectedArea);
     setTimeRange(selectedTime);
     setIncludeMonthly(monthlyToggle);
+    setFreeQuestion(freeQuestion.trim() || null);
     setPhase("reading");
     router.push("/saju/session");
   };
@@ -287,6 +307,7 @@ function SajuPageContent() {
           <SajuSelectStep selectedCharacter={selectedCharacter} dialogueMessages={dialogueMessages}
             selectedTime={selectedTime} selectedArea={selectedArea} monthlyToggle={monthlyToggle}
             canStart={selectedTime !== null && selectedArea !== null}
+            freeQuestion={freeQuestion} onFreeQuestionChange={setFreeQuestionLocal}
             onBack={handleBack} onTimeSelect={handleTimeSelect} onAreaSelect={setSelectedArea}
             onMonthlyToggle={() => setMonthlyToggle((v) => !v)} onStart={handleStart} />
         )}
