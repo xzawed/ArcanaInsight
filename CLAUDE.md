@@ -152,6 +152,15 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 **CI/CD**: PR→main: lint→build→E2E. 주간QA 토요일. Railway 자동배포. → [`docs/workflow/ci-cd.md`](docs/workflow/ci-cd.md)
 
+**구현 계획서 필수 섹션** (`docs/superpowers/plans/*.md` 상단):
+```markdown
+## 적용 가능 위험 항목 (CLAUDE.md 필수 주의사항)
+- [ ] SSR/Hydration: useState 초기값·useEffect setState 패턴 해당 여부
+- [ ] 비슷한 파일 N개 생성 여부 → 공통 베이스 추출 검토
+- [ ] UI 텍스트 변경 여부 → E2E 셀렉터 동시 검토 필요
+```
+각 Task 검증 단계에 `pnpm type-check && pnpm lint` 포함 필수 (type-check만으로는 lint 규칙 미검출).
+
 ## 레이아웃 규칙 (필수 준수)
 
 캐릭터 등장 모든 페이지. 상세: [`docs/conventions/layout-rules.md`](docs/conventions/layout-rules.md)
@@ -176,21 +185,31 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 
 ## 필수 주의사항
 
-1. **Zod `null` vs `undefined`**: Zustand `null` 초기값 필드 → `.nullish()` 필수. 위반 시 프로덕션 400 (로컬 통과) — **2026-04-24 장애 원인**. → [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)
-2. **SSR 비결정 값 금지**: `new Date()`, `Math.random()` 등 → `useEffect` 안에서만. 초기값은 `""`/`0`/`null`. React error #418 방지.
-3. **`<Image fill>` sizes 필수**: 미설정 시 Mobile Android CI 타임아웃. `sizes="(max-width: 640px) 50vw, ..."` 필수.
-4. **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
-5. **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
-6. **API 라우트 outer catch 커버리지**: `POST` 핸들러 최외부 `} catch {` 블록은 `checkRateLimit: vi.fn().mockRejectedValue(new Error(...))` 패턴으로 커버. 미커버 시 Codecov patch 실패.
-7. **SSE 라우트 fire-and-forget 패턴**: 스트림 전송 완료 후 DB 저장은 `void saveFn(args).catch(e => console.error("[tag]", e))` 패턴 필수. `await` 금지 (스트림 블로킹). tarot·saju·shinjeom reading 라우트 모두 동일 패턴 적용.
-8. **DB 어댑터 동적 require**: `src/lib/db/index.ts`의 `getDb()`는 런타임에 `DB_PROVIDER`에 따라 `require()`로 어댑터 로드. 새 어댑터 추가 시 정적 `import` 금지 — 번들에 항상 포함되어 불필요한 의존성 로드 발생.
-9. **JSON 파싱 — 문자열 내 `{}` 주의**: AI 응답 파싱 시 단순 괄호 카운터(`text[i] === "{"`)나 탐욕적 정규식(`/\{[\s\S]*\}/`)은 문자열 값 안의 `{}`를 구분 못해 조기 종료 or 과잉 추출 발생. 반드시 `parseJsonSafe()` (`src/services/core/text-cleaner.ts`) 사용. — **2026-04-26 타로·신점 결과 노출 장애 원인**. → [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md#3-json-파싱-파이프라인)
-10. **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 실행 시 `next`, `eslint-config-next` 등 피어 의존성 버전이 의도치 않게 변경될 수 있음. 추가 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 버전 변동 반드시 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
-11. **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체를 차단. 새 PR에서 이 패턴 발견 시 병합 전 제거. `grep -r "import \"@[^\"]*\"" src/` 로 주기적 검사.
-12. **E2E 스펙 추가 시 인증 의존성 명시**: 새 spec이 실 Supabase 세션을 요구하면 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 추가. CI 자동 제외 여부 playwright.config.ts 확인.
-13. **UI 텍스트 변경 시 E2E 셀렉터 동시 검토 필수**: 버튼·헤딩 등 사용자 노출 텍스트를 바꿀 때 `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴을 반드시 검색해 깨진 셀렉터를 함께 수정. — **2026-05-01 사주 버튼 마이크로카피 변경 후 E2E CI 실패 원인**.
-14. **`useEffect` 내 `setState` 동기 호출 금지** (`react-hooks/set-state-in-effect`): `useEffect` body에서 `setState(...)` 직접 호출 불가 → `setTimeout(() => setState(...), 0)` + `return () => clearTimeout(t)` 패턴 필수. — **2026-05-01 CharacterDisplay·HeroSection 린트 실패 원인**.
-15. **클라이언트 전용 초기값 hydration 안전 패턴**: `new Date()` / `Math.random()` / `window` 참조를 `useState` 초기값이나 lazy initializer에 넣으면 React hydration error #418 발생. 올바른 패턴: `useState("")` + `useEffect(() => { const t = setTimeout(() => setState(computedValue), 0); return () => clearTimeout(t); }, [])`. — **2026-05-01 HeroSection 캐릭터ID 초기화 hydration 오류 원인**.
+> 카테고리별로 그룹화. 해당 작업 시 관련 그룹만 우선 확인.
+
+### SSR · Hydration (컴포넌트 작성 시)
+- **SSR 비결정 값 금지**: `new Date()`, `Math.random()`, `window` 참조 → `useEffect` 안에서만. `useState` 초기값은 `""`/`0`/`null`. React error #418 방지.
+- **`useEffect` 내 `setState` 동기 호출 금지** (`react-hooks/set-state-in-effect`): `useEffect` body에서 직접 호출 불가 → `setTimeout(() => setState(...), 0)` + `return () => clearTimeout(t)` 패턴 필수. — **2026-05-01 CharacterDisplay·HeroSection 린트 실패 원인**.
+- **Hydration 안전 초기화 패턴**: `window` 분기·날짜·랜덤값을 `useState` lazy initializer에 넣으면 SSR/CSR 불일치로 hydration error #418 발생. 올바른 패턴: `useState("")` + `useEffect(() => { const t = setTimeout(() => setState(val), 0); return () => clearTimeout(t); }, [])`. — **2026-05-01 HeroSection hydration 오류 원인**.
+- **`<Image fill>` sizes 필수**: 미설정 시 Mobile Android CI 타임아웃. `sizes="(max-width: 640px) 50vw, ..."` 필수.
+
+### API · 보안 (새 라우트 추가 시)
+- **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
+- **Zod `null` vs `undefined`**: Zustand `null` 초기값 필드 → `.nullish()` 필수. 위반 시 프로덕션 400 (로컬 통과) — **2026-04-24 장애 원인**. → [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)
+- **API 라우트 outer catch 커버리지**: `POST` 핸들러 최외부 `} catch {` 블록은 `checkRateLimit: vi.fn().mockRejectedValue(new Error(...))` 패턴으로 커버. 미커버 시 Codecov patch 실패.
+- **SSE 라우트 fire-and-forget 패턴**: 스트림 전송 완료 후 DB 저장은 `void saveFn(args).catch(e => console.error("[tag]", e))` 패턴 필수. `await` 금지 (스트림 블로킹).
+- **DB 어댑터 동적 require**: `getDb()`는 런타임 `require()` 로드. 새 어댑터 추가 시 정적 `import` 금지.
+- **JSON 파싱 — 문자열 내 `{}` 주의**: AI 응답 파싱 시 반드시 `parseJsonSafe()` (`src/services/core/text-cleaner.ts`) 사용. — **2026-04-26 타로·신점 결과 노출 장애 원인**. → [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md#3-json-파싱-파이프라인)
+
+### 테스트 · CI (테스트 작성·PR 전)
+- **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
+- **E2E 스펙 추가 시 인증 의존성 명시**: 실 Supabase 세션 요구 spec은 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수.
+- **UI 텍스트 변경 시 E2E 셀렉터 동시 검토**: `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴 grep 후 같은 커밋에 수정. — **2026-05-01 사주 버튼 변경 후 E2E CI 실패 원인**.
+
+### 패키지 · 빌드 (의존성 추가·수정 시)
+- **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 피어 의존성 버전 변동 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
+- **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체 차단. 새 PR에서 발견 시 병합 전 제거.
+- **비슷한 파일 N개 생성 시 공통 베이스 추출 검토**: 동일 의도 파일 2개 이상 → 팩토리/베이스 우선 설계. SonarCloud `new_duplicated_lines_density` 임계치 3%. — **2026-05-01 OG 이미지 중복 SonarCloud 실패 원인**.
 
 ## 업무 유형별 가이드
 
