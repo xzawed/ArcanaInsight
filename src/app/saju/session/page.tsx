@@ -18,7 +18,7 @@ import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
-import { sajuWaitingLines } from "@/data/characters/waiting-lines";
+import { sajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText } from "@/data/characters/waiting-lines";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -279,7 +279,7 @@ export default function SajuSessionPage() {
               ) : (
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-10 h-10 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-                  <p className="text-arcana-muted text-xs font-serif">사주를 분석하고 있어요...</p>
+                  <p className="text-arcana-muted text-xs font-serif">{sajuAnalyzingText[characterId ?? ""] ?? defaultSajuAnalyzingText}</p>
                 </div>
               )}
             </div>

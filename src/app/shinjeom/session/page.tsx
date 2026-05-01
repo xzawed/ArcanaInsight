@@ -10,6 +10,7 @@ import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
+import { loadingText, defaultLoadingText } from "@/data/characters/waiting-lines";
 
 function updateMessageContent(msgId: string, content: string) {
   useShinjeomSessionStore.setState((state) => ({
@@ -314,7 +315,7 @@ export default function ShinjeomSessionPage() {
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-arcana-card/70 border border-arcana-border rounded-2xl px-4 py-3">
-                      <span className="text-arcana-muted text-sm animate-pulse">답변을 준비하고 있어요...</span>
+                      <span className="text-arcana-muted text-sm animate-pulse">{loadingText[characterId ?? ""] ?? defaultLoadingText}</span>
                     </div>
                   </div>
                 )}

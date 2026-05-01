@@ -187,6 +187,44 @@ export const sajuWaitingLines: Record<string, WaitingLine[]> = {
   ],
 };
 
+/** 신점 응답 대기 중 기본 폴백 텍스트 */
+export const defaultLoadingText = "답변을 준비하고 있어요...";
+
+/** 신점 응답 대기 중 캐릭터별 한 줄 텍스트 */
+export const loadingText: Record<string, string> = {
+  arcana: "별들의 속삭임을 듣고 있어요...",
+  miko: "...기운을 모으고 있습니다",
+  seonhwa: "조용히 기운을 읽고 있어요~",
+  hoshi: "잠깐만~! 생각 중이야★",
+  luna: "달의 빛으로 살펴보고 있어요...",
+  rei: "...",
+  cairn: "잠시만 기다려주십시오...",
+  zero: "...말을 고르고 있어",
+  haru: "열심히 생각하고 있어요! 잠깐만요 ☀️",
+  ren: "...천천히 헤아리고 있소",
+  lix: "잠깐만~ ㅋㅋ 거의 다 됐어~",
+  ethan: "꼼꼼하게 생각 중이거든요...",
+};
+
+/** 사주 분석 대기 중 기본 폴백 텍스트 */
+export const defaultSajuAnalyzingText = "사주를 분석하고 있어요...";
+
+/** 사주 분석 대기 중 캐릭터별 한 줄 텍스트 */
+export const sajuAnalyzingText: Record<string, string> = {
+  arcana: "사주의 별자리를 읽고 있어요...",
+  miko: "...팔자의 기운을 모으고 있습니다",
+  seonhwa: "사주를 정성스럽게 살펴보고 있어요~",
+  hoshi: "잠깐만~! 사주 계산 중이야★",
+  luna: "달빛으로 사주를 살펴보고 있어요...",
+  rei: "사주 분석 중.",
+  cairn: "사주팔자를 살피고 있습니다...",
+  zero: "...팔자의 이야기를 읽고 있어",
+  haru: "사주 열심히 분석 중이에요! ☀️",
+  ren: "사주의 이치를 헤아리고 있소...",
+  lix: "사주 보는 중~ ㅋㅋ 잠깐만!",
+  ethan: "사주명리 분석 중이거든요...",
+};
+
 const cardPreviewTemplates: Record<string, (pos: string, name: string, kw: string) => string> = {
   arcana: (pos, name, kw) => `[${pos}] '${name}'... ${kw}의 에너지가 느껴지네요`,
   miko: (pos, name, kw) => `[${pos}] '${name}'... ${kw}의 기운이 서려 있습니다`,
