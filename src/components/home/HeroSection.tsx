@@ -1,14 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { getCharacterById } from "@/data/characters";
 
+const CHARACTER_ORDER = [
+  "arcana", "miko", "seonhwa", "hoshi", "luna", "rei",
+  "cairn", "zero", "haru", "ren", "lix", "ethan",
+];
+
+function getTodayIndex(): number {
+  return Math.floor(Date.now() / 86400000) % CHARACTER_ORDER.length;
+}
+
 export function HeroSection() {
-  const arcana = getCharacterById("arcana")!;
+  const [characterId] = useState<string>(() => {
+    if (globalThis.window === undefined) return "arcana";
+    return CHARACTER_ORDER[getTodayIndex()];
+  });
+
+  const character = getCharacterById(characterId)!;
 
   const scrollToDaily = () => {
     document.getElementById("daily-card")?.scrollIntoView({ behavior: "smooth" });
@@ -33,7 +48,18 @@ export function HeroSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="h-[40%] md:h-full w-full md:w-[50%] relative"
         >
-          <CharacterDisplay character={arcana} mood="smile" className="w-full h-full" />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={characterId}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full h-full"
+            >
+              <CharacterDisplay character={character} mood="smile" className="w-full h-full" />
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
 
         <motion.div
@@ -42,6 +68,20 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           className="w-full md:w-[50%] flex flex-col items-center md:items-start justify-center px-4 md:px-12"
         >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={characterId}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.35 }}
+              className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-arcana-purple/10 border border-arcana-purple/25"
+            >
+              <span className="text-arcana-muted text-xs">✨ 오늘의 상담사</span>
+              <span className="text-arcana-purple font-serif font-bold text-sm">{character.name}</span>
+            </motion.div>
+          </AnimatePresence>
+
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 text-center md:text-left leading-tight">
             <span className="bg-gradient-to-r from-arcana-purple via-arcana-indigo to-arcana-gold bg-clip-text text-transparent">
               카드가 속삭이는
