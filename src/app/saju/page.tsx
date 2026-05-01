@@ -18,6 +18,7 @@ import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
+import { SAJU_COPY } from "@/data/ui-copy";
 
 type PageStep = "character-select" | "info-input" | "saju-select";
 
@@ -34,8 +35,8 @@ function CharacterSelectStep({ characters, genderFilter, setGenderFilter, select
     <motion.div key="char-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="max-w-4xl mx-auto px-4 py-8 relative z-20">
       <div className="text-center mb-8">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2">사주 상담사를 선택해주세요</h2>
-        <p className="text-arcana-muted text-sm md:text-base">사주명리학 전문 상담을 받아보세요</p>
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2">{SAJU_COPY.characterSelect.heading}</h2>
+        <p className="text-arcana-muted text-sm md:text-base">{SAJU_COPY.characterSelect.sub}</p>
       </div>
       <div className="flex justify-center gap-2 mb-6">
         {(["all", "female", "male"] as GenderFilter[]).map((f) => (
@@ -109,7 +110,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col px-4 md:px-6 py-4 overflow-y-auto">
         <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-          ← 정보 수정
+          {SAJU_COPY.back.info}
         </button>
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2">
@@ -176,7 +177,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
               ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/30 hover:opacity-90"
               : "bg-arcana-surface/50 text-arcana-muted border border-arcana-border cursor-not-allowed"
           }`}>
-          {canStart ? "사주 분석 시작하기 →" : "시간단위와 분석영역을 선택해주세요"}
+          {canStart ? SAJU_COPY.startButton.active : SAJU_COPY.startButton.inactive}
         </button>
       </div>
     </motion.div>
