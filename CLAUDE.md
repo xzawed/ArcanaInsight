@@ -40,8 +40,8 @@
 src/
 ├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings)
 ├── components/      # card/, character/, chat/, common/, effects/, home/, layout/, saju/, skin/, tarot/
-│   ├── effects/     # MysticBackground (서비스별 배경 파티클), ParticleOverlay, CharacterAuraLayer (오라 링)
-│   └── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임)
+│   ├── effects/     # MysticBackground (서비스별 배경 파티클), ParticleOverlay
+│   └── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임), CharacterAuraLayer (오라 링)
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
 ├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
 ├── lib/
