@@ -14,6 +14,7 @@ import { useCharacterStore } from "@/hooks/useCharacter";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
@@ -167,6 +168,7 @@ export default function SajuSessionPage() {
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density={phase === "reading" ? "high" : "low"} className="z-10" />
+      <MysticBackground service="saju" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 좌측 컬럼: 캐릭터 + 대사 */}
