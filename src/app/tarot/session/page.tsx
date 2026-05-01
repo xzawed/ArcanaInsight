@@ -22,6 +22,12 @@ import { TarotCard, SelectedCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
+import type { Mood } from "@/types/character";
+
+/** 결과 도착 시 캐릭터별 mood (정의 안 된 캐릭터는 "smile") */
+const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
+  rei: "serious", zero: "serious", miko: "serious", ren: "serious",
+};
 
 const deckManager = new DeckManager();
 
@@ -200,7 +206,7 @@ export default function TarotSessionPage() {
     selectCard(selected);
     setSelectedIndices((prev) => [...prev, index]);
     setRevealedPositions((prev) => [...prev, position]);
-    setMood("mystical");
+    setMood("surprised");
 
     const currentCount = currentCards.length + 1;
     const isLast = currentCount >= required;
@@ -281,12 +287,13 @@ export default function TarotSessionPage() {
     const baseDelay = (cards.length + 1) * 2000;
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: "mystical", timestamp: new Date() });
+        setMood(line.mood);
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
       }, baseDelay + i * 3000));
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [spreadType, addChatMessage]);
+  }, [spreadType, addChatMessage, setMood]);
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
@@ -338,7 +345,7 @@ export default function TarotSessionPage() {
         setReadingResult(result);
         const currentSpread = spreadType ? spreads[spreadType] : null;
         addReadingResultMessages(result, cards, currentSpread, addChatMessage);
-        setPhase("result"); setMood("smile");
+        setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
       },
       onError: (msg) => {
         stopSequence();

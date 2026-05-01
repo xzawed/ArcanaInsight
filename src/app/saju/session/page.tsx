@@ -19,6 +19,12 @@ import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
 import { sajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText, characterErrorLines, defaultErrorLines } from "@/data/characters/waiting-lines";
+import type { Mood } from "@/types/character";
+
+/** 결과 도착 시 캐릭터별 mood (정의 안 된 캐릭터는 "smile") */
+const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
+  rei: "serious", zero: "serious", miko: "serious", ren: "serious",
+};
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -112,8 +118,8 @@ export default function SajuSessionPage() {
     const timers: ReturnType<typeof setTimeout>[] = [];
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        setMood("mystical");
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: "mystical", timestamp: new Date() });
+        setMood(line.mood);
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
       }, (i + 1) * 3000));
     });
     const stopTimers = () => timers.forEach(clearTimeout);
@@ -131,7 +137,7 @@ export default function SajuSessionPage() {
         if (data.result) {
           setReadingResult(data.result as ReadingResult);
           if (data.sajuData) setSajuData(data.sajuData as SajuResult);
-          setPhase("result"); setMood("smile");
+          setPhase("result"); setMood(CHARACTER_RESULT_MOODS[state.characterId ?? ""] ?? "smile");
           const doneMsg = state.characterId === "miko"
             ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
             : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
