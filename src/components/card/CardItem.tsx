@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardFace } from "./CardFace";
 import { CardBack } from "./CardBack";
@@ -29,18 +29,43 @@ function hexToRgbBase(hex: string): string {
 
 export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, glowColor }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-8, 8]);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (isFlipped) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0);
+    mouseY.set(0);
+  }
+
   const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
 
   return (
     <motion.div
       onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       whileHover={!isFlipped ? {
         y: -8,
         scale: 1.02,
         transition: { duration: 0.2 },
       } : undefined}
       className={`relative cursor-pointer ${useCustomSize ? "" : sizeClasses[size]} ${className}`}
-      style={{ perspective: "1000px", ...(useCustomSize ? { width, height } : {}) }}
+      style={{
+        perspective: "1000px",
+        rotateX: isFlipped ? undefined : rotateX,
+        rotateY: isFlipped ? undefined : rotateY,
+        ...(useCustomSize ? { width, height } : {}),
+      }}
     >
       {!isFlipped && (
         <motion.div
