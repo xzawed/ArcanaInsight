@@ -40,6 +40,8 @@
 src/
 ├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings)
 ├── components/      # card/, character/, chat/, common/, effects/, home/, layout/, saju/, skin/, tarot/
+│   ├── effects/     # MysticBackground (서비스별 배경 파티클), ParticleOverlay, CharacterAuraLayer (오라 링)
+│   └── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임)
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
 ├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
 ├── lib/
@@ -107,6 +109,8 @@ scripts/
 **SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버 공통 헤더 `SSE_HEADERS` + `jsonError()` (`src/lib/request-utils.ts`), Provider 공통 SSE 리더 `readSseLines` + `withAbortTimeout` (`src/services/core/http-utils.ts`). 클라이언트 `fetchSSEStream()` (`src/hooks/useSSEStream.ts`). `/api/daily-card`는 JSON (비스트리밍).
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
+
+**비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `MysticBackground` (서비스별 파티클 배경 — tarot·saju·shinjeom·home). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
 
 ## 명령어
 
@@ -185,6 +189,8 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 11. **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체를 차단. 새 PR에서 이 패턴 발견 시 병합 전 제거. `grep -r "import \"@[^\"]*\"" src/` 로 주기적 검사.
 12. **E2E 스펙 추가 시 인증 의존성 명시**: 새 spec이 실 Supabase 세션을 요구하면 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 추가. CI 자동 제외 여부 playwright.config.ts 확인.
 13. **UI 텍스트 변경 시 E2E 셀렉터 동시 검토 필수**: 버튼·헤딩 등 사용자 노출 텍스트를 바꿀 때 `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴을 반드시 검색해 깨진 셀렉터를 함께 수정. — **2026-05-01 사주 버튼 마이크로카피 변경 후 E2E CI 실패 원인**.
+14. **`useEffect` 내 `setState` 동기 호출 금지** (`react-hooks/set-state-in-effect`): `useEffect` body에서 `setState(...)` 직접 호출 불가 → `setTimeout(() => setState(...), 0)` + `return () => clearTimeout(t)` 패턴 필수. — **2026-05-01 CharacterDisplay·HeroSection 린트 실패 원인**.
+15. **클라이언트 전용 초기값 hydration 안전 패턴**: `new Date()` / `Math.random()` / `window` 참조를 `useState` 초기값이나 lazy initializer에 넣으면 React hydration error #418 발생. 올바른 패턴: `useState("")` + `useEffect(() => { const t = setTimeout(() => setState(computedValue), 0); return () => clearTimeout(t); }, [])`. — **2026-05-01 HeroSection 캐릭터ID 초기화 hydration 오류 원인**.
 
 ## 업무 유형별 가이드
 
