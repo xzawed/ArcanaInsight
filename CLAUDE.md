@@ -112,6 +112,8 @@ scripts/
 
 **비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `MysticBackground` (서비스별 파티클 배경 — tarot·saju·shinjeom·home). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
 
+**캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `SpriteAnimator.CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>`. 에러 대사: `characterErrorLines` / `defaultErrorLines` (`waiting-lines.ts`). 결과 mood: `CHARACTER_RESULT_MOODS` (same file). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
+
 ## 명령어
 
 ```bash
