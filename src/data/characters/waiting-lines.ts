@@ -277,3 +277,8 @@ export const defaultErrorLines: CharacterErrorLines = {
   api: "AI 서비스 연결에 문제가 있어요. 관리자에게 문의해주세요.",
   reading: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.",
 };
+
+/** 결과 도착 시 캐릭터별 mood — 미정의 캐릭터는 "smile" 폴백 */
+export const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
+  rei: "serious", zero: "serious", miko: "serious", ren: "serious",
+};

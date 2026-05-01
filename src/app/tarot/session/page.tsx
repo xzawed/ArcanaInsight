@@ -15,19 +15,14 @@ import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
-import { waitingLines, defaultWaitingLines, buildCardPreviewLine, characterErrorLines, defaultErrorLines } from "@/data/characters/waiting-lines";
+import { waitingLines, defaultWaitingLines, buildCardPreviewLine, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
-import type { Mood } from "@/types/character";
 
-/** 결과 도착 시 캐릭터별 mood (정의 안 된 캐릭터는 "smile") */
-const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
-  rei: "serious", zero: "serious", miko: "serious", ren: "serious",
-};
 
 const deckManager = new DeckManager();
 

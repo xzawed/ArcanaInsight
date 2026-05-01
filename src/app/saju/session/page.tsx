@@ -18,13 +18,7 @@ import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
-import { sajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText, characterErrorLines, defaultErrorLines } from "@/data/characters/waiting-lines";
-import type { Mood } from "@/types/character";
-
-/** 결과 도착 시 캐릭터별 mood (정의 안 된 캐릭터는 "smile") */
-const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
-  rei: "serious", zero: "serious", miko: "serious", ren: "serious",
-};
+import { sajuWaitingLines, defaultSajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -114,7 +108,7 @@ export default function SajuSessionPage() {
 
     // 대기 대사
     const charId = state.characterId || "seonhwa";
-    const lines = sajuWaitingLines[charId] || sajuWaitingLines["seonhwa"];
+    const lines = sajuWaitingLines[charId] || defaultSajuWaitingLines;
     const timers: ReturnType<typeof setTimeout>[] = [];
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
