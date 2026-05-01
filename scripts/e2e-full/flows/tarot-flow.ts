@@ -1,16 +1,11 @@
 import type { Page } from '@playwright/test';
 import type { TestCase } from '../types';
+import { CHAR_KO } from './constants';
 
 const CARD_COUNTS: Record<string, number> = {
   'one-card': 1, 'three-card': 3, 'five-card': 5,
   'relationship': 7, 'horseshoe': 7, 'decision': 5,
   'week-ahead': 7, 'celtic-cross': 10, 'zodiac': 12, 'tree-of-life': 10,
-};
-
-const CHAR_KO: Record<string, string> = {
-  arcana: '아르카나', miko: '미코', seonhwa: '선화', hoshi: '호시',
-  luna: '루나', rei: '레이', cairn: '카이른', zero: '제로',
-  haru: '하루', ren: '렌', lix: '릭스', ethan: '에단',
 };
 
 const TOPIC_KO: Record<string, string> = {
