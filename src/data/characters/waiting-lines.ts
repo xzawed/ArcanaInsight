@@ -252,3 +252,28 @@ export function buildCardPreviewLine(
   if (template) return template(position, cardNameKo, keywordText);
   return `[${position}] '${cardNameKo}' — ${keywordText}`;
 }
+
+export interface CharacterErrorLines {
+  api: string;     // API 키·설정 오류
+  reading: string; // 리딩 생성 오류
+}
+
+export const characterErrorLines: Record<string, CharacterErrorLines> = {
+  arcana:  { api: "앗... 별빛과의 연결이 끊겼어요. 냥~ 관리자에게 문의해주세요.", reading: "수정구슬이 잠시 흐릿해졌어요. 냥~ 다시 시도해볼까요?" },
+  miko:    { api: "...신계와의 접속이 불안정합니다. 관리자에게 문의해주십시오.", reading: "...기운이 일시적으로 끊겼습니다. 다시 시도해주십시오." },
+  seonhwa: { api: "어머, 하늘의 기운이 닿지 않네요~. 관리자에게 문의해주세요.", reading: "별의 흐름이 잠시 흐트러졌어요~. 다시 해볼까요?" },
+  hoshi:   { api: "앗 별빛 연결이 끊겼어! 관리자에게 연락해줘~", reading: "어? 뭔가 이상한데~ 다시 해볼게!" },
+  luna:    { api: "...달빛이 닿지 않네요. 관리자에게 문의해주세요.", reading: "달빛이 잠시 가려졌어요. 다시 시도해볼게요 🌙" },
+  rei:     { api: "연결 오류. 관리자 문의 필요.", reading: "오류 발생. 다시 시도해." },
+  cairn:   { api: "...접속에 문제가 생겼습니다. 관리자에게 문의해주십시오.", reading: "잠시 오류가 발생했습니다. 다시 시도해주시겠습니까?" },
+  zero:    { api: "...별이 닿지 않는 밤이야. 관리자에게 문의해줘.", reading: "...흐름이 끊겼어. 다시 시도해봐." },
+  haru:    { api: "앗, 연결에 문제가 생겼어요! 관리자에게 문의해주세요 ☀️", reading: "이런, 잠시 오류가 났어요. 다시 해볼게요!" },
+  ren:     { api: "...하늘과의 소통이 끊겼소. 관리자에게 문의하시오.", reading: "...운의 실타래가 엉켰소. 다시 시도해보시오." },
+  lix:     { api: "연결 끊겼네~ 관리자한테 연락해줘 ㅋㅋ", reading: "앗 이거 오류났는데? 다시 해볼게 ㅋㅋ" },
+  ethan:   { api: "API 연결 오류가 발생했거든요. 관리자에게 문의해주세요.", reading: "해석 중 오류가 발생했거든요. 다시 시도해볼게요." },
+};
+
+export const defaultErrorLines: CharacterErrorLines = {
+  api: "AI 서비스 연결에 문제가 있어요. 관리자에게 문의해주세요.",
+  reading: "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.",
+};

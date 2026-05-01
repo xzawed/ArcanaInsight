@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
-import { ERROR_MESSAGES } from "@/data/error-messages";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
 import { motion } from "framer-motion";
@@ -19,7 +18,7 @@ import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
-import { sajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText } from "@/data/characters/waiting-lines";
+import { sajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText, characterErrorLines, defaultErrorLines } from "@/data/characters/waiting-lines";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -143,8 +142,10 @@ export default function SajuSessionPage() {
       onError: (msg) => {
         stopTimers();
         console.error("사주 리딩 실패:", msg);
+        const errLines = (charId && characterErrorLines[charId]) ? characterErrorLines[charId] : defaultErrorLines;
+        const errText = msg.includes("GROK_API_KEY") ? errLines.api : errLines.reading;
         addChatMessage({ id: crypto.randomUUID(), role: "character",
-          content: ERROR_MESSAGES.READING_FAIL, mood: "default", timestamp: new Date() });
+          content: errText, mood: "default", timestamp: new Date() });
         setMood("default"); setReadingError(true);
       },
     });

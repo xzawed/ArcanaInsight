@@ -15,7 +15,7 @@ import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
-import { waitingLines, defaultWaitingLines, buildCardPreviewLine } from "@/data/characters/waiting-lines";
+import { waitingLines, defaultWaitingLines, buildCardPreviewLine, characterErrorLines, defaultErrorLines } from "@/data/characters/waiting-lines";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
@@ -74,12 +74,11 @@ async function shareTarotResult(): Promise<void> {
   }
 }
 
-/** SSE 에러 메시지에서 사용자 표시 텍스트를 결정한다 */
-function getReadingErrorText(msg: string): string {
-  if (msg.includes("GROK_API_KEY")) {
-    return "AI 서비스 설정에 문제가 있어요. 관리자에게 문의해주세요.";
-  }
-  return "카드 해석 중 문제가 발생했어요. 다시 시도해주세요.";
+/** SSE 에러 메시지에서 캐릭터 말투의 사용자 표시 텍스트를 결정한다 */
+function getReadingErrorText(msg: string, charId: string | null | undefined): string {
+  const lines = (charId && characterErrorLines[charId]) ? characterErrorLines[charId] : defaultErrorLines;
+  if (msg.includes("GROK_API_KEY")) return lines.api;
+  return lines.reading;
 }
 
 /** 정상 리딩 결과를 채팅 메시지로 변환하여 addChatMessage를 호출한다 */
@@ -344,7 +343,11 @@ export default function TarotSessionPage() {
       onError: (msg) => {
         stopSequence();
         console.error("리딩 SSE 에러:", msg);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getReadingErrorText(msg), mood: "default", timestamp: new Date() });
+        addChatMessage({
+          id: crypto.randomUUID(), role: "character",
+          content: getReadingErrorText(msg, characterId),
+          mood: "default", timestamp: new Date(),
+        });
         setMood("default"); setReadingError(true);
       },
     });
