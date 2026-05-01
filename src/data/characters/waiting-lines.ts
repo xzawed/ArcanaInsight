@@ -282,3 +282,19 @@ export const defaultErrorLines: CharacterErrorLines = {
 export const CHARACTER_RESULT_MOODS: Record<string, Mood> = {
   rei: "serious", zero: "serious", miko: "serious", ren: "serious",
 };
+
+/** 타로 카드 셔플 의식 타이프라이터 텍스트 — 최대 12자, 58ms/자 */
+export const shuffleCeremonyText: Record<string, string> = {
+  arcana:  "카드를 골라봐요 ✨",
+  miko:    "패를 고르십시오",
+  seonhwa: "카드를 고르세요~",
+  hoshi:   "골라봐~! ★",
+  luna:    "카드를 골라줘요 🌙",
+  rei:     "골라.",
+  cairn:   "카드를 고르십시오",
+  zero:    "...운명을 골라",
+  haru:    "카드 골라요! ☀️",
+  ren:     "패를 고르시오",
+  lix:     "어떤 거 골라볼까~ ㅋ",
+  ethan:   "카드 선택해줘요",
+};
