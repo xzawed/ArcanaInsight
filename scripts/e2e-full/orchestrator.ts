@@ -24,6 +24,7 @@ async function runWorker(workerId: number, casesFile: string): Promise<void> {
     const worker = spawn('pnpm', ['exec', 'tsx', 'scripts/e2e-full/worker.ts'], {
       env: { ...process.env, WORKER_ID: String(workerId), CASES_FILE: casesFile },
       stdio: 'inherit',
+      shell: process.platform === 'win32',
     });
     worker.on('close', code => code === 0 ? resolve() : reject(new Error(`Worker ${workerId} 종료 코드: ${code}`)));
   });
