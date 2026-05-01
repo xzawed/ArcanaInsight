@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState, useRef } from "react";
+import React, { useEffect, useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
@@ -23,6 +23,55 @@ import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 
 const deckManager = new DeckManager();
+
+/** startWaitingSequence 내부 setTimeout 콜백 — 중첩 5단계 초과 해소용 헬퍼 */
+function buildRevealStep(
+  sc: SelectedCard,
+  currentSpread: SpreadDefinition | null,
+  charId: string,
+  revealPos: React.Dispatch<React.SetStateAction<number[]>>,
+  addMsg: (msg: ChatMessage) => void,
+): () => void {
+  return () => {
+    revealPos((prev) => [...prev, sc.position]);
+    const posLabel = currentSpread?.positions[sc.position]?.labelKo ?? `위치 ${sc.position + 1}`;
+    const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
+    const preview = buildCardPreviewLine(charId, sc.card.nameKo, keywords, posLabel);
+    addMsg({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
+  };
+}
+
+/** 타로 결과 공유 버튼 핸들러 — CC 22 → 모듈 레벨 추출 */
+async function shareTarotResult(): Promise<void> {
+  const result = useSessionStore.getState().readingResult;
+  const shareToken = result?.shareToken;
+  const siteName = "ArcanaInsight";
+
+  if (shareToken) {
+    const url = `${globalThis.location?.origin}/tarot/result/${shareToken}`;
+    const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        alert("링크가 복사되었습니다!");
+      } catch (e) { console.warn("클립보드 복사 실패:", e); }
+    }
+  } else {
+    const summary = result?.overallReading
+      ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
+      : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+    } else {
+      try {
+        await navigator.clipboard.writeText(summary);
+        alert("결과가 복사되었습니다!");
+      } catch (e) { console.warn("클립보드 복사 실패:", e); }
+    }
+  }
+}
 
 /** SSE 에러 메시지에서 사용자 표시 텍스트를 결정한다 */
 function getReadingErrorText(msg: string): string {
@@ -222,14 +271,10 @@ export default function TarotSessionPage() {
 
     // 1단계: 카드 순차 뒤집기 (2초 간격) + 카드 정보 미리보기
     cards.forEach((sc, i) => {
-      timers.push(setTimeout(() => {
-        setRevealedPositions((prev) => [...prev, sc.position]);
-
-        const posLabel = currentSpread?.positions[sc.position]?.labelKo || `위치 ${sc.position + 1}`;
-        const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
-        const preview = buildCardPreviewLine(charId, sc.card.nameKo, keywords, posLabel);
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
-      }, (i + 1) * 2000));
+      timers.push(setTimeout(
+        buildRevealStep(sc, currentSpread, charId, setRevealedPositions, addChatMessage),
+        (i + 1) * 2000,
+      ));
     });
 
     // 2단계: 캐릭터 대기 대사 (카드 뒤집기 끝난 후 3초 간격)
@@ -529,38 +574,7 @@ export default function TarotSessionPage() {
                     새로운 상담
                   </button>
                   <button
-                    onClick={async () => {
-                      const result = useSessionStore.getState().readingResult;
-                      const shareToken = result?.shareToken;
-                      const siteName = "ArcanaInsight";
-
-                      if (shareToken) {
-                        // 공유 링크가 있으면 URL 공유
-                        const url = `${window.location.origin}/tarot/result/${shareToken}`;
-                        const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
-                        if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                        } else {
-                          try {
-                            await navigator.clipboard.writeText(`${text}\n${url}`);
-                            alert("링크가 복사되었습니다!");
-                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                        }
-                      } else {
-                        // 공유 링크 없으면 결과 텍스트 직접 공유
-                        const summary = result?.overallReading
-                          ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
-                          : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
-                        if (navigator.share) {
-                          try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-                        } else {
-                          try {
-                            await navigator.clipboard.writeText(summary);
-                            alert("결과가 복사되었습니다!");
-                          } catch (e) { console.warn("클립보드 복사 실패:", e); }
-                        }
-                      }
-                    }}
+                    onClick={shareTarotResult}
                     className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
                   >
                     결과 공유하기
