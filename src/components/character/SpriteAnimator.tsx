@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, type Easing } from "framer-motion";
+import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType } from "@/types/character";
 
 interface MoodConfig {
@@ -29,25 +29,10 @@ const MOOD_TO_FILE: Record<Mood, string> = {
 };
 
 const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
-  // idle animation 타입별 (mood === "default"일 때 적용)
-  float: {
-    y: [0, -6, 0],
-    scale: [1, 1.01, 1],
-  },
-  "float-strong": {
-    y: [0, -8, 0],
-    scale: [1, 1.015, 1],
-  },
-  bounce: {
-    y: [0, -12, 0],
-    scale: [1, 1.02, 1],
-  },
-  breathe: {
-    y: [0, -2, 0, -1, 0],
-    scale: [1, 1.005, 1, 1.003, 1],
-    opacity: [1, 1, 1, 0.88, 1],
-  },
-  // mood 전용 오버라이드
+  float: { y: [0, -6, 0], scale: [1, 1.01, 1] },
+  "float-strong": { y: [0, -8, 0], scale: [1, 1.015, 1] },
+  bounce: { y: [0, -12, 0], scale: [1, 1.02, 1] },
+  breathe: { y: [0, -2, 0, -1, 0], scale: [1, 1.005, 1, 1.003, 1], opacity: [1, 1, 1, 0.88, 1] },
   mystical: {
     y: [0, -10, 0],
     scale: [1, 1.02, 1],
@@ -74,6 +59,30 @@ const ENTER_MOTION: Record<string, Record<string, number[]>> = {
   wink: { scale: [0.95, 1.02, 1], y: [3, -2, 0] },
 };
 
+// 캐릭터별 입장 시그니처 애니메이션 (처음 등장 시 1회만 재생)
+interface EntranceConfig {
+  initial: TargetAndTransition;
+  transition: Transition;
+}
+
+const CHAR_ENTRANCE: Record<string, EntranceConfig> = {
+  arcana:  { initial: { y: 60, opacity: 0 },                transition: { duration: 0.85, ease: "easeOut" } },
+  miko:    { initial: { opacity: 0, scale: 0.95 },           transition: { duration: 1.1, ease: "easeOut" } },
+  seonhwa: { initial: { x: -35, opacity: 0 },               transition: { duration: 0.75, ease: "easeOut" } },
+  hoshi:   { initial: { x: 65, opacity: 0, scale: 0.82 },   transition: { type: "spring", stiffness: 180, damping: 12 } },
+  luna:    { initial: { y: -25, opacity: 0 },               transition: { duration: 0.95, ease: "easeOut" } },
+  rei:     { initial: { opacity: 0 },                        transition: { duration: 1.3, ease: "easeInOut" } },
+  cairn:   { initial: { y: 35, opacity: 0, scale: 0.94 },   transition: { duration: 0.85, ease: "easeOut" } },
+  zero:    { initial: { opacity: 0, rotate: -3 },            transition: { duration: 1.5, ease: "easeOut" } },
+  haru:    { initial: { y: 45, opacity: 0 },                transition: { type: "spring", stiffness: 200, damping: 16 } },
+  ren:     { initial: { x: -25, opacity: 0, scale: 0.97 },  transition: { duration: 1.05, ease: "easeOut" } },
+  lix:     { initial: { rotate: -9, scale: 0.8, opacity: 0 }, transition: { duration: 0.5, ease: "backOut" } },
+  ethan:   { initial: { y: 18, opacity: 0 },                transition: { duration: 0.95, ease: "easeOut" } },
+};
+
+// 이미 입장 애니메이션을 재생한 캐릭터 ID 추적 (모듈 레벨 — SSR 비간섭, 클라이언트 세션 유지)
+const enteredChars = new Set<string>();
+
 interface SpriteAnimatorProps {
   readonly characterId: string;
   readonly mood: Mood;
@@ -86,6 +95,16 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onA
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
   const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
+
+  // 첫 등장이면 입장 시그니처, 이후 무드 전환은 표준 페이드
+  const entrance = CHAR_ENTRANCE[characterId];
+  const isFirstEntrance = !enteredChars.has(characterId);
+  const motionInitial: TargetAndTransition = isFirstEntrance && entrance ? entrance.initial : { opacity: 0 };
+  const mountTransition: Transition = isFirstEntrance && entrance ? entrance.transition : { duration: 0.55, ease: "easeInOut" };
+
+  useEffect(() => {
+    enteredChars.add(characterId);
+  }, [characterId]);
 
   useEffect(() => {
     if (config.loop || !onAnimationEnd) return;
@@ -101,33 +120,33 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onA
 
   return (
     <div className={`relative ${className}`}>
-    <AnimatePresence mode="sync">
-      <motion.div
-        key={`${characterId}-${mood}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.55, ease: "easeInOut" }}
-        className="absolute inset-0"
-      >
-        {!isLooping && enterAnim ? (
-          <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
-            className="relative w-full h-full">
-            <Image src={imageSrc} alt="character" fill sizes="50vw"
-              className="object-contain object-center" priority />
-          </motion.div>
-        ) : (
-          <motion.div
-            animate={loopAnim}
-            transition={loopTransition}
-            className="relative w-full h-full"
-          >
-            <Image src={imageSrc} alt="character" fill sizes="50vw"
-              className="object-contain object-center" priority />
-          </motion.div>
-        )}
-      </motion.div>
-    </AnimatePresence>
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={`${characterId}-${mood}`}
+          initial={motionInitial}
+          animate={{ opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
+          exit={{ opacity: 0 }}
+          transition={mountTransition}
+          className="absolute inset-0"
+        >
+          {!isLooping && enterAnim ? (
+            <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
+              className="relative w-full h-full">
+              <Image src={imageSrc} alt="character" fill sizes="50vw"
+                className="object-contain object-center" priority />
+            </motion.div>
+          ) : (
+            <motion.div
+              animate={loopAnim}
+              transition={loopTransition}
+              className="relative w-full h-full"
+            >
+              <Image src={imageSrc} alt="character" fill sizes="50vw"
+                className="object-contain object-center" priority />
+            </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

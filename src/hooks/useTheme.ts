@@ -86,18 +86,19 @@ export const themes: Record<ThemeId, ThemeConfig> = {
   },
 };
 
-/** 현재 시간 기반 자동 테마 결정 */
+/** 현재 시간 기반 자동 테마 결정 (spec 시간대: 심야→새벽→낮→황혼) */
 function getAutoTheme(): ThemeId {
   const now = new Date();
   const hour = now.getHours();
   const month = now.getMonth(); // 0-11
 
-  // 시간 기반 (우선)
-  if (hour >= 5 && hour < 8) return "dawn";
-  if (hour >= 17 && hour < 20) return "sunset";
-  if (hour >= 20 || hour < 5) return "midnight";
-
-  // 낮 시간(8~17)은 계절 기반
+  // 심야 (22:00~05:59) — 짙은 남색 + 별 파티클 최대
+  if (hour >= 22 || hour < 6) return "midnight";
+  // 새벽/아침 (06:00~11:59) — 차분한 푸른빛 + 여명 그라데이션
+  if (hour < 12) return "dawn";
+  // 황혼 (18:00~21:59) — 보라+주황 매직아워
+  if (hour >= 18) return "sunset";
+  // 낮 (12:00~17:59) — 계절 기반 밝은 조명
   if (month >= 2 && month <= 4) return "spring";
   if (month >= 5 && month <= 7) return "summer";
   if (month >= 8 && month <= 10) return "autumn";
@@ -119,7 +120,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     const activeTheme = mode === "auto" ? getAutoTheme() : mode;
     set({ mode, activeTheme });
     try {
-      if (typeof window !== "undefined") {
+      if (globalThis.window !== undefined) {
         localStorage.setItem("arcana-theme-mode", mode);
       }
     } catch { /* Safari Private 모드 등에서 localStorage 접근 실패 시 무시 */ } // NOSONAR

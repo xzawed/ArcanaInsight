@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { getCharacterById } from "@/data/characters";
+import { useThemeStore, type ThemeId } from "@/hooks/useTheme";
 
 const CHARACTER_ORDER = [
   "arcana", "miko", "seonhwa", "hoshi", "luna", "rei",
@@ -17,13 +18,27 @@ function getTodayIndex(): number {
   return Math.floor(Date.now() / 86400000) % CHARACTER_ORDER.length;
 }
 
+// 시간대별 분위기 오버레이 (hero-bg.jpg 위에 합성)
+const THEME_OVERLAY: Record<ThemeId, string> = {
+  midnight: "radial-gradient(ellipse 80% 55% at 50% 30%, rgba(88,28,135,0.55) 0%, rgba(10,10,26,0.88) 100%)",
+  dawn:     "linear-gradient(180deg, rgba(244,114,182,0.35) 0%, rgba(99,102,241,0.25) 40%, rgba(26,15,30,0.88) 100%)",
+  sunset:   "linear-gradient(0deg, rgba(251,146,60,0.50) 0%, rgba(139,92,246,0.40) 55%, rgba(26,15,10,0.88) 100%)",
+  spring:   "radial-gradient(ellipse 80% 50% at 50% 40%, rgba(244,114,182,0.28) 0%, rgba(20,15,24,0.88) 100%)",
+  summer:   "radial-gradient(ellipse 80% 50% at 50% 40%, rgba(56,189,248,0.22) 0%, rgba(10,22,40,0.88) 100%)",
+  autumn:   "radial-gradient(ellipse 80% 50% at 50% 40%, rgba(217,119,6,0.28) 0%, rgba(26,16,10,0.88) 100%)",
+  winter:   "radial-gradient(ellipse 80% 50% at 50% 40%, rgba(147,197,253,0.22) 0%, rgba(12,18,32,0.88) 100%)",
+};
+
 export function HeroSection() {
+  const { activeTheme } = useThemeStore();
+
   const [characterId] = useState<string>(() => {
     if (globalThis.window === undefined) return "arcana";
     return CHARACTER_ORDER[getTodayIndex()];
   });
 
   const character = getCharacterById(characterId)!;
+  const particleDensity = activeTheme === "midnight" ? "high" : "medium";
 
   const scrollToDaily = () => {
     document.getElementById("daily-card")?.scrollIntoView({ behavior: "smooth" });
@@ -32,14 +47,20 @@ export function HeroSection() {
   return (
     <section className="relative h-[100dvh] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
+        <Image src="/images/backgrounds/hero-bg.jpg" alt="" fill className="object-cover" priority sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",
-        }} />
+        {/* 시간대별 분위기 오버레이 */}
+        <motion.div
+          key={activeTheme}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, ease: "easeInOut" }}
+          className="absolute inset-0"
+          style={{ background: THEME_OVERLAY[activeTheme] }}
+        />
       </div>
 
-      <ParticleOverlay density="medium" className="z-10" />
+      <ParticleOverlay density={particleDensity} className="z-10" />
 
       <div className="flex-1 flex flex-col md:flex-row items-center z-20 px-4 md:px-8">
         <motion.div
