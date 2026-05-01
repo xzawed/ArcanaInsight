@@ -181,6 +181,9 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 7. **SSE 라우트 fire-and-forget 패턴**: 스트림 전송 완료 후 DB 저장은 `void saveFn(args).catch(e => console.error("[tag]", e))` 패턴 필수. `await` 금지 (스트림 블로킹). tarot·saju·shinjeom reading 라우트 모두 동일 패턴 적용.
 8. **DB 어댑터 동적 require**: `src/lib/db/index.ts`의 `getDb()`는 런타임에 `DB_PROVIDER`에 따라 `require()`로 어댑터 로드. 새 어댑터 추가 시 정적 `import` 금지 — 번들에 항상 포함되어 불필요한 의존성 로드 발생.
 9. **JSON 파싱 — 문자열 내 `{}` 주의**: AI 응답 파싱 시 단순 괄호 카운터(`text[i] === "{"`)나 탐욕적 정규식(`/\{[\s\S]*\}/`)은 문자열 값 안의 `{}`를 구분 못해 조기 종료 or 과잉 추출 발생. 반드시 `parseJsonSafe()` (`src/services/core/text-cleaner.ts`) 사용. — **2026-04-26 타로·신점 결과 노출 장애 원인**. → [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md#3-json-파싱-파이프라인)
+10. **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 실행 시 `next`, `eslint-config-next` 등 피어 의존성 버전이 의도치 않게 변경될 수 있음. 추가 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 버전 변동 반드시 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
+11. **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체를 차단. 새 PR에서 이 패턴 발견 시 병합 전 제거. `grep -r "import \"@[^\"]*\"" src/` 로 주기적 검사.
+12. **E2E 스펙 추가 시 인증 의존성 명시**: 새 spec이 실 Supabase 세션을 요구하면 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 추가. CI 자동 제외 여부 playwright.config.ts 확인.
 
 ## 업무 유형별 가이드
 
