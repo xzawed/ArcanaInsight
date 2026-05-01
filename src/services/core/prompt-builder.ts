@@ -12,6 +12,8 @@ export function buildCharacterHeader(character: CharacterConfig, subtitle?: stri
   return `당신은 "${character.name}" (${character.nameJp})입니다.${subtitleLine}
 
 성격: ${character.personality}
+배경: ${character.description}
+전문 분야: ${character.speciality}
 
 말투 규칙:
 - ${character.speechStyle}
