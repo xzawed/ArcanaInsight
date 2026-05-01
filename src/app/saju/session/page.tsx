@@ -188,43 +188,64 @@ export default function SajuSessionPage() {
 
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           {phase === "result" && readingResult && sajuData ? (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
               className="w-full flex-1 flex flex-col overflow-hidden py-4">
               <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
-                <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
-                  dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
-                <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}>
+                  <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
+                    dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}>
+                  <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
+                </motion.div>
 
                 {readingResult.overallReading && (
-                  <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5">
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+                    className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
+                  >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">☯</span>
                       <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                     </div>
                     <ReadingText text={readingResult.overallReading} />
-                  </div>
+                  </motion.div>
                 )}
 
                 {readingResult.topicReading && (
-                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.55, ease: "easeOut" }}
+                    className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5"
+                  >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">🔍</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</span>
                     </div>
                     <ReadingText text={readingResult.topicReading || ""} />
-                  </div>
+                  </motion.div>
                 )}
 
-                <DaeunTimeline majorFortunes={sajuData.majorFortunes} yearlyFortune={sajuData.yearlyFortune} birthYear={birthYear} />
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}>
+                  <DaeunTimeline majorFortunes={sajuData.majorFortunes} yearlyFortune={sajuData.yearlyFortune} birthYear={birthYear} />
+                </motion.div>
 
                 {readingResult.advice && (
-                  <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5">
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.85, ease: "easeOut" }}
+                    className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5"
+                  >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">✨</span>
                       <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                     </div>
                     <ReadingText text={readingResult.advice} />
-                  </div>
+                  </motion.div>
                 )}
               </div>
 

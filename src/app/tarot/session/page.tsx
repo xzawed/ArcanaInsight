@@ -513,13 +513,14 @@ export default function TarotSessionPage() {
             {phase === "result" && readingResult && (
               <motion.div
                 key="result"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
                 <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
-                  {/* 카드별 해석 */}
+                  {/* 카드별 해석 — 순차 공개 */}
                   {readingResult.cardInterpretations?.map((interp, i) => {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);
                     const fallbackCard = !card && interp.position < selectedCards.length
@@ -527,36 +528,52 @@ export default function TarotSessionPage() {
                     const displayName = card?.card.nameKo || fallbackCard?.card.nameKo || "";
                     const posLabel = spread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
                     return (
-                      <div key={`card-${i}`} className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">
+                      <motion.div
+                        key={`card-${i}`}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 + Math.min(i * 0.15, 0.45), ease: "easeOut" }}
+                        className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5"
+                      >
                         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-arcana-border/50">
                           <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
                           <span className="text-arcana-text font-bold text-sm md:text-base">{displayName}</span>
                         </div>
                         <ReadingText text={interp.interpretation} />
-                      </div>
+                      </motion.div>
                     );
                   })}
 
                   {/* 종합 해석 */}
                   {readingResult.overallReading && (
-                    <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
+                      className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
+                    >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">🔮</span>
                         <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
                       </div>
                       <ReadingText text={readingResult.overallReading} />
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* 조언 */}
                   {readingResult.advice && (
-                    <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.9, ease: "easeOut" }}
+                      className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5"
+                    >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">✨</span>
                         <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
                       </div>
                       <ReadingText text={readingResult.advice} />
-                    </div>
+                    </motion.div>
                   )}
 
                 </div>

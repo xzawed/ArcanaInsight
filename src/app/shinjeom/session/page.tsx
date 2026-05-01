@@ -233,33 +233,48 @@ export default function ShinjeomSessionPage() {
 
           {phase === "result" && readingResult ? (
             /* 최종 결과 */
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 overflow-y-auto py-4 space-y-4">
-              <div className="bg-arcana-purple/10 border border-arcana-purple/30 rounded-2xl p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+                className="bg-arcana-purple/10 border border-arcana-purple/30 rounded-2xl p-4"
+              >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🔮</span>
                   <span className="text-arcana-purple font-serif font-bold">종합 신점</span>
                 </div>
                 <ReadingText text={readingResult.overallReading} />
-              </div>
+              </motion.div>
 
               {readingResult.topicReading && (
-                <div className="bg-arcana-gold/5 border border-arcana-gold/30 rounded-2xl p-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
+                  className="bg-arcana-gold/5 border border-arcana-gold/30 rounded-2xl p-4"
+                >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">🔍</span>
                     <span className="text-arcana-gold font-serif font-bold">상세 해석</span>
                   </div>
                   <ReadingText text={readingResult.topicReading} />
-                </div>
+                </motion.div>
               )}
 
               {readingResult.advice && (
-                <div className="bg-arcana-card/70 border border-arcana-border rounded-2xl p-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+                  className="bg-arcana-card/70 border border-arcana-border rounded-2xl p-4"
+                >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">✨</span>
                     <span className="text-arcana-gold font-serif font-bold">조언</span>
                   </div>
                   <ReadingText text={readingResult.advice} />
-                </div>
+                </motion.div>
               )}
 
               <div className="flex gap-3 pt-2">
