@@ -68,7 +68,7 @@ export default function ShinjeomSessionPage() {
     phase, topic, characterId, chatMessages, turnCount, readingResult, isLoading,
     addChatMessage, incrementTurn, setReadingResult, setLoading, setPhase, setSessionId, reset,
   } = useShinjeomSessionStore();
-  const { setMood } = useCharacterStore();
+  const { setMood, currentMood } = useCharacterStore();
 
   const character = characterId ? getCharacterById(characterId) : null;
   const [inputText, setInputText] = useState("");
@@ -82,6 +82,7 @@ export default function ShinjeomSessionPage() {
       return;
     }
     if (sessionCreated) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessionCreated(true);
 
     const initSession = async () => {
@@ -161,7 +162,7 @@ export default function ShinjeomSessionPage() {
         return false;
       });
     } catch {
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
       setMood("default");
     }
     setLoading(false);
@@ -209,7 +210,7 @@ export default function ShinjeomSessionPage() {
         return false;
       });
     } catch {
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: "네트워크 문제가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+      addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
       setMood("default");
     }
     setLoading(false);
@@ -231,7 +232,7 @@ export default function ShinjeomSessionPage() {
         <div className="w-full h-[25%] md:h-auto md:w-[50%] md:flex-shrink-0 flex flex-col">
           {character && (
             <div className="flex-1 relative overflow-hidden">
-              <CharacterDisplay character={character} mood={useCharacterStore.getState().currentMood} className="w-full h-full" />
+              <CharacterDisplay character={character} mood={currentMood} className="w-full h-full" />
             </div>
           )}
         </div>
