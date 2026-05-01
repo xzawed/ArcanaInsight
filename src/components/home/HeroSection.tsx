@@ -9,15 +9,7 @@ import { MysticBackground } from "@/components/effects/MysticBackground";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { getCharacterById } from "@/data/characters";
 import { useThemeStore, type ThemeId } from "@/hooks/useTheme";
-
-const CHARACTER_ORDER = [
-  "arcana", "miko", "seonhwa", "hoshi", "luna", "rei",
-  "cairn", "zero", "haru", "ren", "lix", "ethan",
-];
-
-function getTodayIndex(): number {
-  return Math.floor(Date.now() / 86400000) % CHARACTER_ORDER.length;
-}
+import { getDailyCharacterId } from "@/lib/daily-character";
 
 // 시간대별 분위기 오버레이 (hero-bg.jpg 위에 합성)
 const THEME_OVERLAY: Record<ThemeId, string> = {
@@ -36,7 +28,7 @@ export function HeroSection() {
   const [characterId, setCharacterId] = useState<string>("arcana");
 
   useEffect(() => {
-    const t = setTimeout(() => setCharacterId(CHARACTER_ORDER[getTodayIndex()]), 0);
+    const t = setTimeout(() => setCharacterId(getDailyCharacterId()), 0);
     return () => clearTimeout(t);
   }, []);
 

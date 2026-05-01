@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 type Service = "home" | "tarot" | "saju" | "shinjeom";
@@ -53,9 +54,10 @@ const RUNE_POSITIONS = [
 
 export function MysticBackground({ service }: MysticBackgroundProps) {
   const shouldReduceMotion = useReducedMotion();
+  const reactId = useId();
   const mistColor = MIST_COLOR[service];
   const runes = RUNE_SYMBOLS[service];
-  const filterId = `turbulence-${service}`;
+  const filterId = `turbulence-${service}-${reactId.replaceAll(":", "")}`;
 
   return (
     <div className="absolute inset-0 pointer-events-none z-[5] overflow-hidden" aria-hidden>

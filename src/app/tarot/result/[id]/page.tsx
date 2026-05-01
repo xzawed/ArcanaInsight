@@ -8,6 +8,7 @@ import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "./ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 import { ReadingText } from "@/components/common/ReadingText";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 
 const deckManager = new DeckManager();
 
@@ -46,6 +47,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      <MysticBackground service="tarot" />
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />

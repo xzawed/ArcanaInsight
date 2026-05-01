@@ -6,6 +6,7 @@ import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
 import { SajuResultShareButton } from "./SajuResultShareButton";
 import type { SajuResult } from "@/services/saju/saju-types";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 
 export default async function SajuResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -60,6 +61,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      <MysticBackground service="saju" />
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />

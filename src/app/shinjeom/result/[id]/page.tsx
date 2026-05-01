@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { ReadingText } from "@/components/common/ReadingText";
 import { ShinjeomResultShareButton } from "./ShinjeomResultShareButton";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 
 interface ShinjeomReadingRow {
   id: string;
@@ -28,6 +29,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      <MysticBackground service="shinjeom" />
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
