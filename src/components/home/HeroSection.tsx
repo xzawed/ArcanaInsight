@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,10 +33,12 @@ const THEME_OVERLAY: Record<ThemeId, string> = {
 export function HeroSection() {
   const { activeTheme } = useThemeStore();
 
-  const [characterId] = useState<string>(() => {
-    if (globalThis.window === undefined) return "arcana";
-    return CHARACTER_ORDER[getTodayIndex()];
-  });
+  const [characterId, setCharacterId] = useState<string>("arcana");
+
+  useEffect(() => {
+    const t = setTimeout(() => setCharacterId(CHARACTER_ORDER[getTodayIndex()]), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const character = getCharacterById(characterId)!;
   const particleDensity = activeTheme === "midnight" ? "high" : "medium";
