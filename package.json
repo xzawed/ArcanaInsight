@@ -17,6 +17,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:full": "tsx scripts/e2e-full/orchestrator.ts --mode=full --workers=6",
+    "test:e2e:full:ci": "tsx scripts/e2e-full/orchestrator.ts --mode=ci",
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts"
   },
   "dependencies": {
@@ -44,7 +46,8 @@
     "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "eslint-config-next": "16.2.1",
+    "@anthropic-ai/sdk": "^0.92.0",
+    "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",

@@ -51,3 +51,8 @@ playwright/.cache/
 
 # MCP 설정 (토큰 포함 가능 — git 제외 필수)
 .mcp.json
+
+# E2E Full Run 결과 (대용량, 로컬 전용)
+docs/e2e-reports/
+scripts/e2e-full/results/
+scripts/e2e-full/cases/
