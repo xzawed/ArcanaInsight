@@ -13,6 +13,7 @@ import { CardDeck } from "@/components/card/CardDeck";
 import { CardSpread } from "@/components/card/CardSpread";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
 import { waitingLines, defaultWaitingLines, buildCardPreviewLine } from "@/data/characters/waiting-lines";
 import { DeckManager } from "@/services/tarot/deck-manager";
@@ -381,6 +382,7 @@ export default function TarotSessionPage() {
         particleStyle={effectTheme?.particleStyle}
         className="z-10"
       />
+      <MysticBackground service="tarot" />
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">

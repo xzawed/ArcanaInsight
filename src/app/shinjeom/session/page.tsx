@@ -7,9 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useShinjeomSessionStore } from "@/hooks/useShinjeomSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { MysticBackground } from "@/components/effects/MysticBackground";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
+import { loadingText, defaultLoadingText } from "@/data/characters/waiting-lines";
 
 function updateMessageContent(msgId: string, content: string) {
   useShinjeomSessionStore.setState((state) => ({
@@ -217,6 +219,7 @@ export default function ShinjeomSessionPage() {
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density="low" className="z-10" />
+      <MysticBackground service="shinjeom" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터 */}
@@ -314,7 +317,7 @@ export default function ShinjeomSessionPage() {
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-arcana-card/70 border border-arcana-border rounded-2xl px-4 py-3">
-                      <span className="text-arcana-muted text-sm animate-pulse">답변을 준비하고 있어요...</span>
+                      <span className="text-arcana-muted text-sm animate-pulse">{loadingText[characterId ?? ""] ?? defaultLoadingText}</span>
                     </div>
                   </div>
                 )}
