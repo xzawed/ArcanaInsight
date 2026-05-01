@@ -1,6 +1,7 @@
 import { CharacterConfig } from "@/types/character";
 import { SelectedCard } from "@/types/card";
 import { Topic, SpreadDefinition } from "@/types/session";
+import type { CharacterMemoryEntry } from "@/lib/db/character-context";
 
 const topicLabels: Partial<Record<Topic, string>> = {
   love: "연애/관계", "love-single": "연애/관계 (솔로)", "love-couple": "연애/관계 (커플)",
@@ -152,14 +153,8 @@ export function buildFreeQuestionPrompt(question?: string | null): string {
   return `\n\n사용자 질문: "${sanitized}"\n이 질문을 카드 해석에 반영하여 직접적으로 답해주세요.`;
 }
 
-interface MemoryEntry {
-  serviceType: string;
-  date: string;
-  overallReading: string;
-}
-
 /** 최근 세션 요약을 시스템 프롬프트에 주입 */
-export function buildCharacterMemoryPrompt(memories: MemoryEntry[]): string {
+export function buildCharacterMemoryPrompt(memories: CharacterMemoryEntry[]): string {
   if (memories.length === 0) return "";
   const serviceLabel: Record<string, string> = { tarot: "타로", saju: "사주" };
   const lines = memories.map((m) => {

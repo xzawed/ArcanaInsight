@@ -6,10 +6,9 @@ import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt, buildFreeQuestionPrompt, buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
 import { getRecentCharacterMemory } from "@/lib/db/character-context";
 import { getDb } from "@/lib/db";
-import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
