@@ -25,13 +25,16 @@ export class SupabaseAdapter implements DbClient {
     return data as T
   }
 
-  async findMany<T>(table: string, where?: Record<string, unknown>, options?: { limit?: number; offset?: number }): Promise<T[]> {
+  async findMany<T>(table: string, where?: Record<string, unknown>, options?: { limit?: number; offset?: number; orderBy?: string; orderDir?: 'asc' | 'desc' }): Promise<T[]> {
     const supabase = await this.client()
     let query = supabase.from(table).select("*")
     if (where) {
       for (const [key, value] of Object.entries(where)) {
         query = query.eq(key, value) as typeof query
       }
+    }
+    if (options?.orderBy) {
+      query = query.order(options.orderBy, { ascending: options.orderDir !== 'desc' })
     }
     if (options?.limit !== undefined) {
       const start = options.offset ?? 0

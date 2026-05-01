@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader } from "./prompt-builder";
+import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt } from "./prompt-builder";
 import type { CharacterConfig } from "@/types/character";
 import type { SelectedCard, TarotCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
@@ -437,5 +437,42 @@ describe("buildCharacterHeader", () => {
     expect(result).toContain(subtitle);
     const lines = result.split("\n");
     expect(lines[1]).toBe(subtitle);
+  });
+});
+
+describe("buildCharacterMemoryPrompt", () => {
+  it("빈 배열이면 빈 문자열 반환", () => {
+    expect(buildCharacterMemoryPrompt([])).toBe("");
+  });
+
+  it("타로 세션 메모리를 올바른 형식으로 반환", () => {
+    const result = buildCharacterMemoryPrompt([
+      { serviceType: "tarot", date: "2026-04-01", overallReading: "운이 좋다" },
+    ]);
+    expect(result).toContain("이전 상담 기억");
+    expect(result).toContain("[2026-04-01] 타로: 운이 좋다");
+  });
+
+  it("사주 세션은 '사주' 레이블로 포함", () => {
+    const result = buildCharacterMemoryPrompt([
+      { serviceType: "saju", date: "2026-03-15", overallReading: "사주 분석" },
+    ]);
+    expect(result).toContain("[2026-03-15] 사주: 사주 분석");
+  });
+
+  it("알 수 없는 서비스 타입은 '신점' 레이블 폴백", () => {
+    const result = buildCharacterMemoryPrompt([
+      { serviceType: "shinjeom", date: "2026-02-10", overallReading: "신점 결과" },
+    ]);
+    expect(result).toContain("[2026-02-10] 신점: 신점 결과");
+  });
+
+  it("여러 세션을 줄바꿈으로 구분해 포함", () => {
+    const result = buildCharacterMemoryPrompt([
+      { serviceType: "tarot", date: "2026-04-01", overallReading: "첫번째" },
+      { serviceType: "saju",  date: "2026-03-15", overallReading: "두번째" },
+    ]);
+    expect(result).toContain("첫번째");
+    expect(result).toContain("두번째");
   });
 });

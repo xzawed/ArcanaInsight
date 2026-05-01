@@ -151,3 +151,20 @@ export function buildFreeQuestionPrompt(question?: string | null): string {
   const sanitized = sanitizeField(question, 200);
   return `\n\n사용자 질문: "${sanitized}"\n이 질문을 카드 해석에 반영하여 직접적으로 답해주세요.`;
 }
+
+interface MemoryEntry {
+  serviceType: string;
+  date: string;
+  overallReading: string;
+}
+
+/** 최근 세션 요약을 시스템 프롬프트에 주입 */
+export function buildCharacterMemoryPrompt(memories: MemoryEntry[]): string {
+  if (memories.length === 0) return "";
+  const serviceLabel: Record<string, string> = { tarot: "타로", saju: "사주" };
+  const lines = memories.map((m) => {
+    const label = serviceLabel[m.serviceType] ?? "신점";
+    return `- [${m.date}] ${label}: ${m.overallReading}`;
+  });
+  return `\n\n이전 상담 기억 (참고용, 직접 언급 금지):\n${lines.join("\n")}`;
+}

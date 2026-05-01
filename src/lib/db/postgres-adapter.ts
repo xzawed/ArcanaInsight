@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import { eq, and, inArray, getTableColumns } from "drizzle-orm"
+import { eq, and, inArray, getTableColumns, asc, desc } from "drizzle-orm"
 import type { PgTable, PgColumn } from "drizzle-orm/pg-core"
 import type { ColumnBaseConfig, ColumnDataType } from "drizzle-orm"
 import * as schema from "./schema/index"
@@ -73,12 +73,19 @@ export class PostgresAdapter implements DbClient {
     return result[0] ? normalizeRow<T>(result[0] as Record<string, unknown>) : null
   }
 
-  async findMany<T>(table: string, where?: Record<string, unknown>, options?: { limit?: number; offset?: number }): Promise<T[]> {
+  async findMany<T>(table: string, where?: Record<string, unknown>, options?: { limit?: number; offset?: number; orderBy?: string; orderDir?: 'asc' | 'desc' }): Promise<T[]> {
     const db = getConnection()
     const t = resolveTable(table)
     const conditions = (where && Object.keys(where).length > 0) ? buildConditions(t, where) : null
     let q = db.select().from(t).$dynamic()
     if (conditions) q = q.where(and(...conditions))
+    if (options?.orderBy) {
+      const cols = getTableColumns(t)
+      const orderCol = cols[options.orderBy] ?? cols[snakeToCamel(options.orderBy)]
+      if (orderCol) {
+        q = q.orderBy(options.orderDir === 'desc' ? desc(orderCol) : asc(orderCol))
+      }
+    }
     if (options?.limit !== undefined) q = q.limit(options.limit)
     if (options?.offset !== undefined) q = q.offset(options.offset)
     const rows = await q as Record<string, unknown>[]

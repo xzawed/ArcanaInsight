@@ -5,7 +5,9 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
-import { buildUserInfoPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
+import { buildUserInfoPrompt, buildFreeQuestionPrompt, buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
+import { getCurrentUser } from "@/lib/auth";
+import { getRecentCharacterMemory } from "@/lib/db/character-context";
 import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
@@ -33,6 +35,18 @@ function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 7) return 6500;
   if (cardCount <= 9) return 8000;
   return 9500;
+}
+
+/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
+async function fetchMemoryPrompt(sessionId: string, characterId: string): Promise<string> {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser?.id) return "";
+    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId);
+    return buildCharacterMemoryPrompt(memories);
+  } catch {
+    return "";
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -83,6 +97,11 @@ export async function POST(request: NextRequest) {
 
     const db = sessionId ? getDb() : null
 
+    // 캐릭터 메모리 조회 (인증된 사용자 + sessionId 있을 때만)
+    const memoryPrompt = (sessionId && characterId)
+      ? await fetchMemoryPrompt(sessionId, characterId)
+      : "";
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -90,7 +109,7 @@ export async function POST(request: NextRequest) {
         try {
           const cardCount = cards.length;
           const maxTokens = computeReadingMaxTokens(cardCount);
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt + freeQuestionPrompt, maxTokens)) {
+          for await (const chunk of grokProvider.streamReading(systemPrompt + memoryPrompt, readingPrompt + userInfoPrompt + freeQuestionPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
