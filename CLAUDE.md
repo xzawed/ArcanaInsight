@@ -25,7 +25,7 @@
 
 | | |
 |---|---|
-| **언어·프레임워크** | TypeScript strict, Next.js 16.2.1 (App Router), React 19.2.4 |
+| **언어·프레임워크** | TypeScript strict, Next.js 16.2.3 (App Router), React 19.2.4 |
 | **스타일링·애니메이션** | Tailwind CSS v4 (`@theme`), Framer Motion v12.38 |
 | **AI** | Grok API (xAI) 우선 + Claude API 자동 fallback |
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
@@ -63,8 +63,14 @@ docs/                # → docs/README.md 인덱스
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
 supabase/migrations/ # 001~011 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
-e2e/                 # 19개 spec, 3 디바이스 — → docs/workflow/e2e-testing.md
-scripts/             # sync-test-count.ts, check-env-docs.ts, check-doc-links.ts, pre-push-checks.sh
+e2e/                 # 20개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
+scripts/
+├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
+│   ├── orchestrator.ts, worker.ts, reporter.ts
+│   ├── matrix/      # characters.ts, tarot.ts, saju.ts, shinjeom.ts, ci-subset.ts
+│   ├── flows/       # tarot-flow.ts, saju-flow.ts, shinjeom-flow.ts
+│   └── validators/  # structure-validator.ts, content-validator.ts (Haiku API)
+└── sync-test-count.ts, check-env-docs.ts, check-doc-links.ts, pre-push-checks.sh
 ```
 
 ## 캐릭터 시스템
@@ -110,13 +116,19 @@ pnpm build         # 프로덕션 빌드
 pnpm lint          # ESLint
 pnpm type-check    # tsc --noEmit
 pnpm test:coverage # Vitest + 커버리지 (statements 98%)
-pnpm test:e2e      # Playwright (3 디바이스)
+pnpm test:e2e      # Playwright (3 디바이스, smart-ci 제외)
+pnpm test:e2e:full          # 전수 E2E: 252 조합, 6 워커 (실서버 + 실 API 키 필요)
+pnpm test:e2e:full:ci       # CI 모드 오케스트레이터 (12 대표 케이스)
 pnpm exec tsx scripts/sync-test-count.ts       # CLAUDE.md 테스트 수 동기화
 pnpm exec tsx scripts/check-env-docs.ts        # env.ts ↔ env-variables.md 정합성
 pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 ```
 
 > **Windows E2E**: Docker 필수. → [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)
+>
+> **E2E 전수 검증** (`pnpm test:e2e:full`): 타로 84 + 사주 96 + 신점 72 = 252 조합. 6 워커 병렬. 실 Supabase 세션 + Grok API 키 필요. CI에서는 `pnpm test:e2e:full:ci` (오케스트레이터 경유) 또는 수동 실행.
+>
+> **`smart-ci.spec.ts`**: `pnpm test:e2e` CI에서 자동 제외 (`testIgnore: process.env.CI`). 실 Supabase 인증 세션 없으면 플로우 실패.
 
 ## 환경변수
 
