@@ -53,9 +53,9 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       isMountedRef.current = true;
       return;
     }
-    setIsTransitioning(true);
-    const t = setTimeout(() => { setIsTransitioning(false); }, 500);
-    return () => { clearTimeout(t); };
+    const t1 = setTimeout(() => setIsTransitioning(true), 0);
+    const t2 = setTimeout(() => setIsTransitioning(false), 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [mood]);
 
   const handleAnimationEnd = useCallback(() => {
