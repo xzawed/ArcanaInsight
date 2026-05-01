@@ -63,6 +63,7 @@ jobs:
           GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       # ── SonarCloud 분석 ──────────────────────────────────────────────────
       - name: SonarCloud Scan

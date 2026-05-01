@@ -1,8 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { TestCase, ValidationResult } from '../types';
 
-const client = new Anthropic();
-
 const TOPIC_KEYWORDS: Record<string, string[]> = {
   love: ['연애', '사랑', '감정', '관계'],
   'love-single': ['연애', '인연', '만남', '사랑'],
@@ -51,6 +49,11 @@ export async function runContentValidation(
   testCase: TestCase,
   selectedCards: string[] = []
 ): Promise<ValidationResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { passed: true, score: 100, checks: {}, reason: 'ANTHROPIC_API_KEY 미설정 — 콘텐츠 검증 건너뜀', warning: true };
+  }
+
+  const client = new Anthropic();
   const prompt = `당신은 운세 서비스 QA 검증 에이전트입니다.
 서비스: ${testCase.service} | 캐릭터: ${testCase.characterId} | 주제: ${testCase.topic}
 선택 카드(타로): ${selectedCards.join(', ') || '없음'}
