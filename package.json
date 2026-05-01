@@ -33,8 +33,7 @@
     "react-dom": "19.2.4",
     "tyme4ts": "^1.4.5",
     "zod": "^4.3.6",
-    "zustand": "^5.0.12",
-    "@verum/sdk": "latest"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
