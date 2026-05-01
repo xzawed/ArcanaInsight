@@ -13,6 +13,7 @@ import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
 import { Icon } from "@/components/common/Icon";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
+import { SHINJEOM_COPY } from "@/data/ui-copy";
 
 const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
   { id: "shinjeom-general", label: "신수 (종합운)", iconId: "shinjeom-general", desc: "전반적인 운세와 앞날의 길흉" },
@@ -38,9 +39,9 @@ function CharacterSelectStep({ characters, genderFilter, setGenderFilter, select
     <motion.div key="character-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -50 }}
       className="relative z-20 max-w-4xl mx-auto px-4 py-8">
       <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-center mb-2 drop-shadow-md">
-        신점 상담사를 선택하세요
+        {SHINJEOM_COPY.characterSelect.heading}
       </h2>
-      <p className="text-arcana-muted text-sm text-center mb-6">영적 상담을 도와줄 캐릭터를 골라주세요</p>
+      <p className="text-arcana-muted text-sm text-center mb-6">{SHINJEOM_COPY.characterSelect.sub}</p>
       <div className="flex justify-center gap-2 mb-6">
         {(["all", "female", "male"] as const).map((g) => (
           <button key={g} onClick={() => setGenderFilter(g)}
@@ -72,10 +73,10 @@ function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<
     <motion.div key="topic-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
       className="relative z-20 max-w-lg mx-auto px-4 py-8">
       <button onClick={onBack} className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors mb-6">
-        ← 다른 상담사 선택
+        {SHINJEOM_COPY.topicSelect.back}
       </button>
-      <h3 className="font-display font-bold text-lg mb-2 drop-shadow-md">어떤 점을 봐드릴까요?</h3>
-      <p className="text-arcana-muted text-xs mb-6">상담 주제를 선택하면 대화가 시작됩니다</p>
+      <h3 className="font-display font-bold text-lg mb-2 drop-shadow-md">{SHINJEOM_COPY.topicSelect.heading}</h3>
+      <p className="text-arcana-muted text-xs mb-6">{SHINJEOM_COPY.topicSelect.sub}</p>
       <div className="grid grid-cols-1 gap-3">
         {topics.map((t, index) => (
           <motion.button key={t.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}

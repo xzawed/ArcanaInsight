@@ -18,6 +18,7 @@ import { spreads } from "@/data/spreads";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Icon } from "@/components/common/Icon";
+import { TAROT_COPY } from "@/data/ui-copy";
 
 const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
   { id: "love-single", label: "연애 (솔로)", iconId: "topic-love-single", desc: "새로운 만남과 인연에 대한 상담" },
@@ -71,8 +72,8 @@ function CharacterSelectStep({ availableCharacters, genderFilter, setGenderFilte
     <motion.div key="character-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -50 }}
       className="max-w-4xl mx-auto px-4 py-8 relative z-20">
       <div className="text-center mb-8">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2 drop-shadow-md">상담사를 선택해주세요</h2>
-        <p className="text-arcana-muted text-sm md:text-base drop-shadow-sm">각 상담사마다 다른 스타일의 리딩을 제공합니다</p>
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2 drop-shadow-md">{TAROT_COPY.characterSelect.heading}</h2>
+        <p className="text-arcana-muted text-sm md:text-base drop-shadow-sm">{TAROT_COPY.characterSelect.sub}</p>
       </div>
       <div className="flex justify-center gap-2 mb-6">
         {(["all", "female", "male"] as GenderFilter[]).map((f) => (
@@ -115,9 +116,9 @@ function TopicSelectStep({ selectedCharacter, dialogueMessages, onBack, onTopicS
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
         <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-          ← 다른 상담사 선택
+          {TAROT_COPY.back.character}
         </button>
-        <h3 className="font-sans font-bold text-base md:text-lg mb-4 drop-shadow-md">어떤 이야기를 들려주실 건가요?</h3>
+        <h3 className="font-sans font-bold text-base md:text-lg mb-4 drop-shadow-md">{TAROT_COPY.topicSelect.heading}</h3>
         <div className="grid grid-cols-1 gap-2 md:gap-3">
           {topics.map((topic, index) => (
             <motion.button key={topic.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
@@ -161,10 +162,10 @@ function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, 
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
         <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-          ← 주제 다시 선택
+          {TAROT_COPY.back.topic}
         </button>
-        <h3 className="font-sans font-bold text-base md:text-lg mb-2 drop-shadow-md">카드 리딩 방식을 선택해주세요</h3>
-        <p className="text-arcana-muted text-xs mb-4">카드 수가 많을수록 더 깊이 있는 해석을 받을 수 있어요</p>
+        <h3 className="font-sans font-bold text-base md:text-lg mb-2 drop-shadow-md">{TAROT_COPY.spreadSelect.heading}</h3>
+        <p className="text-arcana-muted text-xs mb-4">{TAROT_COPY.spreadSelect.sub}</p>
         <div className="grid grid-cols-1 gap-3">
           {filteredSpreads.map((opt, index) => (
             <motion.button key={opt.type} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
@@ -187,7 +188,7 @@ function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, 
         </div>
         <button type="button" onClick={onOpenUserInfo}
           className="mt-4 w-full py-2.5 rounded-full border border-arcana-border text-arcana-muted text-xs font-sans hover:border-arcana-purple hover:text-arcana-purple transition-colors">
-          <span className="inline-flex items-center gap-1"><Icon id="ui-info" size={14} /> 개인정보 입력하고 더 정확한 리딩 받기 (선택)</span>
+          <span className="inline-flex items-center gap-1"><Icon id="ui-info" size={14} /> {TAROT_COPY.spreadSelect.userInfoBtn}</span>
         </button>
       </div>
     </motion.div>

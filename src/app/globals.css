@@ -10,6 +10,20 @@
   --color-arcana-indigo: #6366f1;
   --color-arcana-gold: #f59e0b;
   --color-arcana-silver: #c0c0c0;
+
+  /* Service-specific palettes */
+  --color-tarot-primary: #3730a3;
+  --color-tarot-accent: #f59e0b;
+  --color-tarot-glow: rgba(55, 48, 163, 0.25);
+
+  --color-saju-primary: #d97706;
+  --color-saju-accent: #065f46;
+  --color-saju-glow: rgba(217, 119, 6, 0.25);
+
+  --color-shinjeom-primary: #991b1b;
+  --color-shinjeom-accent: #b45309;
+  --color-shinjeom-glow: rgba(153, 27, 27, 0.25);
+
   --color-arcana-text: #e2e8f0;
   --color-arcana-muted: #94a3b8;
 
