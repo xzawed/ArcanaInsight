@@ -3,7 +3,9 @@ import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 import { getDb } from "@/lib/db";
-import { assertSessionOwnership } from "@/lib/auth";
+import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
+import { getRecentCharacterMemory } from "@/lib/db/character-context";
+import { buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
@@ -16,6 +18,17 @@ const aiProvider = new FallbackProvider();
 const SHINJEOM_TOKENS_FINAL = 4000;
 const SHINJEOM_TOKENS_CHAT = 1000;
 
+/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
+async function fetchMemoryPrompt(characterId: string): Promise<string> {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser?.id) return "";
+    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId);
+    return buildCharacterMemoryPrompt(memories);
+  } catch {
+    return "";
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,13 +61,18 @@ export async function POST(request: NextRequest) {
     const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
 
     const db = sessionId ? getDb() : null;
+
+    // 최종 턴에만 캐릭터 메모리 주입 (중간 대화는 토큰 절약)
+    const memoryPrompt = (sessionId && characterId && isFinalTurn)
+      ? await fetchMemoryPrompt(characterId)
+      : "";
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         let fullResponse = "";
         try {
           const shinjeomMaxTokens = isFinalTurn ? SHINJEOM_TOKENS_FINAL : SHINJEOM_TOKENS_CHAT;
-          for await (const chunk of aiProvider.streamReading(systemPrompt, userPrompt, shinjeomMaxTokens)) {
+          for await (const chunk of aiProvider.streamReading(systemPrompt + memoryPrompt, userPrompt, shinjeomMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
