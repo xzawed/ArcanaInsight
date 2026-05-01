@@ -5,7 +5,9 @@ import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
-import { assertSessionOwnership } from "@/lib/auth";
+import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
+import { getRecentCharacterMemory } from "@/lib/db/character-context";
+import { buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
@@ -13,6 +15,18 @@ import { saveSajuReading } from "@/lib/db/reading-saver";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
+
+/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
+async function fetchMemoryPrompt(characterId: string): Promise<string> {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser?.id) return "";
+    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId);
+    return buildCharacterMemoryPrompt(memories);
+  } catch {
+    return "";
+  }
+}
 
 // 월별 상세 포함 여부에 따른 max_tokens 상수
 const SAJU_TOKENS_WITH_MONTHLY = 8000;
@@ -81,6 +95,11 @@ export async function POST(request: NextRequest) {
 
     const db = sessionId ? getDb() : null
 
+    // 캐릭터 메모리 조회 (인증된 사용자 + sessionId 있을 때만)
+    const memoryPrompt = (sessionId && characterId)
+      ? await fetchMemoryPrompt(characterId)
+      : "";
+
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
@@ -88,7 +107,7 @@ export async function POST(request: NextRequest) {
         try {
           // 월별 상세 포함 여부에 따라 max_tokens 조정 (월별 12개월 상세 보장)
           const sajuMaxTokens = includeMonthly ? SAJU_TOKENS_WITH_MONTHLY : SAJU_TOKENS_BASE;
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt, sajuMaxTokens)) {
+          for await (const chunk of grokProvider.streamReading(systemPrompt + memoryPrompt, readingPrompt, sajuMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
