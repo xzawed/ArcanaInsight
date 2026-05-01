@@ -11,7 +11,12 @@ import { MysticBackground } from "@/components/effects/MysticBackground";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
-import { loadingText, defaultLoadingText } from "@/data/characters/waiting-lines";
+import { loadingText, defaultLoadingText, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+
+function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
+  const lines = (charId && characterErrorLines[charId]) || defaultErrorLines;
+  return lines[type];
+}
 
 function updateMessageContent(msgId: string, content: string) {
   useShinjeomSessionStore.setState((state) => ({
@@ -140,7 +145,7 @@ export default function ShinjeomSessionPage() {
       });
 
       if (!response.ok || !response.body) {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "죄송해요, 연결에 문제가 있어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
         setMood("default");
         setLoading(false);
         return;
@@ -151,7 +156,7 @@ export default function ShinjeomSessionPage() {
 
       let fullText = "";
       await drainSseChunks(response.body.getReader(), (data) => {
-        if (data.error) { updateMessageContent(msgId, "문제가 발생했어요. 다시 시도해주세요."); return true; }
+        if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
         if (data.chunk) { fullText += data.chunk as string; updateMessageContent(msgId, fullText); }
         return false;
       });
@@ -184,7 +189,7 @@ export default function ShinjeomSessionPage() {
       });
 
       if (!response.ok || !response.body) {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: "죄송해요, 결과를 가져오는 중 오류가 발생했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "reading"), mood: "default", timestamp: new Date() });
         setMood("default");
         setLoading(false);
         return;
@@ -194,12 +199,12 @@ export default function ShinjeomSessionPage() {
       addChatMessage({ id: msgId, role: "character", content: "신점 결과를 준비하고 있어요...", mood: "mystical", timestamp: new Date() });
 
       await drainSseChunks(response.body.getReader(), (data) => {
-        if (data.error) { updateMessageContent(msgId, "문제가 발생했어요. 다시 시도해주세요."); return true; }
+        if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
         if (data.done && data.isFinal && data.result) {
           removeMessage(msgId);
           setReadingResult(data.result as Parameters<typeof setReadingResult>[0]);
           setPhase("result");
-          setMood("smile");
+          setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
         }
         return false;
       });
