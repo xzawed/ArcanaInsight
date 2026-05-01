@@ -1,3 +1,4 @@
+import "@verum/sdk/openai";
 import { AIProvider } from "@/types/service";
 import { getAnthropicApiKey, getClaudeBaseUrl, getClaudeModel, getAiTimeoutMs, getDefaultMaxTokens } from "@/lib/env";
 import { withAbortTimeout, readSseLines } from "./http-utils";
