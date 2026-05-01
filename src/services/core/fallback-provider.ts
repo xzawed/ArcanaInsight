@@ -1,3 +1,4 @@
+import "@verum/sdk/openai";
 import { AIProvider } from "@/types/service";
 import { GrokProvider, RateLimitError, AuthError } from "./grok-provider";
 import { ClaudeProvider } from "./claude-provider";
