@@ -184,6 +184,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 10. **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 실행 시 `next`, `eslint-config-next` 등 피어 의존성 버전이 의도치 않게 변경될 수 있음. 추가 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 버전 변동 반드시 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
 11. **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체를 차단. 새 PR에서 이 패턴 발견 시 병합 전 제거. `grep -r "import \"@[^\"]*\"" src/` 로 주기적 검사.
 12. **E2E 스펙 추가 시 인증 의존성 명시**: 새 spec이 실 Supabase 세션을 요구하면 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 추가. CI 자동 제외 여부 playwright.config.ts 확인.
+13. **UI 텍스트 변경 시 E2E 셀렉터 동시 검토 필수**: 버튼·헤딩 등 사용자 노출 텍스트를 바꿀 때 `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴을 반드시 검색해 깨진 셀렉터를 함께 수정. — **2026-05-01 사주 버튼 마이크로카피 변경 후 E2E CI 실패 원인**.
 
 ## 업무 유형별 가이드
 
