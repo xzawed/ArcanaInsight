@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mood } from "@/types/character";
+import { motion, AnimatePresence, type Easing } from "framer-motion";
+import { Mood, IdleAnimationType } from "@/types/character";
 
 interface MoodConfig {
   loop: boolean;
@@ -29,10 +29,25 @@ const MOOD_TO_FILE: Record<Mood, string> = {
 };
 
 const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
-  default: {
+  // idle animation 타입별 (mood === "default"일 때 적용)
+  float: {
     y: [0, -6, 0],
     scale: [1, 1.01, 1],
   },
+  "float-strong": {
+    y: [0, -8, 0],
+    scale: [1, 1.015, 1],
+  },
+  bounce: {
+    y: [0, -12, 0],
+    scale: [1, 1.02, 1],
+  },
+  breathe: {
+    y: [0, -2, 0, -1, 0],
+    scale: [1, 1.005, 1, 1.003, 1],
+    opacity: [1, 1, 1, 0.88, 1],
+  },
+  // mood 전용 오버라이드
   mystical: {
     y: [0, -10, 0],
     scale: [1, 1.02, 1],
@@ -42,6 +57,14 @@ const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
       "drop-shadow(0 0 8px rgba(139,92,246,0.3))",
     ],
   },
+};
+
+const LOOP_TRANSITIONS: Record<string, { duration: number; repeat: number; ease: Easing }> = {
+  float: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+  "float-strong": { duration: 3, repeat: Infinity, ease: "easeInOut" },
+  bounce: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+  breathe: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+  mystical: { duration: 4, repeat: Infinity, ease: "easeInOut" },
 };
 
 const ENTER_MOTION: Record<string, Record<string, number[]>> = {
@@ -54,11 +77,12 @@ const ENTER_MOTION: Record<string, Record<string, number[]>> = {
 interface SpriteAnimatorProps {
   readonly characterId: string;
   readonly mood: Mood;
+  readonly idleAnimation?: IdleAnimationType;
   readonly onAnimationEnd?: () => void;
   readonly className?: string;
 }
 
-export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
+export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
   const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
@@ -70,7 +94,9 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
   }, [mood, config, onAnimationEnd]);
 
   const isLooping = config.loop;
-  const loopAnim = LOOP_MOTION[mood] ?? LOOP_MOTION.default;
+  const activeLoopKey = mood === "default" ? idleAnimation : mood;
+  const loopAnim = LOOP_MOTION[activeLoopKey] ?? LOOP_MOTION.float;
+  const loopTransition = LOOP_TRANSITIONS[activeLoopKey] ?? LOOP_TRANSITIONS.float;
   const enterAnim = ENTER_MOTION[mood];
 
   return (
@@ -93,7 +119,7 @@ export function SpriteAnimator({ characterId, mood, onAnimationEnd, className = 
         ) : (
           <motion.div
             animate={loopAnim}
-            transition={{ duration: mood === "mystical" ? 4 : 3, repeat: Infinity, ease: "easeInOut" }}
+            transition={loopTransition}
             className="relative w-full h-full"
           >
             <Image src={imageSrc} alt="character" fill sizes="50vw"

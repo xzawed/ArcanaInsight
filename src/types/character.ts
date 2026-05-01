@@ -2,6 +2,7 @@ export type Mood = "default" | "smile" | "serious" | "surprised" | "wink" | "mys
 export type Gender = "female" | "male";
 export type GenderFilter = "female" | "male" | "all";
 export type ParticleStyle = "sparkle" | "flame" | "petal" | "star" | "snowflake" | "lightning" | "bubble" | "rune";
+export type IdleAnimationType = "float" | "float-strong" | "bounce" | "breathe";
 
 export interface EffectTheme {
   primary: string;
@@ -17,7 +18,7 @@ export interface CharacterConfig {
   gender: Gender;
   greeting: string;
   expressions: Record<Mood, string>;
-  idleAnimation: string;
+  idleAnimation: IdleAnimationType;
   personality: string;
   description: string;
   speciality: string;

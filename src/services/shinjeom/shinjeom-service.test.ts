@@ -18,7 +18,7 @@ vi.mock("@/data/characters", () => ({
         speciality: "힐링",
         voiceTone: "부드러운",
         unlocked: true,
-        idleAnimation: "",
+        idleAnimation: "float",
         effectTheme: {
           primary: "#60a5fa",
           secondary: "#93c5fd",

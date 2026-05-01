@@ -17,7 +17,7 @@ vi.mock("@/data/characters", () => ({
         speciality: "동양철학",
         voiceTone: "우아한",
         unlocked: true,
-        idleAnimation: "",
+        idleAnimation: "float",
         effectTheme: {
           primary: "#f472b6",
           secondary: "#e879f9",

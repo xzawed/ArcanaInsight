@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Topic, SpreadType, ChatMessage } from "@/types/session";
 import { useSessionStore } from "@/hooks/useSession";
@@ -19,6 +18,7 @@ import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Icon } from "@/components/common/Icon";
 import { TAROT_COPY } from "@/data/ui-copy";
+import { ServiceBackground } from "@/components/effects/ServiceBackground";
 
 const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
   { id: "love-single", label: "연애 (솔로)", iconId: "topic-love-single", desc: "새로운 만남과 인연에 대한 상담" },
@@ -299,11 +299,7 @@ function TarotPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/50" />
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)" }} />
-      </div>
+      <ServiceBackground service="tarot" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (

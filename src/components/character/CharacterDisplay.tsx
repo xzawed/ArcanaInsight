@@ -45,6 +45,7 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
         <SpriteAnimator
           characterId={character.id}
           mood={mood}
+          idleAnimation={character.idleAnimation}
           onAnimationEnd={handleAnimationEnd}
           className="w-full h-full"
         />

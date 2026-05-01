@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { Icon } from "@/components/common/Icon";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSajuSessionStore } from "@/hooks/useSajuSession";
@@ -19,6 +18,7 @@ import { UserInfo } from "@/types/user-info";
 import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { SAJU_COPY } from "@/data/ui-copy";
+import { ServiceBackground } from "@/components/effects/ServiceBackground";
 
 type PageStep = "character-select" | "info-input" | "saju-select";
 
@@ -273,10 +273,7 @@ function SajuPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/50" />
-      </div>
+      <ServiceBackground service="saju" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (

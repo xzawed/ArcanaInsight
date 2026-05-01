@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useShinjeomSessionStore } from "@/hooks/useShinjeomSession";
 import { CharacterCard } from "@/components/character/CharacterCard";
@@ -14,6 +13,7 @@ import { Topic } from "@/types/session";
 import { Icon } from "@/components/common/Icon";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { SHINJEOM_COPY } from "@/data/ui-copy";
+import { ServiceBackground } from "@/components/effects/ServiceBackground";
 
 const topics: { id: Topic; label: string; iconId: string; desc: string }[] = [
   { id: "shinjeom-general", label: "신수 (종합운)", iconId: "shinjeom-general", desc: "전반적인 운세와 앞날의 길흉" },
@@ -167,10 +167,7 @@ function ShinjeomPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/60" />
-      </div>
+      <ServiceBackground service="shinjeom" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (
