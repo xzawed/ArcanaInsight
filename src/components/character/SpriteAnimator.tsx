@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType } from "@/types/character";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface MoodConfig {
   loop: boolean;
@@ -28,56 +29,37 @@ const MOOD_TO_FILE: Record<Mood, string> = {
   mystical: "mystical",
 };
 
-const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
-  float: {
-    y: [0, -6, 0],
-    scale: [1, 1.01, 1],
-    filter: [
-      "drop-shadow(0 0 6px rgba(139,92,246,0.25))",
-      "drop-shadow(0 0 16px rgba(139,92,246,0.60))",
-      "drop-shadow(0 0 6px rgba(139,92,246,0.25))",
-    ],
-  },
-  "float-strong": {
-    y: [0, -8, 0],
-    scale: [1, 1.015, 1],
-    filter: [
-      "drop-shadow(0 0 8px rgba(139,92,246,0.30))",
-      "drop-shadow(0 0 22px rgba(139,92,246,0.70))",
-      "drop-shadow(0 0 8px rgba(139,92,246,0.30))",
-    ],
-  },
-  bounce: {
-    y: [0, -12, 0],
-    scale: [1, 1.02, 1],
-    filter: [
-      "drop-shadow(0 0 6px rgba(212,175,55,0.20))",
-      "drop-shadow(0 0 18px rgba(212,175,55,0.55))",
-      "drop-shadow(0 0 6px rgba(212,175,55,0.20))",
-    ],
-  },
-  breathe: {
-    y: [0, -2, 0, -1, 0],
-    scale: [1, 1.005, 1, 1.003, 1],
-    opacity: [1, 1, 1, 0.88, 1],
-    filter: [
-      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
-      "drop-shadow(0 0 12px rgba(139,92,246,0.50))",
-      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
-      "drop-shadow(0 0 8px rgba(139,92,246,0.35))",
-      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
-    ],
-  },
-  mystical: {
-    y: [0, -10, 0],
-    scale: [1, 1.02, 1],
-    filter: [
-      "drop-shadow(0 0 8px rgba(139,92,246,0.3))",
-      "drop-shadow(0 0 20px rgba(139,92,246,0.6))",
-      "drop-shadow(0 0 8px rgba(139,92,246,0.3))",
-    ],
-  },
-};
+function buildLoopMotion(primary: string): Record<string, Record<string, number[] | string[]>> {
+  const sh = (blur: number, alpha: number) => `drop-shadow(0 0 ${blur}px ${hexToRgba(primary, alpha)})`;
+  return {
+    float: {
+      y: [0, -6, 0],
+      scale: [1, 1.01, 1],
+      filter: [sh(6, 0.25), sh(16, 0.6), sh(6, 0.25)],
+    },
+    "float-strong": {
+      y: [0, -8, 0],
+      scale: [1, 1.015, 1],
+      filter: [sh(8, 0.3), sh(22, 0.7), sh(8, 0.3)],
+    },
+    bounce: {
+      y: [0, -12, 0],
+      scale: [1, 1.02, 1],
+      filter: [sh(6, 0.2), sh(18, 0.55), sh(6, 0.2)],
+    },
+    breathe: {
+      y: [0, -2, 0, -1, 0],
+      scale: [1, 1.005, 1, 1.003, 1],
+      opacity: [1, 1, 1, 0.88, 1],
+      filter: [sh(4, 0.2), sh(12, 0.5), sh(4, 0.2), sh(8, 0.35), sh(4, 0.2)],
+    },
+    mystical: {
+      y: [0, -10, 0],
+      scale: [1, 1.02, 1],
+      filter: [sh(8, 0.3), sh(20, 0.6), sh(8, 0.3)],
+    },
+  };
+}
 
 const LOOP_TRANSITIONS: Record<string, { duration: number; repeat: number; ease: Easing }> = {
   float: { duration: 3, repeat: Infinity, ease: "easeInOut" },
@@ -122,11 +104,12 @@ interface SpriteAnimatorProps {
   readonly characterId: string;
   readonly mood: Mood;
   readonly idleAnimation?: IdleAnimationType;
+  readonly primaryColor?: string;
   readonly onAnimationEnd?: () => void;
   readonly className?: string;
 }
 
-export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onAnimationEnd, className = "" }: SpriteAnimatorProps) {
+export function SpriteAnimator({ characterId, mood, idleAnimation = "float", primaryColor, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
   const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
@@ -149,7 +132,8 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onA
 
   const isLooping = config.loop;
   const activeLoopKey = mood === "default" ? idleAnimation : mood;
-  const loopAnim = LOOP_MOTION[activeLoopKey] ?? LOOP_MOTION.float;
+  const loopMotion = buildLoopMotion(primaryColor ?? "#a78bfa");
+  const loopAnim = loopMotion[activeLoopKey] ?? loopMotion.float;
   const loopTransition = LOOP_TRANSITIONS[activeLoopKey] ?? LOOP_TRANSITIONS.float;
   const enterAnim = ENTER_MOTION[mood];
 
@@ -167,7 +151,7 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onA
           {!isLooping && enterAnim ? (
             <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
               className="relative w-full h-full">
-              <Image src={imageSrc} alt="character" fill sizes="50vw"
+              <Image src={imageSrc} alt="" fill sizes="50vw"
                 className="object-contain object-center" priority />
             </motion.div>
           ) : (
@@ -176,7 +160,7 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", onA
               transition={loopTransition}
               className="relative w-full h-full"
             >
-              <Image src={imageSrc} alt="character" fill sizes="50vw"
+              <Image src={imageSrc} alt="" fill sizes="50vw"
                 className="object-contain object-center" priority />
             </motion.div>
           )}

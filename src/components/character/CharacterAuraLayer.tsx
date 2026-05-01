@@ -2,20 +2,22 @@
 
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Mood } from "@/types/character";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface CharacterAuraLayerProps {
   readonly mood: Mood;
   readonly isTransitioning: boolean;
+  readonly primaryColor: string;
 }
 
-// mood별 오라 색상
-const AURA_COLOR: Record<Mood, string> = {
-  default:   "rgba(139,92,246,0.5)",
-  smile:     "rgba(212,175,55,0.6)",
-  mystical:  "rgba(139,92,246,0.8)",
-  serious:   "rgba(99,102,241,0.5)",
-  surprised: "rgba(251,146,60,0.5)",
-  wink:      "rgba(244,114,182,0.5)",
+// mood별 오라 불투명도
+const AURA_OPACITY: Record<Mood, number> = {
+  default:   0.5,
+  smile:     0.6,
+  mystical:  0.8,
+  serious:   0.5,
+  surprised: 0.5,
+  wink:      0.5,
 };
 
 // 상시 파티클 고정 offset (SSR 안전 — Math.random 미사용)
@@ -34,9 +36,9 @@ const BURST_PARTICLES = [
   { dx: 36,  dy: -65, size: 4, delay: 0.12 },
 ] as const;
 
-export function CharacterAuraLayer({ mood, isTransitioning }: CharacterAuraLayerProps) {
+export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: CharacterAuraLayerProps) {
   const shouldReduceMotion = useReducedMotion();
-  const color = AURA_COLOR[mood];
+  const color = hexToRgba(primaryColor, AURA_OPACITY[mood]);
 
   if (shouldReduceMotion) {
     return (

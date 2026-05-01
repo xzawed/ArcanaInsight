@@ -6,6 +6,7 @@ import { CharacterConfig, Mood } from "@/types/character";
 import { SpriteAnimator } from "./SpriteAnimator";
 import { CharacterAuraLayer } from "./CharacterAuraLayer";
 import { useCharacterStore } from "@/hooks/useCharacter";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface CharacterDisplayProps {
   readonly character: CharacterConfig;
@@ -13,18 +14,18 @@ interface CharacterDisplayProps {
   readonly className?: string;
 }
 
-// mood별 버스트 링 색상
-const BURST_COLOR: Record<Mood, string> = {
-  default:   "rgba(139,92,246,0.7)",
-  smile:     "rgba(212,175,55,0.8)",
-  mystical:  "rgba(139,92,246,0.9)",
-  serious:   "rgba(99,102,241,0.7)",
-  surprised: "rgba(251,146,60,0.8)",
-  wink:      "rgba(244,114,182,0.8)",
+// mood별 버스트 링 불투명도
+const BURST_OPACITY: Record<Mood, number> = {
+  default:   0.7,
+  smile:     0.8,
+  mystical:  0.9,
+  serious:   0.7,
+  surprised: 0.8,
+  wink:      0.8,
 };
 
-function GlowBurstRing({ mood }: { readonly mood: Mood }) {
-  const color = BURST_COLOR[mood];
+function GlowBurstRing({ mood, primaryColor }: { readonly mood: Mood; readonly primaryColor: string }) {
+  const color = hexToRgba(primaryColor, BURST_OPACITY[mood]);
   return (
     <motion.div
       className="absolute pointer-events-none z-20"
@@ -70,12 +71,12 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 h-40 md:w-64 md:h-64 bg-gradient-radial from-arcana-purple/20 to-transparent rounded-full blur-3xl" />
 
       {/* CharacterAuraLayer — overflow-hidden 밖 */}
-      <CharacterAuraLayer mood={mood} isTransitioning={isTransitioning} />
+      <CharacterAuraLayer mood={mood} isTransitioning={isTransitioning} primaryColor={character.effectTheme.primary} />
 
       {/* GlowBurstRing — mood 전환 시 1회 재생, overflow-hidden 밖 */}
       <AnimatePresence>
         {isTransitioning && (
-          <GlowBurstRing key={`burst-${mood}`} mood={mood} />
+          <GlowBurstRing key={`burst-${mood}`} mood={mood} primaryColor={character.effectTheme.primary} />
         )}
       </AnimatePresence>
 
@@ -103,6 +104,7 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
           characterId={character.id}
           mood={mood}
           idleAnimation={character.idleAnimation}
+          primaryColor={character.effectTheme.primary}
           onAnimationEnd={handleAnimationEnd}
           className="w-full h-full"
         />
