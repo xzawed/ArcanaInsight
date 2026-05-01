@@ -40,6 +40,7 @@ export const TarotReadingSchema = z.object({
     gender: z.string().max(10),
     birthHour: z.string().max(20),
   }).nullish(),
+  freeQuestion: z.string().max(200).nullish(),
   cards: z.array(z.object({
     cardId: z.string().max(50),
     position: z.number().int().min(0).max(21),

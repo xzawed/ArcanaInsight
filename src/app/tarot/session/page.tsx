@@ -320,6 +320,7 @@ export default function TarotSessionPage() {
       body: {
         sessionId, topic, spreadType, characterId,
         userInfo: useSessionStore.getState().userInfo,
+        freeQuestion: useSessionStore.getState().freeQuestion,
         cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })),
       },
       onChunk: () => { /* 청크별 화면 표시 없음 — 대기 연출 사용 */ },

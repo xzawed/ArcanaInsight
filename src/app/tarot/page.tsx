@@ -138,13 +138,15 @@ function TopicSelectStep({ selectedCharacter, dialogueMessages, onBack, onTopicS
   );
 }
 
-function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, onBack, onSpreadSelect, onOpenUserInfo }: Readonly<{
+function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, onBack, onSpreadSelect, onOpenUserInfo, freeQuestion, onFreeQuestionChange }: Readonly<{
   selectedCharacter: CharacterConfig | null;
   dialogueMessages: ChatMessage[];
   selectedTopic: Topic | null;
   onBack: () => void;
   onSpreadSelect: (s: SpreadType) => void;
   onOpenUserInfo: () => void;
+  freeQuestion: string;
+  onFreeQuestionChange: (q: string) => void;
 }>) {
   const filteredSpreads = spreadOptions.filter((opt) => !selectedTopic || topicSpreads[selectedTopic]?.includes(opt.type));
   return (
@@ -186,6 +188,20 @@ function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, 
             </motion.button>
           ))}
         </div>
+        {/* 자유 질문 입력 — optional */}
+        <div className="mt-4">
+          <label className="block text-arcana-muted text-xs mb-1.5 font-sans">
+            무엇이 가장 궁금하세요? <span className="text-arcana-border/60">(선택)</span>
+          </label>
+          <textarea
+            value={freeQuestion}
+            onChange={(e) => onFreeQuestionChange(e.target.value)}
+            placeholder="예: 이번 달 직장 운은 어떨까요?"
+            maxLength={200}
+            rows={2}
+            className="w-full bg-arcana-card/50 border border-arcana-border rounded-xl px-3 py-2 text-arcana-text text-sm placeholder-arcana-muted/50 resize-none focus:outline-none focus:border-arcana-purple transition-colors"
+          />
+        </div>
         <button type="button" onClick={onOpenUserInfo}
           className="mt-4 w-full py-2.5 rounded-full border border-arcana-border text-arcana-muted text-xs font-sans hover:border-arcana-purple hover:text-arcana-purple transition-colors">
           <span className="inline-flex items-center gap-1"><Icon id="ui-info" size={14} /> {TAROT_COPY.spreadSelect.userInfoBtn}</span>
@@ -222,7 +238,7 @@ function UserInfoStep({ selectedCharacter, onSubmit, onBack }: Readonly<{
 function TarotPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setTopic, setSpreadType, setPhase, setCharacterId } = useSessionStore();
+  const { setTopic, setSpreadType, setPhase, setCharacterId, setFreeQuestion } = useSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const availableCharacters = getCharactersByGender(genderFilter);
 
@@ -233,6 +249,7 @@ function TarotPageContent() {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
+  const [localFreeQuestion, setLocalFreeQuestion] = useState("");
 
   // 프리셀렉트된 캐릭터: 스토어 반영 + 인사 메시지 생성 (클라이언트 마운트 후 — new Date() SSR 비결정 방지)
   useEffect(() => {
@@ -313,7 +330,9 @@ function TarotPageContent() {
         {step === "spread-select" && (
           <SpreadSelectStep selectedCharacter={selectedCharacter} dialogueMessages={dialogueMessages}
             selectedTopic={selectedTopic} onBack={handleBack} onSpreadSelect={handleSpreadSelect}
-            onOpenUserInfo={() => setStep("user-info")} />
+            onOpenUserInfo={() => setStep("user-info")}
+            freeQuestion={localFreeQuestion}
+            onFreeQuestionChange={(q) => { setLocalFreeQuestion(q); setFreeQuestion(q); }} />
         )}
         {step === "user-info" && (
           <UserInfoStep selectedCharacter={selectedCharacter} onSubmit={handleUserInfoSubmit} onBack={() => setStep("topic-select")} />

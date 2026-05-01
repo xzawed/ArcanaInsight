@@ -144,3 +144,10 @@ export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string
   const birthHour = sanitizeField(birthHourMap[userInfo.birthHour] || userInfo.birthHour, 20);
   return `\n\n상담자 정보:\n- 이름: ${name}\n- 생년월일: ${birthDate}\n- 성별: ${gender}\n- 태어난 시: ${birthHour}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
 }
+
+/** 사용자 자유 질문을 프롬프트에 추가 (최대 200자, 인젝션 방지) */
+export function buildFreeQuestionPrompt(question?: string | null): string {
+  if (!question?.trim()) return "";
+  const sanitized = sanitizeField(question, 200);
+  return `\n\n사용자 질문: "${sanitized}"\n이 질문을 카드 해석에 반영하여 직접적으로 답해주세요.`;
+}

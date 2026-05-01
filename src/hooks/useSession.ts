@@ -35,6 +35,8 @@ interface SessionState {
   setReadingResult: (result: ReadingResult) => void;
   setLoading: (loading: boolean) => void;
   setUserInfo: (info: UserInfo) => void;
+  freeQuestion: string | null;
+  setFreeQuestion: (q: string) => void;
   reset: () => void;
 }
 
@@ -51,6 +53,7 @@ const initialState = {
   readingResult: null,
   isLoading: false,
   userInfo: null,
+  freeQuestion: null,
 };
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -74,5 +77,6 @@ export const useSessionStore = create<SessionState>((set) => ({
   setReadingResult: (result) => set({ readingResult: result }),
   setLoading: (loading) => set({ isLoading: loading }),
   setUserInfo: (info) => set({ userInfo: info }),
+  setFreeQuestion: (q) => set({ freeQuestion: q || null }),
   reset: () => set(initialState),
 }));

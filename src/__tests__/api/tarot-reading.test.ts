@@ -306,6 +306,26 @@ describe("POST /api/tarot/reading", () => {
     expect(payload.result.parseError).toBe("truncated");
   });
 
+  it("freeQuestion 포함 요청 → SSE 스트림 응답", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      freeQuestion: "이번 달 운은 어떨까요?",
+    }));
+    expect(res.headers.get("Content-Type")).toBe("text/event-stream");
+    const text = await readSSEStream(res);
+    expect(text).toContain("done");
+  });
+
+  it("freeQuestion 200자 초과 → 400 Invalid request", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      freeQuestion: "a".repeat(201),
+    }));
+    expect(res.status).toBe(400);
+  });
+
   it("outer catch non-Error → String(e) 분기 커버", async () => {
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockRejectedValue("string-throw"),

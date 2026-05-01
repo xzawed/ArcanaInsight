@@ -5,7 +5,7 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic } from "@/types/session";
 import { SelectedCard } from "@/types/card";
-import { buildUserInfoPrompt } from "@/services/core/prompt-builder";
+import { buildUserInfoPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { getDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { TAROT_TOPICS } from "@/data/topics";
@@ -46,9 +46,10 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증
     const parsed = TarotReadingSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, topic, spreadType, characterId, userInfo, cards } = parsed.data as {
+    const { sessionId, topic, spreadType, characterId, userInfo, freeQuestion, cards } = parsed.data as {
       sessionId?: string | null; topic: Topic; spreadType?: string; characterId?: string;
       userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
+      freeQuestion?: string | null;
       cards: { cardId: string; position: number; isReversed: boolean }[];
     };
 
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
+    const freeQuestionPrompt = buildFreeQuestionPrompt(freeQuestion);
     const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
       ? spreadType
       : spreadResolver.resolveForTopic(topic).type;
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
         try {
           const cardCount = cards.length;
           const maxTokens = computeReadingMaxTokens(cardCount);
-          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt, maxTokens)) {
+          for await (const chunk of grokProvider.streamReading(systemPrompt, readingPrompt + userInfoPrompt + freeQuestionPrompt, maxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
