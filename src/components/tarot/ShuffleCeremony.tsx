@@ -63,23 +63,19 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
       return;
     }
 
-    const canvasEl = canvasRef.current;
-    if (!canvasEl) return;
-    const ctx2d = canvasEl.getContext("2d");
-    if (!ctx2d) return;
-
-    // After null guards, use typed aliases so TypeScript knows they're non-null
-    const canvas: HTMLCanvasElement = canvasEl;
-    const ctx: CanvasRenderingContext2D = ctx2d;
+    if (!canvasRef.current) return;
+    if (!canvasRef.current.getContext("2d")) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d")!;
 
     const setSize = () => {
-      const rect = canvas.parentElement!.getBoundingClientRect();
+      const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
     };
     setSize();
     const observer = new ResizeObserver(setSize);
-    observer.observe(canvas.parentElement!);
+    observer.observe(canvas);
 
     const charText = shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
     const textChars = [...charText];
@@ -182,7 +178,9 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
     <div
       className="w-full h-full flex items-center justify-center cursor-pointer select-none"
       onClick={() => { doneRef.current = true; }}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") doneRef.current = true; }}
       role="button"
+      tabIndex={0}
       aria-label="카드 셔플 의식 스킵"
     >
       <canvas ref={canvasRef} className="w-full h-full" />
