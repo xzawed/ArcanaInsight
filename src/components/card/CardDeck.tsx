@@ -13,12 +13,54 @@ interface CardDeckProps {
   readonly onCardSelect: (index: number) => void;
 }
 
+interface CardTransformInput {
+  index: number;
+  totalCards: number;
+  overlap: number;
+  cardH: number;
+  effectivelySpread: boolean;
+  isSelected: boolean;
+  isHovered: boolean;
+  ritualDone: boolean;
+}
+
+function getCardTransform({ index, totalCards, overlap, cardH, effectivelySpread, isSelected, isHovered, ritualDone }: CardTransformInput) {
+  const half = totalCards / 2;
+  const maxArc = Math.min(totalCards * 0.9, 40);
+
+  const angle = effectivelySpread ? (index - half) * (maxArc / totalCards) : 0;
+  const xOffset = effectivelySpread ? (index - half) * overlap : (index - half) * 1.5;
+  const baseY = effectivelySpread
+    ? Math.pow(Math.abs(index - half) / half, 2) * cardH * 0.15
+    : index * -0.3;
+  const hoverLift = ritualDone && isHovered && !isSelected ? -8 : 0;
+
+  let scale = 1;
+  if (isSelected) scale = 0.9;
+  else if (ritualDone && isHovered) scale = 1.04;
+
+  return { angle, xOffset, y: isSelected ? -30 : baseY + hoverLift, scale };
+}
+
 export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
   const { selectedSkinId } = useSkinStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // 셔플 의식: gather → spread → gather → spread(final)
+  const [ritualDone, setRitualDone] = useState(false);
+  const [ritualSpread, setRitualSpread] = useState(false);
+
+  useEffect(() => {
+    if (!isSpread) return;
+    const t1 = setTimeout(() => setRitualSpread(true), 350);
+    const t2 = setTimeout(() => setRitualSpread(false), 650);
+    const t3 = setTimeout(() => setRitualSpread(true), 950);
+    const t4 = setTimeout(() => setRitualDone(true), 1100);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+  }, [isSpread]);
 
   useEffect(() => {
     const measure = () => {
@@ -37,27 +79,16 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
       return { cardW: 40, cardH: 60, maxDisplay: 12, overlap: 5, yOffset: 2 };
     }
 
-    // 카드 크기: 컨테이너 높이의 45%, 2:3 비율 (아크 Y offset 공간 확보)
     let cardH = Math.min(containerHeight * 0.45, 140);
     let cardW = cardH / 1.5;
 
-    // 클램프
     cardW = Math.max(Math.min(Math.round(cardW), 90), 28);
     cardH = Math.round(cardW * 1.5);
 
-    // 사용 가능 너비 (양쪽 약간 여유)
     const usableWidth = containerWidth * 0.94;
-
-    // 모바일(768px 미만)에서는 최대 20장, 데스크탑은 전체
     const isMobile = containerWidth < 768;
     const totalCards = isMobile ? Math.min(cards.length, 20) : cards.length;
-
-    // 전체 카드를 넣을 수 있는 겹침 간격 계산
-    const idealOverlap = totalCards > 1
-      ? (usableWidth - cardW) / (totalCards - 1)
-      : 0;
-
-    // 최소 겹침: 카드 사이 3px 이상은 보여야 터치/클릭 가능
+    const idealOverlap = totalCards > 1 ? (usableWidth - cardW) / (totalCards - 1) : 0;
     const MIN_OVERLAP = 3;
 
     let overlap: number;
@@ -71,12 +102,13 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
       maxDisplay = Math.floor((usableWidth - cardW) / overlap) + 1;
     }
 
-    const yOffset = Math.max(cardH * 0.02, 1);
-
-    return { cardW, cardH, maxDisplay, overlap, yOffset };
+    return { cardW, cardH, maxDisplay, overlap, yOffset: Math.max(cardH * 0.02, 1) };
   }, [containerWidth, containerHeight, cards.length]);
 
   const displayCards = useMemo(() => cards.slice(0, layout.maxDisplay), [cards, layout.maxDisplay]);
+
+  // 의식 완료 전에는 ritualSpread, 완료 후에는 isSpread가 기준
+  const effectivelySpread = ritualDone ? isSpread : ritualSpread;
 
   return (
     <div
@@ -85,35 +117,31 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
     >
       {containerWidth > 0 && displayCards.map((card, index) => {
         const isSelected = selectedIndices.includes(index);
-        const totalCards = displayCards.length;
-        const half = totalCards / 2;
-        const maxArc = Math.min(totalCards * 0.9, 40);
-        const angle = isSpread ? (index - half) * (maxArc / totalCards) : 0;
-        const xOffset = isSpread ? (index - half) * layout.overlap : (index - half) * 1.5;
-        const yOffset = isSpread
-          ? Math.pow(Math.abs(index - half) / half, 2) * layout.cardH * 0.15
-          : index * -0.3;
+        const { angle, xOffset, y, scale } = getCardTransform({
+          index,
+          totalCards: displayCards.length,
+          overlap: layout.overlap,
+          cardH: layout.cardH,
+          effectivelySpread,
+          isSelected,
+          isHovered: hoveredIndex === index,
+          ritualDone,
+        });
 
         return (
           <motion.div
             key={card.id}
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
-            animate={{
-              x: xOffset,
-              y: isSelected ? -30 : yOffset,
-              rotate: angle,
-              opacity: isSelected ? 0.3 : 1,
-              scale: isSelected ? 0.9 : 1,
-            }}
+            animate={{ x: xOffset, y, rotate: angle, opacity: isSelected ? 0.3 : 1, scale }}
             transition={{
               type: "spring",
-              stiffness: 120,
-              damping: 18,
-              delay: isSpread ? index * 0.015 : 0,
+              stiffness: ritualDone ? 120 : 200,
+              damping: ritualDone ? 18 : 26,
+              delay: ritualDone && isSpread ? index * 0.015 : 0,
             }}
-            className="absolute cursor-pointer"
+            className={`absolute ${ritualDone && !isSelected ? "cursor-pointer" : "cursor-default"}`}
             style={{ zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index }}
-            onClick={() => { if (!isSelected) onCardSelect(index); }}
+            onClick={() => { if (!isSelected && ritualDone) onCardSelect(index); }}
             onPointerEnter={() => setHoveredIndex(index)}
             onPointerLeave={() => setHoveredIndex(null)}
           >
