@@ -92,7 +92,7 @@ test.describe("사주 서비스 플로우", () => {
     await page.locator("text=종합운").first().click();
 
     // 시작 버튼 클릭
-    const startBtn = page.locator("button").filter({ hasText: /사주 분석|시작/ }).last();
+    const startBtn = page.locator("button").filter({ hasText: /사주 분석|시작|흐름/ }).last();
     await expect(startBtn).toBeEnabled({ timeout: 3_000 });
     await startBtn.click();
 
