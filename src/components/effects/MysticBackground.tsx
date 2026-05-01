@@ -58,7 +58,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
   const filterId = `turbulence-${service}`;
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-[5] overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none z-[5] overflow-hidden" aria-hidden>
       {/* SVG feTurbulence 안개 필터 정의 */}
       <svg width="0" height="0" className="absolute">
         <defs>
@@ -86,7 +86,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
         className="absolute bottom-0 left-0 right-0 h-2/5"
         style={{ filter: `url(#${filterId})` }}
         animate={shouldReduceMotion ? { opacity: 0.7 } : { opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
         <div
           className="absolute inset-0"
@@ -102,7 +102,6 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
         className="absolute inset-0 w-full h-full"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
-        aria-hidden
       >
         {STAR_POINTS.map((s, i) => (
           <motion.circle
