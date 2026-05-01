@@ -1,3 +1,10 @@
+export const CHARACTER_IDS = [
+  "arcana", "miko", "seonhwa", "hoshi", "luna", "rei",
+  "cairn", "zero", "haru", "ren", "lix", "ethan",
+] as const;
+
+export type CharacterId = typeof CHARACTER_IDS[number];
+
 export type Mood = "default" | "smile" | "serious" | "surprised" | "wink" | "mystical";
 export type Gender = "female" | "male";
 export type GenderFilter = "female" | "male" | "all";
@@ -12,7 +19,7 @@ export interface EffectTheme {
 }
 
 export interface CharacterConfig {
-  id: string;
+  id: CharacterId;
   name: string;
   nameJp: string;
   gender: Gender;

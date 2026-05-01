@@ -1,10 +1,7 @@
-export const CHARACTER_ORDER = [
-  "arcana", "miko", "seonhwa", "hoshi", "luna", "rei",
-  "cairn", "zero", "haru", "ren", "lix", "ethan",
-] as const;
+import { CHARACTER_IDS, CharacterId } from "@/types/character";
 
-export type DailyCharacterId = typeof CHARACTER_ORDER[number];
+export const CHARACTER_ORDER: readonly CharacterId[] = CHARACTER_IDS;
 
-export function getDailyCharacterId(now: number = Date.now()): string {
+export function getDailyCharacterId(now: number = Date.now()): CharacterId {
   return CHARACTER_ORDER[Math.floor(now / 86400000) % CHARACTER_ORDER.length];
 }

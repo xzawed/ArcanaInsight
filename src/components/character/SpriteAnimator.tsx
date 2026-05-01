@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
-import { Mood, IdleAnimationType } from "@/types/character";
+import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
 
 interface MoodConfig {
@@ -82,7 +82,7 @@ interface EntranceConfig {
   transition: Transition;
 }
 
-const CHAR_ENTRANCE: Record<string, EntranceConfig> = {
+const CHAR_ENTRANCE: Record<CharacterId, EntranceConfig> = {
   arcana:  { initial: { y: 60, opacity: 0 },                transition: { duration: 0.85, ease: "easeOut" } },
   miko:    { initial: { opacity: 0, scale: 0.95 },           transition: { duration: 1.1, ease: "easeOut" } },
   seonhwa: { initial: { x: -35, opacity: 0 },               transition: { duration: 0.75, ease: "easeOut" } },
@@ -98,10 +98,10 @@ const CHAR_ENTRANCE: Record<string, EntranceConfig> = {
 };
 
 // 이미 입장 애니메이션을 재생한 캐릭터 ID 추적 (모듈 레벨 — SSR 비간섭, 클라이언트 세션 유지)
-const enteredChars = new Set<string>();
+const enteredChars = new Set<CharacterId>();
 
 interface SpriteAnimatorProps {
-  readonly characterId: string;
+  readonly characterId: CharacterId;
   readonly mood: Mood;
   readonly idleAnimation?: IdleAnimationType;
   readonly primaryColor?: string;
