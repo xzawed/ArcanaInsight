@@ -29,10 +29,45 @@ const MOOD_TO_FILE: Record<Mood, string> = {
 };
 
 const LOOP_MOTION: Record<string, Record<string, number[] | string[]>> = {
-  float: { y: [0, -6, 0], scale: [1, 1.01, 1] },
-  "float-strong": { y: [0, -8, 0], scale: [1, 1.015, 1] },
-  bounce: { y: [0, -12, 0], scale: [1, 1.02, 1] },
-  breathe: { y: [0, -2, 0, -1, 0], scale: [1, 1.005, 1, 1.003, 1], opacity: [1, 1, 1, 0.88, 1] },
+  float: {
+    y: [0, -6, 0],
+    scale: [1, 1.01, 1],
+    filter: [
+      "drop-shadow(0 0 6px rgba(139,92,246,0.25))",
+      "drop-shadow(0 0 16px rgba(139,92,246,0.60))",
+      "drop-shadow(0 0 6px rgba(139,92,246,0.25))",
+    ],
+  },
+  "float-strong": {
+    y: [0, -8, 0],
+    scale: [1, 1.015, 1],
+    filter: [
+      "drop-shadow(0 0 8px rgba(139,92,246,0.30))",
+      "drop-shadow(0 0 22px rgba(139,92,246,0.70))",
+      "drop-shadow(0 0 8px rgba(139,92,246,0.30))",
+    ],
+  },
+  bounce: {
+    y: [0, -12, 0],
+    scale: [1, 1.02, 1],
+    filter: [
+      "drop-shadow(0 0 6px rgba(212,175,55,0.20))",
+      "drop-shadow(0 0 18px rgba(212,175,55,0.55))",
+      "drop-shadow(0 0 6px rgba(212,175,55,0.20))",
+    ],
+  },
+  breathe: {
+    y: [0, -2, 0, -1, 0],
+    scale: [1, 1.005, 1, 1.003, 1],
+    opacity: [1, 1, 1, 0.88, 1],
+    filter: [
+      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
+      "drop-shadow(0 0 12px rgba(139,92,246,0.50))",
+      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
+      "drop-shadow(0 0 8px rgba(139,92,246,0.35))",
+      "drop-shadow(0 0 4px rgba(139,92,246,0.20))",
+    ],
+  },
   mystical: {
     y: [0, -10, 0],
     scale: [1, 1.02, 1],
