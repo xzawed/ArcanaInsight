@@ -59,7 +59,7 @@ export function CharacterAuraLayer({ mood, isTransitioning }: CharacterAuraLayer
         className="absolute inset-0"
         style={{
           background: `radial-gradient(ellipse 60% 80% at 50% 60%, ${color} 0%, transparent 70%)`,
-          willChange: "transform",
+          willChange: "transform, opacity",
         }}
         animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.85, 0.5] }}
         transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
@@ -79,8 +79,8 @@ export function CharacterAuraLayer({ mood, isTransitioning }: CharacterAuraLayer
             boxShadow: `0 0 ${p.size * 2}px ${color}`,
             willChange: "transform",
           }}
-          animate={{ y: [0, p.dy, p.dy * 1.2], opacity: [0, 0.8, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: p.delay }}
+          animate={{ y: [0, p.dy, 0], opacity: [0, 0.8, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
         />
       ))}
 
