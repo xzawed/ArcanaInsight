@@ -1,4 +1,3 @@
-import "@verum/sdk/openai";
 import { AIProvider } from "@/types/service";
 import { getGrokApiKey, getGrokModel, getGrokBaseUrl, getAiTimeoutMs, getDefaultMaxTokens, getAiTemperature } from "@/lib/env";
 import { withAbortTimeout, readSseLines } from "./http-utils";
