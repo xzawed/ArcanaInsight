@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { TarotService } from "@/services/tarot/tarot-service"
+import { SpreadResolver } from "@/services/tarot/spread-resolver"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { TAROT_TOPICS } from "@/data/topics"
 import { TarotSessionSchema } from "@/lib/validation/api-schemas"
 
 const tarotService = new TarotService()
+const spreadResolver = new SpreadResolver()
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +24,7 @@ export async function POST(request: NextRequest) {
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const sessionData = tarotService.startSession(topic)
-    const validSpreadTypes = ["one-card", "three-card", "five-card"]
-    const resolvedSpreadType = spreadType && validSpreadTypes.includes(spreadType)
+    const resolvedSpreadType = (spreadType && spreadResolver.getSpreadByType(spreadType))
       ? spreadType
       : sessionData.spreadType
 
