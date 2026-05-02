@@ -284,23 +284,23 @@ export default function TarotSessionPage() {
     });
 
     // 2단계: 캐릭터 대기 대사 (카드 뒤집기 끝난 후 3초 간격)
+    // CLAUDE.md 규칙: 대기 대사 중 표정 변경 금지 — setMood 호출 제거
     const baseDelay = (cards.length + 1) * 2000;
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        setMood(line.mood);
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
       }, baseDelay + i * 3000));
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [spreadType, addChatMessage, setMood]);
+  }, [spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     // 카드 뒤집기 초기화 (reading 시작 시 전부 뒷면으로)
     setRevealedPositions([]);
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요", mood: "mystical", timestamp: new Date() });
-    setMood("mystical");
+    // setMood("mystical") 중복 호출 제거 — 위에서 이미 호출됨
 
     // 대기 연출 시작 (API 호출과 동시 실행)
     const stopSequence = startWaitingSequence(cards, characterId || "arcana");
@@ -384,7 +384,7 @@ export default function TarotSessionPage() {
   }, [chatMessages, phase]);
 
   const spread = spreadType ? spreads[spreadType] : null;
-  const particleDensityMap: Record<string, "low" | "medium" | "high"> = { reading: "high", result: "low" };
+  const particleDensityMap: Record<string, "low" | "medium" | "high"> = { reading: "medium", result: "low" };
   const particleDensity = particleDensityMap[phase] ?? "medium";
   const effectTheme = character?.effectTheme;
 
@@ -547,7 +547,7 @@ export default function TarotSessionPage() {
                 key="result"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
@@ -564,7 +564,7 @@ export default function TarotSessionPage() {
                         key={`card-${i}`}
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 + Math.min(i * 0.15, 0.45), ease: "easeOut" }}
+                        transition={{ duration: 0.5, delay: 0.1 + Math.min(i * 0.2, 0.8), ease: "easeOut" }}
                         className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5"
                       >
                         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-arcana-border/50">
@@ -581,7 +581,7 @@ export default function TarotSessionPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
+                      transition={{ duration: 0.5, delay: 1.0, ease: "easeOut" }}
                       className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
                     >
                       <div className="flex items-center gap-2 mb-3">
@@ -597,7 +597,7 @@ export default function TarotSessionPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.9, ease: "easeOut" }}
+                      transition={{ duration: 0.5, delay: 1.4, ease: "easeOut" }}
                       className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5"
                     >
                       <div className="flex items-center gap-2 mb-3">
