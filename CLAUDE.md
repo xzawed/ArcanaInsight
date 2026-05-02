@@ -65,7 +65,7 @@ docs/                # → docs/README.md 인덱스
 ├── operations/      # known-issues, env-variables, deployment, monitoring, operation-guide
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
-supabase/migrations/ # 001~011 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
+supabase/migrations/ # 001~012 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
 e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
@@ -212,7 +212,8 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 - **UI 텍스트 변경 시 E2E 셀렉터 동시 검토**: `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴 grep 후 같은 커밋에 수정. — **2026-05-01 사주 버튼 변경 후 E2E CI 실패 원인**.
 - **E2E 드롭다운 버튼 셀렉터**: `Icon` 컴포넌트가 `<img>`로 렌더링되므로 `button:has(img)` + `text=` 조합은 auto 버튼 오탐 발생. 드롭다운 내 특정 버튼은 `data-testid` 부여 필수. 데스크탑·모바일 드롭다운은 반드시 별도 `ref` + 별도 `testid` 사용 — 동일 `ref` 공유 시 React last-wins로 outside-click 오탐 발생하며 드롭다운이 선택 즉시 닫힘. 예: 데스크탑 `data-testid="theme-option-${t.id}"`, 모바일 `data-testid="mobile-theme-option-${t.id}"`. — **2026-05-02 E2E dawn 3회 연속 실패 + 테마 드롭다운 즉시 닫힘 버그(PR #211) 원인**.
 
-- **Enum 화이트리스트 하드코딩 금지**: API 라우트에서 Zod `z.enum([...])` 검증 통과 후 일부 값만 하드코딩으로 재검증하면 나머지 값이 누락됨. `spreadResolver.getSpreadByType(val)` 처럼 유틸 메서드로 전체 enum 검증 필수. — **2026-05-02 celtic-cross 등 7종 타로 스프레드 리딩 결과 미생성(PR #213) 원인**.
+- **Enum 화이트리스트 하드코딩 금지**: API 라우트에서 Zod `z.enum([...])` 검증 통과 후 일부 값만 하드코딩으로 재검증하면 나머지 값이 누락됨. `spreadResolver.getSpreadByType(val)` 처럼 유틸 메서드로 전체 enum 검증 필수. session/route.ts·reading/route.ts 모두 적용. — **2026-05-02 celtic-cross 등 7종 타로 세션 생성 DB 제약 위반 + 리딩 전체 차단(PR #213, #216) 원인**.
+- **DB CHECK 제약과 앱 코드 동기화 필수**: DB schema에 CHECK 제약이 있는 enum 컬럼(spread_type, topic 등)에 새 값 추가 시 마이그레이션(ALTER TABLE ... DROP CONSTRAINT + ADD CONSTRAINT) 필수. 앱 코드만 수정하면 DB INSERT 500. — **2026-05-02 012_spread_type_expand.sql 장애 원인**.
 
 ### 패키지 · 빌드 (의존성 추가·수정 시)
 - **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 피어 의존성 버전 변동 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
