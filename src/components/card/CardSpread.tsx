@@ -139,10 +139,10 @@ export function CardSpread({ selectedCards, spread, revealedPositions, glowColor
             initial={{ opacity: 0, scale: 0.3, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{
-              delay: pos.index * 0.25,
+              delay: Math.min(pos.index * 0.4, 1.6),
               type: "spring",
-              stiffness: 100,
-              damping: 15,
+              stiffness: 70,
+              damping: 22,
             }}
             className="absolute transform -translate-x-1/2 -translate-y-1/2"
             style={{ left: `${pos.x}%`, top: `${pos.y}%` }}

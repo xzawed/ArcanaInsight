@@ -16,12 +16,12 @@ interface CharacterDisplayProps {
 
 // mood별 버스트 링 불투명도
 const BURST_OPACITY: Record<Mood, number> = {
-  default:   0.7,
-  smile:     0.8,
-  mystical:  0.9,
-  serious:   0.7,
-  surprised: 0.8,
-  wink:      0.8,
+  default:   0.6,
+  smile:     0.7,
+  mystical:  0.8,
+  serious:   0.6,
+  surprised: 0.7,
+  wink:      0.7,
 };
 
 function GlowBurstRing({ mood, primaryColor }: { readonly mood: Mood; readonly primaryColor: string }) {
@@ -33,12 +33,12 @@ function GlowBurstRing({ mood, primaryColor }: { readonly mood: Mood; readonly p
         inset: "-5%",
         borderRadius: "45%",
         border: `1.5px solid ${color}`,
-        boxShadow: `0 0 16px ${color}, 0 0 32px ${color}`,
+        boxShadow: `0 0 10px ${hexToRgba(primaryColor, 0.4)}, 0 0 20px ${hexToRgba(primaryColor, 0.2)}`,
       }}
-      initial={{ scale: 1, opacity: 0.8 }}
-      animate={{ scale: 2.5, opacity: 0 }}
+      initial={{ scale: 1, opacity: 0.6 }}
+      animate={{ scale: 1.7, opacity: 0 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
+      transition={{ duration: 0.85, ease: "easeOut" }}
     />
   );
 }
@@ -48,14 +48,14 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
   const [isTransitioning, setIsTransitioning] = useState(false);
   const isMountedRef = useRef(false);
 
-  // mood 변경 시 isTransitioning true → 500ms 후 false (첫 마운트 스킵)
+  // mood 변경 시 isTransitioning true → 850ms 후 false (GlowBurst duration과 일치, 첫 마운트 스킵)
   useEffect(() => {
     if (!isMountedRef.current) {
       isMountedRef.current = true;
       return;
     }
     const t1 = setTimeout(() => setIsTransitioning(true), 0);
-    const t2 = setTimeout(() => setIsTransitioning(false), 500);
+    const t2 = setTimeout(() => setIsTransitioning(false), 1600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [mood]);
 

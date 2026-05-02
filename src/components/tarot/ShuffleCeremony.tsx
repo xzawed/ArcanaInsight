@@ -2,10 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { shuffleCeremonyText } from "@/data/characters/waiting-lines";
+import { hexToRgbComponents } from "@/lib/color-utils";
 
 interface ShuffleCeremonyProps {
-  characterId: string;
-  onComplete: () => void;
+  readonly characterId: string;
+  readonly onComplete: () => void;
+  readonly primaryColor?: string;
 }
 
 const N = 9;
@@ -20,15 +22,14 @@ function drawCard(
   ctx: CanvasRenderingContext2D,
   x: number, y: number, w: number, h: number,
   angle: number, alpha: number, glowStrength: number,
+  rgb: string,
 ) {
   ctx.save();
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
   ctx.translate(x, y);
   ctx.rotate(angle);
-  if (glowStrength > 0) {
-    ctx.shadowColor = `rgba(139,92,246,${glowStrength})`;
-    ctx.shadowBlur = 20 * glowStrength;
-  }
+  ctx.shadowBlur = glowStrength > 0 ? 20 * glowStrength : 0;
+  ctx.shadowColor = glowStrength > 0 ? `rgba(${rgb},${glowStrength})` : "rgba(0,0,0,0)";
   ctx.beginPath();
   if (ctx.roundRect) ctx.roundRect(-w/2, -h/2, w, h, 4);
   else ctx.rect(-w/2, -h/2, w, h);
@@ -37,13 +38,13 @@ function drawCard(
   g.addColorStop(1, "#1a0a3e");
   ctx.fillStyle = g;
   ctx.fill();
-  ctx.strokeStyle = "rgba(139,92,246,0.6)";
+  ctx.strokeStyle = `rgba(${rgb},0.6)`;
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.restore();
 }
 
-export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProps) {
+export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5cf6" }: ShuffleCeremonyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const calledRef = useRef(false);
   const doneRef = useRef(false);
@@ -79,6 +80,7 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
 
     const charText = shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
     const textChars = [...charText];
+    const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;
     let startMs: number | null = null;
     const cw = 34, ch = 54;
@@ -89,7 +91,7 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
       ctx.clearRect(0, 0, W, H);
       for (let i = 0; i < N; i++) {
         const f = i/(N-1) - 0.5;
-        drawCard(ctx, cx + f*120, cy + Math.pow(f*2, 2)*15, cw, ch, f*0.4, 1, 0);
+        drawCard(ctx, cx + f*120, cy + Math.pow(f*2, 2)*15, cw, ch, f*0.4, 1, 0, rgb);
       }
       ctx.fillStyle = "rgba(196,181,253,0.95)";
       ctx.font = "14px serif";
@@ -125,21 +127,21 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
         const upY = cy - lerp(0, 26, p) + lerp(0, 26, ret);
         const dnY = cy + lerp(0, 20, p) - lerp(0, 20, ret);
         const glow = p > 0.4 ? Math.min((p - 0.4) / 0.6, 1) * (1 - ret) * 0.8 : 0;
-        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, upY - i*2.5, cw, ch, 0, 1, glow*0.4);
-        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, dnY + i*2.5, cw, ch, 0, 1, glow*0.4);
+        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, upY - i*2.5, cw, ch, 0, 1, glow*0.4, rgb);
+        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, dnY + i*2.5, cw, ch, 0, 1, glow*0.4, rgb);
       } else if (t < 0.7) {
         // ② 글로우 폭발
         const p = easeOut((t - 0.5) / 0.2);
         const fade = 1 - p;
         const rr = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120*p + 10);
-        rr.addColorStop(0, `rgba(139,92,246,${0.55*fade})`);
-        rr.addColorStop(1, "rgba(139,92,246,0)");
+        rr.addColorStop(0, `rgba(${rgb},${0.55*fade})`);
+        rr.addColorStop(1, `rgba(${rgb},0)`);
         ctx.fillStyle = rr;
         ctx.fillRect(0, 0, W, H);
-        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, fade*0.9);
+        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, fade*0.9, rgb);
       } else if (t < 1.4) {
         // ③ 타이프라이터
-        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, 0);
+        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, 0, rgb);
         const count = Math.floor((t - 0.7) / 0.058);
         if (count > 0) {
           ctx.fillStyle = "rgba(196,181,253,0.95)";
@@ -153,7 +155,7 @@ export function ShuffleCeremony({ characterId, onComplete }: ShuffleCeremonyProp
         const p = springFn(Math.min((t - 1.4) / 0.6, 1));
         for (let i = 0; i < N; i++) {
           const f = i/(N-1) - 0.5;
-          drawCard(ctx, cx + f*120*p, cy + Math.pow(f*2, 2)*15*p, cw, ch, f*0.4*p, 1, 0);
+          drawCard(ctx, cx + f*120*p, cy + Math.pow(f*2, 2)*15*p, cw, ch, f*0.4*p, 1, 0, rgb);
         }
         ctx.fillStyle = "rgba(196,181,253,0.95)";
         ctx.font = "14px serif";

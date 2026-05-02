@@ -48,7 +48,7 @@ async function handleSajuShare(r: { shareToken?: string | null; overallReading?:
   const shareToken = r?.shareToken;
   const title = `사주 분석 결과 - ${SITE_NAME}`;
   if (shareToken) {
-    const url = `${globalThis.location.origin}/saju/result/${shareToken}`;
+    const url = `${globalThis.location?.origin}/saju/result/${shareToken}`;
     const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${SITE_NAME}`;
     await shareWithUrl(title, text, url);
   } else {
@@ -63,7 +63,7 @@ export default function SajuSessionPage() {
   const router = useRouter();
   const { currentMood, setMood } = useCharacterStore();
   const {
-    phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData,
+    phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData, isLoading,
     setPhase, setSessionId, addChatMessage, setReadingResult, setSajuData, setLoading,
   } = useSajuSessionStore();
 
@@ -110,9 +110,9 @@ export default function SajuSessionPage() {
     const charId = state.characterId || "seonhwa";
     const lines = sajuWaitingLines[charId] || defaultSajuWaitingLines;
     const timers: ReturnType<typeof setTimeout>[] = [];
+    // CLAUDE.md 규칙: 대기 대사 중 표정 변경 금지 — setMood 호출 제거
     lines.forEach((line, i) => {
       timers.push(setTimeout(() => {
-        setMood(line.mood);
         addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
       }, (i + 1) * 3000));
     });
@@ -169,7 +169,7 @@ export default function SajuSessionPage() {
         <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
-      <ParticleOverlay density={phase === "reading" ? "high" : "low"} className="z-10" />
+      <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />
       <MysticBackground service="saju" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
@@ -192,7 +192,7 @@ export default function SajuSessionPage() {
 
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
           {phase === "result" && readingResult && sajuData ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
               className="w-full flex-1 flex flex-col overflow-hidden py-4">
               <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}>
@@ -271,7 +271,8 @@ export default function SajuSessionPage() {
                   <p className="text-arcana-muted text-sm font-serif">해석에 문제가 발생했어요</p>
                   <div className="flex gap-3">
                     <button onClick={() => { setReadingError(false); startReading(); }}
-                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm">
+                      disabled={isLoading}
+                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                       다시 시도
                     </button>
                     <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}

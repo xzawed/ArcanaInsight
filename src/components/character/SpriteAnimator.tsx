@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
@@ -70,10 +70,10 @@ const LOOP_TRANSITIONS: Record<string, { duration: number; repeat: number; ease:
 };
 
 const ENTER_MOTION: Record<string, Record<string, number[]>> = {
-  smile: { scale: [0.95, 1.03, 1], y: [5, -3, 0] },
+  smile: { scale: [0.97, 1.01, 1], y: [3, -1, 0] },
   serious: { scale: [1, 0.98, 1], y: [0, 2, 0] },
-  surprised: { scale: [0.9, 1.05, 1], y: [10, -5, 0] },
-  wink: { scale: [0.95, 1.02, 1], y: [3, -2, 0] },
+  surprised: { scale: [0.97, 1.02, 1], y: [4, -2, 0] },
+  wink: { scale: [0.97, 1.01, 1], y: [3, -2, 0] },
 };
 
 // 캐릭터별 입장 시그니처 애니메이션 (처음 등장 시 1회만 재생)
@@ -132,7 +132,7 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", pri
 
   const isLooping = config.loop;
   const activeLoopKey = mood === "default" ? idleAnimation : mood;
-  const loopMotion = buildLoopMotion(primaryColor ?? "#a78bfa");
+  const loopMotion = useMemo(() => buildLoopMotion(primaryColor ?? "#a78bfa"), [primaryColor]);
   const loopAnim = loopMotion[activeLoopKey] ?? loopMotion.float;
   const loopTransition = LOOP_TRANSITIONS[activeLoopKey] ?? LOOP_TRANSITIONS.float;
   const enterAnim = ENTER_MOTION[mood];
