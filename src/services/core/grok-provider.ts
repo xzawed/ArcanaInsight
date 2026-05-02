@@ -100,7 +100,8 @@ export class GrokProvider implements AIProvider {
       yield* readSseLines(
         response,
         (p) => (p as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content ?? null,
-        "Grok"
+        "Grok",
+        controller.signal
       );
     } finally {
       clearTimeout(timer);

@@ -61,12 +61,14 @@ function processLine(
 
 function flushRemainingBuffer(
   sseBuffer: string,
-  handlers: Pick<SSEStreamOptions, "onDone">
+  handlers: Pick<SSEStreamOptions, "onDone" | "onError">
 ): void {
   if (!sseBuffer.trim() || !sseBuffer.startsWith("data: ")) return;
   try {
     const data = JSON.parse(sseBuffer.slice(6)) as Record<string, unknown>;
-    if (data.done) {
+    if (data.error) {
+      handlers.onError?.(data.error as string);
+    } else if (data.done) {
       handlers.onDone(data);
     }
   } catch (e) {
@@ -87,7 +89,7 @@ async function readStream(
     const { done, value } = await reader.read();
 
     if (done) {
-      flushRemainingBuffer(sseBuffer, handlers);
+      flushRemainingBuffer(sseBuffer, { onDone: handlers.onDone, onError: handlers.onError });
       break;
     }
 

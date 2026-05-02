@@ -70,8 +70,14 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
     // 네이티브 휠 이벤트로 스크롤 — overflow-x:clip 환경에서 window.scrollTo가
     // 작동하지 않으므로 실제 브라우저 스크롤 이벤트를 사용
+    // 마우스를 뷰포트 중앙으로 이동 후 휠 이벤트 발생 (CI 헤드리스 환경 안정성)
+    await page.mouse.move(640, 400);
     await page.mouse.wheel(0, 500);
-    await page.waitForTimeout(300);
+    // 고정 타임아웃 대신 스크롤 상태 폴링 (CI 환경 응답 지연 대응)
+    await page.waitForFunction(
+      () => (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) > 0,
+      { timeout: 3000 }
+    );
 
     const scrolled = await page.evaluate(
       () => window.scrollY || document.documentElement.scrollTop || document.body.scrollTop

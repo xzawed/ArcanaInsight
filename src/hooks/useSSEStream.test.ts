@@ -188,6 +188,53 @@ describe("fetchSSEStream", () => {
     expect(chunks).toEqual(["정상"]);
   });
 
+  it("스트림 종료 시 버퍼에 error 이벤트가 남아 있으면 onError를 호출한다", async () => {
+    // TCP 비정상 종료: error 이벤트가 마지막 줄에 \n 없이 남는 케이스
+    const text = 'data: {"chunk":"시작"}\ndata: {"error":"버퍼 에러"}';
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(text));
+        controller.close();
+      },
+    });
+    mockFetch.mockResolvedValue({ ok: true, status: 200, body: stream, json: vi.fn() } as unknown as Response);
+
+    const onError = vi.fn();
+    const chunks: string[] = [];
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: (c) => chunks.push(c),
+      onDone: vi.fn(),
+      onError,
+    });
+
+    expect(onError).toHaveBeenCalledWith("버퍼 에러");
+    expect(chunks).toEqual(["시작"]);
+  });
+
+  it("스트림 종료 시 버퍼에 잘못된 JSON이 있으면 에러 없이 무시한다", async () => {
+    const text = 'data: {"chunk":"정상"}\ndata: {invalid json}';
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(text));
+        controller.close();
+      },
+    });
+    mockFetch.mockResolvedValue({ ok: true, status: 200, body: stream, json: vi.fn() } as unknown as Response);
+
+    const onError = vi.fn();
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone: vi.fn(),
+      onError,
+    });
+
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   it("스트림 종료 시 버퍼에 남은 done 이벤트를 처리한다", async () => {
     // 개행 없이 끝나는 마지막 라인을 남기는 케이스 시뮬레이션
     const text = 'data: {"chunk":"마지막"}\ndata: {"done":true,"result":"완료"}';

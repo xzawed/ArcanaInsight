@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useThemeStore, themes, ThemeId } from "@/hooks/useTheme";
@@ -14,14 +14,16 @@ export default function SettingsPage() {
   const { selectedSkinId, setSkin } = useSkinStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
 
-  const [confirmEachCard, setConfirmEachCard] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("arcana-confirm-each-card") === "true";
-    return false;
-  });
-  const [hasSavedInfo, setHasSavedInfo] = useState(() => {
-    if (typeof window !== "undefined") return !!localStorage.getItem("arcana_user_info");
-    return false;
-  });
+  const [confirmEachCard, setConfirmEachCard] = useState(false);
+  const [hasSavedInfo, setHasSavedInfo] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setConfirmEachCard(localStorage.getItem("arcana-confirm-each-card") === "true");
+      setHasSavedInfo(!!localStorage.getItem("arcana_user_info"));
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const toggleConfirmMode = () => {
     const next = !confirmEachCard;

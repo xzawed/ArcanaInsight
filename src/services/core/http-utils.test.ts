@@ -65,4 +65,14 @@ describe("readSseLines", () => {
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });
+
+  it("signal이 이미 abort된 상태면 reader.cancel 후 AbortError throw", async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    const res = makeResponse(["data: {\"delta\":\"hello\"}"]);
+    const gen = readSseLines(res, () => null, "TEST", controller.signal);
+
+    await expect(gen.next()).rejects.toThrow(DOMException);
+  });
 });
