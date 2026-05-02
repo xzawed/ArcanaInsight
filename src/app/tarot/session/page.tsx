@@ -553,7 +553,7 @@ export default function TarotSessionPage() {
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
                 {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
-                <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
+                <div ref={resultContainerRef} data-testid="reading-content" className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
                   {/* 카드별 해석 — 순차 공개 */}
                   {readingResult.cardInterpretations?.map((interp, i) => {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);

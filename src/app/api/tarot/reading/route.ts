@@ -3,7 +3,7 @@ import { TarotService } from "@/services/tarot/tarot-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
-import { Topic } from "@/types/session";
+import { Topic, SpreadType } from "@/types/session";
 import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt, buildFreeQuestionPrompt, buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
 import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
     const systemPrompt = tarotService.getSystemPrompt(characterId);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const freeQuestionPrompt = buildFreeQuestionPrompt(freeQuestion);
-    const resolvedSpreadType = (spreadType === "one-card" || spreadType === "three-card" || spreadType === "five-card")
-      ? spreadType
-      : spreadResolver.resolveForTopic(topic).type;
+    const resolvedSpreadType: SpreadType = (spreadType && spreadResolver.getSpreadByType(spreadType))
+      ? (spreadType as SpreadType)
+      : spreadResolver.resolveForTopic(topic as Topic).type;
     const readingPrompt = tarotService.getReadingPrompt({
       session: { id: sessionId || "anonymous", userId: null, serviceType: "tarot", topic, status: "in_progress",
         spreadType: resolvedSpreadType, selectedCards, createdAt: new Date(), completedAt: null },

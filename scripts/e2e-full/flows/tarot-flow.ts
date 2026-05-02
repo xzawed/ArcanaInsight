@@ -15,18 +15,19 @@ const TOPIC_KO: Record<string, string> = {
   finance: '재물',
   career: '직장',
   health: '건강',
-  general: '종합',
+  general: '일반 상담',
 };
 
 const SPREAD_KO: Record<string, string> = {
   'one-card': '원카드',
   'three-card': '쓰리카드',
-  'relationship': '관계',
-  'horseshoe': '말굽',
-  'decision': '결정',
-  'week-ahead': '주간',
-  'celtic-cross': '켈틱크로스',
-  'zodiac': '조디악',
+  'five-card': '켈틱 크로스 (5장)',
+  'relationship': '관계 스프레드',
+  'horseshoe': '말굽 스프레드',
+  'decision': '의사결정',
+  'week-ahead': '한 주 전망',
+  'celtic-cross': '켈틱 크로스 (10장)',
+  'zodiac': '조디악 휠',
   'tree-of-life': '생명의 나무',
 };
 
@@ -83,12 +84,12 @@ export async function executeTarotFlow(
     await startBtn.click();
   }
 
-  // 6. 카드 선택
+  // 6. 카드 선택 (data-testid^="card-back-" — CardDeck motion.div 마다 부여)
   const count = CARD_COUNTS[tc.spreadType ?? 'three-card'] ?? 3;
   const selectedCards: string[] = [];
 
   for (let i = 0; i < count; i++) {
-    const card = page.locator('[data-testid^="card-back"]').first();
+    const card = page.locator('[data-testid^="card-back-"]').first();
     await card.waitFor({ timeout: 15000 });
     const cardName = await card.getAttribute('data-card-name') ?? `card-${i}`;
     selectedCards.push(cardName);
@@ -101,13 +102,12 @@ export async function executeTarotFlow(
     await page.waitForTimeout(300);
   }
 
-  // 7. 결과 페이지 대기
-  await page.waitForURL('**/tarot/result/**', { timeout: 120000 });
+  // 7. 결과 대기 — 타로 세션은 URL 변경 없이 인라인으로 결과 표시
+  const resultLocator = page.locator('[data-testid="reading-content"]');
+  await resultLocator.waitFor({ timeout: 120000 });
 
   // 8. 응답 텍스트 추출
-  const textLocator = page.locator('[data-testid="reading-content"]').first();
-  await textLocator.waitFor({ timeout: 30000 });
-  const responseText = await textLocator.innerText();
+  const responseText = await resultLocator.innerText();
 
   return { responseText, selectedCards };
 }

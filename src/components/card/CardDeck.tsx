@@ -129,6 +129,8 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
         return (
           <motion.div
             key={card.id}
+            data-testid={`card-back-${index}`}
+            data-card-name={card.id}
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
             animate={{ x: xOffset, y, rotate: angle, opacity: isSelected ? 0.3 : 1, scale }}
             transition={{
