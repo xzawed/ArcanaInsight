@@ -61,20 +61,22 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page }) => {
     await page.goto("/");
-    // JS 번들 실행 + React 하이드레이션 완료 후 body scroll 동작 보장
-    await page.waitForLoadState("load");
+    await page.waitForLoadState("domcontentloaded");
 
     // 페이지 높이가 뷰포트보다 큰지 (스크롤 가능)
     const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
     const viewportHeight = await page.evaluate(() => window.innerHeight);
     expect(scrollHeight).toBeGreaterThan(viewportHeight);
 
-    // 최하단까지 스크롤
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(500);
+    // 네이티브 휠 이벤트로 스크롤 — overflow-x:clip 환경에서 window.scrollTo가
+    // 작동하지 않으므로 실제 브라우저 스크롤 이벤트를 사용
+    await page.mouse.wheel(0, 500);
+    await page.waitForTimeout(300);
 
-    const scrollY = await page.evaluate(() => window.scrollY);
-    expect(scrollY).toBeGreaterThan(0);
+    const scrolled = await page.evaluate(
+      () => window.scrollY || document.documentElement.scrollTop || document.body.scrollTop
+    );
+    expect(scrolled).toBeGreaterThan(0);
   });
 
   test("링크 — 주요 네비게이션 링크 200 응답", async ({ request }) => {
