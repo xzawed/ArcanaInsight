@@ -6,6 +6,9 @@ on:
     - cron: "0 0 * * 6"
   workflow_dispatch: # 수동 실행 가능
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
   issues: write    # QA 실패 Issue 생성·닫기
