@@ -84,7 +84,7 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
         />
       ))}
 
-      {/* burst 파티클 5개 — isTransitioning 시 렌더 */}
+      {/* burst 파티클 3개 — isTransitioning 시 렌더 */}
       <AnimatePresence>
         {isTransitioning && BURST_PARTICLES.map((p, i) => (
           <motion.div

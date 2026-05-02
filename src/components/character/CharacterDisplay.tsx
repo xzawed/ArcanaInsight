@@ -33,7 +33,7 @@ function GlowBurstRing({ mood, primaryColor }: { readonly mood: Mood; readonly p
         inset: "-5%",
         borderRadius: "45%",
         border: `1.5px solid ${color}`,
-        boxShadow: `0 0 10px rgba(168,85,247,0.4), 0 0 20px rgba(168,85,247,0.2)`,
+        boxShadow: `0 0 10px ${hexToRgba(primaryColor, 0.4)}, 0 0 20px ${hexToRgba(primaryColor, 0.2)}`,
       }}
       initial={{ scale: 1, opacity: 0.6 }}
       animate={{ scale: 1.7, opacity: 0 }}
