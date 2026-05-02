@@ -249,8 +249,8 @@ test.describe("AI 응답 렌더링 — 타로", () => {
 
     await enterTarotSession(page);
 
-    // 카드 선택 대기 (세션 페이지 진입 후)
-    await page.waitForTimeout(3000);
+    // 카드 선택 대기 — ShuffleCeremony 2200ms + CI 여유 버퍼
+    await page.waitForTimeout(3500);
 
     // 세션 페이지에서 JSON 잔여물 확인
     const bodyText = await page.textContent("body");

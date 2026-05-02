@@ -10,6 +10,7 @@ import { useCharacterStore } from "@/hooks/useCharacter";
 import { useCardAnimationStore } from "@/hooks/useCardAnimation";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CardDeck } from "@/components/card/CardDeck";
+import { ShuffleCeremony } from "@/components/tarot/ShuffleCeremony";
 import { CardSpread } from "@/components/card/CardSpread";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
@@ -177,17 +178,19 @@ export default function TarotSessionPage() {
     setMood("default");
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: character.greeting, mood: "default", timestamp: new Date() });
 
-    setTimeout(() => {
-      setAnimationPhase("spreading");
-      setPhase("card-select");
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: `${requiredCards}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요`,
-        mood: "default", timestamp: new Date(),
-      });
-    }, 2000);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]); // NOSONAR
+
+  const handleCeremonyComplete = useCallback(() => {
+    const { requiredCards: required } = useSessionStore.getState();
+    setAnimationPhase("spreading");
+    setPhase("card-select");
+    addChatMessage({
+      id: crypto.randomUUID(), role: "character",
+      content: `${required}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요`,
+      mood: "default", timestamp: new Date(),
+    });
+  }, [addChatMessage, setAnimationPhase, setPhase]);
 
   const handleCardSelect = useCallback((index: number) => {
     // 항상 fresh 상태를 읽어 stale closure 방지
@@ -416,6 +419,12 @@ export default function TarotSessionPage() {
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
+          {phase === "card-shuffle" && (
+            <ShuffleCeremony
+              characterId={characterId ?? "arcana"}
+              onComplete={handleCeremonyComplete}
+            />
+          )}
           {phase === "card-select" && (
             <div className="flex items-center justify-between mb-2">
               <button
