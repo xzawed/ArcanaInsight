@@ -44,7 +44,7 @@ src/
 │   ├── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임), CharacterAuraLayer (오라 링)
 │   └── tarot/       # ShuffleCeremony (카드 선택 진입 시 2.2s Canvas rAF 의식 애니메이션)
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
-├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter
+├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter, useReducedMotionStore
 ├── lib/
 │   ├── env.ts       # 환경변수 getter 16개 (하드코딩 금지)
 │   ├── request-utils.ts  # getClientIp / pickFields / jsonError / SSE_HEADERS
@@ -111,7 +111,7 @@ scripts/
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
-**비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `MysticBackground` (서비스별 파티클 배경 — tarot·saju·shinjeom·home). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
+**비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링 — OS `prefers-reduced-motion` OR `useReducedMotionStore` 사용자 설정 적용), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `MysticBackground` (서비스별 파티클 배경 40개 — tarot·saju·shinjeom·home, 황금각 분포). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
 
 **ShuffleCeremony**: 타로 카드 선택 진입 시 2.2초 Canvas rAF 의식 애니메이션. `phase === "card-shuffle"` 조건부 렌더 → `onComplete` 시 `setPhase("card-select")`. 4단계: ① 덱 컷(0–500ms) ② 글로우 폭발(500–700ms) ③ 타이프라이터(700–1400ms, 58ms/자) ④ 부채꼴 펼침(1400–2000ms, spring). 클릭·키보드(Enter/Space) 스킵, `prefers-reduced-motion` 즉시 스킵. `shuffleCeremonyText` 12캐릭터 텍스트 → `waiting-lines.ts`. N=9 고정(시각 효과, 실제 스프레드 크기 무관).
 
@@ -210,6 +210,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
 - **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
 - **E2E 스펙 추가 시 인증 의존성 명시**: 실 Supabase 세션 요구 spec은 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수.
 - **UI 텍스트 변경 시 E2E 셀렉터 동시 검토**: `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴 grep 후 같은 커밋에 수정. — **2026-05-01 사주 버튼 변경 후 E2E CI 실패 원인**.
+- **E2E 드롭다운 버튼 셀렉터**: `Icon` 컴포넌트가 `<img>`로 렌더링되므로 `button:has(img)` + `text=` 조합은 auto 버튼 오탐 발생. 드롭다운 내 특정 버튼은 `data-testid` 부여 필수. 예: `Header.tsx` 테마 버튼 `data-testid={`theme-option-${t.id}`}`. — **2026-05-02 E2E dawn 테스트 CI 3회 연속 실패 원인**.
 
 ### 패키지 · 빌드 (의존성 추가·수정 시)
 - **패키지 추가 후 lockfile 변동 확인 필수**: `pnpm add` 후 `git diff pnpm-lock.yaml | grep "^[-+].*version"` 으로 피어 의존성 버전 변동 검토. — **2026-05-01 lockfile 불일치 장애 원인**.
