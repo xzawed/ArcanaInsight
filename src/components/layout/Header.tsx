@@ -17,6 +17,7 @@ export function Header() {
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
+  const mobileThemeRef = useRef<HTMLDivElement>(null);
   const { mode, activeTheme, setMode } = useThemeStore();
 
   useEffect(() => {
@@ -48,7 +49,9 @@ export function Header() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsDropdownOpen(false);
       }
-      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+      const insideDesktopTheme = themeRef.current?.contains(e.target as Node) ?? false;
+      const insideMobileTheme = mobileThemeRef.current?.contains(e.target as Node) ?? false;
+      if (!insideDesktopTheme && !insideMobileTheme) {
         setIsThemeOpen(false);
       }
     };
@@ -215,7 +218,7 @@ export function Header() {
           >
             <Icon id="ui-settings" size={20} />
           </Link>
-          <div ref={themeRef} className="relative">
+          <div ref={mobileThemeRef} className="relative">
             <button
               onClick={() => setIsThemeOpen(!isThemeOpen)}
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -237,7 +240,7 @@ export function Header() {
                 {themeList.map((t) => (
                   <button
                     key={t.id}
-                    data-testid={`theme-option-${t.id}`}
+                    data-testid={`mobile-theme-option-${t.id}`}
                     onClick={() => { setMode(t.id as ThemeId); setIsThemeOpen(false); }}
                     className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
                       mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
