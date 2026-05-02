@@ -44,6 +44,7 @@ function TarotBackground() {
             top: `${star.y}%`,
             width: `${star.size}px`,
             height: `${star.size}px`,
+            willChange: "opacity",
           }}
           animate={{ opacity: [0.2, 0.9, 0.2] }}
           transition={{ duration: star.duration, repeat: Infinity, ease: "easeInOut", delay: star.delay }}
