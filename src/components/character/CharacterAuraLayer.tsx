@@ -27,13 +27,11 @@ const AMBIENT_PARTICLES = [
   { dx: 24,  dy: -55, size: 3, delay: 2.1 },
 ] as const;
 
-// burst 파티클 고정 offset
+// burst 파티클 고정 offset (3개로 축소 — 균등 분산)
 const BURST_PARTICLES = [
   { dx: -30, dy: -75, size: 4, delay: 0 },
-  { dx: -12, dy: -85, size: 3, delay: 0.08 },
-  { dx: 6,   dy: -80, size: 4, delay: 0.15 },
-  { dx: 22,  dy: -72, size: 3, delay: 0.05 },
-  { dx: 36,  dy: -65, size: 4, delay: 0.12 },
+  { dx: 6,   dy: -85, size: 3, delay: 0.08 },
+  { dx: 36,  dy: -65, size: 4, delay: 0.15 },
 ] as const;
 
 export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: CharacterAuraLayerProps) {
@@ -68,9 +66,9 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
       />
 
       {/* 상시 파티클 3개 */}
-      {AMBIENT_PARTICLES.map((p, i) => (
+      {AMBIENT_PARTICLES.map((p) => (
         <motion.div
-          key={i}
+          key={`p-${p.dx}-${p.dy}`}
           className="absolute rounded-full"
           style={{
             width: p.size,
@@ -86,7 +84,7 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
         />
       ))}
 
-      {/* burst 파티클 5개 — isTransitioning 시 렌더 */}
+      {/* burst 파티클 3개 — isTransitioning 시 렌더 */}
       <AnimatePresence>
         {isTransitioning && BURST_PARTICLES.map((p, i) => (
           <motion.div
@@ -103,7 +101,7 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
             initial={{ y: 0, opacity: 0, scale: 0 }}
             animate={{ y: p.dy, opacity: [0, 1, 0], scale: [0, 1.5, 1] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, delay: p.delay, ease: "easeOut" }}
+            transition={{ duration: 1.6, delay: p.delay, ease: "easeOut" }}
           />
         ))}
       </AnimatePresence>
