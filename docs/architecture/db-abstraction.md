@@ -36,12 +36,13 @@ API Route
 
 ```
 src/lib/db/
-├── index.ts            # getDb() 팩토리
-├── types.ts            # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
-├── supabase-adapter.ts # Supabase 구현체
-├── postgres-adapter.ts # Drizzle ORM 구현체
-├── reading-saver.ts    # DB 저장 추상화 — 3회 retry + 지수 백오프
-└── schema/index.ts     # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
+├── index.ts              # getDb() 팩토리
+├── types.ts              # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
+├── supabase-adapter.ts   # Supabase 구현체
+├── postgres-adapter.ts   # Drizzle ORM 구현체
+├── reading-saver.ts      # DB 저장 추상화 — 3회 retry + 지수 백오프
+├── character-context.ts  # getRecentCharacterMemory() — 캐릭터 메모리 컨텍스트 조회
+└── schema/index.ts       # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
 ```
 
 ---

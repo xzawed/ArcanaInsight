@@ -8,7 +8,7 @@
 
 | 유형 | 형식 | 위치 | 규격 |
 |------|------|------|------|
-| 캐릭터 (10명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 1408×768 |
+| 캐릭터 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 1408×768 |
 | 카드 | SVG | `cards/major/`, `cards/cups/` 등 | — |
 | 배경 | JPG | `backgrounds/` | — |
 | 아이콘 | PNG RGBA (투명 배경) | `images/icons/` | 콘텐츠 크롭 |
@@ -18,10 +18,10 @@
 
 ## 2. 캐릭터 이미지 상세
 
-**10캐릭터** (arcana, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan):
+**12캐릭터** (arcana, miko, seonhwa, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan):
 - PNG 누끼, `nukki/` 폴더 경로
 - 예: `/images/characters/arcana/nukki/default.png`
-- 6가지 mood: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- 7가지 mood: `default`, `idle`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 
 ---
 

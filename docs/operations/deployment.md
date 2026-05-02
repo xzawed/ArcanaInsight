@@ -19,12 +19,19 @@ Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수�
 - `railway.toml` — 빌드/배포 설정 (nixpacks 빌더)
 - `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트)
 
-### GitHub Secrets (필수)
+### GitHub Secrets (CI 전용)
 
-| Secret | 설명 |
-|--------|------|
-| `RAILWAY_TOKEN` | Railway API 토큰 |
-| `RAILWAY_SERVICE_ID` | Railway 서비스 ID |
+> **Railway 배포는 Secrets 불필요**: Railway는 자체 GitHub 연동으로 `main` 브랜치를 자동 감지하여 배포합니다 (`railway.toml` 기준). `deploy.yml`은 코드 품질 검증 전용 워크플로우입니다.
+
+| Secret | 설명 | 사용 워크플로우 |
+|--------|------|----------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL | deploy.yml, sonar.yml, weekly-qa.yml |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 익명 키 | deploy.yml, sonar.yml, weekly-qa.yml |
+| `NEXT_PUBLIC_SITE_URL` | 사이트 URL | deploy.yml, sonar.yml, weekly-qa.yml |
+| `GROK_API_KEY` | Grok API 키 | deploy.yml, sonar.yml, weekly-qa.yml |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 키 | deploy.yml, sonar.yml, weekly-qa.yml |
+| `SONAR_TOKEN` | SonarCloud 분석 토큰 | sonar.yml |
+| `CODECOV_TOKEN` | Codecov 업로드 토큰 | sonar.yml |
 
 ---
 

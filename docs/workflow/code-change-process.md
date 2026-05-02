@@ -15,7 +15,7 @@
 ```bash
 pnpm type-check        # TypeScript 타입 체크
 pnpm lint              # ESLint 코드 품질 검사
-pnpm test:coverage     # 단위 테스트 + 커버리지 임계값 확인 (statements 60%)
+pnpm test:coverage     # 단위 테스트 + 커버리지 임계값 확인 (statements 98%)
 pnpm build             # 프로덕션 빌드 확인
 ```
 

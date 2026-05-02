@@ -36,7 +36,7 @@ ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙�
 - **다크 모드 기본** (점술/타로의 신비로운 분위기)
 - **커스텀 컬러** (`globals.css` `@theme` 블록):
   - `arcana-bg`, `arcana-surface`, `arcana-card`, `arcana-border`
-  - `arcana-purple`, `arcana-indigo`, `arcana-gold`
+  - `arcana-purple`, `arcana-indigo`, `arcana-gold`, `arcana-silver`
   - `arcana-text`, `arcana-muted`
 
 ---

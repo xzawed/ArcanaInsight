@@ -6,7 +6,7 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **697개 테스트** / statements 88%+ 커버리지
+- **697개 테스트** / statements 98%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
 - 임계값: `branches 92 / functions 98 / lines 98 / statements 98`
 
@@ -41,9 +41,9 @@ import 방식:
 import { POST } from "@/app/api/tarot/reading/route";
 ```
 
-현재 `src/__tests__/api/` 파일 목록 (10개):
+현재 `src/__tests__/api/` 파일 목록 (11개):
 - `tarot-session.test.ts` (13개), `saju-session.test.ts` (11개), `shinjeom-session.test.ts` (11개)
-- `tarot-result.test.ts` (4개), `saju-result.test.ts` (4개)
+- `tarot-result.test.ts` (4개), `saju-result.test.ts` (4개), `shinjeom-result.test.ts`
 - `tarot-reading.test.ts` (7개), `saju-reading.test.ts` (5개), `shinjeom-message.test.ts` (5개)
 - `favorite-character.test.ts` (5개), `daily-card.test.ts` (6개)
 
@@ -111,10 +111,10 @@ describe("API 테스트", () => {
 ```ts
 coverage: {
   thresholds: {
-    branches: 75,
-    functions: 85,
-    lines: 88,
-    statements: 88,
+    branches: 92,
+    functions: 98,
+    lines: 98,
+    statements: 98,
   }
 }
 ```

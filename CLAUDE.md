@@ -43,8 +43,8 @@ src/
 │   ├── effects/     # MysticBackground (별자리·안개·룬 오버레이 z-[5]), ServiceBackground (배경 파티클 -z-10), ParticleOverlay, ScrollReveal
 │   ├── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임), CharacterAuraLayer (오라 링)
 │   └── tarot/       # ShuffleCeremony (카드 선택 진입 시 2.2s Canvas rAF 의식 애니메이션)
-├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
-├── hooks/           # Zustand stores + useSSEStream, useTheme, useFavoriteCharacter, useReducedMotionStore
+├── data/            # cards/, characters/, skins/, spreads/, saju/, home/, topics.ts, birth-hours.ts, error-messages.ts, ui-copy.ts
+├── hooks/           # Zustand stores: useSession, useSajuSession, useShinjeomSession, useSkinStore, useGenderStore, useFavoriteCharacter, useReducedMotionStore + useSSEStream, useTheme, useCharacter, useCardAnimation
 ├── lib/
 │   ├── env.ts       # 환경변수 getter 16개 (하드코딩 금지)
 │   ├── request-utils.ts  # getClientIp / pickFields / jsonError / SSE_HEADERS
@@ -66,7 +66,7 @@ docs/                # → docs/README.md 인덱스
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
 supabase/migrations/ # 001~011 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
-e2e/                 # 20개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
+e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
 │   ├── orchestrator.ts, worker.ts, reporter.ts
@@ -84,7 +84,7 @@ scripts/
 |---|---|---|---|---|
 | `arcana` | 아르카나 | 여 | ~네요/~해요, 신비 | 직관·감성 |
 | `miko` | 미코 | 여 | ~입니다, 엄숙 | 영적 해석 |
-| `seonhwa` | 선화 | 여 | ~랍니다, 우아 | 동양적 해석 |
+| `seonhwa` | 선화 | 여 | ~세요/~랍니다, 우아 | 동양적 해석 |
 | `hoshi` | 호시 | 여 | ~야/~지, 반말+이모지 | 캐주얼 |
 | `luna` | 루나 | 여 | ~요/~네요, 다정·신비 | 힐링 |
 | `rei` | 레이 | 여 | ~야/~지, 건조·핵심 | 냉철 분석 |
@@ -95,7 +95,7 @@ scripts/
 | `lix` | 릭스 | 남 | ~는데/~ㄹ까, 장난 | 트릭스터 |
 | `ethan` | 에단 | 남 | ~거든요, 친절·상세 | 학구적 |
 
-**표정 규칙 (3단계만)**: `default` → 세션 진입/대기 | `mystical` → 카드 선택/리딩 대기 | `smile` → 결과 도착. 에러 시 `default` 복귀. 대기 대사 중 표정 변경 금지.
+**표정 규칙 (6-mood)**: `default` → 세션 진입/대기 | `mystical` → 카드 선택/리딩 대기 | `smile` → 결과 도착 | `serious` / `surprised` / `wink` → 대기 대사 mood 연동. 에러 시 `default` 복귀. 대기 대사 중 표정은 `line.mood` 따름.
 
 **이미지 경로**: 12캐릭터 모두 `nukki/[mood].png` (1408×768)
 
@@ -111,11 +111,11 @@ scripts/
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
-**비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링 — OS `prefers-reduced-motion` OR `useReducedMotionStore` 사용자 설정 적용, 파티클 `willChange: "transform, opacity"`), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `ServiceBackground` (서비스별 파티클 배경 40개 — tarot·saju·shinjeom, 황금각 분포, 별 파티클 `willChange: "opacity"`). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
+**비주얼 FX 시스템**: 캐릭터 오라·글로우·배경 효과 레이어. `CharacterAuraLayer` (Framer Motion 오라 링 — OS `prefers-reduced-motion` OR `useReducedMotionStore` 사용자 설정 적용, 파티클 `willChange: "transform, opacity"`), `GlowBurstRing` (표정 전환 시 버스트, `CharacterDisplay` 내부 inline 컴포넌트), `ServiceBackground` (서비스별 전체화면 배경 -z-10 — tarot: 별 파티클 40개 황금각 분포 `willChange: "opacity"`, saju: 그라디언트 2레이어, shinjeom: 오방색 5레이어). `SpriteAnimator`는 mood별 `filter: drop-shadow` 키프레임 내장. OG 이미지 공통 팩토리: `src/app/_og/ResultOgBase.tsx` → `makeResultOgResponse(config)` (SonarCloud 중복 방지용).
 
-**ShuffleCeremony**: 타로 카드 선택 진입 시 2.2초 Canvas rAF 의식 애니메이션. `phase === "card-shuffle"` 조건부 렌더 → `onComplete` 시 `setPhase("card-select")`. 4단계: ① 덱 컷(0–500ms) ② 글로우 폭발(500–700ms) ③ 타이프라이터(700–1400ms, 58ms/자) ④ 부채꼴 펼침(1400–2000ms, spring). 클릭·키보드(Enter/Space) 스킵, `prefers-reduced-motion` 즉시 스킵. `shuffleCeremonyText` 12캐릭터 텍스트 → `waiting-lines.ts`. N=9 고정(시각 효과, 실제 스프레드 크기 무관).
+**ShuffleCeremony**: 타로 카드 선택 진입 시 2.2초 Canvas rAF 의식 애니메이션. `phase === "card-shuffle"` 조건부 렌더 → `onComplete` 시 `setPhase("card-select")`. 4단계: ① 덱 컷(0–500ms) ② 글로우 폭발(500–700ms) ③ 타이프라이터(700–1400ms, 58ms/자) ④ 부채꼴 펼침(1400–2200ms, spring). 클릭·키보드(Enter/Space) 스킵, `prefers-reduced-motion` 즉시 스킵. `shuffleCeremonyText` 12캐릭터 텍스트 → `waiting-lines.ts`. N=9 고정(시각 효과, 실제 스프레드 크기 무관).
 
-**캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `SpriteAnimator.CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>`. 에러 대사: `characterErrorLines` / `defaultErrorLines` (`waiting-lines.ts`). 결과 mood: `CHARACTER_RESULT_MOODS` (same file). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
+**캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` (`waiting-lines.ts`). 결과 mood: `CHARACTER_RESULT_MOODS` (same file). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
 
 ## 명령어
 

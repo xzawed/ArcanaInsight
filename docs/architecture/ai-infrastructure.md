@@ -32,7 +32,7 @@ API Route (route.ts)
 서킷 상태는 `CircuitBreaker` (`src/services/core/circuit-breaker.ts`) 로 관리:
 
 ```ts
-new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "grok_circuit" })
+new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "__arcanaFallbackCircuit__" })
 ```
 
 | 메서드 | 역할 |

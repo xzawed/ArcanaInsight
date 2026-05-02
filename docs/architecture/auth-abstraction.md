@@ -9,9 +9,9 @@
 | 함수 | 설명 |
 |------|------|
 | `getCurrentUser()` | 현재 로그인 사용자 반환. 비로그인 시 `null` |
-| `requireUser()` | 로그인 필수. 비로그인 시 401 반환 |
-| `assertSessionOwnership(sessionId, userId)` | 세션 소유자 확인. 불일치 시 403 |
-| `assertReadingAccess(mode)` | `"public"` = 항상 허용, `"owner"` = 소유자만 허용 |
+| `requireUser()` | 로그인 필수. 비로그인 시 `Error("Unauthorized")` throw |
+| `assertSessionOwnership(sessionId)` | 세션 소유자 확인. 불일치 시 403, 세션 없으면 404 |
+| `assertReadingAccess(sessionId, mode)` | `"public"` = 항상 허용, `"owner"` = 소유자만 허용 |
 
 ---
 
@@ -59,7 +59,8 @@
 
 ```ts
 // 공유 결과 조회 라우트 패턴
-await assertReadingAccess("public");  // 항상 통과
+const err = await assertReadingAccess(sessionId, "public");  // 항상 통과 (null 반환)
+if (err) return err;
 const result = await getDb().findOne("readings", { share_token });
 // whitelist 직렬화 — 새 컬럼이 추가돼도 명시하지 않으면 응답에서 자동 제외
 return Response.json(pickFields(result, READING_PUBLIC_FIELDS));
@@ -67,7 +68,8 @@ return Response.json(pickFields(result, READING_PUBLIC_FIELDS));
 
 소유자 전용 쓰기·삭제:
 ```ts
-await assertReadingAccess("owner");   // 소유자만 통과
+const err = await assertReadingAccess(sessionId, "owner");   // 소유자만 통과 (통과 시 null, 실패 시 Response 반환)
+if (err) return err;
 ```
 
 **응답 whitelist 패턴** (`src/lib/request-utils.ts`):

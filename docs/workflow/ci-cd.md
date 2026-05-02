@@ -12,10 +12,13 @@ GitHub Actions → Railway 자동 배포 파이프라인 설명입니다.
 
 ```
 jobs:
-  1. Lint & Type Check  (pnpm type-check && pnpm lint)
-  2. Build              (pnpm build)
-  3. E2E Tests          (Desktop Chrome + Mobile Android, Playwright v1.59.1)
+  1. Lint & Type Check  (pnpm lint && pnpm type-check)
+  2. Unit Tests         (pnpm test:coverage — Vitest, artifact 7일 보존)
+  3. Build              (pnpm build)
+  4. E2E Tests          (Desktop Chrome + Mobile Android, Playwright v1.59.1)
 ```
+
+`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` 환경변수가 모든 워크플로우에 전역 적용되어 있습니다.
 
 - 3개 job이 모두 통과해야 PR 머지 가능 (branch protection rule)
 - E2E 실패 → 스크린샷·비디오 artifact 90일 보존

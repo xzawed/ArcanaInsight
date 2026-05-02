@@ -3,7 +3,7 @@
 
 # ArcanaInsight E2E 테스트 가이드
 
-- **19개 spec 파일** / **141개 테스트** (Desktop Chrome 기준)
+- **21개 spec 파일** / **141개 테스트** (Desktop Chrome 기준)
 - **3개 디바이스 프로필**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
 - **Playwright 버전**: `v1.59.1` — CI Docker 이미지와 버전 고정, 임의 변경 금지
 
@@ -130,6 +130,8 @@ docker run --rm \
 | `responsive.spec.ts` | 3개 뷰포트(데스크탑·태블릿·모바일) 레이아웃 깨짐 여부 | — | 없음 |
 | `cross-platform.spec.ts` | 콘솔 에러 · 이미지 로드 · safe-area · 링크 200 응답 | — | Desktop + Mobile |
 | `ui-quality.spec.ts` | JSON 잔여물 감지 · 핵심 텍스트 존재 · 레이아웃 깨짐 · 빈 페이지 감지 | — | 없음 |
+| `theme.spec.ts` | 테마 드롭다운 · 7종 테마 전환 · 3개 디바이스 | — | 없음 |
+| `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) | — | ⚠️ 실 세션 필요 |
 
 ---
 
