@@ -1,21 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useThemeStore, themes, ThemeId } from "@/hooks/useTheme";
 import { useSkinStore } from "@/hooks/useSkinStore";
 import { useGenderStore } from "@/hooks/useGenderStore";
+import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 import { cardSkins } from "@/data/skins";
 import { GenderFilter } from "@/types/character";
+
+function SaveToast({ visible }: { visible: boolean }) {
+  return (
+    <div
+      className={`fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-arcana-purple text-white text-sm font-sans shadow-lg shadow-arcana-purple/30 pointer-events-none transition-all duration-300 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+      }`}
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      설정 저장됨
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { mode, activeTheme, setMode } = useThemeStore();
   const { selectedSkinId, setSkin } = useSkinStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
+  const { reducedMotion, setReducedMotion } = useReducedMotionStore();
 
   const [confirmEachCard, setConfirmEachCard] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -25,16 +42,44 @@ export default function SettingsPage() {
     return () => clearTimeout(t);
   }, []);
 
+  const showToast = useCallback(() => {
+    setToastVisible(true);
+    const t = setTimeout(() => setToastVisible(false), 1800);
+    return () => clearTimeout(t);
+  }, []);
+
+  const handleThemeChange = (id: "auto" | ThemeId) => {
+    setMode(id);
+    showToast();
+  };
+
+  const handleSkinChange = (skinId: string) => {
+    setSkin(skinId);
+    showToast();
+  };
+
+  const handleGenderChange = (id: GenderFilter) => {
+    setGenderFilter(id);
+    showToast();
+  };
+
   const toggleConfirmMode = () => {
     const next = !confirmEachCard;
     setConfirmEachCard(next);
     localStorage.setItem("arcana-confirm-each-card", String(next));
+    showToast();
+  };
+
+  const toggleReducedMotion = () => {
+    setReducedMotion(!reducedMotion);
+    showToast();
   };
 
   const clearSavedInfo = () => {
     localStorage.removeItem("arcana_user_info");
     localStorage.removeItem("arcana_privacy_agreed");
     setHasSavedInfo(false);
+    showToast();
   };
 
   const themeOptions: { id: "auto" | ThemeId; label: string; icon: string }[] = [
@@ -52,9 +97,11 @@ export default function SettingsPage() {
     <div className="relative min-h-screen">
       {/* 배경 */}
       <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
+        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/70" />
       </div>
+
+      <SaveToast visible={toastVisible} />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Link href="/" className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
@@ -71,11 +118,11 @@ export default function SettingsPage() {
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">테마</h2>
             <p className="text-arcana-muted text-xs mb-4">현재: {mode === "auto" ? `자동 (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {themeOptions.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => setMode(t.id)}
+                  onClick={() => handleThemeChange(t.id)}
                   className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs transition-all ${
                     mode === t.id
                       ? "border-arcana-purple bg-arcana-purple/15 text-arcana-purple shadow-sm"
@@ -97,7 +144,7 @@ export default function SettingsPage() {
               {cardSkins.map((skin) => (
                 <button
                   key={skin.id}
-                  onClick={() => setSkin(skin.id)}
+                  onClick={() => handleSkinChange(skin.id)}
                   className={`p-3 rounded-xl border text-left transition-all ${
                     selectedSkinId === skin.id
                       ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
@@ -125,7 +172,7 @@ export default function SettingsPage() {
               {genderOptions.map((opt) => (
                 <button
                   key={opt.id}
-                  onClick={() => setGenderFilter(opt.id)}
+                  onClick={() => handleGenderChange(opt.id)}
                   className={`flex-1 py-2.5 rounded-full text-sm font-display font-bold transition-all ${
                     genderFilter === opt.id
                       ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/20"
@@ -157,6 +204,31 @@ export default function SettingsPage() {
               }`}>
                 <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
                   confirmEachCard ? "translate-x-4" : "translate-x-0"
+                }`} />
+              </div>
+            </button>
+          </section>
+
+          {/* 애니메이션 */}
+          <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">애니메이션</h2>
+            <p className="text-arcana-muted text-xs mb-4">오라·파티클 등 장식 애니메이션 감소</p>
+            <button
+              onClick={toggleReducedMotion}
+              className="w-full flex items-center justify-between p-3 rounded-xl border border-arcana-border/50 hover:border-arcana-border transition-colors"
+              aria-pressed={reducedMotion}
+            >
+              <div>
+                <span className="text-arcana-text text-sm font-sans">애니메이션 감소</span>
+                <p className="text-arcana-muted text-xs mt-0.5">
+                  {reducedMotion ? "최소 애니메이션 (배터리·접근성 절약)" : "일반 애니메이션 (기본)"}
+                </p>
+              </div>
+              <div className={`w-10 h-6 rounded-full flex items-center px-0.5 transition-colors ${
+                reducedMotion ? "bg-arcana-purple" : "bg-arcana-border"
+              }`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                  reducedMotion ? "translate-x-4" : "translate-x-0"
                 }`} />
               </div>
             </button>
