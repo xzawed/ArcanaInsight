@@ -17,6 +17,7 @@ export function Header() {
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
+  const mobileThemeRef = useRef<HTMLDivElement>(null);
   const { mode, activeTheme, setMode } = useThemeStore();
 
   useEffect(() => {
@@ -48,7 +49,9 @@ export function Header() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsDropdownOpen(false);
       }
-      if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
+      const inDesktop = themeRef.current?.contains(e.target as Node);
+      const inMobile = mobileThemeRef.current?.contains(e.target as Node);
+      if (!inDesktop && !inMobile) {
         setIsThemeOpen(false);
       }
     };
@@ -132,7 +135,7 @@ export function Header() {
               <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden z-50">
                 <div className="px-3 py-2 border-b border-arcana-border">
                   <p className="text-arcana-muted text-[10px] font-serif">테마 설정</p>
                 </div>
@@ -214,7 +217,7 @@ export function Header() {
           >
             <Icon id="ui-settings" size={20} />
           </Link>
-          <div ref={themeRef} className="relative">
+          <div ref={mobileThemeRef} className="relative">
             <button
               onClick={() => setIsThemeOpen(!isThemeOpen)}
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
