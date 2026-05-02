@@ -11,6 +11,9 @@ on:
       - 'n8n/**'
       - '.github/ISSUE_TEMPLATE/**'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: read
   issues: read     # QA 실패 Issue 목록 조회
