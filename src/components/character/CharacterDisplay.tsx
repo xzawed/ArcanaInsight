@@ -55,7 +55,7 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       return;
     }
     const t1 = setTimeout(() => setIsTransitioning(true), 0);
-    const t2 = setTimeout(() => setIsTransitioning(false), 850);
+    const t2 = setTimeout(() => setIsTransitioning(false), 1600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [mood]);
 
