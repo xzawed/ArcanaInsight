@@ -11,11 +11,11 @@ const THEMES = [
   { id: "winter",   nameKo: "겨울 설경" },
 ] as const;
 
-// auto 버튼은 현재 테마명을 작은 스팬으로 표시하므로 text= 셀렉터가 오탐될 수 있음.
-// img 포함 버튼(= 테마 버튼)만 대상으로 해 auto 버튼 레이블 스팬 오탐 방지.
+// data-testid 기반 셀렉터 — auto 버튼 오탐 없이 테마 버튼만 정확히 선택
+// Header.tsx에서 두 드롭다운(데스크탑/모바일) 모두 data-testid={`theme-option-${t.id}`} 부여
 // nth: 0 = 데스크탑 드롭다운, 1 = 모바일 드롭다운 (DOM 순서 기반)
-function themeBtn(page: import("@playwright/test").Page, nameKo: string, nth = 0) {
-  return page.locator("div.absolute button:has(img)").filter({ hasText: nameKo }).nth(nth);
+function themeOptionBtn(page: import("@playwright/test").Page, id: string, nth = 0) {
+  return page.locator(`[data-testid="theme-option-${id}"]`).nth(nth);
 }
 
 test.describe("테마 드롭다운 — 데스크탑 기본 동작", () => {
@@ -59,9 +59,8 @@ test.describe("테마 드롭다운 — 7개 테마 선택 + localStorage + CSS �
       await btn.click();
       await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
 
-      // img 포함 버튼(테마 버튼)만 선택 — auto 버튼 현재 테마 레이블 스팬 오탐 방지
-      const option = themeBtn(page, nameKo, 0);
-      await option.evaluate((el) => (el as HTMLElement).click());
+      // data-testid 기반 — auto 버튼 오탐 완전 차단
+      await themeOptionBtn(page, id, 0).evaluate((el) => (el as HTMLElement).click());
       await page.waitForTimeout(300);
 
       const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
@@ -84,8 +83,7 @@ test.describe("테마 드롭다운 — auto 모드 선택", () => {
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
-    // img 버튼으로 midnight 선택 (auto 레이블 오탐 방지)
-    await themeBtn(page, "한밤의 신비", 0).evaluate((el) => (el as HTMLElement).click());
+    await themeOptionBtn(page, "midnight", 0).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(300);
 
     await btn.click();
@@ -112,7 +110,7 @@ test.describe("테마 드롭다운 — 모바일 390px", () => {
     await expect(page.locator("text=자동 (시간/계절)").last()).toBeVisible({ timeout: 3000 });
 
     // 모바일 드롭다운 버튼(nth=1)으로 한밤의 신비 선택
-    await themeBtn(page, "한밤의 신비", 1).evaluate((el) => (el as HTMLElement).click());
+    await themeOptionBtn(page, "midnight", 1).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(300);
 
     const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
@@ -131,7 +129,7 @@ test.describe("테마 — 새로고침 후 유지", () => {
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
-    await themeBtn(page, "황혼의 노을", 0).evaluate((el) => (el as HTMLElement).click());
+    await themeOptionBtn(page, "sunset", 0).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(300);
 
     await page.reload();
@@ -157,7 +155,7 @@ test.describe("테마 — 설정 페이지 상태 일치", () => {
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
-    await themeBtn(page, "한여름 밤", 0).evaluate((el) => (el as HTMLElement).click());
+    await themeOptionBtn(page, "summer", 0).evaluate((el) => (el as HTMLElement).click());
     await page.waitForTimeout(300);
 
     await page.goto("/settings");
