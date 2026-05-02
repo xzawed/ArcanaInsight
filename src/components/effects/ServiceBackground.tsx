@@ -9,7 +9,7 @@ interface ServiceBackgroundProps {
 }
 
 // 타로 별자리: 황금비 배치 — SSR 안전 정적 배열 (Math.random 미사용)
-const STAR_POSITIONS = Array.from({ length: 80 }, (_, i) => ({
+const STAR_POSITIONS = Array.from({ length: 40 }, (_, i) => ({
   id: i,
   x: (i * 137.508) % 100,
   y: (i * 97.317) % 100,
