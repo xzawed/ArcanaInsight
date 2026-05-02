@@ -61,7 +61,8 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    // JS 번들 실행 + React 하이드레이션 완료 후 body scroll 동작 보장
+    await page.waitForLoadState("load");
 
     // 페이지 높이가 뷰포트보다 큰지 (스크롤 가능)
     const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
