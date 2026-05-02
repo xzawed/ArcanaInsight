@@ -5,9 +5,9 @@ import { shuffleCeremonyText } from "@/data/characters/waiting-lines";
 import { hexToRgbComponents } from "@/lib/color-utils";
 
 interface ShuffleCeremonyProps {
-  characterId: string;
-  onComplete: () => void;
-  primaryColor?: string;
+  readonly characterId: string;
+  readonly onComplete: () => void;
+  readonly primaryColor?: string;
 }
 
 const N = 9;

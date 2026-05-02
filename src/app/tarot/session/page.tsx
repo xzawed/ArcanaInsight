@@ -583,7 +583,7 @@ export default function TarotSessionPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 1.0, ease: "easeOut" }}
+                      transition={{ duration: 0.5, delay: 1, ease: "easeOut" }}
                       className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
                     >
                       <div className="flex items-center gap-2 mb-3">

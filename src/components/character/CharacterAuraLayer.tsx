@@ -66,9 +66,9 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
       />
 
       {/* 상시 파티클 3개 */}
-      {AMBIENT_PARTICLES.map((p, i) => (
+      {AMBIENT_PARTICLES.map((p) => (
         <motion.div
-          key={`ambient-${i}`}
+          key={`p-${p.dx}-${p.dy}`}
           className="absolute rounded-full"
           style={{
             width: p.size,
