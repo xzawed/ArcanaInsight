@@ -40,7 +40,7 @@
 src/
 ├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings)
 ├── components/      # card/, character/, chat/, common/, effects/, home/, layout/, saju/, skin/, tarot/
-│   ├── effects/     # MysticBackground (서비스별 배경 파티클), ParticleOverlay
+│   ├── effects/     # MysticBackground (별자리·안개·룬 오버레이 z-[5]), ServiceBackground (배경 파티클 -z-10), ParticleOverlay, ScrollReveal
 │   ├── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임), CharacterAuraLayer (오라 링)
 │   └── tarot/       # ShuffleCeremony (카드 선택 진입 시 2.2s Canvas rAF 의식 애니메이션)
 ├── data/            # cards/, characters/, skins/, spreads/, topics.ts, birth-hours.ts
