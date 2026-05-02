@@ -56,10 +56,8 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   useEffect(() => {
     if (!isSpread) return;
     const t1 = setTimeout(() => setRitualSpread(true), 350);
-    const t2 = setTimeout(() => setRitualSpread(false), 650);
-    const t3 = setTimeout(() => setRitualSpread(true), 950);
-    const t4 = setTimeout(() => setRitualDone(true), 1100);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    const t2 = setTimeout(() => setRitualDone(true), 600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [isSpread]);
 
   useEffect(() => {

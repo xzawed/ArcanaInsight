@@ -438,6 +438,7 @@ export default function TarotSessionPage() {
             <ShuffleCeremony
               characterId={characterId ?? "arcana"}
               onComplete={handleCeremonyComplete}
+              primaryColor={character?.effectTheme.primary}
             />
           )}
           {phase === "card-select" && (
