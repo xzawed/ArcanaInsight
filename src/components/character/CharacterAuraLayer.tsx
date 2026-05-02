@@ -80,7 +80,7 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
             left: `calc(50% + ${p.dx}px)`,
             background: color,
             boxShadow: `0 0 ${p.size * 2}px ${color}`,
-            willChange: "transform",
+            willChange: "transform, opacity",
           }}
           animate={{ y: [0, p.dy, 0], opacity: [0, 0.8, 0] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
