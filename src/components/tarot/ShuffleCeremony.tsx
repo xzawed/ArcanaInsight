@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { shuffleCeremonyText } from "@/data/characters/waiting-lines";
+import { hexToRgbComponents } from "@/lib/color-utils";
 
 interface ShuffleCeremonyProps {
   characterId: string;
@@ -11,12 +12,6 @@ interface ShuffleCeremonyProps {
 
 const N = 9;
 const TOTAL_S = 2.2;
-
-function hexToRgbStr(hex: string): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!r) return "139,92,246";
-  return `${parseInt(r[1], 16)},${parseInt(r[2], 16)},${parseInt(r[3], 16)}`;
-}
 
 function easeInOut(t: number) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
 function easeOut(t: number)   { return 1 - Math.pow(1-t, 3); }
@@ -33,10 +28,8 @@ function drawCard(
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
   ctx.translate(x, y);
   ctx.rotate(angle);
-  if (glowStrength > 0) {
-    ctx.shadowColor = `rgba(${rgb},${glowStrength})`;
-    ctx.shadowBlur = 20 * glowStrength;
-  }
+  ctx.shadowBlur = glowStrength > 0 ? 20 * glowStrength : 0;
+  ctx.shadowColor = glowStrength > 0 ? `rgba(${rgb},${glowStrength})` : "rgba(0,0,0,0)";
   ctx.beginPath();
   if (ctx.roundRect) ctx.roundRect(-w/2, -h/2, w, h, 4);
   else ctx.rect(-w/2, -h/2, w, h);
@@ -87,7 +80,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
 
     const charText = shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
     const textChars = [...charText];
-    const rgb = hexToRgbStr(primaryColor);
+    const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;
     let startMs: number | null = null;
     const cw = 34, ch = 54;

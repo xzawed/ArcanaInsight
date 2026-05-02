@@ -49,7 +49,7 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
   const [containerHeight, setContainerHeight] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // 셔플 의식: gather → spread → gather → spread(final)
+  // 셔플 의식: spread(350ms) → ritualDone(600ms)
   const [ritualDone, setRitualDone] = useState(false);
   const [ritualSpread, setRitualSpread] = useState(false);
 
