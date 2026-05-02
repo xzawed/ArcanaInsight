@@ -37,13 +37,18 @@ function parseSseLine(
 export async function* readSseLines(
   response: Response,
   extractDelta: (parsed: unknown) => string | null,
-  logTag = "SSE"
+  logTag = "SSE",
+  signal?: AbortSignal
 ): AsyncGenerator<string, void, unknown> {
   if (!response.body) throw new Error("Response body is null");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   while (true) {
+    if (signal?.aborted) {
+      await reader.cancel();
+      throw new DOMException("The operation was aborted.", "AbortError");
+    }
     const { done, value } = await reader.read();
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
