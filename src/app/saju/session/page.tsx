@@ -48,7 +48,7 @@ async function handleSajuShare(r: { shareToken?: string | null; overallReading?:
   const shareToken = r?.shareToken;
   const title = `사주 분석 결과 - ${SITE_NAME}`;
   if (shareToken) {
-    const url = `${globalThis.location.origin}/saju/result/${shareToken}`;
+    const url = `${globalThis.location?.origin}/saju/result/${shareToken}`;
     const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${SITE_NAME}`;
     await shareWithUrl(title, text, url);
   } else {
@@ -63,7 +63,7 @@ export default function SajuSessionPage() {
   const router = useRouter();
   const { currentMood, setMood } = useCharacterStore();
   const {
-    phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData,
+    phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData, isLoading,
     setPhase, setSessionId, addChatMessage, setReadingResult, setSajuData, setLoading,
   } = useSajuSessionStore();
 
@@ -271,7 +271,8 @@ export default function SajuSessionPage() {
                   <p className="text-arcana-muted text-sm font-serif">해석에 문제가 발생했어요</p>
                   <div className="flex gap-3">
                     <button onClick={() => { setReadingError(false); startReading(); }}
-                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm">
+                      disabled={isLoading}
+                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                       다시 시도
                     </button>
                     <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}

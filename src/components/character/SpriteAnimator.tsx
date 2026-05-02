@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
@@ -132,7 +132,7 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", pri
 
   const isLooping = config.loop;
   const activeLoopKey = mood === "default" ? idleAnimation : mood;
-  const loopMotion = buildLoopMotion(primaryColor ?? "#a78bfa");
+  const loopMotion = useMemo(() => buildLoopMotion(primaryColor ?? "#a78bfa"), [primaryColor]);
   const loopAnim = loopMotion[activeLoopKey] ?? loopMotion.float;
   const loopTransition = LOOP_TRANSITIONS[activeLoopKey] ?? LOOP_TRANSITIONS.float;
   const enterAnim = ENTER_MOTION[mood];

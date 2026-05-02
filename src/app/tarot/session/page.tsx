@@ -526,7 +526,8 @@ export default function TarotSessionPage() {
                       <div className="flex gap-3">
                         <button
                           onClick={() => { setReadingError(false); startReading(selectedCards); }}
-                          className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity"
+                          disabled={isLoading}
+                          className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           다시 시도
                         </button>
