@@ -59,12 +59,11 @@ describe("POST /api/tarot/session", () => {
     expect(mockDb.insert).toHaveBeenCalledWith("sessions", expect.objectContaining({ spread_type: "three-card" }));
   });
 
-  it("spreadType이 유효 3개 외 값이면 서비스 기본값 사용 (zodiac 등)", async () => {
+  it("spreadType이 유효한 10종이면 모두 그대로 사용 (zodiac 등)", async () => {
     const { POST, mockDb } = await setup();
     await POST(makePostRequest({ topic: "love", spreadType: "zodiac" }));
     const callArg = mockDb.insert.mock.calls[0][1] as Record<string, unknown>;
-    expect(callArg.spread_type).not.toBe("zodiac");
-    expect(callArg.spread_type).toBeTruthy();
+    expect(callArg.spread_type).toBe("zodiac");
   });
 
   it("spreadType 미지정 → sessionData.spreadType 사용", async () => {
