@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Mood } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
+import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 
 interface CharacterAuraLayerProps {
   readonly mood: Mood;
@@ -35,7 +36,9 @@ const BURST_PARTICLES = [
 ] as const;
 
 export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: CharacterAuraLayerProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const systemReducedMotion = useReducedMotion();
+  const { reducedMotion: userReducedMotion } = useReducedMotionStore();
+  const shouldReduceMotion = systemReducedMotion || userReducedMotion;
   const color = hexToRgba(primaryColor, AURA_OPACITY[mood]);
 
   if (shouldReduceMotion) {
