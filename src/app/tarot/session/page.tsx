@@ -128,12 +128,7 @@ export default function TarotSessionPage() {
   const [pendingConfirm, _setPendingConfirm] = useState(false);
   const pendingConfirmRef = useRef(false);
   const setPendingConfirm = (v: boolean) => { pendingConfirmRef.current = v; _setPendingConfirm(v); };
-  const [confirmEachCard, setConfirmEachCard] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("arcana-confirm-each-card") === "true";
-    }
-    return false;
-  });
+  const [confirmEachCard, setConfirmEachCard] = useState(false);
   const resultContainerRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
 
@@ -144,6 +139,13 @@ export default function TarotSessionPage() {
       return next;
     });
   };
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setConfirmEachCard(localStorage.getItem("arcana-confirm-each-card") === "true");
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (!topic || !character || !spreadType) {
@@ -311,6 +313,19 @@ export default function TarotSessionPage() {
         sessionId = useSessionStore.getState().sessionId;
         if (sessionId) break;
       }
+    }
+
+    if (!sessionId) {
+      stopSequence();
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: getReadingErrorText("세션 연결에 실패했습니다. 잠시 후 다시 시도해 주세요.", characterId ?? "arcana"),
+        mood: "default", timestamp: new Date(),
+      });
+      setMood("default");
+      setReadingError(true);
+      setLoading(false);
+      return;
     }
 
     await fetchSSEStream({
