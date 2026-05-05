@@ -31,7 +31,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (697개, statements 98%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (705개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
