@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 import { requireUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
+import { FavoriteCharacterSchema } from "@/lib/validation/api-schemas"
 
 export async function GET() {
   try {
@@ -23,7 +24,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser()
-    const { characterId } = (await request.json()) as { characterId: string | null }
+    const parsed = FavoriteCharacterSchema.safeParse(await request.json())
+    if (!parsed.success) return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+    const { characterId } = parsed.data
     if (characterId !== null && !getCharacterById(characterId)) {
       return NextResponse.json({ error: "Invalid character" }, { status: 400 })
     }

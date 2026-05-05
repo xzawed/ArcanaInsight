@@ -94,4 +94,16 @@ describe("POST /api/profile/favorite-character", () => {
     const res = await POST(makePostRequest({ characterId: "arcana" }));
     expect(res.status).toBe(500);
   });
+
+  it("body 없음 (빈 객체) → 400 (Zod 검증 실패)", async () => {
+    const { POST } = await setup();
+    const req = new Request("http://localhost/api/profile/favorite-character", {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: { "Content-Type": "application/json" },
+    })
+    const res = await POST(req as unknown as import("next/server").NextRequest)
+    expect(res.status).toBe(400)
+    expect((await res.json()).error).toBe("Invalid request body")
+  });
 });

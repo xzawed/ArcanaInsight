@@ -78,3 +78,7 @@ export const ShinjeomMessageSchema = z.object({
   isFinalTurn: z.boolean(),
   messageIndex: z.number().int().min(0).max(200),
 });
+
+export const FavoriteCharacterSchema = z.object({
+  characterId: z.string().max(50).nullable(),
+});

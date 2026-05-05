@@ -40,6 +40,8 @@ export default defineConfig({
         "src/app/api/saju/reading/route.ts",          // PR C
         "src/app/api/shinjeom/message/route.ts",      // PR C
         "src/app/api/shinjeom/result/[id]/route.ts",  // PR-L
+        "src/lib/supabase/admin.ts",  // Admin client — 테스트 있음
+        "src/lib/db/index.ts",        // DB provider 팩토리 — 테스트 있음
       ],
       exclude: [
         "src/**/*.test.ts",
@@ -67,12 +69,14 @@ export default defineConfig({
         "src/hooks/useSkinStore.ts",
         "src/hooks/useTheme.ts",
         // lib 계층 — 테스트 미작성 (auth/storage는 Phase C-4 완료 전까지 제외)
-        "src/lib/supabase/**",
+        "src/lib/supabase/client.ts",
+        "src/lib/supabase/server.ts",
+        "src/lib/supabase/middleware.ts",
+        "src/lib/supabase/storage.ts",
         "src/lib/auth/**",
         "src/lib/storage/**",
         "src/lib/db/schema/**",
         "src/lib/db/types.ts",
-        "src/lib/db/index.ts",
         "src/services/core/ai-provider.ts",   // re-export only
         "src/services/saju/saju-types.ts",    // 타입 정의만
       ],
