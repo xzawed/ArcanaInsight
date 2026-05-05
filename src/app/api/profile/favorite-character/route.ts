@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireUser()
     const parsed = FavoriteCharacterSchema.safeParse(await request.json())
-    if (!parsed.success) return new Response(JSON.stringify({ error: "Invalid request body" }), { status: 400, headers: { "Content-Type": "application/json" } })
+    if (!parsed.success) return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
     const { characterId } = parsed.data
     if (characterId !== null && !getCharacterById(characterId)) {
       return NextResponse.json({ error: "Invalid character" }, { status: 400 })
