@@ -19,7 +19,7 @@ class MockPostgresAdapter {}
 const originalRequire = Module.prototype.require
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Module.prototype.require = function patchedRequire(id: string): any {
+  Module.prototype.require = function patchedRequire(this: NodeModule, id: string): any {
     const resolved = path.resolve(DB_DIR, id)
     if (resolved.endsWith("supabase-admin-adapter") || resolved.includes("supabase-admin-adapter")) {
       return { SupabaseAdminAdapter: MockSupabaseAdminAdapter }
@@ -30,7 +30,6 @@ beforeAll(() => {
     if (resolved.endsWith("postgres-adapter") || resolved.includes("postgres-adapter")) {
       return { PostgresAdapter: MockPostgresAdapter }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return originalRequire.call(this, id)
   } as NodeRequire
 })
