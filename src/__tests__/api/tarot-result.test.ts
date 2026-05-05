@@ -4,7 +4,16 @@ import { makeResultRouteSetup } from "@/test-helpers/api-route-setup";
 
 setupDoMock();
 
-const MOCK_READING = { id: "r-1", share_token: "abc123", overall_reading: "테스트" };
+const MOCK_READING = {
+  id: "r-1",
+  share_token: "abc123",
+  overall_reading: "테스트",
+  card_interpretation: [],
+  advice: "조언",
+  created_at: "2026-05-05T00:00:00Z",
+  user_id: "u-secret",        // SAFE_KEYS에 없는 필드 — 응답에서 제거되어야 함
+  session_id: "s-secret",     // SAFE_KEYS에 없는 필드 — 응답에서 제거되어야 함
+};
 
 async function setup() {
   return makeResultRouteSetup(
@@ -19,7 +28,11 @@ describe("GET /api/tarot/result/[id]", () => {
     mockAdminDb.findOne.mockResolvedValue(MOCK_READING);
     const res = await GET(...makeGetRequest("abc123"));
     expect(res.status).toBe(200);
-    expect((await res.json()).reading).toEqual(MOCK_READING);
+    const body = await res.json();
+    expect(body.reading.id).toBe("r-1");
+    expect(body.reading.overall_reading).toBe("테스트");
+    expect(body.reading.user_id).toBeUndefined();   // pickFields 필터 검증
+    expect(body.reading.session_id).toBeUndefined(); // pickFields 필터 검증
   });
 
   it("존재하지 않는 share_token → 404", async () => {
