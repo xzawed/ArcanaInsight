@@ -10,7 +10,11 @@ const TODAY = "2026-04-24";
 const CACHED_CARD = { card_id: "major-00", is_reversed: false, interpretation: "캐시된 해석", keywords: ["새로운 시작"] };
 const VALID_BODY = { characterId: "arcana", date: TODAY };
 
-async function setup(options: { cached?: boolean; aiError?: string | boolean } = {}) {
+async function setup(options: {
+  cached?: boolean;
+  aiError?: string | boolean;
+  rateLimited?: boolean;
+} = {}) {
   const mockDb = makeMockDb();
   mockDb.findOne.mockResolvedValue(options.cached ? CACHED_CARD : null);
   mockDb.upsert.mockResolvedValue(CACHED_CARD);
@@ -24,6 +28,12 @@ async function setup(options: { cached?: boolean; aiError?: string | boolean } =
 
   vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
   vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+  vi.doMock("@/lib/rate-limit", () => ({
+    checkRateLimit: vi.fn().mockResolvedValue(!options.rateLimited),
+    rateLimitResponse: vi.fn().mockReturnValue(
+      new Response(JSON.stringify({ error: "Too many requests" }), { status: 429 })
+    ),
+  }));
 
   const { POST } = await import("@/app/api/daily-card/route");
   return { POST, mockDb };
@@ -46,6 +56,12 @@ describe("POST /api/daily-card", () => {
     const body = await res.json();
     expect(body.cardId).toBeTruthy();
     expect(body.interpretation).toBeTruthy();
+  });
+
+  it("레이트 리밋 초과 → 429", async () => {
+    const { POST } = await setup({ rateLimited: true });
+    const res = await POST(makePostRequest(VALID_BODY));
+    expect(res.status).toBe(429);
   });
 
   it("캐릭터 없음 → 404", async () => {
@@ -94,8 +110,6 @@ describe("POST /api/daily-card", () => {
 
   it("isReversed 결정 — seed % 3 === 0 시 역방향", async () => {
     const { POST } = await setup();
-    // date+characterId 해시가 3의 배수인 조합으로 역방향 검증
-    // 먼저 정방향 케이스(기본값) 확인
     const res = await POST(makePostRequest({ characterId: "arcana", date: TODAY }));
     expect(res.status).toBe(200);
     const body = await res.json();
