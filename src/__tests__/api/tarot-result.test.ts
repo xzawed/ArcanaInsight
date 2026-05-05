@@ -15,32 +15,32 @@ async function setup() {
 
 describe("GET /api/tarot/result/[id]", () => {
   it("존재하는 share_token → reading 반환", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(MOCK_READING);
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(MOCK_READING);
     const res = await GET(...makeGetRequest("abc123"));
     expect(res.status).toBe(200);
     expect((await res.json()).reading).toEqual(MOCK_READING);
   });
 
   it("존재하지 않는 share_token → 404", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(null);
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(null);
     const res = await GET(...makeGetRequest("no-such-token"));
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe("Reading not found");
   });
 
   it("DB 오류 → 500", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockRejectedValue(new Error("DB error"));
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockRejectedValue(new Error("DB error"));
     const res = await GET(...makeGetRequest("abc123"));
     expect(res.status).toBe(500);
   });
 
-  it("readings 테이블에 share_token으로 조회", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(MOCK_READING);
+  it("getAdminDb로 readings 테이블 share_token 조회", async () => {
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(MOCK_READING);
     await GET(...makeGetRequest("tok123"));
-    expect(mockDb.findOne).toHaveBeenCalledWith("readings", { share_token: "tok123" });
+    expect(mockAdminDb.findOne).toHaveBeenCalledWith("readings", { share_token: "tok123" });
   });
 });

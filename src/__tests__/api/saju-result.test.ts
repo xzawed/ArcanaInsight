@@ -15,32 +15,32 @@ async function setup() {
 
 describe("GET /api/saju/result/[id]", () => {
   it("존재하는 share_token → reading 반환", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(MOCK_READING);
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(MOCK_READING);
     const res = await GET(...makeGetRequest("saju-tok"));
     expect(res.status).toBe(200);
     expect((await res.json()).reading).toEqual(MOCK_READING);
   });
 
   it("존재하지 않는 share_token → 404", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(null);
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(null);
     const res = await GET(...makeGetRequest("no-such-token"));
     expect(res.status).toBe(404);
     expect((await res.json()).error).toBe("Reading not found");
   });
 
   it("DB 오류 → 500", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockRejectedValue(new Error("DB error"));
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockRejectedValue(new Error("DB error"));
     const res = await GET(...makeGetRequest("saju-tok"));
     expect(res.status).toBe(500);
   });
 
   it("saju_readings 테이블에 share_token으로 조회", async () => {
-    const { GET, mockDb, makeGetRequest } = await setup();
-    mockDb.findOne.mockResolvedValue(MOCK_READING);
+    const { GET, mockAdminDb, makeGetRequest } = await setup();
+    mockAdminDb.findOne.mockResolvedValue(MOCK_READING);
     await GET(...makeGetRequest("tok456"));
-    expect(mockDb.findOne).toHaveBeenCalledWith("saju_readings", { share_token: "tok456" });
+    expect(mockAdminDb.findOne).toHaveBeenCalledWith("saju_readings", { share_token: "tok456" });
   });
 });

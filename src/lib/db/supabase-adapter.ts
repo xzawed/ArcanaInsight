@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import type { DbClient } from "./types"
 
 export class SupabaseAdapter implements DbClient {
-  private async client() {
+  protected async client() {
     return createClient()
   }
 

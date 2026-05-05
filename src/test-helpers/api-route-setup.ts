@@ -37,10 +37,15 @@ export async function makeResultRouteSetup(
 ): Promise<{
   GET: (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>
   mockDb: MockDb
+  mockAdminDb: MockDb
   makeGetRequest: (id: string) => [NextRequest, { params: Promise<{ id: string }> }]
 }> {
   const mockDb = makeMockDb()
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }))
+  const mockAdminDb = makeMockDb()
+  vi.doMock("@/lib/db", () => ({
+    getDb: vi.fn().mockReturnValue(mockDb),
+    getAdminDb: vi.fn().mockReturnValue(mockAdminDb),
+  }))
 
   const route = await routeImport()
 
@@ -54,6 +59,7 @@ export async function makeResultRouteSetup(
   return {
     GET: route.GET as (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => Promise<Response>,
     mockDb,
+    mockAdminDb,
     makeGetRequest,
   }
 }
