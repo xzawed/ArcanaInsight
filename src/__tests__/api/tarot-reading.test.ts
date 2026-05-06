@@ -242,11 +242,15 @@ describe("POST /api/tarot/reading", () => {
     expect(text).toContain("error");
   });
 
-  it("computeReadingMaxTokens 정책 — 1장→2600, 5장→6500, 10장→14000이 streamReading에 전달", async () => {
+  it("computeReadingMaxTokens 정책 — 모든 분기가 streamReading에 정확히 전달", async () => {
     const cases: { count: number; expected: number }[] = [
       { count: 1, expected: 2600 },
+      { count: 3, expected: 4500 },
       { count: 5, expected: 6500 },
+      { count: 7, expected: 8500 },
+      { count: 9, expected: 10500 },
       { count: 10, expected: 14000 },
+      { count: 12, expected: 16000 },
     ];
     for (const { count, expected } of cases) {
       vi.resetModules();
