@@ -41,10 +41,16 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://example.com' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
           GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: next-build-weekly
+          path: .next/
+          retention-days: 1
 
   e2e-desktop:
     name: E2E — Desktop Chrome
@@ -58,6 +64,11 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-build-weekly
+          path: .next/
 
       - uses: actions/cache@v4
         id: pw-cache
@@ -103,6 +114,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-build-weekly
+          path: .next/
+
       - uses: actions/cache@v4
         id: pw-cache
         with:
@@ -146,6 +162,11 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: next-build-weekly
+          path: .next/
 
       - uses: actions/cache@v4
         id: pw-cache
