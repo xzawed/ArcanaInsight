@@ -58,7 +58,20 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: npx playwright install --with-deps chromium
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Playwright 설치 (캐시 미스)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright 시스템 의존성 설치 (캐시 히트)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: E2E 테스트 (Desktop Chrome)
         run: pnpm test:e2e --project="Desktop Chrome"
@@ -89,7 +102,20 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: npx playwright install --with-deps chromium
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Playwright 설치 (캐시 미스)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright 시스템 의존성 설치 (캐시 히트)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: E2E 테스트 (Mobile Android — Pixel 7)
         run: pnpm test:e2e --project="Mobile Android"
@@ -120,7 +146,20 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: npx playwright install --with-deps webkit
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-webkit-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Playwright 설치 (캐시 미스)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps webkit
+
+      - name: Playwright 시스템 의존성 설치 (캐시 히트)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps webkit
 
       - name: E2E 테스트 (Mobile iOS — iPhone 14)
         run: pnpm test:e2e --project="Mobile iOS"

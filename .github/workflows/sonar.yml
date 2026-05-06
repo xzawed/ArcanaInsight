@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # SonarCloud는 전체 git 히스토리 필요 (blame, blame 기반 새 코드 감지)
+          fetch-depth: 0   # SonarCloud는 전체 git 히스토리 필요 (blame, 새 코드 감지)
 
       - uses: pnpm/action-setup@v4
 
@@ -42,35 +42,13 @@ jobs:
       - name: 의존성 설치
         run: pnpm install --frozen-lockfile
 
-      - name: TypeScript 타입 체크
-        run: pnpm type-check
-
-      - name: ESLint (SonarCloud 참고용)
-        run: pnpm lint
-
       # ── 단위/통합 테스트 + 커버리지 (Vitest) ──────────────────────────────
+      # type-check·lint·E2E는 deploy.yml에서 이미 검증 — 여기서는 coverage 생성만
       - name: 단위·통합 테스트 실행 (커버리지 포함)
         run: pnpm test:coverage
 
-      # ── E2E 실행 + JUnit XML ──────────────────────────────────────────────
-      - name: Playwright 설치 (Chromium)
-        run: npx playwright install --with-deps chromium
-
-      - name: E2E 테스트 실행 (Desktop Chrome)
-        run: pnpm test:e2e --project="Desktop Chrome"
-        env:
-          CI: "true"
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
-          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
-          GROK_MODEL: grok-3
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
       # ── SonarCloud 분석 ──────────────────────────────────────────────────
       - name: SonarCloud Scan
-        if: always()   # E2E 실패 여부와 무관하게 항상 스캔 — Coverage 뱃지 보장
         uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,7 +72,6 @@ jobs:
         with:
           name: sonar-coverage-report
           path: |
-            playwright-report/
             coverage/lcov.info
             coverage/coverage-summary.json
             coverage/junit.xml
