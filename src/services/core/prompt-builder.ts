@@ -8,15 +8,21 @@ const topicLabels: Partial<Record<Topic, string>> = {
   finance: "재정/금전", career: "직장/진로", health: "건강", general: "일반 상담",
 };
 
+/**
+ * locale별 응답 언어 강제 + JSON 키 영어 고정 명시.
+ * - ko: 시스템 프롬프트가 이미 한국어이므로 노이즈 최소화 (지시 생략).
+ * - en/ja: 응답 본문 언어 + JSON 키는 반드시 영어 그대로 유지하도록 명시 (모델이 키 번역하면 parseJsonSafe 실패).
+ */
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  ko: "한국어로만 응답합니다.",
-  en: "You must respond in English only.",
-  ja: "必ず日本語のみで回答してください。",
+  ko: "",
+  en: "Respond in natural English only. Use the EXACT English JSON keys (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice). Translate only the values, never the keys.",
+  ja: "回答は自然な日本語のみで行います。JSONのキー (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
 };
 
 export function buildCharacterHeader(character: CharacterConfig, subtitle?: string, locale: string = "ko"): string {
   const subtitleLine = subtitle ? `\n${subtitle}` : "";
-  const langInstruction = LANGUAGE_INSTRUCTIONS[locale] ?? LANGUAGE_INSTRUCTIONS.ko;
+  const langInstruction = LANGUAGE_INSTRUCTIONS[locale] ?? "";
+  const langLine = langInstruction ? `\n- ${langInstruction}` : "";
   return `당신은 "${character.name}" (${character.nameJp})입니다.${subtitleLine}
 
 성격: ${character.personality}
@@ -24,8 +30,7 @@ export function buildCharacterHeader(character: CharacterConfig, subtitle?: stri
 전문 분야: ${character.speciality}
 
 말투 규칙:
-- ${character.speechStyle}
-- ${langInstruction}`;
+- ${character.speechStyle}${langLine}`;
 }
 
 export function buildSystemPrompt(character: CharacterConfig, locale: string = "ko"): string {

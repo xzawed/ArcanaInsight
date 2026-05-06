@@ -356,9 +356,13 @@ export default function TarotSessionPage() {
           return;
         }
 
-        // JSON 파싱 완전 실패 — 결과 표시 불가
-        if (result.parseError === "invalid_json") {
-          console.warn("[tarot-session] JSON 파싱 완전 실패:", { expected: result.expectedCardCount });
+        // 결과 표시 불가 — 빈 핵심 필드/JSON 실패/fallback (DB 저장 차단됨)
+        if (
+          result.parseError === "invalid_json" ||
+          result.parseError === "missing_fields" ||
+          result.parseError === "fallback_text"
+        ) {
+          console.warn("[tarot-session] 결과 표시 불가:", { parseError: result.parseError, expected: result.expectedCardCount });
           addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
           return;

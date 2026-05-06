@@ -198,17 +198,26 @@ ${instruction}
     const parsed = parseJsonSafe(aiResponse);
 
     if (parsed) {
-      return {
-        overallReading: cleanReadingText(String(parsed.overallReading || "")),
+      const overallReading = cleanReadingText(String(parsed.overallReading || ""));
+      const advice = cleanReadingText(String(parsed.advice || ""));
+      const result: ReadingResult = {
+        overallReading,
         topicReading: cleanReadingText(String(parsed.topicReading || "")),
-        advice: cleanReadingText(String(parsed.advice || "")),
+        advice,
       };
+      // 핵심 필드(overallReading 또는 advice) 빈 문자 = 부분 파싱
+      if (!overallReading || !advice) result.parseError = "missing_fields";
+      return result;
     }
 
     // JSON 파싱 완전 실패 — 텍스트에서 의미 있는 내용만 추출
     console.error("사주 AI 응답 JSON 파싱 실패 (최종 fallback)\n원본 응답:", aiResponse.slice(0, 500));
     const cleanText = extractFallbackText(aiResponse);
-    return { overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.", advice: "" };
+    return {
+      overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.",
+      advice: "",
+      parseError: cleanText ? "fallback_text" : "invalid_json",
+    };
   }
 
 }

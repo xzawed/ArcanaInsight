@@ -124,11 +124,13 @@ export async function POST(request: NextRequest) {
             });
           }
 
-          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬)
+          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬).
+          // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
 
-          // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
-          if (db && sessionId) {
+          // DB 저장 — fire-and-forget. parseError 있는 부분 결과는 영구 저장하지 않는다
+          // (result/[id] 진입 시 빈 화면 방지). 클라이언트는 in_progress 세션을 재시도 가능.
+          if (db && sessionId && !result.parseError) {
             void saveTarotReading(db, sessionId, result, cards, locale).catch(
               (e) => console.error("타로 DB 저장 최종 실패:", e)
             )

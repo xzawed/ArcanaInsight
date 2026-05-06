@@ -16,8 +16,9 @@ const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
 
 // 최종 턴(결과 요청) vs 일반 대화 max_tokens 상수
-const SHINJEOM_TOKENS_FINAL = 4000;
-const SHINJEOM_TOKENS_CHAT = 1000;
+// 한국어 토큰 비효율(영어 대비 1.3배) + JSON 오버헤드 반영해 final 상향 (truncated 방지)
+const SHINJEOM_TOKENS_FINAL = 6500;
+const SHINJEOM_TOKENS_CHAT = 1200;
 
 /** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
 async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
@@ -82,9 +83,21 @@ export async function POST(request: NextRequest) {
           if (isFinalTurn) {
             const result = shinjeomService.parseResult(fullResponse);
 
-            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry)
+            if (result.parseError) {
+              console.warn("[shinjeom-message] 부분 파싱:", {
+                parseError: result.parseError,
+                olen: result.overallReading?.length ?? 0,
+                alen: result.advice?.length ?? 0,
+                sessionId: sessionId ?? null,
+              });
+            }
+
+            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry).
+            // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
-            if (db && sessionId) {
+
+            // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 빈 화면 방지).
+            if (db && sessionId && !result.parseError) {
               void saveShinjeomFinalReading(db, sessionId, result, locale).catch(
                 (e) => console.error("신점 최종 DB 저장 최종 실패:", e)
               );

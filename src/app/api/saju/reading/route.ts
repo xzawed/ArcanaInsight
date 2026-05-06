@@ -29,9 +29,19 @@ async function fetchMemoryPrompt(characterId: string, locale: string): Promise<s
   }
 }
 
-// 월별 상세 포함 여부에 따른 max_tokens 상수
-const SAJU_TOKENS_WITH_MONTHLY = 8000;
-const SAJU_TOKENS_BASE = 4000;
+/**
+ * 사주 max_tokens 정책 — 한국어 토큰 비효율(영어 대비 1.3배) + JSON 오버헤드 + 사주명리 깊이 반영.
+ * 4000/8000 고정은 truncated 빈번 → JSON 파싱 실패 → 빈 결과 표시 유발.
+ * timeRange·includeMonthly 기반으로 단계화 (타로 computeReadingMaxTokens 사상과 동일).
+ * 출력 토큰만 과금되므로 상한 자체는 비용을 늘리지 않는다.
+ */
+function computeSajuReadingMaxTokens(timeRange: SajuTimeRange, includeMonthly: boolean): number {
+  if (includeMonthly) return 16000;          // 월운 12개월 상세 포함
+  if (timeRange === "five-year") return 12000;
+  if (timeRange === "three-year" || timeRange === "next-year") return 10000;
+  if (timeRange === "full-fortune") return 13000;
+  return 8000;                               // this-week / this-month / this-year 기본
+}
 
 const VALID_TOPICS: Topic[] = [
   "saju-general", "saju-love-single", "saju-love-couple",
@@ -103,23 +113,35 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let fullResponse = "";
         try {
-          // 월별 상세 포함 여부에 따라 max_tokens 조정 (월별 12개월 상세 보장)
-          const sajuMaxTokens = includeMonthly ? SAJU_TOKENS_WITH_MONTHLY : SAJU_TOKENS_BASE;
+          // timeRange·includeMonthly 기반 동적 max_tokens (truncated 방지)
+          const sajuMaxTokens = computeSajuReadingMaxTokens(timeRange, includeMonthly ?? false);
           for await (const chunk of grokProvider.streamReading(systemPrompt + memoryPrompt, readingPrompt, sajuMaxTokens)) {
             fullResponse += chunk;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           }
           const result = sajuService.parseResult(fullResponse);
 
-          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget)
+          // 부분 파싱(누락/잘림)은 운영 로그로 명시 추적
+          if (result.parseError) {
+            console.warn("[saju-reading] 부분 파싱:", {
+              parseError: result.parseError,
+              olen: result.overallReading?.length ?? 0,
+              alen: result.advice?.length ?? 0,
+              sessionId: sessionId ?? null,
+            });
+          }
+
+          // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget).
+          // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({
             done: true,
             result,
             sajuData: sajuResult,
           })}\n\n`));
 
-          // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
-          if (db && sessionId) {
+          // DB 저장 — fire-and-forget. parseError 있는 부분 결과는 영구 저장하지 않는다
+          // (result/[id] 진입 시 빈 화면 방지). 클라이언트는 in_progress 세션을 재시도 가능.
+          if (db && sessionId && !result.parseError) {
             void saveSajuReading(db, sessionId, {
               session_id: sessionId,
               birth_date: userInfo.birthDate,

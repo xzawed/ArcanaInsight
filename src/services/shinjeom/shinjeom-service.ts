@@ -120,17 +120,24 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
   parseResult(aiResponse: string): ReadingResult {
     const parsed = parseJsonSafe(aiResponse);
     if (parsed) {
-      return {
-        overallReading: cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : ""),
+      const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
+      const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
+      const result: ReadingResult = {
+        overallReading,
         topicReading: cleanReadingText(typeof parsed.topicReading === "string" ? parsed.topicReading : ""),
-        advice: cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : ""),
+        advice,
       };
+      if (!overallReading || !advice) result.parseError = "missing_fields";
+      return result;
     }
 
-    // 중간 대화 또는 파싱 실패 → 텍스트 그대로
+    // 라우트는 isFinalTurn=true일 때만 parseResult를 호출하므로 JSON 파싱 실패 = 모델이 형식 위반.
+    // raw 텍스트는 살아남지만 advice가 빠져 있으므로 parseError로 신호.
+    const cleanText = cleanReadingText(aiResponse);
     return {
-      overallReading: cleanReadingText(aiResponse),
+      overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.",
       advice: "",
+      parseError: cleanText ? "fallback_text" : "invalid_json",
     };
   }
 }
