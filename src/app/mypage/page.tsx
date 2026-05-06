@@ -6,6 +6,8 @@ import { getDb } from "@/lib/db";
 import { getDbProvider } from "@/lib/env";
 import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
+import { getRequestLocale } from "@/i18n/server-locale";
+import { getCardName } from "@/data/cards/locale-helpers";
 import { LogoutButton } from "./LogoutButton";
 import { FavoriteCharacterSelector } from "./FavoriteCharacterSelector";
 
@@ -116,7 +118,7 @@ function getReadingFromSession(session: SessionRow): ReadingData | undefined {
 }
 
 /** 카드 빈도 집계 → 가장 많이 뽑은 카드명 반환 */
-function getMostFrequentCard(sessionCards: SessionCard[]): string | null {
+function getMostFrequentCard(sessionCards: SessionCard[], locale: string): string | null {
   if (sessionCards.length === 0) return null;
   const freq: Record<string, number> = {};
   for (const sc of sessionCards) {
@@ -124,13 +126,14 @@ function getMostFrequentCard(sessionCards: SessionCard[]): string | null {
   }
   const topCardId = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
   const card = deckManager.getCardById(topCardId);
-  return card?.nameKo ?? topCardId;
+  return card ? getCardName(card, locale) : topCardId;
 }
 
 export default async function MyPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
+  const locale = await getRequestLocale();
   const db = getDb();
 
   // 1. 프로필 + 전체 세션 병렬 조회
@@ -184,7 +187,7 @@ export default async function MyPage() {
   const totalReadings = sessionList.length;
   const lastReadingDate = sessionList.length > 0 ? sessionList[0].created_at : null;
   const favoriteCharName = getCharacterName(profile?.favorite_character_id);
-  const mostFrequentCard = getMostFrequentCard(sessionCards);
+  const mostFrequentCard = getMostFrequentCard(sessionCards, locale);
   const nickname = profile?.nickname || "사용자";
   const initial = nickname.charAt(0);
 

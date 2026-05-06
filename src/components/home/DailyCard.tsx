@@ -10,6 +10,7 @@ import { CardFace } from "@/components/card/CardFace";
 import { CardBack } from "@/components/card/CardBack";
 import { useSkinStore } from "@/hooks/useSkinStore";
 import { useT } from "@/i18n/useT";
+import { getCardName } from "@/data/cards/locale-helpers";
 
 const deckManager = new DeckManager();
 
@@ -79,9 +80,10 @@ interface InterpretationPanelProps {
   characterName: string | undefined;
   onShare: () => void;
   tr: (key: string) => string;
+  locale: string;
 }
 
-function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoading, characterName, onShare, tr }: InterpretationPanelProps) {
+function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoading, characterName, onShare, tr, locale }: InterpretationPanelProps) {
   if (currentData && currentCard && isFlipped) {
     return (
       <motion.div
@@ -90,7 +92,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
         className="space-y-4"
       >
         <div>
-          <h3 className="font-display font-bold text-lg">{currentCard.nameKo}</h3>
+          <h3 className="font-display font-bold text-lg">{getCardName(currentCard, locale)}</h3>
           <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? tr("home.daily-card.reversed") : tr("home.daily-card.upright")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -135,7 +137,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
 }
 
 export function DailyCard() {
-  const { t: tr } = useT();
+  const { t: tr, locale } = useT();
   const characters = getAvailableCharacters();
   const { selectedSkinId } = useSkinStore();
   const [activeTab, setActiveTab] = useState(characters[0].id);
@@ -186,7 +188,7 @@ export function DailyCard() {
 
   const handleShare = async () => {
     if (!currentData || !currentCard) return;
-    const text = `🔮 오늘의 카드: ${currentCard.nameKo}\n\n${currentData.interpretation}\n\n- ${activeCharacter?.name}의 해석 | ArcanaInsight`;
+    const text = `🔮 오늘의 카드: ${getCardName(currentCard, locale)}\n\n${currentData.interpretation}\n\n- ${activeCharacter?.name}의 해석 | ArcanaInsight`;
     if (navigator.share) {
       await navigator.share({ title: tr("home.daily-card.share-text"), text });
     } else {
@@ -252,6 +254,7 @@ export function DailyCard() {
                 characterName: activeCharacter?.name,
                 onShare: handleShare,
                 tr,
+                locale,
               })}
             </div>
           </motion.div>

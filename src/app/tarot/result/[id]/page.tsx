@@ -11,6 +11,7 @@ import { ReadingText } from "@/components/common/ReadingText";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
+import { getCardName } from "@/data/cards/locale-helpers";
 
 const deckManager = new DeckManager();
 
@@ -89,7 +90,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                     <div key={interp.cardId} className="flex flex-col items-center gap-1">
                       <ResultCardFace card={card} isReversed={!!interp.isReversed} />
                       <span className="text-arcana-gold text-[10px] font-serif font-bold text-center leading-tight">{pos?.labelKo}</span>
-                      <span className="text-arcana-text text-[10px] text-center max-w-[60px] truncate">{card.nameKo}</span>
+                      <span className="text-arcana-text text-[10px] text-center max-w-[60px] truncate">{getCardName(card, locale)}</span>
                     </div>
                   );
                 })}
@@ -136,7 +137,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                     <div className="flex-1 min-w-0">
                       <span className="inline-block text-arcana-gold text-sm font-serif font-bold mb-1">{pos?.labelKo}</span>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-arcana-text font-bold">{card?.nameKo}</span>
+                        <span className="text-arcana-text font-bold">{card ? getCardName(card, locale) : undefined}</span>
                         <span className="text-arcana-muted text-xs md:text-sm">{card?.name}</span>
                         {interp.isReversed && <span className="text-red-400 text-xs bg-red-900/30 px-1.5 py-0.5 rounded">{t("tarot.result.card.reversed", locale)}</span>}
                       </div>
