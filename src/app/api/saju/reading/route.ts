@@ -63,18 +63,12 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증
     const parsed = SajuReadingSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, topic, timeRange, includeMonthly, characterId, freeQuestion, userInfo } = parsed.data as {
-      sessionId?: string | null;
-      topic: Topic;
-      timeRange: SajuTimeRange;
-      includeMonthly: boolean;
-      characterId?: string;
-      freeQuestion?: string | null;
-      userInfo: { name?: string; birthDate: string; birthHour: string; gender: "male" | "female" | "other" };
-    };
+    const { sessionId, topic: rawTopic, timeRange: rawTimeRange, includeMonthly, characterId, freeQuestion, userInfo } = parsed.data;
 
-    if (!VALID_TOPICS.includes(topic)) return jsonError("Invalid topic");
-    if (!VALID_TIME_RANGES.includes(timeRange)) return jsonError("Invalid timeRange");
+    if (!VALID_TOPICS.includes(rawTopic as Topic)) return jsonError("Invalid topic");
+    if (!VALID_TIME_RANGES.includes(rawTimeRange as SajuTimeRange)) return jsonError("Invalid timeRange");
+    const topic = rawTopic as Topic;
+    const timeRange = rawTimeRange as SajuTimeRange;
 
     // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
     if (sessionId) {
@@ -91,7 +85,7 @@ export async function POST(request: NextRequest) {
       name: userInfo.name,
     }, calcOptions);
 
-    const systemPrompt = sajuService.getSystemPrompt(characterId);
+    const systemPrompt = sajuService.getSystemPrompt(characterId ?? undefined);
     const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo)
       + buildFreeQuestionPrompt(freeQuestion);
 

@@ -17,10 +17,11 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
-    const { topic, characterId, spreadType } = parsed.data as { topic: Topic; characterId?: string | null; spreadType?: string | null }
-    if (!TAROT_TOPICS.includes(topic)) {
+    const { topic: rawTopic, characterId, spreadType } = parsed.data
+    if (!TAROT_TOPICS.includes(rawTopic as Topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
+    const topic = rawTopic as Topic
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const sessionData = tarotService.startSession(topic)
