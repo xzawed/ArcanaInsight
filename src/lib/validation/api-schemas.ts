@@ -1,10 +1,16 @@
 import { z } from "zod";
+import { LOCALES } from "@/i18n/config";
 
 const uuidOrNull = z.string().max(36).nullish();
 const topicStr = z.string().max(60);
 const charIdStr = z.string().max(50).nullish();
 const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).max(10);
 const spreadTypeEnum = z.enum(["one-card", "three-card", "five-card", "celtic-cross", "relationship", "horseshoe", "decision", "week-ahead", "zodiac", "tree-of-life"]);
+const localeEnum = z.enum(LOCALES);
+
+export const LocaleSchema = z.object({
+  locale: localeEnum,
+});
 
 // 세션 생성 스키마
 export const TarotSessionSchema = z.object({

@@ -18,6 +18,7 @@ export const profiles = pgTable("profiles", {
   birthHour: text("birth_hour"),
   privacyAgreedAt: timestamp("privacy_agreed_at", { withTimezone: true }),
   selectedSkin: text("selected_skin").default("gold-luxury"),
+  locale: text("locale").default("ko"),
 })
 
 export const sessions = pgTable("sessions", {
@@ -30,10 +31,12 @@ export const sessions = pgTable("sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   characterId: text("character_id"),
+  locale: text("locale").default("ko"),
 }, (t) => [
   index("idx_sessions_user_id").on(t.userId),
   index("idx_sessions_status").on(t.status),
   index("idx_sessions_character_id").on(t.characterId),
+  index("idx_sessions_user_locale").on(t.userId, t.locale),
 ])
 
 export const sessionCards = pgTable("session_cards", {
@@ -55,6 +58,7 @@ export const readings = pgTable("readings", {
   advice: text("advice").notNull().default(""),
   shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  locale: text("locale").default("ko"),
 }, (t) => [
   index("idx_readings_share_token").on(t.shareToken),
 ])
@@ -95,6 +99,7 @@ export const sajuReadings = pgTable("saju_readings", {
   advice: text("advice").notNull().default(""),
   shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  locale: text("locale").default("ko"),
 }, (t) => [
   index("idx_saju_readings_session_id").on(t.sessionId),
   index("idx_saju_readings_share_token").on(t.shareToken),
@@ -120,6 +125,7 @@ export const shinjeomReadings = pgTable("shinjeom_readings", {
   advice: text("advice").notNull().default(""),
   shareToken: text("share_token").unique().$defaultFn(() => crypto.randomUUID()),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  locale: text("locale").default("ko"),
 })
 
 export const services = pgTable("services", {
