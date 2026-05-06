@@ -6,6 +6,8 @@ import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeStore, themes, type ThemeId } from "@/hooks/useTheme";
 import { Icon } from "@/components/common/Icon";
+import { useT } from "@/i18n/useT";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import type { User } from "@supabase/supabase-js";
 
 const themeList = Object.values(themes);
@@ -19,6 +21,7 @@ export function Header() {
   const themeRef = useRef<HTMLDivElement>(null);
   const mobileThemeRef = useRef<HTMLDivElement>(null);
   const { mode, activeTheme, setMode } = useThemeStore();
+  const { t } = useT();
 
   useEffect(() => {
     const supabase = createClient();
@@ -88,41 +91,31 @@ export function Header() {
         {/* 데스크탑 네비게이션 */}
         <nav className="hidden md:flex items-center gap-6">
           <Link
-            href="/"
-            className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
-          >
-            홈
-          </Link>
-          <Link
             href="/tarot"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >
-            타로 상담
+            {t("header.nav.tarot")}
           </Link>
           <Link
             href="/saju"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >
-            사주 상담
+            {t("header.nav.saju")}
           </Link>
           <Link
             href="/shinjeom"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >
-            신점
+            {t("header.nav.shinjeom")}
           </Link>
           <Link
             href="/mypage"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
           >
-            마이페이지
+            {t("header.nav.mypage")}
           </Link>
-          <Link
-            href="/settings"
-            className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
-          >
-            설정
-          </Link>
+
+          <LanguageSwitcher variant="desktop" />
 
           {/* 테마 선택 */}
           <div ref={themeRef} className="relative">
@@ -188,13 +181,13 @@ export function Header() {
                     onClick={() => setIsDropdownOpen(false)}
                     className="block px-4 py-3 text-sm text-arcana-text hover:bg-arcana-purple/10 transition-colors"
                   >
-                    마이페이지
+                    {t("header.nav.mypage")}
                   </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-3 text-sm text-arcana-muted hover:text-arcana-text hover:bg-arcana-purple/10 transition-colors border-t border-arcana-border"
                   >
-                    로그아웃
+                    {t("header.auth.logout")}
                   </button>
                 </div>
               )}
@@ -204,17 +197,18 @@ export function Header() {
               href="/auth/login"
               className="px-4 py-2 rounded-full text-xs font-serif font-bold bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white hover:opacity-90 shadow-lg shadow-arcana-purple/20 transition-opacity min-h-[44px] flex items-center"
             >
-              로그인
+              {t("header.auth.login")}
             </Link>
           )}
         </nav>
 
-        {/* 모바일: 설정 + 테마 */}
+        {/* 모바일: 언어 + 설정 + 테마 */}
         <div className="md:hidden flex items-center gap-1">
+          <LanguageSwitcher variant="mobile" />
           <Link
             href="/settings"
             className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="설정"
+            aria-label={t("header.nav.mypage")}
           >
             <Icon id="ui-settings" size={20} />
           </Link>
