@@ -19,28 +19,34 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Lint → Build → E2E
+  # ── 1단계: 정적 검사 (즉시 시작) ──────────────────────────────────────────
+  static:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
-
-      # 1단계: Lint + Type Check
       - run: pnpm lint
       - run: pnpm type-check
 
-      # 2단계: 단위·통합 테스트 (Vitest)
+  # ── 2단계: 단위·통합 테스트 (static와 병렬 시작) ────────────────────────
+  unit:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm test:coverage
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -48,7 +54,19 @@ jobs:
           path: coverage/
           retention-days: 7
 
-      # 3단계: Build
+  # ── 3단계: 프로덕션 빌드 검증 (static와 병렬 시작, E2E 불필요) ─────────
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    needs: static
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
@@ -58,9 +76,36 @@ jobs:
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
-      # 3단계: E2E (Chromium만 — Desktop + Android, iOS는 주간 QA에서)
-      - run: npx playwright install --with-deps chromium
-      - run: pnpm test:e2e --project="Desktop Chrome" --project="Mobile Android"
+  # ── 4단계: E2E (static + unit 완료 후, build와 무관) ────────────────────
+  # webServer: "pnpm dev" → dev server 자동 기동, build artifact 불필요
+  e2e-desktop:
+    name: E2E — Desktop Chrome
+    runs-on: ubuntu-latest
+    needs: [static, unit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Playwright 설치 (캐시 미스)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright 시스템 의존성 설치 (캐시 히트)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - run: pnpm test:e2e --project="Desktop Chrome"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
@@ -72,6 +117,49 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-desktop
+          path: playwright-report/
+          retention-days: 7
+
+  e2e-android:
+    name: E2E — Mobile Android
+    runs-on: ubuntu-latest
+    needs: [static, unit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Playwright 설치 (캐시 미스)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright 시스템 의존성 설치 (캐시 히트)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - run: pnpm test:e2e --project="Mobile Android"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
+          GROK_MODEL: grok-3
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-android
           path: playwright-report/
           retention-days: 7
