@@ -411,6 +411,6 @@ curl -s -u "$SONARQUBE_TOKEN:" "https://sonarcloud.io/api/qualitygates/project_s
 | PR #232 | 캐릭터 페르소나 EN/JA + locale-context 필터 + Noto Sans JP | ✅ 머지 완료 |
 | PR #233 | hreflang generateMetadata + 번역 키 drift CI | ✅ 머지 완료 |
 | PR #234 | E2E i18n 매트릭스 (ai_locale 쿠키 주입 + LanguageSwitcher 검증) | ✅ 머지 완료 |
-| PR #235 (진행 중) | 신점 하이브리드 — SHINJEOM_COPY 제거 + useT() 마이그레이션 + CulturalReadingDisplay | 🔄 진행 중 |
+| PR #235 | 신점 하이브리드 — SHINJEOM_COPY 제거 + useT() 마이그레이션 + CulturalReadingDisplay | ✅ 머지 완료 |
 
-**잔여 작업:** 없음 (PR #235 머지 후 i18n-master-plan 완료)
+**✅ i18n-master-plan PR-6 전체 완료 (2026-05-07)**
