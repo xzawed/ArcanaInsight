@@ -145,6 +145,23 @@ export interface SharedKeys {
     "result.topic": string;
     "result.advice": string;
     "result.cta": string;
+    "page.character-select.heading": string;
+    "page.character-select.sub": string;
+    "page.topic-select.heading": string;
+    "page.topic-select.sub": string;
+    "page.topic-select.back": string;
+    "topic.general.label": string;
+    "topic.general.desc": string;
+    "topic.love.label": string;
+    "topic.love.desc": string;
+    "topic.wealth.label": string;
+    "topic.wealth.desc": string;
+    "topic.career.label": string;
+    "topic.career.desc": string;
+    "topic.health.label": string;
+    "topic.health.desc": string;
+    "topic.auspicious.label": string;
+    "topic.auspicious.desc": string;
   };
 }
 

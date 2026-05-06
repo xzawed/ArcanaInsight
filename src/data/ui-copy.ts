@@ -30,15 +30,3 @@ export const SAJU_COPY = {
     info: "← 정보 수정",
   },
 } as const;
-
-export const SHINJEOM_COPY = {
-  characterSelect: {
-    heading: "신점 상담사를 선택해주세요",
-    sub: "영적 상담을 도와줄 캐릭터를 골라주세요",
-  },
-  topicSelect: {
-    heading: "어떤 운을 살펴드릴까요?",
-    sub: "상담 주제를 선택하면 대화가 시작됩니다",
-    back: "← 다른 상담사 선택",
-  },
-} as const;
