@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { ReadingText } from "@/components/common/ReadingText";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { ResultPageShell } from "@/components/common/ResultPageShell";
 
 interface ShinjeomReadingRow {
   id: string;
@@ -31,14 +30,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
   const advice = cleanReadingText(reading.advice || "");
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <MysticBackground service="shinjeom" />
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/60" />
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 py-8 relative">
+    <ResultPageShell service="shinjeom">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("shinjeom.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
@@ -85,7 +77,6 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
           </a>
           <ResultShareButton service="shinjeom" shareToken={id} />
         </div>
-      </div>
-    </div>
+    </ResultPageShell>
   );
 }

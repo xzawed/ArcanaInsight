@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { getRequestLocale } from "@/i18n/server-locale";
@@ -7,8 +6,8 @@ import { t } from "@/i18n/translations";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
+import { ResultPageShell } from "@/components/common/ResultPageShell";
 import type { SajuResult } from "@/services/saju/saju-types";
-import { MysticBackground } from "@/components/effects/MysticBackground";
 
 export default async function SajuResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -63,14 +62,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <MysticBackground service="saju" />
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/60" />
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 py-8 relative">
+    <ResultPageShell service="saju">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("saju.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
@@ -119,7 +111,6 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
           </a>
           <ResultShareButton service="saju" shareToken={id} />
         </div>
-      </div>
-    </div>
+    </ResultPageShell>
   );
 }

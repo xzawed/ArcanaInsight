@@ -8,7 +8,7 @@ import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 import { ReadingText } from "@/components/common/ReadingText";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { ResultPageShell } from "@/components/common/ResultPageShell";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { getCardName } from "@/data/cards/locale-helpers";
@@ -50,15 +50,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   const advice = cleanReadingText(reading.advice || "");
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <MysticBackground service="tarot" />
-      {/* 배경 이미지 */}
-      <div className="fixed inset-0 -z-10">
-        <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
-        <div className="absolute inset-0 bg-arcana-bg/60" />
-      </div>
-
-      <div className="max-w-5xl mx-auto px-4 py-8 relative">
+    <ResultPageShell service="tarot">
         {/* 장식 - 떠다니는 카드 */}
         <div className="absolute -top-4 -right-8 w-32 h-32 opacity-20 pointer-events-none">
           <Image src="/images/backgrounds/deco-floating-cards.jpg" alt="" fill className="object-contain"  sizes="100vw" />
@@ -157,7 +149,6 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           </a>
           <ResultShareButton service="tarot" shareToken={id} spreadName={spread?.nameKo ?? "타로"} />
         </div>
-      </div>
-    </div>
+    </ResultPageShell>
   );
 }
