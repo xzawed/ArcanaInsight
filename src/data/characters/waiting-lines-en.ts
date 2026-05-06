@@ -283,3 +283,5 @@ export const shuffleCeremonyText: Record<string, string> = {
   lix:     "Which one? lol",
   ethan:   "Select a card",
 };
+
+export const shinjeomInitialPrompt = "What's on your mind? Feel free to share.";

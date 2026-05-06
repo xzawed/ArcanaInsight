@@ -56,6 +56,30 @@ describe("getRecentCharacterMemory", () => {
     );
   });
 
+  it("locale 지정 시 filter에 locale 포함", async () => {
+    const db = makeMockDb();
+    db.findMany.mockResolvedValue([]);
+    db.findManyIn.mockResolvedValue([]);
+    await getRecentCharacterMemory(db, "user-1", "arcana", 3, "en");
+    expect(db.findMany).toHaveBeenCalledWith(
+      "sessions",
+      { user_id: "user-1", character_id: "arcana", status: "completed", locale: "en" },
+      { limit: 3, orderBy: "created_at", orderDir: "desc" },
+    );
+  });
+
+  it("locale 미지정 시 locale 필터 미포함", async () => {
+    const db = makeMockDb();
+    db.findMany.mockResolvedValue([]);
+    db.findManyIn.mockResolvedValue([]);
+    await getRecentCharacterMemory(db, "user-1", "arcana");
+    expect(db.findMany).toHaveBeenCalledWith(
+      "sessions",
+      { user_id: "user-1", character_id: "arcana", status: "completed" },
+      { limit: 3, orderBy: "created_at", orderDir: "desc" },
+    );
+  });
+
   it("overall_reading 150자 초과 시 잘림", async () => {
     const db = makeMockDb();
     const longText = "가".repeat(200);

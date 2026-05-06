@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { getCharacterById } from "@/data/characters";
+import { getCharacterDescription, getCharacterSpeciality } from "@/data/characters/locale-helpers";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 
 const services = [
@@ -16,6 +18,7 @@ const services = [
 export default function CharacterPage() {
   const params = useParams();
   const router = useRouter();
+  const locale = useLocaleStore((s) => s.locale);
   const id = typeof params.id === "string" ? params.id : "";
   const character = getCharacterById(id);
 
@@ -79,9 +82,9 @@ export default function CharacterPage() {
               <h1 className="font-serif font-bold text-2xl md:text-3xl mb-1">{character.name}</h1>
               <p className="text-arcana-muted text-sm">{character.nameJp}</p>
               <div className="mt-2 inline-block px-3 py-1 bg-arcana-purple/10 border border-arcana-purple/30 rounded-full">
-                <span className="text-arcana-purple text-xs font-serif">{character.speciality}</span>
+                <span className="text-arcana-purple text-xs font-serif">{getCharacterSpeciality(character, locale)}</span>
               </div>
-              <p className="text-arcana-text text-sm leading-relaxed mt-3">{character.description}</p>
+              <p className="text-arcana-text text-sm leading-relaxed mt-3">{getCharacterDescription(character, locale)}</p>
             </div>
 
             <h2 className="font-serif font-bold text-sm text-arcana-muted mb-3">서비스 선택</h2>

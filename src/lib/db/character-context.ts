@@ -26,11 +26,14 @@ export async function getRecentCharacterMemory(
   userId: string,
   characterId: string,
   limit = 3,
+  locale?: string,
 ): Promise<CharacterMemoryEntry[]> {
   try {
+    const filter: Record<string, unknown> = { user_id: userId, character_id: characterId, status: "completed" };
+    if (locale) filter.locale = locale;
     const sessions = await db.findMany<RecentSession>(
       "sessions",
-      { user_id: userId, character_id: characterId, status: "completed" },
+      filter,
       { limit, orderBy: "created_at", orderDir: "desc" },
     );
     if (sessions.length === 0) return [];
