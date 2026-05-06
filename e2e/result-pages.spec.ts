@@ -53,3 +53,31 @@ test.describe("결과 페이지 — 공유 URL", () => {
     expect(errors).toHaveLength(0);
   });
 });
+
+// PR #219 회귀 방지 (D1 P0):
+// migration 014 가 share_token 공개 RLS 를 DROP 한 후 SSR 페이지가 anon 키로
+// 조회하면 정상 발급된 토큰조차 RLS empty → notFound() → 100% 404 가 된다.
+// service_role 어댑터 사용 시 라우팅·렌더 자체가 깨지지 않아야 한다는 최소
+// 보장으로, 비인증 브라우저 컨텍스트에서 모든 result page 가 5xx/JS 에러 없이
+// 응답하는지 검증한다.
+test.describe("결과 페이지 — 비인증 컨텍스트 (D1 회귀 방지)", () => {
+  for (const service of ["tarot", "saju", "shinjeom"] as const) {
+    test(`${service} 결과 — 비인증 시크릿 컨텍스트에서 5xx/JS 에러 없이 응답`, async ({ browser }) => {
+      const context = await browser.newContext({ storageState: undefined });
+      const page = await context.newPage();
+      const errors: string[] = [];
+      const failedRequests: string[] = [];
+      page.on("pageerror", (err) => errors.push(err.message));
+      page.on("response", (res) => {
+        if (res.status() >= 500) failedRequests.push(`${res.status()} ${res.url()}`);
+      });
+      const response = await page.goto(`/${service}/result/probe-token-${Date.now()}`);
+      await page.waitForLoadState("networkidle");
+      expect(response, "초기 응답이 존재해야 함").not.toBeNull();
+      expect(response!.status(), "5xx 금지 (RLS 빈결과는 404 로 변환되어야 함)").toBeLessThan(500);
+      expect(errors, "JS 페이지 에러 없음").toHaveLength(0);
+      expect(failedRequests, "5xx 부속 요청 없음").toHaveLength(0);
+      await context.close();
+    });
+  }
+});
