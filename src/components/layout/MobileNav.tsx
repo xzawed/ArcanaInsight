@@ -3,23 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/common/Icon";
+import { useT } from "@/i18n/useT";
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   iconId: string;
+  testid: string;
 }
 
 const navItems: NavItem[] = [
-  { href: "/", label: "홈", iconId: "nav-home" },
-  { href: "/tarot", label: "타로", iconId: "nav-tarot" },
-  { href: "/saju", label: "사주", iconId: "nav-saju" },
-  { href: "/shinjeom", label: "신점", iconId: "nav-shinjeom" },
-  { href: "/mypage", label: "MY", iconId: "nav-mypage" },
+  { href: "/", labelKey: "header.nav.home", iconId: "nav-home", testid: "mobile-nav-home" },
+  { href: "/tarot", labelKey: "header.nav.tarot", iconId: "nav-tarot", testid: "mobile-nav-tarot" },
+  { href: "/saju", labelKey: "header.nav.saju", iconId: "nav-saju", testid: "mobile-nav-saju" },
+  { href: "/shinjeom", labelKey: "header.nav.shinjeom", iconId: "nav-shinjeom", testid: "mobile-nav-shinjeom" },
+  { href: "/mypage", labelKey: "header.nav.mypage", iconId: "nav-mypage", testid: "mobile-nav-mypage" },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
+  const { t } = useT();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-arcana-bg/90 backdrop-blur-md border-t border-arcana-border pb-[env(safe-area-inset-bottom)]">
@@ -39,14 +42,19 @@ export function MobileNav() {
             >
               <Icon id={item.iconId} size={20} />
               <span className={`text-xs font-sans leading-tight ${isActive ? "font-bold" : ""}`}>
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </span>
           );
 
           return (
-            <Link key={item.href} href={item.href} className="flex items-center justify-center"
-              onClick={(e) => { (e.currentTarget as HTMLElement).blur(); }}>
+            <Link
+              key={item.href}
+              href={item.href}
+              data-testid={item.testid}
+              className="flex items-center justify-center"
+              onClick={(e) => { (e.currentTarget as HTMLElement).blur(); }}
+            >
               {content}
             </Link>
           );

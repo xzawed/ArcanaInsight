@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useT } from "@/i18n/useT";
 
 export function Footer() {
+  const { t } = useT();
   return (
     <footer className="bg-arcana-surface border-t border-arcana-border mt-auto">
       {/* 상단 섹션 */}
@@ -11,27 +15,27 @@ export function Footer() {
             ArcanaInsight
           </span>
           <p className="mt-2 text-sm text-arcana-muted leading-relaxed">
-            AI 캐릭터와 함께하는 타로 &amp; 운세 플랫폼
+            {t("footer.tagline")}
           </p>
         </div>
 
         {/* 컬럼 2: 서비스 링크 */}
         <div>
-          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">서비스</h3>
+          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">{t("footer.section.services")}</h3>
           <ul className="space-y-2">
             <li>
               <Link href="/tarot" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
-                타로 상담
+                {t("footer.link.tarot")}
               </Link>
             </li>
             <li>
               <Link href="/#daily-card" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
-                오늘의 운세
+                {t("footer.link.daily-card")}
               </Link>
             </li>
             <li>
               <Link href="/mypage" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
-                마이페이지
+                {t("footer.link.mypage")}
               </Link>
             </li>
           </ul>
@@ -39,16 +43,16 @@ export function Footer() {
 
         {/* 컬럼 3: 정보 링크 */}
         <div>
-          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">정보</h3>
+          <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">{t("footer.section.info")}</h3>
           <ul className="space-y-2">
             <li>
               <Link href="/terms" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
-                이용약관
+                {t("footer.link.terms")}
               </Link>
             </li>
             <li>
               <Link href="/privacy" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
-                개인정보처리방침
+                {t("footer.link.privacy")}
               </Link>
             </li>
           </ul>

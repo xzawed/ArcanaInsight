@@ -9,6 +9,9 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { FocusReset } from "@/components/layout/FocusReset";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from "@/i18n/config";
+import { t as translate } from "@/i18n/translations";
+import { ToastHost } from "@/components/common/Toast";
+import { LocaleConfirmModal } from "@/components/common/LocaleConfirmModal";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -42,7 +45,7 @@ export default async function RootLayout({
       </head>
       <body className="bg-arcana-bg text-arcana-text font-sans min-h-screen antialiased flex flex-col">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-arcana-purple focus:text-white focus:rounded-lg">
-          메인 콘텐츠로 이동
+          {translate("common.skip-link", locale)}
         </a>
         <LocaleProvider initial={locale}>
           <ThemeProvider>
@@ -55,6 +58,8 @@ export default async function RootLayout({
             </main>
             <Footer />
             <MobileNav />
+            <ToastHost />
+            <LocaleConfirmModal />
           </ThemeProvider>
         </LocaleProvider>
       </body>

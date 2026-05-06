@@ -45,6 +45,7 @@ export default defineConfig({
         "src/i18n/config.ts",         // PR-1 i18n config — 테스트 있음
         "src/i18n/detect.ts",         // PR-1 locale detection — 테스트 있음
         "src/i18n/translations/index.ts", // PR-1 t() fallback — 테스트 있음
+        "src/i18n/translations/shared/keys.ts", // PR-2 flatten 헬퍼 — 테스트 있음
         "src/hooks/useLocaleStore.ts",    // PR-1 Zustand store — 테스트 있음
       ],
       exclude: [
