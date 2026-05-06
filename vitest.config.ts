@@ -42,6 +42,10 @@ export default defineConfig({
         "src/app/api/shinjeom/result/[id]/route.ts",  // PR-L
         "src/lib/supabase/admin.ts",  // Admin client — 테스트 있음
         "src/lib/db/index.ts",        // DB provider 팩토리 — 테스트 있음
+        "src/i18n/config.ts",         // PR-1 i18n config — 테스트 있음
+        "src/i18n/detect.ts",         // PR-1 locale detection — 테스트 있음
+        "src/i18n/translations/index.ts", // PR-1 t() fallback — 테스트 있음
+        "src/hooks/useLocaleStore.ts",    // PR-1 Zustand store — 테스트 있음
       ],
       exclude: [
         "src/**/*.test.ts",
