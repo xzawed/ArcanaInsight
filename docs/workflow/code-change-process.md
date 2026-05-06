@@ -138,3 +138,16 @@ git branch | grep -v '^\* main' | xargs git branch -D
 - **마이너·패치는 허용**: 보안 패치, 버그 픽스 수준의 업데이트는 자율 적용 가능
 - **pnpm 버전 고정**: `pnpm@10.33.0` — `pnpm-lock.yaml`과 Docker 실행 스크립트에 고정됨, 임의 변경 금지
 - **Playwright 버전 고정**: Docker 이미지 `mcr.microsoft.com/playwright:v1.59.1-noble` — CI와 로컬 동기화를 위해 임의 변경 금지
+
+## i18n 체크리스트 (UI 텍스트·번역 변경 시)
+
+- [ ] `shared/keys.ts` 타입 추가 (ko/en/ja 모두 강제)
+- [ ] ko 사전 100% 채움 (SSOT)
+- [ ] en 사전 임시 영문 (외부 번역 발주 대기 중)
+- [ ] ja 사전은 PR-5 일괄 (현재는 ko fallback)
+- [ ] 클라이언트 호출 = `useT()`, 서버 호출 = `t(key, locale)` + `getRequestLocale()`
+- [ ] LocaleProvider SSR 패턴 (`setTimeout` 래핑) 준수
+- [ ] E2E 셀렉터를 `data-testid`로 (한글 regex 금지)
+- [ ] `pnpm sync:test-count` 실행 후 CLAUDE.md 자동 갱신 확인
+
+상세: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)

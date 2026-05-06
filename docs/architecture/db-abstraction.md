@@ -63,6 +63,9 @@ src/lib/db/
 | `009_shinjeom_topics_expand.sql` | 신점 직장/이직 + 택일 토픽 |
 | `010_share_token_default_fix.sql` | readings share_token NULL 백필 |
 | `011_saju_shinjeom_share_token_defaults.sql` | saju/shinjeom share_token NULL 백필 |
+| `012_spread_type_expand.sql` | sessions.spread_type CHECK 제약 확장 (10개 스프레드, PR #216) |
+| `013_*` ~ `015_fix_sessions_rls.sql` | RLS 보강 (PR #219·#221 — share_token USING(true), 익명 세션 SELECT 허용 등) |
+| `016_locale_columns.sql` | 5개 테이블 locale 컬럼 + idx_sessions_user_locale (PR #223) |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
@@ -118,3 +121,16 @@ GOOGLE_CLIENT_SECRET=
 ```
 
 > Google Cloud Console: PostgreSQL 모드 사용 시 Authorized redirect URI에 `{NEXTAUTH_URL}/api/auth/callback/google` 추가 필요
+
+## i18n locale 컬럼 (016 마이그레이션)
+
+5개 테이블에 `locale TEXT DEFAULT 'ko' CHECK (locale IN ('ko','en','ja'))` 컬럼:
+- `profiles` — 사용자 선호 locale (인증 사용자 SSOT)
+- `sessions` — 세션 작성 시점 locale (`idx_sessions_user_locale` 인덱스, PR-4 character-context 필터)
+- `readings` / `saju_readings` / `shinjeom_readings` — 결과 텍스트 작성 언어
+
+`daily_cards`는 `(date, character_id)` UNIQUE 단일 사전 정책으로 locale 미포함 (의도). 표시 시점 locale 분리는 PR-3·PR-5에서 처리.
+
+INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 결정한 locale 명시 동봉. 미동봉 시 DEFAULT 'ko' 자동 입력 — PR-A 정합성 핫픽스에서 6개 INSERT 경로에 추가됨.
+
+상세: [`i18n.md`](i18n.md)

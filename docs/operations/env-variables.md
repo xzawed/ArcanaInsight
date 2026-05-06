@@ -111,3 +111,11 @@ DB_PROVIDER=supabase
 - `src/lib/storage/index.ts` — DB_PROVIDER 기반 이미지 URL 전환
 - [`../architecture/db-abstraction.md`](../architecture/db-abstraction.md) — DB 추상화 상세
 - [`../architecture/auth-abstraction.md`](../architecture/auth-abstraction.md) — Auth 추상화 상세
+
+## i18n locale 컬럼 호환 (postgres 모드)
+
+`DB_PROVIDER=postgres` 모드에서도 016 마이그레이션 동일하게 적용해야 한다. PostgreSQL 자체 환경에서 마이그레이션 도구로 `supabase/migrations/016_locale_columns.sql` 적용 또는 동일 ALTER 문 수동 실행. `idx_sessions_user_locale` 인덱스도 함께 생성 필요. Drizzle `schema/index.ts`에 이미 `locale` 필드 정의되어 있어 ORM 레벨은 자동 처리.
+
+i18n 자체에는 신규 환경변수 없음 — 쿠키(`ai_locale`)와 헤더(`x-locale`)로 처리.
+
+상세: [`../architecture/i18n.md`](../architecture/i18n.md)

@@ -92,3 +92,7 @@ GOOGLE_CLIENT_SECRET=
 Google Cloud Console에서 Authorized redirect URI에 `{NEXTAUTH_URL}/api/auth/callback/google` 추가 필요.
 
 API 라우트: `src/app/api/auth/[...nextauth]/` — PostgreSQL 모드 전용
+
+## i18n locale 필드
+
+`AuthUser` 타입은 `{ id, email }`만 포함. locale 필드는 PR-4에서 추가 예정. 현재는 쿠키(`ai_locale`)가 SSOT이고 `profiles.locale`은 보조 동기화 (`/api/locale` POST가 양쪽 갱신). 상세: [`i18n.md`](i18n.md)

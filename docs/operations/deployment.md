@@ -122,3 +122,26 @@ railway logs --tail
 ## CI/CD 파이프라인 상세
 
 → [`../workflow/ci-cd.md`](../workflow/ci-cd.md)
+
+## 016 마이그레이션 (locale 컬럼) 적용·롤백
+
+### 적용 (이미 운영 적용 완료, 2026-05-06)
+```sql
+-- supabase/migrations/016_locale_columns.sql
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS locale TEXT DEFAULT 'ko'
+  CHECK (locale IN ('ko','en','ja'));
+-- (sessions·readings·saju_readings·shinjeom_readings 동일)
+CREATE INDEX IF NOT EXISTS idx_sessions_user_locale ON public.sessions (user_id, locale);
+```
+
+### 롤백 (긴급 시)
+```sql
+DROP INDEX IF EXISTS public.idx_sessions_user_locale;
+ALTER TABLE public.profiles DROP COLUMN IF EXISTS locale;
+ALTER TABLE public.sessions DROP COLUMN IF EXISTS locale;
+ALTER TABLE public.readings DROP COLUMN IF EXISTS locale;
+ALTER TABLE public.saju_readings DROP COLUMN IF EXISTS locale;
+ALTER TABLE public.shinjeom_readings DROP COLUMN IF EXISTS locale;
+```
+
+> 주의: 롤백 시 PR-A의 `db.insert("sessions", { ..., locale })` 호출이 unknown column 에러 → 코드도 함께 롤백 필요 (PR #226 revert).

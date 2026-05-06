@@ -49,3 +49,17 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
 | **Verum 제거** | `refactor/remove-verum-invasive-integration` / PR #163 | ✅ merged | `src/lib/verum/` 삭제, route.ts·env.ts·테스트·문서 전체 정리, CI 빌드·SonarCloud·Codecov 통과 (620→575) |
 
 **배경**: Verum 자동 생성 PR #161 이 침투적 방식으로 코드베이스를 수정해 SonarCloud/Codecov 실패. 사용자 직접 운영 서비스이므로 향후 비침투적(외부 프록시/사이드카) 방식으로 재도입 예정. git tag `verum-removal-base`(`780bb04`) — 롤백 기준점.
+
+---
+
+## i18n 다국어 — 미해결·후속 PR 의존 (2026-05-06 multi-agent 감사)
+
+| 항목 | 영역 | 상태·근거 |
+|------|------|-----------|
+| **AuthUser 타입 locale 필드 미포함** | `src/lib/auth/index.ts` | PR-4 예정. 현재는 쿠키(`ai_locale`)가 SSOT, `profiles.locale`은 보조 동기화. cross-locale 쿼리 필요 시 PR-4에서 `getCurrentUser()` 반환 타입 확장. |
+| **`daily_cards` 테이블 locale 컬럼 의도적 미포함** | `supabase/migrations/003_daily_cards.sql` | 옵션 B 확정 — `(date, character_id)` UNIQUE 단일 사전 정책. locale 분리 시 4×용량 폭증. 표시 시점 locale 분리는 PR-3·PR-5에서 처리. |
+| **PR-2 사전 정의됨, 페이지 미적용 i18n 키 19개** | `src/i18n/translations/ko/index.ts` (`home.*` 8 + `settings.*` 11) | PR-2에서 사전만 정의됨 (정의 자체는 정상). 페이지 코드(`src/app/page.tsx`·`src/app/settings/page.tsx`) `t()` 적용은 PR-3 영역. SharedKeys 타입은 모든 locale 강제하므로 정의됨 미사용 키도 타입 안전 유지. |
+| **translations 사전 SonarCloud 중복도 모니터링** | `src/i18n/translations/{ko,en,ja}/index.ts` | 현재 4 파일(인덱스+공유키+3 locale). PR-3·PR-5에서 카드·캐릭터 데이터가 추가되면 중복도 누적 위험. `shared/keys.ts` 공통 베이스 + `flatten()` 헬퍼로 1차 방어 중. SonarCloud `new_duplicated_lines_density` 3% 임계 모니터링 필요. |
+| **외부 번역가 발주 시점 미결정** | `docs/i18n/glossary.md`·`character-voice-guide.md` | PR-3 진입 시점에 발주 권장 (사용자 결정). 발주 자료는 PR-3·PR-4 시 작성될 예정. 현재 영어 사전은 1차 임시 직역 placeholder. |
+
+상세 인프라: [`../architecture/i18n.md`](../architecture/i18n.md) / 컨벤션: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)

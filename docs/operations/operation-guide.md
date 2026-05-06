@@ -233,3 +233,16 @@ flowchart TB
 | **n8n Cloud** | https://xzawed.app.n8n.cloud |
 | **Supabase** | Supabase 대시보드 (프로젝트 설정) |
 | **Railway** | Railway 대시보드 (배포 관리) |
+
+## 9. i18n locale 트러블슈팅
+
+### 사용자가 "언어 변경이 적용 안 된다"고 신고하는 경우
+1. **쿠키 차단 환경 확인** — 브라우저가 third-party 쿠키 차단·시크릿 모드일 때 `ai_locale` 쿠키 저장 실패. LanguageSwitcher가 쿠키 설정 시도하지만 page reload 후 DEFAULT_LOCALE='ko'로 회귀.
+2. **localStorage 차단** — LocaleConfirmModal의 1회 표시 보장이 무효화되어 매 방문 모달 노출 (UX 저하). 사용자에게 쿠키·localStorage 허용 안내.
+3. **DB locale 동기화 확인** — 인증 사용자: `profiles.locale` SELECT로 확인. 쿠키와 불일치하면 `/api/locale` POST가 한 번 실패한 케이스.
+4. **`<html lang>` 검증** — DevTools Elements 탭에서 `<html lang="en">` 등 확인. `ko`로 표시되면 쿠키가 SSR에 도달하지 못한 상태 (middleware 동작 의심).
+
+### locale별 카드·캐릭터 표시가 한국어로 나오는 경우 (PR-3·4·5 진행 중 정상)
+- 카드 데이터 영문화는 PR-3, 캐릭터 페르소나는 PR-4, 일본어 전체 채움은 PR-5에서 진행. 현재는 ko fallback이 의도된 동작.
+
+상세: [`../architecture/i18n.md`](../architecture/i18n.md)

@@ -91,3 +91,12 @@ ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙�
 - 홈 페이지 데이터: `src/data/home/` 정적 관리
 - `.env` 파일 절대 커밋 금지 (Railway 환경변수로 관리)
 - DB 마이그레이션: `supabase/migrations/` 번호 순서 유지 (002 결번)
+
+## i18n 다국어
+
+UI 텍스트 추가·변경 시 한글 하드코딩 금지. `t()` 호출로 분리:
+- 클라이언트 컴포넌트: `useT()` 훅 (`src/i18n/useT.ts`)
+- 서버 컴포넌트·라우트: `t(key, locale)` 직접 호출 + `getRequestLocale()`로 locale 결정
+- 키 추가 절차: `shared/keys.ts` 타입 → `ko/index.ts` SSOT → `en/index.ts` 임시 → `ja/index.ts` PR-5
+
+상세 컨벤션: [`i18n-style.md`](i18n-style.md) / 인프라: [`../architecture/i18n.md`](../architecture/i18n.md)

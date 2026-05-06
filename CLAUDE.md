@@ -31,32 +31,36 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (714개, statements 98%), Playwright (3 디바이스) |
+| **다국어·i18n** | 자체 translations 모듈 + middleware locale 쿠키 (ko/en/ja) — → [`docs/architecture/i18n.md`](docs/architecture/i18n.md) |
+| **테스트** | Vitest 2.0 (757개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
 
 ```
 src/
-├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings)
+├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings·api/locale)
 ├── components/      # card/, character/, chat/, common/, effects/, home/, layout/, saju/, skin/, tarot/
+│   ├── common/      # Toast (locale 변경 알림), LocaleConfirmModal (첫방문 자동 감지)
 │   ├── effects/     # MysticBackground (별자리·안개·룬 오버레이 z-[5]), ServiceBackground (배경 파티클 -z-10), ParticleOverlay, ScrollReveal
+│   ├── layout/      # Header·Footer·MobileNav·LanguageSwitcher (데스크탑·모바일 분리 testid)
 │   ├── character/   # CharacterDisplay (GlowBurstRing 내장), SpriteAnimator (drop-shadow 키프레임), CharacterAuraLayer (오라 링)
 │   └── tarot/       # ShuffleCeremony (카드 선택 진입 시 2.2s Canvas rAF 의식 애니메이션)
+├── i18n/            # config·detect·LocaleProvider·useT·server-locale + translations/{ko,en,ja,shared}
 ├── data/            # cards/, characters/, skins/, spreads/, saju/, home/, topics.ts, birth-hours.ts, error-messages.ts, ui-copy.ts
-├── hooks/           # Zustand stores: useSession, useSajuSession, useShinjeomSession, useSkinStore, useGenderStore, useFavoriteCharacter, useReducedMotionStore + useSSEStream, useTheme, useCharacter, useCardAnimation
+├── hooks/           # Zustand stores: useSession, useSajuSession, useShinjeomSession, useSkinStore, useGenderStore, useFavoriteCharacter, useReducedMotionStore, useLocaleStore + useSSEStream, useTheme, useCharacter, useCardAnimation
 ├── lib/
 │   ├── env.ts       # 환경변수 getter 16개 (하드코딩 금지)
 │   ├── request-utils.ts  # getClientIp / pickFields / jsonError / SSE_HEADERS
 │   ├── rate-limit.ts
-│   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기)
+│   ├── db/          # getDb() — SupabaseAdapter / PostgresAdapter (DB_PROVIDER 분기), reading-saver.ts (locale 동봉)
 │   ├── auth/        # getCurrentUser() / requireUser() / assertSessionOwnership()
-│   ├── validation/  # api-schemas.ts (Zod 7종)
+│   ├── validation/  # api-schemas.ts (Zod 7종 + LocaleSchema)
 │   └── storage/     # getCardImageUrl() — provider별 이미지 URL
 ├── services/        # core/ (FallbackProvider·PromptBuilder·CircuitBreaker·http-utils), tarot/, saju/, shinjeom/
 ├── types/           # card.ts, character.ts, session.ts, service.ts, user-info.ts
 ├── test-helpers/    # mock-db, mock-auth, mock-request, mock-ai, reset-modules, api-route-setup
-└── __tests__/api/   # API 라우트 단위 테스트 (vitest.config.ts exclude 우회)
+└── __tests__/api/   # API 라우트 단위 테스트 (vitest.config.ts exclude 우회) + locale-wiring
 
 docs/                # → docs/README.md 인덱스
 ├── architecture/    # system-overview, ai-infrastructure, db-abstraction, auth-abstraction, data-model
@@ -65,7 +69,7 @@ docs/                # → docs/README.md 인덱스
 ├── operations/      # known-issues, env-variables, deployment, monitoring, operation-guide
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
-supabase/migrations/ # 001 + 003~015 SQL (002 결번, 14개 파일, PostgreSQL 모드: src/lib/db/schema/index.ts)
+supabase/migrations/ # 001 + 003~016 SQL (002 결번, 15개 파일, PostgreSQL 모드: src/lib/db/schema/index.ts)
 e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
@@ -95,6 +99,8 @@ scripts/
 | `lix` | 릭스 | 남 | ~는데/~ㄹ까, 장난 | 트릭스터 |
 | `ethan` | 에단 | 남 | ~거든요, 친절·상세 | 학구적 |
 
+> **다국어 페르소나**: 영어·일본어 페르소나는 PR-4에서 외부 번역가 의뢰로 추가 예정 (캐릭터별 화법 시그니처 보존: arcana=elegant mystic, hoshi=casual GenZ, ren=archaic 등).
+
 **표정 규칙 (6-mood)**: `default` → 세션 진입/대기 | `mystical` → 카드 선택/리딩 대기 | `smile` → 결과 도착 | `serious` / `surprised` / `wink` → 대기 대사 mood 연동. 에러 시 `default` 복귀. 대기 대사 중 표정은 `line.mood` 따름.
 
 **이미지 경로**: 12캐릭터 모두 `nukki/[mood].png` (1408×768)
@@ -116,6 +122,8 @@ scripts/
 **ShuffleCeremony**: 타로 카드 선택 진입 시 2.2초 Canvas rAF 의식 애니메이션. `phase === "card-shuffle"` 조건부 렌더 → `onComplete` 시 `setPhase("card-select")`. 4단계: ① 덱 컷(0–500ms) ② 글로우 폭발(500–700ms) ③ 타이프라이터(700–1400ms, 58ms/자) ④ 부채꼴 펼침(1400–2200ms, spring). 클릭·키보드(Enter/Space) 스킵, `prefers-reduced-motion` 즉시 스킵. `shuffleCeremonyText` 12캐릭터 텍스트 → `waiting-lines.ts`. N=9 고정(시각 효과, 실제 스프레드 크기 무관).
 
 **캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` (`waiting-lines.ts`). 결과 mood: `CHARACTER_RESULT_MOODS` (same file). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
+
+**i18n 다국어 시스템**: 한국어(ko)·영어(en)·일본어(ja) 3개 locale. middleware가 쿠키→Accept-Language→DEFAULT 우선순위로 locale 결정 후 `x-locale` 헤더 부착. SSR layout이 `cookies()`로 `<html lang>` 동적 결정 + `LocaleProvider`가 client store(`useLocaleStore`) 동기화 (CLAUDE.md SSR 규칙: useEffect 내 setState `setTimeout` 래핑 필수). 클라이언트 호출 = `useT()` 훅, 서버 호출 = `t(key, locale)` 직접. 사전 모듈 `src/i18n/translations/{ko,en,ja}/index.ts` + 공통 베이스 `shared/keys.ts` (SonarCloud 중복 방지). DB 5개 테이블(profiles·sessions·readings·saju_readings·shinjeom_readings)에 `locale TEXT DEFAULT 'ko' CHECK` 컬럼 (016 마이그레이션) — `idx_sessions_user_locale` 인덱스 (PR-4 character-context 필터). `daily_cards`는 character_id+date 단일 사전(locale 분리 없음). 신규 세션·리딩 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 동봉. 영어 사전은 1차 임시(외부 번역가 발주 대기), 일본어는 common·locale namespace만 1차 — PR-3·PR-4·PR-5에서 점진 채움. → [`docs/architecture/i18n.md`](docs/architecture/i18n.md)
 
 ## 명령어
 
@@ -222,6 +230,13 @@ pnpm check:doc-links        # docs 링크 검증
 - **npm 미등록 패키지 side-effect import 즉시 차단**: `import "미등록패키지/path"` 형태는 모듈 로딩 시점에 vitest·Next.js 전체 차단. 새 PR에서 발견 시 병합 전 제거.
 - **비슷한 파일 N개 생성 시 공통 베이스 추출 검토**: 동일 의도 파일 2개 이상 → 팩토리/베이스 우선 설계. SonarCloud `new_duplicated_lines_density` 임계치 3%. — **2026-05-01 OG 이미지 중복 SonarCloud 실패 원인**.
 
+### i18n 다국어 (UI 텍스트·번역·locale 작업 시)
+- **LocaleProvider SSR 패턴 필수**: `useEffect` 내 `setLocale()` 동기 호출 금지. `setTimeout(() => setLocale(initial), 0); return () => clearTimeout(t)` 패턴 사용. 미준수 시 hydration error #418 발생. — **`react-hooks/set-state-in-effect` 린트 위반 원인**.
+- **번역 키 정의 우선**: 새 UI 텍스트 추가 → ① `src/i18n/translations/shared/keys.ts`에 타입 추가 → ② `ko/index.ts` (SSOT) 채움 → ③ `en/index.ts` 임시 영문 (외부 번역 대기) → ④ `ja/index.ts`는 PR-5에서 일괄. ko 사전이 SSOT, en/ja는 부분 번역 허용 (Partial<SharedKeys>).
+- **LanguageSwitcher 데스크탑·모바일 별도 ref + 별도 testid 필수**: 동일 ref 공유 시 React last-wins로 outside-click 오탐. 데스크탑 `data-testid="lang-option-${l}"`, 모바일 `data-testid="mobile-lang-option-${l}"`. PR #211 테마 드롭다운 교훈 동일 적용.
+- **API 라우트 INSERT에 locale 동봉 필수**: 신규 `sessions`·`readings` INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 결정 후 동봉. 미동봉 시 DEFAULT 'ko' 자동 입력 → 영어/일본어 사용자 데이터가 'ko'로 고정. — **PR-A 정합성 핫픽스 원인**.
+- **E2E 셀렉터는 data-testid 우선**: 한글 텍스트 `hasText` regex 셀렉터는 i18n 텍스트 변경에 깨짐. nav·LanguageSwitcher·드롭다운은 `data-testid` 부여 필수. — **PR-A E2E `responsive.spec.ts` 수정 원인**.
+
 ## 업무 유형별 가이드
 
 → 상세: [`docs/workflow/task-playbooks.md`](docs/workflow/task-playbooks.md)
@@ -235,6 +250,7 @@ pnpm check:doc-links        # docs 링크 검증
 | 카드 스킨 | `src/data/skins/index.ts`, `src/lib/storage/index.ts` | `skin-manager` |
 | DB 스키마 | `supabase/migrations/`, `src/lib/db/schema/index.ts` | — |
 | AI 프롬프트 | `src/services/core/prompt-builder.ts`, `[service]-service.ts` | — |
+| 다국어·번역 | `src/i18n/translations/shared/keys.ts`, `{ko,en,ja}/index.ts` | — |
 | 코드 품질 검증 | `pnpm type-check && pnpm lint && pnpm build` | `quality-gate` |
 
 ## 미구현 기능·기술 부채
