@@ -35,5 +35,8 @@ jobs:
       - name: 문서 링크 존재성 검사
         run: pnpm exec tsx scripts/check-doc-links.ts
 
+      - name: i18n 번역 키 drift 검사
+        run: pnpm exec tsx scripts/check-translation-keys.ts
+
       # sync-test-count --check 은 테스트 실행이 너무 느려 PR CI에서 제외.
       # 로컬에서 수동 실행: pnpm exec tsx scripts/sync-test-count.ts --check

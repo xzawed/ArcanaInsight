@@ -21,6 +21,7 @@
     "test:e2e:full:ci": "tsx scripts/e2e-full/orchestrator.ts --mode=ci",
     "check:doc-links": "tsx scripts/check-doc-links.ts",
     "check:env-docs": "tsx scripts/check-env-docs.ts",
+    "i18n:check": "tsx scripts/check-translation-keys.ts",
     "sync:test-count": "tsx scripts/sync-test-count.ts",
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts"
   },

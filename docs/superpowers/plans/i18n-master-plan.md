@@ -405,12 +405,12 @@ curl -s -u "$SONARQUBE_TOKEN:" "https://sonarcloud.io/api/qualitygates/project_s
 |---|---|---|
 | PR-1 ~ PR-A | i18n 인프라·DB·LocaleProvider·session/reading 배선 | ✅ 머지 완료 |
 | PR-B | CLAUDE.md·architecture 문서 갱신 | ✅ 머지 완료 |
-| PR-C (feat/i18n-locale-ai-response) | Grok locale 분기 AI 응답·UI en/ja·waiting-lines en/ja | ✅ 완료 (브랜치) |
+| PR-C (feat/i18n-locale-ai-response) | Grok locale 분기 AI 응답·UI en/ja·waiting-lines en/ja | ✅ 머지 완료 |
+| PR #230 | home/settings i18n + OG 이미지 영문화 | ✅ 머지 완료 |
+| PR #231 | 카드 이름 ja + getCardName locale 헬퍼 | ✅ 머지 완료 |
+| PR #232 | 캐릭터 페르소나 EN/JA + locale-context 필터 + Noto Sans JP | ✅ 머지 완료 |
+| PR #233 (진행 중) | hreflang generateMetadata + 번역 키 drift CI | 🔄 진행 중 |
 
-**PR-C 완료 항목:**
-- `prompt-builder.ts`: `LANGUAGE_INSTRUCTIONS` map — AI 응답이 locale 언어로 자동 생성
-- `tarot/saju/shinjeom result 페이지`: 한국어 하드코딩 → `t(key, locale)` 전환
-- `waiting-lines-en.ts` / `waiting-lines-ja.ts`: 12캐릭터 대사 en/ja 번역 완료
-- `waiting-lines-i18n.ts`: `getWaitingLinesData(locale)` — 세션 컴포넌트·ShuffleCeremony 진입점
-- `ja/index.ts`: UI namespace (header/footer/home/settings/tarot/saju/shinjeom) 완성
-- 762개 테스트 통과, type-check·lint·build 클린
+**잔여 작업 (PR-6 중 미완성):**
+- E2E locale matrix (i18n-matrix.spec.ts, playwright.config.ts locale 매트릭스)
+- 신점 하이브리드 (Cultural Reading ko원문+로마자+영문 해설, 별도 PR 권장)
