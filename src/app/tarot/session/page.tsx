@@ -18,6 +18,7 @@ import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
+import { getCardName } from "@/data/cards/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
@@ -43,7 +44,7 @@ function buildRevealStep(
     const posLabel = currentSpread?.positions[sc.position]?.labelKo ?? `위치 ${sc.position + 1}`;
     const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
     const wl = getWaitingLinesData(locale);
-    const cardName = locale === "en" ? sc.card.name : sc.card.nameKo;
+    const cardName = getCardName(sc.card, locale);
     const preview = wl.buildCardPreviewLine(charId, cardName, keywords, posLabel);
     addMsg({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
   };
@@ -95,6 +96,7 @@ function addReadingResultMessages(
   cards: SelectedCard[],
   currentSpread: SpreadDefinition | null,
   addChatMessage: (msg: ChatMessage) => void,
+  locale: string,
 ): void {
   if (Array.isArray(result.cardInterpretations) && result.cardInterpretations.length > 0) {
     for (const interp of result.cardInterpretations) {
@@ -102,7 +104,7 @@ function addReadingResultMessages(
       const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: `[${posLabel}] ${card?.card.nameKo || ""}\n\n${interp.interpretation}`,
+        content: `[${posLabel}] ${card?.card ? getCardName(card.card, locale) : ""}\n\n${interp.interpretation}`,
         mood: "smile", timestamp: new Date(),
       });
     }
@@ -366,7 +368,7 @@ export default function TarotSessionPage() {
         setRevealedPositions(cards.map((c) => c.position));
         setReadingResult(result);
         const currentSpread = spreadType ? spreads[spreadType] : null;
-        addReadingResultMessages(result, cards, currentSpread, addChatMessage);
+        addReadingResultMessages(result, cards, currentSpread, addChatMessage, locale);
         setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
       },
       onError: (msg) => {
@@ -567,7 +569,7 @@ export default function TarotSessionPage() {
                     const card = selectedCards.find(c => c.card.id === interp.cardId);
                     const fallbackCard = !card && interp.position < selectedCards.length
                       ? selectedCards[interp.position] : null;
-                    const displayName = card?.card.nameKo || fallbackCard?.card.nameKo || "";
+                    const displayName = card?.card ? getCardName(card.card, locale) : fallbackCard?.card ? getCardName(fallbackCard.card, locale) : "";
                     const posLabel = spread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
                     return (
                       <motion.div

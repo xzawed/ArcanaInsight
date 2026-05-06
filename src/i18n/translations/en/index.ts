@@ -131,6 +131,7 @@ export const en: Partial<SharedKeys> = {
     "result.advice": "Advice",
     "result.cta": "Get my tarot reading",
     "result.card.reversed": "Reversed",
+    "result.card.reversed-badge": "R",
     "result.no-reading": "Could not load the reading result.",
   },
   saju: {
