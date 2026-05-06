@@ -8,8 +8,8 @@ test.describe("반응형 레이아웃", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 데스크탑 네비 표시
-    const desktopNav = page.locator("nav").filter({ hasText: /타로 상담/ });
+    // 데스크탑 네비 표시 (data-testid 사용 — i18n 텍스트 변경에 안정적)
+    const desktopNav = page.locator('[data-testid="desktop-nav"]');
     await expect(desktopNav).toBeVisible();
 
     // MobileNav 숨김
@@ -26,8 +26,8 @@ test.describe("반응형 레이아웃", () => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // 최소 5개의 네비 아이템 (홈/타로/사주/신점/MY)
-    const navItems = page.locator("nav a, nav button").filter({ hasText: /홈|타로|사주|신점|MY/ });
+    // 최소 5개의 모바일 네비 아이템 (data-testid="mobile-nav-*" 사용 — i18n 안정적)
+    const navItems = page.locator('[data-testid^="mobile-nav-"]');
     expect(await navItems.count()).toBeGreaterThanOrEqual(4);
   });
 

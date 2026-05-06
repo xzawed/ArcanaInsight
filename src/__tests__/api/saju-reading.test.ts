@@ -158,7 +158,7 @@ describe("POST /api/saju/reading", () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-saju" }));
     await readSSEStream(res);
     await Promise.resolve();
-    expect(mockSave).toHaveBeenCalledWith(mockDb, "sess-saju", expect.any(Object));
+    expect(mockSave).toHaveBeenCalledWith(mockDb, "sess-saju", expect.any(Object), expect.any(String));
   });
 
   it("topicReading 없는 AI 응답 → topic_reading || '' 분기 커버", async () => {

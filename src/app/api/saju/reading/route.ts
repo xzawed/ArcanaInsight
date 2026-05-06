@@ -12,6 +12,7 @@ import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveSajuReading } from "@/lib/db/reading-saver";
+import { getRequestLocale } from "@/i18n/server-locale";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`saju:${ip}`, 10, 60_000))) return rateLimitResponse();
 
+    const locale = await getRequestLocale();
     const rawBody = await request.json();
 
     // Zod 입력 검증
@@ -138,7 +140,7 @@ export async function POST(request: NextRequest) {
               overall_reading: result.overallReading,
               topic_reading: result.topicReading || "",
               advice: result.advice,
-            }).catch((e) => console.error("사주 DB 저장 최종 실패:", e))
+            }, locale).catch((e) => console.error("사주 DB 저장 최종 실패:", e))
           }
         } catch (e) {
           console.error("사주 리딩 생성 실패:", e instanceof Error ? e.message : String(e));

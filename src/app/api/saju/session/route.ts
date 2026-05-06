@@ -5,6 +5,7 @@ import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { SAJU_TOPICS } from "@/data/topics"
 import { SajuSessionSchema } from "@/lib/validation/api-schemas"
+import { getRequestLocale } from "@/i18n/server-locale"
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const db = getDb()
+    const locale = await getRequestLocale()
     const session = await db.insert("sessions", {
       user_id: user?.id ?? null,
       service_type: "saju",
@@ -27,6 +29,7 @@ export async function POST(request: NextRequest) {
       spread_type: null,
       status: "in_progress",
       character_id: validCharId,
+      locale,
     })
     return NextResponse.json({ session })
   } catch (e) {

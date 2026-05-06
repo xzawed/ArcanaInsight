@@ -12,3 +12,10 @@ process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000";
 
 // fetch 전역 모킹 (AI Provider, 외부 HTTP 호출)
 global.fetch = vi.fn();
+
+// next/headers 전역 mock — server-only API 사용 코드(API 라우트·server-locale)의 단위 테스트 지원.
+// 개별 테스트에서 vi.doMock("next/headers", ...) 으로 override 가능 (server-locale.test.ts 참고).
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue({ get: () => null }),
+  cookies: vi.fn().mockResolvedValue({ get: () => undefined }),
+}));

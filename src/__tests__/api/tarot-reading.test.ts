@@ -201,7 +201,8 @@ describe("POST /api/tarot/reading", () => {
       mockDb,
       "sess-existing",
       expect.objectContaining({ overallReading: expect.any(String) }),
-      expect.any(Array)
+      expect.any(Array),
+      expect.any(String)  // locale (PR-A: i18n wiring)
     );
   });
 

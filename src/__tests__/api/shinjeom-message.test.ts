@@ -149,7 +149,7 @@ describe("POST /api/shinjeom/message", () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-final", isFinalTurn: true }));
     await readSSEStream(res);
     await Promise.resolve();
-    expect(mockSaveFinal).toHaveBeenCalledWith(mockDb, "sess-final", expect.any(Object));
+    expect(mockSaveFinal).toHaveBeenCalledWith(mockDb, "sess-final", expect.any(Object), expect.any(String));
   });
 
   it("AI 오류 → 스트림 내부 catch에서 errMsg 전송", async () => {
