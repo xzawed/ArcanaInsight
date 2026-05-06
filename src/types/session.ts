@@ -30,6 +30,7 @@ export interface SpreadPosition {
   labelKo: string;
   x: number;
   y: number;
+  rotation?: number;
 }
 
 export interface SpreadDefinition {

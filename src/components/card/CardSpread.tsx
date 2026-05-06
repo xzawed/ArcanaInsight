@@ -149,7 +149,10 @@ export function CardSpread({ selectedCards, spread, revealedPositions, glowColor
           >
             {selectedCard ? (
               <div className="flex flex-col items-center gap-0.5 md:gap-1">
-                <div className="relative">
+                <div
+                  className="relative"
+                  style={pos.rotation ? { transform: `rotate(${pos.rotation}deg)` } : undefined}
+                >
                   {isRevealed && (
                     <motion.div
                       className="absolute -inset-1 md:-inset-2 rounded-xl blur-md"

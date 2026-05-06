@@ -31,7 +31,7 @@ export const spreads: Record<SpreadType, SpreadDefinition> = {
     description: "가장 전통적인 10장 배열법으로 인생의 복합적인 상황을 깊이 분석합니다.",
     positions: [
       { index: 0, label: "Present Situation", labelKo: "현재 상황", x: 35, y: 50 },
-      { index: 1, label: "Challenge", labelKo: "도전/방해 요소", x: 35, y: 50 },
+      { index: 1, label: "Challenge", labelKo: "도전/방해 요소", x: 35, y: 50, rotation: 90 },
       { index: 2, label: "Foundation", labelKo: "기반/원인", x: 35, y: 80 },
       { index: 3, label: "Recent Past", labelKo: "최근 과거", x: 15, y: 50 },
       { index: 4, label: "Crown", labelKo: "의식적 목표", x: 35, y: 20 },
