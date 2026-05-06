@@ -5,7 +5,7 @@ import { cleanReadingText } from "@/services/core/text-cleaner";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { ReadingText } from "@/components/common/ReadingText";
-import { ShinjeomResultShareButton } from "./ShinjeomResultShareButton";
+import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 
 interface ShinjeomReadingRow {
@@ -83,7 +83,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
           >
             {t("shinjeom.result.cta", locale)}
           </a>
-          <ShinjeomResultShareButton shareToken={id} />
+          <ResultShareButton service="shinjeom" shareToken={id} />
         </div>
       </div>
     </div>

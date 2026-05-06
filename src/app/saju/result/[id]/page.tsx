@@ -6,7 +6,7 @@ import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
-import { SajuResultShareButton } from "./SajuResultShareButton";
+import { ResultShareButton } from "@/components/common/ResultShareButton";
 import type { SajuResult } from "@/services/saju/saju-types";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 
@@ -117,7 +117,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
           >
             {t("saju.result.cta", locale)}
           </a>
-          <SajuResultShareButton shareToken={id} />
+          <ResultShareButton service="saju" shareToken={id} />
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { spreads } from "@/data/spreads";
 import { SpreadType } from "@/types/session";
-import { ResultShareButton } from "./ResultShareButton";
+import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 import { ReadingText } from "@/components/common/ReadingText";
 import { MysticBackground } from "@/components/effects/MysticBackground";
@@ -155,7 +155,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <a href="/tarot" className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
             {t("tarot.result.cta", locale)}
           </a>
-          <ResultShareButton shareToken={id} spreadName={spread?.nameKo ?? "타로"} />
+          <ResultShareButton service="tarot" shareToken={id} spreadName={spread?.nameKo ?? "타로"} />
         </div>
       </div>
     </div>
