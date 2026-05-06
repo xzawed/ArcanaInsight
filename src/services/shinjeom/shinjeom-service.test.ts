@@ -372,5 +372,35 @@ describe("ShinjeomService", () => {
       const result = service.parseResult(twoJsonBlocks);
       expect(result.overallReading).toContain("첫 번째 결과");
     });
+
+    describe("parseError 시그널", () => {
+      it("overallReading이 빈 문자열이면 parseError='missing_fields'", () => {
+        const json = JSON.stringify({ overallReading: "", topicReading: "주제", advice: "조언" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBe("missing_fields");
+      });
+
+      it("advice가 빈 문자열이면 parseError='missing_fields'", () => {
+        const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBe("missing_fields");
+      });
+
+      it("핵심 필드가 모두 채워지면 parseError 없음", () => {
+        const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "조언" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBeUndefined();
+      });
+
+      it("JSON 파싱 실패 + raw 텍스트 살아있음 → parseError='fallback_text'", () => {
+        const result = service.parseResult("일반 텍스트 결과입니다");
+        expect(result.parseError).toBe("fallback_text");
+      });
+
+      it("JSON 파싱 실패 + 빈 입력 → parseError='invalid_json'", () => {
+        const result = service.parseResult("");
+        expect(result.parseError).toBe("invalid_json");
+      });
+    });
   });
 });

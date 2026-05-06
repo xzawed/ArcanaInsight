@@ -237,9 +237,11 @@ describe("buildSystemPrompt", () => {
     expect(result).toContain("advice");
   });
 
-  it("한국어 응답 규칙을 명시한다", () => {
+  it("ko 기본: 시스템 프롬프트가 한국어로 작성됨 (응답 형식 명세 포함)", () => {
     const result = buildSystemPrompt(dummyCharacter);
-    expect(result).toContain("한국어");
+    // ko에서는 별도 언어 지시문이 없지만 시스템 프롬프트 본문은 한국어로 작성됨
+    expect(result).toContain("응답 형식");
+    expect(result).toContain("절대 규칙");
   });
 
   it("string 타입을 반환한다", () => {
@@ -422,8 +424,10 @@ describe("buildCharacterHeader", () => {
     expect(result).toContain(dummyCharacter.speechStyle);
   });
 
-  it("'한국어로만 응답합니다' 공통 규칙을 포함한다", () => {
-    expect(buildCharacterHeader(dummyCharacter)).toContain("한국어로만 응답합니다");
+  it("ko (기본 locale): 시스템 프롬프트가 한국어이므로 추가 언어 지시문이 없다 (노이즈 제거)", () => {
+    const result = buildCharacterHeader(dummyCharacter);
+    expect(result).not.toContain("한국어로만 응답합니다");
+    expect(result).not.toContain("English only");
   });
 
   it("subtitle 없이 호출하면 subtitle 줄이 없다", () => {

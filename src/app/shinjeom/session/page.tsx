@@ -207,6 +207,14 @@ export default function ShinjeomSessionPage() {
       await drainSseChunks(response.body.getReader(), (data) => {
         if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
         if (data.done && data.isFinal && data.result) {
+          const result = data.result as { parseError?: string };
+          // 결과 표시 불가 — DB 저장도 차단된 상태 → 사용자에게 재시도 안내
+          if (result.parseError) {
+            console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
+            updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+            setMood("default");
+            return true;
+          }
           removeMessage(msgId);
           setReadingResult(data.result as Parameters<typeof setReadingResult>[0]);
           setPhase("result");

@@ -252,4 +252,66 @@ describe("POST /api/shinjeom/message", () => {
     const text = await readSSEStream(res);
     expect(text).toContain("done");
   });
+
+  // ─── max_tokens 분기 ─────────────────────────────────────────────────────
+  describe("SHINJEOM_TOKENS — final/chat 분기", () => {
+    async function captureMaxTokens(body: Record<string, unknown>): Promise<number | undefined> {
+      const provider = {
+        streamReading: vi.fn().mockImplementation(async function* () {
+          yield JSON.stringify({ overallReading: "ok", topicReading: "주제", advice: "조언" });
+        }),
+        generateReading: vi.fn().mockResolvedValue(""),
+      };
+      const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+      vi.doMock("@/lib/rate-limit", () => ({
+        checkRateLimit: vi.fn().mockReturnValue(true),
+        rateLimitResponse: vi.fn(),
+      }));
+      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+      vi.doMock("@/lib/auth", () => makeAuthMock());
+      vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+      const { POST } = await import("@/app/api/shinjeom/message/route");
+      const res = await POST(makePostRequest({ ...VALID_BODY, ...body }));
+      await readSSEStream(res);
+      return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
+    }
+
+    it("isFinalTurn=true → max_tokens 6500 (truncated 방지 상향)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: true })).toBe(6500);
+    });
+
+    it("isFinalTurn=false → max_tokens 1200 (중간 대화)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: false })).toBe(1200);
+    });
+  });
+
+  // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────
+  it("isFinalTurn=true + parseError(missing_fields) → saveShinjeomFinalReading 미호출", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    // overallReading 채움 + advice 빈 문자 → parseResult가 missing_fields 부여
+    const partialJson = JSON.stringify({ overallReading: "결과 본문", topicReading: "주제", advice: "" });
+    const provider = {
+      streamReading: vi.fn().mockImplementation(async function* () { yield partialJson; }),
+      generateReading: vi.fn().mockResolvedValue(""),
+    };
+    const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+    vi.doMock("@/lib/db/reading-saver", () => ({
+      saveShinjeomFinalReading: mockSave,
+      saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
+    }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+    const { POST } = await import("@/app/api/shinjeom/message/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, isFinalTurn: true, sessionId: "sess-shinjeom-partial" }));
+    const text = await readSSEStream(res);
+    await Promise.resolve();
+    expect(text).toContain("missing_fields");
+    expect(mockSave).not.toHaveBeenCalled();
+  });
 });

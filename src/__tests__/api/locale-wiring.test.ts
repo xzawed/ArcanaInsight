@@ -143,30 +143,76 @@ describe("locale wiring — reading-saver", () => {
 describe("locale wiring — prompt-builder language instruction", () => {
   const character = getCharacterById("arcana");
 
-  it("locale='ko' → 한국어로만 응답합니다 포함", () => {
+  it("locale='ko' → 시스템 프롬프트가 이미 한국어이므로 추가 언어 지시문 없음 (노이즈 제거)", () => {
     const result = buildCharacterHeader(character!, undefined, "ko");
-    expect(result).toContain("한국어로만 응답합니다");
+    expect(result).not.toContain("한국어로만 응답합니다");
+    expect(result).not.toContain("English only");
+    expect(result).not.toContain("日本語");
   });
 
-  it("locale='en' → English only 지시문 포함", () => {
+  it("locale='en' → English only 지시문 + JSON 키 영어 고정 명시", () => {
     const result = buildCharacterHeader(character!, undefined, "en");
-    expect(result).toContain("English only");
+    expect(result).toContain("natural English only");
+    expect(result).toContain("EXACT English JSON keys");
     expect(result).not.toContain("한국어로만");
   });
 
-  it("locale='ja' → 日本語 지시문 포함", () => {
+  it("locale='ja' → 日本語 지시문 + JSON 키 영어 고정 명시", () => {
     const result = buildCharacterHeader(character!, undefined, "ja");
     expect(result).toContain("日本語");
-    expect(result).not.toContain("한국어로만");
+    expect(result).toContain("英語のまま");
   });
 
   it("buildSystemPrompt locale='en' → English only 지시문 전파", () => {
     const result = buildSystemPrompt(character!, "en");
-    expect(result).toContain("English only");
+    expect(result).toContain("natural English only");
   });
 
-  it("미지원 locale → ko fallback 적용", () => {
+  it("미지원 locale → 빈 문자 fallback (ko와 동일 — 노이즈 없음)", () => {
     const result = buildCharacterHeader(character!, undefined, "fr");
-    expect(result).toContain("한국어로만 응답합니다");
+    expect(result).not.toContain("한국어로만 응답합니다");
+    expect(result).not.toContain("English only");
+  });
+});
+
+describe("locale wiring — reading-saver safeLocale 가드 (Fix D)", () => {
+  it("saveTarotReading: 빈 문자열 locale → 'ko' 자동 치환 (016 CHECK 위반 방지)", async () => {
+    const { saveTarotReading } = await import("@/lib/db/reading-saver");
+    const mockDb = makeMockDb();
+    await saveTarotReading(
+      mockDb as unknown as Parameters<typeof saveTarotReading>[0],
+      "sess-empty-locale",
+      { overallReading: "test", advice: "" },
+      [{ cardId: "major-00", position: 0, isReversed: false }],
+      ""
+    );
+    const readingsInsert = mockDb.insertCalls.find((c) => c.table === "readings");
+    expect(readingsInsert!.data.locale).toBe("ko");
+  });
+
+  it("saveSajuReading: 잘못된 locale ('xx') → 'ko' 자동 치환", async () => {
+    const { saveSajuReading } = await import("@/lib/db/reading-saver");
+    const mockDb = makeMockDb();
+    await saveSajuReading(
+      mockDb as unknown as Parameters<typeof saveSajuReading>[0],
+      "sess-bad-locale",
+      { session_id: "sess-bad-locale", overall_reading: "" },
+      "xx"
+    );
+    const sajuInsert = mockDb.insertCalls.find((c) => c.table === "saju_readings");
+    expect(sajuInsert!.data.locale).toBe("ko");
+  });
+
+  it("saveShinjeomFinalReading: 빈 locale → 'ko' 자동 치환", async () => {
+    const { saveShinjeomFinalReading } = await import("@/lib/db/reading-saver");
+    const mockDb = makeMockDb();
+    await saveShinjeomFinalReading(
+      mockDb as unknown as Parameters<typeof saveShinjeomFinalReading>[0],
+      "sess-shin-empty",
+      { overallReading: "test", advice: "" },
+      ""
+    );
+    const shinInsert = mockDb.insertCalls.find((c) => c.table === "shinjeom_readings");
+    expect(shinInsert!.data.locale).toBe("ko");
   });
 });

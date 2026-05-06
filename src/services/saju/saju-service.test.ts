@@ -345,6 +345,37 @@ describe("SajuService", () => {
       const result = service.parseResult(partialJson);
       expect(result.overallReading).toContain("종합 운세");
     });
+
+    describe("parseError 시그널", () => {
+      it("overallReading이 빈 문자열이면 parseError='missing_fields'", () => {
+        const json = JSON.stringify({ overallReading: "", topicReading: "주제", advice: "조언" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBe("missing_fields");
+      });
+
+      it("advice가 빈 문자열이면 parseError='missing_fields'", () => {
+        const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBe("missing_fields");
+      });
+
+      it("핵심 필드가 모두 채워지면 parseError 없음", () => {
+        const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "조언" });
+        const result = service.parseResult(json);
+        expect(result.parseError).toBeUndefined();
+      });
+
+      it("JSON 파싱 완전 실패 + fallback 텍스트 추출 성공 → parseError='fallback_text'", () => {
+        const invalid = "이것은 유효하지 않은 JSON입니다... 의미 있는 텍스트";
+        const result = service.parseResult(invalid);
+        expect(result.parseError).toBe("fallback_text");
+      });
+
+      it("JSON 파싱 실패 + fallback 텍스트도 비어 있음 → parseError='invalid_json'", () => {
+        const result = service.parseResult("");
+        expect(result.parseError).toBe("invalid_json");
+      });
+    });
   });
 
   // ─── topicLabels 매핑 ─────────────────────────────────────────────────────

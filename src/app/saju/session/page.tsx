@@ -133,16 +133,27 @@ export default function SajuSessionPage() {
       onChunk: () => { /* 사주는 스트리밍 표시 불필요 — 대기 연출 사용 */ },
       onDone: (data) => {
         stopTimers();
-        if (data.result) {
-          setReadingResult(data.result as ReadingResult);
-          if (data.sajuData) setSajuData(data.sajuData as SajuResult);
-          setPhase("result"); setMood(CHARACTER_RESULT_MOODS[state.characterId ?? ""] ?? "smile");
-          const doneMsg = state.characterId === "miko"
-            ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
-            : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
+        const result = data.result as ReadingResult | undefined;
+        if (!result) return;
+
+        // 결과 표시 불가 — DB 저장도 차단된 상태이므로 사용자에게 재시도 안내
+        if (result.parseError) {
+          console.warn("[saju-session] 결과 표시 불가:", { parseError: result.parseError });
+          const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
           addChatMessage({ id: crypto.randomUUID(), role: "character",
-            content: doneMsg, mood: "smile", timestamp: new Date() });
+            content: errLines.reading, mood: "default", timestamp: new Date() });
+          setMood("default"); setReadingError(true);
+          return;
         }
+
+        setReadingResult(result);
+        if (data.sajuData) setSajuData(data.sajuData as SajuResult);
+        setPhase("result"); setMood(CHARACTER_RESULT_MOODS[state.characterId ?? ""] ?? "smile");
+        const doneMsg = state.characterId === "miko"
+          ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
+          : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
+        addChatMessage({ id: crypto.randomUUID(), role: "character",
+          content: doneMsg, mood: "smile", timestamp: new Date() });
       },
       onError: (msg) => {
         stopTimers();

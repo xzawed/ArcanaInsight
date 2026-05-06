@@ -1,4 +1,10 @@
 import type { DbClient } from "./types";
+import { isLocale, DEFAULT_LOCALE } from "@/i18n/config";
+
+/** 016 마이그레이션 CHECK 제약(locale IN ('ko','en','ja'))과 동기화 — 빈 문자열·잘못된 값 차단 */
+function safeLocale(locale: string): string {
+  return isLocale(locale) ? locale : DEFAULT_LOCALE;
+}
 
 /** PostgreSQL 23xxx (무결성 제약 위반) 등 재시도해도 동일하게 실패하는 영구 에러 판별 */
 function isPermanentError(e: unknown): boolean {
@@ -32,6 +38,7 @@ export async function saveTarotReading(
   cards: { cardId: string; position: number; isReversed: boolean }[],
   locale: string = "ko"
 ): Promise<void> {
+  const lc = safeLocale(locale);
   await withRetry(() =>
     Promise.all([
       db.insert("readings", {
@@ -39,7 +46,7 @@ export async function saveTarotReading(
         card_interpretation: reading.cardInterpretations,
         overall_reading: reading.overallReading,
         advice: reading.advice,
-        locale,
+        locale: lc,
       }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",
@@ -64,9 +71,10 @@ export async function saveSajuReading(
   sajuReadingData: Record<string, unknown>,
   locale: string = "ko"
 ): Promise<void> {
+  const lc = safeLocale(locale);
   await withRetry(() =>
     Promise.all([
-      db.insert("saju_readings", { ...sajuReadingData, locale }),
+      db.insert("saju_readings", { ...sajuReadingData, locale: lc }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",
         completed_at: new Date().toISOString(),
@@ -82,6 +90,7 @@ export async function saveShinjeomFinalReading(
   result: { overallReading: string; topicReading?: string; advice: string },
   locale: string = "ko"
 ): Promise<void> {
+  const lc = safeLocale(locale);
   await withRetry(() =>
     Promise.all([
       db.insert("shinjeom_readings", {
@@ -89,7 +98,7 @@ export async function saveShinjeomFinalReading(
         overall_reading: result.overallReading,
         topic_reading: result.topicReading || "",
         advice: result.advice,
-        locale,
+        locale: lc,
       }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",

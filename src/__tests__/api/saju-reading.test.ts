@@ -215,4 +215,74 @@ describe("POST /api/saju/reading", () => {
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
   });
+
+  // ─── computeSajuReadingMaxTokens 분기 ─────────────────────────────────────
+  describe("computeSajuReadingMaxTokens — 동적 max_tokens", () => {
+    async function captureMaxTokens(body: Record<string, unknown>): Promise<number | undefined> {
+      const provider = {
+        streamReading: vi.fn().mockImplementation(async function* () {
+          yield JSON.stringify({ overallReading: "ok", topicReading: "주제", advice: "조언" });
+        }),
+        generateReading: vi.fn().mockResolvedValue(""),
+      };
+      const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+      vi.doMock("@/lib/rate-limit", () => ({
+        checkRateLimit: vi.fn().mockReturnValue(true),
+        rateLimitResponse: vi.fn(),
+      }));
+      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+      vi.doMock("@/lib/auth", () => makeAuthMock());
+      vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+      const { POST } = await import("@/app/api/saju/reading/route");
+      const res = await POST(makePostRequest({ ...VALID_BODY, ...body }));
+      await readSSEStream(res);
+      return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
+    }
+
+    it("includeMonthly=true → max_tokens 16000", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: true })).toBe(16000);
+    });
+
+    it("timeRange='full-fortune' → max_tokens 13000", async () => {
+      expect(await captureMaxTokens({ timeRange: "full-fortune", includeMonthly: false })).toBe(13000);
+    });
+
+    it("timeRange='five-year' → max_tokens 12000", async () => {
+      expect(await captureMaxTokens({ timeRange: "five-year", includeMonthly: false })).toBe(12000);
+    });
+
+    it("timeRange='three-year' → max_tokens 10000", async () => {
+      expect(await captureMaxTokens({ timeRange: "three-year", includeMonthly: false })).toBe(10000);
+    });
+
+    it("기본 (this-month, monthly 미포함) → max_tokens 8000", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: false })).toBe(8000);
+    });
+  });
+
+  // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────
+  it("parseError(missing_fields) → saveSajuReading 미호출 (부분 결과 영구 저장 차단)", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    // overallReading만 있고 advice 빈 문자 → parseResult가 missing_fields 부여
+    const partialJson = JSON.stringify({ overallReading: "결과 본문", topicReading: "주제", advice: "" });
+    const mockAiModule = makeMockAiModule({
+      streamReading: vi.fn().mockImplementation(async function* () { yield partialJson; }),
+      generateReading: vi.fn().mockResolvedValue(""),
+    });
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-partial" }));
+    const text = await readSSEStream(res);
+    await Promise.resolve();
+    expect(text).toContain("missing_fields");
+    expect(mockSave).not.toHaveBeenCalled();
+  });
 });

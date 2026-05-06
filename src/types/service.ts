@@ -8,8 +8,12 @@ export interface ReadingResult {
   advice: string;
   topicReading?: string;
   shareToken?: string | null;
-  /** AI 응답이 잘렸거나 JSON 파싱 실패 시 클라이언트가 감지하기 위한 시그널 */
-  parseError?: "truncated" | "invalid_json";
+  /** AI 응답이 잘렸거나 JSON 파싱 실패 시 클라이언트가 감지하기 위한 시그널.
+   *  - truncated: 카드 수 부족 등 응답이 도중에 잘림
+   *  - invalid_json: JSON 파싱 완전 실패 + fallback 텍스트도 비어있음
+   *  - fallback_text: JSON 파싱 실패 후 raw 텍스트 추출은 성공
+   *  - missing_fields: JSON 파싱 성공이지만 핵심 필드(overallReading 또는 advice)가 빈 문자열 */
+  parseError?: "truncated" | "invalid_json" | "fallback_text" | "missing_fields";
   /** 요청 시 선택된 카드 수 — truncated 판정 기준 */
   expectedCardCount?: number;
 }
