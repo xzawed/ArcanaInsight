@@ -79,6 +79,8 @@ jobs:
         with:
           name: next-build
           path: .next/
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
   # ── 4단계: E2E (build 아티팩트 다운로드 → pnpm start 서빙) ─────────────

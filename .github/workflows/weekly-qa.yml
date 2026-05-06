@@ -50,6 +50,8 @@ jobs:
         with:
           name: next-build-weekly
           path: .next/
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
   e2e-desktop:
@@ -87,9 +89,10 @@ jobs:
       - name: E2E 테스트 (Desktop Chrome)
         run: pnpm test:e2e --project="Desktop Chrome"
         env:
+          CI: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
           GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
@@ -136,9 +139,10 @@ jobs:
       - name: E2E 테스트 (Mobile Android — Pixel 7)
         run: pnpm test:e2e --project="Mobile Android"
         env:
+          CI: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
           GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
@@ -185,9 +189,10 @@ jobs:
       - name: E2E 테스트 (Mobile iOS — iPhone 14)
         run: pnpm test:e2e --project="Mobile iOS"
         env:
+          CI: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
           GROK_API_KEY: ${{ secrets.GROK_API_KEY || 'placeholder-grok-key' }}
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
