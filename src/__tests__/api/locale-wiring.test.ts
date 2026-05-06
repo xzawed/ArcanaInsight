@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { buildCharacterHeader, buildSystemPrompt } from "@/services/core/prompt-builder";
+import { getCharacterById } from "@/data/characters";
 
 /**
  * locale wiring 검증 — PR-A 정합성 핫픽스.
@@ -135,5 +137,36 @@ describe("locale wiring — reading-saver", () => {
     );
     const readingsInsert = mockDb.insertCalls.find((c) => c.table === "readings");
     expect(readingsInsert!.data.locale).toBe("ko");
+  });
+});
+
+describe("locale wiring — prompt-builder language instruction", () => {
+  const character = getCharacterById("arcana");
+
+  it("locale='ko' → 한국어로만 응답합니다 포함", () => {
+    const result = buildCharacterHeader(character!, undefined, "ko");
+    expect(result).toContain("한국어로만 응답합니다");
+  });
+
+  it("locale='en' → English only 지시문 포함", () => {
+    const result = buildCharacterHeader(character!, undefined, "en");
+    expect(result).toContain("English only");
+    expect(result).not.toContain("한국어로만");
+  });
+
+  it("locale='ja' → 日本語 지시문 포함", () => {
+    const result = buildCharacterHeader(character!, undefined, "ja");
+    expect(result).toContain("日本語");
+    expect(result).not.toContain("한국어로만");
+  });
+
+  it("buildSystemPrompt locale='en' → English only 지시문 전파", () => {
+    const result = buildSystemPrompt(character!, "en");
+    expect(result).toContain("English only");
+  });
+
+  it("미지원 locale → ko fallback 적용", () => {
+    const result = buildCharacterHeader(character!, undefined, "fr");
+    expect(result).toContain("한국어로만 응답합니다");
   });
 });

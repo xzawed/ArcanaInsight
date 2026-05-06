@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
+import { getRequestLocale } from "@/i18n/server-locale";
+import { t } from "@/i18n/translations";
 import { ReadingText } from "@/components/common/ReadingText";
 import { ShinjeomResultShareButton } from "./ShinjeomResultShareButton";
 import { MysticBackground } from "@/components/effects/MysticBackground";
@@ -18,6 +20,7 @@ interface ShinjeomReadingRow {
 
 export default async function ShinjeomResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const locale = await getRequestLocale();
   const db = getAdminDb();
   const reading = await db.findOne<ShinjeomReadingRow>("shinjeom_readings", { share_token: id });
 
@@ -37,7 +40,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative">
         <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">신점 결과</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("shinjeom.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
         </div>
 
@@ -46,7 +49,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
             <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔮</span>
-                <h2 className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</h2>
+                <h2 className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("shinjeom.result.overall", locale)}</h2>
               </div>
               <ReadingText text={overallReading} />
             </div>
@@ -56,7 +59,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🌿</span>
-                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</h2>
+                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("shinjeom.result.topic", locale)}</h2>
               </div>
               <ReadingText text={topicReading} />
             </div>
@@ -66,7 +69,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
             <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">✨</span>
-                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</h2>
+                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("shinjeom.result.advice", locale)}</h2>
               </div>
               <ReadingText text={advice} />
             </div>
@@ -78,7 +81,7 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
             href="/shinjeom"
             className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
           >
-            나도 신점 상담 받기
+            {t("shinjeom.result.cta", locale)}
           </a>
           <ShinjeomResultShareButton shareToken={id} />
         </div>

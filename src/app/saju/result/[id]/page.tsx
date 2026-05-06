@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
+import { getRequestLocale } from "@/i18n/server-locale";
+import { t } from "@/i18n/translations";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
 import { SajuResultShareButton } from "./SajuResultShareButton";
@@ -35,6 +37,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     created_at: string;
   }
 
+  const locale = await getRequestLocale();
   const db = getAdminDb();
   const reading = await db.findOne<SajuReadingRow>("saju_readings", { share_token: id });
 
@@ -69,7 +72,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
 
       <div className="max-w-5xl mx-auto px-4 py-8 relative">
         <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">사주 분석 결과</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("saju.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
         </div>
 
@@ -80,7 +83,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
             <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">☯</span>
-                <h2 className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</h2>
+                <h2 className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("saju.result.overall", locale)}</h2>
               </div>
               <ReadingText text={overallReading} />
             </div>
@@ -90,7 +93,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔍</span>
-                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</h2>
+                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.topic", locale)}</h2>
               </div>
               <ReadingText text={topicReading} />
             </div>
@@ -100,7 +103,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
             <div className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">✨</span>
-                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</h2>
+                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.advice", locale)}</h2>
               </div>
               <ReadingText text={advice} />
             </div>
@@ -112,7 +115,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
             href="/saju"
             className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
           >
-            나도 사주 분석 받기
+            {t("saju.result.cta", locale)}
           </a>
           <SajuResultShareButton shareToken={id} />
         </div>

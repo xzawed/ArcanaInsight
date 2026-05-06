@@ -22,11 +22,11 @@ describe("translations 사전 — namespace × locale", () => {
     expect(t("settings.page.title", "en")).toBe("Settings");
   });
 
-  it("ja 사전은 common·locale namespace만 1차 채움 — 나머지는 ko fallback", () => {
+  it("ja 사전은 UI namespace 모두 채움 — 번역값 직접 반환", () => {
     expect(t("common.language", "ja")).toBe("言語");
     expect(t("locale.modal.title", "ja")).toBe("言語を選択してください");
-    expect(t("header.nav.tarot", "ja")).toBe("타로");
-    expect(t("home.hero.title", "ja")).toBe("타로 & 운세 상담");
+    expect(t("header.nav.tarot", "ja")).toBe("タロット");
+    expect(t("home.hero.title", "ja")).toBe("タロット＆運勢リーディング");
   });
 
   it("등록되지 않은 키는 키 자체 반환", () => {

@@ -9,6 +9,8 @@ import { ResultShareButton } from "./ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 import { ReadingText } from "@/components/common/ReadingText";
 import { MysticBackground } from "@/components/effects/MysticBackground";
+import { getRequestLocale } from "@/i18n/server-locale";
+import { t } from "@/i18n/translations";
 
 const deckManager = new DeckManager();
 
@@ -29,6 +31,7 @@ interface SessionRow {
 
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const locale = await getRequestLocale();
   const db = getAdminDb();
   const reading = await db.findOne<ReadingRow>("readings", { share_token: id });
   if (!reading) notFound();
@@ -61,7 +64,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">타로 리딩 결과</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("tarot.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{spread?.nameKo} 스프레드 ・ {new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
         </div>
 
@@ -97,11 +100,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">🔮</span>
-                <h2 className="font-serif font-bold text-xl text-arcana-purple">종합 해석</h2>
+                <h2 className="font-serif font-bold text-xl text-arcana-purple">{t("tarot.result.overall", locale)}</h2>
               </div>
               {overallReading
                 ? <ReadingText text={overallReading} />
-                : <p className="text-arcana-muted text-sm">해석 결과를 불러올 수 없습니다.</p>
+                : <p className="text-arcana-muted text-sm">{t("tarot.result.no-reading", locale)}</p>
               }
             </div>
 
@@ -110,7 +113,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">✨</span>
-                  <h2 className="font-serif font-bold text-xl text-arcana-gold">조언</h2>
+                  <h2 className="font-serif font-bold text-xl text-arcana-gold">{t("tarot.result.advice", locale)}</h2>
                 </div>
                 <ReadingText text={advice} />
               </div>
@@ -135,7 +138,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       <div className="flex items-baseline gap-2">
                         <span className="text-arcana-text font-bold">{card?.nameKo}</span>
                         <span className="text-arcana-muted text-xs md:text-sm">{card?.name}</span>
-                        {interp.isReversed && <span className="text-red-400 text-xs bg-red-900/30 px-1.5 py-0.5 rounded">역방향</span>}
+                        {interp.isReversed && <span className="text-red-400 text-xs bg-red-900/30 px-1.5 py-0.5 rounded">{t("tarot.result.card.reversed", locale)}</span>}
                       </div>
                     </div>
                   </div>
@@ -149,7 +152,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         {/* 하단 액션 */}
         <div className="flex justify-center gap-4 mt-8">
           <a href="/tarot" className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
-            나도 타로 상담 받기
+            {t("tarot.result.cta", locale)}
           </a>
           <ResultShareButton shareToken={id} spreadName={spread?.nameKo ?? "타로"} />
         </div>

@@ -72,4 +72,26 @@ export const en: Partial<SharedKeys> = {
     "modal.confirm": "Switch",
     "modal.keep-korean": "Keep Korean",
   },
+  tarot: {
+    "result.title": "Tarot Reading Result",
+    "result.overall": "Overall Reading",
+    "result.advice": "Advice",
+    "result.cta": "Get my tarot reading",
+    "result.card.reversed": "Reversed",
+    "result.no-reading": "Could not load the reading result.",
+  },
+  saju: {
+    "result.title": "Saju Analysis Result",
+    "result.overall": "Overall Reading",
+    "result.topic": "Topic Reading",
+    "result.advice": "Advice",
+    "result.cta": "Get my Saju analysis",
+  },
+  shinjeom: {
+    "result.title": "Shinjeom Result",
+    "result.overall": "Overall Reading",
+    "result.topic": "Topic Reading",
+    "result.advice": "Advice",
+    "result.cta": "Get my Shinjeom reading",
+  },
 };

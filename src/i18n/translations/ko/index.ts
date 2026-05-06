@@ -67,4 +67,26 @@ export const ko: SharedKeys = {
     "modal.confirm": "변경",
     "modal.keep-korean": "한국어 유지",
   },
+  tarot: {
+    "result.title": "타로 리딩 결과",
+    "result.overall": "종합 해석",
+    "result.advice": "조언",
+    "result.cta": "나도 타로 상담 받기",
+    "result.card.reversed": "역방향",
+    "result.no-reading": "해석 결과를 불러올 수 없습니다.",
+  },
+  saju: {
+    "result.title": "사주 분석 결과",
+    "result.overall": "종합 해석",
+    "result.topic": "주제별 해석",
+    "result.advice": "조언",
+    "result.cta": "나도 사주 분석 받기",
+  },
+  shinjeom: {
+    "result.title": "신점 결과",
+    "result.overall": "종합 해석",
+    "result.topic": "주제별 해석",
+    "result.advice": "조언",
+    "result.cta": "나도 신점 상담 받기",
+  },
 };

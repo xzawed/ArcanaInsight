@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       name: userInfo.name,
     }, calcOptions);
 
-    const systemPrompt = sajuService.getSystemPrompt(characterId ?? undefined);
+    const systemPrompt = sajuService.getSystemPrompt(characterId ?? undefined, locale);
     const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo)
       + buildFreeQuestionPrompt(freeQuestion);
 

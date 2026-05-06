@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { shuffleCeremonyText } from "@/data/characters/waiting-lines";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { hexToRgbComponents } from "@/lib/color-utils";
 
 interface ShuffleCeremonyProps {
@@ -78,7 +79,8 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const observer = new ResizeObserver(setSize);
     observer.observe(canvas);
 
-    const charText = shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
+    const wl = getWaitingLinesData(useLocaleStore.getState().locale);
+    const charText = wl.shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
     const textChars = [...charText];
     const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;

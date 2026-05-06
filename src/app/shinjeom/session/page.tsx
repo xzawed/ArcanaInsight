@@ -11,10 +11,13 @@ import { MysticBackground } from "@/components/effects/MysticBackground";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
-import { loadingText, defaultLoadingText, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
-  const lines = (charId && characterErrorLines[charId]) || defaultErrorLines;
+  const wl = getWaitingLinesData(useLocaleStore.getState().locale);
+  const lines = (charId && wl.characterErrorLines[charId]) || wl.defaultErrorLines;
   return lines[type];
 }
 
@@ -64,6 +67,7 @@ async function drainSseChunks(
 
 export default function ShinjeomSessionPage() {
   const router = useRouter();
+  const locale = useLocaleStore((s) => s.locale);
   const {
     phase, topic, characterId, chatMessages, turnCount, readingResult, isLoading,
     addChatMessage, incrementTurn, setReadingResult, setLoading, setPhase, setSessionId, reset,
@@ -323,7 +327,7 @@ export default function ShinjeomSessionPage() {
                 {isLoading && (
                   <div className="flex justify-start">
                     <div className="bg-arcana-card/70 border border-arcana-border rounded-2xl px-4 py-3">
-                      <span className="text-arcana-muted text-sm animate-pulse">{loadingText[characterId ?? ""] ?? defaultLoadingText}</span>
+                      <span className="text-arcana-muted text-sm animate-pulse">{getWaitingLinesData(locale).loadingText[characterId ?? ""] ?? getWaitingLinesData(locale).defaultLoadingText}</span>
                     </div>
                   </div>
                 )}
