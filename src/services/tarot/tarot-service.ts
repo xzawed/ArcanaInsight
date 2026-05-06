@@ -22,11 +22,11 @@ export class TarotService implements DivinationService {
     return { userId: null, serviceType: this.id, topic, status: "in_progress", spreadType: spread.type, selectedCards: [], completedAt: null };
   }
 
-  getSystemPrompt(characterId?: string): string {
+  getSystemPrompt(characterId?: string, locale?: string): string {
     const character = characterId
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
-    return buildSystemPrompt(character);
+    return buildSystemPrompt(character, locale ?? "ko");
   }
 
   getReadingPrompt(context: SessionContext): string {

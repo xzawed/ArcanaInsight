@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       if (ownerErr) return ownerErr;
     }
 
-    const systemPrompt = shinjeomService.getSystemPrompt(characterId ?? undefined);
+    const systemPrompt = shinjeomService.getSystemPrompt(characterId ?? undefined, locale);
     const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
 
     const db = sessionId ? getDb() : null;

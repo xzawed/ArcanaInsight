@@ -142,12 +142,12 @@ export class SajuService implements DivinationService {
     return { userId: null, serviceType: this.id, topic, status: "in_progress", spreadType: null, selectedCards: [], completedAt: null };
   }
 
-  getSystemPrompt(characterId?: string): string {
+  getSystemPrompt(characterId?: string, locale?: string): string {
     const character = characterId
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
 
-    return `${buildCharacterHeader(character)}
+    return `${buildCharacterHeader(character, undefined, locale ?? "ko")}
 - 사주명리학 전문가로서, 제공된 사주 데이터만 기반으로 해석합니다.
 - 부정적 내용도 긍정적 조언으로 전환합니다.
 

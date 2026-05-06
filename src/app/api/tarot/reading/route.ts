@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
 
-    const systemPrompt = tarotService.getSystemPrompt(characterId ?? undefined);
+    const systemPrompt = tarotService.getSystemPrompt(characterId ?? undefined, locale);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const freeQuestionPrompt = buildFreeQuestionPrompt(freeQuestion);
     const resolvedSpreadType: SpreadType = (spreadType && spreadResolver.getSpreadByType(spreadType))

@@ -36,12 +36,12 @@ export class ShinjeomService implements DivinationService {
     };
   }
 
-  getSystemPrompt(characterId?: string): string {
+  getSystemPrompt(characterId?: string, locale?: string): string {
     const character = characterId
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
 
-    return `${buildCharacterHeader(character, "신점(영적 상담)을 제공하는 무속 상담사입니다.")}
+    return `${buildCharacterHeader(character, "신점(영적 상담)을 제공하는 무속 상담사입니다.", locale ?? "ko")}
 - 영적 직관과 무속적 지혜를 바탕으로 상담합니다.
 - 사용자의 고민에 공감하며 따뜻하게 대합니다.
 - 지나치게 부정적이거나 공포를 조장하지 않습니다.
