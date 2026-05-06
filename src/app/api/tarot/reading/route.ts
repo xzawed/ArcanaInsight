@@ -14,6 +14,7 @@ import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
 import { saveTarotReading } from "@/lib/db/reading-saver";
+import { getRequestLocale } from "@/i18n/server-locale";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`tarot:${ip}`, 10, 60_000))) return rateLimitResponse();
 
+    const locale = await getRequestLocale();
     const rawBody = await request.json();
 
     // Zod 입력 검증
@@ -125,7 +127,7 @@ export async function POST(request: NextRequest) {
 
           // DB 저장 — fire-and-forget (스트림 블로킹 없음, 3회 retry)
           if (db && sessionId) {
-            void saveTarotReading(db, sessionId, result, cards).catch(
+            void saveTarotReading(db, sessionId, result, cards, locale).catch(
               (e) => console.error("타로 DB 저장 최종 실패:", e)
             )
           }

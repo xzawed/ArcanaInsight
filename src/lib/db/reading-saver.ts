@@ -23,12 +23,14 @@ async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
   throw lastErr;
 }
 
-/** 타로 리딩 결과 + 세션 완료 + 카드 목록 저장 (3회 retry) */
+/** 타로 리딩 결과 + 세션 완료 + 카드 목록 저장 (3회 retry).
+ *  locale 인자는 readings 테이블에 작성 시점 locale을 기록 (sessions.locale과 별도 — 결과 텍스트 언어 추적용). */
 export async function saveTarotReading(
   db: DbClient,
   sessionId: string,
   reading: { cardInterpretations?: unknown; overallReading: string; advice: string },
-  cards: { cardId: string; position: number; isReversed: boolean }[]
+  cards: { cardId: string; position: number; isReversed: boolean }[],
+  locale: string = "ko"
 ): Promise<void> {
   await withRetry(() =>
     Promise.all([
@@ -37,6 +39,7 @@ export async function saveTarotReading(
         card_interpretation: reading.cardInterpretations,
         overall_reading: reading.overallReading,
         advice: reading.advice,
+        locale,
       }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",
@@ -54,15 +57,16 @@ export async function saveTarotReading(
   );
 }
 
-/** 사주 리딩 결과 + 세션 완료 저장 (3회 retry) */
+/** 사주 리딩 결과 + 세션 완료 저장 (3회 retry). locale은 saju_readings 테이블 컬럼. */
 export async function saveSajuReading(
   db: DbClient,
   sessionId: string,
-  sajuReadingData: Record<string, unknown>
+  sajuReadingData: Record<string, unknown>,
+  locale: string = "ko"
 ): Promise<void> {
   await withRetry(() =>
     Promise.all([
-      db.insert("saju_readings", sajuReadingData),
+      db.insert("saju_readings", { ...sajuReadingData, locale }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",
         completed_at: new Date().toISOString(),
@@ -71,11 +75,12 @@ export async function saveSajuReading(
   );
 }
 
-/** 신점 최종 리딩 결과 + 세션 완료 저장 (3회 retry) */
+/** 신점 최종 리딩 결과 + 세션 완료 저장 (3회 retry). locale은 shinjeom_readings 테이블 컬럼. */
 export async function saveShinjeomFinalReading(
   db: DbClient,
   sessionId: string,
-  result: { overallReading: string; topicReading?: string; advice: string }
+  result: { overallReading: string; topicReading?: string; advice: string },
+  locale: string = "ko"
 ): Promise<void> {
   await withRetry(() =>
     Promise.all([
@@ -84,6 +89,7 @@ export async function saveShinjeomFinalReading(
         overall_reading: result.overallReading,
         topic_reading: result.topicReading || "",
         advice: result.advice,
+        locale,
       }),
       db.update("sessions", { id: sessionId }, {
         status: "completed",

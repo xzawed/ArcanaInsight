@@ -7,6 +7,7 @@ import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { TAROT_TOPICS } from "@/data/topics"
 import { TarotSessionSchema } from "@/lib/validation/api-schemas"
+import { getRequestLocale } from "@/i18n/server-locale"
 
 const tarotService = new TarotService()
 const spreadResolver = new SpreadResolver()
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
       : sessionData.spreadType
 
     const db = getDb()
+    const locale = await getRequestLocale()
     const session = await db.insert("sessions", {
       user_id: user?.id ?? null,
       service_type: sessionData.serviceType,
@@ -37,6 +39,7 @@ export async function POST(request: NextRequest) {
       spread_type: resolvedSpreadType,
       status: sessionData.status,
       character_id: validCharId,
+      locale,
     })
     return NextResponse.json({ session })
   } catch (e) {

@@ -10,6 +10,7 @@ import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
+import { getRequestLocale } from "@/i18n/server-locale";
 
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`shinjeom:${ip}`, 20, 60_000))) return rateLimitResponse();
 
+    const locale = await getRequestLocale();
     const rawBody = await request.json();
 
     // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
             // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
             if (db && sessionId) {
-              void saveShinjeomFinalReading(db, sessionId, result).catch(
+              void saveShinjeomFinalReading(db, sessionId, result, locale).catch(
                 (e) => console.error("신점 최종 DB 저장 최종 실패:", e)
               );
             }

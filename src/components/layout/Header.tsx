@@ -89,7 +89,7 @@ export function Header() {
         </Link>
 
         {/* 데스크탑 네비게이션 */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav data-testid="desktop-nav" className="hidden md:flex items-center gap-6">
           <Link
             href="/tarot"
             className="text-arcana-muted hover:text-arcana-text transition-colors font-sans text-sm"
