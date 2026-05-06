@@ -27,6 +27,7 @@ const spreadResolver = new SpreadResolver();
  * 한국어는 영어 대비 토큰 효율이 약 1.3배 낮고, JSON 구조 오버헤드(~10%)도 더해진다.
  * 이전 정책(4단)에서는 5장 이상에서 잘림이 발생해 cardInterpretations가 누락되었음.
  * 출력 토큰만 과금되므로 max_tokens 상한 자체는 비용을 늘리지 않는다.
+ * celtic-cross(10장)·zodiac(12장) 등 대형 스프레드는 상한을 분리해 잘림을 방지한다.
  */
 function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 1) return 2000;
@@ -34,7 +35,8 @@ function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 5) return 5000;
   if (cardCount <= 7) return 6500;
   if (cardCount <= 9) return 8000;
-  return 9500;
+  if (cardCount <= 10) return 11000; // celtic-cross (10장)
+  return 13000;                      // zodiac(12장) 등 대형 스프레드
 }
 
 /** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
