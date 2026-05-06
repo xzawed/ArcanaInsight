@@ -19,6 +19,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:full": "tsx scripts/e2e-full/orchestrator.ts --mode=full --workers=6",
     "test:e2e:full:ci": "tsx scripts/e2e-full/orchestrator.ts --mode=ci",
+    "check:doc-links": "tsx scripts/check-doc-links.ts",
+    "check:env-docs": "tsx scripts/check-env-docs.ts",
+    "sync:test-count": "tsx scripts/sync-test-count.ts",
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts"
   },
   "dependencies": {

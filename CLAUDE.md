@@ -128,10 +128,12 @@ pnpm test:coverage # Vitest + 커버리지 (statements 98%)
 pnpm test:e2e      # Playwright (3 디바이스, smart-ci 제외)
 pnpm test:e2e:full          # 전수 E2E: 252 조합, 6 워커 (실서버 + 실 API 키 필요)
 pnpm test:e2e:full:ci       # CI 모드 오케스트레이터 (12 대표 케이스)
-pnpm exec tsx scripts/sync-test-count.ts       # CLAUDE.md 테스트 수 동기화
-pnpm exec tsx scripts/check-env-docs.ts        # env.ts ↔ env-variables.md 정합성
-pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
+pnpm sync:test-count        # CLAUDE.md 테스트 수 동기화
+pnpm check:env-docs         # env.ts ↔ env-variables.md 정합성
+pnpm check:doc-links        # docs 링크 검증
 ```
+
+> **scripts 운영 정책**: 자동 호출 / npm 등록 / 수동 자산 생성 분류 → [`docs/workflow/scripts.md`](docs/workflow/scripts.md)
 
 > **Windows E2E**: Docker 필수. → [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)
 >

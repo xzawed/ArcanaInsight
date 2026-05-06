@@ -1,3 +1,5 @@
+// ⚠️ 실 Supabase 인증 세션 필요 — TEST_USER_EMAIL/PASSWORD env 미설정 시 모든 케이스 skip
+// CI에서는 testIgnore 대상은 아니지만 Supabase 자격 증명 없이는 의미 없는 통과 처리됨
 import { test, expect } from "@playwright/test";
 
 const TEST_EMAIL = process.env.TEST_USER_EMAIL || "";
