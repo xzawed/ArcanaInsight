@@ -1,5 +1,7 @@
 # ArcanaInsight i18n 완성 계획 — Grok 자체 번역 방식
 
+> **상태: ✅ 완료 (2026-05-06) — PR feat/i18n-locale-ai-response, 커밋 ef7c849**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 기존 i18n 인프라(PR-1/PR-A 완료) 위에서, Grok LLM을 번역 소스로 활용해 AI 리딩 응답·UI·캐릭터 대사를 ko/en/ja 3개 locale로 완성한다.
