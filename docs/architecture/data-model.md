@@ -120,3 +120,12 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 | 출생시간(12시진) | `src/data/birth-hours.ts` |
 | 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
 | 에러 메시지 상수 | `src/data/error-messages.ts` |
+
+## 다국어 데이터 (PR-3·PR-4·PR-5 예정)
+
+- 카드 80장 `name`·`meanings` 객체화 (`{ ko, en, ja? }`) — PR-3에서 외부 번역가 의뢰
+- 12 캐릭터 페르소나 5필드(`greeting`·`personality`·`description`·`speciality`·`speechStyle`)에 영문·일문 추가 — PR-4 외부 번역
+- `waiting-lines.ts` 186줄 영문·일문 — PR-4
+- 일본어 전체 사전 채움 — PR-5
+
+상세: [`i18n.md`](i18n.md)

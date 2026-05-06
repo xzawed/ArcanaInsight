@@ -84,3 +84,7 @@ style={{
 - 5:5 비율 미준수 → 데스크탑에서 캐릭터/콘텐츠 불균형
 - CSS mask 수치 변경 → 배경 블렌딩 이질감 (Mobile iOS에서 더 눈에 띔)
 - `overflow-y-auto` 누락 → 모바일에서 콘텐츠 잘림
+
+## 6. LanguageSwitcher 분리 규칙
+
+데스크탑·모바일 LanguageSwitcher는 반드시 별도 `ref` + 별도 `data-testid` 사용. 동일 ref 공유 시 React last-wins로 outside-click 오탐 → 드롭다운이 선택 즉시 닫힘 (PR #211 테마 드롭다운 교훈). 데스크탑 `data-testid="lang-option-${l}"`, 모바일 `data-testid="mobile-lang-option-${l}"`. 상세: [`i18n-style.md`](i18n-style.md)

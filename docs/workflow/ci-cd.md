@@ -122,3 +122,12 @@ E2E 실행 방법, Docker 스크립트, 디바이스 프로필:
 워크플로우 JSON 파일 및 상세 가이드: `n8n/README.md`
 
 → 모니터링·알림 자동화 상세: [`../operations/monitoring.md`](../operations/monitoring.md)
+
+## SonarCloud ↔ Vitest 정합 검증
+
+`sonar-project.properties` 변경 시 `vitest.config.ts` `coverage.include`와 정합 확인 필수:
+- vitest include 항목이 sonar exclusions에 들어가면 SonarCloud 분모에서 빠져 측정 불일치 발생 (PR-A 정합성 핫픽스 사례)
+- 측정 안 할 파일은 vitest exclude + sonar exclusions 양쪽 모두 명시
+- 측정할 파일은 vitest include + sonar exclusions에서 제외
+
+상세: [`../conventions/i18n-style.md`](../conventions/i18n-style.md) §SonarCloud

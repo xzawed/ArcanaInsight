@@ -116,3 +116,19 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 7. **BottomCTA** — 하단 행동 유도
 
 > GenderFilter 컴포넌트는 `components/home/`에 존재하지만 현재 `page.tsx`에서 미사용
+
+## 다국어(i18n) 인프라
+
+3개 locale (`ko`/`en`/`ja`) 지원. middleware → cookie → SSR layout → LocaleProvider → useT 흐름. 상세는 [`i18n.md`](i18n.md).
+
+```
+Request → middleware (locale 결정 + x-locale 헤더 부착)
+            ↓
+       SSR layout: cookies() → <html lang>
+            ↓
+       LocaleProvider (setTimeout 패턴)
+            ↓
+       useT() / t(key, locale) → translations/{ko,en,ja}
+```
+
+ko가 SSOT, en/ja는 부분 번역 허용 (Partial<SharedKeys> + ko fallback).

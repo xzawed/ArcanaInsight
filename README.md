@@ -3,6 +3,7 @@
 <p align="right"><a href="README.en.md">🇺🇸 English</a></p>
 
 > **애니메이션 캐릭터와 대화하며 타로 리딩 · 사주 분석 · 신점 상담을 받는 운세 종합 플랫폼**
+> **3개 locale 지원** (한국어 · English · 日本語) — `ai_locale` 쿠키 기반 자동 전환 (PR-3·4·5에서 점진 채움)
 
 <p align="center">
   <img src="public/images/backgrounds/hero-bg.jpg" alt="ArcanaInsight Hero" width="100%" style="border-radius:12px" />

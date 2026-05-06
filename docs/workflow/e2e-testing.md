@@ -449,3 +449,14 @@ npx playwright test --list --project="Desktop Chrome" | tail -1  # 테스트 수
 ### Playwright 버전 업그레이드
 
 `playwright.config.ts` 버전과 `.github/workflows/` 내 `mcr.microsoft.com/playwright:vX.X.X-noble` 이미지 버전을 **반드시 동시에** 변경합니다. CI와 로컬 환경 불일치 방지.
+
+## i18n 셀렉터 정책
+
+UI 텍스트가 i18n으로 변경되므로 한글 `hasText` regex 셀렉터 금지 — `data-testid` 우선. 핵심 testid:
+- 데스크탑 nav: `desktop-nav` (Header)
+- 모바일 nav: `mobile-nav-${name}` (각 항목)
+- LanguageSwitcher: `lang-option-${l}`, `mobile-lang-option-${l}`
+- LocaleConfirmModal: `locale-confirm-modal`, `locale-confirm-keep`, `locale-confirm-accept`
+- Toast: `toast`
+
+PR-6에서 locale 매트릭스 (165 test × 3 locale = 495 실행) 도입 예정. 상세: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)

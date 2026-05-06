@@ -131,3 +131,7 @@ for (let i = start; i < text.length; i++) {
 잡기 때문에 여러 JSON 블록이 있거나 값에 `}`가 포함되면 오파싱된다.
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
+
+## 다국어 응답 (PR-4 예정)
+
+`prompt-builder.ts`에 `LANGUAGE_INSTRUCTIONS[locale]` 분기 도입 예정 (PR-4). 현재 `parseJsonSafe()`는 일본어 「」·중영일 혼합 응답을 안전하게 파싱한다 (`src/services/core/__tests__/text-cleaner.locale.test.ts` 검증). 캐릭터 메모리는 `locale` 필터를 추가해 cross-locale 오염 방지 (`idx_sessions_user_locale` 인덱스 활용). 상세: [`i18n.md`](i18n.md)
