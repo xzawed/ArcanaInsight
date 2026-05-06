@@ -399,7 +399,7 @@ curl -s -u "$SONARQUBE_TOKEN:" "https://sonarcloud.io/api/qualitygates/project_s
 
 ---
 
-## 실제 완료 현황 (2026-05-06)
+## 실제 완료 현황 (2026-05-07)
 
 | PR | 내용 | 상태 |
 |---|---|---|
@@ -409,8 +409,8 @@ curl -s -u "$SONARQUBE_TOKEN:" "https://sonarcloud.io/api/qualitygates/project_s
 | PR #230 | home/settings i18n + OG 이미지 영문화 | ✅ 머지 완료 |
 | PR #231 | 카드 이름 ja + getCardName locale 헬퍼 | ✅ 머지 완료 |
 | PR #232 | 캐릭터 페르소나 EN/JA + locale-context 필터 + Noto Sans JP | ✅ 머지 완료 |
-| PR #233 (진행 중) | hreflang generateMetadata + 번역 키 drift CI | 🔄 진행 중 |
+| PR #233 | hreflang generateMetadata + 번역 키 drift CI | ✅ 머지 완료 |
+| PR #234 (진행 중) | E2E i18n 매트릭스 (ai_locale 쿠키 주입 + LanguageSwitcher 검증) | 🔄 진행 중 |
 
 **잔여 작업 (PR-6 중 미완성):**
-- E2E locale matrix (i18n-matrix.spec.ts, playwright.config.ts locale 매트릭스)
 - 신점 하이브리드 (Cultural Reading ko원문+로마자+영문 해설, 별도 PR 권장)
