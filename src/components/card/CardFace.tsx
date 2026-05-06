@@ -5,6 +5,8 @@ import Image from "next/image";
 import { TarotCard } from "@/types/card";
 import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
 import { getCardImageUrl } from "@/lib/storage";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { getCardName } from "@/data/cards/locale-helpers";
 
 interface CardFaceProps {
   readonly card: TarotCard;
@@ -24,6 +26,7 @@ const sizeDimensions = {
 
 export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId }: CardFaceProps) {
   const [imageError, setImageError] = useState(false);
+  const locale = useLocaleStore((s) => s.locale);
   const preset = sizeDimensions[size];
   const w = width ?? preset.w;
   const h = height ?? preset.h;
@@ -52,7 +55,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
       >
         <Image
           src={getCardImageUrl(skinId, card.id)}
-          alt={card.nameKo}
+          alt={getCardName(card, locale)}
           fill
           sizes={`${Math.max(w, h)}px`}
           unoptimized
@@ -126,7 +129,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
 
         <text x={cx} y={h * 0.92} textAnchor="middle" dominantBaseline="central"
           fill="#94a3b8" fontSize={fontSize - 2}>
-          {card.nameKo}
+          {getCardName(card, locale)}
         </text>
       </svg>
 

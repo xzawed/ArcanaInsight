@@ -12,6 +12,7 @@ export interface TarotCard {
   id: string;
   name: string;
   nameKo: string;
+  nameJa?: string;
   number: number;
   type: "major" | "minor";
   suit?: CardSuit;
