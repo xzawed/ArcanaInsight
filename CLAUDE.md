@@ -31,7 +31,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (705개, statements 98%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (714개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -65,7 +65,7 @@ docs/                # → docs/README.md 인덱스
 ├── operations/      # known-issues, env-variables, deployment, monitoring, operation-guide
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
-supabase/migrations/ # 001~012 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
+supabase/migrations/ # 001 + 003~015 SQL (002 결번, 14개 파일, PostgreSQL 모드: src/lib/db/schema/index.ts)
 e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
