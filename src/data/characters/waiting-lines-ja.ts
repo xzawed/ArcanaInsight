@@ -283,3 +283,5 @@ export const shuffleCeremonyText: Record<string, string> = {
   lix:     "どれ選ぶ~? ｗｗ",
   ethan:   "カードを選んでね",
 };
+
+export const shinjeomInitialPrompt = "どんなお悩みがありますか？気軽にお話しください。";

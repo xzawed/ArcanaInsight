@@ -13,6 +13,7 @@ import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
+import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
@@ -104,7 +105,7 @@ export default function ShinjeomSessionPage() {
     setMood("default");
     addChatMessage({
       id: crypto.randomUUID(), role: "character",
-      content: character.greeting + "\n\n어떤 고민이 있으신가요? 편하게 말씀해 주세요.",
+      content: getCharacterGreeting(character, useLocaleStore.getState().locale) + "\n\n" + getWaitingLinesData(useLocaleStore.getState().locale).shinjeomInitialPrompt,
       mood: "default", timestamp: new Date(),
     });
   }, [topic, characterId, character, router, sessionCreated, setSessionId, setMood, addChatMessage]);

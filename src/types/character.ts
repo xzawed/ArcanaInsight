@@ -24,11 +24,17 @@ export interface CharacterConfig {
   nameJp: string;
   gender: Gender;
   greeting: string;
+  greetingEn?: string;
+  greetingJa?: string;
   expressions: Record<Mood, string>;
   idleAnimation: IdleAnimationType;
   personality: string;
   description: string;
+  descriptionEn?: string;
+  descriptionJa?: string;
   speciality: string;
+  specialityEn?: string;
+  specialityJa?: string;
   speechStyle: string;
   voiceTone: string;
   unlocked: boolean;

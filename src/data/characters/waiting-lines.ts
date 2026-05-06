@@ -298,3 +298,5 @@ export const shuffleCeremonyText: Record<string, string> = {
   lix:     "어떤 거 골라볼까~ ㅋ",
   ethan:   "카드 선택해줘요",
 };
+
+export const shinjeomInitialPrompt = "어떤 고민이 있으신가요? 편하게 말씀해 주세요.";

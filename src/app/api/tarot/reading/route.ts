@@ -38,11 +38,11 @@ function computeReadingMaxTokens(cardCount: number): number {
 }
 
 /** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
-async function fetchMemoryPrompt(characterId: string): Promise<string> {
+async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser?.id) return "";
-    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId);
+    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId, 3, locale);
     return buildCharacterMemoryPrompt(memories);
   } catch {
     return "";
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     // 캐릭터 메모리 조회 (인증된 사용자 + sessionId 있을 때만)
     const memoryPrompt = (sessionId && characterId)
-      ? await fetchMemoryPrompt(characterId)
+      ? await fetchMemoryPrompt(characterId, locale)
       : "";
 
     const encoder = new TextEncoder();

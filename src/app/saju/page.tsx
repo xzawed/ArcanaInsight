@@ -11,12 +11,14 @@ import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { getCharactersByGender, getCharacterById } from "@/data/characters";
+import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { SAJU_COPY } from "@/data/ui-copy";
 import { ServiceBackground } from "@/components/effects/ServiceBackground";
 
@@ -207,6 +209,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
 function SajuPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocaleStore((s) => s.locale);
   const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase, setFreeQuestion } = useSajuSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const sajuCharacters = getCharactersByGender(genderFilter);
@@ -226,7 +229,7 @@ function SajuPageContent() {
   useEffect(() => {
     if (preselectedChar) {
       setCharacterId(preselectedChar.id);
-      setDialogueMessages([{ id: crypto.randomUUID(), role: "character" as const, content: preselectedChar.greeting, mood: "smile", timestamp: new Date() }]);
+      setDialogueMessages([{ id: crypto.randomUUID(), role: "character" as const, content: getCharacterGreeting(preselectedChar, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -237,7 +240,7 @@ function SajuPageContent() {
     if (favoriteCharacter && !selectedCharacter) {
       setSelectedCharacter(favoriteCharacter);
       setCharacterId(favoriteCharacter.id);
-      setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: favoriteCharacter.greeting, mood: "smile", timestamp: new Date() }]);
+      setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(favoriteCharacter, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
       setStep("info-input");
     }
   }, [favoriteCharacter, selectedCharacter, setCharacterId]);
@@ -255,7 +258,7 @@ function SajuPageContent() {
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
     setCharacterId(character.id);
-    setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: character.greeting, mood: "smile", timestamp: new Date() }]);
+    setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(character, locale), mood: "smile", timestamp: new Date() }]);
     setStep("info-input");
   };
 
