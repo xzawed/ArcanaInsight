@@ -19,6 +19,7 @@ export default defineConfig({
 
   use: {
     baseURL: "http://localhost:3000",
+    locale: "ko",
     screenshot: "only-on-failure",
     trace: "on-first-retry",
   },
