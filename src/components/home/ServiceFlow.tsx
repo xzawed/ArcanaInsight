@@ -2,21 +2,23 @@
 
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { Icon } from "@/components/common/Icon";
-
-const STEPS = [
-  { num: "01", iconId: "ui-person", title: "상담사 선택", desc: "12명의 개성 있는 AI 상담사 중 선택" },
-  { num: "02", iconId: "ui-target", title: "주제 선택", desc: "연애, 직장, 재정, 건강, 일반 등 다양한 주제" },
-  { num: "03", iconId: "nav-tarot", title: "카드 리딩", desc: "직감으로 카드를 선택하면 실시간 AI 해석" },
-  { num: "04", iconId: "ui-book", title: "결과 확인", desc: "상세 해석과 조언, 저장 및 공유 가능" },
-];
+import { useT } from "@/i18n/useT";
 
 export function ServiceFlow() {
+  const { t } = useT();
+  const STEPS = [
+    { num: "01", iconId: "ui-person", title: t("home.service-flow.step1.title"), desc: t("home.service-flow.step1.desc") },
+    { num: "02", iconId: "ui-target", title: t("home.service-flow.step2.title"), desc: t("home.service-flow.step2.desc") },
+    { num: "03", iconId: "nav-tarot", title: t("home.service-flow.step3.title"), desc: t("home.service-flow.step3.desc") },
+    { num: "04", iconId: "ui-book", title: t("home.service-flow.step4.title"), desc: t("home.service-flow.step4.desc") },
+  ];
+
   return (
     <section className="py-16 md:py-24 px-4 bg-arcana-surface/30">
       <div className="max-w-5xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">이렇게 진행됩니다</h2>
-          <p className="text-arcana-muted text-sm md:text-base">간단한 4단계로 타로 상담을 받아보세요</p>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">{t("home.service-flow.title")}</h2>
+          <p className="text-arcana-muted text-sm md:text-base">{t("home.service-flow.desc")}</p>
         </ScrollReveal>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-4 relative">

@@ -9,6 +9,7 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { CardFace } from "@/components/card/CardFace";
 import { CardBack } from "@/components/card/CardBack";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useT } from "@/i18n/useT";
 
 const deckManager = new DeckManager();
 
@@ -26,9 +27,10 @@ interface CardSlotProps {
   isFlipped: boolean;
   selectedSkinId: string;
   onFlip: () => void;
+  tr: (key: string) => string;
 }
 
-function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, selectedSkinId, onFlip }: CardSlotProps) {
+function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, selectedSkinId, onFlip, tr }: CardSlotProps) {
   if (isLoading) {
     return (
       <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-arcana-border flex items-center justify-center">
@@ -58,7 +60,7 @@ function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, select
             <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} />
           </div>
         </motion.div>
-        {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">탭하여 카드 확인</p>}
+        {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">{tr("home.daily-card.tap-hint")}</p>}
       </motion.div>
     );
   }
@@ -76,9 +78,10 @@ interface InterpretationPanelProps {
   isLoading: boolean;
   characterName: string | undefined;
   onShare: () => void;
+  tr: (key: string) => string;
 }
 
-function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoading, characterName, onShare }: InterpretationPanelProps) {
+function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoading, characterName, onShare, tr }: InterpretationPanelProps) {
   if (currentData && currentCard && isFlipped) {
     return (
       <motion.div
@@ -88,7 +91,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
       >
         <div>
           <h3 className="font-display font-bold text-lg">{currentCard.nameKo}</h3>
-          <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? "(역방향)" : "(정방향)"}</p>
+          <p className="text-arcana-muted text-xs">{currentCard.name} {currentData.isReversed ? tr("home.daily-card.reversed") : tr("home.daily-card.upright")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {currentData.keywords.map((kw) => (
@@ -107,7 +110,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
         </div>
         <button onClick={onShare} type="button"
           className="px-4 py-2 text-xs rounded-full border border-arcana-purple text-arcana-purple font-display font-bold hover:bg-arcana-purple/10 transition-colors">
-          공유하기
+          {tr("home.daily-card.share")}
         </button>
       </motion.div>
     );
@@ -115,7 +118,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
   if (currentData && !isFlipped) {
     return (
       <div className="flex flex-col items-center md:items-start justify-center h-full">
-        <p className="text-arcana-muted text-sm font-sans">카드를 탭하여 오늘의 운세를 확인해보세요</p>
+        <p className="text-arcana-muted text-sm font-sans">{tr("home.daily-card.tap-desc")}</p>
       </div>
     );
   }
@@ -132,6 +135,7 @@ function renderInterpretationPanel({ currentData, currentCard, isFlipped, isLoad
 }
 
 export function DailyCard() {
+  const { t: tr } = useT();
   const characters = getAvailableCharacters();
   const { selectedSkinId } = useSkinStore();
   const [activeTab, setActiveTab] = useState(characters[0].id);
@@ -184,7 +188,7 @@ export function DailyCard() {
     if (!currentData || !currentCard) return;
     const text = `🔮 오늘의 카드: ${currentCard.nameKo}\n\n${currentData.interpretation}\n\n- ${activeCharacter?.name}의 해석 | ArcanaInsight`;
     if (navigator.share) {
-      await navigator.share({ title: "오늘의 카드 - ArcanaInsight", text });
+      await navigator.share({ title: tr("home.daily-card.share-text"), text });
     } else {
       await navigator.clipboard.writeText(text);
     }
@@ -194,7 +198,7 @@ export function DailyCard() {
     <section id="daily-card" className="py-16 md:py-24 px-4">
       <div className="max-w-4xl mx-auto">
         <ScrollReveal className="text-center mb-8">
-          <h2 className="text-xl md:text-2xl font-display font-bold mb-2">오늘의 카드</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-2">{tr("home.daily-card.title")}</h2>
           <p className="text-arcana-muted text-sm" suppressHydrationWarning>{todayLabel}</p>
         </ScrollReveal>
 
@@ -234,6 +238,7 @@ export function DailyCard() {
                 isFlipped,
                 selectedSkinId,
                 onFlip: () => handleFlip(activeTab),
+                tr,
               })}
             </div>
 
@@ -246,6 +251,7 @@ export function DailyCard() {
                 isLoading: loading === activeTab,
                 characterName: activeCharacter?.name,
                 onShare: handleShare,
+                tr,
               })}
             </div>
           </motion.div>

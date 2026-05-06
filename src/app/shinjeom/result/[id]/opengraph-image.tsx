@@ -32,8 +32,8 @@ export default function Image() {
     accentColor: "rgba(209,213,219,0.8)",
     iconEmoji: "🔮",
     iconGlow: "0 0 20px rgba(153,27,27,0.8)",
-    title: "신점 결과",
+    title: "Shinjeom Result",
     titleColor: "#f5e6ff",
-    subtitle: "신령의 기운으로 읽는 오늘의 운세",
+    subtitle: "Spiritual insight into your fortune",
   });
 }

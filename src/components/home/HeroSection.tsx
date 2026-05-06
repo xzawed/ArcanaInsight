@@ -10,6 +10,7 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { getCharacterById } from "@/data/characters";
 import { useThemeStore, type ThemeId } from "@/hooks/useTheme";
 import { getDailyCharacterId } from "@/lib/daily-character";
+import { useT } from "@/i18n/useT";
 
 // 시간대별 분위기 오버레이 (hero-bg.jpg 위에 합성)
 const THEME_OVERLAY: Record<ThemeId, string> = {
@@ -24,6 +25,7 @@ const THEME_OVERLAY: Record<ThemeId, string> = {
 
 export function HeroSection() {
   const { activeTheme } = useThemeStore();
+  const { t } = useT();
 
   const [characterId, setCharacterId] = useState<string>("arcana");
 
@@ -94,29 +96,29 @@ export function HeroSection() {
               transition={{ duration: 0.35 }}
               className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-arcana-purple/10 border border-arcana-purple/25"
             >
-              <span className="text-arcana-muted text-xs">✨ 오늘의 상담사</span>
+              <span className="text-arcana-muted text-xs">{`✨ ${t("home.hero.today-character")}`}</span>
               <span className="text-arcana-purple font-serif font-bold text-sm">{character.name}</span>
             </motion.div>
           </AnimatePresence>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 text-center md:text-left leading-tight">
             <span className="bg-gradient-to-r from-arcana-purple via-arcana-indigo to-arcana-gold bg-clip-text text-transparent">
-              카드가 속삭이는
+              {t("home.hero.title-line1")}
             </span>
             <br />
-            <span className="text-arcana-text">당신의 이야기</span>
+            <span className="text-arcana-text">{t("home.hero.title-line2")}</span>
           </h1>
           <p className="text-arcana-muted text-sm md:text-base mb-8 text-center md:text-left max-w-md">
-            AI 타로 상담사와 함께하는 신비로운 운세 체험. 12명의 개성 있는 캐릭터가 카드의 메시지를 전합니다.
+            {t("home.hero.desc")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link href="/tarot"
               className="px-8 py-3 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-sans font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20 text-center">
-              타로 상담 시작하기
+              {t("home.hero.cta-tarot")}
             </Link>
             <button onClick={scrollToDaily} type="button"
               className="px-8 py-3 rounded-full border border-arcana-purple text-arcana-purple font-sans font-bold text-sm hover:bg-arcana-purple/10 transition-colors text-center">
-              오늘의 카드 뽑기
+              {t("home.hero.cta-daily")}
             </button>
           </div>
         </motion.div>
@@ -127,7 +129,7 @@ export function HeroSection() {
         transition={{ duration: 2, repeat: Infinity }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-arcana-muted text-xs flex flex-col items-center gap-1"
       >
-        <span>스크롤하여 더 알아보기</span>
+        <span>{t("home.hero.scroll-hint")}</span>
         <span>▼</span>
       </motion.div>
     </section>

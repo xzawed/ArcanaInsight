@@ -33,8 +33,8 @@ export default function Image() {
     accentColor: "rgba(167,139,250,0.85)",
     iconEmoji: "✦",
     iconGlow: "0 0 24px rgba(167,139,250,0.8)",
-    title: "타로 리딩 결과",
+    title: "Tarot Reading Result",
     titleColor: "#e2e8f0",
-    subtitle: "카드가 속삭이는 당신의 이야기",
+    subtitle: "Your cards tell your story",
   });
 }
