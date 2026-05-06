@@ -354,15 +354,21 @@ export default function TarotSessionPage() {
           return;
         }
 
-        // 부분 파싱(잘림/JSON 실패) 시 잘못된 결과를 정상처럼 표시하지 않음
-        if (result.parseError) {
-          console.warn("[tarot-session] 부분 파싱 응답:", { parseError: result.parseError, expected: result.expectedCardCount, got: result.cardInterpretations?.length ?? 0 });
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "AI 해석이 일부만 도착했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+        // JSON 파싱 완전 실패 — 결과 표시 불가
+        if (result.parseError === "invalid_json") {
+          console.warn("[tarot-session] JSON 파싱 완전 실패:", { expected: result.expectedCardCount });
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
           return;
         }
 
-        // 정상 흐름 — 카드 뒤집기 완료 + 결과 phase 진입
+        // 부분 파싱(잘림) — 받은 해석은 그대로 표시하고 안내 메시지 추가
+        if (result.parseError === "truncated") {
+          console.warn("[tarot-session] 부분 파싱 응답:", { expected: result.expectedCardCount, got: result.cardInterpretations?.length ?? 0 });
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "일부 카드 해석이 도착하지 않았어요. 받은 결과를 먼저 보여드릴게요.", mood: "default", timestamp: new Date() });
+        }
+
+        // 정상 흐름 (또는 부분 결과) — 카드 뒤집기 완료 + 결과 phase 진입
         setRevealedPositions(cards.map((c) => c.position));
         setReadingResult(result);
         const currentSpread = spreadType ? spreads[spreadType] : null;
