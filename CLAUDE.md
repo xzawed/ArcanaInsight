@@ -70,7 +70,7 @@ docs/                # → docs/README.md 인덱스
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
 supabase/migrations/ # 001 + 003~016 SQL (002 결번, 15개 파일, PostgreSQL 모드: src/lib/db/schema/index.ts)
-e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
+e2e/                 # 22개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
 │   ├── orchestrator.ts, worker.ts, reporter.ts
