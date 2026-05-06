@@ -99,7 +99,7 @@ scripts/
 | `lix` | 릭스 | 남 | ~는데/~ㄹ까, 장난 | 트릭스터 |
 | `ethan` | 에단 | 남 | ~거든요, 친절·상세 | 학구적 |
 
-> **다국어 페르소나**: 영어·일본어 페르소나는 PR-4에서 외부 번역가 의뢰로 추가 예정 (캐릭터별 화법 시그니처 보존: arcana=elegant mystic, hoshi=casual GenZ, ren=archaic 등).
+> **다국어 페르소나** (Z2 시나리오, 2026-05 확정): 영어·일본어 페르소나는 PR-4에서 **자체 작성 + LLM 직접 다국어 응답**으로 처리 (외부 번역가 발주 0건, 부수 비용 0원). 캐릭터별 화법 시그니처(arcana=elegant mystic·hoshi=casual GenZ·ren=archaic) 보존을 위해 paid Grok/Claude 직접 응답 활용 (V2 검증 8.5~9.5/10). 일본어 役割語: arcana=ですわ調·miko=でございます·ren=でござる·hoshi=だよ/じゃん.
 
 **표정 규칙 (6-mood)**: `default` → 세션 진입/대기 | `mystical` → 카드 선택/리딩 대기 | `smile` → 결과 도착 | `serious` / `surprised` / `wink` → 대기 대사 mood 연동. 에러 시 `default` 복귀. 대기 대사 중 표정은 `line.mood` 따름.
 
@@ -123,7 +123,9 @@ scripts/
 
 **캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` (`waiting-lines.ts`). 결과 mood: `CHARACTER_RESULT_MOODS` (same file). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
 
-**i18n 다국어 시스템**: 한국어(ko)·영어(en)·일본어(ja) 3개 locale. middleware가 쿠키→Accept-Language→DEFAULT 우선순위로 locale 결정 후 `x-locale` 헤더 부착. SSR layout이 `cookies()`로 `<html lang>` 동적 결정 + `LocaleProvider`가 client store(`useLocaleStore`) 동기화 (CLAUDE.md SSR 규칙: useEffect 내 setState `setTimeout` 래핑 필수). 클라이언트 호출 = `useT()` 훅, 서버 호출 = `t(key, locale)` 직접. 사전 모듈 `src/i18n/translations/{ko,en,ja}/index.ts` + 공통 베이스 `shared/keys.ts` (SonarCloud 중복 방지). DB 5개 테이블(profiles·sessions·readings·saju_readings·shinjeom_readings)에 `locale TEXT DEFAULT 'ko' CHECK` 컬럼 (016 마이그레이션) — `idx_sessions_user_locale` 인덱스 (PR-4 character-context 필터). `daily_cards`는 character_id+date 단일 사전(locale 분리 없음). 신규 세션·리딩 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 동봉. 영어 사전은 1차 임시(외부 번역가 발주 대기), 일본어는 common·locale namespace만 1차 — PR-3·PR-4·PR-5에서 점진 채움. → [`docs/architecture/i18n.md`](docs/architecture/i18n.md)
+**i18n 다국어 시스템**: 한국어(ko)·영어(en)·일본어(ja) 3개 locale. middleware가 쿠키→Accept-Language→DEFAULT 우선순위로 locale 결정 후 `x-locale` 헤더 부착. SSR layout이 `cookies()`로 `<html lang>` 동적 결정 + `LocaleProvider`가 client store(`useLocaleStore`) 동기화 (SSR 규칙: useEffect 내 setState `setTimeout` 래핑 필수). 클라이언트 호출 = `useT()` 훅, 서버 호출 = `t(key, locale)` 직접. 사전 모듈 `src/i18n/translations/{ko,en,ja}/index.ts` + 공통 베이스 `shared/keys.ts` (SonarCloud 중복 방지). DB 5개 테이블(profiles·sessions·readings·saju_readings·shinjeom_readings)에 `locale TEXT DEFAULT 'ko' CHECK` 컬럼 (016 마이그레이션) — `idx_sessions_user_locale` 인덱스 (PR-4 character-context 필터). `daily_cards`는 character_id+date 단일 사전(locale 분리 없음). 신규 세션·리딩 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 동봉.
+
+**Z2 시나리오** (2026-05 확정, 부수 비용 0원): ① **AI 응답 LLM 직접 다국어 생성** — `prompt-builder.ts` locale 분기 (`LANGUAGE_INSTRUCTIONS[locale]`·`buildCharacterHeader(character, locale)`), Grok/Claude system prompt에 캐릭터별 영문/일문 페르소나 SSOT 주입. 외부 번역가 발주 0건. ② **정적 영역만 무료 NMT** — UI 라벨·카드 키워드·스프레드 등 약 900 항목, Cerebras·Groq·SambaNova·HuggingFace 4단 fallback (모두 카드 등록 불필요·상업 사용 명시 허용). ③ **회피 옵션** — Gemini Free(EEA/UK ToS 위반)·DeepL Free(신규 가입 종료)·Papago(외국 사용자 차단)·Azure F0(카드 등록 강제) 모두 제외. → 상세: [`docs/superpowers/plans/i18n-master-plan.md`](docs/superpowers/plans/i18n-master-plan.md)·[`docs/architecture/i18n.md`](docs/architecture/i18n.md)
 
 ## 명령어
 
@@ -232,7 +234,10 @@ pnpm check:doc-links        # docs 링크 검증
 
 ### i18n 다국어 (UI 텍스트·번역·locale 작업 시)
 - **LocaleProvider SSR 패턴 필수**: `useEffect` 내 `setLocale()` 동기 호출 금지. `setTimeout(() => setLocale(initial), 0); return () => clearTimeout(t)` 패턴 사용. 미준수 시 hydration error #418 발생. — **`react-hooks/set-state-in-effect` 린트 위반 원인**.
-- **번역 키 정의 우선**: 새 UI 텍스트 추가 → ① `src/i18n/translations/shared/keys.ts`에 타입 추가 → ② `ko/index.ts` (SSOT) 채움 → ③ `en/index.ts` 임시 영문 (외부 번역 대기) → ④ `ja/index.ts`는 PR-5에서 일괄. ko 사전이 SSOT, en/ja는 부분 번역 허용 (Partial<SharedKeys>).
+- **번역 키 정의 우선**: 새 UI 텍스트 추가 → ① `src/i18n/translations/shared/keys.ts`에 타입 추가 → ② `ko/index.ts` (SSOT) 채움 → ③ `pnpm i18n:translate` 무료 NMT로 en/ja 자동 갱신 (Z2 시나리오) → ④ `_generated.ts` 산출물 사람 검수 → ⑤ `overrides/{en,ja}.json` 사람 수정 우선. ko 사전이 SSOT, en/ja는 자동 생성 + 사람 수정 머지 (자동 재실행 시 overrides 보존). PR-3 진입 전까지는 Partial<SharedKeys> 부분 번역 허용.
+- **AI 응답 LLM 직접 다국어 응답 (Z2 시나리오)**: 타로·사주·신점 결과는 `prompt-builder.ts` locale 분기로 LLM이 처음부터 영어/일본어 응답. system prompt 자체를 해당 언어로 로컬라이즈 필수 (한국어 prompt + locale=en 시 Grok 슬라이드백 위험 — V2 검증). `LANGUAGE_INSTRUCTIONS[locale]`·`buildCharacterHeader(character, locale)`·`getCardName(card, locale)` helper 사용. 외부 번역가 발주 0건. 캐릭터 페르소나는 `src/data/characters/persona/{ko,en,ja}.ts` 분리 SSOT.
+- **무료 NMT Provider 4단 fallback**: Cerebras·Groq·SambaNova·HuggingFace (모두 카드 등록 불필요·상업 사용 명시 허용). ❌ Gemini Free(EEA/UK ToS 위반·2025-12 quota 50~80% 삭감) / ❌ DeepL Free(신규 가입 종료) / ❌ Papago(외국 사용자 차단) / ❌ Azure F0(카드 등록 강제) **모두 회피**. 정적 영역(UI·카드 키워드·스프레드)만 NMT 처리, 사용자 입력은 절대 무료 NMT 미전송 (Z-08 PII 유출 방지).
+- **Z2 캐릭터 메모리 cross-locale 정책**: `getRecentCharacterMemory(db, userId, charId, locale, limit)` — 같은 locale 메모리만 활용 (옵션 1). `idx_sessions_user_locale` 인덱스 (016 마이그레이션) 활용. 영어 첫 사용자 메모리 0건은 의도된 동작.
 - **LanguageSwitcher 데스크탑·모바일 별도 ref + 별도 testid 필수**: 동일 ref 공유 시 React last-wins로 outside-click 오탐. 데스크탑 `data-testid="lang-option-${l}"`, 모바일 `data-testid="mobile-lang-option-${l}"`. PR #211 테마 드롭다운 교훈 동일 적용.
 - **API 라우트 INSERT에 locale 동봉 필수**: 신규 `sessions`·`readings` INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 결정 후 동봉. 미동봉 시 DEFAULT 'ko' 자동 입력 → 영어/일본어 사용자 데이터가 'ko'로 고정. — **PR-A 정합성 핫픽스 원인**.
 - **E2E 셀렉터는 data-testid 우선**: 한글 텍스트 `hasText` regex 셀렉터는 i18n 텍스트 변경에 깨짐. nav·LanguageSwitcher·드롭다운은 `data-testid` 부여 필수. — **PR-A E2E `responsive.spec.ts` 수정 원인**.

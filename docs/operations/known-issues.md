@@ -60,6 +60,33 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
 | **`daily_cards` 테이블 locale 컬럼 의도적 미포함** | `supabase/migrations/003_daily_cards.sql` | 옵션 B 확정 — `(date, character_id)` UNIQUE 단일 사전 정책. locale 분리 시 4×용량 폭증. 표시 시점 locale 분리는 PR-3·PR-5에서 처리. |
 | **PR-2 사전 정의됨, 페이지 미적용 i18n 키 19개** | `src/i18n/translations/ko/index.ts` (`home.*` 8 + `settings.*` 11) | PR-2에서 사전만 정의됨 (정의 자체는 정상). 페이지 코드(`src/app/page.tsx`·`src/app/settings/page.tsx`) `t()` 적용은 PR-3 영역. SharedKeys 타입은 모든 locale 강제하므로 정의됨 미사용 키도 타입 안전 유지. |
 | **translations 사전 SonarCloud 중복도 모니터링** | `src/i18n/translations/{ko,en,ja}/index.ts` | 현재 4 파일(인덱스+공유키+3 locale). PR-3·PR-5에서 카드·캐릭터 데이터가 추가되면 중복도 누적 위험. `shared/keys.ts` 공통 베이스 + `flatten()` 헬퍼로 1차 방어 중. SonarCloud `new_duplicated_lines_density` 3% 임계 모니터링 필요. |
-| **외부 번역가 발주 시점 미결정** | `docs/i18n/glossary.md`·`character-voice-guide.md` | PR-3 진입 시점에 발주 권장 (사용자 결정). 발주 자료는 PR-3·PR-4 시 작성될 예정. 현재 영어 사전은 1차 임시 직역 placeholder. |
+| ~~외부 번역가 발주 시점 미결정~~ | — | **2026-05-06 Z2 시나리오 채택으로 외부 발주 0건 확정**. AI 응답은 paid Grok/Claude 직접 다국어 응답, 정적 영역만 무료 NMT 4단 fallback. |
 
-상세 인프라: [`../architecture/i18n.md`](../architecture/i18n.md) / 컨벤션: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)
+### Z2 시나리오 잔존 리스크 (2026-05-06 8 라운드 + 4 검증 결과)
+
+| ID | 영역 | 등급 | 대응책 |
+|---|---|---|---|
+| Z-01 | 캐릭터 보이스 회귀 (NMT 평탄화 ren·lix·hoshi·arcana) | P0 | 글로서리 강제 + voice 가이드 + LLM cross-validation. paid Grok/Claude 직접 응답으로 V2 8.5~9.5/10 (R3 7/10 대비 +1.5~2.5점) |
+| Z-02 | 일본어 native 검수 부재 | P1 | PR-7 베타 피드백 + 일본인 무료 도움 모집 + ko fallback + 출시 보류 옵션 |
+| Z-03 | 무료 NMT Provider 정책 변경 | P1 | Cerebras·Groq·SambaNova·HuggingFace 4단 fallback chain + 월 1회 probe |
+| Z-04 | LLM 모델 업데이트로 다국어 회귀 | P0 | LANGUAGE_INSTRUCTIONS + scripts/check-ai-quality 회귀 감지 |
+| Z-05 | parseJsonSafe 일본어 따옴표 「」 | P1 | `text-cleaner.locale.test.ts` 단위 테스트 (PR-1 머지 완료) |
+| Z-06 | NMT 글로서리 위반 (Joey Yap 십성·Smith-Waite 카드) | P1 | `pnpm i18n:nmt:diff` CI 강제 |
+| Z-07 | 캐릭터 메모리 cross-locale 오염 | P0 | character-context.ts WHERE locale 필터 (V1 옵션 1) — `idx_sessions_user_locale` 활용 |
+| Z-08 | NMT 응답 PII 유출 | P0 | 정적 영역만 NMT, 사용자 입력 절대 미전송 (운영 정책 명문화) |
+| Z-09 | hoshi 일본어 ギャル 7.5/10 (V2 식별) | P2 | LLM cross-validation 강화 + PR-7 베타 피드백 |
+| Z-10 | hreflang SEO 누락 | P2 | PR-6 generateMetadata alternates 강제 |
+
+### 회피 옵션 (Z2 시나리오 정책 차단)
+
+| Provider | 차단 사유 | R1 검증 |
+|---|---|---|
+| Gemini Free | EEA/UK ToS 위반 (Paid 강제) + 2025-12 quota 50~80% 삭감 | https://discuss.ai.google.dev/t/clarification-on-only-paid-services-for-eea-ch-uk/107860 |
+| DeepL Free | 2025년 후반 신규 가입 종료, Pro 다운그레이드만 가능 | https://support.deepl.com/hc/en-us/articles/360021200939 |
+| Papago (Naver NCP) | 한국 휴대폰·주민등록 인증 필수 → 외국 사용자 가입 차단 | https://guide.ncloud-docs.com/docs/papagotranslation-spec |
+| Azure Translator F0 | 무료(2M chars/월)지만 신용카드 등록 강제 → 부수 비용 0원 정책 위반 | https://learn.microsoft.com/azure/ai-services/translator/service-limits |
+| LibreTranslate Railway self-host | $5/월 (사실상 무료지만 부수 비용 발생) | 부수 비용 0원 정책 |
+| NLLB-200 self-host | CC-BY-NC 4.0 라이선스 → 상용 서비스 사용 금지 | 라이선스 위반 |
+| Fiverr·Upwork 외부 번역가 | 비용 발생 (Z2 시나리오 채택으로 회피) | 부수 비용 0원 정책 |
+
+상세 인프라: [`../architecture/i18n.md`](../architecture/i18n.md) / 컨벤션: [`../conventions/i18n-style.md`](../conventions/i18n-style.md) / 마스터 플랜: [`../superpowers/plans/i18n-master-plan.md`](../superpowers/plans/i18n-master-plan.md)

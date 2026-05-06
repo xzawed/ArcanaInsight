@@ -67,6 +67,23 @@
 
 ---
 
+## i18n 무료 NMT (선택 — Z2 시나리오 빌드타임 전용)
+
+정적 영역(UI 라벨·카드 키워드·스프레드 등 약 900 항목) 자동 번역 전용. **모두 카드 등록 불필요 + 상업 사용 명시 허용 + 학습 미사용**. 빌드타임 `pnpm i18n:translate` 스크립트만 사용하므로 production 라우트 호출 없음. 미설정 시 fallback chain의 다음 Provider로 자동 전환.
+
+| 변수 | 설명 | 무료 한도 | 가입 |
+|------|------|----------|------|
+| `CEREBRAS_API_KEY` | 1순위 Provider (Llama 3.3 70B) | 1M tokens/일, 30 RPM | email만 |
+| `GROQ_API_KEY` | 2순위 fallback | 14,400 RPD, 30 RPM | email만 |
+| `SAMBANOVA_API_KEY` | 3순위 fallback (영구 무료 보장) | 20~30 RPM | email만 |
+| `HUGGINGFACE_API_KEY` | 4순위 fallback | 100K credits/월 | email만 |
+
+> **회피 옵션**: ❌ Gemini Free (EEA/UK ToS 위반·2025-12 quota 50~80% 삭감) / ❌ DeepL Free (신규 가입 종료) / ❌ Papago (외국 사용자 가입 차단) / ❌ Azure F0 (카드 등록 강제, 부수 비용 0원 정책 위반).
+
+> **데이터 정책**: 정적 메타데이터(UI·카드·스프레드)만 NMT 호출. 사용자 PII·사주·readings 본문은 절대 무료 NMT 미전송 (Z-08 PII 유출 방지). AI 동적 응답은 기존 paid Grok/Claude 사용.
+
+---
+
 ## AI 공급자 튜닝 (선택)
 
 미설정 시 기본값을 사용합니다.

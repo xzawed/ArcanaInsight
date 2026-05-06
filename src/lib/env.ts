@@ -28,3 +28,10 @@ export function getPostgresPoolSize(): number { return parseInt(process.env.POST
 export function getUpstashRedisRestUrl(): string { return process.env.UPSTASH_REDIS_REST_URL ?? "" }
 export function getUpstashRedisRestToken(): string { return process.env.UPSTASH_REDIS_REST_TOKEN ?? "" }
 
+// i18n 무료 NMT (Z2 시나리오, 빌드타임 정적 번역 전용 — 모두 카드 등록 불필요)
+// 미설정 시 fallback chain skip, 다음 Provider로 자동 전환
+export function getCerebrasApiKey(): string { return process.env.CEREBRAS_API_KEY ?? "" }
+export function getGroqApiKey(): string { return process.env.GROQ_API_KEY ?? "" }
+export function getSambaNovaApiKey(): string { return process.env.SAMBANOVA_API_KEY ?? "" }
+export function getHuggingFaceApiKey(): string { return process.env.HUGGINGFACE_API_KEY ?? "" }
+
