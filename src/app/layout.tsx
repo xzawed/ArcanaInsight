@@ -19,11 +19,35 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  title: "ArcanaInsight — 타로 & 운세 상담",
-  description:
-    "애니메이션 캐릭터와 함께하는 타로 리딩, 사주, 신점 종합 운세 플랫폼",
+const OG_LOCALE_MAP: Record<string, string> = {
+  ko: "ko_KR",
+  en: "en_US",
+  ja: "ja_JP",
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcanainsight-production.up.railway.app";
+  return {
+    title: "ArcanaInsight — 타로 & 운세 상담",
+    description: "애니메이션 캐릭터와 함께하는 타로 리딩, 사주, 신점 종합 운세 플랫폼",
+    alternates: {
+      canonical: siteUrl,
+      languages: {
+        "ko": siteUrl,
+        "en": siteUrl,
+        "ja": siteUrl,
+        "x-default": siteUrl,
+      },
+    },
+    openGraph: {
+      locale: OG_LOCALE_MAP[locale] ?? "ko_KR",
+      alternateLocale: Object.values(OG_LOCALE_MAP).filter((l) => l !== (OG_LOCALE_MAP[locale] ?? "ko_KR")),
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

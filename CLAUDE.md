@@ -32,7 +32,7 @@
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
 | **다국어·i18n** | 자체 translations 모듈 + middleware locale 쿠키 (ko/en/ja) — → [`docs/architecture/i18n.md`](docs/architecture/i18n.md) |
-| **테스트** | Vitest 2.0 (762개, statements 98%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (764개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -123,7 +123,7 @@ scripts/
 
 **캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` → `getWaitingLinesData(locale)` 경유 ko/en/ja 분기. 결과 mood: `CHARACTER_RESULT_MOODS` (`waiting-lines.ts`). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
 
-**i18n 다국어 시스템**: 한국어(ko)·영어(en)·일본어(ja) 3개 locale. middleware가 쿠키→Accept-Language→DEFAULT 우선순위로 locale 결정 후 `x-locale` 헤더 부착. SSR layout이 `cookies()`로 `<html lang>` 동적 결정 + `LocaleProvider`가 client store(`useLocaleStore`) 동기화 (CLAUDE.md SSR 규칙: useEffect 내 setState `setTimeout` 래핑 필수). 클라이언트 호출 = `useT()` 훅, 서버 호출 = `t(key, locale)` 직접. 사전 모듈 `src/i18n/translations/{ko,en,ja}/index.ts` + 공통 베이스 `shared/keys.ts` (SonarCloud 중복 방지). DB 5개 테이블(profiles·sessions·readings·saju_readings·shinjeom_readings)에 `locale TEXT DEFAULT 'ko' CHECK` 컬럼 (016 마이그레이션) — `idx_sessions_user_locale` 인덱스 (PR-4 character-context 필터). `daily_cards`는 character_id+date 단일 사전(locale 분리 없음). 신규 세션·리딩 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 동봉. 영어·일본어 사전 UI namespace 완성 (PR-C). 캐릭터 대사(waiting-lines) en/ja 전용 파일 — `src/data/characters/waiting-lines-{en,ja}.ts`. `getWaitingLinesData(locale)` (`waiting-lines-i18n.ts`) — 세션 컴포넌트·ShuffleCeremony locale 분기 진입점. AI 응답 locale: `buildCharacterHeader(locale)` `LANGUAGE_INSTRUCTIONS` map → Grok이 locale 언어로만 응답. → [`docs/architecture/i18n.md`](docs/architecture/i18n.md)
+**i18n 다국어 시스템**: 한국어(ko)·영어(en)·일본어(ja) 3개 locale. middleware가 쿠키→Accept-Language→DEFAULT 우선순위로 locale 결정 후 `x-locale` 헤더 부착. SSR layout이 `cookies()`로 `<html lang>` 동적 결정 + `LocaleProvider`가 client store(`useLocaleStore`) 동기화 (CLAUDE.md SSR 규칙: useEffect 내 setState `setTimeout` 래핑 필수). 클라이언트 호출 = `useT()` 훅, 서버 호출 = `t(key, locale)` 직접. 사전 모듈 `src/i18n/translations/{ko,en,ja}/index.ts` + 공통 베이스 `shared/keys.ts` (SonarCloud 중복 방지). DB 5개 테이블(profiles·sessions·readings·saju_readings·shinjeom_readings)에 `locale TEXT DEFAULT 'ko' CHECK` 컬럼 (016 마이그레이션) — `idx_sessions_user_locale` 인덱스 (PR-4 character-context 필터). `daily_cards`는 character_id+date 단일 사전(locale 분리 없음). 신규 세션·리딩 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 동봉. 영어·일본어 사전 UI namespace 완성 (PR-C). 캐릭터 대사(waiting-lines) en/ja 전용 파일 — `src/data/characters/waiting-lines-{en,ja}.ts`. `getWaitingLinesData(locale)` (`waiting-lines-i18n.ts`) — 세션 컴포넌트·ShuffleCeremony locale 분기 진입점. AI 응답 locale: `buildCharacterHeader(locale)` `LANGUAGE_INSTRUCTIONS` map → Grok이 locale 언어로만 응답. **캐릭터 locale 헬퍼**: `src/data/characters/locale-helpers.ts` — `getCharacterGreeting/Description/Speciality(char, locale)` 순수 함수. `CharacterConfig`에 `greetingEn/Ja`, `descriptionEn/Ja`, `specialityEn/Ja` 옵션 필드 (PR #232). `getRecentCharacterMemory` locale 파라미터 — 로케일별 메모리 필터링. **번역 키 drift 검사**: `pnpm i18n:check` (`scripts/check-translation-keys.ts`) — en/ja orphan 키 발견 시 exit 1, CI docs-sync 단계에 포함. **hreflang**: `layout.tsx` `generateMetadata()` → `alternates.languages` ko/en/ja/x-default + `openGraph.locale`. → [`docs/architecture/i18n.md`](docs/architecture/i18n.md)
 
 ## 명령어
 
@@ -139,6 +139,7 @@ pnpm test:e2e:full:ci       # CI 모드 오케스트레이터 (12 대표 케이�
 pnpm sync:test-count        # CLAUDE.md 테스트 수 동기화
 pnpm check:env-docs         # env.ts ↔ env-variables.md 정합성
 pnpm check:doc-links        # docs 링크 검증
+pnpm i18n:check             # ko/en/ja 번역 키 drift 검출 (orphan 발견 시 exit 1)
 ```
 
 > **scripts 운영 정책**: 자동 호출 / npm 등록 / 수동 자산 생성 분류 → [`docs/workflow/scripts.md`](docs/workflow/scripts.md)
