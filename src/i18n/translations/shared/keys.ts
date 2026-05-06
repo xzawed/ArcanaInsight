@@ -69,6 +69,28 @@ export interface SharedKeys {
     "modal.confirm": string;
     "modal.keep-korean": string;
   };
+  tarot: {
+    "result.title": string;
+    "result.overall": string;
+    "result.advice": string;
+    "result.cta": string;
+    "result.card.reversed": string;
+    "result.no-reading": string;
+  };
+  saju: {
+    "result.title": string;
+    "result.overall": string;
+    "result.topic": string;
+    "result.advice": string;
+    "result.cta": string;
+  };
+  shinjeom: {
+    "result.title": string;
+    "result.overall": string;
+    "result.topic": string;
+    "result.advice": string;
+    "result.cta": string;
+  };
 }
 
 export type Namespace = keyof SharedKeys;

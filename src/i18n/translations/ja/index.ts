@@ -23,4 +23,26 @@ export const ja: Partial<SharedKeys> = {
     "modal.confirm": "変更",
     "modal.keep-korean": "韓国語のまま",
   },
+  tarot: {
+    "result.title": "タロット鑑定結果",
+    "result.overall": "総合解釈",
+    "result.advice": "アドバイス",
+    "result.cta": "私もタロット鑑定を受ける",
+    "result.card.reversed": "逆位置",
+    "result.no-reading": "鑑定結果を読み込めませんでした。",
+  },
+  saju: {
+    "result.title": "四柱分析結果",
+    "result.overall": "総合解釈",
+    "result.topic": "テーマ別解釈",
+    "result.advice": "アドバイス",
+    "result.cta": "私も四柱分析を受ける",
+  },
+  shinjeom: {
+    "result.title": "神占結果",
+    "result.overall": "総合解釈",
+    "result.topic": "テーマ別解釈",
+    "result.advice": "アドバイス",
+    "result.cta": "私も神占相談を受ける",
+  },
 };
