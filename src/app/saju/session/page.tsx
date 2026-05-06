@@ -18,7 +18,9 @@ import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
 import { getCharacterById } from "@/data/characters";
-import { sajuWaitingLines, defaultSajuWaitingLines, sajuAnalyzingText, defaultSajuAnalyzingText, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -61,6 +63,7 @@ async function handleSajuShare(r: { shareToken?: string | null; overallReading?:
 
 export default function SajuSessionPage() {
   const router = useRouter();
+  const locale = useLocaleStore((s) => s.locale);
   const { currentMood, setMood } = useCharacterStore();
   const {
     phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData, isLoading,
@@ -108,7 +111,8 @@ export default function SajuSessionPage() {
 
     // 대기 대사
     const charId = state.characterId || "seonhwa";
-    const lines = sajuWaitingLines[charId] || defaultSajuWaitingLines;
+    const wl = getWaitingLinesData(useLocaleStore.getState().locale);
+    const lines = wl.sajuWaitingLines[charId] || wl.defaultSajuWaitingLines;
     const timers: ReturnType<typeof setTimeout>[] = [];
     // CLAUDE.md 규칙: 대기 대사 중 표정 변경 금지 — setMood 호출 제거
     lines.forEach((line, i) => {
@@ -143,7 +147,7 @@ export default function SajuSessionPage() {
       onError: (msg) => {
         stopTimers();
         console.error("사주 리딩 실패:", msg);
-        const errLines = (charId && characterErrorLines[charId]) ? characterErrorLines[charId] : defaultErrorLines;
+        const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
         const errText = msg.includes("GROK_API_KEY") ? errLines.api : errLines.reading;
         addChatMessage({ id: crypto.randomUUID(), role: "character",
           content: errText, mood: "default", timestamp: new Date() });
@@ -284,7 +288,7 @@ export default function SajuSessionPage() {
               ) : (
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-10 h-10 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-                  <p className="text-arcana-muted text-xs font-serif">{sajuAnalyzingText[characterId ?? ""] ?? defaultSajuAnalyzingText}</p>
+                  <p className="text-arcana-muted text-xs font-serif">{getWaitingLinesData(locale).sajuAnalyzingText[characterId ?? ""] ?? getWaitingLinesData(locale).defaultSajuAnalyzingText}</p>
                 </div>
               )}
             </div>

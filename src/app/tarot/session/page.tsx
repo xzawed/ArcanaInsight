@@ -16,7 +16,9 @@ import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
-import { waitingLines, defaultWaitingLines, buildCardPreviewLine, characterErrorLines, defaultErrorLines, CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
+import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
@@ -32,6 +34,7 @@ function buildRevealStep(
   sc: SelectedCard,
   currentSpread: SpreadDefinition | null,
   charId: string,
+  locale: string,
   revealPos: React.Dispatch<React.SetStateAction<number[]>>,
   addMsg: (msg: ChatMessage) => void,
 ): () => void {
@@ -39,7 +42,9 @@ function buildRevealStep(
     revealPos((prev) => [...prev, sc.position]);
     const posLabel = currentSpread?.positions[sc.position]?.labelKo ?? `위치 ${sc.position + 1}`;
     const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
-    const preview = buildCardPreviewLine(charId, sc.card.nameKo, keywords, posLabel);
+    const wl = getWaitingLinesData(locale);
+    const cardName = locale === "en" ? sc.card.name : sc.card.nameKo;
+    const preview = wl.buildCardPreviewLine(charId, cardName, keywords, posLabel);
     addMsg({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
   };
 }
@@ -78,7 +83,8 @@ async function shareTarotResult(): Promise<void> {
 
 /** SSE 에러 메시지에서 캐릭터 말투의 사용자 표시 텍스트를 결정한다 */
 function getReadingErrorText(msg: string, charId: string | null | undefined): string {
-  const lines = (charId && characterErrorLines[charId]) ? characterErrorLines[charId] : defaultErrorLines;
+  const wl = getWaitingLinesData(useLocaleStore.getState().locale);
+  const lines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
   if (msg.includes("GROK_API_KEY")) return lines.api;
   return lines.reading;
 }
@@ -111,6 +117,7 @@ function addReadingResultMessages(
 
 export default function TarotSessionPage() {
   const router = useRouter();
+  const locale = useLocaleStore((s) => s.locale);
   const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
@@ -271,14 +278,15 @@ export default function TarotSessionPage() {
 
   // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
   const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
+    const wl = getWaitingLinesData(locale);
     const timers: ReturnType<typeof setTimeout>[] = [];
     const currentSpread = spreadType ? spreads[spreadType] : null;
-    const lines = waitingLines[charId] || defaultWaitingLines;
+    const lines = wl.waitingLines[charId] || wl.defaultWaitingLines;
 
     // 1단계: 카드 순차 뒤집기 (2초 간격) + 카드 정보 미리보기
     cards.forEach((sc, i) => {
       timers.push(setTimeout(
-        buildRevealStep(sc, currentSpread, charId, setRevealedPositions, addChatMessage),
+        buildRevealStep(sc, currentSpread, charId, locale, setRevealedPositions, addChatMessage),
         (i + 1) * 2000,
       ));
     });
@@ -293,7 +301,7 @@ export default function TarotSessionPage() {
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [spreadType, addChatMessage]);
+  }, [locale, spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
