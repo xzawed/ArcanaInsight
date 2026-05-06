@@ -130,6 +130,7 @@ export interface SharedKeys {
     "result.advice": string;
     "result.cta": string;
     "result.card.reversed": string;
+    "result.card.reversed-badge": string;
     "result.no-reading": string;
   };
   saju: {

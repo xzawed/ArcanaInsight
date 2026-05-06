@@ -126,6 +126,7 @@ export const ko: SharedKeys = {
     "result.advice": "조언",
     "result.cta": "나도 타로 상담 받기",
     "result.card.reversed": "역방향",
+    "result.card.reversed-badge": "역",
     "result.no-reading": "해석 결과를 불러올 수 없습니다.",
   },
   saju: {

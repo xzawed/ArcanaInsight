@@ -66,7 +66,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("tarot.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{spread?.nameKo} 스프레드 ・ {new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
+          <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
         </div>
 
         {/* 데스크탑 5:5 레이아웃 / 모바일 세로 배치 */}
@@ -74,7 +74,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           {/* 왼쪽: 스프레드 요약 + 선택된 카드 시각화 */}
           <div className="w-full md:w-[50%] space-y-4">
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-6">
-              <h2 className="font-serif font-bold text-lg text-arcana-gold mb-4">{spread?.nameKo} 스프레드</h2>
+              <h2 className="font-serif font-bold text-lg text-arcana-gold mb-4">{locale === "ko" ? spread?.nameKo : spread?.name}</h2>
               <div className={
                 interpretations.length <= 5
                   ? "flex flex-wrap justify-center gap-4"

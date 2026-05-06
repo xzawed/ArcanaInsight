@@ -7,6 +7,7 @@ import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
 import { getCardImageUrl } from "@/lib/storage";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getCardName } from "@/data/cards/locale-helpers";
+import { t } from "@/i18n/translations";
 
 interface CardFaceProps {
   readonly card: TarotCard;
@@ -64,7 +65,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
         />
         {isReversed && (
           <span className="absolute top-1 right-1 text-[8px] text-red-400 bg-red-900/40 px-1 rounded rotate-180">
-            역
+            {t("tarot.result.card.reversed-badge", locale)}
           </span>
         )}
       </div>

@@ -133,6 +133,7 @@ export const ja: Partial<SharedKeys> = {
     "result.advice": "アドバイス",
     "result.cta": "私もタロット鑑定を受ける",
     "result.card.reversed": "逆位置",
+    "result.card.reversed-badge": "逆",
     "result.no-reading": "鑑定結果を読み込めませんでした。",
   },
   saju: {
