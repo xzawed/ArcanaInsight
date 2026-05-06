@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
@@ -35,7 +35,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     created_at: string;
   }
 
-  const db = getDb();
+  const db = getAdminDb();
   const reading = await db.findOne<SajuReadingRow>("saju_readings", { share_token: id });
 
   if (!reading) notFound();

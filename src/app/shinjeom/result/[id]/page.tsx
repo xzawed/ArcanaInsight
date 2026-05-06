@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/db";
 import { cleanReadingText } from "@/services/core/text-cleaner";
 import { ReadingText } from "@/components/common/ReadingText";
 import { ShinjeomResultShareButton } from "./ShinjeomResultShareButton";
@@ -18,7 +18,7 @@ interface ShinjeomReadingRow {
 
 export default async function ShinjeomResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = getDb();
+  const db = getAdminDb();
   const reading = await db.findOne<ShinjeomReadingRow>("shinjeom_readings", { share_token: id });
 
   if (!reading) notFound();
