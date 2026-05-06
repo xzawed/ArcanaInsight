@@ -18,12 +18,14 @@ export const SajuSessionSchema = z.object({
   characterId: charIdStr,
 });
 
+// Shinjeom 세션은 캐릭터 선택 후 진입하는 플로우라 characterId 필수
+// (charIdStr.nullish 미사용 의도)
 export const ShinjeomSessionSchema = z.object({
   topic: topicStr,
   characterId: z.string().max(50),
 });
 
-// 일일 카드 스키마
+// 일일 카드는 홈에서 즐겨찾기 캐릭터를 강제 선택해 호출 — characterId 필수 + 빈 문자열 거부
 export const DailyCardSchema = z.object({
   characterId: z.string().min(1).max(50),
   date: dateStr,
@@ -79,6 +81,8 @@ export const ShinjeomMessageSchema = z.object({
   messageIndex: z.number().int().min(0).max(200),
 });
 
+// 선호 캐릭터는 null로 해제 가능하지만 키는 필수 — undefined(빈 body)는 400
+// (.nullable() 의도 — .nullish()로 바꾸면 빈 body도 통과되어 보안 테스트 깨짐)
 export const FavoriteCharacterSchema = z.object({
   characterId: z.string().max(50).nullable(),
 });

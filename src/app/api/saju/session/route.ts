@@ -12,10 +12,11 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
-    const { topic, characterId } = parsed.data as { topic: Topic; characterId?: string | null }
-    if (!SAJU_TOPICS.includes(topic)) {
+    const { topic: rawTopic, characterId } = parsed.data
+    if (!SAJU_TOPICS.includes(rawTopic as Topic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
+    const topic = rawTopic as Topic
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const db = getDb()

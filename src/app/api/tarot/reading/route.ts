@@ -59,15 +59,11 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증
     const parsed = TarotReadingSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, topic, spreadType, characterId, userInfo, freeQuestion, cards } = parsed.data as {
-      sessionId?: string | null; topic: Topic; spreadType?: string; characterId?: string;
-      userInfo?: { name: string; birthDate: string; gender: string; birthHour: string };
-      freeQuestion?: string | null;
-      cards: { cardId: string; position: number; isReversed: boolean }[];
-    };
+    const { sessionId, topic: rawTopic, spreadType, characterId, userInfo, freeQuestion, cards } = parsed.data;
 
     // 입력 검증
-    if (!TAROT_TOPICS.includes(topic)) return jsonError("Invalid topic");
+    if (!TAROT_TOPICS.includes(rawTopic as Topic)) return jsonError("Invalid topic");
+    const topic = rawTopic as Topic;
 
     // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
     if (sessionId) {
@@ -82,7 +78,7 @@ export async function POST(request: NextRequest) {
       return { card, position: c.position, isReversed: c.isReversed, selectedAt: new Date() };
     });
 
-    const systemPrompt = tarotService.getSystemPrompt(characterId);
+    const systemPrompt = tarotService.getSystemPrompt(characterId ?? undefined);
     const userInfoPrompt = buildUserInfoPrompt(userInfo);
     const freeQuestionPrompt = buildFreeQuestionPrompt(freeQuestion);
     const resolvedSpreadType: SpreadType = (spreadType && spreadResolver.getSpreadByType(spreadType))

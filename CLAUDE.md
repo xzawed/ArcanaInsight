@@ -31,7 +31,7 @@
 | **인증·DB** | Supabase Auth / NextAuth.js v5 (DB_PROVIDER별 전환) |
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
-| **테스트** | Vitest 2.0 (705개, statements 98%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (714개, statements 98%), Playwright (3 디바이스) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -65,7 +65,7 @@ docs/                # → docs/README.md 인덱스
 ├── operations/      # known-issues, env-variables, deployment, monitoring, operation-guide
 └── archive/         # process-diagrams, skills-original, ai-quality-roadmap
 
-supabase/migrations/ # 001~012 SQL (002 결번, PostgreSQL 모드: src/lib/db/schema/index.ts)
+supabase/migrations/ # 001 + 003~015 SQL (002 결번, 14개 파일, PostgreSQL 모드: src/lib/db/schema/index.ts)
 e2e/                 # 21개 spec (smart-ci.spec.ts 포함), 3 디바이스 — → docs/workflow/e2e-testing.md
 scripts/
 ├── e2e-full/        # 멀티 에이전트 E2E 전수 검증 (252 조합)
@@ -128,10 +128,12 @@ pnpm test:coverage # Vitest + 커버리지 (statements 98%)
 pnpm test:e2e      # Playwright (3 디바이스, smart-ci 제외)
 pnpm test:e2e:full          # 전수 E2E: 252 조합, 6 워커 (실서버 + 실 API 키 필요)
 pnpm test:e2e:full:ci       # CI 모드 오케스트레이터 (12 대표 케이스)
-pnpm exec tsx scripts/sync-test-count.ts       # CLAUDE.md 테스트 수 동기화
-pnpm exec tsx scripts/check-env-docs.ts        # env.ts ↔ env-variables.md 정합성
-pnpm exec tsx scripts/check-doc-links.ts       # docs 링크 검증
+pnpm sync:test-count        # CLAUDE.md 테스트 수 동기화
+pnpm check:env-docs         # env.ts ↔ env-variables.md 정합성
+pnpm check:doc-links        # docs 링크 검증
 ```
+
+> **scripts 운영 정책**: 자동 호출 / npm 등록 / 수동 자산 생성 분류 → [`docs/workflow/scripts.md`](docs/workflow/scripts.md)
 
 > **Windows E2E**: Docker 필수. → [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)
 >
