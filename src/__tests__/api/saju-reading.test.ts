@@ -239,24 +239,24 @@ describe("POST /api/saju/reading", () => {
       return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
     }
 
-    it("includeMonthly=true → max_tokens 16000", async () => {
-      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: true })).toBe(16000);
+    it("includeMonthly=true → max_tokens 20000", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: true })).toBe(20000);
     });
 
-    it("timeRange='full-fortune' → max_tokens 13000", async () => {
-      expect(await captureMaxTokens({ timeRange: "full-fortune", includeMonthly: false })).toBe(13000);
+    it("timeRange='full-fortune' → max_tokens 17000", async () => {
+      expect(await captureMaxTokens({ timeRange: "full-fortune", includeMonthly: false })).toBe(17000);
     });
 
-    it("timeRange='five-year' → max_tokens 12000", async () => {
-      expect(await captureMaxTokens({ timeRange: "five-year", includeMonthly: false })).toBe(12000);
+    it("timeRange='five-year' → max_tokens 15000", async () => {
+      expect(await captureMaxTokens({ timeRange: "five-year", includeMonthly: false })).toBe(15000);
     });
 
-    it("timeRange='three-year' → max_tokens 10000", async () => {
-      expect(await captureMaxTokens({ timeRange: "three-year", includeMonthly: false })).toBe(10000);
+    it("timeRange='three-year' → max_tokens 13000", async () => {
+      expect(await captureMaxTokens({ timeRange: "three-year", includeMonthly: false })).toBe(13000);
     });
 
-    it("기본 (this-month, monthly 미포함) → max_tokens 8000", async () => {
-      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: false })).toBe(8000);
+    it("기본 (this-month, monthly 미포함) → max_tokens 10000", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: false })).toBe(10000);
     });
   });
 

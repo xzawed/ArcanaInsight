@@ -105,7 +105,8 @@ ${historyText}
 }
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.
-JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.`;
+JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
+내부 reasoning·생각·계획 단계를 출력하지 마세요 — 첫 토큰부터 곧바로 JSON을 시작하고 <think> 같은 태그도 출력 금지.`;
   }
 
   getReadingPrompt(context: SessionContext): string {

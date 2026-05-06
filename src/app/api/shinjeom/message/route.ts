@@ -16,9 +16,9 @@ const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
 
 // 최종 턴(결과 요청) vs 일반 대화 max_tokens 상수
-// 한국어 토큰 비효율(영어 대비 1.3배) + JSON 오버헤드 반영해 final 상향 (truncated 방지)
-const SHINJEOM_TOKENS_FINAL = 6500;
-const SHINJEOM_TOKENS_CHAT = 1200;
+// 한국어 토큰 비효율 + JSON 오버헤드 + Grok 내부 reasoning(thinking) 토큰 흡수까지 고려한 안전 마진.
+const SHINJEOM_TOKENS_FINAL = 8500;
+const SHINJEOM_TOKENS_CHAT = 1500;
 
 /** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
 async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {

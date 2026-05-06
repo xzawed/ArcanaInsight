@@ -276,12 +276,12 @@ describe("POST /api/shinjeom/message", () => {
       return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
     }
 
-    it("isFinalTurn=true → max_tokens 6500 (truncated 방지 상향)", async () => {
-      expect(await captureMaxTokens({ isFinalTurn: true })).toBe(6500);
+    it("isFinalTurn=true → max_tokens 8500 (truncated 방지 상향)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: true })).toBe(8500);
     });
 
-    it("isFinalTurn=false → max_tokens 1200 (중간 대화)", async () => {
-      expect(await captureMaxTokens({ isFinalTurn: false })).toBe(1200);
+    it("isFinalTurn=false → max_tokens 1500 (중간 대화)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: false })).toBe(1500);
     });
   });
 

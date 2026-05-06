@@ -160,6 +160,8 @@ export class SajuService implements DivinationService {
 - 반드시 아래 JSON 형식으로만 응답합니다.
 - JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
 - 마크다운 코드블록을 사용하지 않습니다.
+- 내부 reasoning·생각·계획 단계를 출력하지 마세요. 첫 토큰부터 곧바로 JSON을 시작합니다.
+- <think> 같은 태그·메타 텍스트도 출력 금지 (응답 토큰 한도 내에 JSON 본문이 모두 들어가야 함).
 - JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
 {
   "overallReading": "종합 해석 문단1\\n\\n문단2",
