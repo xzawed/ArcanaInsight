@@ -9,8 +9,9 @@ import { useGenderStore } from "@/hooks/useGenderStore";
 import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 import { cardSkins } from "@/data/skins";
 import { GenderFilter } from "@/types/character";
+import { useT } from "@/i18n/useT";
 
-function SaveToast({ visible }: { visible: boolean }) {
+function SaveToast({ visible, text }: { visible: boolean; text: string }) {
   return (
     <div
       className={`fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-arcana-purple text-white text-sm font-sans shadow-lg shadow-arcana-purple/30 pointer-events-none transition-all duration-300 ${
@@ -19,12 +20,13 @@ function SaveToast({ visible }: { visible: boolean }) {
       aria-live="polite"
       aria-atomic="true"
     >
-      설정 저장됨
+      {text}
     </div>
   );
 }
 
 export default function SettingsPage() {
+  const { t } = useT();
   const { mode, activeTheme, setMode } = useThemeStore();
   const { selectedSkinId, setSkin } = useSkinStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
@@ -83,14 +85,14 @@ export default function SettingsPage() {
   };
 
   const themeOptions: { id: "auto" | ThemeId; label: string; icon: string }[] = [
-    { id: "auto", label: "자동 (시간/계절)", icon: "🔄" },
-    ...Object.values(themes).map((t) => ({ id: t.id, label: t.nameKo, icon: t.icon })),
+    { id: "auto", label: t("settings.theme.auto-label"), icon: "🔄" },
+    ...Object.values(themes).map((th) => ({ id: th.id, label: th.nameKo, icon: th.icon })),
   ];
 
   const genderOptions: { id: GenderFilter; label: string }[] = [
-    { id: "all", label: "전부" },
-    { id: "female", label: "여자" },
-    { id: "male", label: "남자" },
+    { id: "all", label: t("settings.gender.all") },
+    { id: "female", label: t("settings.gender.female") },
+    { id: "male", label: t("settings.gender.male") },
   ];
 
   return (
@@ -101,23 +103,23 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-arcana-bg/70" />
       </div>
 
-      <SaveToast visible={toastVisible} />
+      <SaveToast visible={toastVisible} text={t("settings.toast.saved")} />
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Link href="/" className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-          ← 홈으로
+          {t("settings.back-home")}
         </Link>
 
         <h1 className="text-2xl md:text-3xl font-display font-bold text-arcana-purple mt-4 mb-8 drop-shadow-md">
-          설정
+          {t("settings.page.title")}
         </h1>
 
         <div className="space-y-6">
 
           {/* 테마 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">테마</h2>
-            <p className="text-arcana-muted text-xs mb-4">현재: {mode === "auto" ? `자동 (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.theme")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${mode === "auto" ? `${t("settings.theme.auto-label")} (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}`}</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {themeOptions.map((t) => (
                 <button
@@ -138,8 +140,8 @@ export default function SettingsPage() {
 
           {/* 카드 스킨 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">카드 스킨</h2>
-            <p className="text-arcana-muted text-xs mb-4">현재: {cardSkins.find((s) => s.id === selectedSkinId)?.nameKo || "기본"}</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.card-skin")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${cardSkins.find((s) => s.id === selectedSkinId)?.nameKo || "기본"}`}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {cardSkins.map((skin) => (
                 <button
@@ -166,8 +168,8 @@ export default function SettingsPage() {
 
           {/* 상담사 성별 필터 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">기본 상담사 필터</h2>
-            <p className="text-arcana-muted text-xs mb-4">캐릭터 선택 시 기본 필터</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.gender-filter")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{t("settings.section.gender-filter.desc")}</p>
             <div className="flex gap-2">
               {genderOptions.map((opt) => (
                 <button
@@ -187,16 +189,16 @@ export default function SettingsPage() {
 
           {/* 카드 선택 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">카드 선택 방식</h2>
-            <p className="text-arcana-muted text-xs mb-4">타로 카드 선택 시 동작</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.card-selection")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{t("settings.section.card-selection.desc")}</p>
             <button
               onClick={toggleConfirmMode}
               className="w-full flex items-center justify-between p-3 rounded-xl border border-arcana-border/50 hover:border-arcana-border transition-colors"
             >
               <div>
-                <span className="text-arcana-text text-sm font-sans">카드 확인 모드</span>
+                <span className="text-arcana-text text-sm font-sans">{t("settings.card-confirm.label")}</span>
                 <p className="text-arcana-muted text-xs mt-0.5">
-                  {confirmEachCard ? "매 카드 선택 시 확인 요청" : "확인 없이 바로 선택 (기본)"}
+                  {confirmEachCard ? t("settings.card-confirm.on") : t("settings.card-confirm.off")}
                 </p>
               </div>
               <div className={`w-10 h-6 rounded-full flex items-center px-0.5 transition-colors ${
@@ -211,17 +213,17 @@ export default function SettingsPage() {
 
           {/* 애니메이션 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">애니메이션</h2>
-            <p className="text-arcana-muted text-xs mb-4">오라·파티클 등 장식 애니메이션 감소</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.animation")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{t("settings.section.animation.desc")}</p>
             <button
               onClick={toggleReducedMotion}
               className="w-full flex items-center justify-between p-3 rounded-xl border border-arcana-border/50 hover:border-arcana-border transition-colors"
               aria-pressed={reducedMotion}
             >
               <div>
-                <span className="text-arcana-text text-sm font-sans">애니메이션 감소</span>
+                <span className="text-arcana-text text-sm font-sans">{t("settings.reduced-motion.label")}</span>
                 <p className="text-arcana-muted text-xs mt-0.5">
-                  {reducedMotion ? "최소 애니메이션 (배터리·접근성 절약)" : "일반 애니메이션 (기본)"}
+                  {reducedMotion ? t("settings.reduced-motion.on") : t("settings.reduced-motion.off")}
                 </p>
               </div>
               <div className={`w-10 h-6 rounded-full flex items-center px-0.5 transition-colors ${
@@ -236,20 +238,20 @@ export default function SettingsPage() {
 
           {/* 저장된 개인정보 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">저장된 개인정보</h2>
-            <p className="text-arcana-muted text-xs mb-4">브라우저에 저장된 정보 관리</p>
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.privacy")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{t("settings.section.privacy.desc")}</p>
             {hasSavedInfo ? (
               <div className="flex items-center justify-between">
-                <span className="text-arcana-text text-sm">개인정보 저장됨</span>
+                <span className="text-arcana-text text-sm">{t("settings.privacy.saved")}</span>
                 <button
                   onClick={clearSavedInfo}
                   className="px-4 py-1.5 rounded-full border border-red-500/30 text-red-400 text-xs font-sans hover:bg-red-500/10 transition-colors"
                 >
-                  삭제
+                  {t("settings.privacy.delete")}
                 </button>
               </div>
             ) : (
-              <p className="text-arcana-muted text-sm">저장된 정보 없음</p>
+              <p className="text-arcana-muted text-sm">{t("settings.privacy.empty")}</p>
             )}
           </section>
 

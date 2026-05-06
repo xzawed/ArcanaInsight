@@ -49,6 +49,35 @@ export interface SharedKeys {
     "service.shinjeom.desc": string;
     "section.daily-card": string;
     "daily-card.cta": string;
+    // 새로 추가
+    "hero.today-character": string;
+    "hero.title-line1": string;
+    "hero.title-line2": string;
+    "hero.desc": string;
+    "hero.cta-tarot": string;
+    "hero.cta-daily": string;
+    "hero.scroll-hint": string;
+    "service-flow.title": string;
+    "service-flow.desc": string;
+    "service-flow.step1.title": string;
+    "service-flow.step1.desc": string;
+    "service-flow.step2.title": string;
+    "service-flow.step2.desc": string;
+    "service-flow.step3.title": string;
+    "service-flow.step3.desc": string;
+    "service-flow.step4.title": string;
+    "service-flow.step4.desc": string;
+    "faq.title": string;
+    "bottom-cta.title": string;
+    "bottom-cta.desc": string;
+    "bottom-cta.cta": string;
+    "daily-card.title": string;
+    "daily-card.tap-hint": string;
+    "daily-card.tap-desc": string;
+    "daily-card.share": string;
+    "daily-card.reversed": string;
+    "daily-card.upright": string;
+    "daily-card.share-text": string;
   };
   settings: {
     "page.title": string;
@@ -62,6 +91,32 @@ export interface SharedKeys {
     "section.account": string;
     "logout": string;
     "saved": string;
+    // 새로 추가
+    "back-home": string;
+    "toast.saved": string;
+    "section.card-skin": string;
+    "section.gender-filter": string;
+    "section.gender-filter.desc": string;
+    "gender.all": string;
+    "gender.female": string;
+    "gender.male": string;
+    "section.card-selection": string;
+    "section.card-selection.desc": string;
+    "card-confirm.label": string;
+    "card-confirm.on": string;
+    "card-confirm.off": string;
+    "section.animation": string;
+    "section.animation.desc": string;
+    "reduced-motion.label": string;
+    "reduced-motion.on": string;
+    "reduced-motion.off": string;
+    "section.privacy": string;
+    "section.privacy.desc": string;
+    "privacy.saved": string;
+    "privacy.empty": string;
+    "privacy.delete": string;
+    "theme.auto-label": string;
+    "theme.current": string;
   };
   locale: {
     "modal.title": string;

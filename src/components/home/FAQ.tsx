@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { faqItems } from "@/data/home/faq";
+import { useT } from "@/i18n/useT";
 
 function FAQItem({ question, answer, index }: { question: string; answer: string; index: number }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,11 +47,12 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
 }
 
 export function FAQ() {
+  const { t } = useT();
   return (
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-3xl mx-auto">
         <ScrollReveal className="text-center mb-12">
-          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">자주 묻는 질문</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">{t("home.faq.title")}</h2>
         </ScrollReveal>
 
         <div className="space-y-3">

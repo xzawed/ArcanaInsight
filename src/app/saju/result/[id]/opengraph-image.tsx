@@ -33,8 +33,8 @@ export default function Image() {
     accentColor: "rgba(217,119,6,0.85)",
     iconEmoji: "☯",
     iconGlow: "0 0 24px rgba(217,119,6,0.7)",
-    title: "사주 분석 결과",
+    title: "Saju Analysis Result",
     titleColor: "#fef3c7",
-    subtitle: "오행의 흐름으로 읽는 나의 운명",
+    subtitle: "Your four pillars reveal your destiny",
   });
 }
