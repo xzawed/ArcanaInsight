@@ -8,7 +8,7 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
   });
 
   test("홈 링크", async ({ page }) => {
-    const homeLink = page.locator("nav a[href='/']").first();
+    const homeLink = page.locator("header a[href='/']").first();
     await homeLink.click();
     await page.waitForURL("**/");
   });
@@ -27,11 +27,11 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
     await page.waitForURL("**/saju");
   });
 
-  test("설정 링크", async ({ page }) => {
-    const link = page.locator("nav a[href='/settings']");
+  test("마이페이지 링크", async ({ page }) => {
+    const link = page.locator("nav a[href='/mypage']").first();
     await expect(link).toBeVisible();
     await link.click();
-    await page.waitForURL("**/settings");
+    await page.waitForURL("**/mypage");
   });
 });
 
@@ -118,7 +118,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    const settingsIcon = page.locator("a[href='/settings'][aria-label='설정']");
+    const settingsIcon = page.locator("header a[href='/settings']");
     await expect(settingsIcon).toBeVisible();
   });
 
@@ -127,7 +127,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    const settingsIcon = page.locator("a[href='/settings'][aria-label='설정']");
+    const settingsIcon = page.locator("header a[href='/settings']");
     await settingsIcon.click();
     await page.waitForURL("**/settings");
   });
