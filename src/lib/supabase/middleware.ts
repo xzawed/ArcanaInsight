@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config";
+import { detectLocale } from "@/i18n/detect";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -30,5 +32,16 @@ export async function updateSession(request: NextRequest) {
   );
 
   await supabase.auth.getUser();
+
+  const locale = detectLocale(request);
+  if (request.cookies.get(LOCALE_COOKIE)?.value !== locale) {
+    supabaseResponse.cookies.set(LOCALE_COOKIE, locale, {
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      path: "/",
+      sameSite: "lax",
+    });
+  }
+  supabaseResponse.headers.set("x-locale", locale);
+
   return supabaseResponse;
 }
