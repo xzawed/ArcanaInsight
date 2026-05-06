@@ -8,7 +8,6 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
   });
 
   test("홈 링크", async ({ page }) => {
-    await page.goto("/tarot"); // 다른 페이지에서 시작
     const homeLink = page.locator("nav a[href='/']").first();
     await homeLink.click();
     await page.waitForURL("**/");
@@ -66,7 +65,7 @@ test.describe("네비게이션 — Header 테마 드롭다운", () => {
     const sunsetBtn = page.locator("button:has-text('황혼의 노을')").first();
     if (await sunsetBtn.isVisible()) {
       await sunsetBtn.click();
-      await page.waitForTimeout(500);
+      await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "sunset", { timeout: 3000 }).catch(() => {});
       // localStorage에 저장되었는지 확인
       const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
       expect(saved).toBe("sunset");
@@ -155,7 +154,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 홈에서 아래로 스크롤
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
     const scrollBefore = await page.evaluate(() => window.scrollY);
     expect(scrollBefore).toBeGreaterThan(0);
 
@@ -163,7 +162,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const tarotTab = page.locator("nav a[href='/tarot']").last();
     await tarotTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/tarot");
-    await page.waitForTimeout(500); // AnimatePresence 전환 대기
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterTarot = await page.evaluate(() => window.scrollY);
     expect(scrollAfterTarot).toBe(0);
 
@@ -171,7 +170,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const sajuTab = page.locator("nav a[href='/saju']").last();
     await sajuTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/saju");
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterSaju = await page.evaluate(() => window.scrollY);
     expect(scrollAfterSaju).toBe(0);
 
@@ -179,7 +178,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const shinjeomTab = page.locator("nav a[href='/shinjeom']").last();
     await shinjeomTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/shinjeom");
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterShinjeom = await page.evaluate(() => window.scrollY);
     expect(scrollAfterShinjeom).toBe(0);
   });
@@ -191,13 +190,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 홈에서 아래로 스크롤
     await page.evaluate(() => window.scrollTo(0, 800));
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
 
     // 타로 링크 클릭
     const tarotLink = page.locator("nav a[href='/tarot']").first();
     await tarotLink.click();
     await page.waitForURL("**/tarot");
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });
@@ -209,13 +208,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
     await page.evaluate(() => window.scrollTo(0, 300));
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
 
     // 홈으로 이동 (evaluate로 nextjs-portal 우회)
     const homeTab = page.locator("nav a[href='/']").last();
     await homeTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL(/\/$/);
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });

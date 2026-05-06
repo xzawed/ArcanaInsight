@@ -114,7 +114,7 @@ test.describe("i18n — LanguageSwitcher 데스크탑", () => {
   test("영어 선택 → ai_locale 쿠키 en으로 설정", async ({ page }) => {
     await page.locator('[data-testid="lang-switcher"]').click();
     await page.locator('[data-testid="lang-option-en"]').click();
-    await page.waitForTimeout(500);
+    await page.waitForResponse((resp) => resp.url().includes("api/locale"), { timeout: 3000 }).catch(() => {});
 
     const cookies = await page.context().cookies();
     const localeCookie = cookies.find((c) => c.name === LOCALE_COOKIE);
@@ -124,7 +124,7 @@ test.describe("i18n — LanguageSwitcher 데스크탑", () => {
   test("일본어 선택 → ai_locale 쿠키 ja로 설정", async ({ page }) => {
     await page.locator('[data-testid="lang-switcher"]').click();
     await page.locator('[data-testid="lang-option-ja"]').click();
-    await page.waitForTimeout(500);
+    await page.waitForResponse((resp) => resp.url().includes("api/locale"), { timeout: 3000 }).catch(() => {});
 
     const cookies = await page.context().cookies();
     const localeCookie = cookies.find((c) => c.name === LOCALE_COOKIE);
@@ -135,7 +135,7 @@ test.describe("i18n — LanguageSwitcher 데스크탑", () => {
     // 언어 전환
     await page.locator('[data-testid="lang-switcher"]').click();
     await page.locator('[data-testid="lang-option-en"]').click();
-    await page.waitForTimeout(300);
+    await page.waitForResponse((resp) => resp.url().includes("api/locale"), { timeout: 3000 }).catch(() => {});
 
     // 재방문
     await page.goto("/");

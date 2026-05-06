@@ -28,7 +28,9 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
   ];
 
   for (const p of pages) {
-    test(`${p.name} (${p.path}) — JSON 잔여물 없음`, async ({ page }) => {
+    test(`${p.name} (${p.path}) — JSON 잔여물 없음 + 콘솔 에러 없음`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", (err) => errors.push(err.message));
       await page.goto(p.path);
       await page.waitForLoadState("networkidle");
       const bodyText = await page.textContent("body");
@@ -36,13 +38,6 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
       for (const pattern of JSON_ARTIFACTS) {
         expect(bodyText).not.toMatch(pattern);
       }
-    });
-
-    test(`${p.name} (${p.path}) — 콘솔 에러 없음`, async ({ page }) => {
-      const errors: string[] = [];
-      page.on("pageerror", (err) => errors.push(err.message));
-      await page.goto(p.path);
-      await page.waitForLoadState("networkidle");
       expect(errors).toHaveLength(0);
     });
   }

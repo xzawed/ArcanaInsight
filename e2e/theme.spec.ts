@@ -44,8 +44,7 @@ test.describe("테마 드롭다운 — 데스크탑 기본 동작", () => {
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
 
     await page.locator("body").click({ position: { x: 100, y: 400 } });
-    await page.waitForTimeout(300);
-    await expect(page.locator("text=자동 (시간/계절)").first()).not.toBeVisible();
+    await expect(page.locator("text=자동 (시간/계절)").first()).not.toBeVisible({ timeout: 2000 });
   });
 });
 
@@ -64,7 +63,10 @@ test.describe("테마 드롭다운 — 7개 테마 선택 + localStorage + CSS �
 
       // data-testid 기반 — auto 버튼 오탐 완전 차단
       await themeOptionBtn(page, id).evaluate((el) => (el as HTMLElement).click());
-      await page.waitForTimeout(300);
+      await page.waitForFunction(
+        (themeId) => localStorage.getItem("arcana-theme-mode") === themeId,
+        id, { timeout: 3000 }
+      );
 
       const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
       expect(saved).toBe(id);
@@ -87,12 +89,12 @@ test.describe("테마 드롭다운 — auto 모드 선택", () => {
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
     await themeOptionBtn(page, "midnight").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "midnight", { timeout: 3000 });
 
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
     await page.locator("text=자동 (시간/계절)").first().evaluate((el) => (el as HTMLElement).click());
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "auto", { timeout: 3000 });
 
     const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
     expect(saved).toBe("auto");
@@ -114,7 +116,7 @@ test.describe("테마 드롭다운 — 모바일 390px", () => {
 
     // 모바일 드롭다운 버튼 — mobile-theme-option-* testid 사용
     await mobileThemeOptionBtn(page, "midnight").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "midnight", { timeout: 3000 });
 
     const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
     expect(saved).toBe("midnight");
@@ -133,11 +135,11 @@ test.describe("테마 — 새로고침 후 유지", () => {
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
     await themeOptionBtn(page, "sunset").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "sunset", { timeout: 3000 });
 
     await page.reload();
     await page.waitForLoadState("load");
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") !== null, { timeout: 3000 });
 
     const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
     expect(saved).toBe("sunset");
@@ -159,7 +161,7 @@ test.describe("테마 — 설정 페이지 상태 일치", () => {
     await btn.click();
     await expect(page.locator("text=자동 (시간/계절)").first()).toBeVisible({ timeout: 3000 });
     await themeOptionBtn(page, "summer").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "summer", { timeout: 3000 });
 
     await page.goto("/settings");
     await page.waitForLoadState("load");
