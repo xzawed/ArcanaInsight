@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatMessage } from "@/types/session";
+import { useT } from "@/i18n/useT";
 
 interface DialogueBoxProps {
   readonly messages: ChatMessage[];
@@ -11,7 +12,9 @@ interface DialogueBoxProps {
   readonly className?: string;
 }
 
-export function DialogueBox({ messages, characterName = "아르카나", isTyping = false, className = "" }: DialogueBoxProps) {
+export function DialogueBox({ messages, characterName, isTyping = false, className = "" }: DialogueBoxProps) {
+  const { t } = useT();
+  const displayName = characterName ?? t("chat.default-character-name");
   const lastMessage = messages.filter((m) => m.role === "character").at(-1);
   const [displayedText, setDisplayedText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
@@ -49,7 +52,7 @@ export function DialogueBox({ messages, characterName = "아르카나", isTyping
       <div className="relative z-10 p-3 md:p-5">
         <div className="flex items-center gap-2 mb-2">
           <div className="px-3 py-0.5 bg-gradient-to-r from-arcana-purple to-arcana-indigo rounded-full">
-            <span className="text-white text-xs font-serif font-bold">{characterName}</span>
+            <span className="text-white text-xs font-serif font-bold">{displayName}</span>
           </div>
           <div className="flex-1 h-px bg-gradient-to-r from-arcana-purple/40 to-transparent" />
         </div>
@@ -90,7 +93,7 @@ export function DialogueBox({ messages, characterName = "아르카나", isTyping
                 )}
               </motion.p>
             ) : (
-              <p className="text-arcana-muted text-sm italic">카드를 선택하면 상담이 시작됩니다...</p>
+              <p className="text-arcana-muted text-sm italic">{t("chat.empty-prompt")}</p>
             )}
           </AnimatePresence>
         </div>

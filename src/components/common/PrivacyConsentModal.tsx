@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/i18n/useT";
 
 interface PrivacyConsentModalProps {
   readonly isOpen: boolean;
@@ -10,6 +11,7 @@ interface PrivacyConsentModalProps {
 }
 
 export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsentModalProps) {
+  const { t } = useT();
   return (
     <AnimatePresence>
       {isOpen && (
@@ -19,7 +21,7 @@ export function PrivacyConsentModal({ isOpen, onAgree, onCancel }: PrivacyConsen
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
         >
-          <button type="button" aria-label="모달 닫기" onClick={onCancel} className="absolute inset-0 bg-black/60 cursor-default" />
+          <button type="button" aria-label={t("common.modal.close-aria")} onClick={onCancel} className="absolute inset-0 bg-black/60 cursor-default" />
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

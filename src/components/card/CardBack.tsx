@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getCardBackUrl } from "@/lib/storage";
+import { useT } from "@/i18n/useT";
 
 interface CardBackProps {
   readonly size?: "sm" | "md" | "lg";
@@ -19,6 +20,7 @@ const sizeDimensions = {
 };
 
 export function CardBack({ size = "md", width, height, className = "", skinId }: CardBackProps) {
+  const { t } = useT();
   const [imageError, setImageError] = useState(false);
   const preset = sizeDimensions[size];
   const w = width ?? preset.w;
@@ -36,7 +38,7 @@ export function CardBack({ size = "md", width, height, className = "", skinId }:
       <div className={`relative rounded-lg overflow-hidden ${className}`} style={{ width: w, height: h }}>
         <Image
           src={getCardBackUrl(skinId)}
-          alt="카드 뒷면"
+          alt={t("common.card.back-alt")}
           fill
           sizes={`${Math.max(w, h)}px`}
           unoptimized

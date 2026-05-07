@@ -15,6 +15,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
 import { saveTarotReading } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
+import { t as translate } from "@/i18n/translations";
 
 const tarotService = new TarotService();
 const grokProvider = new FallbackProvider();
@@ -53,11 +54,10 @@ async function fetchMemoryPrompt(characterId: string, locale: string): Promise<s
 
 export async function POST(request: NextRequest) {
   try {
+    const locale = await getRequestLocale();
     // Rate limiting
     const ip = getClientIp(request.headers);
-    if (!(await checkRateLimit(`tarot:${ip}`, 10, 60_000))) return rateLimitResponse();
-
-    const locale = await getRequestLocale();
+    if (!(await checkRateLimit(`tarot:${ip}`, 10, 60_000))) return rateLimitResponse(locale);
     const rawBody = await request.json();
 
     // Zod 입력 검증
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
           }
         } catch (e) {
           console.error("리딩 생성 실패:", e instanceof Error ? e.message : String(e));
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: "리딩 생성 중 오류가 발생했습니다." })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: translate("api.reading-error", locale) })}\n\n`));
         }
         controller.close();
       },

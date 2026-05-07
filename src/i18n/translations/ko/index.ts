@@ -168,6 +168,8 @@ export const ko: SharedKeys = {
     "session.btn.new-session": "새로운 상담",
     "session.btn.share": "결과 공유하기",
     "session.error.reading": "해석에 문제가 발생했어요",
+    "session.shuffle.fallback-text": "카드를 선택하세요",
+    "session.shuffle.skip-aria": "카드 셔플 의식 스킵",
   },
   saju: {
     "result.title": "사주 분석 결과",
@@ -277,6 +279,17 @@ export const ko: SharedKeys = {
   share: {
     "result-button-default": "결과 공유하기",
     "copied-button": "링크 복사됨!",
+  },
+  chat: {
+    "default-character-name": "아르카나",
+    "empty-prompt": "카드를 선택하면 상담이 시작됩니다...",
+  },
+  api: {
+    "rate-limit-error": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+    "reading-error": "리딩 생성 중 오류가 발생했습니다.",
+  },
+  meta: {
+    "site-description": "애니메이션 캐릭터와 함께하는 타로 리딩, 사주, 신점 종합 운세 플랫폼",
   },
   shinjeom: {
     "result.title": "신점 결과",

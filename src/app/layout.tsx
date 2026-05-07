@@ -31,8 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://arcanainsight-production.up.railway.app";
   return {
-    title: "ArcanaInsight — 타로 & 운세 상담",
-    description: "애니메이션 캐릭터와 함께하는 타로 리딩, 사주, 신점 종합 운세 플랫폼",
+    title: `ArcanaInsight — ${translate("home.hero.title", locale)}`,
+    description: translate("meta.site-description", locale),
     alternates: {
       canonical: siteUrl,
       languages: {

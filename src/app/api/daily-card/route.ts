@@ -6,6 +6,7 @@ import { getCharacterById } from "@/data/characters";
 import { DailyCardSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { getRequestLocale } from "@/i18n/server-locale";
 
 const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
@@ -23,8 +24,9 @@ function hashDateSeed(date: string, characterId: string): number {
 
 export async function POST(request: NextRequest) {
   try {
+    const locale = await getRequestLocale();
     const ip = getClientIp(request.headers);
-    if (!(await checkRateLimit(`daily-card:${ip}`, 30, 60_000))) return rateLimitResponse();
+    if (!(await checkRateLimit(`daily-card:${ip}`, 30, 60_000))) return rateLimitResponse(locale);
 
     const parsed = DailyCardSchema.safeParse(await request.json());
     if (!parsed.success) {
