@@ -97,9 +97,9 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/shinjeom");
     await page.waitForLoadState("domcontentloaded");
-    // 캐릭터 선택
-    const firstChar = page.locator("[data-testid='character-card']").first();
-    await expect(firstChar).toBeVisible({ timeout: 5000 });
+    // 캐릭터 선택 (기존 spec 패턴 — shinjeom 페이지는 character-card testid 없음)
+    const firstChar = page.locator("button").filter({ hasText: /아르카나|루나|미코/ }).first();
+    await expect(firstChar).toBeVisible({ timeout: 10_000 });
     await firstChar.click();
     // 주제 선택
     const firstTopic = page.locator("[data-testid^='shinjeom-topic-btn-']").first();
