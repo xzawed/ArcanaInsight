@@ -16,11 +16,18 @@ import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
-import { sajuTimeOptions, sajuAreaOptions } from "@/data/saju/categories";
+import { sajuTimeOptions, sajuAreaOptions, getSajuTimeLabel, getSajuTimeDesc, getSajuAreaLabel, getSajuAreaDesc } from "@/data/saju/categories";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
-import { SAJU_COPY } from "@/data/ui-copy";
 import { ServiceBackground } from "@/components/effects/ServiceBackground";
+import { useT } from "@/i18n/useT";
+import { t as translate } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
+
+/** "{name}" placeholder 치환 — saju.page.after-info-msg 전용 */
+function buildAfterInfoMsg(name: string, locale: Locale): string {
+  return translate("saju.page.after-info-msg", locale).replace("{name}", name);
+}
 
 type PageStep = "character-select" | "info-input" | "saju-select";
 
@@ -33,12 +40,18 @@ function CharacterSelectStep({ characters, genderFilter, setGenderFilter, select
   selectedCharacter: CharacterConfig | null;
   onSelect: (c: CharacterConfig) => void;
 }>) {
+  const { t } = useT();
+  const genderLabels: Record<GenderFilter, string> = {
+    all: t("tarot.page.gender.all"),
+    female: t("tarot.page.gender.female"),
+    male: t("tarot.page.gender.male"),
+  };
   return (
     <motion.div key="char-select" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="max-w-4xl mx-auto px-4 py-8 relative z-20">
       <div className="text-center mb-8">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2">{SAJU_COPY.characterSelect.heading}</h2>
-        <p className="text-arcana-muted text-sm md:text-base">{SAJU_COPY.characterSelect.sub}</p>
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-bold mb-2">{t("saju.page.character-select.heading")}</h2>
+        <p className="text-arcana-muted text-sm md:text-base">{t("saju.page.character-select.sub")}</p>
       </div>
       <div className="flex justify-center gap-2 mb-6">
         {(["all", "female", "male"] as GenderFilter[]).map((f) => (
@@ -48,7 +61,7 @@ function CharacterSelectStep({ characters, genderFilter, setGenderFilter, select
                 ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple"
                 : "border-arcana-border text-arcana-muted hover:border-arcana-purple"
             }`}>
-            {{ all: "전부", female: "여자", male: "남자" }[f]}
+            {genderLabels[f]}
           </button>
         ))}
       </div>
@@ -99,7 +112,9 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
   onMonthlyToggle: () => void;
   onStart: () => void;
 }>) {
-  const selectedTimeOption = sajuTimeOptions.find((t) => t.id === selectedTime);
+  const { t } = useT();
+  const locale = useLocaleStore((s) => s.locale);
+  const selectedTimeOption = sajuTimeOptions.find((opt) => opt.id === selectedTime);
   return (
     <motion.div key="saju-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
       className="relative z-20 h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col md:flex-row overflow-hidden">
@@ -115,12 +130,12 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col px-4 md:px-6 py-4 overflow-y-auto">
         <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
-          {SAJU_COPY.back.info}
+          {t("saju.page.back-info")}
         </button>
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2">
             <Icon id="ui-hourglass" size={20} />
-            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">시간단위</h3>
+            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">{t("saju.page.section.time-range")}</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {sajuTimeOptions.map((opt) => (
@@ -131,11 +146,11 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
                     : "border-arcana-border text-arcana-muted hover:border-arcana-purple/60 bg-arcana-card/50"
                 }`}>
                 <Icon id={opt.icon} size={18} />
-                <span>{opt.label}</span>
+                <span>{getSajuTimeLabel(opt, locale)}</span>
               </button>
             ))}
           </div>
-          {selectedTimeOption && <p className="text-arcana-muted text-xs mt-1.5 pl-1">{selectedTimeOption.desc}</p>}
+          {selectedTimeOption && <p className="text-arcana-muted text-xs mt-1.5 pl-1">{getSajuTimeDesc(selectedTimeOption, locale)}</p>}
         </div>
         {selectedTimeOption?.allowMonthly && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-5">
@@ -148,14 +163,14 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
                 className={`w-9 h-5 rounded-full transition-colors relative ${monthlyToggle ? "bg-arcana-purple" : "bg-arcana-border"}`}>
                 <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${monthlyToggle ? "translate-x-4" : "translate-x-0.5"}`} />
               </button>
-              <span className="text-xs font-sans text-arcana-muted group-hover:text-arcana-text transition-colors">월별 상세 포함</span>
+              <span className="text-xs font-sans text-arcana-muted group-hover:text-arcana-text transition-colors">{t("saju.page.monthly-toggle")}</span>
             </label>
           </motion.div>
         )}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Icon id="saju-general" size={20} />
-            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">분석영역</h3>
+            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">{t("saju.page.section.area")}</h3>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {sajuAreaOptions.map((opt) => (
@@ -168,9 +183,9 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
                 <Icon id={opt.icon} size={22} className="flex-shrink-0" />
                 <div className="min-w-0">
                   <p className={`text-xs md:text-sm font-display font-bold truncate ${selectedArea === opt.id ? "text-arcana-purple" : "text-arcana-text"}`}>
-                    {opt.label}
+                    {getSajuAreaLabel(opt, locale)}
                   </p>
-                  <p className="text-arcana-muted text-xs truncate">{opt.desc}</p>
+                  <p className="text-arcana-muted text-xs truncate">{getSajuAreaDesc(opt, locale)}</p>
                 </div>
               </button>
             ))}
@@ -179,12 +194,12 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-arcana-purple text-sm">✦</span>
-            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">추가 질문 (선택)</h3>
+            <h3 className="font-sans font-bold text-sm md:text-base text-arcana-purple">{t("saju.page.section.free-question")}</h3>
           </div>
           <textarea
             value={freeQuestion}
             onChange={(e) => onFreeQuestionChange(e.target.value)}
-            placeholder="구체적으로 궁금한 점이 있다면 적어주세요. (최대 200자)"
+            placeholder={t("saju.page.section.free-question-placeholder")}
             maxLength={200}
             rows={3}
             className="w-full px-4 py-3 rounded-xl bg-arcana-card/70 border border-arcana-border text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:outline-none focus:border-arcana-purple transition-colors resize-none"
@@ -197,7 +212,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
               ? "bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white shadow-lg shadow-arcana-purple/30 hover:opacity-90"
               : "bg-arcana-surface/50 text-arcana-muted border border-arcana-border cursor-not-allowed"
           }`}>
-          {canStart ? SAJU_COPY.startButton.active : SAJU_COPY.startButton.inactive}
+          {canStart ? t("saju.page.start.active") : t("saju.page.start.inactive")}
         </button>
       </div>
     </motion.div>
@@ -266,7 +281,7 @@ function SajuPageContent() {
     setUserInfo(info);
     setDialogueMessages((prev) => [...prev, {
       id: crypto.randomUUID(), role: "character",
-      content: `${info.name || ""}님의 사주를 확인했어요. 어느 기간의 어떤 분야를 알아볼까요?`,
+      content: buildAfterInfoMsg(info.name || "", locale),
       mood: "mystical", timestamp: new Date(),
     }]);
     setStep("saju-select");

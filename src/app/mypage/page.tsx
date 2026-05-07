@@ -8,6 +8,9 @@ import { characters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { getCardName } from "@/data/cards/locale-helpers";
+import { t } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
+import { getTopicLabel } from "@/data/topics-meta";
 import { LogoutButton } from "./LogoutButton";
 import { FavoriteCharacterSelector } from "./FavoriteCharacterSelector";
 
@@ -43,30 +46,6 @@ interface Profile {
   favorite_character_id?: string;
 }
 
-const topicLabels: Record<string, string> = {
-  love: "연애/관계",
-  "love-single": "연애 (솔로)",
-  "love-couple": "연애 (커플)",
-  finance: "재정/금전",
-  career: "직장/진로",
-  health: "건강",
-  general: "일반 상담",
-  "saju-general": "사주 종합",
-  "saju-love-single": "사주 연애(솔로)",
-  "saju-love-couple": "사주 연애(커플)",
-  "saju-career": "사주 직장·재물",
-  "saju-health": "사주 건강",
-  "saju-personality": "사주 성격·적성",
-  "saju-compatibility": "사주 궁합",
-  "saju-auspicious-date": "사주 택일",
-  "shinjeom-general": "신점 종합",
-  "shinjeom-love": "신점 연애/궁합",
-  "shinjeom-wealth": "신점 재물/사업",
-  "shinjeom-career": "신점 직장/이직",
-  "shinjeom-health": "신점 건강/액막이",
-  "shinjeom-auspicious": "신점 택일",
-};
-
 const topicColors: Record<string, string> = {
   love: "bg-pink-500/20 text-pink-300 border-pink-500/30",
   "love-single": "bg-pink-500/20 text-pink-300 border-pink-500/30",
@@ -85,16 +64,18 @@ const serviceColors: Record<string, string> = {
 
 const deckManager = new DeckManager();
 
-function formatRelativeDate(dateStr: string): string {
+function formatRelativeDate(dateStr: string, locale: Locale): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return "오늘";
-  if (diffDays === 1) return "어제";
-  if (diffDays < 7) return `${diffDays}일 전`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전`;
-  return date.toLocaleDateString("ko-KR");
+  if (diffDays === 0) return t("mypage.date.today", locale);
+  if (diffDays === 1) return t("mypage.date.yesterday", locale);
+  if (diffDays < 7) return t("mypage.date.days-ago", locale).replace("{n}", String(diffDays));
+  if (diffDays < 30) return t("mypage.date.weeks-ago", locale).replace("{n}", String(Math.floor(diffDays / 7)));
+  // 월 단위 이상은 locale 별 toLocaleDateString
+  const localeMap: Record<Locale, string> = { ko: "ko-KR", en: "en-US", ja: "ja-JP" };
+  return date.toLocaleDateString(localeMap[locale]);
 }
 
 function getCharacterName(characterId?: string | null): string | null {
@@ -118,7 +99,7 @@ function getReadingFromSession(session: SessionRow): ReadingData | undefined {
 }
 
 /** 카드 빈도 집계 → 가장 많이 뽑은 카드명 반환 */
-function getMostFrequentCard(sessionCards: SessionCard[], locale: string): string | null {
+function getMostFrequentCard(sessionCards: SessionCard[], locale: Locale): string | null {
   if (sessionCards.length === 0) return null;
   const freq: Record<string, number> = {};
   for (const sc of sessionCards) {
@@ -127,6 +108,12 @@ function getMostFrequentCard(sessionCards: SessionCard[], locale: string): strin
   const topCardId = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
   const card = deckManager.getCardById(topCardId);
   return card ? getCardName(card, locale) : topCardId;
+}
+
+function getServiceLabel(serviceType: string, locale: Locale): string {
+  if (serviceType === "saju") return t("mypage.service.saju", locale);
+  if (serviceType === "shinjeom") return t("mypage.service.shinjeom", locale);
+  return t("mypage.service.tarot", locale);
 }
 
 export default async function MyPage() {
@@ -142,7 +129,7 @@ export default async function MyPage() {
     db.findMany<SessionRow>("sessions", { user_id: user.id }).catch(() => [] as SessionRow[]),
   ]);
 
-  const profileError: { message: string } | null = !profile ? { message: "프로필을 불러올 수 없습니다" } : null;
+  const profileError: { message: string } | null = !profile ? { message: t("mypage.profile.error-detail-fallback", locale) } : null;
 
   // status 필터 + 최신순 정렬 (DB Provider별 ORDER BY 미지원이므로 JS에서 처리)
   const filtered = (allRawSessions as SessionRow[])
@@ -188,7 +175,7 @@ export default async function MyPage() {
   const lastReadingDate = sessionList.length > 0 ? sessionList[0].created_at : null;
   const favoriteCharName = getCharacterName(profile?.favorite_character_id);
   const mostFrequentCard = getMostFrequentCard(sessionCards, locale);
-  const nickname = profile?.nickname || "사용자";
+  const nickname = profile?.nickname || t("mypage.profile.default-nickname", locale);
   const initial = nickname.charAt(0);
 
   return (
@@ -204,7 +191,7 @@ export default async function MyPage() {
         {/* DB 에러 안내 */}
         {profileError && (
           <div className="mb-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-            <p className="font-bold">데이터를 불러오는 중 문제가 발생했습니다</p>
+            <p className="font-bold">{t("mypage.profile.error", locale)}</p>
             <p className="mt-1 text-xs text-red-400/70">{profileError.message}</p>
           </div>
         )}
@@ -220,7 +207,7 @@ export default async function MyPage() {
               <p className="text-arcana-muted text-sm truncate">{profile?.email}</p>
               {favoriteCharName && (
                 <p className="text-arcana-purple text-xs mt-1">
-                  선호 상담사: <span className="font-semibold">{favoriteCharName}</span>
+                  {t("mypage.profile.favorite-character", locale)}: <span className="font-semibold">{favoriteCharName}</span>
                 </p>
               )}
             </div>
@@ -232,13 +219,13 @@ export default async function MyPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
             <p className="text-2xl font-serif font-bold text-arcana-purple">{totalReadings}</p>
-            <p className="text-arcana-muted text-xs mt-1">총 리딩 수</p>
+            <p className="text-arcana-muted text-xs mt-1">{t("mypage.stats.total", locale)}</p>
           </div>
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
             <p className="text-sm font-serif font-bold text-arcana-gold truncate">
-              {mostFrequentCard ?? "아직 없음"}
+              {mostFrequentCard ?? t("mypage.stats.frequent-card-empty", locale)}
             </p>
-            <p className="text-arcana-muted text-xs mt-1">자주 뽑은 카드</p>
+            <p className="text-arcana-muted text-xs mt-1">{t("mypage.stats.frequent-card", locale)}</p>
           </div>
           <FavoriteCharacterSelector
             currentCharacterId={profile?.favorite_character_id}
@@ -246,14 +233,14 @@ export default async function MyPage() {
           />
           <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center">
             <p className="text-sm font-serif font-bold text-arcana-text truncate">
-              {lastReadingDate ? formatRelativeDate(lastReadingDate) : "없음"}
+              {lastReadingDate ? formatRelativeDate(lastReadingDate, locale) : t("mypage.stats.last-reading-empty", locale)}
             </p>
-            <p className="text-arcana-muted text-xs mt-1">최근 상담</p>
+            <p className="text-arcana-muted text-xs mt-1">{t("mypage.stats.last-reading", locale)}</p>
           </div>
         </div>
 
         {/* 리딩 히스토리 */}
-        <h3 className="font-serif font-bold text-base md:text-lg mb-4 drop-shadow-md">리딩 히스토리</h3>
+        <h3 className="font-serif font-bold text-base md:text-lg mb-4 drop-shadow-md">{t("mypage.history.title", locale)}</h3>
 
         {sessionList.length === 0 ? (
           <div className="text-center py-16 bg-arcana-card/50 backdrop-blur-sm rounded-2xl border border-arcana-border">
@@ -265,13 +252,13 @@ export default async function MyPage() {
                 className="object-contain rounded-full opacity-60"
                sizes="100vw" />
             </div>
-            <p className="text-arcana-muted text-lg font-serif mb-2">아직 리딩 기록이 없습니다</p>
-            <p className="text-arcana-muted/60 text-sm mb-6">카드가 당신의 이야기를 기다리고 있어요</p>
+            <p className="text-arcana-muted text-lg font-serif mb-2">{t("mypage.history.empty.title", locale)}</p>
+            <p className="text-arcana-muted/60 text-sm mb-6">{t("mypage.history.empty.desc", locale)}</p>
             <Link
               href="/tarot"
               className="inline-block rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-arcana-purple/30 hover:shadow-xl hover:shadow-arcana-purple/40 transition-all"
             >
-              첫 타로 상담 시작하기
+              {t("mypage.history.empty.cta", locale)}
             </Link>
           </div>
         ) : (
@@ -285,8 +272,7 @@ export default async function MyPage() {
                 ? overallText.slice(0, 80) + "..."
                 : overallText || null;
               const shareToken = reading?.share_token;
-              const serviceLabelMap: Record<string, string> = { saju: "사주", shinjeom: "신점", tarot: "타로" };
-              const serviceLabel = serviceLabelMap[session.service_type] ?? "타로";
+              const serviceLabel = getServiceLabel(session.service_type, locale);
               const resultPath = session.service_type === "saju"
                 ? `/saju/result/${shareToken}`
                 : session.service_type === "shinjeom"
@@ -300,7 +286,7 @@ export default async function MyPage() {
                       <span
                         className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full border ${topicColor}`}
                       >
-                        {topicLabels[session.topic] ?? session.topic}
+                        {getTopicLabel(session.topic, locale)}
                       </span>
                       <span className={`text-xs font-display font-bold ${serviceColors[session.service_type] ?? "text-arcana-purple"}`}>
                         {serviceLabel}
@@ -312,13 +298,13 @@ export default async function MyPage() {
                       )}
                     </div>
                     <span className="text-arcana-muted text-xs shrink-0">
-                      {formatRelativeDate(session.created_at)}
+                      {formatRelativeDate(session.created_at, locale)}
                     </span>
                   </div>
                   {preview ? (
                     <p className="text-arcana-text/80 text-sm mt-2 line-clamp-2">{preview}</p>
                   ) : (
-                    <p className="text-arcana-muted/60 text-xs mt-2 italic">결과가 저장되지 않았습니다</p>
+                    <p className="text-arcana-muted/60 text-xs mt-2 italic">{t("mypage.history.no-result", locale)}</p>
                   )}
                 </>
               );

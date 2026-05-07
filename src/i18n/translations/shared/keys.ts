@@ -132,6 +132,22 @@ export interface SharedKeys {
     "result.card.reversed": string;
     "result.card.reversed-badge": string;
     "result.no-reading": string;
+    // 페이지 카피 (PR 5)
+    "page.character-select.heading": string;
+    "page.character-select.sub": string;
+    "page.gender.all": string;
+    "page.gender.female": string;
+    "page.gender.male": string;
+    "page.topic-select.heading": string;
+    "page.topic-select.back": string;
+    "page.spread-select.heading": string;
+    "page.spread-select.sub": string;
+    "page.spread-select.cards-suffix": string;
+    "page.spread-select.back": string;
+    "page.spread-select.user-info-btn": string;
+    "page.spread-select.free-question-label": string;
+    "page.spread-select.free-question-optional": string;
+    "page.spread-select.free-question-placeholder": string;
   };
   saju: {
     "result.title": string;
@@ -139,6 +155,43 @@ export interface SharedKeys {
     "result.topic": string;
     "result.advice": string;
     "result.cta": string;
+    // 페이지 카피 (PR 5)
+    "page.character-select.heading": string;
+    "page.character-select.sub": string;
+    "page.section.time-range": string;
+    "page.section.area": string;
+    "page.section.free-question": string;
+    "page.section.free-question-optional": string;
+    "page.section.free-question-placeholder": string;
+    "page.monthly-toggle": string;
+    "page.start.active": string;
+    "page.start.inactive": string;
+    "page.back-info": string;
+    "page.after-info-msg": string;
+  };
+  mypage: {
+    "page.title": string;
+    "profile.error": string;
+    "profile.error-detail-fallback": string;
+    "profile.favorite-character": string;
+    "profile.default-nickname": string;
+    "stats.total": string;
+    "stats.frequent-card": string;
+    "stats.frequent-card-empty": string;
+    "stats.last-reading": string;
+    "stats.last-reading-empty": string;
+    "history.title": string;
+    "history.empty.title": string;
+    "history.empty.desc": string;
+    "history.empty.cta": string;
+    "history.no-result": string;
+    "service.tarot": string;
+    "service.saju": string;
+    "service.shinjeom": string;
+    "date.today": string;
+    "date.yesterday": string;
+    "date.days-ago": string;
+    "date.weeks-ago": string;
   };
   shinjeom: {
     "result.title": string;

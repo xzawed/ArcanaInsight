@@ -28,6 +28,7 @@ export interface SpreadPosition {
   index: number;
   label: string;
   labelKo: string;
+  labelJa?: string;
   x: number;
   y: number;
   rotation?: number;
@@ -37,7 +38,18 @@ export interface SpreadDefinition {
   type: SpreadType;
   name: string;
   nameKo: string;
+  nameJa?: string;
   description: string;
+  /** UI(스프레드 선택) 카드 — 짧은 한 줄 부제. multi-locale 인라인. */
+  shortDescKo?: string;
+  shortDescEn?: string;
+  shortDescJa?: string;
+  /** UI(스프레드 선택) 카드 — 긴 설명. multi-locale 인라인. */
+  detailKo?: string;
+  detailEn?: string;
+  detailJa?: string;
+  /** UI 아이콘 ID. */
+  iconId?: string;
   positions: SpreadPosition[];
 }
 
