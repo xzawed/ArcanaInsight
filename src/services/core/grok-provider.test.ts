@@ -345,5 +345,25 @@ describe("GrokProvider", () => {
       expect(body.reasoning_effort).toBe("high");
       delete process.env.GROK_REASONING_EFFORT;
     });
+
+    it("grok-3-mini 모델도 reasoning_effort 옵션 적용", async () => {
+      process.env.GROK_MODEL = "grok-3-mini";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBe("low");
+    });
+
+    it("grok-4 (자동 reasoning, 옵션 미지원) → reasoning_effort 옵션 제외", async () => {
+      process.env.GROK_MODEL = "grok-4";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBeUndefined();
+    });
   });
 });
