@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { LOCALES, type Locale } from "@/i18n/config";
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function LanguageSwitcher({ variant, onSelect }: Props) {
+  const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
   const { t } = useT();
@@ -40,6 +42,11 @@ export function LanguageSwitcher({ variant, onSelect }: Props) {
   }, []);
 
   const handleSelect = async (next: Locale) => {
+    // 동일 locale 클릭 시 no-op — 불필요한 router.refresh + 토스트 발사 방지
+    if (next === locale) {
+      setOpen(false);
+      return;
+    }
     setLocale(next);
     setOpen(false);
     showToast(translate("common.language.changed", next));
@@ -53,6 +60,9 @@ export function LanguageSwitcher({ variant, onSelect }: Props) {
       // 쿠키는 클라이언트에서 이미 설정됨
     }
     onSelect?.(next);
+    // 서버 컴포넌트(layout, mypage 등)가 새 locale 쿠키로 재요청되도록 router.refresh().
+    // window.location.reload()와 달리 SPA 입력 상태(폼·스크롤·진행 중 세션)를 보존.
+    router.refresh();
   };
 
   const testidPrefix = variant === "desktop" ? "lang-option" : "mobile-lang-option";
