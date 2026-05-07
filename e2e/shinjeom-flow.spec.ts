@@ -99,9 +99,8 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
     await page.waitForLoadState("domcontentloaded");
     // 캐릭터 선택
     const firstChar = page.locator("[data-testid='character-card']").first();
-    if (await firstChar.isVisible()) {
-      await firstChar.click();
-    }
+    await expect(firstChar).toBeVisible({ timeout: 5000 });
+    await firstChar.click();
     // 주제 선택
     const firstTopic = page.locator("[data-testid^='shinjeom-topic-btn-']").first();
     await expect(firstTopic).toBeVisible({ timeout: 5000 });
