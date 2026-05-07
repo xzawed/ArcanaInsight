@@ -7,6 +7,8 @@ import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
 import { TAROT_TOPICS } from "@/data/topics"
 import { TarotSessionSchema } from "@/lib/validation/api-schemas"
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/request-utils"
 import { getRequestLocale } from "@/i18n/server-locale"
 
 const tarotService = new TarotService()
@@ -14,6 +16,11 @@ const spreadResolver = new SpreadResolver()
 
 export async function POST(request: NextRequest) {
   try {
+    const locale = await getRequestLocale()
+    // Rate limiting
+    const ip = getClientIp(request.headers)
+    if (!(await checkRateLimit(`tarot-session:${ip}`, 20, 60_000))) return rateLimitResponse(locale)
+
     const parsed = TarotSessionSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
@@ -31,7 +38,6 @@ export async function POST(request: NextRequest) {
       : sessionData.spreadType
 
     const db = getDb()
-    const locale = await getRequestLocale()
     const session = await db.insert("sessions", {
       user_id: user?.id ?? null,
       service_type: sessionData.serviceType,
