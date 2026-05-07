@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { hexToRgbComponents } from "@/lib/color-utils";
+import { t as translate } from "@/i18n/translations";
+import { useT } from "@/i18n/useT";
 
 interface ShuffleCeremonyProps {
   readonly characterId: string;
@@ -46,6 +48,7 @@ function drawCard(
 }
 
 export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5cf6" }: ShuffleCeremonyProps) {
+  const { t } = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const calledRef = useRef(false);
   const doneRef = useRef(false);
@@ -79,8 +82,9 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const observer = new ResizeObserver(setSize);
     observer.observe(canvas);
 
-    const wl = getWaitingLinesData(useLocaleStore.getState().locale);
-    const charText = wl.shuffleCeremonyText[characterId] ?? "카드를 선택하세요";
+    const locale = useLocaleStore.getState().locale;
+    const wl = getWaitingLinesData(locale);
+    const charText = wl.shuffleCeremonyText[characterId] ?? translate("tarot.session.shuffle.fallback-text", locale);
     const textChars = [...charText];
     const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;
@@ -185,7 +189,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") doneRef.current = true; }}
       role="button"
       tabIndex={0}
-      aria-label="카드 셔플 의식 스킵"
+      aria-label={t("tarot.session.shuffle.skip-aria")}
     >
       <canvas ref={canvasRef} className="w-full h-full" />
     </div>

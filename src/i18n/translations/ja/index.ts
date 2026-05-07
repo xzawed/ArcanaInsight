@@ -175,6 +175,8 @@ export const ja: Partial<SharedKeys> = {
     "session.btn.new-session": "新しい相談",
     "session.btn.share": "結果を共有",
     "session.error.reading": "解釈に問題が発生しました",
+    "session.shuffle.fallback-text": "カードを選んでください",
+    "session.shuffle.skip-aria": "カードシャッフル儀式をスキップ",
   },
   saju: {
     "result.title": "四柱分析結果",
@@ -284,6 +286,17 @@ export const ja: Partial<SharedKeys> = {
   share: {
     "result-button-default": "結果を共有",
     "copied-button": "リンクコピー済み！",
+  },
+  chat: {
+    "default-character-name": "アルカナ",
+    "empty-prompt": "カードを選ぶと相談が始まります...",
+  },
+  api: {
+    "rate-limit-error": "リクエストが多すぎます。しばらくしてから再度お試しください。",
+    "reading-error": "鑑定の生成中にエラーが発生しました。",
+  },
+  meta: {
+    "site-description": "アニメーションキャラクターと楽しむタロット・四柱推命・神占の総合占いプラットフォーム",
   },
   shinjeom: {
     "result.title": "神占結果",

@@ -34,11 +34,10 @@ async function fetchMemoryPrompt(characterId: string, locale: string): Promise<s
 
 export async function POST(request: NextRequest) {
   try {
+    const locale = await getRequestLocale();
     // Rate limiting
     const ip = getClientIp(request.headers);
-    if (!(await checkRateLimit(`shinjeom:${ip}`, 20, 60_000))) return rateLimitResponse();
-
-    const locale = await getRequestLocale();
+    if (!(await checkRateLimit(`shinjeom:${ip}`, 20, 60_000))) return rateLimitResponse(locale);
     const rawBody = await request.json();
 
     // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)

@@ -173,6 +173,8 @@ export const en: Partial<SharedKeys> = {
     "session.btn.new-session": "New session",
     "session.btn.share": "Share result",
     "session.error.reading": "Something went wrong with the reading",
+    "session.shuffle.fallback-text": "Choose your cards",
+    "session.shuffle.skip-aria": "Skip card shuffle ceremony",
   },
   saju: {
     "result.title": "Saju Analysis Result",
@@ -282,6 +284,17 @@ export const en: Partial<SharedKeys> = {
   share: {
     "result-button-default": "Share result",
     "copied-button": "Link copied!",
+  },
+  chat: {
+    "default-character-name": "Arcana",
+    "empty-prompt": "Choose your cards to begin the consultation...",
+  },
+  api: {
+    "rate-limit-error": "Too many requests. Please try again shortly.",
+    "reading-error": "An error occurred while generating the reading.",
+  },
+  meta: {
+    "site-description": "Tarot, Saju, and Shinjeom fortune-telling platform with animated AI characters",
   },
   shinjeom: {
     "result.title": "Shinjeom Result",

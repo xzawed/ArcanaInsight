@@ -1,4 +1,6 @@
 import { getUpstashRedisRestUrl, getUpstashRedisRestToken } from "@/lib/env";
+import { t as translate } from "@/i18n/translations";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 
 interface RateLimitEntry {
   count: number;
@@ -56,9 +58,9 @@ export async function checkRateLimit(key: string, limit: number, windowMs: numbe
   return checkUpstash(key, limit, windowMs);
 }
 
-export function rateLimitResponse(): Response {
+export function rateLimitResponse(locale: Locale = DEFAULT_LOCALE): Response {
   return new Response(
-    JSON.stringify({ error: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." }),
+    JSON.stringify({ error: translate("api.rate-limit-error", locale) }),
     { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
   );
 }

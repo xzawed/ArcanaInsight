@@ -176,6 +176,8 @@ export interface SharedKeys {
     "session.btn.new-session": string;
     "session.btn.share": string;
     "session.error.reading": string;
+    "session.shuffle.fallback-text": string;
+    "session.shuffle.skip-aria": string;
   };
   saju: {
     "result.title": string;
@@ -289,6 +291,17 @@ export interface SharedKeys {
   share: {
     "result-button-default": string;
     "copied-button": string;
+  };
+  chat: {
+    "default-character-name": string;
+    "empty-prompt": string;
+  };
+  api: {
+    "rate-limit-error": string;
+    "reading-error": string;
+  };
+  meta: {
+    "site-description": string;
   };
   shinjeom: {
     "result.title": string;
