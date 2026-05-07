@@ -15,6 +15,8 @@ import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { useT } from "@/i18n/useT";
+import { t as translate } from "@/i18n/translations";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
@@ -69,6 +71,7 @@ async function drainSseChunks(
 export default function ShinjeomSessionPage() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
+  const { t } = useT();
   const {
     phase, topic, characterId, chatMessages, turnCount, readingResult, isLoading,
     addChatMessage, incrementTurn, setReadingResult, setLoading, setPhase, setSessionId, reset,
@@ -202,7 +205,7 @@ export default function ShinjeomSessionPage() {
       }
 
       const msgId = crypto.randomUUID();
-      addChatMessage({ id: msgId, role: "character", content: "신점 결과를 준비하고 있어요...", mood: "mystical", timestamp: new Date() });
+      addChatMessage({ id: msgId, role: "character", content: translate("shinjeom.session.msg.preparing-result", locale), mood: "mystical", timestamp: new Date() });
 
       await drainSseChunks(response.body.getReader(), (data) => {
         if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
@@ -264,7 +267,7 @@ export default function ShinjeomSessionPage() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🔮</span>
-                  <span className="text-arcana-purple font-serif font-bold">종합 신점</span>
+                  <span className="text-arcana-purple font-serif font-bold">{t("shinjeom.result.overall")}</span>
                 </div>
                 <ReadingText text={readingResult.overallReading} />
               </motion.div>
@@ -278,7 +281,7 @@ export default function ShinjeomSessionPage() {
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">🔍</span>
-                    <span className="text-arcana-gold font-serif font-bold">상세 해석</span>
+                    <span className="text-arcana-gold font-serif font-bold">{t("shinjeom.result.topic")}</span>
                   </div>
                   <ReadingText text={readingResult.topicReading} />
                 </motion.div>
@@ -293,7 +296,7 @@ export default function ShinjeomSessionPage() {
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-lg">✨</span>
-                    <span className="text-arcana-gold font-serif font-bold">조언</span>
+                    <span className="text-arcana-gold font-serif font-bold">{t("shinjeom.result.advice")}</span>
                   </div>
                   <ReadingText text={readingResult.advice} />
                 </motion.div>
@@ -304,7 +307,7 @@ export default function ShinjeomSessionPage() {
                   onClick={() => { reset(); router.push("/shinjeom"); }}
                   className="flex-1 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm"
                 >
-                  새로운 상담
+                  {t("tarot.session.btn.new-session")}
                 </button>
               </div>
             </motion.div>
@@ -350,7 +353,7 @@ export default function ShinjeomSessionPage() {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSend(); }}
-                    placeholder={turnCount === 0 ? "고민을 말씀해주세요..." : "답변을 입력하세요..."}
+                    placeholder={turnCount === 0 ? t("shinjeom.session.input.placeholder.first") : t("shinjeom.session.input.placeholder.followup")}
                     disabled={isLoading}
                     className="flex-1 px-4 py-2.5 rounded-full bg-arcana-card/70 border border-arcana-border text-arcana-text text-sm placeholder:text-arcana-muted/50 focus:outline-none focus:border-arcana-purple transition-colors"
                   />
@@ -359,7 +362,7 @@ export default function ShinjeomSessionPage() {
                     disabled={!inputText.trim() || isLoading}
                     className="px-5 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-40 transition-opacity"
                   >
-                    전송
+                    {t("shinjeom.session.btn.send")}
                   </button>
                 </div>
                 {turnCount >= 1 && (
@@ -368,7 +371,7 @@ export default function ShinjeomSessionPage() {
                     disabled={isLoading}
                     className="w-full mt-2 py-2.5 rounded-full border border-arcana-gold/60 text-arcana-gold font-serif font-bold text-sm disabled:opacity-40 transition-opacity hover:bg-arcana-gold/10"
                   >
-                    신점 결과 받기
+                    {t("shinjeom.session.btn.get-result")}
                   </button>
                 )}
               </div>

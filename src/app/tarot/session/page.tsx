@@ -21,11 +21,19 @@ import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { getCardName } from "@/data/cards/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { DeckManager } from "@/services/tarot/deck-manager";
-import { spreads } from "@/data/spreads";
+import { spreads, getPositionLabel } from "@/data/spreads";
 import { TarotCard, SelectedCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { useT } from "@/i18n/useT";
+import { t as translate } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
+
+/** "위치 N" / "Position N" / "位置 N" — locale별 fallback 라벨 */
+function fallbackPosLabel(position: number, locale: Locale): string {
+  return translate("tarot.session.position-fallback", locale).replace("{n}", String(position + 1));
+}
 
 
 const deckManager = new DeckManager();
@@ -35,13 +43,14 @@ function buildRevealStep(
   sc: SelectedCard,
   currentSpread: SpreadDefinition | null,
   charId: string,
-  locale: string,
+  locale: Locale,
   revealPos: React.Dispatch<React.SetStateAction<number[]>>,
   addMsg: (msg: ChatMessage) => void,
 ): () => void {
   return () => {
     revealPos((prev) => [...prev, sc.position]);
-    const posLabel = currentSpread?.positions[sc.position]?.labelKo ?? `위치 ${sc.position + 1}`;
+    const pos = currentSpread?.positions[sc.position];
+    const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(sc.position, locale);
     const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
     const wl = getWaitingLinesData(locale);
     const cardName = getCardName(sc.card, locale);
@@ -51,33 +60,36 @@ function buildRevealStep(
 }
 
 /** 타로 결과 공유 버튼 핸들러 — CC 22 → 모듈 레벨 추출 */
-async function shareTarotResult(): Promise<void> {
+async function shareTarotResult(locale: Locale): Promise<void> {
   const result = useSessionStore.getState().readingResult;
   const shareToken = result?.shareToken;
   const siteName = "ArcanaInsight";
+  const shareTitle = `${translate("tarot.session.share.title", locale)} - ${siteName}`;
+  const linkCopied = translate("common.share.link-copied", locale);
+  const textCopied = translate("common.share.text-copied", locale);
 
   if (shareToken) {
     const url = `${globalThis.location?.origin}/tarot/result/${shareToken}`;
-    const text = `🔮 타로 리딩 결과를 확인해보세요!\n\n- ${siteName}`;
+    const text = `🔮 ${shareTitle}`;
     if (navigator.share) {
-      try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+      try { await navigator.share({ title: shareTitle, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
     } else {
       try {
         await navigator.clipboard.writeText(`${text}\n${url}`);
-        alert("링크가 복사되었습니다!");
-      } catch (e) { console.warn("클립보드 복사 실패:", e); }
+        alert(linkCopied);
+      } catch (e) { console.warn("clipboard write failed:", e); }
     }
   } else {
     const summary = result?.overallReading
-      ? `🔮 타로 리딩 결과\n\n${result.overallReading}\n\n- ${siteName}`
-      : `🔮 타로 리딩을 받아보세요!\n\n- ${siteName}`;
+      ? `🔮 ${shareTitle}\n\n${result.overallReading}\n\n- ${siteName}`
+      : `🔮 ${shareTitle}\n\n- ${siteName}`;
     if (navigator.share) {
-      try { await navigator.share({ title: `타로 리딩 결과 - ${siteName}`, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+      try { await navigator.share({ title: shareTitle, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
     } else {
       try {
         await navigator.clipboard.writeText(summary);
-        alert("결과가 복사되었습니다!");
-      } catch (e) { console.warn("클립보드 복사 실패:", e); }
+        alert(textCopied);
+      } catch (e) { console.warn("clipboard write failed:", e); }
     }
   }
 }
@@ -96,12 +108,13 @@ function addReadingResultMessages(
   cards: SelectedCard[],
   currentSpread: SpreadDefinition | null,
   addChatMessage: (msg: ChatMessage) => void,
-  locale: string,
+  locale: Locale,
 ): void {
   if (Array.isArray(result.cardInterpretations) && result.cardInterpretations.length > 0) {
     for (const interp of result.cardInterpretations) {
       const card = cards.find((c) => c.card.id === interp.cardId);
-      const posLabel = currentSpread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
+      const pos = currentSpread?.positions[interp.position];
+      const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
         content: `[${posLabel}] ${card?.card ? getCardName(card.card, locale) : ""}\n\n${interp.interpretation}`,
@@ -110,16 +123,19 @@ function addReadingResultMessages(
     }
   }
   if (result.overallReading) {
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `종합 해석\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
+    const header = translate("tarot.session.msg.overall-header", locale);
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `${header}\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
   }
   if (result.advice) {
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `조언\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
+    const header = translate("tarot.session.msg.advice-header", locale);
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `${header}\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
   }
 }
 
 export default function TarotSessionPage() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
+  const { t } = useT();
   const { currentMood, setMood } = useCharacterStore();
   const { animationPhase, setAnimationPhase } = useCardAnimationStore();
   const {
@@ -250,9 +266,12 @@ export default function TarotSessionPage() {
     if (currentCards.length >= requiredCards) {
       startReading(currentCards);
     } else {
+      const nextCardMsg = translate("tarot.session.msg.next-card", locale)
+        .replace("{current}", String(currentCards.length))
+        .replace("{total}", String(requiredCards));
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: `좋아요! 다음 카드를 골라주세요. (${currentCards.length}/${requiredCards})`,
+        content: nextCardMsg,
         mood: "default", timestamp: new Date(),
       });
       setMood("default");
@@ -272,11 +291,11 @@ export default function TarotSessionPage() {
     setRevealedPositions((prev) => prev.filter((p) => p !== lastCard.position));
     addChatMessage({
       id: crypto.randomUUID(), role: "character",
-      content: "다른 카드를 골라주세요. 직감을 믿으세요!",
+      content: translate("tarot.session.msg.different-card", locale),
       mood: "default", timestamp: new Date(),
     });
     setMood("default");
-  }, [addChatMessage, setMood]);
+  }, [addChatMessage, setMood, locale]);
 
   // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
   const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
@@ -309,7 +328,7 @@ export default function TarotSessionPage() {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     // 카드 뒤집기 초기화 (reading 시작 시 전부 뒷면으로)
     setRevealedPositions([]);
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드가 모두 모였네요... 이제 카드의 이야기를 들어볼게요", mood: "mystical", timestamp: new Date() });
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.cards-gathered", locale), mood: "mystical", timestamp: new Date() });
     // setMood("mystical") 중복 호출 제거 — 위에서 이미 호출됨
 
     // 대기 연출 시작 (API 호출과 동시 실행)
@@ -329,7 +348,7 @@ export default function TarotSessionPage() {
       stopSequence();
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: getReadingErrorText("세션 연결에 실패했습니다. 잠시 후 다시 시도해 주세요.", characterId ?? "arcana"),
+        content: getReadingErrorText(translate("tarot.session.msg.connection-failed", locale), characterId ?? "arcana"),
         mood: "default", timestamp: new Date(),
       });
       setMood("default");
@@ -351,7 +370,7 @@ export default function TarotSessionPage() {
         stopSequence();
         const result = data.result as ReadingResult | undefined;
         if (!result) {
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
           return;
         }
@@ -363,7 +382,7 @@ export default function TarotSessionPage() {
           result.parseError === "fallback_text"
         ) {
           console.warn("[tarot-session] 결과 표시 불가:", { parseError: result.parseError, expected: result.expectedCardCount });
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "카드 해석 결과를 받지 못했어요. 다시 시도해주세요.", mood: "default", timestamp: new Date() });
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
           return;
         }
@@ -371,7 +390,7 @@ export default function TarotSessionPage() {
         // 부분 파싱(잘림) — 받은 해석은 그대로 표시하고 안내 메시지 추가
         if (result.parseError === "truncated") {
           console.warn("[tarot-session] 부분 파싱 응답:", { expected: result.expectedCardCount, got: result.cardInterpretations?.length ?? 0 });
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: "일부 카드 해석이 도착하지 않았어요. 받은 결과를 먼저 보여드릴게요.", mood: "default", timestamp: new Date() });
+          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.partial-result", locale), mood: "default", timestamp: new Date() });
         }
 
         // 정상 흐름 (또는 부분 결과) — 카드 뒤집기 완료 + 결과 phase 진입
@@ -514,13 +533,13 @@ export default function TarotSessionPage() {
                       onClick={handleCancelLastCard}
                       className="px-5 py-2 rounded-full border border-arcana-border text-arcana-muted text-xs font-serif font-bold hover:border-arcana-purple hover:text-arcana-purple transition-colors"
                     >
-                      다시 고르기
+                      {t("tarot.session.btn.pick-again")}
                     </button>
                     <button
                       onClick={handleConfirmCard}
                       className="px-5 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white text-xs font-serif font-bold hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
                     >
-                      {selectedCards.length >= requiredCards ? "이 카드로 진행" : "확인"}
+                      {selectedCards.length >= requiredCards ? t("tarot.session.btn.proceed") : t("tarot.session.btn.confirm")}
                     </button>
                   </motion.div>
                 )}
@@ -543,20 +562,20 @@ export default function TarotSessionPage() {
                 {readingError && !isLoading && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <div className="flex flex-col items-center gap-3">
-                      <p className="text-arcana-muted text-sm font-serif">해석에 문제가 발생했어요</p>
+                      <p className="text-arcana-muted text-sm font-serif">{t("tarot.session.error.reading")}</p>
                       <div className="flex gap-3">
                         <button
                           onClick={() => { setReadingError(false); startReading(selectedCards); }}
                           disabled={isLoading}
                           className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          다시 시도
+                          {t("tarot.session.btn.try-again")}
                         </button>
                         <button
                           onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
                           className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
                         >
-                          새로운 상담
+                          {t("tarot.session.btn.new-session")}
                         </button>
                       </div>
                     </div>
@@ -580,7 +599,8 @@ export default function TarotSessionPage() {
                     const fallbackCard = !card && interp.position < selectedCards.length
                       ? selectedCards[interp.position] : null;
                     const displayName = card?.card ? getCardName(card.card, locale) : fallbackCard?.card ? getCardName(fallbackCard.card, locale) : "";
-                    const posLabel = spread?.positions[interp.position]?.labelKo || `위치 ${interp.position + 1}`;
+                    const pos = spread?.positions[interp.position];
+                    const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
                     return (
                       <motion.div
                         key={`card-${i}`}
@@ -608,7 +628,7 @@ export default function TarotSessionPage() {
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">🔮</span>
-                        <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
+                        <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("tarot.result.overall")}</span>
                       </div>
                       <ReadingText text={readingResult.overallReading} />
                     </motion.div>
@@ -624,7 +644,7 @@ export default function TarotSessionPage() {
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-lg">✨</span>
-                        <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
+                        <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("tarot.result.advice")}</span>
                       </div>
                       <ReadingText text={readingResult.advice} />
                     </motion.div>
@@ -642,13 +662,13 @@ export default function TarotSessionPage() {
                     }}
                     className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
                   >
-                    새로운 상담
+                    {t("tarot.session.btn.new-session")}
                   </button>
                   <button
-                    onClick={shareTarotResult}
+                    onClick={() => shareTarotResult(locale)}
                     className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
                   >
-                    결과 공유하기
+                    {t("tarot.session.btn.share")}
                   </button>
                 </div>
               </motion.div>
