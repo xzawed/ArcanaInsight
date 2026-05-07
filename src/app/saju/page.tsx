@@ -139,7 +139,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
           </div>
           <div className="flex flex-wrap gap-2">
             {sajuTimeOptions.map((opt) => (
-              <button key={opt.id} onClick={() => onTimeSelect(opt.id, !!opt.allowMonthly)}
+              <button key={opt.id} data-testid={`saju-time-btn-${opt.id}`} onClick={() => onTimeSelect(opt.id, !!opt.allowMonthly)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-bold border transition-all ${
                   selectedTime === opt.id
                     ? "border-arcana-purple bg-arcana-purple/20 text-arcana-purple shadow-sm shadow-arcana-purple/20"
@@ -174,7 +174,7 @@ function SajuSelectStep({ selectedCharacter, dialogueMessages, selectedTime, sel
           </div>
           <div className="grid grid-cols-2 gap-2">
             {sajuAreaOptions.map((opt) => (
-              <button key={opt.id} onClick={() => onAreaSelect(opt.id)}
+              <button key={opt.id} data-testid={`saju-area-btn-${opt.id}`} onClick={() => onAreaSelect(opt.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl text-left border transition-all ${
                   selectedArea === opt.id
                     ? "border-arcana-purple bg-arcana-purple/15 shadow-sm shadow-arcana-purple/20"

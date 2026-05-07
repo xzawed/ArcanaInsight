@@ -92,7 +92,7 @@ function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<
       <p className="text-arcana-muted text-xs mb-6">{t("shinjeom.page.topic-select.sub")}</p>
       <div className="grid grid-cols-1 gap-3">
         {TOPIC_CONFIGS.map((topic, index) => (
-          <motion.button key={topic.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          <motion.button key={topic.id} data-testid={`shinjeom-topic-btn-${topic.id}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }} whileTap={{ scale: 0.97 }}
             onClick={() => onTopicSelect(topic.id)}
             className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10">
