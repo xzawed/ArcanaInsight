@@ -4,14 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useThemeStore, themes, getThemeName, type ThemeId } from "@/hooks/useTheme";
+import { useThemeStore, themes, getThemeName } from "@/hooks/useTheme";
 import { Icon } from "@/components/common/Icon";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { ThemeDropdown } from "@/components/layout/ThemeDropdown";
 import type { User } from "@supabase/supabase-js";
-
-const themeList = Object.values(themes);
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,7 +20,7 @@ export function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
   const mobileThemeRef = useRef<HTMLDivElement>(null);
-  const { mode, activeTheme, setMode } = useThemeStore();
+  const { activeTheme } = useThemeStore();
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);
   const activeThemeName = getThemeName(themes[activeTheme], locale);
@@ -131,39 +130,7 @@ export function Header() {
               <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden">
-                <div className="px-3 py-2 border-b border-arcana-border">
-                  <p className="text-arcana-muted text-[10px] font-serif">{t("header.theme.settings-label")}</p>
-                </div>
-                <button
-                  onClick={() => { setMode("auto"); setIsThemeOpen(false); }}
-                  className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
-                    mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
-                  }`}
-                >
-                  <Icon id="ui-auto-theme" size={16} />
-                  <span className="font-serif text-xs">{t("settings.theme.auto-label")}</span>
-                  {mode === "auto" && <span className="ml-auto text-[10px] text-arcana-muted">{activeThemeName}</span>}
-                </button>
-                <div className="border-t border-arcana-border" />
-                {themeList.map((th) => (
-                  <button
-                    key={th.id}
-                    data-testid={`theme-option-${th.id}`}
-                    onClick={() => { setMode(th.id as ThemeId); setIsThemeOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
-                      mode === th.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
-                    }`}
-                  >
-                    <Image src={th.iconPath} alt="" width={16} height={16} unoptimized />
-                    <span className="font-serif text-xs">{getThemeName(th, locale)}</span>
-                    <span
-                      className="ml-auto w-3 h-3 rounded-full border border-arcana-border"
-                      style={{ backgroundColor: th.colors.primary }}
-                    />
-                  </button>
-                ))}
-              </div>
+              <ThemeDropdown variant="desktop" onClose={() => setIsThemeOpen(false)} />
             )}
           </div>
 
@@ -224,31 +191,7 @@ export function Header() {
               <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden z-50">
-                <button
-                  onClick={() => { setMode("auto"); setIsThemeOpen(false); }}
-                  className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
-                    mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
-                  }`}
-                >
-                  <Icon id="ui-auto-theme" size={16} />
-                  <span className="font-serif text-xs">{t("settings.theme.auto-label")}</span>
-                </button>
-                {themeList.map((th) => (
-                  <button
-                    key={th.id}
-                    data-testid={`mobile-theme-option-${th.id}`}
-                    onClick={() => { setMode(th.id as ThemeId); setIsThemeOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
-                      mode === th.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
-                    }`}
-                  >
-                    <Image src={th.iconPath} alt="" width={16} height={16} unoptimized />
-                    <span className="font-serif text-xs">{getThemeName(th, locale)}</span>
-                    <span className="ml-auto w-3 h-3 rounded-full border border-arcana-border" style={{ backgroundColor: th.colors.primary }} />
-                  </button>
-                ))}
-              </div>
+              <ThemeDropdown variant="mobile" onClose={() => setIsThemeOpen(false)} />
             )}
           </div>
         </div>
