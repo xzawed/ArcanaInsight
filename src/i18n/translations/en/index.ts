@@ -182,6 +182,12 @@ export const en: Partial<SharedKeys> = {
     "session.error.reading": "Something went wrong with the reading",
     "session.shuffle.fallback-text": "Choose your cards",
     "session.shuffle.skip-aria": "Skip card shuffle ceremony",
+    "session.progress.connecting": "Connecting to the AI reader…",
+    "session.progress.analyzing": "Interpreting your cards…",
+    "session.progress.long-wait": "Just a bit longer — preparing a deeper interpretation.",
+    "session.progress.elapsed": "{n}s elapsed",
+    "session.error.title": "Something went wrong while reading",
+    "session.error.timeout": "The response is taking too long. Please try again.",
   },
   saju: {
     "result.title": "Saju Analysis Result",

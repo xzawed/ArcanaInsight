@@ -204,17 +204,20 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
   test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/tarot");
-    await page.waitForLoadState("domcontentloaded");
+    // Mobile Android Pixel 7 에뮬에서 layout 안정화 시간 확보 (2026-05-08 PR #265 회귀 핫픽스)
+    // domcontentloaded 직후 scrollTo는 캐릭터 그리드 레이아웃 미완성 시 무시될 수 있음.
+    await page.waitForLoadState("load");
 
     // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
     await page.evaluate(() => window.scrollTo(0, 300));
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
+    await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 });
 
     // 홈으로 이동 (evaluate로 nextjs-portal 우회)
     const homeTab = page.locator("nav a[href='/']").last();
     await homeTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL(/\/$/);
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
+    await page.waitForLoadState("load");
+    await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });

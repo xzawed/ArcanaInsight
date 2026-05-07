@@ -249,8 +249,8 @@ describe("POST /api/tarot/reading", () => {
       { count: 5, expected: 6500 },
       { count: 7, expected: 8500 },
       { count: 9, expected: 10500 },
-      { count: 10, expected: 14000 },
-      { count: 12, expected: 16000 },
+      { count: 10, expected: 18000 },
+      { count: 12, expected: 20000 },
     ];
     for (const { count, expected } of cases) {
       vi.resetModules();

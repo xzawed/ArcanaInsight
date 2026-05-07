@@ -12,6 +12,7 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CardDeck } from "@/components/card/CardDeck";
 import { ShuffleCeremony } from "@/components/tarot/ShuffleCeremony";
 import { CardSpread } from "@/components/card/CardSpread";
+import { ReadingProgressIndicator } from "@/components/tarot/ReadingProgressIndicator";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground } from "@/components/effects/MysticBackground";
@@ -151,6 +152,11 @@ export default function TarotSessionPage() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
   const [readingError, setReadingError] = useState(false);
+  const [readingErrorReason, setReadingErrorReason] = useState<"timeout" | "generic">("generic");
+  const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const readingAbortRef = useRef<AbortController | null>(null);
   const [pendingConfirm, _setPendingConfirm] = useState(false);
   const pendingConfirmRef = useRef(false);
   const setPendingConfirm = (v: boolean) => { pendingConfirmRef.current = v; _setPendingConfirm(v); };
@@ -329,10 +335,13 @@ export default function TarotSessionPage() {
 
   const startReading = async (cards: SelectedCard[]) => {
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
+    setReadingErrorReason("generic");
+    setIsConnecting(true);
+    setElapsedSec(0);
+    setReadingStartedAt(Date.now());
     // 카드 뒤집기 초기화 (reading 시작 시 전부 뒷면으로)
     setRevealedPositions([]);
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.cards-gathered", locale), mood: "mystical", timestamp: new Date() });
-    // setMood("mystical") 중복 호출 제거 — 위에서 이미 호출됨
 
     // 대기 연출 시작 (API 호출과 동시 실행)
     const stopSequence = startWaitingSequence(cards, characterId || "arcana");
@@ -357,19 +366,45 @@ export default function TarotSessionPage() {
       setMood("default");
       setReadingError(true);
       setLoading(false);
+      setReadingStartedAt(null);
+      setIsConnecting(false);
       return;
     }
 
+    setIsConnecting(false);
+
+    // 클라이언트 hard timeout (180초). 서버 SSE가 hung되거나 done 이벤트가 도달 못 하는 경우 강제 종료.
+    // — 사용자 보고: celtic-cross 무응답 시 isLoading=true로 영구 멈춤. 이 타임아웃이 안전망.
+    const abortController = new AbortController();
+    readingAbortRef.current = abortController;
+    let finished = false;
+    const timeoutId = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      abortController.abort();
+      stopSequence();
+      console.warn("[tarot-session] 클라이언트 타임아웃 (180s)");
+      setMood("default");
+      setReadingErrorReason("timeout");
+      setReadingError(true);
+      setLoading(false);
+      setReadingStartedAt(null);
+    }, 180_000);
+
     await fetchSSEStream({
       url: "/api/tarot/reading",
+      signal: abortController.signal,
       body: {
         sessionId, topic, spreadType, characterId,
         userInfo: useSessionStore.getState().userInfo,
         freeQuestion: useSessionStore.getState().freeQuestion,
         cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })),
       },
-      onChunk: () => { /* 청크별 화면 표시 없음 — 대기 연출 사용 */ },
+      onChunk: () => { /* 청크별 화면 표시 없음 — 대기 연출 + 인디케이터 사용 */ },
       onDone: (data) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
         stopSequence();
         const result = data.result as ReadingResult | undefined;
         if (!result) {
@@ -404,6 +439,9 @@ export default function TarotSessionPage() {
         setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
       },
       onError: (msg) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
         stopSequence();
         console.error("리딩 SSE 에러:", msg);
         addChatMessage({
@@ -414,8 +452,20 @@ export default function TarotSessionPage() {
         setMood("default"); setReadingError(true);
       },
     });
+    if (!finished) clearTimeout(timeoutId);
     setLoading(false);
+    setReadingStartedAt(null);
   };
+
+  // elapsed 카운터 — phase=reading + isLoading 동안 1초 단위로 갱신.
+  // CLAUDE.md SSR 패턴: 초기값 0, useEffect 안에서만 setInterval, cleanup 필수.
+  useEffect(() => {
+    if (phase !== "reading" || !isLoading || readingStartedAt === null) return undefined;
+    const interval = setInterval(() => {
+      setElapsedSec(Math.floor((Date.now() - readingStartedAt) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [phase, isLoading, readingStartedAt]);
 
   // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방지)
   useEffect(() => {
@@ -561,13 +611,26 @@ export default function TarotSessionPage() {
                   revealedPositions={revealedPositions}
                   glowColor={effectTheme?.primary}
                 />
-                {/* 스피너 제거 — 카드 순차 뒤집기 연출이 로딩 상태를 시각적으로 대체 */}
+                {/* 카드 뒤집기 연출 + 진행 인디케이터 동시 노출. 인디케이터는 화면 하단 fixed 미니 배너. */}
+                {phase === "reading" && isLoading && !readingError && (
+                  <ReadingProgressIndicator
+                    elapsedSec={elapsedSec}
+                    isConnecting={isConnecting}
+                    primaryColor={effectTheme?.primary}
+                  />
+                )}
                 {readingError && !isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="flex flex-col items-center gap-3">
-                      <p className="text-arcana-muted text-sm font-serif">{t("tarot.session.error.reading")}</p>
+                  <div className="absolute inset-0 flex items-center justify-center z-10" data-testid="reading-error">
+                    <div className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-arcana-card/90 border border-red-500/40 shadow-xl backdrop-blur-md max-w-sm">
+                      <p className="text-arcana-text text-sm md:text-base font-serif font-bold text-center">
+                        {t("tarot.session.error.title")}
+                      </p>
+                      <p className="text-arcana-muted text-xs md:text-sm font-sans text-center">
+                        {readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
+                      </p>
                       <div className="flex gap-3">
                         <button
+                          data-testid="reading-retry"
                           onClick={() => { setReadingError(false); startReading(selectedCards); }}
                           disabled={isLoading}
                           className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"

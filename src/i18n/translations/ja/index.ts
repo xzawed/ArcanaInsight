@@ -184,6 +184,12 @@ export const ja: Partial<SharedKeys> = {
     "session.error.reading": "解釈に問題が発生しました",
     "session.shuffle.fallback-text": "カードを選んでください",
     "session.shuffle.skip-aria": "カードシャッフル儀式をスキップ",
+    "session.progress.connecting": "AI占い師に接続中…",
+    "session.progress.analyzing": "カードを解釈しています…",
+    "session.progress.long-wait": "もう少しお待ちください。より深い解釈を準備しています。",
+    "session.progress.elapsed": "{n}秒経過",
+    "session.error.title": "解釈中に問題が発生しました",
+    "session.error.timeout": "応答に時間がかかりすぎています。もう一度お試しください。",
   },
   saju: {
     "result.title": "四柱分析結果",

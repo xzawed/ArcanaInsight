@@ -26,9 +26,12 @@ const spreadResolver = new SpreadResolver();
  * 카드 수에 비례한 max_tokens 정책.
  *
  * 한국어는 영어 대비 토큰 효율이 약 1.3배 낮고, JSON 구조 오버헤드(~10%)도 더해진다.
- * 또한 Grok 모델이 응답 전 내부 reasoning(thinking) 토큰을 소비할 수 있어,
- * 첫 PR(#245) 이후에도 celtic-cross(10장)에서 truncated 사례가 보고됨.
- * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다 — 안전 마진을 +30~40% 추가.
+ * 또한 Grok-3 reasoning 모델은 응답 전 내부 reasoning(thinking) 토큰을 max_tokens 안에서
+ * 함께 소비하므로, celtic-cross(10장) 14000으로도 본문이 잘리는 사례가 PR #264 이후 다시 발생.
+ * (사용자 보고: 10장 리딩 시 결과 미수신 + parseError invalid_json 추정)
+ *
+ * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다 — reasoning 4000~5000 흡수 + 본문 14000~15000
+ * 보장을 위해 10장 18000 / 12장+ 20000으로 추가 상향. (PR #265, 2026-05-08)
  */
 function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 1) return 2600;
@@ -36,8 +39,8 @@ function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 5) return 6500;
   if (cardCount <= 7) return 8500;
   if (cardCount <= 9) return 10500;
-  if (cardCount <= 10) return 14000; // celtic-cross (10장)
-  return 16000;                      // zodiac(12장) 등 대형 스프레드
+  if (cardCount <= 10) return 18000; // celtic-cross (10장) — reasoning 잠식 대응 +4000
+  return 20000;                      // zodiac(12장) 등 대형 스프레드 — +4000
 }
 
 /** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
