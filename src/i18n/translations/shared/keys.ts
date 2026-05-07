@@ -11,6 +11,8 @@ export interface SharedKeys {
     "close": string;
     "language": string;
     "language.changed": string;
+    "share.link-copied": string;
+    "share.text-copied": string;
   };
   header: {
     "logo.alt": string;
@@ -148,6 +150,24 @@ export interface SharedKeys {
     "page.spread-select.free-question-label": string;
     "page.spread-select.free-question-optional": string;
     "page.spread-select.free-question-placeholder": string;
+    // 세션 페이지 (PR 6)
+    "session.share.title": string;
+    "session.position-fallback": string;
+    "session.msg.next-card": string;
+    "session.msg.different-card": string;
+    "session.msg.cards-gathered": string;
+    "session.msg.connection-failed": string;
+    "session.msg.no-result": string;
+    "session.msg.partial-result": string;
+    "session.msg.overall-header": string;
+    "session.msg.advice-header": string;
+    "session.btn.proceed": string;
+    "session.btn.confirm": string;
+    "session.btn.pick-again": string;
+    "session.btn.try-again": string;
+    "session.btn.new-session": string;
+    "session.btn.share": string;
+    "session.error.reading": string;
   };
   saju: {
     "result.title": string;
@@ -168,6 +188,12 @@ export interface SharedKeys {
     "page.start.inactive": string;
     "page.back-info": string;
     "page.after-info-msg": string;
+    // 세션 페이지 (PR 6)
+    "session.share.title": string;
+    "session.msg.init-formal": string;
+    "session.msg.init-casual": string;
+    "session.msg.complete-formal": string;
+    "session.msg.complete-casual": string;
   };
   mypage: {
     "page.title": string;
@@ -216,6 +242,12 @@ export interface SharedKeys {
     "topic.health.desc": string;
     "topic.auspicious.label": string;
     "topic.auspicious.desc": string;
+    // 세션 페이지 (PR 6)
+    "session.msg.preparing-result": string;
+    "session.input.placeholder.first": string;
+    "session.input.placeholder.followup": string;
+    "session.btn.send": string;
+    "session.btn.get-result": string;
   };
 }
 

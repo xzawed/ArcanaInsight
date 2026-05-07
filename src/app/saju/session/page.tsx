@@ -21,49 +21,67 @@ import { getCharacterById } from "@/data/characters";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { useT } from "@/i18n/useT";
+import { t as translate } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
 
 const SITE_NAME = "ArcanaInsight";
 
-async function shareWithUrl(title: string, text: string, url: string): Promise<void> {
+/** 사주 init 메시지 — name이 비어 있으면 locale별 prefix를 자동 제거 */
+function buildSajuInitMsg(name: string, charId: string | null, locale: Locale): string {
+  const key = charId === "miko" ? "saju.session.msg.init-formal" : "saju.session.msg.init-casual";
+  const template = translate(key, locale);
+  if (!name) {
+    return template
+      .replace(/\{name\}님의 /g, "")
+      .replace(/\{name\}'s /g, "")
+      .replace(/\{name\}様の /g, "")
+      .replace("{name}", "");
+  }
+  return template.replace("{name}", name);
+}
+
+async function shareWithUrl(title: string, text: string, url: string, locale: Locale): Promise<void> {
   if (navigator.share) {
     try { await navigator.share({ title, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
   } else {
     try {
       await navigator.clipboard.writeText(`${text}\n${url}`);
-      alert("링크가 복사되었습니다!");
-    } catch (e) { console.warn("클립보드 복사 실패:", e); }
+      alert(translate("common.share.link-copied", locale));
+    } catch (e) { console.warn("clipboard write failed:", e); }
   }
 }
 
-async function shareWithText(title: string, text: string): Promise<void> {
+async function shareWithText(title: string, text: string, locale: Locale): Promise<void> {
   if (navigator.share) {
     try { await navigator.share({ title, text }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
   } else {
     try {
       await navigator.clipboard.writeText(text);
-      alert("결과가 복사되었습니다!");
-    } catch (e) { console.warn("클립보드 복사 실패:", e); }
+      alert(translate("common.share.text-copied", locale));
+    } catch (e) { console.warn("clipboard write failed:", e); }
   }
 }
 
-async function handleSajuShare(r: { shareToken?: string | null; overallReading?: string | null } | null): Promise<void> {
+async function handleSajuShare(r: { shareToken?: string | null; overallReading?: string | null } | null, locale: Locale): Promise<void> {
   const shareToken = r?.shareToken;
-  const title = `사주 분석 결과 - ${SITE_NAME}`;
+  const title = `${translate("saju.session.share.title", locale)} - ${SITE_NAME}`;
   if (shareToken) {
     const url = `${globalThis.location?.origin}/saju/result/${shareToken}`;
-    const text = `☯ 사주 분석 결과를 확인해보세요!\n\n- ${SITE_NAME}`;
-    await shareWithUrl(title, text, url);
+    const text = `☯ ${title}`;
+    await shareWithUrl(title, text, url, locale);
   } else {
     const summary = r?.overallReading
-      ? `☯ 사주 분석 결과\n\n${r.overallReading.slice(0, 100)}...\n\n- ${SITE_NAME}`
-      : `☯ 사주 분석을 받아보세요!\n\n- ${SITE_NAME}`;
-    await shareWithText(title, summary);
+      ? `☯ ${title}\n\n${r.overallReading.slice(0, 100)}...\n\n- ${SITE_NAME}`
+      : `☯ ${title}\n\n- ${SITE_NAME}`;
+    await shareWithText(title, summary, locale);
   }
 }
 
 export default function SajuSessionPage() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
+  const { t } = useT();
   const { currentMood, setMood } = useCharacterStore();
   const {
     phase, topic, characterId, userInfo, timeRange, chatMessages, readingResult, sajuData, isLoading,
@@ -92,10 +110,7 @@ export default function SajuSessionPage() {
     }).catch((e) => console.warn("사주 세션 생성 실패 (리딩은 계속 진행):", e));
 
     setMood("default");
-    const namePrefix = userInfo.name ? `${userInfo.name}님의` : "";
-    const initMsg = characterId === "miko"
-      ? `${namePrefix} 사주팔자를 읽어보겠습니다. 조용히 기다려주십시오.`
-      : `${namePrefix} 사주를 살펴보고 있어요~ 잠시만 기다려주세요.`;
+    const initMsg = buildSajuInitMsg(userInfo.name || "", characterId, locale);
     addChatMessage({ id: crypto.randomUUID(), role: "character",
       content: initMsg, mood: "default", timestamp: new Date(),
     });
@@ -150,8 +165,8 @@ export default function SajuSessionPage() {
         if (data.sajuData) setSajuData(data.sajuData as SajuResult);
         setPhase("result"); setMood(CHARACTER_RESULT_MOODS[state.characterId ?? ""] ?? "smile");
         const doneMsg = state.characterId === "miko"
-          ? "사주팔자의 해석이 완료되었습니다. 결과를 확인해주십시오."
-          : "사주 분석이 완료되었어요! 결과를 확인해보세요~";
+          ? translate("saju.session.msg.complete-formal", locale)
+          : translate("saju.session.msg.complete-casual", locale);
         addChatMessage({ id: crypto.randomUUID(), role: "character",
           content: doneMsg, mood: "smile", timestamp: new Date() });
       },
@@ -227,7 +242,7 @@ export default function SajuSessionPage() {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">☯</span>
-                      <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">종합 해석</span>
+                      <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("saju.result.overall")}</span>
                     </div>
                     <ReadingText text={readingResult.overallReading} />
                   </motion.div>
@@ -242,7 +257,7 @@ export default function SajuSessionPage() {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">🔍</span>
-                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">주제별 해석</span>
+                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.topic")}</span>
                     </div>
                     <ReadingText text={readingResult.topicReading || ""} />
                   </motion.div>
@@ -261,7 +276,7 @@ export default function SajuSessionPage() {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-lg">✨</span>
-                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">조언</span>
+                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.advice")}</span>
                     </div>
                     <ReadingText text={readingResult.advice} />
                   </motion.div>
@@ -271,11 +286,11 @@ export default function SajuSessionPage() {
               <div className="flex gap-3 pt-5 flex-shrink-0">
                 <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
                   className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
-                  새로운 상담
+                  {t("tarot.session.btn.new-session")}
                 </button>
-                <button onClick={() => handleSajuShare(useSajuSessionStore.getState().readingResult)}
+                <button onClick={() => handleSajuShare(useSajuSessionStore.getState().readingResult, locale)}
                   className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
-                  결과 공유하기
+                  {t("tarot.session.btn.share")}
                 </button>
               </div>
             </motion.div>
@@ -283,16 +298,16 @@ export default function SajuSessionPage() {
             <div className="flex-1 flex items-center justify-center">
               {readingError ? (
                 <div className="flex flex-col items-center gap-3">
-                  <p className="text-arcana-muted text-sm font-serif">해석에 문제가 발생했어요</p>
+                  <p className="text-arcana-muted text-sm font-serif">{t("tarot.session.error.reading")}</p>
                   <div className="flex gap-3">
                     <button onClick={() => { setReadingError(false); startReading(); }}
                       disabled={isLoading}
                       className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                      다시 시도
+                      {t("tarot.session.btn.try-again")}
                     </button>
                     <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
                       className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm">
-                      새로운 상담
+                      {t("tarot.session.btn.new-session")}
                     </button>
                   </div>
                 </div>
