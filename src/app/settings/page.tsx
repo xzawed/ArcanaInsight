@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useThemeStore, themes, ThemeId } from "@/hooks/useTheme";
+import { useThemeStore, themes, getThemeName, ThemeId } from "@/hooks/useTheme";
 import { useSkinStore } from "@/hooks/useSkinStore";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
-import { cardSkins } from "@/data/skins";
+import { cardSkins, getSkinName, getSkinDescription } from "@/data/skins";
 import { GenderFilter } from "@/types/character";
 import { useT } from "@/i18n/useT";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 function SaveToast({ visible, text }: { visible: boolean; text: string }) {
   return (
@@ -27,6 +28,7 @@ function SaveToast({ visible, text }: { visible: boolean; text: string }) {
 
 export default function SettingsPage() {
   const { t } = useT();
+  const locale = useLocaleStore((s) => s.locale);
   const { mode, activeTheme, setMode } = useThemeStore();
   const { selectedSkinId, setSkin } = useSkinStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
@@ -119,7 +121,7 @@ export default function SettingsPage() {
           {/* 테마 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.theme")}</h2>
-            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${mode === "auto" ? `${t("settings.theme.auto-label")} (${themes[activeTheme].nameKo})` : themes[activeTheme].nameKo}`}</p>
+            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${mode === "auto" ? `${t("settings.theme.auto-label")} (${getThemeName(themes[activeTheme], locale)})` : getThemeName(themes[activeTheme], locale)}`}</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {themeOptions.map((t) => (
                 <button
@@ -141,7 +143,11 @@ export default function SettingsPage() {
           {/* 카드 스킨 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.card-skin")}</h2>
-            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${cardSkins.find((s) => s.id === selectedSkinId)?.nameKo || "기본"}`}</p>
+            <p className="text-arcana-muted text-xs mb-4">{(() => {
+              const cur = cardSkins.find((s) => s.id === selectedSkinId);
+              const skinLabel = cur ? getSkinName(cur, locale) : t("settings.theme.auto");
+              return `${t("settings.theme.current")} ${skinLabel}`;
+            })()}</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {cardSkins.map((skin) => (
                 <button
@@ -158,9 +164,9 @@ export default function SettingsPage() {
                       className="w-4 h-4 rounded-full border border-white/20"
                       style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
                     />
-                    <span className="font-sans font-bold text-xs text-arcana-text">{skin.nameKo}</span>
+                    <span className="font-sans font-bold text-xs text-arcana-text">{getSkinName(skin, locale)}</span>
                   </div>
-                  <p className="text-arcana-muted text-xs leading-relaxed">{skin.description}</p>
+                  <p className="text-arcana-muted text-xs leading-relaxed">{getSkinDescription(skin, locale)}</p>
                 </button>
               ))}
             </div>

@@ -17,6 +17,8 @@ export interface SharedKeys {
     "back-arrow": string;
     "modal.close-aria": string;
     "card.back-alt": string;
+    // PR 11
+    "skin.preview-alt": string;
   };
   header: {
     "logo.alt": string;
@@ -299,6 +301,8 @@ export interface SharedKeys {
   api: {
     "rate-limit-error": string;
     "reading-error": string;
+    "ai-config-error": string;
+    "daily-card-error": string;
   };
   meta: {
     "site-description": string;

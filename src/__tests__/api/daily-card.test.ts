@@ -105,7 +105,7 @@ describe("POST /api/daily-card", () => {
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
     const body = await res.json();
-    expect(body.error).toMatch(/요청이 많아/);
+    expect(body.error).toMatch(/요청이 너무 많습니다/);
   });
 
   it("isReversed 결정 — seed % 3 === 0 시 역방향", async () => {
