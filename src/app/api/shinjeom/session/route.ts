@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { ShinjeomSessionSchema } from "@/lib/validation/api-schemas"
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
+import { getClientIp } from "@/lib/request-utils"
 import { getRequestLocale } from "@/i18n/server-locale"
 
 export async function POST(request: NextRequest) {
   try {
+    const locale = await getRequestLocale()
+    // Rate limiting
+    const ip = getClientIp(request.headers)
+    if (!(await checkRateLimit(`shinjeom-session:${ip}`, 20, 60_000))) return rateLimitResponse(locale)
+
     const parsed = ShinjeomSessionSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
@@ -16,7 +23,6 @@ export async function POST(request: NextRequest) {
     try {
       const user = await getCurrentUser()
       const db = getDb()
-      const locale = await getRequestLocale()
       session = await db.insert("sessions", {
         service_type: "shinjeom",
         topic,

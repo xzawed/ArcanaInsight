@@ -11,6 +11,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
+import { t as translate } from "@/i18n/translations";
 
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
@@ -111,8 +112,8 @@ export async function POST(request: NextRequest) {
             }
           }
         } catch (e) {
-          const errMsg = e instanceof Error ? e.message : String(e);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: errMsg })}\n\n`));
+          console.error("[shinjeom-message] 스트림 오류:", e instanceof Error ? e.message : String(e));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: translate("api.reading-error", locale) })}\n\n`));
         }
         controller.close();
       },

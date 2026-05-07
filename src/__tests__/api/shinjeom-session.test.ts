@@ -99,4 +99,14 @@ describe("POST /api/shinjeom/session", () => {
     expect(res.status).toBe(500);
     expect((await res.json()).error).toBe("Internal server error");
   });
+
+  it("checkRateLimit 예외 → 500 (outer catch 커버리지)", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue(new Error("redis error")),
+      rateLimitResponse: vi.fn(),
+    }));
+    const { POST } = await import("@/app/api/shinjeom/session/route");
+    const res = await POST(makePostRequest({ topic: "shinjeom-general", characterId: "arcana" }));
+    expect(res.status).toBe(500);
+  });
 });

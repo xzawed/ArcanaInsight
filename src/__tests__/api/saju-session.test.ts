@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { setupDoMock } from "@/test-helpers/reset-modules";
 import { MOCK_USER } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
@@ -83,5 +83,15 @@ describe("POST /api/saju/session", () => {
     const { POST } = await setup();
     const res = await POST(makePostRequest({ topic: "saju-auspicious-date" }));
     expect(res.status).toBe(200);
+  });
+
+  it("checkRateLimit 예외 → 500 (outer catch 커버리지)", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue(new Error("redis error")),
+      rateLimitResponse: vi.fn(),
+    }));
+    const { POST } = await import("@/app/api/saju/session/route");
+    const res = await POST(makePostRequest({ topic: "saju-general" }));
+    expect(res.status).toBe(500);
   });
 });
