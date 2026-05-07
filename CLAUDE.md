@@ -24,7 +24,7 @@
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
 | **다국어·i18n** | 자체 translations 모듈 + middleware locale 쿠키 (ko/en/ja) — → [`docs/architecture/i18n.md`](docs/architecture/i18n.md) |
-| **테스트** | Vitest 2.0 (804개, statements 98%), Playwright (3 디바이스, `SKIP_WEBKIT=1`로 iOS 제외 가능) |
+| **테스트** | Vitest 2.0 (819개, statements 98%), Playwright (3 디바이스, `SKIP_WEBKIT=1`로 iOS 제외 가능) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -65,7 +65,7 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 **API 보안**: Rate Limit → Zod safeParse → requireUser → assertSessionOwnership. → [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md)
 - Rate Limit 범위: **세션 API**(tarot/saju/shinjeom session, 분당 20회) + **reading/message API** 모두 적용. `locale` 선언은 rate limit 호출 전 최상단에 위치.
 
-**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드 (타로·사주 세션 페이지 모두 적용), 초과 시 `readingErrorReason="timeout"` + 재시도 UI(`data-testid="reading-retry"`) 표시. `/api/daily-card`는 JSON.
+**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드 (타로·사주·신점 세션 페이지 모두 적용), 초과 시 `readingErrorReason="timeout"` + 재시도 UI(`data-testid="reading-retry"`) 표시. 신점 세션은 `handleSend`·`handleEndConsultation` 각각 AbortController 적용. `/api/daily-card`는 JSON.
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
@@ -164,7 +164,7 @@ pnpm i18n:check             # ko/en/ja 번역 키 drift 검출 (orphan 발견 �
 - **SSR 비결정 값 금지**: `new Date()`, `Math.random()`, `window` → `useEffect` 안에서만. `useState` 초기값은 `""`/`0`/`null` (React error #418 방지). `useEffect` 내 setState 직접 호출 금지 → `setTimeout(() => setState(...), 0)` + `return () => clearTimeout(t)` 필수 (`react-hooks/set-state-in-effect`).
 - **`<Image fill>` sizes 필수**: 미설정 시 Mobile Android CI 타임아웃. `sizes="(max-width: 640px) 50vw, ..."` 필수.
 - **`next/dynamic ssr:false`는 Canvas/WebGL 전용**: `ShuffleCeremony`(Canvas rAF) 같은 컴포넌트에만 사용. 일반 UI 컴포넌트는 SSR 기본값 유지.
-- **`React.memo` + `displayName`**: 무거운 렌더 컴포넌트(`SpriteAnimator`, `CardDeck`, `CardSpread`)는 `React.memo(function Name() {...})` + `Name.displayName = "Name"` 패턴. 배열 prop은 `areEqual` 커스텀 비교 함수 필수 (`revealedPositions` 등 — 참조 동일성 비교 실패 방지).
+- **`React.memo` + `displayName`**: 무거운 렌더 컴포넌트(`SpriteAnimator`, `CardDeck`, `CardSpread`, `CharacterDisplay`, `DialogueBox`)는 `React.memo(function Name() {...})` + `Name.displayName = "Name"` 패턴. 배열 prop은 `areEqual` 커스텀 비교 함수 필수 (`revealedPositions` 등 — 참조 동일성 비교 실패 방지). Zustand 스토어 구독은 prop이 아니므로 `areEqual` 우회 — re-render 정상 발생.
 
 ### API · 보안 (새 라우트 추가 시)
 - **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
