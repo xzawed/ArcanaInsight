@@ -4,6 +4,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardFace } from "./CardFace";
 import { CardBack } from "./CardBack";
+import { hexToRgbBase } from "@/lib/color-utils";
 
 interface CardItemProps {
   readonly card: TarotCard;
@@ -20,12 +21,6 @@ interface CardItemProps {
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
-
-function hexToRgbBase(hex: string): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!r) return "212, 175, 55";
-  return `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}`;
-}
 
 export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, glowColor }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
