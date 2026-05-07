@@ -186,6 +186,13 @@ export interface SharedKeys {
     "session.error.reading": string;
     "session.shuffle.fallback-text": string;
     "session.shuffle.skip-aria": string;
+    // PR #265 — 진행 인디케이터 + 에러 세부 라벨
+    "session.progress.connecting": string;
+    "session.progress.analyzing": string;
+    "session.progress.long-wait": string;
+    "session.progress.elapsed": string;
+    "session.error.title": string;
+    "session.error.timeout": string;
   };
   saju: {
     "result.title": string;

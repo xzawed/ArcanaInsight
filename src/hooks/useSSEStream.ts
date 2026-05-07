@@ -14,6 +14,8 @@ interface SSEStreamOptions {
   onDone: (data: Record<string, unknown>) => void;
   /** 에러 시 콜백 */
   onError: (message: string) => void;
+  /** 외부에서 fetch abort 신호 전달 (타임아웃 등) */
+  signal?: AbortSignal;
 }
 
 type LineResult = { signal: "done" | "error" } | { signal: "continue" };
@@ -113,12 +115,14 @@ export async function fetchSSEStream({
   onChunk,
   onDone,
   onError,
+  signal,
 }: SSEStreamOptions): Promise<void> {
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal,
     });
 
     if (!response.ok || !response.body) {

@@ -177,6 +177,12 @@ export const ko: SharedKeys = {
     "session.error.reading": "해석에 문제가 발생했어요",
     "session.shuffle.fallback-text": "카드를 선택하세요",
     "session.shuffle.skip-aria": "카드 셔플 의식 스킵",
+    "session.progress.connecting": "AI 점성가에게 연결 중…",
+    "session.progress.analyzing": "카드를 해석하고 있어요…",
+    "session.progress.long-wait": "조금만 더 기다려주세요. 깊이 있는 해석을 준비 중이에요.",
+    "session.progress.elapsed": "{n}초 경과",
+    "session.error.title": "해석 중 문제가 발생했어요",
+    "session.error.timeout": "응답이 너무 오래 걸려요. 다시 시도해주세요.",
   },
   saju: {
     "result.title": "사주 분석 결과",
