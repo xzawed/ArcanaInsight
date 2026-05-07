@@ -106,7 +106,7 @@ function TopicSelectStep({ selectedCharacter, dialogueMessages, onBack, onTopicS
         </div>
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
-        <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
+        <button onClick={onBack} data-testid="topic-back-btn" className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
           {t("tarot.page.topic-select.back")}
         </button>
         <h3 className="font-sans font-bold text-base md:text-lg mb-4 drop-shadow-md">{t("tarot.page.topic-select.heading")}</h3>
@@ -115,6 +115,7 @@ function TopicSelectStep({ selectedCharacter, dialogueMessages, onBack, onTopicS
             <motion.button key={topicId} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.08 }} whileTap={{ scale: 0.97 }}
               onClick={() => onTopicSelect(topicId)}
+              data-testid={`topic-btn-${topicId}`}
               className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-3 md:p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10 flex items-center gap-3">
               <Icon id={getTopicIconId(topicId) ?? "topic-general"} size={24} />
               <div>
@@ -157,7 +158,7 @@ function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, 
         </div>
       </div>
       <div className="flex-1 md:w-[50%] flex flex-col justify-start md:justify-center px-4 md:px-6 py-4 md:py-8 overflow-y-auto">
-        <button onClick={onBack} className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
+        <button onClick={onBack} data-testid="spread-back-btn" className="self-start mb-4 text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
           {t("tarot.page.spread-select.back")}
         </button>
         <h3 className="font-sans font-bold text-base md:text-lg mb-2 drop-shadow-md">{t("tarot.page.spread-select.heading")}</h3>
@@ -167,6 +168,7 @@ function SpreadSelectStep({ selectedCharacter, dialogueMessages, selectedTopic, 
             <motion.button key={spread.type} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }} whileTap={{ scale: 0.97 }}
               onClick={() => onSpreadSelect(spread.type)}
+              data-testid={`spread-btn-${spread.type}`}
               className="group bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-xl p-4 text-left hover:border-arcana-purple transition-all hover:shadow-lg hover:shadow-arcana-purple/10">
               <div className="flex items-center gap-3 mb-2">
                 <Icon id={spread.iconId ?? "spread-card"} size={28} />
