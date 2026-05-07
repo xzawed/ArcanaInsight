@@ -11,13 +11,25 @@ const topicLabels: Partial<Record<Topic, string>> = {
 /**
  * locale별 응답 언어 강제 + JSON 키 영어 고정 명시.
  * - ko: 시스템 프롬프트가 이미 한국어이므로 노이즈 최소화 (지시 생략).
- * - en/ja: 응답 본문 언어 + JSON 키는 반드시 영어 그대로 유지하도록 명시 (모델이 키 번역하면 parseJsonSafe 실패).
+ * - en/ja: **CRITICAL** 강조 + 한국어 금지 명시 + JSON 키 영어 고정. 시스템 프롬프트가 한국어로 작성되어 있어 모델이 한국어로 응답하는 회귀를 막기 위해 시스템 프롬프트 **맨 앞**과 **맨 뒤** 양쪽에 주입한다.
  */
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   ko: "",
-  en: "Respond in natural English only. Use the EXACT English JSON keys (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice). Translate only the values, never the keys.",
-  ja: "回答は自然な日本語のみで行います。JSONのキー (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
+  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice) — translate only the values, never the keys.",
+  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, interpretation, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
 };
+
+/** 응답 직전 마지막 강조 — 모델은 가까운 위치의 지시를 더 강하게 따른다. */
+const LANGUAGE_FOOTER: Record<string, string> = {
+  ko: "",
+  en: "\n\n**FINAL REMINDER**: Output language MUST be English. Begin your JSON response now.",
+  ja: "\n\n【最終確認】出力言語は必ず日本語です。今すぐJSON応答を開始してください。",
+};
+
+/** locale별 시스템 프롬프트 끝에 주입되는 응답 언어 강조 footer (saju/shinjeom service에서도 재사용). */
+export function getLanguageFooter(locale: string = "ko"): string {
+  return LANGUAGE_FOOTER[locale] ?? "";
+}
 
 export function buildCharacterHeader(character: CharacterConfig, subtitle?: string, locale: string = "ko"): string {
   const subtitleLine = subtitle ? `\n${subtitle}` : "";
@@ -34,7 +46,10 @@ export function buildCharacterHeader(character: CharacterConfig, subtitle?: stri
 }
 
 export function buildSystemPrompt(character: CharacterConfig, locale: string = "ko"): string {
-  return `${buildCharacterHeader(character, undefined, locale)}
+  const langTop = LANGUAGE_INSTRUCTIONS[locale] ?? "";
+  const langTopBlock = langTop ? `${langTop}\n\n` : "";
+  const langFooter = LANGUAGE_FOOTER[locale] ?? "";
+  return `${langTopBlock}${buildCharacterHeader(character, undefined, locale)}
 - 타로 카드 해석 전문가로서, 카드의 상징과 의미를 깊이 있게 설명합니다.
 - 사용자에게 따뜻하고 공감하는 태도로 상담합니다.
 - 지나치게 부정적이거나 공포를 조장하는 해석은 피합니다.
@@ -80,7 +95,7 @@ export function buildSystemPrompt(character: CharacterConfig, locale: string = "
   ],
   "overallReading": "문단1\\n\\n문단2",
   "advice": "조언 내용"
-}`;
+}${langFooter}`;
 }
 
 export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], spread: SpreadDefinition): string {

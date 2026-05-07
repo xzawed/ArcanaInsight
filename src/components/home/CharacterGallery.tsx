@@ -7,8 +7,13 @@ import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { GenderFilterToggle } from "@/components/home/GenderFilter";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { getCharactersByGender } from "@/data/characters";
+import { getCharacterSpeciality } from "@/data/characters/locale-helpers";
+import { useT } from "@/i18n/useT";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 export function CharacterGallery() {
+  const { t } = useT();
+  const locale = useLocaleStore((s) => s.locale);
   const { genderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
 
@@ -16,9 +21,9 @@ export function CharacterGallery() {
     <section className="py-16 md:py-24 px-4">
       <div className="max-w-6xl mx-auto">
         <ScrollReveal className="text-center mb-8">
-          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">당신의 상담사를 만나보세요</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">{t("home.gallery.title")}</h2>
           <p className="text-arcana-muted text-sm md:text-base max-w-lg mx-auto">
-            각 상담사만의 특별한 리딩 스타일로 카드의 메시지를 전합니다
+            {t("home.gallery.desc")}
           </p>
         </ScrollReveal>
 
@@ -47,7 +52,7 @@ export function CharacterGallery() {
                     <h3 className="font-display font-bold text-sm truncate">{char.name}</h3>
                     <p className="text-arcana-muted text-xs mt-0.5 truncate">{char.nameJp}</p>
                     <div className="mt-1.5 inline-block max-w-full px-2 py-0.5 bg-arcana-purple/10 border border-arcana-purple/30 rounded-full">
-                      <span className="text-arcana-purple text-xs font-sans truncate block">{char.speciality}</span>
+                      <span className="text-arcana-purple text-xs font-sans truncate block">{getCharacterSpeciality(char, locale)}</span>
                     </div>
                   </div>
                 </motion.div>

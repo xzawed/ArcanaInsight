@@ -5,7 +5,7 @@ import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
 import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
-import { buildCharacterHeader } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, getLanguageFooter } from "@/services/core/prompt-builder";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
 const TOPIC_LABELS: Record<string, string> = {
@@ -167,7 +167,7 @@ export class SajuService implements DivinationService {
   "overallReading": "종합 해석 문단1\\n\\n문단2",
   "topicReading": "주제별 해석 문단1\\n\\n문단2",
   "advice": "조언 내용"
-}`;
+}${getLanguageFooter(locale ?? "ko")}`;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -3,7 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
-import { buildCharacterHeader } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, getLanguageFooter } from "@/services/core/prompt-builder";
 
 const topicLabels: Record<string, string> = {
   "shinjeom-general": "신수 (종합운)",
@@ -60,7 +60,7 @@ export class ShinjeomService implements DivinationService {
 
 중요 규칙 — 최종 결과:
 - 최종 결과는 반드시 JSON 형식으로 응답합니다.
-- 최종이 아닌 중간 대화에서는 일반 텍스트로 응답합니다.`;
+- 최종이 아닌 중간 대화에서는 일반 텍스트로 응답합니다.${getLanguageFooter(locale ?? "ko")}`;
   }
 
   buildConversationPrompt(

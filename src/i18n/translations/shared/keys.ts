@@ -90,6 +90,8 @@ export interface SharedKeys {
     "daily-card.reversed": string;
     "daily-card.upright": string;
     "daily-card.share-text": string;
+    "gallery.title": string;
+    "gallery.desc": string;
   };
   settings: {
     "page.title": string;
@@ -177,6 +179,7 @@ export interface SharedKeys {
     "session.btn.try-again": string;
     "session.btn.new-session": string;
     "session.btn.share": string;
+    "session.btn.back-to-character": string;
     "session.error.reading": string;
     "session.shuffle.fallback-text": string;
     "session.shuffle.skip-aria": string;

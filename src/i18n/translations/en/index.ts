@@ -89,6 +89,8 @@ export const en: Partial<SharedKeys> = {
     "daily-card.reversed": "(Reversed)",
     "daily-card.upright": "(Upright)",
     "daily-card.share-text": "Daily Card - ArcanaInsight",
+    "gallery.title": "Meet your reader",
+    "gallery.desc": "Each reader delivers the cards' message in their own unique style",
   },
   settings: {
     "page.title": "Settings",
@@ -173,6 +175,7 @@ export const en: Partial<SharedKeys> = {
     "session.btn.try-again": "Try again",
     "session.btn.new-session": "New session",
     "session.btn.share": "Share result",
+    "session.btn.back-to-character": "← Choose another reader",
     "session.error.reading": "Something went wrong with the reading",
     "session.shuffle.fallback-text": "Choose your cards",
     "session.shuffle.skip-aria": "Skip card shuffle ceremony",
