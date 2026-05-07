@@ -1,3 +1,4 @@
+// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상 (playwright.config.ts testIgnore로 CI 제외)
 import { test, expect } from '@playwright/test';
 import { getCiSubset } from '../scripts/e2e-full/matrix/ci-subset';
 import { executeTarotFlow } from '../scripts/e2e-full/flows/tarot-flow';
