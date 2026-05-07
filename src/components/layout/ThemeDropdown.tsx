@@ -31,6 +31,7 @@ export function ThemeDropdown({ variant, onClose }: ThemeDropdownProps) {
         </div>
       )}
       <button
+        data-testid={isDesktop ? "theme-option-auto" : "mobile-theme-option-auto"}
         onClick={() => { setMode("auto"); onClose(); }}
         className={`w-full text-left px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
           mode === "auto" ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
