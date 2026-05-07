@@ -19,6 +19,7 @@ import { getCharacterById } from "@/data/characters";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { getCardName } from "@/data/cards/locale-helpers";
+import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { spreads, getPositionLabel } from "@/data/spreads";
@@ -203,7 +204,7 @@ export default function TarotSessionPage() {
     initSession();
 
     setMood("default");
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: character.greeting, mood: "default", timestamp: new Date() });
+    addChatMessage({ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(character, locale), mood: "default", timestamp: new Date() });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]); // NOSONAR
@@ -214,10 +215,10 @@ export default function TarotSessionPage() {
     setPhase("card-select");
     addChatMessage({
       id: crypto.randomUUID(), role: "character",
-      content: `${required}장의 카드를 골라주세요. 직감을 믿고 끌리는 카드를 선택해보세요`,
+      content: t("tarot.session.msg.pick-cards-prompt").replace("{n}", String(required)),
       mood: "default", timestamp: new Date(),
     });
-  }, [addChatMessage, setAnimationPhase, setPhase]);
+  }, [addChatMessage, setAnimationPhase, setPhase, t]);
 
   const handleCardSelect = useCallback((index: number) => {
     // 항상 fresh 상태를 읽어 stale closure 방지
@@ -250,8 +251,10 @@ export default function TarotSessionPage() {
         addChatMessage({
           id: crypto.randomUUID(), role: "character",
           content: isLast
-            ? `${required}장의 카드가 모두 선택되었어요! 이 카드로 리딩을 시작할까요?`
-            : `${currentCount}번째 카드를 선택했어요. 이 카드가 맞나요? (${currentCount}/${required})`,
+            ? t("tarot.session.msg.confirm-final").replace("{n}", String(required))
+            : t("tarot.session.msg.confirm-card")
+                .replace(/\{current\}/g, String(currentCount))
+                .replace(/\{total\}/g, String(required)),
           mood: "mystical", timestamp: new Date(),
         });
       }, 500);
@@ -503,7 +506,7 @@ export default function TarotSessionPage() {
                 }`}>
                   {confirmEachCard && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                 </span>
-                {t("tarot.card-confirm.label")}
+                {t("settings.card-confirm.label")}
               </button>
             </div>
           )}

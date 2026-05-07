@@ -165,6 +165,9 @@ export interface SharedKeys {
     // 세션 페이지 (PR 6)
     "session.share.title": string;
     "session.position-fallback": string;
+    "session.msg.pick-cards-prompt": string;
+    "session.msg.confirm-final": string;
+    "session.msg.confirm-card": string;
     "session.msg.next-card": string;
     "session.msg.different-card": string;
     "session.msg.cards-gathered": string;
