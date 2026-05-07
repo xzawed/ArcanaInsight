@@ -113,6 +113,16 @@ DB_PROVIDER=supabase
 - [`../architecture/db-abstraction.md`](../architecture/db-abstraction.md) — DB 추상화 상세
 - [`../architecture/auth-abstraction.md`](../architecture/auth-abstraction.md) — Auth 추상화 상세
 
+## E2E 테스트 전용 변수
+
+| 변수 | 설명 | 비고 |
+|------|------|------|
+| `SKIP_WEBKIT` | `1` 설정 시 `playwright.config.ts`에서 Mobile iOS(WebKit) 프로젝트 제외 | 로컬 개발·CI에서 WebKit 설치 없이 Desktop+Android만 실행 |
+
+> `SKIP_WEBKIT=1`은 로컬 개발 편의용. PR CI는 원래 Mobile iOS를 포함하지 않으므로 별도 설정 불필요. 주간 QA는 `SKIP_WEBKIT` 없이 전체 3개 디바이스 실행.
+
+---
+
 ## i18n locale 컬럼 호환 (postgres 모드)
 
 `DB_PROVIDER=postgres` 모드에서도 016 마이그레이션 동일하게 적용해야 한다. PostgreSQL 자체 환경에서 마이그레이션 도구로 `supabase/migrations/016_locale_columns.sql` 적용 또는 동일 ALTER 문 수동 실행. `idx_sessions_user_locale` 인덱스도 함께 생성 필요. Drizzle `schema/index.ts`에 이미 `locale` 필드 정의되어 있어 ORM 레벨은 자동 처리.

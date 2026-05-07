@@ -6,7 +6,7 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **757개 테스트** / statements 98%+ 커버리지
+- **804개 테스트** / statements 98%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
 - 임계값: `branches 92 / functions 98 / lines 98 / statements 98`
 
@@ -41,15 +41,53 @@ import 방식:
 import { POST } from "@/app/api/tarot/reading/route";
 ```
 
-현재 `src/__tests__/api/` 파일 목록 (11개):
-- `tarot-session.test.ts` (13개), `saju-session.test.ts` (11개), `shinjeom-session.test.ts` (11개)
+현재 `src/__tests__/api/` 파일 목록 (12개):
+- `tarot-session.test.ts` (14개), `saju-session.test.ts` (12개), `shinjeom-session.test.ts` (12개)
 - `tarot-result.test.ts` (4개), `saju-result.test.ts` (4개), `shinjeom-result.test.ts`
-- `tarot-reading.test.ts` (7개), `saju-reading.test.ts` (5개), `shinjeom-message.test.ts` (5개)
-- `favorite-character.test.ts` (5개), `daily-card.test.ts` (6개)
+- `tarot-reading.test.ts` (22개), `saju-reading.test.ts` (19개), `shinjeom-message.test.ts` (18개)
+- `favorite-character.test.ts` (5개), `daily-card.test.ts` (6개), `locale-wiring.test.ts`
 
 ---
 
-## 3. `vi.doMock` factory 누출 방지 ⚠️
+## 3. SSE 스트리밍 테스트 timeout ⚠️
+
+SSE 라우트 테스트는 스트림 완료까지 기본 timeout(5s)을 초과할 수 있습니다. `it()` 세 번째 인자로 명시합니다:
+
+```ts
+it("유효한 요청 → SSE 스트림 응답", { timeout: 15000 }, async () => {
+  const { POST } = await setup();
+  const res = await POST(makePostRequest(...));
+  // SSE 스트림 소비
+  const chunks = await readSSEStream(res);
+  expect(chunks.some(c => c.done)).toBe(true);
+});
+```
+
+적용 대상: `tarot-reading.test.ts`, `saju-reading.test.ts`, `shinjeom-message.test.ts`의 SSE 응답 테스트.
+
+---
+
+## 4. Outer catch 커버리지 패턴
+
+API 라우트 최외부 `catch` 블록은 일반 요청 흐름에서 도달하지 않으므로 별도 테스트가 필요합니다. `checkRateLimit`을 예외 throw로 mock해 강제로 진입합니다:
+
+```ts
+it("checkRateLimit 예외 → 500 (outer catch 커버리지)", async () => {
+  vi.doMock("@/lib/rate-limit", () => ({
+    checkRateLimit: vi.fn().mockRejectedValue(new Error("redis error")),
+    rateLimitResponse: vi.fn(),
+  }));
+  const { POST } = await import("@/app/api/tarot/session/route");
+  const res = await POST(makePostRequest({ ... }));
+  expect(res.status).toBe(500);
+});
+```
+
+**적용 대상**: 모든 세션 라우트(`tarot/saju/shinjeom session`) + reading/message 라우트. Codecov patch 커버리지 통과 요건.
+
+---
+
+## 5. `vi.doMock` factory 누출 방지 ⚠️
 
 `vi.doMock`으로 등록한 mock factory는 `vi.resetModules()` 후에도 **유지됩니다**.
 
@@ -76,7 +114,7 @@ async function setup() {
 
 ---
 
-## 4. 테스트 헬퍼 (`src/test-helpers/`)
+## 6. 테스트 헬퍼 (`src/test-helpers/`)
 
 | 파일 | 제공 함수 |
 |------|---------|
@@ -105,7 +143,7 @@ describe("API 테스트", () => {
 
 ---
 
-## 5. 커버리지 임계값
+## 7. 커버리지 임계값
 
 `vitest.config.ts`:
 ```ts
@@ -123,7 +161,7 @@ coverage: {
 
 ---
 
-## 6. CLAUDE.md 테스트 수 동기화
+## 8. CLAUDE.md 테스트 수 동기화
 
 테스트가 추가/삭제될 때마다 CLAUDE.md의 테스트 수를 동기화합니다:
 

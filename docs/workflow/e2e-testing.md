@@ -32,6 +32,9 @@
 pnpm test:e2e          # 3개 디바이스 전체 (headless)
 pnpm test:e2e:ui       # UI 모드 (시각적 디버깅, 브라우저 창 열림)
 
+# Mobile iOS 제외 (WebKit 설치 없이 실행)
+SKIP_WEBKIT=1 pnpm test:e2e
+
 # 특정 프로젝트만
 npx playwright test --project="Desktop Chrome"
 npx playwright test --project="Mobile Android"
@@ -131,7 +134,7 @@ docker run --rm \
 | `cross-platform.spec.ts` | 콘솔 에러 · 이미지 로드 · safe-area · 링크 200 응답 | — | Desktop + Mobile |
 | `ui-quality.spec.ts` | JSON 잔여물 감지 · 핵심 텍스트 존재 · 레이아웃 깨짐 · 빈 페이지 감지 | — | 없음 |
 | `theme.spec.ts` | 테마 드롭다운 · 7종 테마 전환 · 3개 디바이스 | — | 없음 |
-| `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) | — | ⚠️ 실 세션 필요 |
+| `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) — 파일 상단 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수 | — | ⚠️ 실 세션 필요 |
 
 ---
 
@@ -458,5 +461,7 @@ UI 텍스트가 i18n으로 변경되므로 한글 `hasText` regex 셀렉터 금�
 - LanguageSwitcher: `lang-option-${l}`, `mobile-lang-option-${l}`
 - LocaleConfirmModal: `locale-confirm-modal`, `locale-confirm-keep`, `locale-confirm-accept`
 - Toast: `toast`
+- 타로 플로우: `topic-btn-${topic}`, `spread-btn-${spread}`, `topic-back-btn` (`src/app/tarot/page.tsx`)
+- 재시도 버튼: `reading-retry` (타로·사주 세션 페이지 타임아웃/에러 시)
 
 PR-6에서 locale 매트릭스 (165 test × 3 locale = 495 실행) 도입 예정. 상세: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)

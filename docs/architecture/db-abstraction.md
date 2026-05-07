@@ -41,7 +41,7 @@ src/lib/db/
 ├── supabase-adapter.ts   # Supabase 구현체
 ├── postgres-adapter.ts   # Drizzle ORM 구현체
 ├── reading-saver.ts      # DB 저장 추상화 — 3회 retry + 지수 백오프
-├── character-context.ts  # getRecentCharacterMemory() — 캐릭터 메모리 컨텍스트 조회
+├── character-context.ts  # getRecentCharacterMemory() / fetchMemoryPrompt() — 캐릭터 메모리 공통 추출 (tarot/saju/shinjeom 3개 라우트에서 import)
 └── schema/index.ts       # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
 ```
 

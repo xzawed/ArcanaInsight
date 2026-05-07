@@ -28,10 +28,28 @@
 
 ---
 
-## 3. API 보안 패턴 (3개 AI API 라우트 공통)
+## 3. API 보안 패턴 (6개 라우트 공통)
 
-모든 AI API 라우트(`/api/tarot/reading`, `/api/saju/reading`, `/api/shinjeom/message`)에 동일하게 적용:
+모든 세션 생성 API + AI 리딩 API 라우트에 동일하게 적용:
 
+**세션 생성 라우트** (`/api/tarot/session`, `/api/saju/session`, `/api/shinjeom/session`):
+```
+요청 수신
+  │
+  ├─ 1. Rate Limiting — checkRateLimit() (src/lib/rate-limit.ts)
+  │      세션 API: 20 req/min / 초과 시 429
+  │      ※ locale 선언을 rate limit 호출 전 최상단에 배치 (locale 없는 429 응답 방지)
+  │
+  ├─ 2. 입력 검증 — Zod safeParse()
+  │      실패 시 400
+  │
+  ├─ 3. 인증 — requireUser()
+  │      비로그인 시 401
+  │
+  └─ 4. DB INSERT → 세션 ID 반환
+```
+
+**AI 리딩/대화 라우트** (`/api/tarot/reading`, `/api/saju/reading`, `/api/shinjeom/message`):
 ```
 요청 수신
   │

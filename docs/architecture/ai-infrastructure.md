@@ -132,6 +132,30 @@ for (let i = start; i < text.length; i++) {
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
 
-## 다국어 응답 (PR-4 예정)
+## 클라이언트 타임아웃 패턴 (tarot/saju 세션 공통)
 
-`prompt-builder.ts`에 `LANGUAGE_INSTRUCTIONS[locale]` 분기 도입 예정 (PR-4). 현재 `parseJsonSafe()`는 일본어 「」·중영일 혼합 응답을 안전하게 파싱한다 (`src/services/core/__tests__/text-cleaner.locale.test.ts` 검증). 캐릭터 메모리는 `locale` 필터를 추가해 cross-locale 오염 방지 (`idx_sessions_user_locale` 인덱스 활용). 상세: [`i18n.md`](i18n.md)
+타로·사주 세션 페이지는 180s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:
+
+```ts
+const abortController = new AbortController();
+let finished = false;
+
+// 180s 하드 타임아웃
+const timer = setTimeout(() => {
+  if (finished) return;
+  abortController.abort();
+  setReadingErrorReason("timeout");
+}, 180_000);
+
+await fetchSSEStream({ signal: abortController.signal, ... });
+finished = true;
+clearTimeout(timer);
+```
+
+재시도 UI: `data-testid="reading-retry"` 버튼이 표시되어 사용자가 재시도 가능. 적용 라우트: `src/app/tarot/session/page.tsx`, `src/app/saju/session/page.tsx`.
+
+---
+
+## 다국어 응답
+
+`prompt-builder.ts`에 `LANGUAGE_INSTRUCTIONS[locale]` 분기 적용 완료. `parseJsonSafe()`는 일본어 「」·중영일 혼합 응답을 안전하게 파싱한다 (`src/services/core/__tests__/text-cleaner.locale.test.ts` 검증). 캐릭터 메모리는 `locale` 필터를 추가해 cross-locale 오염 방지 (`idx_sessions_user_locale` 인덱스 활용). 상세: [`i18n.md`](i18n.md)
