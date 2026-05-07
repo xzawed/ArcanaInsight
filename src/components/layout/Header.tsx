@@ -4,9 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useThemeStore, themes, type ThemeId } from "@/hooks/useTheme";
+import { useThemeStore, themes, getThemeName, type ThemeId } from "@/hooks/useTheme";
 import { Icon } from "@/components/common/Icon";
 import { useT } from "@/i18n/useT";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import type { User } from "@supabase/supabase-js";
 
@@ -22,6 +23,8 @@ export function Header() {
   const mobileThemeRef = useRef<HTMLDivElement>(null);
   const { mode, activeTheme, setMode } = useThemeStore();
   const { t } = useT();
+  const locale = useLocaleStore((s) => s.locale);
+  const activeThemeName = getThemeName(themes[activeTheme], locale);
 
   useEffect(() => {
     const supabase = createClient();
@@ -122,15 +125,15 @@ export function Header() {
             <button
               onClick={() => setIsThemeOpen(!isThemeOpen)}
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="테마 변경"
-              title={`현재: ${themes[activeTheme].nameKo}`}
+              aria-label={t("header.theme.change-aria")}
+              title={`${t("settings.theme.current")} ${activeThemeName}`}
             >
               <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
             {isThemeOpen && (
               <div className="absolute right-0 mt-2 w-52 bg-arcana-card/90 backdrop-blur-md rounded-xl border border-arcana-border shadow-xl shadow-black/30 overflow-hidden">
                 <div className="px-3 py-2 border-b border-arcana-border">
-                  <p className="text-arcana-muted text-[10px] font-serif">테마 설정</p>
+                  <p className="text-arcana-muted text-[10px] font-serif">{t("header.theme.settings-label")}</p>
                 </div>
                 <button
                   onClick={() => { setMode("auto"); setIsThemeOpen(false); }}
@@ -139,24 +142,24 @@ export function Header() {
                   }`}
                 >
                   <Icon id="ui-auto-theme" size={16} />
-                  <span className="font-serif text-xs">자동 (시간/계절)</span>
-                  {mode === "auto" && <span className="ml-auto text-[10px] text-arcana-muted">{themes[activeTheme].nameKo}</span>}
+                  <span className="font-serif text-xs">{t("settings.theme.auto-label")}</span>
+                  {mode === "auto" && <span className="ml-auto text-[10px] text-arcana-muted">{activeThemeName}</span>}
                 </button>
                 <div className="border-t border-arcana-border" />
-                {themeList.map((t) => (
+                {themeList.map((th) => (
                   <button
-                    key={t.id}
-                    data-testid={`theme-option-${t.id}`}
-                    onClick={() => { setMode(t.id as ThemeId); setIsThemeOpen(false); }}
+                    key={th.id}
+                    data-testid={`theme-option-${th.id}`}
+                    onClick={() => { setMode(th.id as ThemeId); setIsThemeOpen(false); }}
                     className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
-                      mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                      mode === th.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                     }`}
                   >
-                    <Image src={t.iconPath} alt="" width={16} height={16} unoptimized />
-                    <span className="font-serif text-xs">{t.nameKo}</span>
+                    <Image src={th.iconPath} alt="" width={16} height={16} unoptimized />
+                    <span className="font-serif text-xs">{getThemeName(th, locale)}</span>
                     <span
                       className="ml-auto w-3 h-3 rounded-full border border-arcana-border"
-                      style={{ backgroundColor: t.colors.primary }}
+                      style={{ backgroundColor: th.colors.primary }}
                     />
                   </button>
                 ))}
@@ -170,7 +173,7 @@ export function Header() {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-9 h-9 rounded-full bg-gradient-to-br from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm flex items-center justify-center hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px]"
-                aria-label="사용자 메뉴"
+                aria-label={t("header.user-menu-aria")}
               >
                 {userInitial}
               </button>
@@ -216,7 +219,7 @@ export function Header() {
             <button
               onClick={() => setIsThemeOpen(!isThemeOpen)}
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="테마 변경"
+              aria-label={t("header.theme.change-aria")}
             >
               <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
             </button>
@@ -229,20 +232,20 @@ export function Header() {
                   }`}
                 >
                   <Icon id="ui-auto-theme" size={16} />
-                  <span className="font-serif text-xs">자동 (시간/계절)</span>
+                  <span className="font-serif text-xs">{t("settings.theme.auto-label")}</span>
                 </button>
-                {themeList.map((t) => (
+                {themeList.map((th) => (
                   <button
-                    key={t.id}
-                    data-testid={`mobile-theme-option-${t.id}`}
-                    onClick={() => { setMode(t.id as ThemeId); setIsThemeOpen(false); }}
+                    key={th.id}
+                    data-testid={`mobile-theme-option-${th.id}`}
+                    onClick={() => { setMode(th.id as ThemeId); setIsThemeOpen(false); }}
                     className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
-                      mode === t.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
+                      mode === th.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
                     }`}
                   >
-                    <Image src={t.iconPath} alt="" width={16} height={16} unoptimized />
-                    <span className="font-serif text-xs">{t.nameKo}</span>
-                    <span className="ml-auto w-3 h-3 rounded-full border border-arcana-border" style={{ backgroundColor: t.colors.primary }} />
+                    <Image src={th.iconPath} alt="" width={16} height={16} unoptimized />
+                    <span className="font-serif text-xs">{getThemeName(th, locale)}</span>
+                    <span className="ml-auto w-3 h-3 rounded-full border border-arcana-border" style={{ backgroundColor: th.colors.primary }} />
                   </button>
                 ))}
               </div>

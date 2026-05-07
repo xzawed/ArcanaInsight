@@ -20,6 +20,9 @@ export const ja: Partial<SharedKeys> = {
     "auth.signup": "新規登録",
     "theme.label": "テーマ",
     "theme.auto": "自動",
+    "theme.change-aria": "テーマを変更",
+    "theme.settings-label": "テーマ設定",
+    "user-menu-aria": "ユーザーメニュー",
   },
   footer: {
     "tagline": "AIキャラクターとのタロット＆運勢リーディング",

@@ -24,6 +24,9 @@ export const ko: SharedKeys = {
     "auth.signup": "회원가입",
     "theme.label": "테마",
     "theme.auto": "자동",
+    "theme.change-aria": "테마 변경",
+    "theme.settings-label": "테마 설정",
+    "user-menu-aria": "사용자 메뉴",
   },
   footer: {
     "tagline": "AI 캐릭터와 함께하는 타로 & 운세 플랫폼",

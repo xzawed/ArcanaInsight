@@ -29,6 +29,9 @@ export const en: Partial<SharedKeys> = {
     "auth.signup": "Sign up",
     "theme.label": "Theme",
     "theme.auto": "Auto",
+    "theme.change-aria": "Change theme",
+    "theme.settings-label": "Theme settings",
+    "user-menu-aria": "User menu",
   },
   footer: {
     "tagline": "Tarot & fortune readings with AI characters",

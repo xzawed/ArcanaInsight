@@ -168,8 +168,8 @@ test.describe("AI 응답 렌더링 — 신점", () => {
     await expect(page.locator("text=신점 결과 받기")).toBeVisible({ timeout: 5_000 });
     await page.locator("text=신점 결과 받기").click();
 
-    // 결과 화면 렌더링 대기 (종합 신점 섹션 출현)
-    await expect(page.locator("text=종합 신점").first()).toBeVisible({ timeout: 10_000 });
+    // 결과 화면 렌더링 대기 (종합 해석 섹션 출현 — PR 6에서 shinjeom.result.overall 키로 통일)
+    await expect(page.locator("text=종합 해석").first()).toBeVisible({ timeout: 10_000 });
 
     // JSON 잔여물 미노출 + 결과 텍스트 확인
     const bodyText = await page.textContent("body");
