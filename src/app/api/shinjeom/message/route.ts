@@ -3,9 +3,8 @@ import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
 import { getDb } from "@/lib/db";
-import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
-import { getRecentCharacterMemory } from "@/lib/db/character-context";
-import { buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
+import { assertSessionOwnership } from "@/lib/auth";
+import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
@@ -20,18 +19,6 @@ const aiProvider = new FallbackProvider();
 // 한국어 토큰 비효율 + JSON 오버헤드 + Grok 내부 reasoning(thinking) 토큰 흡수까지 고려한 안전 마진.
 const SHINJEOM_TOKENS_FINAL = 8500;
 const SHINJEOM_TOKENS_CHAT = 1500;
-
-/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
-async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
-  try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser?.id) return "";
-    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId, 3, locale);
-    return buildCharacterMemoryPrompt(memories);
-  } catch {
-    return "";
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
