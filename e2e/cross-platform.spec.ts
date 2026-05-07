@@ -61,19 +61,32 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page }) => {
     await page.goto("/");
-    // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe) load 후 scrollHeight 계산이 안정.
-    // domcontentloaded 직후엔 viewportHeight보다 작아 보이는 flaky 사례 발생 (PR #265 회귀 핫픽스).
+    // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe·next/dynamic) load 후
+    // scrollHeight 계산이 안정. domcontentloaded · load 직후엔 viewportHeight보다 작아 보이는
+    // flaky 사례 발생 (PR #265 회귀 핫픽스 v2 — 2026-05-08).
     await page.waitForLoadState("load");
+    await page.waitForLoadState("networkidle").catch(() => { /* networkidle 미도달도 허용 */ });
+
+    // scrollHeight 안정화 폴링 — lazy 이미지 hydration 후 페이지가 viewport보다 충분히 길어질 때까지 대기.
+    const viewportHeight = await page.evaluate(() => window.innerHeight);
+    await page
+      .waitForFunction(
+        (vh) =>
+          Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) > vh + 200,
+        viewportHeight,
+        { timeout: 10000 }
+      )
+      .catch(() => { /* 폴링 실패 시 아래 expect로 정상 fail */ });
 
     // 페이지 높이가 뷰포트보다 큰지 (스크롤 가능)
-    const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
-    const viewportHeight = await page.evaluate(() => window.innerHeight);
+    const scrollHeight = await page.evaluate(() =>
+      Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+    );
     expect(scrollHeight).toBeGreaterThan(viewportHeight);
 
-    // 네이티브 휠 이벤트로 스크롤 — overflow-x:clip 환경에서 window.scrollTo가
-    // 작동하지 않으므로 실제 브라우저 스크롤 이벤트를 사용
-    // 마우스를 뷰포트 중앙으로 이동 후 휠 이벤트 발생 (CI 헤드리스 환경 안정성)
-    await page.mouse.move(640, 400);
+    // 스크롤: window.scrollTo + 네이티브 휠 이벤트 둘 다 시도 (mobile webkit/android headless 호환)
+    await page.evaluate(() => window.scrollTo(0, 500));
+    await page.mouse.move(200, 400);
     await page.mouse.wheel(0, 500);
     // 고정 타임아웃 대신 스크롤 상태 폴링 (CI 환경 응답 지연 대응)
     await page.waitForFunction(
