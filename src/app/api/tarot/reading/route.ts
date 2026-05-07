@@ -5,9 +5,9 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic, SpreadType } from "@/types/session";
 import { SelectedCard } from "@/types/card";
-import { buildUserInfoPrompt, buildFreeQuestionPrompt, buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
-import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
-import { getRecentCharacterMemory } from "@/lib/db/character-context";
+import { buildUserInfoPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
+import { assertSessionOwnership } from "@/lib/auth";
+import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { getDb } from "@/lib/db";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
@@ -41,18 +41,6 @@ function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 9) return 10500;
   if (cardCount <= 10) return 18000; // celtic-cross (10장) — reasoning 잠식 대응 +4000
   return 20000;                      // zodiac(12장) 등 대형 스프레드 — +4000
-}
-
-/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
-async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
-  try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser?.id) return "";
-    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId, 3, locale);
-    return buildCharacterMemoryPrompt(memories);
-  } catch {
-    return "";
-  }
 }
 
 export async function POST(request: NextRequest) {

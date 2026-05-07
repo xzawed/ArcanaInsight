@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt } from "./prompt-builder";
+import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt, getLanguageFooter } from "./prompt-builder";
 import type { CharacterConfig } from "@/types/character";
 import type { SelectedCard, TarotCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
@@ -247,6 +247,32 @@ describe("buildSystemPrompt", () => {
   it("string 타입을 반환한다", () => {
     expect(typeof buildSystemPrompt(dummyCharacter)).toBe("string");
   });
+
+  it("en locale: 시스템 프롬프트가 영어 지시문으로 시작한다", () => {
+    const result = buildSystemPrompt(dummyCharacter, "en");
+    expect(result).toContain("CRITICAL");
+  });
+
+  it("en locale: LANGUAGE_FOOTER가 시스템 프롬프트 끝에 포함된다", () => {
+    const result = buildSystemPrompt(dummyCharacter, "en");
+    expect(result).toContain("Begin your JSON response now.");
+  });
+
+  it("ja locale: 시스템 프롬프트가 일본어 지시문을 포함한다", () => {
+    const result = buildSystemPrompt(dummyCharacter, "ja");
+    expect(result).toContain("最重要");
+  });
+
+  it("ja locale: LANGUAGE_FOOTER가 시스템 프롬프트 끝에 포함된다", () => {
+    const result = buildSystemPrompt(dummyCharacter, "ja");
+    expect(result).toContain("今すぐJSON応答を開始してください。");
+  });
+
+  it("ko locale: 영어/일본어 강제 지시문이 포함되지 않는다", () => {
+    const result = buildSystemPrompt(dummyCharacter, "ko");
+    expect(result).not.toContain("CRITICAL");
+    expect(result).not.toContain("最重要");
+  });
 });
 
 // ─────────────────────────── buildReadingPrompt ───────────────────────────
@@ -442,6 +468,24 @@ describe("buildCharacterHeader", () => {
     const lines = result.split("\n");
     expect(lines[1]).toBe(subtitle);
   });
+
+  it("en locale: LANGUAGE_INSTRUCTIONS에 영어 강제 지시문이 포함된다", () => {
+    const result = buildCharacterHeader(dummyCharacter, undefined, "en");
+    expect(result).toContain("CRITICAL");
+    expect(result).toContain("English");
+  });
+
+  it("ja locale: LANGUAGE_INSTRUCTIONS에 일본어 강제 지시문이 포함된다", () => {
+    const result = buildCharacterHeader(dummyCharacter, undefined, "ja");
+    expect(result).toContain("最重要");
+    expect(result).toContain("日本語");
+  });
+
+  it("알 수 없는 locale은 ko와 동일하게 추가 지시문이 없다", () => {
+    const result = buildCharacterHeader(dummyCharacter, undefined, "zh" as never);
+    expect(result).not.toContain("CRITICAL");
+    expect(result).not.toContain("最重要");
+  });
 });
 
 describe("buildCharacterMemoryPrompt", () => {
@@ -478,5 +522,21 @@ describe("buildCharacterMemoryPrompt", () => {
     ]);
     expect(result).toContain("첫번째");
     expect(result).toContain("두번째");
+  });
+});
+
+// ─────────────────────────── getLanguageFooter ───────────────────────────
+
+describe("getLanguageFooter", () => {
+  it("ko는 빈 문자열을 반환한다", () => {
+    expect(getLanguageFooter("ko")).toBe("");
+  });
+
+  it("en은 FINAL REMINDER를 포함한다", () => {
+    expect(getLanguageFooter("en")).toContain("FINAL REMINDER");
+  });
+
+  it("ja는 最終確認을 포함한다", () => {
+    expect(getLanguageFooter("ja")).toContain("最終確認");
   });
 });

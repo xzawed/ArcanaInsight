@@ -1,23 +1,18 @@
 "use client";
 
-import { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { SelectedCard } from "@/types/card";
 import { SpreadDefinition, SpreadPosition } from "@/types/session";
 import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { hexToRgbBase } from "@/lib/color-utils";
 
 interface CardSpreadProps {
   readonly selectedCards: SelectedCard[];
   readonly spread: SpreadDefinition;
   readonly revealedPositions: number[];
   readonly glowColor?: string;
-}
-
-function hexToRgbBase(hex: string): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!r) return "212, 175, 55";
-  return `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}`;
 }
 
 /**
@@ -98,7 +93,8 @@ function computeLayout(
   return { cardW, cardH, positions: adjusted };
 }
 
-export function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
+export const CardSpread = React.memo(
+  function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
   const { selectedSkinId } = useSkinStore();
   const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,4 +194,12 @@ export function CardSpread({ selectedCards, spread, revealedPositions, glowColor
       })}
     </div>
   );
-}
+  },
+  (prev, next) =>
+    prev.spread === next.spread &&
+    prev.glowColor === next.glowColor &&
+    prev.selectedCards === next.selectedCards &&
+    prev.revealedPositions.length === next.revealedPositions.length &&
+    prev.revealedPositions.every((v, i) => v === next.revealedPositions[i]),
+);
+CardSpread.displayName = "CardSpread";

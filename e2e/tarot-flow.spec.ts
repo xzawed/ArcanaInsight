@@ -12,7 +12,7 @@ test.describe("타로 서비스 플로우", () => {
     await characterCards.first().click();
 
     // 캐릭터 클릭 → 바로 주제 선택 단계로 전환 (상담 시작 중간 단계 없음)
-    await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("[data-testid='topic-btn-love-single']")).toBeVisible({ timeout: 5_000 });
   });
 
   test("Step 2→3: 캐릭터 선택 → 주제 선택", async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe("타로 서비스 플로우", () => {
     await characterCards.first().click();
 
     // Step 3: 토픽 목록 표시
-    await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("[data-testid='topic-btn-love-single']")).toBeVisible({ timeout: 5_000 });
   });
 
   test("Step 3→4: 주제 선택 → 스프레드 선택", async ({ page }) => {
@@ -36,11 +36,11 @@ test.describe("타로 서비스 플로우", () => {
     await characterCards.first().click();
 
     // 토픽 선택 (종합)
-    await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
-    await page.locator("text=종합").first().click();
+    await expect(page.locator("[data-testid='topic-btn-general']")).toBeVisible({ timeout: 5_000 });
+    await page.locator("[data-testid='topic-btn-general']").click();
 
     // Step 4: 스프레드 옵션 표시
-    await expect(page.locator("button").filter({ hasText: "원카드" }).first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("[data-testid='spread-btn-one-card']")).toBeVisible({ timeout: 5_000 });
   });
 
   test("Step 4: 스프레드 선택 → 세션 페이지 이동", async ({ page }) => {
@@ -51,11 +51,11 @@ test.describe("타로 서비스 플로우", () => {
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
-    await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
-    await page.locator("text=종합").first().click();
+    await expect(page.locator("[data-testid='topic-btn-general']")).toBeVisible({ timeout: 5_000 });
+    await page.locator("[data-testid='topic-btn-general']").click();
 
     // 원카드 선택 — evaluate로 직접 DOM click (헤더 가로채기 완전 우회)
-    const spreadBtn = page.locator("button").filter({ hasText: "원카드" }).first();
+    const spreadBtn = page.locator("[data-testid='spread-btn-one-card']");
     await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
     await spreadBtn.evaluate((el) => (el as HTMLElement).click());
 
@@ -71,10 +71,10 @@ test.describe("타로 서비스 플로우", () => {
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
-    await expect(page.locator("text=연애").first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("[data-testid='topic-btn-love-single']")).toBeVisible({ timeout: 5_000 });
 
     // 뒤로가기 버튼 클릭
-    const backBtn = page.locator("text=다른 상담사 선택").first();
+    const backBtn = page.locator("[data-testid='topic-back-btn']");
     if (await backBtn.isVisible()) {
       await backBtn.click();
       await expect(characterCards.first()).toBeVisible({ timeout: 5_000 });

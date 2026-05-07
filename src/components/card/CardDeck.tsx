@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
@@ -42,7 +42,7 @@ function getCardTransform({ index, totalCards, overlap, cardH, effectivelySpread
   return { angle, xOffset, y: isSelected ? -30 : baseY + hoverLift, scale };
 }
 
-export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
+export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
   const { selectedSkinId } = useSkinStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -158,4 +158,5 @@ export function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: Car
       })}
     </div>
   );
-}
+});
+CardDeck.displayName = "CardDeck";

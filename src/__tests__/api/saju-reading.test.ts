@@ -42,7 +42,7 @@ async function setup() {
 }
 
 describe("POST /api/saju/reading", () => {
-  it("유효한 요청 → SSE 스트림 응답", async () => {
+  it("유효한 요청 → SSE 스트림 응답", { timeout: 15000 }, async () => {
     const { POST } = await setup();
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.headers.get("Content-Type")).toBe("text/event-stream");

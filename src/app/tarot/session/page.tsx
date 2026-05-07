@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback, useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
@@ -9,11 +10,24 @@ import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { useCardAnimationStore } from "@/hooks/useCardAnimation";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
-import { CardDeck } from "@/components/card/CardDeck";
-import { ShuffleCeremony } from "@/components/tarot/ShuffleCeremony";
-import { CardSpread } from "@/components/card/CardSpread";
-import { ReadingProgressIndicator } from "@/components/tarot/ReadingProgressIndicator";
 import { DialogueBox } from "@/components/chat/DialogueBox";
+
+const ShuffleCeremony = dynamic(
+  () => import("@/components/tarot/ShuffleCeremony").then((m) => ({ default: m.ShuffleCeremony })),
+  { ssr: false, loading: () => null },
+);
+const CardDeck = dynamic(
+  () => import("@/components/card/CardDeck").then((m) => ({ default: m.CardDeck })),
+  { loading: () => <div className="w-full flex-1 min-h-[160px] md:min-h-[280px]" /> },
+);
+const CardSpread = dynamic(
+  () => import("@/components/card/CardSpread").then((m) => ({ default: m.CardSpread })),
+  { loading: () => null },
+);
+const ReadingProgressIndicator = dynamic(
+  () => import("@/components/tarot/ReadingProgressIndicator").then((m) => ({ default: m.ReadingProgressIndicator })),
+  { loading: () => null },
+);
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";

@@ -1,4 +1,7 @@
 import type { DbClient } from "./types";
+import { getCurrentUser } from "@/lib/auth";
+import { getDb } from "@/lib/db";
+import { buildCharacterMemoryPrompt } from "@/services/core/prompt-builder";
 
 interface RecentSession {
   id: string;
@@ -53,5 +56,20 @@ export async function getRecentCharacterMemory(
   } catch (e) {
     console.warn("[character-context] 메모리 조회 실패 (리딩 계속):", e instanceof Error ? e.message : String(e));
     return [];
+  }
+}
+
+/**
+ * 캐릭터 메모리를 조회해 프롬프트 문자열로 변환.
+ * 실패해도 빈 문자열 반환 (리딩 계속). 인증된 사용자에게만 의미 있음.
+ */
+export async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser?.id) return "";
+    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId, 3, locale);
+    return buildCharacterMemoryPrompt(memories);
+  } catch {
+    return "";
   }
 }

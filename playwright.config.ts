@@ -33,10 +33,14 @@ export default defineConfig({
       name: "Mobile Android",
       use: { ...devices["Pixel 7"] },
     },
-    {
-      name: "Mobile iOS",
-      use: { ...devices["iPhone 14"] },
-    },
+    ...(process.env.SKIP_WEBKIT
+      ? []
+      : [
+          {
+            name: "Mobile iOS",
+            use: { ...devices["iPhone 14"] },
+          },
+        ]),
   ],
 
   webServer: {

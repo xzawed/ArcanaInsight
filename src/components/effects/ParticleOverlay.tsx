@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ParticleStyle } from "@/types/character";
+import { hexToRgba } from "@/lib/color-utils";
 
 interface ColorScheme {
   primary: string;
@@ -35,12 +36,6 @@ const DEFAULT_COLORS = [
   "rgba(255, 255, 255, 0.3)",
   "rgba(99, 102, 241, 0.3)",
 ];
-
-function hexToRgba(hex: string, alpha: number): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!r) return `rgba(212,175,55,${alpha})`;
-  return `rgba(${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}, ${alpha})`;
-}
 
 function buildColors(colorScheme?: ColorScheme): string[] {
   if (!colorScheme) return DEFAULT_COLORS;

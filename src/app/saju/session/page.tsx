@@ -90,6 +90,7 @@ export default function SajuSessionPage() {
 
   const character = characterId ? getCharacterById(characterId) : null;
   const [readingError, setReadingError] = useState(false);
+  const [readingErrorReason, setReadingErrorReason] = useState<"timeout" | "generic">("generic");
   const resultContainerRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
 
@@ -119,9 +120,10 @@ export default function SajuSessionPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // NOSONAR
 
-  const startReading = async () => {
+  const startReading = () => {
     setLoading(true);
     setReadingError(false);
+    setReadingErrorReason("generic");
     const state = useSajuSessionStore.getState();
 
     // 대기 대사
@@ -137,8 +139,24 @@ export default function SajuSessionPage() {
     });
     const stopTimers = () => timers.forEach(clearTimeout);
 
-    await fetchSSEStream({
+    // 클라이언트 hard timeout (180초). 서버 SSE가 hung되거나 done 이벤트가 도달 못 하는 경우 강제 종료.
+    const abortController = new AbortController();
+    let finished = false;
+    const timeoutId = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      abortController.abort();
+      stopTimers();
+      console.warn("[saju-session] 클라이언트 타임아웃 180s");
+      setMood("default");
+      setReadingErrorReason("timeout");
+      setReadingError(true);
+      setLoading(false);
+    }, 180_000);
+
+    void fetchSSEStream({
       url: "/api/saju/reading",
+      signal: abortController.signal,
       body: {
         sessionId: state.sessionId, topic: state.topic,
         timeRange: state.timeRange, includeMonthly: state.includeMonthly,
@@ -147,9 +165,15 @@ export default function SajuSessionPage() {
       },
       onChunk: () => { /* 사주는 스트리밍 표시 불필요 — 대기 연출 사용 */ },
       onDone: (data) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
         stopTimers();
         const result = data.result as ReadingResult | undefined;
-        if (!result) return;
+        if (!result) {
+          setMood("default"); setReadingError(true); setLoading(false);
+          return;
+        }
 
         // 결과 표시 불가 — DB 저장도 차단된 상태이므로 사용자에게 재시도 안내
         if (result.parseError) {
@@ -157,7 +181,7 @@ export default function SajuSessionPage() {
           const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
           addChatMessage({ id: crypto.randomUUID(), role: "character",
             content: errLines.reading, mood: "default", timestamp: new Date() });
-          setMood("default"); setReadingError(true);
+          setMood("default"); setReadingError(true); setLoading(false);
           return;
         }
 
@@ -169,18 +193,25 @@ export default function SajuSessionPage() {
           : translate("saju.session.msg.complete-casual", locale);
         addChatMessage({ id: crypto.randomUUID(), role: "character",
           content: doneMsg, mood: "smile", timestamp: new Date() });
+        setLoading(false);
       },
       onError: (msg) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
         stopTimers();
         console.error("사주 리딩 실패:", msg);
         const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
         const errText = msg.includes("GROK_API_KEY") ? errLines.api : errLines.reading;
         addChatMessage({ id: crypto.randomUUID(), role: "character",
           content: errText, mood: "default", timestamp: new Date() });
-        setMood("default"); setReadingError(true);
+        setMood("default"); setReadingError(true); setLoading(false);
       },
+    }).then(() => {
+      if (!finished) clearTimeout(timeoutId);
     });
-    setLoading(false);
+
+    return () => { clearTimeout(timeoutId); abortController.abort(); };
   };
 
   useEffect(() => {
@@ -297,16 +328,23 @@ export default function SajuSessionPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center">
               {readingError ? (
-                <div className="flex flex-col items-center gap-3">
-                  <p className="text-arcana-muted text-sm font-serif">{t("tarot.session.error.reading")}</p>
+                <div className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-arcana-card/90 border border-red-500/40 shadow-xl backdrop-blur-md max-w-sm" data-testid="reading-error">
+                  <p className="text-arcana-text text-sm md:text-base font-serif font-bold text-center">
+                    {t("tarot.session.error.title")}
+                  </p>
+                  <p className="text-arcana-muted text-xs md:text-sm font-sans text-center">
+                    {readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
+                  </p>
                   <div className="flex gap-3">
-                    <button onClick={() => { setReadingError(false); startReading(); }}
+                    <button
+                      data-testid="reading-retry"
+                      onClick={() => { setReadingError(false); startReading(); }}
                       disabled={isLoading}
-                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
                       {t("tarot.session.btn.try-again")}
                     </button>
                     <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
-                      className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm">
+                      className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
                       {t("tarot.session.btn.new-session")}
                     </button>
                   </div>

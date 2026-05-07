@@ -5,9 +5,9 @@ import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
 import { getDb } from "@/lib/db";
-import { getCurrentUser, assertSessionOwnership } from "@/lib/auth";
-import { getRecentCharacterMemory } from "@/lib/db/character-context";
-import { buildCharacterMemoryPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
+import { assertSessionOwnership } from "@/lib/auth";
+import { fetchMemoryPrompt } from "@/lib/db/character-context";
+import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
@@ -17,18 +17,6 @@ import { t as translate } from "@/i18n/translations";
 
 const sajuService = new SajuService();
 const grokProvider = new FallbackProvider();
-
-/** 캐릭터 메모리 조회 — 실패해도 빈 문자열 반환 (리딩 계속) */
-async function fetchMemoryPrompt(characterId: string, locale: string): Promise<string> {
-  try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser?.id) return "";
-    const memories = await getRecentCharacterMemory(getDb(), currentUser.id, characterId, 3, locale);
-    return buildCharacterMemoryPrompt(memories);
-  } catch {
-    return "";
-  }
-}
 
 /**
  * 사주 max_tokens 정책 — 한국어 토큰 비효율(영어 대비 1.3배) + JSON 오버헤드 + 사주명리 깊이 반영.

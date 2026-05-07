@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { setupDoMock } from "@/test-helpers/reset-modules";
 import { MOCK_USER } from "@/test-helpers/mock-auth";
 import { makePostRequest } from "@/test-helpers/mock-request";
@@ -96,5 +96,15 @@ describe("POST /api/tarot/session", () => {
     const { POST, mockDb } = await setup();
     await POST(makePostRequest({ topic: "finance" }));
     expect(mockDb.insert).toHaveBeenCalledWith("sessions", expect.objectContaining({ service_type: "tarot" }));
+  });
+
+  it("checkRateLimit 예외 → 500 (outer catch 커버리지)", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockRejectedValue(new Error("redis error")),
+      rateLimitResponse: vi.fn(),
+    }));
+    const { POST } = await import("@/app/api/tarot/session/route");
+    const res = await POST(makePostRequest({ topic: "love" }));
+    expect(res.status).toBe(500);
   });
 });
