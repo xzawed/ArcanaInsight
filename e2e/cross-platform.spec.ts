@@ -61,7 +61,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
+    // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe) load 후 scrollHeight 계산이 안정.
+    // domcontentloaded 직후엔 viewportHeight보다 작아 보이는 flaky 사례 발생 (PR #265 회귀 핫픽스).
+    await page.waitForLoadState("load");
 
     // 페이지 높이가 뷰포트보다 큰지 (스크롤 가능)
     const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
@@ -76,7 +78,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     // 고정 타임아웃 대신 스크롤 상태 폴링 (CI 환경 응답 지연 대응)
     await page.waitForFunction(
       () => (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) > 0,
-      { timeout: 3000 }
+      { timeout: 5000 }
     );
 
     const scrolled = await page.evaluate(
