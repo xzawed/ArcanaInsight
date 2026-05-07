@@ -7,6 +7,8 @@ import { DailyCardSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
 import { getRequestLocale } from "@/i18n/server-locale";
+import { t as translate } from "@/i18n/translations";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config";
 
 const grokProvider = new FallbackProvider();
 const deckManager = new DeckManager();
@@ -23,8 +25,10 @@ function hashDateSeed(date: string, characterId: string): number {
 }
 
 export async function POST(request: NextRequest) {
+  let locale: Locale = DEFAULT_LOCALE;
   try {
-    const locale = await getRequestLocale();
+    const reqLocale = await getRequestLocale();
+    if (isLocale(reqLocale)) locale = reqLocale;
     const ip = getClientIp(request.headers);
     if (!(await checkRateLimit(`daily-card:${ip}`, 30, 60_000))) return rateLimitResponse(locale);
 
@@ -95,10 +99,10 @@ export async function POST(request: NextRequest) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Daily card error:", errMsg);
     const userMessage = errMsg.includes("API_KEY") || errMsg.includes("auth")
-      ? "AI 서비스 설정에 문제가 있습니다."
+      ? translate("api.ai-config-error", locale)
       : errMsg.includes("rate limit") || errMsg.includes("429")
-      ? "요청이 많아 잠시 후 다시 시도해주세요."
-      : "일일 카드 생성에 실패했습니다. 잠시 후 다시 시도해주세요.";
+      ? translate("api.rate-limit-error", locale)
+      : translate("api.daily-card-error", locale);
     return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }

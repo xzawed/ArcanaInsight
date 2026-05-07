@@ -14,6 +14,7 @@ export const ko: SharedKeys = {
     "back-arrow": "← 뒤로",
     "modal.close-aria": "모달 닫기",
     "card.back-alt": "카드 뒷면",
+    "skin.preview-alt": "{name} 카드 미리보기",
   },
   header: {
     "logo.alt": "ArcanaInsight",
@@ -287,6 +288,8 @@ export const ko: SharedKeys = {
   api: {
     "rate-limit-error": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
     "reading-error": "리딩 생성 중 오류가 발생했습니다.",
+    "ai-config-error": "AI 서비스 설정에 문제가 있습니다.",
+    "daily-card-error": "일일 카드 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
   },
   meta: {
     "site-description": "애니메이션 캐릭터와 함께하는 타로 리딩, 사주, 신점 종합 운세 플랫폼",

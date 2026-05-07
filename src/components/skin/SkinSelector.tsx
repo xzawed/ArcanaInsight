@@ -4,7 +4,10 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { CardSkin } from "@/data/skins";
+import { getSkinName, getSkinDescription } from "@/data/skins";
 import { getCardThumbnailUrl } from "@/lib/storage";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { useT } from "@/i18n/useT";
 
 interface SkinSelectorProps {
   readonly skin: CardSkin;
@@ -20,6 +23,11 @@ const FAN_CONFIGS = [
 ];
 
 export function SkinSelector({ skin, isSelected, onSelect }: SkinSelectorProps) {
+  const locale = useLocaleStore((s) => s.locale);
+  const { t } = useT();
+  const skinName = getSkinName(skin, locale);
+  const skinDesc = getSkinDescription(skin, locale);
+  const previewAlt = t("common.skin.preview-alt").replace("{name}", skinName);
   // 썸네일 이미지 에러 상태 (카드 ID별)
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
@@ -86,7 +94,7 @@ export function SkinSelector({ skin, isSelected, onSelect }: SkinSelectorProps) 
               ) : (
                 <Image
                   src={thumbUrl}
-                  alt={`${skin.nameKo} 카드 미리보기`}
+                  alt={previewAlt}
                   width={64}
                   height={100}
                   unoptimized
@@ -107,9 +115,9 @@ export function SkinSelector({ skin, isSelected, onSelect }: SkinSelectorProps) 
             className="w-3 h-3 rounded-full flex-shrink-0 ring-1 ring-white/10"
             style={{ background: skin.palette.primary }}
           />
-          <h3 className="font-serif font-bold text-sm text-arcana-text truncate">{skin.nameKo}</h3>
+          <h3 className="font-serif font-bold text-sm text-arcana-text truncate">{skinName}</h3>
         </div>
-        <p className="text-arcana-muted text-xs leading-relaxed line-clamp-2">{skin.description}</p>
+        <p className="text-arcana-muted text-xs leading-relaxed line-clamp-2">{skinDesc}</p>
       </div>
     </motion.button>
   );

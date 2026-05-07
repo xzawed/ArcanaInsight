@@ -19,6 +19,7 @@ export const en: Partial<SharedKeys> = {
     "back-arrow": "← Back",
     "modal.close-aria": "Close modal",
     "card.back-alt": "Card back",
+    "skin.preview-alt": "{name} card preview",
   },
   header: {
     "logo.alt": "ArcanaInsight",
@@ -292,6 +293,8 @@ export const en: Partial<SharedKeys> = {
   api: {
     "rate-limit-error": "Too many requests. Please try again shortly.",
     "reading-error": "An error occurred while generating the reading.",
+    "ai-config-error": "There is a problem with the AI service configuration.",
+    "daily-card-error": "Failed to generate the daily card. Please try again shortly.",
   },
   meta: {
     "site-description": "Tarot, Saju, and Shinjeom fortune-telling platform with animated AI characters",

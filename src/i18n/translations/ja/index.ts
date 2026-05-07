@@ -128,6 +128,7 @@ export const ja: Partial<SharedKeys> = {
     "back-arrow": "← 戻る",
     "modal.close-aria": "モーダルを閉じる",
     "card.back-alt": "カード裏面",
+    "skin.preview-alt": "{name} カードプレビュー",
   },
   locale: {
     "modal.title": "言語を選択してください",
@@ -294,6 +295,8 @@ export const ja: Partial<SharedKeys> = {
   api: {
     "rate-limit-error": "リクエストが多すぎます。しばらくしてから再度お試しください。",
     "reading-error": "鑑定の生成中にエラーが発生しました。",
+    "ai-config-error": "AIサービスの設定に問題があります。",
+    "daily-card-error": "デイリーカードの生成に失敗しました。しばらくしてから再度お試しください。",
   },
   meta: {
     "site-description": "アニメーションキャラクターと楽しむタロット・四柱推命・神占の総合占いプラットフォーム",
