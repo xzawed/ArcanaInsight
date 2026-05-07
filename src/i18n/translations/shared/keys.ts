@@ -194,6 +194,23 @@ export interface SharedKeys {
     "session.msg.init-casual": string;
     "session.msg.complete-formal": string;
     "session.msg.complete-casual": string;
+    // 사주 차트 (PR 7)
+    "chart.title": string;
+    "chart.day-master": string;
+    "chart.strong": string;
+    "chart.weak": string;
+    "chart.yongsin": string;
+    "chart.yongsin-label": string;
+    "chart.ohaeng-title": string;
+    "chart.daeun-title": string;
+    "chart.current": string;
+    "chart.yearly": string;
+    "chart.pillar.hour": string;
+    "chart.pillar.day": string;
+    "chart.pillar.month": string;
+    "chart.pillar.year": string;
+    "chart.age-range": string;
+    "chart.age-until": string;
   };
   mypage: {
     "page.title": string;
