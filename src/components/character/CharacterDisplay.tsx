@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CharacterConfig, Mood } from "@/types/character";
 import { SpriteAnimator } from "./SpriteAnimator";
@@ -43,7 +43,7 @@ function GlowBurstRing({ mood, primaryColor }: { readonly mood: Mood; readonly p
   );
 }
 
-export function CharacterDisplay({ character, mood, className = "" }: CharacterDisplayProps) {
+export const CharacterDisplay = React.memo(function CharacterDisplay({ character, mood, className = "" }: CharacterDisplayProps) {
   const { setMood } = useCharacterStore();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const isMountedRef = useRef(false);
@@ -111,4 +111,5 @@ export function CharacterDisplay({ character, mood, className = "" }: CharacterD
       </div>
     </div>
   );
-}
+});
+CharacterDisplay.displayName = "CharacterDisplay";

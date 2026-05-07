@@ -6,7 +6,9 @@ import { SelectedCard } from "@/types/card";
 import { SpreadDefinition, SpreadPosition } from "@/types/session";
 import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { hexToRgbBase } from "@/lib/color-utils";
+import { getPositionLabel } from "@/data/spreads";
 
 interface CardSpreadProps {
   readonly selectedCards: SelectedCard[];
@@ -96,6 +98,7 @@ function computeLayout(
 export const CardSpread = React.memo(
   function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
   const { selectedSkinId } = useSkinStore();
+  const locale = useLocaleStore((s) => s.locale);
   const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -173,7 +176,7 @@ export const CardSpread = React.memo(
                   className="text-arcana-gold font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)] truncate text-center"
                   style={{ fontSize: Math.max(layout.cardW * 0.18, 8), maxWidth: layout.cardW * 1.5 }}
                 >
-                  {pos.labelKo}
+                  {getPositionLabel(pos, locale)}
                 </span>
               </div>
             ) : (
@@ -185,7 +188,7 @@ export const CardSpread = React.memo(
                   className="text-arcana-gold/60 font-serif font-bold truncate"
                   style={{ fontSize: Math.max(layout.cardW * 0.18, 8) }}
                 >
-                  {pos.labelKo}
+                  {getPositionLabel(pos, locale)}
                 </span>
               </div>
             )}

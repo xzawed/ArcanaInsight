@@ -24,7 +24,7 @@
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
 | **다국어·i18n** | 자체 translations 모듈 + middleware locale 쿠키 (ko/en/ja) — → [`docs/architecture/i18n.md`](docs/architecture/i18n.md) |
-| **테스트** | Vitest 2.0 (804개, statements 98%), Playwright (3 디바이스, `SKIP_WEBKIT=1`로 iOS 제외 가능) |
+| **테스트** | Vitest 2.0 (819개, statements 98%), Playwright (3 디바이스, `SKIP_WEBKIT=1`로 iOS 제외 가능) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -65,8 +65,7 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 **API 보안**: Rate Limit → Zod safeParse → requireUser → assertSessionOwnership. → [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md)
 - Rate Limit 범위: **세션 API**(tarot/saju/shinjeom session, 분당 20회) + **reading/message API** 모두 적용. `locale` 선언은 rate limit 호출 전 최상단에 위치.
 
-**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드, 초과 시 `readingErrorReason="timeout"`. `/api/daily-card`는 JSON.
-- **타로·사주 세션 페이지** 모두 180s AbortController 적용. 에러/타임아웃 시 재시도 UI(`data-testid="reading-retry"`) 표시.
+**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드 (타로·사주·신점 세션 페이지 모두 적용), 초과 시 `readingErrorReason="timeout"` + 재시도 UI(`data-testid="reading-retry"`) 표시. 신점 세션은 `handleSend`·`handleEndConsultation` 각각 AbortController 적용. `/api/daily-card`는 JSON.
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
@@ -164,6 +163,8 @@ pnpm i18n:check             # ko/en/ja 번역 키 drift 검출 (orphan 발견 �
 ### SSR · Hydration (컴포넌트 작성 시)
 - **SSR 비결정 값 금지**: `new Date()`, `Math.random()`, `window` → `useEffect` 안에서만. `useState` 초기값은 `""`/`0`/`null` (React error #418 방지). `useEffect` 내 setState 직접 호출 금지 → `setTimeout(() => setState(...), 0)` + `return () => clearTimeout(t)` 필수 (`react-hooks/set-state-in-effect`).
 - **`<Image fill>` sizes 필수**: 미설정 시 Mobile Android CI 타임아웃. `sizes="(max-width: 640px) 50vw, ..."` 필수.
+- **`next/dynamic ssr:false`는 Canvas/WebGL 전용**: `ShuffleCeremony`(Canvas rAF) 같은 컴포넌트에만 사용. 일반 UI 컴포넌트는 SSR 기본값 유지.
+- **`React.memo` + `displayName`**: 무거운 렌더 컴포넌트(`SpriteAnimator`, `CardDeck`, `CardSpread`, `CharacterDisplay`, `DialogueBox`)는 `React.memo(function Name() {...})` + `Name.displayName = "Name"` 패턴. 배열 prop은 `areEqual` 커스텀 비교 함수 필수 (`revealedPositions` 등 — 참조 동일성 비교 실패 방지). Zustand 스토어 구독은 prop이 아니므로 `areEqual` 우회 — re-render 정상 발생.
 
 ### API · 보안 (새 라우트 추가 시)
 - **API 스키마**: 새 라우트 → `api-schemas.ts` Zod 먼저 정의, `safeParse` 사용. 타입 단언 `as {...}` 금지.
@@ -177,7 +178,7 @@ pnpm i18n:check             # ko/en/ja 번역 키 drift 검출 (orphan 발견 �
 - **API 라우트 테스트 경로**: `src/app/api/` 내 `*.test.ts`는 vitest 수집 불가 → `src/__tests__/api/` 배치. → [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md)
 - **E2E 스펙 추가 시 인증 의존성 명시**: 실 Supabase 세션 요구 spec은 파일 상단에 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수.
 - **UI 텍스트 변경 시 E2E 셀렉터 동시 검토**: `e2e/` 내 `hasText`, `getByText`, `locator("text=")` 패턴 grep 후 같은 커밋에 수정.
-- **E2E 드롭다운**: `button:has(img)+text=` 조합 오탐 발생 → `data-testid` 필수. 데스크탑·모바일 드롭다운 반드시 별도 `ref`+별도 `testid` — 동일 `ref` 공유 시 React last-wins로 outside-click 오탐(드롭다운 선택 즉시 닫힘).
+- **E2E 드롭다운**: `button:has(img)+text=` 조합 오탐 발생 → `data-testid` 필수. 데스크탑·모바일 드롭다운 반드시 별도 `ref`+별도 `testid` — 동일 `ref` 공유 시 React last-wins로 outside-click 오탐(드롭다운 선택 즉시 닫힘). **ThemeDropdown testid**: `theme-option-${id}` (데스크탑) / `mobile-theme-option-${id}` (모바일) — `text=` 셀렉터는 i18n 변경 시 파손.
 - **Mobile Android 스크롤 테스트**: `domcontentloaded` 직후 scrollTo/scrollHeight flaky → `load`+`networkidle` 두 단계 대기 + scrollHeight polling(최대 10s) + `window.scrollTo`&`mouse.wheel` 병행 필수.
 
 - **Enum 화이트리스트 하드코딩 금지**: API 라우트에서 Zod `z.enum([...])` 검증 통과 후 일부 값만 하드코딩으로 재검증하면 나머지 값이 누락됨. `spreadResolver.getSpreadByType(val)` 처럼 유틸 메서드로 전체 enum 검증 필수. session/route.ts·reading/route.ts 모두 적용.
