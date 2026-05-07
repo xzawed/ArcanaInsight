@@ -24,7 +24,7 @@
 | **DB ORM** | Supabase PostgreSQL / Drizzle ORM (DB_PROVIDER별 전환) |
 | **상태·패키지** | Zustand v5.0, pnpm 10.33.0 |
 | **다국어·i18n** | 자체 translations 모듈 + middleware locale 쿠키 (ko/en/ja) — → [`docs/architecture/i18n.md`](docs/architecture/i18n.md) |
-| **테스트** | Vitest 2.0 (764개, statements 98%), Playwright (3 디바이스) |
+| **테스트** | Vitest 2.0 (804개, statements 98%), Playwright (3 디바이스, `SKIP_WEBKIT=1`로 iOS 제외 가능) |
 | **CI/CD·호스팅** | GitHub Actions → Railway |
 
 ## 프로젝트 구조
@@ -32,11 +32,11 @@
 ```
 src/
 ├── app/             # Pages & API (tarot·saju·shinjeom·mypage·auth·character·settings·api/locale)
-├── components/      # card/character/chat/common/effects/home/layout/saju/skin/tarot/ (CharacterDisplay·CharacterAuraLayer·ShuffleCeremony·ServiceBackground·LanguageSwitcher 등)
+├── components/      # card/character/chat/common/effects/home/layout/saju/skin/tarot/ (CharacterDisplay·CharacterAuraLayer·ShuffleCeremony·ThemeDropdown·ServiceBackground·LanguageSwitcher 등)
 ├── i18n/            # config·detect·LocaleProvider·useT·server-locale + translations/{ko,en,ja,shared}
 ├── data/            # cards/, characters/, skins/, spreads/, saju/, shinjeom/, home/, topics.ts, birth-hours.ts, error-messages.ts, ui-copy.ts
 ├── hooks/           # Zustand stores (useSession·useSajuSession·useShinjeomSession·useLocaleStore 등) + useSSEStream, useTheme, useCharacter, useCardAnimation
-├── lib/             # env.ts (getter 16개), request-utils.ts (SSE_HEADERS·jsonError), rate-limit.ts, db/ (getDb()·reading-saver), auth/ (getCurrentUser·requireUser·assertSessionOwnership), validation/ (api-schemas·Zod), storage/ (getCardImageUrl)
+├── lib/             # env.ts (getter 16개), request-utils.ts (SSE_HEADERS·jsonError), rate-limit.ts, db/ (getDb()·reading-saver·character-context), auth/ (getCurrentUser·requireUser·assertSessionOwnership), validation/ (api-schemas·Zod), storage/ (getCardImageUrl), color-utils.ts
 ├── services/        # core/ (FallbackProvider·PromptBuilder·CircuitBreaker·http-utils), tarot/, saju/, shinjeom/
 ├── types/           # card.ts, character.ts, session.ts, service.ts, user-info.ts
 ├── test-helpers/    # mock-db, mock-auth, mock-request, mock-ai, reset-modules, api-route-setup
@@ -63,8 +63,10 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 **DB_PROVIDER**: `supabase`(기본) ↔ `postgres` 즉시 전환. `getDb()` / `getCurrentUser()` / `getCardImageUrl()` 자동 분기. → [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md)
 
 **API 보안**: Rate Limit → Zod safeParse → requireUser → assertSessionOwnership. → [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md)
+- Rate Limit 범위: **세션 API**(tarot/saju/shinjeom session, 분당 20회) + **reading/message API** 모두 적용. `locale` 선언은 rate limit 호출 전 최상단에 위치.
 
 **SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드, 초과 시 `readingErrorReason="timeout"`. `/api/daily-card`는 JSON.
+- **타로·사주 세션 페이지** 모두 180s AbortController 적용. 에러/타임아웃 시 재시도 UI(`data-testid="reading-retry"`) 표시.
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
@@ -83,7 +85,7 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 
 **SpreadPosition rotation**: `SpreadPosition.rotation?: number` — celtic-cross position 1에 `rotation: 90` (전통 레이아웃). `CardSpread.tsx` 카드 컨테이너 `transform: rotate(Ndeg)` (라벨 회전 제외).
 
-**캐릭터 경험 시스템**: `CharacterId` union (`CHARACTER_IDS as const`). `CHAR_ENTRANCE`(입장 설정), `CHARACTER_RESULT_MOODS`(결과 mood). 6-mood 연동: 카드선택→`surprised`, 대기→`line.mood`, 결과→캐릭터별. 자유질문(`freeQuestion`→`buildFreeQuestionPrompt()`), 캐릭터 메모리(`getRecentCharacterMemory()`→system prompt 주입, 인증 사용자 전용). → [`docs/architecture/data-model.md`](docs/architecture/data-model.md)
+**캐릭터 경험 시스템**: `CharacterId` union (`CHARACTER_IDS as const`). `CHAR_ENTRANCE`(입장 설정), `CHARACTER_RESULT_MOODS`(결과 mood). 6-mood 연동: 카드선택→`surprised`, 대기→`line.mood`, 결과→캐릭터별. 자유질문(`freeQuestion`→`buildFreeQuestionPrompt()`), 캐릭터 메모리(`getRecentCharacterMemory()`→system prompt 주입, 인증 사용자 전용). `fetchMemoryPrompt(characterId, locale)` 공통 함수 → `src/lib/db/character-context.ts`. → [`docs/architecture/data-model.md`](docs/architecture/data-model.md)
 
 **i18n 다국어 시스템**: ko/en/ja. middleware가 쿠키→Accept-Language→DEFAULT로 locale 결정 → `x-locale` 헤더. `useT()` (클라이언트) / `t(key, locale)` (서버). 사전: `src/i18n/translations/{ko,en,ja}/index.ts` + `shared/keys.ts`. DB 5테이블에 `locale CHECK('ko','en','ja')` (016 마이그레이션). INSERT 시 `getRequestLocale()` 동봉 필수. AI 응답 locale: `buildCharacterHeader(locale)` `LANGUAGE_INSTRUCTIONS` — en/ja는 응답 언어 + JSON 키 영어 고정 강제(`parseJsonSafe` 실패 방지). 캐릭터 locale 헬퍼: `src/data/characters/locale-helpers.ts`. drift 검사: `pnpm i18n:check`. → [`docs/architecture/i18n.md`](docs/architecture/i18n.md)
 
