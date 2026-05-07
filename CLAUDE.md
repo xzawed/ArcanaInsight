@@ -135,7 +135,18 @@ scripts/
 
 **캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` → `getWaitingLinesData(locale)` 경유 ko/en/ja 분기. 결과 mood: `CHARACTER_RESULT_MOODS` (`waiting-lines.ts`). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
 
-**i18n 화면 노출 회귀 3건 핫픽스 (PR #262)**: PR 5~10 작업 후 영어/일본어 사용자에게 한국어 잔여 노출 정밀 grep 회귀 점검에서 3건 발견·수정. ① **`tarot/result/[id]/page.tsx:150`** `spread?.nameKo ?? "타로"` → `spread ? getSpreadName(spread, locale) : t("header.nav.tarot", locale)` (PR 5 `getSpreadName` 헬퍼 누락). ② **`settings/page.tsx` + `SkinSelector.tsx`** 카드 스킨 6개 이름·설명·미리보기 alt 한국어 고정 → `CardSkin` 인터페이스 multi-locale 확장(`nameJa`·`descriptionEn`·`descriptionJa` 옵션 필드) + `getSkinName/getSkinDescription` 헬퍼(스프레드/캐릭터 패턴 동일) + `common.skin.preview-alt` 사전 키. settings 테마 표시도 `themes[activeTheme].nameKo` → `getThemeName(themes[activeTheme], locale)`. ③ **`daily-card/route.ts` catch 블록** 사용자 노출 에러 메시지 3종 한국어 고정 → `api.ai-config-error / rate-limit-error / daily-card-error` 사전 키 + `translate(key, locale)`. `locale` 변수를 `try` 밖 outer scope로 이동(catch 접근). `daily-card.test.ts` 기대 메시지 업데이트(`/요청이 많아/` → `/요청이 너무 많습니다/`). 사전 ko/en/ja 286 → **289/289/289** (drift 0). **교훈**: PR 단위 작업 후 헬퍼 도입 시 result/settings 같은 보조 페이지 grep 누락 가능 → 사이클 마지막 PR에서 `rg "['\"][가-힣]" src/components/ src/app/` 풀 스캔 의무화.
+**i18n 런타임 한국어 잔여 + AI 응답 locale 강제 강화 (PR #263)**: 사용자 보고 — 영어 locale인데 화면·AI 응답에 한국어 노출. 스크린샷 직접 매칭 정밀 추적.
+
+**화면 잔여 4건 i18n 적용**:
+- `CharacterGallery.tsx` 홈 캐릭터 섹션 — h2 "당신의 상담사를 만나보세요" + p 설명 + `char.speciality` 한국어 고정 → `home.gallery.title/desc` 사전 키 + `getCharacterSpeciality(char, locale)` 헬퍼 적용.
+- `tarot/session/page.tsx` 카드 선택 화면 — "← 상담사 다시 선택" 버튼 + "카드 확인 모드" 버튼 → `tarot.session.btn.back-to-character` 사전 키 신규 + 기존 `tarot.card-confirm.label` 키 적용.
+
+**AI 응답 locale 강제 강화** (외부 번역가 비용 0): locale 전달 자체는 정상이었으나(`getRequestLocale()` → service → `buildCharacterHeader(locale)`), **시스템 프롬프트 본문이 한국어 hard-coded인 상태에서 LANGUAGE_INSTRUCTIONS이 캐릭터 헤더 끝에 한 줄만 추가됐기 때문에 모델 신호가 약했음** — 모델이 한국어 본문에 끌려 한국어 응답 생성. 강화 방안:
+- **`LANGUAGE_INSTRUCTIONS` 자체 강화**: `**CRITICAL — RESPONSE LANGUAGE**` + `STRICTLY FORBIDDEN` + "system prompt is in Korean for INSTRUCTIONS only — output 100% English/Japanese" 명시 (한국어 시스템 프롬프트와 응답 언어를 명시적 분리).
+- **시스템 프롬프트 맨 앞 + 맨 뒤 양쪽 주입**: `buildSystemPrompt`에서 langTopBlock(맨 앞) + buildCharacterHeader + 본문 + langFooter(맨 뒤). 모델은 가까운 위치 지시를 더 강하게 따르므로 응답 직전 footer 효과 큼.
+- **`LANGUAGE_FOOTER` 신규 + `getLanguageFooter(locale)` export**: `FINAL REMINDER: Output language MUST be English. Begin your JSON response now.` — saju/shinjeom service 시스템 프롬프트 끝에도 동일 적용.
+
+사전 ko/en/ja 289 → **292/292/292** (drift 0). `locale-wiring.test.ts` 기대 phrase 갱신 (`"natural English only"` → `"natural English"` + `"STRICTLY FORBIDDEN"` + `"FINAL REMINDER"`). **효과 검증 필요**: LLM 동작 의존이므로 영어/일본어 실제 리딩에서 한국어 잔여 발생 시 옵션 B(시스템 프롬프트 본문 자체를 locale별 분기) 진행 — Claude 자체 번역으로 외부 번역가 비용 없음.
 
 **i18n Header + 홈 보조 + E2E 회귀 핫픽스 (PR #257)**: Header.tsx aria-label("테마 변경"·"사용자 메뉴") + 테마 드롭다운 라벨("테마 설정"·"자동 (시간/계절)") 다국어화. `useTheme.ts` themes 객체에 `nameJa` 추가(7개 테마) + `getThemeName(theme, locale)` 헬퍼. GenderFilter.tsx는 settings.gender.* 키 재사용. **E2E 회귀 핫픽스**: PR 6 머지 시 ShinjeomSessionPage 결과 헤더가 "종합 신점" → `t("shinjeom.result.overall")`("종합 해석")로 통일됐으나 e2e/ai-response-rendering.spec.ts:172 셀렉터 미동시 수정 → PR 7 빌드에서 노출(L172 `text=종합 신점` 셀렉터 수정). CLAUDE.md L235 "UI 텍스트 변경 시 E2E 셀렉터 동시 검토" 규칙 위반 회귀. 사전 +3키(`header.theme.change-aria`·`theme.settings-label`·`user-menu-aria`) → ko/en/ja 238/238/238 (drift 0).
 
