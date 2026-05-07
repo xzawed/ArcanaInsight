@@ -6,18 +6,13 @@ import { SelectedCard } from "@/types/card";
 import { SpreadDefinition, SpreadPosition } from "@/types/session";
 import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { hexToRgbBase } from "@/lib/color-utils";
 
 interface CardSpreadProps {
   readonly selectedCards: SelectedCard[];
   readonly spread: SpreadDefinition;
   readonly revealedPositions: number[];
   readonly glowColor?: string;
-}
-
-function hexToRgbBase(hex: string): string {
-  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!r) return "212, 175, 55";
-  return `${parseInt(r[1], 16)}, ${parseInt(r[2], 16)}, ${parseInt(r[3], 16)}`;
 }
 
 /**
