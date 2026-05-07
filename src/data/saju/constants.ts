@@ -1,13 +1,13 @@
 /** 오행 타입 */
 export type OhaengType = "wood" | "fire" | "earth" | "metal" | "water";
 
-/** 오행 한글/한자/색상 매핑 */
-export const OHAENG: Record<OhaengType, { ko: string; hanja: string; color: string }> = {
-  wood:  { ko: "목", hanja: "木", color: "#10b981" },  // emerald-500
-  fire:  { ko: "화", hanja: "火", color: "#ef4444" },  // red-500
-  earth: { ko: "토", hanja: "土", color: "#f59e0b" },  // amber-500
-  metal: { ko: "금", hanja: "金", color: "#cbd5e1" },  // slate-300
-  water: { ko: "수", hanja: "水", color: "#3b82f6" },  // blue-500
+/** 오행 한글/한자/색상 매핑 + multi-locale UI 라벨 */
+export const OHAENG: Record<OhaengType, { ko: string; hanja: string; color: string; en: string; ja: string }> = {
+  wood:  { ko: "목", hanja: "木", color: "#10b981", en: "Wood",  ja: "木" },
+  fire:  { ko: "화", hanja: "火", color: "#ef4444", en: "Fire",  ja: "火" },
+  earth: { ko: "토", hanja: "土", color: "#f59e0b", en: "Earth", ja: "土" },
+  metal: { ko: "금", hanja: "金", color: "#cbd5e1", en: "Metal", ja: "金" },
+  water: { ko: "수", hanja: "水", color: "#3b82f6", en: "Water", ja: "水" },
 };
 
 /** 천간 → 오행 매핑 */
@@ -77,3 +77,94 @@ export const BIRTH_HOUR_MAP: Record<string, number> = {
   o: 11, mi: 13, sin: 15, yu: 17, sul: 19, hae: 21,
   unknown: -1,
 };
+
+// ─── multi-locale UI 라벨 (PR 7) ─────────────────────────────────────────────
+
+/** 천간 한자 → locale별 발음 (ko=한글 / en=한국식 로마자 / ja=일본 음독 카타카나) */
+export const STEM_LABELS: Record<string, { ko: string; en: string; ja: string }> = {
+  "甲": { ko: "갑", en: "Gap",     ja: "コウ" },
+  "乙": { ko: "을", en: "Eul",     ja: "オツ" },
+  "丙": { ko: "병", en: "Byeong",  ja: "ヘイ" },
+  "丁": { ko: "정", en: "Jeong",   ja: "テイ" },
+  "戊": { ko: "무", en: "Mu",      ja: "ボ" },
+  "己": { ko: "기", en: "Gi",      ja: "キ" },
+  "庚": { ko: "경", en: "Gyeong",  ja: "コウ" },
+  "辛": { ko: "신", en: "Sin",     ja: "シン" },
+  "壬": { ko: "임", en: "Im",      ja: "ジン" },
+  "癸": { ko: "계", en: "Gye",     ja: "キ" },
+};
+
+/** 지지 한자 → locale별 발음 */
+export const BRANCH_LABELS: Record<string, { ko: string; en: string; ja: string }> = {
+  "子": { ko: "자", en: "Ja",    ja: "シ" },
+  "丑": { ko: "축", en: "Chuk",  ja: "チュウ" },
+  "寅": { ko: "인", en: "In",    ja: "イン" },
+  "卯": { ko: "묘", en: "Myo",   ja: "ボウ" },
+  "辰": { ko: "진", en: "Jin",   ja: "シン" },
+  "巳": { ko: "사", en: "Sa",    ja: "シ" },
+  "午": { ko: "오", en: "O",     ja: "ゴ" },
+  "未": { ko: "미", en: "Mi",    ja: "ビ" },
+  "申": { ko: "신", en: "Sin",   ja: "シン" },
+  "酉": { ko: "유", en: "Yu",    ja: "ユウ" },
+  "戌": { ko: "술", en: "Sul",   ja: "ジュツ" },
+  "亥": { ko: "해", en: "Hae",   ja: "ガイ" },
+};
+
+/** OHAENG 라벨 — locale별 짧은 표기 (UI 우측 칩, 용신 배지 등) */
+export function getOhaengLabel(el: OhaengType, locale: string): string {
+  if (locale === "en") return OHAENG[el].en;
+  if (locale === "ja") return OHAENG[el].ja;
+  return OHAENG[el].ko;
+}
+
+/** 천간 한자 → locale별 발음. 매핑 없으면 한자 그대로 반환. */
+export function getStemReading(stemHanja: string, locale: string): string {
+  const labels = STEM_LABELS[stemHanja];
+  if (!labels) return stemHanja;
+  if (locale === "en") return labels.en;
+  if (locale === "ja") return labels.ja;
+  return labels.ko;
+}
+
+/** 지지 한자 → locale별 발음. 매핑 없으면 한자 그대로 반환. */
+export function getBranchReading(branchHanja: string, locale: string): string {
+  const labels = BRANCH_LABELS[branchHanja];
+  if (!labels) return branchHanja;
+  if (locale === "en") return labels.en;
+  if (locale === "ja") return labels.ja;
+  return labels.ko;
+}
+
+/** 천간 한글 발음 → 한자 역매핑 (saju-calculator의 majorFortunes는 stem 한글만 보유) */
+const STEM_HANJA_FROM_KO: Record<string, string> = Object.fromEntries(
+  Object.entries(STEM_KO).map(([hanja, ko]) => [ko, hanja])
+);
+
+/** 지지 한글 발음 → 한자 역매핑 */
+const BRANCH_HANJA_FROM_KO: Record<string, string> = Object.fromEntries(
+  Object.entries(BRANCH_KO).map(([hanja, ko]) => [ko, hanja])
+);
+
+/** 한글 천간 발음을 받아 locale별 발음으로 변환. */
+export function getStemReadingFromKo(koStem: string, locale: string): string {
+  const hanja = STEM_HANJA_FROM_KO[koStem];
+  if (!hanja) return koStem;
+  return getStemReading(hanja, locale);
+}
+
+/** 한글 지지 발음을 받아 locale별 발음으로 변환. */
+export function getBranchReadingFromKo(koBranch: string, locale: string): string {
+  const hanja = BRANCH_HANJA_FROM_KO[koBranch];
+  if (!hanja) return koBranch;
+  return getBranchReading(hanja, locale);
+}
+
+/** 한글 천간 발음 → 한자 (DaeunTimeline 메인 표시용) */
+export function getStemHanjaFromKo(koStem: string): string {
+  return STEM_HANJA_FROM_KO[koStem] ?? koStem;
+}
+
+/** 한글 지지 발음 → 한자 */
+export function getBranchHanjaFromKo(koBranch: string): string {
+  return BRANCH_HANJA_FROM_KO[koBranch] ?? koBranch;
+}

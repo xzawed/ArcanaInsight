@@ -1,7 +1,9 @@
 "use client";
 
-import { OHAENG } from "@/data/saju/constants";
+import { OHAENG, getOhaengLabel } from "@/data/saju/constants";
 import type { OhaengType } from "@/data/saju/constants";
+import { useT } from "@/i18n/useT";
+import { useLocaleStore } from "@/hooks/useLocaleStore";
 
 interface OhaengGraphProps {
   readonly elements: Record<OhaengType, number>;
@@ -9,6 +11,8 @@ interface OhaengGraphProps {
 }
 
 export function OhaengGraph({ elements, yongsinElement }: OhaengGraphProps) {
+  const { t } = useT();
+  const locale = useLocaleStore((s) => s.locale);
   const maxCount = Math.max(...Object.values(elements), 1);
   const ohaengOrder: OhaengType[] = ["wood", "fire", "earth", "metal", "water"];
 
@@ -16,7 +20,7 @@ export function OhaengGraph({ elements, yongsinElement }: OhaengGraphProps) {
     <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg">🔥</span>
-        <h3 className="font-serif font-bold text-arcana-purple">오행 분포</h3>
+        <h3 className="font-serif font-bold text-arcana-purple">{t("saju.chart.ohaeng-title")}</h3>
       </div>
 
       <div className="space-y-3">
@@ -40,9 +44,9 @@ export function OhaengGraph({ elements, yongsinElement }: OhaengGraphProps) {
                   {count}
                 </span>
               </div>
-              <span className="w-8 text-xs md:text-sm text-arcana-muted">{info.ko}</span>
+              <span className="w-12 text-xs md:text-sm text-arcana-muted">{getOhaengLabel(el, locale)}</span>
               {isYongsin && (
-                <span className="text-[10px] md:text-xs text-arcana-gold bg-arcana-gold/10 px-1.5 py-0.5 rounded-full font-bold">용신</span>
+                <span className="text-[10px] md:text-xs text-arcana-gold bg-arcana-gold/10 px-1.5 py-0.5 rounded-full font-bold">{t("saju.chart.yongsin")}</span>
               )}
             </div>
           );
