@@ -135,7 +135,15 @@ scripts/
 
 **캐릭터 경험 시스템**: `CharacterId` 타입 (`src/types/character.ts` — `CHARACTER_IDS as const` 기반 union). `CHAR_ENTRANCE: Record<CharacterId, EntranceConfig>` (SpriteAnimator 모듈 내 상수). 에러 대사: `characterErrorLines` / `defaultErrorLines` → `getWaitingLinesData(locale)` 경유 ko/en/ja 분기. 결과 mood: `CHARACTER_RESULT_MOODS` (`waiting-lines.ts`). 6-mood 전체 활성화: 카드 선택→`surprised`, 대기줄→`line.mood`, 결과→캐릭터별. 자유 질문: `freeQuestion` (Zustand `useSession`) → Zod 검증 → `buildFreeQuestionPrompt()`. 캐릭터 메모리: `getRecentCharacterMemory()` (`src/lib/db/character-context.ts`) → `buildCharacterMemoryPrompt()` → system prompt 주입 (인증 사용자 전용, 실패 시 빈 문자열 반환).
 
-**i18n 런타임 한국어 잔여 + AI 응답 locale 강제 강화 (PR #263)**: 사용자 보고 — 영어 locale인데 화면·AI 응답에 한국어 노출. 스크린샷 직접 매칭 정밀 추적.
+**i18n 타로 세션 캐릭터 대사 4건 + namespace 불일치 (PR #264)**: 사용자 보고 — 영어 locale에서 ① "tarot.card-confirm.lab..." (번역 키 자체) 노출 ② 캐릭터 대사 "3장의 카드를 골라주세요..." 한국어 노출.
+
+**원인 1 — namespace 불일치 → 키 문자열 그대로 노출**: PR 12에서 `t("tarot.card-confirm.label")` 호출했으나 실제 사전 키는 `settings.card-confirm.label` (settings namespace). `flatten()`이 `${namespace}.${innerKey}` 형태로 키 생성하므로 tarot 접두사 조회 실패 → `t()` fallback이 **입력 키 문자열 자체를 반환** → 화면 노출. 수정: `t("settings.card-confirm.label")`.
+
+**원인 2 — 캐릭터 대사 4건 한국어 hard-coded**: ① `character.greeting` 직접 필드 접근 → `getCharacterGreeting(character, locale)` 헬퍼 (PR #232 재활용). ② "{n}장의 카드를 골라주세요..." → `tarot.session.msg.pick-cards-prompt` 신규 키. ③ "{n}장의 카드가 모두 선택되었어요!" → `tarot.session.msg.confirm-final` 신규 키. ④ "{n}번째 카드를 선택했어요. 이 카드가 맞나요?" → `tarot.session.msg.confirm-card` 신규 키. `{current}` placeholder가 두 번 등장하므로 `/\{current\}/g` 정규식 치환(`String.replace`는 첫 매치만 교체).
+
+사전 ko/en/ja 292 → **295/295/295** (drift 0). `useCallback` deps에 `t` 추가(`react-hooks/exhaustive-deps`). **새 규칙**: `t()` 호출 시 namespace 정확성 grep 검증 필수 — 미스매치 시 키 문자열이 사용자에게 직접 노출되는 최악 UX 회귀. 새 사전 키 추가 전 같은 의미 기존 키가 다른 namespace에 있는지 확인.
+
+
 
 **화면 잔여 4건 i18n 적용**:
 - `CharacterGallery.tsx` 홈 캐릭터 섹션 — h2 "당신의 상담사를 만나보세요" + p 설명 + `char.speciality` 한국어 고정 → `home.gallery.title/desc` 사전 키 + `getCharacterSpeciality(char, locale)` 헬퍼 적용.
@@ -267,6 +275,7 @@ pnpm i18n:check             # ko/en/ja 번역 키 drift 검출 (orphan 발견 �
 ### i18n 다국어 (UI 텍스트·번역·locale 작업 시)
 - **LocaleProvider SSR 패턴 필수**: `useEffect` 내 `setLocale()` 동기 호출 금지. `setTimeout(() => setLocale(initial), 0); return () => clearTimeout(t)` 패턴 사용. 미준수 시 hydration error #418 발생. — **`react-hooks/set-state-in-effect` 린트 위반 원인**.
 - **번역 키 정의 우선**: 새 UI 텍스트 추가 → ① `src/i18n/translations/shared/keys.ts`에 타입 추가 → ② `ko/index.ts` (SSOT) 채움 → ③ `en/index.ts` 임시 영문 (외부 번역 대기) → ④ `ja/index.ts`는 PR-5에서 일괄. ko 사전이 SSOT, en/ja는 부분 번역 허용 (Partial<SharedKeys>).
+- **`t()` 호출 시 namespace 정확성 검증 필수**: `flatten()`이 `${namespace}.${innerKey}` 형태로 키 생성. 호출하는 namespace와 사전 정의 namespace가 다르면 lookup 실패 → `t()` fallback이 **입력 키 문자열 자체를 반환** → 화면에 키가 그대로 노출되는 최악 UX. 새 키 호출 전 `grep "innerKey" src/i18n/translations/shared/keys.ts`로 정의 위치 확인. 같은 의미 기존 키가 다른 namespace에 있다면 재활용. — **PR #264 "tarot.card-confirm.lab..." 노출 회귀 원인**.
 - **LanguageSwitcher 데스크탑·모바일 별도 ref + 별도 testid 필수**: 동일 ref 공유 시 React last-wins로 outside-click 오탐. 데스크탑 `data-testid="lang-option-${l}"`, 모바일 `data-testid="mobile-lang-option-${l}"`. PR #211 테마 드롭다운 교훈 동일 적용.
 - **API 라우트 INSERT에 locale 동봉 필수**: 신규 `sessions`·`readings` INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 locale 결정 후 동봉. 미동봉 시 DEFAULT 'ko' 자동 입력 → 영어/일본어 사용자 데이터가 'ko'로 고정. — **PR-A 정합성 핫픽스 원인**.
 - **E2E 셀렉터는 data-testid 우선**: 한글 텍스트 `hasText` regex 셀렉터는 i18n 텍스트 변경에 깨짐. nav·LanguageSwitcher·드롭다운은 `data-testid` 부여 필수. — **PR-A E2E `responsive.spec.ts` 수정 원인**.
