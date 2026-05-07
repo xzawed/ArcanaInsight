@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { characters } from "@/data/characters";
+import { useT } from "@/i18n/useT";
 
 interface FavoriteCharacterSelectorProps {
   currentCharacterId?: string | null;
@@ -13,6 +14,7 @@ interface FavoriteCharacterSelectorProps {
 
 export function FavoriteCharacterSelector({ currentCharacterId, currentCharacterName }: FavoriteCharacterSelectorProps) {
   const router = useRouter();
+  const { t } = useT();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -36,10 +38,10 @@ export function FavoriteCharacterSelector({ currentCharacterId, currentCharacter
         className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 text-center w-full hover:border-arcana-purple/50 transition-colors group"
       >
         <p className={`text-sm font-sans font-bold truncate transition-colors ${currentCharacterName ? "text-arcana-indigo" : "text-arcana-muted"}`}>
-          {isPending ? "저장 중..." : (currentCharacterName ?? "미설정")}
+          {isPending ? t("mypage.favorite.saving") : (currentCharacterName ?? t("mypage.favorite.unset"))}
         </p>
         <p className="text-arcana-muted text-xs mt-1 group-hover:text-arcana-purple/70 transition-colors">
-          선호 상담사 {currentCharacterName ? "변경" : "설정"}
+          {t("mypage.profile.favorite-character")} {currentCharacterName ? t("mypage.favorite.action.change") : t("mypage.favorite.action.set")}
         </p>
       </button>
 
@@ -61,7 +63,7 @@ export function FavoriteCharacterSelector({ currentCharacterId, currentCharacter
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-sans font-bold text-base">선호 상담사 선택</h3>
+                <h3 className="font-sans font-bold text-base">{t("mypage.favorite.modal-title")}</h3>
                 <button onClick={() => setOpen(false)} className="text-arcana-muted hover:text-arcana-text text-xl leading-none">✕</button>
               </div>
 
@@ -82,7 +84,7 @@ export function FavoriteCharacterSelector({ currentCharacterId, currentCharacter
                   onClick={() => handleSelect(null)}
                   className="w-full py-2 rounded-full text-xs text-arcana-muted border border-arcana-border hover:border-arcana-purple/50 hover:text-arcana-text transition-colors"
                 >
-                  선호 상담사 해제
+                  {t("mypage.favorite.action.unset")}
                 </button>
               )}
             </motion.div>
