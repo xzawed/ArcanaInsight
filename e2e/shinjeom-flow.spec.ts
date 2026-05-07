@@ -90,3 +90,45 @@ test.describe("신점 서비스 플로우", () => {
     expect(await cards.count()).toBeLessThanOrEqual(6);
   });
 });
+
+test.describe("신점 세션 — 메시지 전송 플로우", () => {
+  test.beforeEach(async ({ page }) => {
+    // 신점 세션 진입: 첫 번째 캐릭터 선택 → 첫 번째 주제 선택
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/shinjeom");
+    await page.waitForLoadState("domcontentloaded");
+    // 캐릭터 선택 (기존 spec 패턴 — shinjeom 페이지는 character-card testid 없음)
+    const firstChar = page.locator("button").filter({ hasText: /아르카나|루나|미코/ }).first();
+    await expect(firstChar).toBeVisible({ timeout: 10_000 });
+    await firstChar.click();
+    // 주제 선택
+    const firstTopic = page.locator("[data-testid^='shinjeom-topic-btn-']").first();
+    await expect(firstTopic).toBeVisible({ timeout: 5000 });
+    await firstTopic.click();
+    await page.waitForURL("**/shinjeom/session", { timeout: 10000 });
+  });
+
+  test("입력창 표시 + 메시지 전송 가능", async ({ page }) => {
+    const input = page.locator("input[type='text']").first();
+    await expect(input).toBeVisible({ timeout: 5000 });
+    await expect(input).not.toBeDisabled();
+
+    await input.fill("안녕하세요");
+    const sendBtn = page.locator("button:has-text('전송')").first();
+    await expect(sendBtn).not.toBeDisabled();
+  });
+
+  test("메시지 전송 후 isLoading 해제 (타임아웃 없음)", async ({ page }) => {
+    const input = page.locator("input[type='text']").first();
+    await input.fill("오늘 운세는 어때요?");
+
+    const sendBtn = page.locator("button:has-text('전송')").first();
+    await sendBtn.click();
+
+    // 전송 후 입력창 비워짐 확인
+    await expect(input).toHaveValue("", { timeout: 3000 });
+
+    // 로딩 완료 후 입력 재활성화 (최대 30초 AI 응답 대기)
+    await expect(input).not.toBeDisabled({ timeout: 30000 });
+  });
+});

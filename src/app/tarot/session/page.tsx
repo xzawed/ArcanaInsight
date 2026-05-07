@@ -22,7 +22,7 @@ const CardDeck = dynamic(
 );
 const CardSpread = dynamic(
   () => import("@/components/card/CardSpread").then((m) => ({ default: m.CardSpread })),
-  { loading: () => null },
+  { loading: () => <div className="w-full flex-1 min-h-[200px] md:min-h-[360px]" /> },
 );
 const ReadingProgressIndicator = dynamic(
   () => import("@/components/tarot/ReadingProgressIndicator").then((m) => ({ default: m.ReadingProgressIndicator })),

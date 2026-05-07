@@ -93,6 +93,7 @@ export default function SajuSessionPage() {
   const [readingErrorReason, setReadingErrorReason] = useState<"timeout" | "generic">("generic");
   const resultContainerRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
+  const readingAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!topic || !character || !userInfo || !timeRange) {
@@ -141,6 +142,7 @@ export default function SajuSessionPage() {
 
     // 클라이언트 hard timeout (180초). 서버 SSE가 hung되거나 done 이벤트가 도달 못 하는 경우 강제 종료.
     const abortController = new AbortController();
+    readingAbortRef.current = abortController;
     let finished = false;
     const timeoutId = setTimeout(() => {
       if (finished) return;
@@ -221,6 +223,10 @@ export default function SajuSessionPage() {
       if (container) container.scrollTop = container.scrollHeight;
     }
   }, [chatMessages, phase]);
+
+  useEffect(() => {
+    return () => { readingAbortRef.current?.abort(); };
+  }, []);
 
   const birthYear = userInfo ? parseInt(userInfo.birthDate.split("-")[0]) : 2000;
 

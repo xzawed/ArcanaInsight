@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatMessage } from "@/types/session";
 import { useT } from "@/i18n/useT";
@@ -12,7 +12,7 @@ interface DialogueBoxProps {
   readonly className?: string;
 }
 
-export function DialogueBox({ messages, characterName, isTyping = false, className = "" }: DialogueBoxProps) {
+export const DialogueBox = React.memo(function DialogueBox({ messages, characterName, isTyping = false, className = "" }: DialogueBoxProps) {
   const { t } = useT();
   const displayName = characterName ?? t("chat.default-character-name");
   const lastMessage = messages.filter((m) => m.role === "character").at(-1);
@@ -111,4 +111,5 @@ export function DialogueBox({ messages, characterName, isTyping = false, classNa
       </div>
     </div>
   );
-}
+});
+DialogueBox.displayName = "DialogueBox";

@@ -17,6 +17,7 @@ import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
+import { fetchSSEStream } from "@/hooks/useSSEStream";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
@@ -38,35 +39,6 @@ function removeMessage(msgId: string) {
   }));
 }
 
-function parseSseLine(line: string): Record<string, unknown> | null {
-  if (!line.startsWith("data: ")) return null;
-  try {
-    return JSON.parse(line.slice(6)) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-async function drainSseChunks(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  onChunk: (data: Record<string, unknown>) => boolean
-): Promise<void> {
-  const decoder = new TextDecoder();
-  let sseBuffer = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    sseBuffer += decoder.decode(value, { stream: true });
-    const lines = sseBuffer.split("\n");
-    sseBuffer = lines.pop() ?? "";
-    for (const line of lines) {
-      const data = parseSseLine(line);
-      if (data === null) continue;
-      const stop = onChunk(data);
-      if (stop) return;
-    }
-  }
-}
 
 export default function ShinjeomSessionPage() {
   const router = useRouter();
@@ -82,6 +54,7 @@ export default function ShinjeomSessionPage() {
   const [inputText, setInputText] = useState("");
   const [sessionCreated, setSessionCreated] = useState(false);
   const redirectedRef = useRef(false);
+  const readingAbortRef = useRef<AbortController | null>(null);
 
   // 세션 생성
   useEffect(() => {
@@ -126,7 +99,11 @@ export default function ShinjeomSessionPage() {
     }
   }, [chatMessages.length]);
 
-  const handleSend = async () => {
+  useEffect(() => {
+    return () => { readingAbortRef.current?.abort(); };
+  }, []);
+
+  const handleSend = () => {
     const message = inputText.trim();
     if (!message || isLoading) return;
 
@@ -134,102 +111,129 @@ export default function ShinjeomSessionPage() {
     setLoading(true);
     setMood("mystical");
 
-    // messageIndex: addChatMessage 호출 전 현재 길이를 캡처
     const messageIndex = useShinjeomSessionStore.getState().chatMessages.length;
-
     addChatMessage({ id: crypto.randomUUID(), role: "user", content: message, timestamp: new Date() });
     incrementTurn();
 
-    try {
-      const response = await fetch("/api/shinjeom/message", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: useShinjeomSessionStore.getState().sessionId,
-          topic, characterId,
-          currentMessage: message,
-          chatHistory: useShinjeomSessionStore.getState().chatMessages,
-          isFinalTurn: false,
-          messageIndex,
-        }),
-      });
+    const msgId = crypto.randomUUID();
+    addChatMessage({ id: msgId, role: "character", content: "", mood: "mystical", timestamp: new Date() });
 
-      if (!response.ok || !response.body) {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
+    const abortController = new AbortController();
+    readingAbortRef.current?.abort();
+    readingAbortRef.current = abortController;
+    let finished = false;
+
+    const timeoutId = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      abortController.abort();
+      updateMessageContent(msgId, getErrorMsg(characterId, "api"));
+      setMood("default");
+      setLoading(false);
+    }, 180_000);
+
+    void fetchSSEStream({
+      url: "/api/shinjeom/message",
+      signal: abortController.signal,
+      body: {
+        sessionId: useShinjeomSessionStore.getState().sessionId,
+        topic, characterId,
+        currentMessage: message,
+        chatHistory: useShinjeomSessionStore.getState().chatMessages,
+        isFinalTurn: false,
+        messageIndex,
+      },
+      onChunk: (_chunk, fullText) => {
+        updateMessageContent(msgId, fullText);
+      },
+      onDone: () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        setLoading(false);
+      },
+      onError: () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
         setMood("default");
         setLoading(false);
-        return;
-      }
-
-      const msgId = crypto.randomUUID();
-      addChatMessage({ id: msgId, role: "character", content: "", mood: "mystical", timestamp: new Date() });
-
-      let fullText = "";
-      await drainSseChunks(response.body.getReader(), (data) => {
-        if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
-        if (data.chunk) { fullText += data.chunk as string; updateMessageContent(msgId, fullText); }
-        return false;
-      });
-    } catch {
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
-      setMood("default");
-    }
-    setLoading(false);
+      },
+    }).then(() => {
+      if (!finished) clearTimeout(timeoutId);
+    });
   };
 
-  const handleEndConsultation = async () => {
+  const handleEndConsultation = () => {
     if (turnCount < 1 || isLoading) return;
 
     setLoading(true);
     setMood("mystical");
 
-    try {
-      const currentChatMessages = useShinjeomSessionStore.getState().chatMessages;
+    const currentChatMessages = useShinjeomSessionStore.getState().chatMessages;
+    const msgId = crypto.randomUUID();
+    addChatMessage({
+      id: msgId, role: "character",
+      content: translate("shinjeom.session.msg.preparing-result", locale),
+      mood: "mystical", timestamp: new Date(),
+    });
 
-      const response = await fetch("/api/shinjeom/message", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: useShinjeomSessionStore.getState().sessionId,
-          topic, characterId,
-          currentMessage: undefined,
-          chatHistory: currentChatMessages,
-          isFinalTurn: true,
-          messageIndex: currentChatMessages.length,
-        }),
-      });
+    const abortController = new AbortController();
+    readingAbortRef.current?.abort();
+    readingAbortRef.current = abortController;
+    let finished = false;
 
-      if (!response.ok || !response.body) {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "reading"), mood: "default", timestamp: new Date() });
+    const timeoutId = setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      abortController.abort();
+      updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+      setMood("default");
+      setLoading(false);
+    }, 180_000);
+
+    void fetchSSEStream({
+      url: "/api/shinjeom/message",
+      signal: abortController.signal,
+      body: {
+        sessionId: useShinjeomSessionStore.getState().sessionId,
+        topic, characterId,
+        currentMessage: undefined,
+        chatHistory: currentChatMessages,
+        isFinalTurn: true,
+        messageIndex: currentChatMessages.length,
+      },
+      onChunk: () => { /* 신점 최종 결과는 done 이벤트로 수신 */ },
+      onDone: (data) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        const result = data.result as { parseError?: string } | undefined;
+        if (!result || result.parseError) {
+          if (result?.parseError) console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
+          updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+          setMood("default");
+          setLoading(false);
+          return;
+        }
+        removeMessage(msgId);
+        setReadingResult(data.result as Parameters<typeof setReadingResult>[0]);
+        setPhase("result");
+        setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
+        setLoading(false);
+      },
+      onError: () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
         setMood("default");
         setLoading(false);
-        return;
-      }
-
-      const msgId = crypto.randomUUID();
-      addChatMessage({ id: msgId, role: "character", content: translate("shinjeom.session.msg.preparing-result", locale), mood: "mystical", timestamp: new Date() });
-
-      await drainSseChunks(response.body.getReader(), (data) => {
-        if (data.error) { updateMessageContent(msgId, getErrorMsg(characterId, "reading")); return true; }
-        if (data.done && data.isFinal && data.result) {
-          const result = data.result as { parseError?: string };
-          // 결과 표시 불가 — DB 저장도 차단된 상태 → 사용자에게 재시도 안내
-          if (result.parseError) {
-            console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
-            updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
-            setMood("default");
-            return true;
-          }
-          removeMessage(msgId);
-          setReadingResult(data.result as Parameters<typeof setReadingResult>[0]);
-          setPhase("result");
-          setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
-        }
-        return false;
-      });
-    } catch {
-      addChatMessage({ id: crypto.randomUUID(), role: "character", content: getErrorMsg(characterId, "api"), mood: "default", timestamp: new Date() });
-      setMood("default");
-    }
-    setLoading(false);
+      },
+    }).then(() => {
+      if (!finished) clearTimeout(timeoutId);
+    });
   };
 
   if (!character) return null;
@@ -367,6 +371,7 @@ export default function ShinjeomSessionPage() {
                 </div>
                 {turnCount >= 1 && (
                   <button
+                    data-testid="shinjeom-get-result-btn"
                     onClick={handleEndConsultation}
                     disabled={isLoading}
                     className="w-full mt-2 py-2.5 rounded-full border border-arcana-gold/60 text-arcana-gold font-serif font-bold text-sm disabled:opacity-40 transition-opacity hover:bg-arcana-gold/10"
