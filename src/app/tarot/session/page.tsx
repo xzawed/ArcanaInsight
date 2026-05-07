@@ -487,7 +487,7 @@ export default function TarotSessionPage() {
                 className="text-arcana-muted text-xs hover:text-arcana-purple transition-colors"
                 type="button"
               >
-                ← 상담사 다시 선택
+                {t("tarot.session.btn.back-to-character")}
               </button>
               <button
                 onClick={toggleConfirmMode}
@@ -503,7 +503,7 @@ export default function TarotSessionPage() {
                 }`}>
                   {confirmEachCard && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                 </span>
-                카드 확인 모드
+                {t("tarot.card-confirm.label")}
               </button>
             </div>
           )}

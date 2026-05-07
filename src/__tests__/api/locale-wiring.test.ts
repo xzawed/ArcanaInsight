@@ -152,8 +152,9 @@ describe("locale wiring — prompt-builder language instruction", () => {
 
   it("locale='en' → English only 지시문 + JSON 키 영어 고정 명시", () => {
     const result = buildCharacterHeader(character!, undefined, "en");
-    expect(result).toContain("natural English only");
+    expect(result).toContain("natural English");
     expect(result).toContain("EXACT English JSON keys");
+    expect(result).toContain("STRICTLY FORBIDDEN");
     expect(result).not.toContain("한국어로만");
   });
 
@@ -163,9 +164,11 @@ describe("locale wiring — prompt-builder language instruction", () => {
     expect(result).toContain("英語のまま");
   });
 
-  it("buildSystemPrompt locale='en' → English only 지시문 전파", () => {
+  it("buildSystemPrompt locale='en' → English only 지시문 전파 + footer 강조", () => {
     const result = buildSystemPrompt(character!, "en");
-    expect(result).toContain("natural English only");
+    expect(result).toContain("natural English");
+    expect(result).toContain("STRICTLY FORBIDDEN");
+    expect(result).toContain("FINAL REMINDER");
   });
 
   it("미지원 locale → 빈 문자 fallback (ko와 동일 — 노이즈 없음)", () => {

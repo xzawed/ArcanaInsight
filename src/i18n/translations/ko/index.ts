@@ -84,6 +84,8 @@ export const ko: SharedKeys = {
     "daily-card.reversed": "(역방향)",
     "daily-card.upright": "(정방향)",
     "daily-card.share-text": "오늘의 카드 - ArcanaInsight",
+    "gallery.title": "당신의 상담사를 만나보세요",
+    "gallery.desc": "각 상담사만의 특별한 리딩 스타일로 카드의 메시지를 전합니다",
   },
   settings: {
     "page.title": "설정",
@@ -168,6 +170,7 @@ export const ko: SharedKeys = {
     "session.btn.try-again": "다시 시도",
     "session.btn.new-session": "새로운 상담",
     "session.btn.share": "결과 공유하기",
+    "session.btn.back-to-character": "← 상담사 다시 선택",
     "session.error.reading": "해석에 문제가 발생했어요",
     "session.shuffle.fallback-text": "카드를 선택하세요",
     "session.shuffle.skip-aria": "카드 셔플 의식 스킵",
