@@ -129,8 +129,8 @@ describe("getGrokBaseUrl", () => {
 // ─────────────────────────── 숫자 반환 함수 ───────────────────────────
 
 describe("getAiTimeoutMs", () => {
-  it("env 미설정 시 기본값 60000을 반환한다", () => {
-    expect(getAiTimeoutMs()).toBe(60000);
+  it("env 미설정 시 기본값 120000을 반환한다 (Grok-3 reasoning 모델 timeout 대응)", () => {
+    expect(getAiTimeoutMs()).toBe(120000);
   });
 
   it("env 설정 시 정수로 파싱하여 반환한다", () => {

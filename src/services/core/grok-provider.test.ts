@@ -289,5 +289,81 @@ describe("GrokProvider", () => {
 
       await expect(collectStream(provider.streamReading("s", "u"))).rejects.toThrow("Response body is null");
     });
+
+    // ─── reasoning 모델 회귀 방지 (PR 회귀 분석) ──────────────────────────
+    it("reasoning 토큰만 소비하고 content가 비어있으면 throw → FallbackProvider Claude 전환", async () => {
+      // reasoning_content만 있고 content는 null인 청크 (delta.content가 없으므로 yield 안 됨)
+      const sseLines = [
+        'data: {"choices":[{"delta":{"reasoning_content":"thinking..."}}]}',
+        'data: {"choices":[{"delta":{"reasoning_content":"more thinking"}}]}',
+        "data: [DONE]",
+      ];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await expect(collectStream(provider.streamReading("s", "u"))).rejects.toThrow(/빈 응답.*reasoning/);
+    });
+
+    it("reasoning 청크 사이에 content 청크가 1개라도 있으면 정상 yield (throw 안 함)", async () => {
+      const sseLines = [
+        'data: {"choices":[{"delta":{"reasoning_content":"thinking"}}]}',
+        'data: {"choices":[{"delta":{"content":"본문"}}]}',
+        "data: [DONE]",
+      ];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      const chunks = await collectStream(provider.streamReading("s", "u"));
+      expect(chunks).toEqual(["본문"]);
+    });
+
+    it("grok-3 모델이면 reasoning_effort 옵션이 body에 포함된다", async () => {
+      process.env.GROK_MODEL = "grok-3";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBeDefined();
+      expect(["low", "high"]).toContain(body.reasoning_effort);
+    });
+
+    it("grok-4-fast-non-reasoning 모델이면 reasoning_effort 옵션 제외 (400 차단 회피)", async () => {
+      process.env.GROK_MODEL = "grok-4-fast-non-reasoning";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBeUndefined();
+    });
+
+    it("GROK_REASONING_EFFORT 환경변수가 'high'면 그대로 적용", async () => {
+      process.env.GROK_MODEL = "grok-3";
+      process.env.GROK_REASONING_EFFORT = "high";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBe("high");
+      delete process.env.GROK_REASONING_EFFORT;
+    });
+
+    it("grok-3-mini 모델도 reasoning_effort 옵션 적용", async () => {
+      process.env.GROK_MODEL = "grok-3-mini";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBe("low");
+    });
+
+    it("grok-4 (자동 reasoning, 옵션 미지원) → reasoning_effort 옵션 제외", async () => {
+      process.env.GROK_MODEL = "grok-4";
+      const newProvider = new GrokProvider();
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(newProvider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.reasoning_effort).toBeUndefined();
+    });
   });
 });

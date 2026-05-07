@@ -1,6 +1,22 @@
 import { AIProvider } from "@/types/service";
-import { getGrokApiKey, getGrokModel, getGrokBaseUrl, getAiTimeoutMs, getDefaultMaxTokens, getAiTemperature } from "@/lib/env";
+import { getGrokApiKey, getGrokModel, getGrokBaseUrl, getAiTimeoutMs, getDefaultMaxTokens, getAiTemperature, getGrokReasoningEffort } from "@/lib/env";
 import { withAbortTimeout, readSseLines } from "./http-utils";
+
+/**
+ * reasoning_effort 옵션이 적용 가능한 Grok 모델 패밀리만 본문에 포함.
+ * - grok-3-mini, grok-3-mini-fast: "low" | "high" 지원
+ * - grok-4 (자동 reasoning): 미지원 (요청 시 400 또는 무시)
+ * - grok-4-fast-non-reasoning: 미지원 (reasoning 자체 비활성)
+ * 미지원 모델에는 옵션을 보내지 않아 400 차단을 회피.
+ */
+function buildReasoningOption(model: string): { reasoning_effort: string } | Record<string, never> {
+  const m = model.toLowerCase();
+  if (m.includes("non-reasoning")) return {};
+  if (m.includes("grok-3-mini")) return { reasoning_effort: getGrokReasoningEffort() };
+  // grok-3 (reasoning 가능 모델)도 reasoning_effort 시도 — xAI가 무시해도 안전
+  if (m === "grok-3" || m.startsWith("grok-3-")) return { reasoning_effort: getGrokReasoningEffort() };
+  return {};
+}
 
 /** Grok API Rate Limit (429) — Retry-After 기반 짧은 쿨다운 */
 export class RateLimitError extends Error {
@@ -71,6 +87,7 @@ export class GrokProvider implements AIProvider {
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
           temperature: getAiTemperature(), max_tokens: maxTokens ?? getDefaultMaxTokens(),
+          ...buildReasoningOption(this.model),
         }),
         signal,
       });
@@ -93,16 +110,24 @@ export class GrokProvider implements AIProvider {
           model: this.model,
           messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
           temperature: getAiTemperature(), max_tokens: maxTokens ?? getDefaultMaxTokens(), stream: true,
+          ...buildReasoningOption(this.model),
         }),
         signal: controller.signal,
       });
       if (!response.ok) { await this.handleErrorResponse(response); return; }
-      yield* readSseLines(
+      // reasoning 모델이 reasoning_content 채널로만 응답하고 content는 비어있는 경우를 감지하기 위해
+      // yield 횟수를 추적. 0회면 throw → FallbackProvider가 Claude로 전환할 수 있도록.
+      let yielded = 0;
+      for await (const chunk of readSseLines(
         response,
         (p) => (p as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content ?? null,
         "Grok",
         controller.signal
-      );
+      )) {
+        yielded++;
+        yield chunk;
+      }
+      if (yielded === 0) throw new Error("Grok API가 빈 응답을 반환했습니다 (reasoning 토큰만 소비됨 가능성).");
     } finally {
       clearTimeout(timer);
     }
