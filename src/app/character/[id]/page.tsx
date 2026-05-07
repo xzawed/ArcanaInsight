@@ -6,29 +6,39 @@ import { motion } from "framer-motion";
 import { getCharacterById } from "@/data/characters";
 import { getCharacterDescription, getCharacterSpeciality } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { useT } from "@/i18n/useT";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 
-const services = [
-  { id: "tarot", label: "타로 리딩", icon: "🃏", desc: "카드로 운명을 읽어요" },
-  { id: "saju", label: "사주 상담", icon: "☯", desc: "사주팔자로 인생을 봐요" },
-  { id: "shinjeom", label: "신점", icon: "🔮", desc: "신의 뜻을 전해드려요" },
-  { id: "fortune", label: "오늘의 운세", icon: "⭐", desc: "오늘 하루를 미리 봐요", disabled: true },
-];
+const SERVICE_IDS = [
+  { id: "tarot",    icon: "🃏" },
+  { id: "saju",     icon: "☯" },
+  { id: "shinjeom", icon: "🔮" },
+  { id: "fortune",  icon: "⭐", disabled: true },
+] as const;
 
 export default function CharacterPage() {
   const params = useParams();
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
+  const { t } = useT();
   const id = typeof params.id === "string" ? params.id : "";
   const character = getCharacterById(id);
 
   if (!character) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-arcana-muted">캐릭터를 찾을 수 없습니다.</p>
+        <p className="text-arcana-muted">{t("character.page.not-found")}</p>
       </div>
     );
   }
+
+  const services = SERVICE_IDS.map((s) => ({
+    id: s.id,
+    icon: s.icon,
+    label: t(`character.service.${s.id}.label`),
+    desc: t(`character.service.${s.id}.desc`),
+    disabled: "disabled" in s ? s.disabled : false,
+  }));
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -75,7 +85,7 @@ export default function CharacterPage() {
               onClick={() => router.back()}
               className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors mb-4"
             >
-              ← 뒤로
+              {t("common.back-arrow")}
             </button>
 
             <div className="mb-6">
@@ -87,7 +97,7 @@ export default function CharacterPage() {
               <p className="text-arcana-text text-sm leading-relaxed mt-3">{getCharacterDescription(character, locale)}</p>
             </div>
 
-            <h2 className="font-serif font-bold text-sm text-arcana-muted mb-3">서비스 선택</h2>
+            <h2 className="font-serif font-bold text-sm text-arcana-muted mb-3">{t("character.page.service-select")}</h2>
             <div className="grid grid-cols-2 gap-3">
               {services.map((service, index) => (
                 <motion.button

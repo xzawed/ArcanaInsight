@@ -13,6 +13,10 @@ export interface SharedKeys {
     "language.changed": string;
     "share.link-copied": string;
     "share.text-copied": string;
+    // PR 9
+    "back-arrow": string;
+    "modal.close-aria": string;
+    "card.back-alt": string;
   };
   header: {
     "logo.alt": string;
@@ -239,6 +243,52 @@ export interface SharedKeys {
     "date.yesterday": string;
     "date.days-ago": string;
     "date.weeks-ago": string;
+    // PR 9 — FavoriteCharacterSelector
+    "favorite.saving": string;
+    "favorite.unset": string;
+    "favorite.action.change": string;
+    "favorite.action.set": string;
+    "favorite.action.unset": string;
+    "favorite.modal-title": string;
+  };
+  character: {
+    "page.service-select": string;
+    "page.not-found": string;
+    "service.tarot.label": string;
+    "service.tarot.desc": string;
+    "service.saju.label": string;
+    "service.saju.desc": string;
+    "service.shinjeom.label": string;
+    "service.shinjeom.desc": string;
+    "service.fortune.label": string;
+    "service.fortune.desc": string;
+  };
+  "user-info": {
+    "title.saju": string;
+    "title.tarot": string;
+    "subtitle.saju": string;
+    "subtitle.tarot.with-name": string;
+    "subtitle.tarot.default": string;
+    "submit.saju": string;
+    "submit.tarot": string;
+    "name-placeholder": string;
+    "gender.male": string;
+    "gender.female": string;
+    "gender.other": string;
+    "save-info.with-account": string;
+    "save-info.local": string;
+    "saved-info-banner": string;
+  };
+  auth: {
+    "login.fallback-error": string;
+    "page.subtitle": string;
+    "page.error-title": string;
+    "page.google-button": string;
+    "page.guest-hint": string;
+  };
+  share: {
+    "result-button-default": string;
+    "copied-button": string;
   };
   shinjeom: {
     "result.title": string;

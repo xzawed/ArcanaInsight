@@ -6,6 +6,7 @@ import { birthHours } from "@/data/birth-hours";
 import { PrivacyConsentModal } from "./PrivacyConsentModal";
 import { createClient } from "@/lib/supabase/client";
 import { UserInfo } from "@/types/user-info";
+import { useT } from "@/i18n/useT";
 
 const STORAGE_KEY = "arcana_user_info";
 const CONSENT_KEY = "arcana_privacy_agreed";
@@ -106,6 +107,7 @@ async function persistProfileToSupabase(data: UserInfo, birthDate: string): Prom
 }
 
 export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {
+  const { t } = useT();
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState(""); // "YYYY-MM-DD"
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
@@ -187,14 +189,15 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     ? birthHours.filter((h) => h.value !== "unknown")
     : birthHours;
 
-  const backLabel = mode === "saju" ? "← 뒤로" : "← 주제 다시 선택";
-  const title = mode === "saju" ? "생년월일 정보 입력" : "상담 정보 입력";
-  const subtitle = mode === "saju"
-    ? "정확한 사주 분석을 위해 필수 정보입니다"
-    : characterName
-      ? `${characterName}가 더 정확한 리딩을 위해 필요한 정보예요`
-      : "더 정확한 리딩을 위해 정보를 입력해주세요";
-  const submitLabel = mode === "saju" ? "사주 분석 시작" : "상담 시작하기";
+  const backLabel = mode === "saju" ? t("common.back-arrow") : t("tarot.page.spread-select.back");
+  const title = mode === "saju" ? t("user-info.title.saju") : t("user-info.title.tarot");
+  const computeSubtitle = (): string => {
+    if (mode === "saju") return t("user-info.subtitle.saju");
+    if (characterName) return t("user-info.subtitle.tarot.with-name").replace("{name}", characterName);
+    return t("user-info.subtitle.tarot.default");
+  };
+  const subtitle = computeSubtitle();
+  const submitLabel = mode === "saju" ? t("user-info.submit.saju") : t("user-info.submit.tarot");
 
   return (
     <div className="space-y-5">
@@ -214,7 +217,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       {hasSavedInfo && (
         <div className="bg-arcana-purple/10 border border-arcana-purple/30 rounded-xl px-4 py-2">
           <p className="text-arcana-purple text-xs">
-            저장된 정보가 자동으로 채워졌습니다. 수정하시면 자동 저장됩니다.
+            {t("user-info.saved-info-banner")}
           </p>
         </div>
       )}
@@ -229,7 +232,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="이름을 입력하세요"
+          placeholder={t("user-info.name-placeholder")}
           className={inputClasses}
         />
       </div>
@@ -263,7 +266,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
                   : "bg-arcana-card/70 border border-arcana-border text-arcana-muted hover:border-arcana-purple"
               }`}
             >
-              {{ male: "남성", female: "여성", other: "기타" }[val]}
+              {t(`user-info.gender.${val}`)}
             </button>
           ))}
         </div>
@@ -302,8 +305,8 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
         />
         <span className="text-arcana-muted text-xs">
           {isLoggedIn
-            ? "개인정보를 저장하여 다음 방문 시 자동 입력"
-            : "이 브라우저에 정보를 저장하여 다음 이용 시 자동 입력"}
+            ? t("user-info.save-info.with-account")
+            : t("user-info.save-info.local")}
         </span>
       </label>
 

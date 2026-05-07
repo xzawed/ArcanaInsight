@@ -5,12 +5,14 @@ import { useState } from "react"
 import Image from "next/image"
 import { signIn } from "next-auth/react"
 import { createClient } from "@/lib/supabase/client"
+import { useT } from "@/i18n/useT"
 
 interface Props {
   useNextAuth: boolean
 }
 
 export default function LoginClient({ useNextAuth }: Props) {
+  const { t } = useT()
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
   const message = searchParams.get("message")
@@ -22,7 +24,7 @@ export default function LoginClient({ useNextAuth }: Props) {
       try {
         await signIn("google", { callbackUrl: "/" })
       } catch (e) {
-        setLoginError(e instanceof Error ? e.message : "로그인에 실패했습니다")
+        setLoginError(e instanceof Error ? e.message : t("auth.login.fallback-error"))
       }
       return
     }
@@ -51,12 +53,12 @@ export default function LoginClient({ useNextAuth }: Props) {
             </div>
           </div>
           <div className="text-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2">로그인</h1>
-            <p className="text-arcana-muted text-sm">리딩 히스토리를 저장하고 관리하세요</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2">{t("header.auth.login")}</h1>
+            <p className="text-arcana-muted text-sm">{t("auth.page.subtitle")}</p>
           </div>
           {(error || loginError) && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-              <p className="font-bold">로그인 실패</p>
+              <p className="font-bold">{t("auth.page.error-title")}</p>
               <p className="mt-1 text-xs">{loginError || message || error}</p>
             </div>
           )}
@@ -65,10 +67,10 @@ export default function LoginClient({ useNextAuth }: Props) {
               onClick={handleLogin}
               className="w-full px-6 py-2.5 rounded-full bg-white text-gray-800 font-serif font-bold text-sm flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors shadow-lg shadow-arcana-purple/20"
             >
-              <span>G</span> Google로 로그인
+              <span>G</span> {t("auth.page.google-button")}
             </button>
           </div>
-          <p className="text-arcana-muted text-xs text-center mt-6">로그인 없이도 타로 상담을 이용할 수 있습니다</p>
+          <p className="text-arcana-muted text-xs text-center mt-6">{t("auth.page.guest-hint")}</p>
         </div>
       </div>
     </div>
