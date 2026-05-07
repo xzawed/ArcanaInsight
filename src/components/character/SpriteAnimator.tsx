@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
@@ -109,7 +109,7 @@ interface SpriteAnimatorProps {
   readonly className?: string;
 }
 
-export function SpriteAnimator({ characterId, mood, idleAnimation = "float", primaryColor, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
+export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, mood, idleAnimation = "float", primaryColor, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
   const imageSrc = `/images/characters/${characterId}/nukki/${fileName}.png`;
@@ -168,4 +168,5 @@ export function SpriteAnimator({ characterId, mood, idleAnimation = "float", pri
       </AnimatePresence>
     </div>
   );
-}
+});
+SpriteAnimator.displayName = "SpriteAnimator";
