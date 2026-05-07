@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { LOCALE_COOKIE, isLocale, type Locale } from "@/i18n/config";
 import { t as translate } from "@/i18n/translations";
@@ -20,6 +21,7 @@ function detectBrowserLocale(): Locale | null {
 }
 
 export function LocaleConfirmModal() {
+  const router = useRouter();
   const setLocale = useLocaleStore((s) => s.setLocale);
   const [suggested, setSuggested] = useState<Locale | null>(null);
 
@@ -66,6 +68,8 @@ export function LocaleConfirmModal() {
       // 쿠키는 클라이언트에서 이미 설정됨
     }
     dismiss();
+    // 서버 컴포넌트가 새 locale 쿠키로 재요청되도록 router.refresh() — 입력 상태 보존.
+    router.refresh();
   };
 
   if (!suggested) return null;
