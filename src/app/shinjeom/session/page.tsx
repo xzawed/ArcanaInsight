@@ -119,6 +119,7 @@ export default function ShinjeomSessionPage() {
     addChatMessage({ id: msgId, role: "character", content: "", mood: "mystical", timestamp: new Date() });
 
     const abortController = new AbortController();
+    readingAbortRef.current?.abort();
     readingAbortRef.current = abortController;
     let finished = false;
 
@@ -179,6 +180,7 @@ export default function ShinjeomSessionPage() {
     });
 
     const abortController = new AbortController();
+    readingAbortRef.current?.abort();
     readingAbortRef.current = abortController;
     let finished = false;
 
@@ -369,6 +371,7 @@ export default function ShinjeomSessionPage() {
                 </div>
                 {turnCount >= 1 && (
                   <button
+                    data-testid="shinjeom-get-result-btn"
                     onClick={handleEndConsultation}
                     disabled={isLoading}
                     className="w-full mt-2 py-2.5 rounded-full border border-arcana-gold/60 text-arcana-gold font-serif font-bold text-sm disabled:opacity-40 transition-opacity hover:bg-arcana-gold/10"
