@@ -31,16 +31,15 @@ async function fetchMemoryPrompt(characterId: string, locale: string): Promise<s
 
 /**
  * 사주 max_tokens 정책 — 한국어 토큰 비효율(영어 대비 1.3배) + JSON 오버헤드 + 사주명리 깊이 반영.
- * 4000/8000 고정은 truncated 빈번 → JSON 파싱 실패 → 빈 결과 표시 유발.
- * timeRange·includeMonthly 기반으로 단계화 (타로 computeReadingMaxTokens 사상과 동일).
- * 출력 토큰만 과금되므로 상한 자체는 비용을 늘리지 않는다.
+ * Grok 내부 reasoning(thinking) 토큰 소비까지 흡수하도록 안전 마진 +30~40% 추가.
+ * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다.
  */
 function computeSajuReadingMaxTokens(timeRange: SajuTimeRange, includeMonthly: boolean): number {
-  if (includeMonthly) return 16000;          // 월운 12개월 상세 포함
-  if (timeRange === "five-year") return 12000;
-  if (timeRange === "three-year" || timeRange === "next-year") return 10000;
-  if (timeRange === "full-fortune") return 13000;
-  return 8000;                               // this-week / this-month / this-year 기본
+  if (includeMonthly) return 20000;          // 월운 12개월 상세 포함
+  if (timeRange === "five-year") return 15000;
+  if (timeRange === "three-year" || timeRange === "next-year") return 13000;
+  if (timeRange === "full-fortune") return 17000;
+  return 10000;                              // this-week / this-month / this-year 기본
 }
 
 const VALID_TOPICS: Topic[] = [

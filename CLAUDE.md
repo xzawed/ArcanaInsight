@@ -122,10 +122,10 @@ scripts/
 
 **ShuffleCeremony**: 타로 카드 선택 진입 시 2.2초 Canvas rAF 의식 애니메이션. `phase === "card-shuffle"` 조건부 렌더 → `onComplete` 시 `setPhase("card-select")`. 4단계: ① 덱 컷(0–500ms) ② 글로우 폭발(500–700ms) ③ 타이프라이터(700–1400ms, 58ms/자) ④ 부채꼴 펼침(1400–2200ms, spring). 클릭·키보드(Enter/Space) 스킵, `prefers-reduced-motion` 즉시 스킵. `shuffleCeremonyText` 12캐릭터 텍스트 → `getWaitingLinesData(locale)` (`waiting-lines-i18n.ts`) — ko/en/ja 분기. N=9 고정(시각 효과, 실제 스프레드 크기 무관).
 
-**리딩 max_tokens 정책 (3개 서비스 통일)**: 한국어 토큰 효율 영어 대비 1.3배 낮음 + JSON 오버헤드 반영 — 4000 토큰 고정은 truncated 빈번 → JSON 파싱 실패 → result 빈 화면 유발. 출력 토큰만 과금되므로 상한 자체는 비용 영향 없음.
-- **타로**: `computeReadingMaxTokens(cardCount)` (`src/app/api/tarot/reading/route.ts`) — 1장→2000, 3장→3500, 5장→5000, 7장→6500, 9장→8000, 10장→11000(celtic-cross), 12장+→13000(zodiac 등).
-- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` (`src/app/api/saju/reading/route.ts`) — includeMonthly→16000, full-fortune→13000, five-year→12000, three/next-year→10000, 기본 8000.
-- **신점**: `SHINJEOM_TOKENS_FINAL=6500` / `SHINJEOM_TOKENS_CHAT=1200` (`src/app/api/shinjeom/message/route.ts`).
+**리딩 max_tokens 정책 (3개 서비스 통일)**: 한국어 토큰 효율 영어 대비 1.3배 낮음 + JSON 오버헤드 + Grok 내부 reasoning(thinking) 토큰 흡수까지 고려한 안전 마진 — 4000 토큰 고정·11000 토큰 고정도 truncated 발견되어 +30~40% 추가 상향. 출력 토큰만 과금되므로 상한 자체는 비용 영향 없음. 시스템 프롬프트에 "내부 reasoning·생각 단계를 출력하지 마세요. 첫 토큰부터 곧바로 JSON을 시작합니다." 명시(prompt-builder, saju-service, shinjeom-service)로 thinking 토큰 소비도 차단.
+- **타로**: `computeReadingMaxTokens(cardCount)` (`src/app/api/tarot/reading/route.ts`) — 1장→2600, 3장→4500, 5장→6500, 7장→8500, 9장→10500, 10장→14000(celtic-cross), 12장+→16000(zodiac 등).
+- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` (`src/app/api/saju/reading/route.ts`) — includeMonthly→20000, full-fortune→17000, five-year→15000, three/next-year→13000, 기본 10000.
+- **신점**: `SHINJEOM_TOKENS_FINAL=8500` / `SHINJEOM_TOKENS_CHAT=1500` (`src/app/api/shinjeom/message/route.ts`).
 
 **parseError 시그널 통일 (3개 서비스)**: `ReadingResult.parseError` union = `"truncated" | "invalid_json" | "fallback_text" | "missing_fields"` (`src/types/service.ts`). saju/shinjeom service `parseResult`도 핵심 필드(`overallReading`/`advice`) 빈 문자 시 `missing_fields` 부여, JSON 파싱 실패 + raw 텍스트 추출 성공 시 `fallback_text` 부여. 라우트는 `parseError` 있는 결과를 SSE done에 그대로 송신하지만 **DB INSERT는 차단** (result/[id] 빈 화면 방지). 클라이언트 session/page.tsx는 parseError 감지 시 캐릭터 에러 메시지 + 재시도 안내 (타로 `truncated`만 부분 결과 표시 유지).
 
