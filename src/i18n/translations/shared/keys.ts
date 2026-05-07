@@ -26,6 +26,10 @@ export interface SharedKeys {
     "auth.signup": string;
     "theme.label": string;
     "theme.auto": string;
+    // PR 8 — Header 잔존
+    "theme.change-aria": string;
+    "theme.settings-label": string;
+    "user-menu-aria": string;
   };
   footer: {
     "tagline": string;

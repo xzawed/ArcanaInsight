@@ -15,10 +15,13 @@ describe("flatten — namespace 키 결합", () => {
       "auth.signup": "회원가입",
       "theme.label": "테마",
       "theme.auto": "자동",
+      "theme.change-aria": "테마 변경",
+      "theme.settings-label": "테마 설정",
+      "user-menu-aria": "사용자 메뉴",
     });
     expect(out["header.nav.tarot"]).toBe("타로");
     expect(out["header.auth.login"]).toBe("로그인");
-    expect(Object.keys(out)).toHaveLength(11);
+    expect(Object.keys(out)).toHaveLength(14);
   });
 
   it("빈 사전이면 빈 객체 반환", () => {

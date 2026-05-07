@@ -22,6 +22,7 @@ export interface ThemeConfig {
   id: ThemeId;
   name: string;
   nameKo: string;
+  nameJa?: string;
   icon: string;
   iconPath: string;
   colors: ThemeColors;
@@ -29,7 +30,7 @@ export interface ThemeConfig {
 
 export const themes: Record<ThemeId, ThemeConfig> = {
   midnight: {
-    id: "midnight", name: "Midnight", nameKo: "한밤의 신비", icon: "🌙", iconPath: "/images/icons/theme-midnight.png",
+    id: "midnight", name: "Midnight", nameKo: "한밤의 신비", nameJa: "真夜中の神秘", icon: "🌙", iconPath: "/images/icons/theme-midnight.png",
     colors: {
       bg: "#0a0a1a", surface: "#12122a", card: "#1a1a3e", border: "#2a2a5e",
       primary: "#a78bfa", secondary: "#6366f1", accent: "#f59e0b",
@@ -37,7 +38,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   dawn: {
-    id: "dawn", name: "Dawn", nameKo: "새벽빛 여명", icon: "🌅", iconPath: "/images/icons/theme-dawn.png",
+    id: "dawn", name: "Dawn", nameKo: "새벽빛 여명", nameJa: "暁の光", icon: "🌅", iconPath: "/images/icons/theme-dawn.png",
     colors: {
       bg: "#1a0f1e", surface: "#241828", card: "#2e1f38", border: "#4a2d5e",
       primary: "#f0abfc", secondary: "#c084fc", accent: "#fbbf24",
@@ -45,7 +46,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   sunset: {
-    id: "sunset", name: "Sunset", nameKo: "황혼의 노을", icon: "🌇", iconPath: "/images/icons/theme-sunset.png",
+    id: "sunset", name: "Sunset", nameKo: "황혼의 노을", nameJa: "黄昏の夕焼け", icon: "🌇", iconPath: "/images/icons/theme-sunset.png",
     colors: {
       bg: "#1a0f0a", surface: "#2a1810", card: "#3a2218", border: "#5e3a2a",
       primary: "#fb923c", secondary: "#f97316", accent: "#fcd34d",
@@ -53,7 +54,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   spring: {
-    id: "spring", name: "Spring", nameKo: "벚꽃 봄바람", icon: "🌸", iconPath: "/images/icons/theme-spring.png",
+    id: "spring", name: "Spring", nameKo: "벚꽃 봄바람", nameJa: "桜の春風", icon: "🌸", iconPath: "/images/icons/theme-spring.png",
     colors: {
       bg: "#140f18", surface: "#1e1525", card: "#2a1e35", border: "#4a3060",
       primary: "#f9a8d4", secondary: "#ec4899", accent: "#a7f3d0",
@@ -61,7 +62,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   summer: {
-    id: "summer", name: "Summer", nameKo: "한여름 밤", icon: "✨", iconPath: "/images/icons/theme-summer.png",
+    id: "summer", name: "Summer", nameKo: "한여름 밤", nameJa: "真夏の夜", icon: "✨", iconPath: "/images/icons/theme-summer.png",
     colors: {
       bg: "#0a1628", surface: "#0f1f38", card: "#162a4a", border: "#1e3a6e",
       primary: "#38bdf8", secondary: "#0ea5e9", accent: "#fbbf24",
@@ -69,7 +70,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   autumn: {
-    id: "autumn", name: "Autumn", nameKo: "가을 단풍", icon: "🍂", iconPath: "/images/icons/theme-autumn.png",
+    id: "autumn", name: "Autumn", nameKo: "가을 단풍", nameJa: "秋の紅葉", icon: "🍂", iconPath: "/images/icons/theme-autumn.png",
     colors: {
       bg: "#1a100a", surface: "#261810", card: "#34201a", border: "#5a3828",
       primary: "#d97706", secondary: "#b45309", accent: "#dc2626",
@@ -77,7 +78,7 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
   winter: {
-    id: "winter", name: "Winter", nameKo: "겨울 설경", icon: "❄️", iconPath: "/images/icons/theme-winter.png",
+    id: "winter", name: "Winter", nameKo: "겨울 설경", nameJa: "冬の雪景色", icon: "❄️", iconPath: "/images/icons/theme-winter.png",
     colors: {
       bg: "#0c1220", surface: "#141e30", card: "#1c2840", border: "#2a3a5a",
       primary: "#93c5fd", secondary: "#60a5fa", accent: "#e2e8f0",
@@ -85,6 +86,13 @@ export const themes: Record<ThemeId, ThemeConfig> = {
     },
   },
 };
+
+/** 테마 이름 — locale별 (en: name 필드 / ja: nameJa / ko: nameKo). */
+export function getThemeName(theme: ThemeConfig, locale: string): string {
+  if (locale === "en") return theme.name;
+  if (locale === "ja" && theme.nameJa) return theme.nameJa;
+  return theme.nameKo;
+}
 
 /** 현재 시간 기반 자동 테마 결정 (spec 시간대: 심야→새벽→낮→황혼) */
 function getAutoTheme(): ThemeId {
