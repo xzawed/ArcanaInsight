@@ -48,8 +48,8 @@ export async function assertReadingAccess(
  * 반환값: 에러 Response(403/404) 또는 null(통과)
  */
 export async function assertSessionOwnership(sessionId: string): Promise<Response | null> {
-  const { getDb } = await import("@/lib/db")
-  const db = getDb()
+  const { getAdminDb } = await import("@/lib/db")
+  const db = getAdminDb()
   const [user, session] = await Promise.all([
     getCurrentUser(),
     db.findOne<{ user_id: string | null }>("sessions", { id: sessionId }),

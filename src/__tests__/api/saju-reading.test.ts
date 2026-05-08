@@ -75,7 +75,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockReturnValue(false),
       rateLimitResponse: vi.fn().mockReturnValue(new Response(JSON.stringify({ error: "Too many requests" }), { status: 429 })),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -88,7 +88,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockRejectedValue(new Error("unexpected")),
       rateLimitResponse: vi.fn(),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -112,7 +112,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -127,7 +127,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => ({
       ...makeAuthMock(),
       assertSessionOwnership: vi.fn().mockResolvedValue(
@@ -151,7 +151,7 @@ describe("POST /api/saju/reading", () => {
       rateLimitResponse: vi.fn(),
     }));
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -174,7 +174,7 @@ describe("POST /api/saju/reading", () => {
       rateLimitResponse: vi.fn(),
     }));
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -193,7 +193,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -208,7 +208,7 @@ describe("POST /api/saju/reading", () => {
       checkRateLimit: vi.fn().mockRejectedValue("string-throw"),
       rateLimitResponse: vi.fn(),
     }));
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
     const { POST } = await import("@/app/api/saju/reading/route");
@@ -230,7 +230,7 @@ describe("POST /api/saju/reading", () => {
         checkRateLimit: vi.fn().mockReturnValue(true),
         rateLimitResponse: vi.fn(),
       }));
-      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
       vi.doMock("@/lib/auth", () => makeAuthMock());
       vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
       const { POST } = await import("@/app/api/saju/reading/route");
@@ -275,7 +275,7 @@ describe("POST /api/saju/reading", () => {
       rateLimitResponse: vi.fn(),
     }));
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
     const { POST } = await import("@/app/api/saju/reading/route");
