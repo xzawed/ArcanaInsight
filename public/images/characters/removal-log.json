@@ -1,0 +1,537 @@
+{
+  "arcana": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:34:52.302Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:34:57.048Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:35:02.800Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:35:07.427Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:35:11.660Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:35:15.910Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\arcana\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:35:20.811Z",
+      "updatedAt": "2026-05-08T20:35:24.807Z"
+    }
+  },
+  "miko": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:35:24.810Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:35:28.109Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:35:39.174Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:35:40.962Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:35:43.664Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:35:45.369Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\miko\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:35:47.720Z",
+      "updatedAt": "2026-05-08T20:35:49.797Z"
+    }
+  },
+  "seonhwa": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:35:49.800Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:35:52.696Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:35:54.829Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:35:57.505Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:35:59.715Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:36:02.183Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\seonhwa\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:36:04.280Z",
+      "updatedAt": "2026-05-08T20:36:06.274Z"
+    }
+  },
+  "hoshi": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:36:06.278Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:36:07.955Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:36:11.274Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:36:13.046Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:36:15.271Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:36:17.331Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\hoshi\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:36:19.042Z",
+      "updatedAt": "2026-05-08T20:36:20.914Z"
+    }
+  },
+  "luna": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:36:20.917Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:36:22.871Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:36:25.165Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:36:27.163Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:36:30.114Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:36:32.492Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\luna\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:36:34.780Z",
+      "updatedAt": "2026-05-08T20:36:36.818Z"
+    }
+  },
+  "rei": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:36:36.821Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:36:38.427Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:36:39.785Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:36:41.193Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:36:42.611Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:36:44.158Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\rei\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:36:45.743Z",
+      "updatedAt": "2026-05-08T20:36:47.436Z"
+    }
+  },
+  "cairn": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:36:47.440Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:36:48.957Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:36:51.617Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:36:53.092Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:36:56.273Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:36:57.660Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\cairn\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:36:59.997Z",
+      "updatedAt": "2026-05-08T20:37:01.362Z"
+    }
+  },
+  "zero": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:37:01.365Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:37:02.697Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:37:04.044Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:37:05.491Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:37:06.875Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:37:08.266Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\zero\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:37:09.673Z",
+      "updatedAt": "2026-05-08T20:37:11.017Z"
+    }
+  },
+  "haru": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\default.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:08.300Z",
+      "updatedAt": "2026-05-08T20:38:09.794Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\idle.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:12.034Z",
+      "updatedAt": "2026-05-08T20:38:14.131Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\smile.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:16.363Z",
+      "updatedAt": "2026-05-08T20:38:17.693Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\serious.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:19.913Z",
+      "updatedAt": "2026-05-08T20:38:22.060Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\surprised.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:48.202Z",
+      "updatedAt": "2026-05-08T20:38:49.710Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\wink.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:29.169Z",
+      "updatedAt": "2026-05-08T20:38:32.026Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\haru\\nukki\\mystical.png",
+      "error": "Rate limit exceeded",
+      "startedAt": "2026-05-08T20:38:34.257Z",
+      "updatedAt": "2026-05-08T20:38:36.725Z"
+    }
+  },
+  "ren": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:37:26.214Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:37:29.557Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:37:30.866Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:37:32.260Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:37:33.698Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:37:35.023Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ren\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:37:36.451Z",
+      "updatedAt": "2026-05-08T20:37:37.820Z"
+    }
+  },
+  "lix": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:37:37.824Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:37:39.838Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:37:41.333Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:37:42.716Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:37:45.487Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:37:46.997Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\lix\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:37:48.415Z",
+      "updatedAt": "2026-05-08T20:37:49.777Z"
+    }
+  },
+  "ethan": {
+    "default": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\default.png",
+      "startedAt": "2026-05-08T20:37:49.781Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "idle": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\idle.png",
+      "startedAt": "2026-05-08T20:37:51.333Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "smile": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\smile.png",
+      "startedAt": "2026-05-08T20:37:52.943Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "serious": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\serious.png",
+      "startedAt": "2026-05-08T20:37:54.361Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "surprised": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\surprised.png",
+      "startedAt": "2026-05-08T20:37:55.732Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "wink": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\wink.png",
+      "startedAt": "2026-05-08T20:37:57.160Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    },
+    "mystical": {
+      "status": "success",
+      "path": "F:\\DEVELOPMENT\\SOURCE\\CLAUDE\\ArcanaInsight\\public\\images\\characters\\ethan\\nukki\\mystical.png",
+      "startedAt": "2026-05-08T20:37:58.513Z",
+      "updatedAt": "2026-05-08T20:38:00.137Z"
+    }
+  }
+}
