@@ -20,6 +20,7 @@ export function jsonError(error: string, status = 400): Response {
 
 export const SSE_HEADERS = {
   "Content-Type": "text/event-stream",
-  "Cache-Control": "no-cache",
+  "Cache-Control": "no-cache, no-transform",
   Connection: "keep-alive",
+  "X-Accel-Buffering": "no",
 } as const

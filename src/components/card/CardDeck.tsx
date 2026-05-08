@@ -133,6 +133,7 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
             data-card-name={card.id}
             initial={{ x: 0, y: 50, rotate: 0, opacity: 0 }}
             animate={{ x: xOffset, y, rotate: angle, opacity: isSelected ? 0.3 : 1, scale }}
+            whileTap={ritualDone && !isSelected ? { scale: scale * 0.95 } : undefined}
             transition={{
               type: "spring",
               stiffness: ritualDone ? 120 : 200,
@@ -140,7 +141,12 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
               delay: ritualDone && isSpread ? index * 0.015 : 0,
             }}
             className={`absolute ${ritualDone && !isSelected ? "cursor-pointer" : "cursor-default"}`}
-            style={{ zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index }}
+            style={{
+              zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index,
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+            }}
+            onPointerDown={() => { if (!isSelected && ritualDone) setHoveredIndex(index); }}
             onClick={() => { if (!isSelected && ritualDone) onCardSelect(index); }}
             onPointerEnter={() => setHoveredIndex(index)}
             onPointerLeave={() => setHoveredIndex(null)}
