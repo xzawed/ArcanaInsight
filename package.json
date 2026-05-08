@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "remove:bg:pilot": "node --env-file=.env.local scripts/remove-character-bg.mjs --pilot",
+    "remove:bg:full": "node --env-file=.env.local scripts/remove-character-bg.mjs --full",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
