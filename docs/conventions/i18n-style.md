@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 1. **타입 먼저**: `src/i18n/translations/shared/keys.ts`의 `SharedKeys` 인터페이스에 키 추가
 2. **ko 사전 채움**: `src/i18n/translations/ko/index.ts` (SSOT, 모든 키 필수)
 3. **en 사전 임시 영문**: `src/i18n/translations/en/index.ts` (외부 번역가 의뢰 대기 중에는 1차 직역)
-4. **ja 사전 PR-5 일괄**: 현재는 `common`·`locale` namespace만 1차 채움 (나머지는 ko fallback)
+4. **ja 사전 관리**: 미번역 키는 ko fallback을 허용하되, 사용자에게 직접 보이는 주요 UI는 우선 번역한다.
 
 ## SSR 규칙 (필수 준수)
 
@@ -61,10 +61,10 @@ export async function POST(req: NextRequest) {
 
 ## 우선 외부 번역 영역 (직접 영문화 금지)
 
-- 캐릭터 12명 페르소나 5필드 (PR-4): 화법 시그니처 보존 필수
-- 카드 80장 `name`·`meanings` (PR-3): 도메인 표준 영문명
-- 사주 천간·지지·오행·십성·신살 (PR-3): 학술 vs 대중 톤 결정
-- 신점 한국 무속 용어 (PR-6): 한국어+로마자+영문 해설 하이브리드
+- 캐릭터 12명 페르소나 필드: 화법 시그니처 보존 필수
+- 카드 이름과 리딩 의미: 도메인 표준 영문명과 사용자가 이해하기 쉬운 표현 균형
+- 사주 천간·지지·오행·십성·신살: 학술 번역과 대중적 설명 톤 결정
+- 신점 한국 무속 용어: 한국어 원문, 로마자, 영문/일문 해설의 혼합 사용 검토
 
 ## E2E 셀렉터
 
@@ -85,9 +85,9 @@ export async function POST(req: NextRequest) {
 
 ## 외부 번역 의뢰 자료
 
-- `docs/i18n/glossary.md` (PR-3 작성): 사주 십성·오방색·타로 표준 영문 용어집
-- `docs/i18n/character-voice-guide.md` (PR-4 작성): 12 캐릭터 영문·일문 화법 시그니처
-- `docs/i18n/character-qa-checklist.md` (PR-4 작성): 페르소나 톤 일관성 QA
+- `docs/i18n/glossary.md`: 사주 십성·오방색·타로 표준 영문 용어집
+- `docs/i18n/character-voice-guide.md`: 12 캐릭터 영문·일문 화법 시그니처
+- `docs/i18n/character-qa-checklist.md`: 페르소나 톤 일관성 QA
 
 ## 참조
 

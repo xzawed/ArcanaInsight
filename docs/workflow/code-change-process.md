@@ -144,7 +144,7 @@ git branch | grep -v '^\* main' | xargs git branch -D
 - [ ] `shared/keys.ts` 타입 추가 (ko/en/ja 모두 강제)
 - [ ] ko 사전 100% 채움 (SSOT)
 - [ ] en 사전 임시 영문 (외부 번역 발주 대기 중)
-- [ ] ja 사전은 PR-5 일괄 (현재는 ko fallback)
+- [ ] ja 사전 미번역 키는 ko fallback 의도인지 확인
 - [ ] 클라이언트 호출 = `useT()`, 서버 호출 = `t(key, locale)` + `getRequestLocale()`
 - [ ] LocaleProvider SSR 패턴 (`setTimeout` 래핑) 준수
 - [ ] E2E 셀렉터를 `data-testid`로 (한글 regex 금지)
