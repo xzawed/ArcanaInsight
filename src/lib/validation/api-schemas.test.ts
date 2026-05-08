@@ -64,6 +64,39 @@ describe("TarotReadingSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  // spread별 cards.length 일치 검증 (superRefine) — 빠른 클릭 race로 부족·초과 카드로 startReading 호출되어
+  // "1-2장 뒤집힌 후 서버 실패 메시지" 발생하던 이슈(2026-05-08) 차단
+  it("celtic-cross spreadType + cards 9장 → 실패 (10장 요구)", () => {
+    const nine = Array.from({ length: 9 }, (_, i) => ({ cardId: `card-${i}`, position: i, isReversed: false }));
+    const result = TarotReadingSchema.safeParse({ topic: "love", spreadType: "celtic-cross", cards: nine });
+    expect(result.success).toBe(false);
+  });
+
+  it("celtic-cross spreadType + cards 10장 → 통과", () => {
+    const ten = Array.from({ length: 10 }, (_, i) => ({ cardId: `card-${i}`, position: i, isReversed: false }));
+    const result = TarotReadingSchema.safeParse({ topic: "love", spreadType: "celtic-cross", cards: ten });
+    expect(result.success).toBe(true);
+  });
+
+  it("zodiac spreadType + cards 11장 → 실패 (12장 요구)", () => {
+    const eleven = Array.from({ length: 11 }, (_, i) => ({ cardId: `card-${i}`, position: i, isReversed: false }));
+    const result = TarotReadingSchema.safeParse({ topic: "love", spreadType: "zodiac", cards: eleven });
+    expect(result.success).toBe(false);
+  });
+
+  it("three-card spreadType + cards 1장 → 실패 (3장 요구)", () => {
+    const result = TarotReadingSchema.safeParse({
+      topic: "love", spreadType: "three-card", cards: validCards,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("spreadType=null이면 cards 길이만 검증 (superRefine 건너뜀)", () => {
+    const five = Array.from({ length: 5 }, (_, i) => ({ cardId: `card-${i}`, position: i, isReversed: false }));
+    const result = TarotReadingSchema.safeParse({ topic: "love", spreadType: null, cards: five });
+    expect(result.success).toBe(true);
+  });
+
   it("topic 누락 시 실패", () => {
     const result = TarotReadingSchema.safeParse({ cards: validCards });
     expect(result.success).toBe(false);

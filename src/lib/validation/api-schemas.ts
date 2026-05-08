@@ -8,6 +8,24 @@ const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).max(10);
 const spreadTypeEnum = z.enum(["one-card", "three-card", "five-card", "celtic-cross", "relationship", "horseshoe", "decision", "week-ahead", "zodiac", "tree-of-life"]);
 const localeEnum = z.enum(LOCALES);
 
+/**
+ * Spread별 정확한 카드 수 — Zod superRefine 및 클라이언트 가드에서 사용.
+ * 빠른 클릭 race로 cards.length가 spread 요구 수와 mismatch인 채 startReading 호출되어
+ * 1-2장만 뒤집힌 채 서버 실패 메시지가 표시되는 이슈(2026-05-08 보고) 차단용.
+ */
+export const SPREAD_REQUIRED_CARDS: Record<string, number> = {
+  "one-card": 1,
+  "three-card": 3,
+  "five-card": 5,
+  "celtic-cross": 10,
+  "relationship": 7,
+  "horseshoe": 7,
+  "decision": 5,
+  "week-ahead": 7,
+  "zodiac": 12,
+  "tree-of-life": 10,
+};
+
 export const LocaleSchema = z.object({
   locale: localeEnum,
 });
@@ -54,6 +72,17 @@ export const TarotReadingSchema = z.object({
     position: z.number().int().min(0).max(21),
     isReversed: z.boolean(),
   })).min(1).max(22),
+}).superRefine((data, ctx) => {
+  // spread별 정확한 카드 수와 일치 강제 — 빠른 클릭 race로 부족·초과 카드로 startReading 호출 차단
+  if (!data.spreadType) return;
+  const expected = SPREAD_REQUIRED_CARDS[data.spreadType];
+  if (expected !== undefined && data.cards.length !== expected) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `cards.length must be ${expected} for spread '${data.spreadType}', got ${data.cards.length}`,
+      path: ["cards"],
+    });
+  }
 });
 
 export const SajuReadingSchema = z.object({

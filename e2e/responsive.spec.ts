@@ -27,7 +27,10 @@ test.describe("반응형 레이아웃", () => {
     await page.waitForLoadState("networkidle");
 
     // 최소 5개의 모바일 네비 아이템 (data-testid="mobile-nav-*" 사용 — i18n 안정적)
+    // Desktop Chrome project는 default viewport가 desktop이라 setViewportSize 후 미디어 쿼리
+    // reflow에 시간 필요 — networkidle만으로는 부족해 explicit visible 대기 추가 (flaky 방지)
     const navItems = page.locator('[data-testid^="mobile-nav-"]');
+    await expect(navItems.first()).toBeVisible({ timeout: 10_000 });
     expect(await navItems.count()).toBeGreaterThanOrEqual(4);
   });
 
