@@ -124,4 +124,42 @@ test.describe("타로 서비스 플로우", () => {
     await expect(page.locator("[data-testid='reading-error']")).toHaveCount(0);
     expect(readingRequests).toBe(1);
   });
+
+  test("JSON 파싱 fallback 텍스트가 있으면 오류 대신 결과를 표시한다", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await mockSessionCreate(page, "**/api/tarot/session");
+    await page.route("**/api/tarot/reading", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        headers: { "Cache-Control": "no-cache", "Connection": "keep-alive" },
+        body: createSSEBody([], {
+          result: {
+            cardInterpretations: [],
+            overallReading: "카드들이 말하는 핵심은 지금의 불안을 정리하고 다음 선택을 차분히 보라는 것입니다.",
+            advice: "",
+            parseError: "fallback_text",
+            expectedCardCount: 1,
+          },
+        }),
+      });
+    });
+
+    await page.goto("/tarot");
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
+    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+    await characterCards.first().click();
+
+    await page.locator("[data-testid='topic-btn-general']").click();
+    await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
+    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+
+    const firstCard = page.locator("[data-testid='card-back-0']");
+    await expect(firstCard).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(700);
+    await firstCard.click({ force: true });
+
+    await expect(page.locator("[data-testid='reading-content']")).toContainText("카드들이 말하는 핵심", { timeout: 10_000 });
+    await expect(page.locator("[data-testid='reading-error']")).toHaveCount(0);
+  });
 });

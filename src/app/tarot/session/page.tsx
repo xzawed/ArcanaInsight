@@ -487,11 +487,10 @@ export default function TarotSessionPage() {
           return;
         }
 
-        // 결과 표시 불가 — 빈 핵심 필드/JSON 실패/fallback (DB 저장 차단됨)
+        // 결과 표시 불가 — fallback_text는 정제된 본문이 있으므로 세션 화면에서는 표시한다.
         if (
           result.parseError === "invalid_json" ||
-          result.parseError === "missing_fields" ||
-          result.parseError === "fallback_text"
+          result.parseError === "missing_fields"
         ) {
           console.warn("[tarot-session] 결과 표시 불가:", { parseError: result.parseError, expected: result.expectedCardCount });
           addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
@@ -500,8 +499,8 @@ export default function TarotSessionPage() {
           return;
         }
 
-        // 부분 파싱(잘림) — 받은 해석은 그대로 표시하고 안내 메시지 추가
-        if (result.parseError === "truncated") {
+        // 부분/대체 파싱 — 받은 해석은 그대로 표시하고 안내 메시지 추가
+        if (result.parseError === "truncated" || result.parseError === "fallback_text") {
           console.warn("[tarot-session] 부분 파싱 응답:", { expected: result.expectedCardCount, got: result.cardInterpretations?.length ?? 0 });
           addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.partial-result", locale), mood: "default", timestamp: new Date() });
         }

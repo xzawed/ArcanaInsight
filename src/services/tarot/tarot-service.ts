@@ -66,7 +66,7 @@ export class TarotService implements DivinationService {
       cardInterpretations: [],
       overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다. 다시 시도해주세요.",
       advice: "",
-      parseError: "invalid_json",
+      parseError: cleanText ? "fallback_text" : "invalid_json",
       ...(typeof expectedCardCount === "number" ? { expectedCardCount } : {}),
     };
   }
