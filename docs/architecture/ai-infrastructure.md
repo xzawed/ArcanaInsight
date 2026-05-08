@@ -140,12 +140,12 @@ for (let i = start; i < text.length; i++) {
 const abortController = new AbortController();
 let finished = false;
 
-// 180s 하드 타임아웃
+// 240s 하드 타임아웃 — 10장+ 타로/full-fortune 사주의 reasoning+stream 시간 대응
 const timer = setTimeout(() => {
   if (finished) return;
   abortController.abort();
   setReadingErrorReason("timeout");
-}, 180_000);
+}, 240_000);
 
 await fetchSSEStream({ signal: abortController.signal, ... });
 finished = true;

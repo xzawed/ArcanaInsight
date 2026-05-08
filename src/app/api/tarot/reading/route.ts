@@ -23,15 +23,19 @@ const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
 
 /**
- * 카드 수에 비례한 max_tokens 정책.
+ * 카드 수에 비례한 max_tokens 정책 — 확장 가능한 동적 산정.
  *
- * 한국어는 영어 대비 토큰 효율이 약 1.3배 낮고, JSON 구조 오버헤드(~10%)도 더해진다.
- * 또한 Grok-3 reasoning 모델은 응답 전 내부 reasoning(thinking) 토큰을 max_tokens 안에서
- * 함께 소비하므로, celtic-cross(10장) 14000으로도 본문이 잘리는 사례가 PR #264 이후 다시 발생.
- * (사용자 보고: 10장 리딩 시 결과 미수신 + parseError invalid_json 추정)
+ * 한국어는 영어 대비 토큰 효율 ~1.3x 낮고, JSON 구조 오버헤드 ~15%, Grok-3 reasoning 모델은
+ * 내부 reasoning(thinking) 토큰을 max_tokens 안에서 함께 소비한다. 사용자 보고: 10장+ 리딩
+ * 시 결과 실패 (parseError invalid_json/truncated 추정) → 본문 잘림이 빈 화면을 유발.
  *
- * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다 — reasoning 4000~5000 흡수 + 본문 14000~15000
- * 보장을 위해 10장 18000 / 12장+ 20000으로 추가 상향. (PR #265, 2026-05-08)
+ * 1~9장: 기존 검증된 값 보존 (충분한 안전마진).
+ * 10장+: 선형 일반화로 확장 가능 — `base + cardCount * perCard + reasoningBuffer`.
+ *   - perCard 1700 = 한국어 평균 카드별 해석(키워드+본문+조언) 분량
+ *   - reasoningBuffer 5000 = Grok-3 reasoning low 흡수 마진
+ *   - base 2500 = system + overallReading + advice 오버헤드
+ * 모델 cap 60000은 Claude Sonnet 4.6/Haiku 4.5 max output 64K 안전마진. Grok·Opus는 더 여유.
+ * 출력 토큰만 과금되므로 상한 자체는 비용 영향 없음.
  */
 function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 1) return 2600;
@@ -39,8 +43,8 @@ function computeReadingMaxTokens(cardCount: number): number {
   if (cardCount <= 5) return 6500;
   if (cardCount <= 7) return 8500;
   if (cardCount <= 9) return 10500;
-  if (cardCount <= 10) return 18000; // celtic-cross (10장) — reasoning 잠식 대응 +4000
-  return 20000;                      // zodiac(12장) 등 대형 스프레드 — +4000
+  // 10장+ 동적 산정 — 12장(zodiac), 미래 15·20장 spread도 자동 대응
+  return Math.min(2500 + cardCount * 1700 + 5000, 60000);
 }
 
 export async function POST(request: NextRequest) {

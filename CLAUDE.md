@@ -65,7 +65,7 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 **API 보안**: Rate Limit → Zod safeParse → requireUser → assertSessionOwnership. → [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md)
 - Rate Limit 범위: **세션 API**(tarot/saju/shinjeom session, 분당 20회) + **reading/message API** 모두 적용. `locale` 선언은 rate limit 호출 전 최상단에 위치.
 
-**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 180s — `AbortController`+`finished` 가드 (타로·사주·신점 세션 페이지 모두 적용), 초과 시 `readingErrorReason="timeout"` + 재시도 UI(`data-testid="reading-retry"`) 표시. 신점 세션은 `handleSend`·`handleEndConsultation` 각각 AbortController 적용. `/api/daily-card`는 JSON.
+**SSE 스트리밍**: tarot/saju/shinjeom reading API. 서버: `SSE_HEADERS`+`jsonError()`(`request-utils.ts`), `readSseLines`+`withAbortTimeout`(`http-utils.ts`). 클라이언트: `fetchSSEStream()`(`useSSEStream.ts`, `AbortSignal` 지원). 클라이언트 hard timeout 240s — `AI_TIMEOUT_MS`와 동조 (10장+ 타로·full-fortune 사주 reasoning+truncation 대응). `AbortController`+`finished` 가드 (타로·사주·신점 세션 페이지 모두 적용), 초과 시 `readingErrorReason="timeout"` + 재시도 UI(`data-testid="reading-retry"`) 표시. 신점 세션은 `handleSend`·`handleEndConsultation` 각각 AbortController 적용. `/api/daily-card`는 JSON.
 
 **share_token**: `/*/result/[id]` 공개 공유. 소유자 전용 = `assertReadingAccess("owner")`.
 
@@ -73,8 +73,8 @@ scripts/e2e-full/    # E2E 전수 검증 252 조합 (orchestrator/worker/reporte
 
 **ShuffleCeremony**: `src/components/tarot/ShuffleCeremony.tsx` — 카드 선택 진입 시 2.2s Canvas rAF 의식 4단계(덱컷→글로우→타이프라이터→부채꼴). 클릭/Enter/Space·`prefers-reduced-motion` 스킵. `getWaitingLinesData(locale)` 경유 ko/en/ja 분기. N=9 고정.
 
-**리딩 max_tokens**: Grok-3 reasoning 토큰 흡수 + 한국어 1.3배 비효율 고려해 +30~40% 상향. `reasoning_effort:"low"` 주입(`buildReasoningOption(model)` — grok-3 계열만), `AI_TIMEOUT_MS=120000`, 빈 응답 throw→Claude fallback 자동 전환. `GROK_REASONING_EFFORT`·`GROK_MODEL` 환경변수로 제어.
-- **타로**: `computeReadingMaxTokens(cardCount)` (`src/app/api/tarot/reading/route.ts`) — 1장→2600, 3장→4500, 5장→6500, 7장→8500, 9장→10500, 10장→18000(celtic-cross), 12장+→20000(zodiac 등).
+**리딩 max_tokens**: Grok-3 reasoning 토큰 흡수 + 한국어 1.3배 비효율 고려해 +30~40% 상향. `reasoning_effort:"low"` 주입(`buildReasoningOption(model)` — grok-3 계열만), `AI_TIMEOUT_MS=240000`(10장+ 응답 시간 200~400s 대응), 빈 응답 throw→Claude fallback 자동 전환. `GROK_REASONING_EFFORT`·`GROK_MODEL` 환경변수로 제어. **Grok/Claude provider는 streaming 종료 시 `finish_reason`/`stop_reason`+`usage`를 콘솔에 로깅** — `length`/`max_tokens`이면 truncated 경고로 운영 진단 가능.
+- **타로**: `computeReadingMaxTokens(cardCount)` (`src/app/api/tarot/reading/route.ts`) — 1장→2600, 3장→4500, 5장→6500, 7장→8500, 9장→10500, **10장+은 `Math.min(2500 + cardCount*1700 + 5000, 60000)` 동적 산정** (10장→24500, 12장→27900/zodiac, 15장→33000, 20장→41500). 미래 spread 자동 대응.
 - **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` (`src/app/api/saju/reading/route.ts`) — includeMonthly→20000, full-fortune→17000, five-year→15000, three/next-year→13000, 기본 10000.
 - **신점**: `SHINJEOM_TOKENS_FINAL=8500` / `SHINJEOM_TOKENS_CHAT=1500` (`src/app/api/shinjeom/message/route.ts`).
 

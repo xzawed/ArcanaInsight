@@ -140,7 +140,8 @@ export default function SajuSessionPage() {
     });
     const stopTimers = () => timers.forEach(clearTimeout);
 
-    // 클라이언트 hard timeout (180초). 서버 SSE가 hung되거나 done 이벤트가 도달 못 하는 경우 강제 종료.
+    // 클라이언트 hard timeout (240초). 서버 AI_TIMEOUT_MS와 동조 — full-fortune/includeMonthly(max_tokens
+    // 17000~20000)는 reasoning 흡수까지 200~400s 소요 가능. 120s/180s에서는 본문 잘림 빈발.
     const abortController = new AbortController();
     readingAbortRef.current = abortController;
     let finished = false;
@@ -149,12 +150,12 @@ export default function SajuSessionPage() {
       finished = true;
       abortController.abort();
       stopTimers();
-      console.warn("[saju-session] 클라이언트 타임아웃 180s");
+      console.warn("[saju-session] 클라이언트 타임아웃 240s");
       setMood("default");
       setReadingErrorReason("timeout");
       setReadingError(true);
       setLoading(false);
-    }, 180_000);
+    }, 240_000);
 
     void fetchSSEStream({
       url: "/api/saju/reading",

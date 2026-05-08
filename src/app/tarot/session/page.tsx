@@ -387,8 +387,8 @@ export default function TarotSessionPage() {
 
     setIsConnecting(false);
 
-    // 클라이언트 hard timeout (180초). 서버 SSE가 hung되거나 done 이벤트가 도달 못 하는 경우 강제 종료.
-    // — 사용자 보고: celtic-cross 무응답 시 isLoading=true로 영구 멈춤. 이 타임아웃이 안전망.
+    // 클라이언트 hard timeout (240초). 서버 AI_TIMEOUT_MS와 동조 — 10장+ 카드 리딩(max_tokens 24500+)은
+    // reasoning 흡수 + 한국어 비효율 + JSON stream으로 200~400s 소요 가능. 120s/180s에서는 본문 잘림 빈발.
     const abortController = new AbortController();
     readingAbortRef.current = abortController;
     let finished = false;
@@ -397,13 +397,13 @@ export default function TarotSessionPage() {
       finished = true;
       abortController.abort();
       stopSequence();
-      console.warn("[tarot-session] 클라이언트 타임아웃 (180s)");
+      console.warn("[tarot-session] 클라이언트 타임아웃 (240s)");
       setMood("default");
       setReadingErrorReason("timeout");
       setReadingError(true);
       setLoading(false);
       setReadingStartedAt(null);
-    }, 180_000);
+    }, 240_000);
 
     await fetchSSEStream({
       url: "/api/tarot/reading",
