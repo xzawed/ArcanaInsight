@@ -4,7 +4,7 @@ import { FallbackProvider } from "@/services/core/fallback-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
-import { getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo)
       + buildFreeQuestionPrompt(freeQuestion);
 
-    const db = sessionId ? getDb() : null
+    const db = sessionId ? getAdminDb() : null
 
     // 캐릭터 메모리 조회 (인증된 사용자 + sessionId 있을 때만)
     const memoryPrompt = (sessionId && characterId)

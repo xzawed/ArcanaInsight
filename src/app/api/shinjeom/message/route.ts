@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { Topic, ChatMessage } from "@/types/session";
-import { getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const systemPrompt = shinjeomService.getSystemPrompt(characterId ?? undefined, locale);
     const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
 
-    const db = sessionId ? getDb() : null;
+    const db = sessionId ? getAdminDb() : null;
 
     // 최종 턴에만 캐릭터 메모리 주입 (중간 대화는 토큰 절약)
     const memoryPrompt = (sessionId && characterId && isFinalTurn)

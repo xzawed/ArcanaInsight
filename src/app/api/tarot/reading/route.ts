@@ -8,7 +8,7 @@ import { SelectedCard } from "@/types/card";
 import { buildUserInfoPrompt, buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { assertSessionOwnership } from "@/lib/auth";
 import { fetchMemoryPrompt } from "@/lib/db/character-context";
-import { getDb } from "@/lib/db";
+import { getAdminDb } from "@/lib/db";
 import { TAROT_TOPICS } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       selectedCards, chatHistory: [], topic,
     });
 
-    const db = sessionId ? getDb() : null
+    const db = sessionId ? getAdminDb() : null
 
     // 캐릭터 메모리 조회 (인증된 사용자 + sessionId 있을 때만)
     const memoryPrompt = (sessionId && characterId)
