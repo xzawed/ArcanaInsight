@@ -87,9 +87,10 @@ describe("jsonError", () => {
 })
 
 describe("SSE_HEADERS", () => {
-  it("SSE 스트리밍에 필요한 헤더 3개 포함", () => {
+  it("SSE 스트리밍에 필요한 헤더 + iOS Safari/Railway 프록시 버퍼링 차단 헤더 포함", () => {
     expect(SSE_HEADERS["Content-Type"]).toBe("text/event-stream")
-    expect(SSE_HEADERS["Cache-Control"]).toBe("no-cache")
+    expect(SSE_HEADERS["Cache-Control"]).toBe("no-cache, no-transform")
     expect(SSE_HEADERS["Connection"]).toBe("keep-alive")
+    expect(SSE_HEADERS["X-Accel-Buffering"]).toBe("no")
   })
 })
