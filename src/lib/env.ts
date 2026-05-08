@@ -14,8 +14,10 @@ export function getClaudeBaseUrl(): string { return process.env.CLAUDE_BASE_URL 
 export function getGrokBaseUrl(): string { return process.env.GROK_BASE_URL ?? "https://api.x.ai/v1" }
 
 // AI 동작 튜닝
-// AI_TIMEOUT_MS — 60s 기본은 reasoning 모델(grok-3 등)에서 timeout 빈번 → 120s로 상향
-export function getAiTimeoutMs(): number { return parseInt(process.env.AI_TIMEOUT_MS ?? "120000", 10) }
+// AI_TIMEOUT_MS — 120s는 10장+ 타로/full-fortune 사주(max_tokens 18000~20000)에서 부족 →
+// reasoning 토큰 흡수 + 한국어 1.3x 비효율 + JSON 구조 오버헤드 고려해 240s로 상향.
+// 클라이언트 hard timeout과 동일.
+export function getAiTimeoutMs(): number { return parseInt(process.env.AI_TIMEOUT_MS ?? "240000", 10) }
 export function getDefaultMaxTokens(): number { return parseInt(process.env.AI_DEFAULT_MAX_TOKENS ?? "4000", 10) }
 export function getAiTemperature(): number { return parseFloat(process.env.AI_TEMPERATURE ?? "0.7") }
 

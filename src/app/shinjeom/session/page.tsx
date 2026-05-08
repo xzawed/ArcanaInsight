@@ -130,7 +130,7 @@ export default function ShinjeomSessionPage() {
       updateMessageContent(msgId, getErrorMsg(characterId, "api"));
       setMood("default");
       setLoading(false);
-    }, 180_000);
+    }, 240_000);
 
     void fetchSSEStream({
       url: "/api/shinjeom/message",
@@ -191,7 +191,7 @@ export default function ShinjeomSessionPage() {
       updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
       setMood("default");
       setLoading(false);
-    }, 180_000);
+    }, 240_000);
 
     void fetchSSEStream({
       url: "/api/shinjeom/message",

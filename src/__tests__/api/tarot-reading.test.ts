@@ -243,14 +243,17 @@ describe("POST /api/tarot/reading", () => {
   });
 
   it("computeReadingMaxTokens 정책 — 모든 분기가 streamReading에 정확히 전달", async () => {
+    // 1~9장: 기존 검증된 고정값. 10장+: 2500 + cardCount*1700 + 5000 (모델 cap 60000)
     const cases: { count: number; expected: number }[] = [
       { count: 1, expected: 2600 },
       { count: 3, expected: 4500 },
       { count: 5, expected: 6500 },
       { count: 7, expected: 8500 },
       { count: 9, expected: 10500 },
-      { count: 10, expected: 18000 },
-      { count: 12, expected: 20000 },
+      { count: 10, expected: 24500 },  // 2500 + 17000 + 5000
+      { count: 12, expected: 27900 },  // 2500 + 20400 + 5000 (zodiac)
+      { count: 15, expected: 33000 },  // 2500 + 25500 + 5000 (미래 spread)
+      { count: 20, expected: 41500 },  // 2500 + 34000 + 5000 (미래 spread)
     ];
     for (const { count, expected } of cases) {
       vi.resetModules();

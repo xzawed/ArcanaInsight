@@ -66,13 +66,15 @@ export class ClaudeProvider implements AIProvider {
   async *streamReading(systemPrompt: string, userPrompt: string, maxTokens?: number): AsyncGenerator<string, void, unknown> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), getAiTimeoutMs());
+    const effectiveMaxTokens = maxTokens ?? getDefaultMaxTokens();
+    const startedAt = Date.now();
     try {
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: "POST",
         headers: this.anthropicHeaders,
         body: JSON.stringify({
           model: this.model,
-          max_tokens: maxTokens ?? getDefaultMaxTokens(),
+          max_tokens: effectiveMaxTokens,
           stream: true,
           system: systemPrompt,
           messages: [{ role: "user", content: userPrompt }],
@@ -84,15 +86,33 @@ export class ClaudeProvider implements AIProvider {
         console.error(`[ClaudeProvider] 스트림 API 오류 (${response.status}):`, errorBody);
         throw new Error(`Claude API 요청이 실패했습니다. (HTTP ${response.status})`);
       }
-      // Anthropic SSE: content_block_delta 이벤트에서 텍스트 추출
-      yield* readSseLines(
+      // Anthropic SSE: content_block_delta(텍스트) + message_delta(stop_reason+usage) 캡처
+      // closure 내 할당은 TS control-flow narrowing 대상이 아니므로 ref 객체로 wrap (never 좁힘 회피)
+      const ref: { yielded: number; firstChunkAt: number | null; stopReason: string | null; outputTokens: number | null } = {
+        yielded: 0, firstChunkAt: null, stopReason: null, outputTokens: null,
+      };
+      for await (const chunk of readSseLines(
         response,
         (p) => {
-          const e = p as { type?: string; delta?: { text?: string } };
+          const e = p as { type?: string; delta?: { text?: string; stop_reason?: string }; usage?: { output_tokens?: number } };
+          if (e.type === "message_delta") {
+            if (e.delta?.stop_reason) ref.stopReason = e.delta.stop_reason;
+            if (typeof e.usage?.output_tokens === "number") ref.outputTokens = e.usage.output_tokens;
+          }
           return e.type === "content_block_delta" && e.delta?.text ? e.delta.text : null;
         },
         "Claude"
-      );
+      )) {
+        if (ref.firstChunkAt === null) ref.firstChunkAt = Date.now();
+        ref.yielded++;
+        yield chunk;
+      }
+      const totalMs = Date.now() - startedAt;
+      const ttfbMs = ref.firstChunkAt !== null ? ref.firstChunkAt - startedAt : null;
+      console.log(`[Claude] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms stop=${ref.stopReason ?? "?"} max_tokens=${effectiveMaxTokens} output_tokens=${ref.outputTokens ?? "?"}`);
+      if (ref.stopReason === "max_tokens") {
+        console.warn(`[Claude] ⚠️ TRUNCATED: max_tokens(${effectiveMaxTokens}) 초과로 본문 잘림 — output_tokens=${ref.outputTokens ?? "?"}`);
+      }
     } finally {
       clearTimeout(timer);
     }

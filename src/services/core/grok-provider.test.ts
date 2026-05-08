@@ -365,5 +365,33 @@ describe("GrokProvider", () => {
       const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
       expect(body.reasoning_effort).toBeUndefined();
     });
+
+    it("finish_reason='length' 시 TRUNCATED 경고 로그 + chunks 정상 yield (10장+ truncation 진단)", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const sseLines = [
+        'data: {"choices":[{"delta":{"content":"부분"}}]}',
+        'data: {"choices":[{"delta":{},"finish_reason":"length"}],"usage":{"completion_tokens":18000,"completion_tokens_details":{"reasoning_tokens":4500}}}',
+        "data: [DONE]",
+      ];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+
+      const chunks = await collectStream(provider.streamReading("s", "u", 18000));
+      expect(chunks).toEqual(["부분"]);
+      // TRUNCATED warn은 yield 종료 후 호출됨
+      const truncatedCall = warnSpy.mock.calls.find(
+        (c) => typeof c[0] === "string" && c[0].includes("TRUNCATED")
+      );
+      expect(truncatedCall).toBeDefined();
+      expect(truncatedCall?.[0]).toContain("18000");
+      warnSpy.mockRestore();
+    });
+
+    it("stream_options.include_usage가 body에 포함된다 (xAI usage capture)", async () => {
+      const sseLines = ['data: {"choices":[{"delta":{"content":"x"}}]}', "data: [DONE]"];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+      await collectStream(provider.streamReading("s", "u"));
+      const body = JSON.parse(mockFetch.mock.calls[0][1]?.body as string);
+      expect(body.stream_options).toEqual({ include_usage: true });
+    });
   });
 });
