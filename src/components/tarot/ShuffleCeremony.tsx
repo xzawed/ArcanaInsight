@@ -103,10 +103,15 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d")!;
 
+    let cssW = 0, cssH = 0;
     const setSize = () => {
+      const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      cssW = rect.width;
+      cssH = rect.height;
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     setSize();
     const observer = new ResizeObserver(setSize);
@@ -121,7 +126,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     let startMs: number | null = null;
 
     function drawFinal() {
-      const W = canvas.width, H = canvas.height;
+      const W = cssW, H = cssH;
       const cx = W/2, cy = H/2;
       const { cw, ch, fanSpread } = computeCardSize(W);
       ctx.clearRect(0, 0, W, H);
@@ -145,7 +150,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
 
       if (!startMs) startMs = ts;
       const t = (ts - startMs) / 1000;
-      const W = canvas.width, H = canvas.height;
+      const W = cssW, H = cssH;
       const cx = W/2, cy = H/2;
       const { cw, ch, fanSpread } = computeCardSize(W);
       ctx.clearRect(0, 0, W, H);
