@@ -138,7 +138,13 @@ describe("POST /api/tarot/reading", () => {
 
   it("spreadType='three-card' 제공 시 그대로 사용한다", async () => {
     const { POST } = await setup();
-    const res = await POST(makePostRequest({ ...VALID_BODY, spreadType: "three-card" }));
+    // spreadType='three-card'는 cards.length=3 요구 (superRefine)
+    const threeCards = [
+      { cardId: "major-00", position: 0, isReversed: false },
+      { cardId: "major-01", position: 1, isReversed: false },
+      { cardId: "major-02", position: 2, isReversed: false },
+    ];
+    const res = await POST(makePostRequest({ ...VALID_BODY, spreadType: "three-card", cards: threeCards }));
     expect(res.headers.get("Content-Type")).toBe("text/event-stream");
     const text = await readSSEStream(res);
     expect(text).toContain("done");

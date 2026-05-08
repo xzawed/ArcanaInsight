@@ -197,6 +197,17 @@ export default function TarotSessionPage() {
     return () => clearTimeout(t);
   }, []);
 
+  // unmount cleanup: 진행 중인 SSE abort + 자동 시작 타이머 clear (saju/shinjeom과 동일 패턴)
+  useEffect(() => {
+    return () => {
+      readingAbortRef.current?.abort();
+      if (autoStartTimerRef.current) {
+        clearTimeout(autoStartTimerRef.current);
+        autoStartTimerRef.current = null;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!topic || !character || !spreadType) {
       if (!redirectedRef.current) { redirectedRef.current = true; router.push("/tarot"); }
@@ -249,13 +260,14 @@ export default function TarotSessionPage() {
     // 1. selectionLockRef 동기 ref-lock (state 반영 전 두 번째 click 차단)
     // 2. pendingConfirmRef (확인 대기 중 추가 선택 차단)
     if (selectionLockRef.current || pendingConfirmRef.current) return;
+    // TOCTOU 방지: lock을 fresh getState 호출 직전에 즉시 set (다른 click handler가 동일 frame에 진입해도 차단)
+    selectionLockRef.current = true;
+    requestAnimationFrame(() => { selectionLockRef.current = false; });
     // 항상 fresh 상태를 읽어 stale closure 방지
     const { selectedCards: currentCards, requiredCards: required } = useSessionStore.getState();
     if (currentCards.length >= required) return;
     // 같은 deck index 중복 클릭 방어 (CardDeck isSelected prop의 stale 보완)
     if (currentCards.some((c) => c.card.id === shuffledDeck[index]?.id)) return;
-    selectionLockRef.current = true;
-    requestAnimationFrame(() => { selectionLockRef.current = false; });
 
     const card = shuffledDeck[index];
     const isReversed = Math.random() > 0.5;
@@ -276,7 +288,13 @@ export default function TarotSessionPage() {
       if (autoStartTimerRef.current) return;
       autoStartTimerRef.current = setTimeout(() => {
         autoStartTimerRef.current = null;
-        const allCards = useSessionStore.getState().selectedCards;
+        const { selectedCards: allCards, requiredCards: req } = useSessionStore.getState();
+        // 800ms 동안 cancel·race로 카드 수가 줄었으면 startReading 차단 (서버에 부족한 cards 전달 방지)
+        if (allCards.length < req) {
+          console.warn("[tarot-session] auto-start aborted: insufficient cards", allCards.length, "/", req);
+          setPendingConfirm(false);
+          return;
+        }
         startReading(allCards);
       }, 800);
     } else if (confirmEachCard || isLast) {
@@ -321,6 +339,11 @@ export default function TarotSessionPage() {
 
   /** 취소 → 마지막 카드 제거, 다시 선택 가능 */
   const handleCancelLastCard = useCallback(() => {
+    // 자동 시작 타이머가 예약돼 있으면 cancel — store가 줄어든 상태로 startReading 발화 방지
+    if (autoStartTimerRef.current) {
+      clearTimeout(autoStartTimerRef.current);
+      autoStartTimerRef.current = null;
+    }
     setPendingConfirm(false);
     const currentCards = useSessionStore.getState().selectedCards;
     if (currentCards.length === 0) return;
@@ -365,6 +388,15 @@ export default function TarotSessionPage() {
   }, [locale, spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
+    // 진입 가드 — race로 cards.length가 spread 요구 수와 mismatch면 abort.
+    // 서버 superRefine이 1차 방어, 클라이언트도 동일 검증으로 onError 모달 노출 차단.
+    const required = useSessionStore.getState().requiredCards;
+    if (!cards || cards.length !== required) {
+      console.warn("[tarot-session] startReading aborted: cards.length mismatch", cards?.length, "/", required);
+      setPendingConfirm(false);
+      setLoading(false);
+      return;
+    }
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     setReadingErrorReason("generic");
     setIsConnecting(true);
