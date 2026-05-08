@@ -177,6 +177,10 @@ export default function TarotSessionPage() {
   const [confirmEachCard, setConfirmEachCard] = useState(false);
   const resultContainerRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
+  // 빠른 연속 터치 race 차단: 동기 ref-lock (RAF로 다음 frame에 unlock)
+  const selectionLockRef = useRef(false);
+  // 마지막 카드 자동 시작 setTimeout 이중 큐잉 차단
+  const autoStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleConfirmMode = () => {
     setConfirmEachCard((prev) => {
@@ -241,17 +245,25 @@ export default function TarotSessionPage() {
   }, [addChatMessage, setAnimationPhase, setPhase, t]);
 
   const handleCardSelect = useCallback((index: number) => {
+    // 빠른 연속 터치 race 차단:
+    // 1. selectionLockRef 동기 ref-lock (state 반영 전 두 번째 click 차단)
+    // 2. pendingConfirmRef (확인 대기 중 추가 선택 차단)
+    if (selectionLockRef.current || pendingConfirmRef.current) return;
     // 항상 fresh 상태를 읽어 stale closure 방지
     const { selectedCards: currentCards, requiredCards: required } = useSessionStore.getState();
-    if (currentCards.length >= required || pendingConfirmRef.current) return;
+    if (currentCards.length >= required) return;
+    // 같은 deck index 중복 클릭 방어 (CardDeck isSelected prop의 stale 보완)
+    if (currentCards.some((c) => c.card.id === shuffledDeck[index]?.id)) return;
+    selectionLockRef.current = true;
+    requestAnimationFrame(() => { selectionLockRef.current = false; });
 
     const card = shuffledDeck[index];
     const isReversed = Math.random() > 0.5;
     const position = currentCards.length;
     const selected: SelectedCard = { card, position, isReversed, selectedAt: new Date() };
     selectCard(selected);
-    setSelectedIndices((prev) => [...prev, index]);
-    setRevealedPositions((prev) => [...prev, position]);
+    setSelectedIndices((prev) => prev.includes(index) ? prev : [...prev, index]);
+    setRevealedPositions((prev) => prev.includes(position) ? prev : [...prev, position]);
     setMood("surprised");
 
     const currentCount = currentCards.length + 1;
@@ -260,7 +272,10 @@ export default function TarotSessionPage() {
     if (isLast && !confirmEachCard) {
       // 확인 모드 OFF + 마지막 카드 → 자동으로 리딩 시작 (즉시 잠금으로 중복 방지)
       setPendingConfirm(true);
-      setTimeout(() => {
+      // setTimeout 이중 큐잉 차단: 이미 예약된 타이머가 있으면 재예약 안 함
+      if (autoStartTimerRef.current) return;
+      autoStartTimerRef.current = setTimeout(() => {
+        autoStartTimerRef.current = null;
         const allCards = useSessionStore.getState().selectedCards;
         startReading(allCards);
       }, 800);
@@ -284,6 +299,8 @@ export default function TarotSessionPage() {
 
   /** 확인 → 마지막 카드면 리딩 시작, 아니면 다음 카드 선택 계속 */
   const handleConfirmCard = useCallback(() => {
+    // 빠른 더블클릭으로 startReading 이중 호출 차단
+    if (!pendingConfirmRef.current) return;
     setPendingConfirm(false);
     const { selectedCards: currentCards } = useSessionStore.getState();
     if (currentCards.length >= requiredCards) {
