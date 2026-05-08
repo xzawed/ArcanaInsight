@@ -75,12 +75,14 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
   const { selectedSkinId } = useSkinStore();
 
   useEffect(() => {
+    let cancelled = false;
     const url = getCardBackUrl(selectedSkinId);
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => { cardImgRef.current = img; };
-    img.onerror = () => { cardImgRef.current = null; };
+    img.onload = () => { if (!cancelled) cardImgRef.current = img; };
+    img.onerror = () => { if (!cancelled) cardImgRef.current = null; };
     img.src = url;
+    return () => { cancelled = true; };
   }, [selectedSkinId]);
 
   useEffect(() => {
