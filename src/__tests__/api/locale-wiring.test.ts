@@ -77,7 +77,7 @@ describe("locale wiring — sessions INSERT", () => {
     vi.doMock("@/lib/auth", () => ({ getCurrentUser: vi.fn().mockResolvedValue(null) }));
 
     const { POST } = await import("@/app/api/shinjeom/session/route");
-    await POST(makePostRequest({ topic: "love", characterId: "arcana" }));
+    await POST(makePostRequest({ topic: "shinjeom-love", characterId: "arcana" }));
 
     const sessionInsert = mockDb.insertCalls.find((c) => c.table === "sessions");
     expect(sessionInsert).toBeDefined();

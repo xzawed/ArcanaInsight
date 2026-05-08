@@ -36,6 +36,13 @@ describe("POST /api/shinjeom/session", () => {
     expect((await res.json()).error).toBe("Invalid request");
   });
 
+  it("신점 topic 목록 밖의 값 → 400", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ topic: "love", characterId: "arcana" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Invalid topic");
+  });
+
   it("DB insert 실패해도 200 반환 (신점은 세션 없이 계속 진행)", async () => {
     const { POST, mockDb } = await setup();
     mockDb.insert.mockRejectedValue(new Error("DB unavailable"));

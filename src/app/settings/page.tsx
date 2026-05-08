@@ -12,6 +12,45 @@ import { GenderFilter } from "@/types/character";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 
+const USER_INFO_KEY = "arcana_user_info";
+const USER_INFO_CONSENT_KEY = "arcana_privacy_agreed";
+
+function hasSavedUserInfo(): boolean {
+  try {
+    return !!sessionStorage.getItem(USER_INFO_KEY);
+  } catch {
+    return false;
+  }
+}
+
+function clearSavedUserInfo(): void {
+  try {
+    sessionStorage.removeItem(USER_INFO_KEY);
+    sessionStorage.removeItem(USER_INFO_CONSENT_KEY);
+    // 이전 localStorage 저장 방식에서 남은 데이터를 함께 정리한다.
+    localStorage.removeItem(USER_INFO_KEY);
+    localStorage.removeItem(USER_INFO_CONSENT_KEY);
+  } catch {
+    // storage 차단 환경에서는 표시 상태만 갱신한다.
+  }
+}
+
+function isConfirmEachCardEnabled(): boolean {
+  try {
+    return localStorage.getItem("arcana-confirm-each-card") === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveConfirmEachCard(enabled: boolean): void {
+  try {
+    localStorage.setItem("arcana-confirm-each-card", String(enabled));
+  } catch {
+    // storage 차단 환경에서는 현재 화면 상태만 유지한다.
+  }
+}
+
 function SaveToast({ visible, text }: { visible: boolean; text: string }) {
   return (
     <div
@@ -40,8 +79,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setConfirmEachCard(localStorage.getItem("arcana-confirm-each-card") === "true");
-      setHasSavedInfo(!!localStorage.getItem("arcana_user_info"));
+      setConfirmEachCard(isConfirmEachCardEnabled());
+      setHasSavedInfo(hasSavedUserInfo());
     }, 0);
     return () => clearTimeout(t);
   }, []);
@@ -70,7 +109,7 @@ export default function SettingsPage() {
   const toggleConfirmMode = () => {
     const next = !confirmEachCard;
     setConfirmEachCard(next);
-    localStorage.setItem("arcana-confirm-each-card", String(next));
+    saveConfirmEachCard(next);
     showToast();
   };
 
@@ -80,8 +119,7 @@ export default function SettingsPage() {
   };
 
   const clearSavedInfo = () => {
-    localStorage.removeItem("arcana_user_info");
-    localStorage.removeItem("arcana_privacy_agreed");
+    clearSavedUserInfo();
     setHasSavedInfo(false);
     showToast();
   };

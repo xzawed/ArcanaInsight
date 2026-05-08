@@ -64,6 +64,13 @@ describe("POST /api/shinjeom/message", () => {
     expect((await res.json()).error).toContain("Message required");
   });
 
+  it("신점 topic 목록 밖의 값 → 400", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ ...VALID_BODY, topic: "love" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Invalid topic");
+  });
+
   it("isFinalTurn=true → 최종 결과 SSE 포함", async () => {
     const { POST } = await setup();
     const res = await POST(makePostRequest({ ...VALID_BODY, isFinalTurn: true }));
