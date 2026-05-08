@@ -226,5 +226,24 @@ describe("ClaudeProvider", () => {
       const chunks = await collectStream(provider.streamReading("s", "u"));
       expect(chunks).toEqual(["첫 번째"]);
     });
+
+    it("message_delta stop_reason='max_tokens' 시 TRUNCATED 경고 로그 (10장+ truncation 진단)", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const sseLines = [
+        'data: {"type":"content_block_delta","delta":{"text":"부분"}}',
+        'data: {"type":"message_delta","delta":{"stop_reason":"max_tokens"},"usage":{"output_tokens":24500}}',
+        "data: [DONE]",
+      ];
+      mockFetch.mockResolvedValue(makeSseResponse(sseLines));
+
+      const chunks = await collectStream(provider.streamReading("s", "u", 24500));
+      expect(chunks).toEqual(["부분"]);
+      const truncatedCall = warnSpy.mock.calls.find(
+        (c) => typeof c[0] === "string" && c[0].includes("TRUNCATED")
+      );
+      expect(truncatedCall).toBeDefined();
+      expect(truncatedCall?.[0]).toContain("24500");
+      warnSpy.mockRestore();
+    });
   });
 });
