@@ -388,11 +388,10 @@ export default function TarotSessionPage() {
   }, [locale, spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
-    // 진입 가드 — race로 cards.length가 spread 요구 수와 mismatch면 abort.
-    // 서버 superRefine이 1차 방어, 클라이언트도 동일 검증으로 onError 모달 노출 차단.
-    const required = useSessionStore.getState().requiredCards;
-    if (!cards || cards.length !== required) {
-      console.warn("[tarot-session] startReading aborted: cards.length mismatch", cards?.length, "/", required);
+    // 진입 가드 — race로 cards가 비어있으면 abort. 부족·초과는 서버 superRefine이 400으로 차단하므로
+    // 클라이언트는 빈 배열만 strict하게 막음 (E2E mock·기타 우회 흐름과 호환).
+    if (!cards || cards.length === 0) {
+      console.warn("[tarot-session] startReading aborted: empty cards");
       setPendingConfirm(false);
       setLoading(false);
       return;
