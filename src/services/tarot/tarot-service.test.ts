@@ -376,8 +376,16 @@ describe("TarotService", () => {
         expect(result.cardInterpretations).toHaveLength(3);
       });
 
-      it("JSON 파싱 완전 실패 시 parseError='invalid_json'을 반환한다", () => {
+      it("JSON 파싱 실패 후 fallback 텍스트가 있으면 parseError='fallback_text'를 반환한다", () => {
         const result = service.parseResult("완전히 망가진 응답", 3);
+        expect(result.parseError).toBe("fallback_text");
+        expect(result.expectedCardCount).toBe(3);
+        expect(result.cardInterpretations).toEqual([]);
+        expect(result.overallReading).toContain("완전히 망가진 응답");
+      });
+
+      it("JSON 파싱 실패 후 fallback 텍스트도 없으면 parseError='invalid_json'을 반환한다", () => {
+        const result = service.parseResult("", 3);
         expect(result.parseError).toBe("invalid_json");
         expect(result.expectedCardCount).toBe(3);
         expect(result.cardInterpretations).toEqual([]);

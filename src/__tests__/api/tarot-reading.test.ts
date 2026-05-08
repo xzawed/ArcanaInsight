@@ -320,6 +320,30 @@ describe("POST /api/tarot/reading", () => {
     expect(payload.result.parseError).toBe("truncated");
   });
 
+  it("AI 응답이 JSON이 아니어도 텍스트가 있으면 fallback_text 결과를 내려준다", async () => {
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => ({
+      FallbackProvider: vi.fn().mockImplementation(() => ({
+        streamReading: vi.fn().mockImplementation(async function* () {
+          yield "카드들이 말하는 핵심은 지금의 불안을 정리하고 다음 선택을 차분히 보라는 것입니다.";
+        }),
+      })),
+    }));
+
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest(VALID_BODY));
+    const text = await readSSEStream(res);
+    const doneLine = text.split("\n").find((l) => l.startsWith("data:") && l.includes("\"done\":true"));
+    const payload = JSON.parse(doneLine!.slice(5).trim());
+    expect(payload.result.parseError).toBe("fallback_text");
+    expect(payload.result.overallReading).toContain("카드들이 말하는 핵심");
+  });
+
   it("freeQuestion 포함 요청 → SSE 스트림 응답", async () => {
     const { POST } = await setup();
     const res = await POST(makePostRequest({
