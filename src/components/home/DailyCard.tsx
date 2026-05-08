@@ -13,6 +13,11 @@ import { useT } from "@/i18n/useT";
 import { getCardName } from "@/data/cards/locale-helpers";
 
 const deckManager = new DeckManager();
+const DATE_LOCALE: Record<string, string> = {
+  ko: "ko-KR",
+  en: "en-US",
+  ja: "ja-JP",
+};
 
 interface DailyCardData {
   cardId: string;
@@ -67,7 +72,7 @@ function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, select
   }
   return (
     <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-dashed border-arcana-border flex items-center justify-center">
-      <span className="text-arcana-muted text-xs">카드 로딩 중...</span>
+      <span className="text-arcana-muted text-xs">{tr("common.loading")}</span>
     </div>
   );
 }
@@ -151,8 +156,13 @@ export function DailyCard() {
     const d = new Date();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setToday(d.toISOString().split("T")[0]);
-    setTodayLabel(d.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" }));
-  }, []);
+    setTodayLabel(d.toLocaleDateString(DATE_LOCALE[locale] ?? DATE_LOCALE.ko, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    }));
+  }, [locale]);
 
   const fetchDailyCard = useCallback(async (characterId: string) => {
     if (!today) return;
@@ -188,9 +198,10 @@ export function DailyCard() {
 
   const handleShare = async () => {
     if (!currentData || !currentCard) return;
-    const text = `🔮 오늘의 카드: ${getCardName(currentCard, locale)}\n\n${currentData.interpretation}\n\n- ${activeCharacter?.name}의 해석 | ArcanaInsight`;
+    const title = tr("home.daily-card.share-text");
+    const text = `🔮 ${title}: ${getCardName(currentCard, locale)}\n\n${currentData.interpretation}\n\nArcanaInsight`;
     if (navigator.share) {
-      await navigator.share({ title: tr("home.daily-card.share-text"), text });
+      await navigator.share({ title, text });
     } else {
       await navigator.clipboard.writeText(text);
     }

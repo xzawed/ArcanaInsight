@@ -11,6 +11,7 @@ import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
+import { SHINJEOM_TOPICS } from "@/data/topics";
 
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
@@ -31,8 +32,9 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)
     const parsed = ShinjeomMessageSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, characterId, currentMessage, isFinalTurn, messageIndex } = parsed.data;
-    const topic = parsed.data.topic as Topic;
+    const { sessionId, characterId, currentMessage, isFinalTurn, messageIndex, topic: rawTopic } = parsed.data;
+    if (!SHINJEOM_TOPICS.includes(rawTopic)) return jsonError("Invalid topic");
+    const topic = rawTopic as Topic;
     // timestamp는 네트워크 전송 시 문자열/숫자로 직렬화되므로 Date로 복원
     const chatHistory: ChatMessage[] = parsed.data.chatHistory.map((m) => ({
       ...m,

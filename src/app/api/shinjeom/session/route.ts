@@ -5,6 +5,7 @@ import { ShinjeomSessionSchema } from "@/lib/validation/api-schemas"
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp } from "@/lib/request-utils"
 import { getRequestLocale } from "@/i18n/server-locale"
+import { SHINJEOM_TOPICS } from "@/data/topics"
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
     const { topic, characterId } = parsed.data
+    if (!SHINJEOM_TOPICS.includes(topic)) {
+      return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
+    }
 
     let session = null
     try {

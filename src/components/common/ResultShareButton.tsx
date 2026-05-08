@@ -11,9 +11,9 @@ type Service = "tarot" | "saju" | "shinjeom";
 const SITE = "ArcanaInsight";
 
 const SERVICE_PATH: Record<Service, string> = {
-  tarot: "/tarot/result",
-  saju: "/saju/result",
-  shinjeom: "/shinjeom/result",
+  tarot: "/tarot/result/",
+  saju: "/saju/result/",
+  shinjeom: "/shinjeom/result/",
 };
 
 const SERVICE_EMOJI: Record<Service, string> = {
@@ -28,9 +28,12 @@ function getShareTitle(service: Service, locale: Locale): string {
     | "tarot.session.share.title"
     | "saju.session.share.title"
     | "shinjeom.session.share.title";
-  // shinjeom.session.share.title은 PR 6에서 추가 안 됨 → result.title 재사용
   if (service === "shinjeom") return `${translate("shinjeom.result.title", locale)} - ${SITE}`;
   return `${translate(key, locale)} - ${SITE}`;
+}
+
+function getShareUrl(service: Service, shareToken: string): string {
+  return `${window.location.origin}${SERVICE_PATH[service]}${shareToken}`;
 }
 
 interface ResultShareButtonProps {
@@ -45,7 +48,7 @@ export function ResultShareButton({ service, shareToken, spreadName }: ResultSha
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}${SERVICE_PATH[service]}/${shareToken}`;
+    const url = getShareUrl(service, shareToken);
     const title = getShareTitle(service, locale);
     const labelPrefix = service === "tarot" && spreadName ? `${spreadName} ` : "";
     const text = `${SERVICE_EMOJI[service]} ${labelPrefix}${title}`;

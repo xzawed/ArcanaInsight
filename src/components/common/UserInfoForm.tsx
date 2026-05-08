@@ -119,7 +119,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
   const [loading, setLoading] = useState(true);
   const [saveWarning, setSaveWarning] = useState(false);
 
-  // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: localStorage)
+  // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: sessionStorage)
   useEffect(() => {
     const setters: ProfileSetters = { setName, setBirthDate, setGender: (v) => setGender(v), setBirthHour, setSaveInfo, setHasSavedInfo };
     const loadUserInfo = async () => {
