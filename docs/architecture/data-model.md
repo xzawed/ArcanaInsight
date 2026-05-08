@@ -121,11 +121,11 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 | 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
 | 에러 메시지 상수 | `src/data/error-messages.ts` |
 
-## 다국어 데이터 (PR-3·PR-4·PR-5 예정)
+## 다국어 데이터
 
-- 카드 80장 `name`·`meanings` 객체화 (`{ ko, en, ja? }`) — PR-3에서 외부 번역가 의뢰
-- 12 캐릭터 페르소나 5필드(`greeting`·`personality`·`description`·`speciality`·`speechStyle`)에 영문·일문 추가 — PR-4 외부 번역
-- `waiting-lines.ts` 186줄 영문·일문 — PR-4
-- 일본어 전체 사전 채움 — PR-5
+- 카드 데이터는 `name`, `nameKo`, `nameJa`를 함께 가진다. 리딩 의미문은 현재 한국어 중심이며 AI 응답 언어는 프롬프트 locale 지시로 제어한다.
+- 캐릭터 데이터는 `greetingEn`, `greetingJa`, `descriptionEn`, `descriptionJa`, `specialityEn`, `specialityJa` 필드를 가진다.
+- 대기 대사는 `waiting-lines.ts`, `waiting-lines-en.ts`, `waiting-lines-ja.ts`, `waiting-lines-i18n.ts`로 분리되어 locale별로 조회한다.
+- UI 사전은 `src/i18n/translations/{ko,en,ja}/index.ts`에 있으며, 미번역 키는 ko fallback을 사용한다.
 
 상세: [`i18n.md`](i18n.md)

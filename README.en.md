@@ -170,14 +170,14 @@ pnpm dev
 | Category | Technology |
 |----------|-----------|
 | 🗣️ Language | TypeScript (strict) |
-| ⚛️ Framework | Next.js 16.2.1 (App Router) · React 19.2.4 |
+| ⚛️ Framework | Next.js 16.2.3 (App Router) · React 19.2.4 |
 | 🎨 Styling | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 🎬 Animation | Framer Motion v12.38 |
 | 🤖 AI | Grok API (xAI) — SSE streaming · Claude API (Anthropic) auto-fallback |
 | 🔐 Auth | Supabase Auth Helpers (Google) |
 | 🗄️ Database | Supabase (PostgreSQL) · Drizzle ORM (on-premises switchover support) |
 | 📦 State | Zustand v5 |
-| 📦 Package manager | pnpm 10.33 |
+| 📦 Package manager | pnpm 10.33.0 |
 | 🚀 Hosting | Railway (auto-deploy via GitHub Actions) |
 | 🧪 E2E Tests | Playwright — 19 files, 141 tests (Desktop · Android · iOS) · [Guide](./e2e/README.md) |
 

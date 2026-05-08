@@ -6,8 +6,8 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **804개 테스트** / statements 98%+ 커버리지
 - **Vitest 2.0** (node env, v8 coverage)
+- 실제 테스트 수는 변경이 잦으므로 `pnpm test:coverage` 출력과 coverage 리포트를 기준으로 확인한다.
 - 임계값: `branches 92 / functions 98 / lines 98 / statements 98`
 
 ```bash
@@ -161,11 +161,11 @@ coverage: {
 
 ---
 
-## 8. CLAUDE.md 테스트 수 동기화
+## 8. 테스트 수 확인
 
-테스트가 추가/삭제될 때마다 CLAUDE.md의 테스트 수를 동기화합니다:
+테스트가 추가/삭제될 때마다 coverage 출력과 문서의 고정 숫자가 어긋나지 않는지 확인합니다. 고정 숫자를 유지하는 문서가 있다면 아래 스크립트로 동기화합니다:
 
 ```bash
-pnpm exec tsx scripts/sync-test-count.ts          # CLAUDE.md 자동 갱신
+pnpm exec tsx scripts/sync-test-count.ts          # 문서 자동 갱신
 pnpm exec tsx scripts/sync-test-count.ts --check  # CI 모드: 불일치 시 exit 1
 ```
