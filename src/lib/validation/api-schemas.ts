@@ -73,6 +73,28 @@ export const TarotReadingSchema = z.object({
     isReversed: z.boolean(),
   })).min(1).max(22),
 }).superRefine((data, ctx) => {
+  const cardIds = new Set<string>();
+  const positions = new Set<number>();
+  data.cards.forEach((card, index) => {
+    if (cardIds.has(card.cardId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `duplicate cardId '${card.cardId}'`,
+        path: ["cards", index, "cardId"],
+      });
+    }
+    cardIds.add(card.cardId);
+
+    if (positions.has(card.position)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `duplicate position '${card.position}'`,
+        path: ["cards", index, "position"],
+      });
+    }
+    positions.add(card.position);
+  });
+
   // spread별 정확한 카드 수와 일치 강제 — 빠른 클릭 race로 부족·초과 카드로 startReading 호출 차단
   if (!data.spreadType) return;
   const expected = SPREAD_REQUIRED_CARDS[data.spreadType];

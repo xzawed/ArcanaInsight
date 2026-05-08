@@ -181,6 +181,8 @@ export default function TarotSessionPage() {
   const selectionLockRef = useRef(false);
   // 마지막 카드 자동 시작 setTimeout 이중 큐잉 차단
   const autoStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 자동 시작 타이머와 확인 버튼이 동시에 startReading을 호출하는 race 차단
+  const readingInFlightRef = useRef(false);
 
   const toggleConfirmMode = () => {
     setConfirmEachCard((prev) => {
@@ -270,10 +272,11 @@ export default function TarotSessionPage() {
     if (currentCards.some((c) => c.card.id === shuffledDeck[index]?.id)) return;
 
     const card = shuffledDeck[index];
+    if (!card) return;
     const isReversed = Math.random() > 0.5;
     const position = currentCards.length;
     const selected: SelectedCard = { card, position, isReversed, selectedAt: new Date() };
-    selectCard(selected);
+    if (!selectCard(selected)) return;
     setSelectedIndices((prev) => prev.includes(index) ? prev : [...prev, index]);
     setRevealedPositions((prev) => prev.includes(position) ? prev : [...prev, position]);
     setMood("surprised");
@@ -319,6 +322,10 @@ export default function TarotSessionPage() {
   const handleConfirmCard = useCallback(() => {
     // 빠른 더블클릭으로 startReading 이중 호출 차단
     if (!pendingConfirmRef.current) return;
+    if (autoStartTimerRef.current) {
+      clearTimeout(autoStartTimerRef.current);
+      autoStartTimerRef.current = null;
+    }
     setPendingConfirm(false);
     const { selectedCards: currentCards } = useSessionStore.getState();
     if (currentCards.length >= requiredCards) {
@@ -388,14 +395,16 @@ export default function TarotSessionPage() {
   }, [locale, spreadType, addChatMessage]);
 
   const startReading = async (cards: SelectedCard[]) => {
-    // 진입 가드 — race로 cards가 비어있으면 abort. 부족·초과는 서버 superRefine이 400으로 차단하므로
-    // 클라이언트는 빈 배열만 strict하게 막음 (E2E mock·기타 우회 흐름과 호환).
-    if (!cards || cards.length === 0) {
-      console.warn("[tarot-session] startReading aborted: empty cards");
+    if (readingInFlightRef.current) return;
+    const { requiredCards: required } = useSessionStore.getState();
+    if (!cards || cards.length !== required) {
+      console.warn("[tarot-session] startReading aborted: card count mismatch", cards?.length ?? 0, "/", required);
       setPendingConfirm(false);
       setLoading(false);
       return;
     }
+    readingInFlightRef.current = true;
+    setPendingConfirm(false);
     setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
     setReadingErrorReason("generic");
     setIsConnecting(true);
@@ -430,6 +439,7 @@ export default function TarotSessionPage() {
       setLoading(false);
       setReadingStartedAt(null);
       setIsConnecting(false);
+      readingInFlightRef.current = false;
       return;
     }
 
@@ -451,6 +461,7 @@ export default function TarotSessionPage() {
       setReadingError(true);
       setLoading(false);
       setReadingStartedAt(null);
+      readingInFlightRef.current = false;
     }, 240_000);
 
     await fetchSSEStream({
@@ -472,6 +483,7 @@ export default function TarotSessionPage() {
         if (!result) {
           addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
+          readingInFlightRef.current = false;
           return;
         }
 
@@ -484,6 +496,7 @@ export default function TarotSessionPage() {
           console.warn("[tarot-session] 결과 표시 불가:", { parseError: result.parseError, expected: result.expectedCardCount });
           addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
           setMood("default"); setReadingError(true);
+          readingInFlightRef.current = false;
           return;
         }
 
@@ -499,6 +512,7 @@ export default function TarotSessionPage() {
         const currentSpread = spreadType ? spreads[spreadType] : null;
         addReadingResultMessages(result, cards, currentSpread, addChatMessage, locale);
         setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
+        readingInFlightRef.current = false;
       },
       onError: (msg) => {
         if (finished) return;
@@ -512,11 +526,13 @@ export default function TarotSessionPage() {
           mood: "default", timestamp: new Date(),
         });
         setMood("default"); setReadingError(true);
+        readingInFlightRef.current = false;
       },
     });
     if (!finished) clearTimeout(timeoutId);
     setLoading(false);
     setReadingStartedAt(null);
+    readingInFlightRef.current = false;
   };
 
   // elapsed 카운터 — phase=reading + isLoading 동안 1초 단위로 갱신.
