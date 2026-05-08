@@ -64,7 +64,15 @@ export const useSessionStore = create<SessionState>((set) => ({
   setSessionId: (id) => set({ sessionId: id }),
   setCharacterId: (id) => set({ characterId: id }),
   setAvailableCards: (cards) => set({ availableCards: cards }),
-  selectCard: (card) => set((state) => ({ selectedCards: [...state.selectedCards, card] })),
+  selectCard: (card) => set((state) => {
+    // atomic check-and-push: 빠른 연속 클릭 race 차단.
+    // - length cap 초과 무시 (handleCardSelect 가드와 이중 방어)
+    // - 같은 card.id 중복 차단 (deck 내 같은 카드 두 번 push 방지)
+    // cancel 후 재선택은 store에서 카드가 빠진 뒤이므로 통과 — 정상.
+    if (state.selectedCards.length >= state.requiredCards) return state;
+    if (state.selectedCards.some((c) => c.card.id === card.card.id)) return state;
+    return { selectedCards: [...state.selectedCards, card] };
+  }),
   addChatMessage: (message) => set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   appendToLastMessage: (content) => set((state) => {
     const messages = [...state.chatMessages];
