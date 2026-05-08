@@ -6,6 +6,8 @@ import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
 import { hexToRgbComponents } from "@/lib/color-utils";
 import { t as translate } from "@/i18n/translations";
 import { useT } from "@/i18n/useT";
+import { useSkinStore } from "@/hooks/useSkinStore";
+import { getCardBackUrl } from "@/lib/storage";
 
 interface ShuffleCeremonyProps {
   readonly characterId: string;
@@ -21,11 +23,19 @@ function easeOut(t: number)   { return 1 - Math.pow(1-t, 3); }
 function springFn(t: number)  { return 1 - Math.cos(t * Math.PI * 2.5) * Math.pow(1-t, 2.5); }
 function lerp(a: number, b: number, t: number) { return a + (b-a)*t; }
 
+function computeCardSize(W: number) {
+  const cw = Math.max(30, Math.min(Math.round(W * 0.09), 90));
+  const ch = Math.round(cw * 1.5);
+  const fanSpread = Math.min(W * 0.65, 480);
+  return { cw, ch, fanSpread };
+}
+
 function drawCard(
   ctx: CanvasRenderingContext2D,
   x: number, y: number, w: number, h: number,
   angle: number, alpha: number, glowStrength: number,
   rgb: string,
+  img?: HTMLImageElement | null,
 ) {
   ctx.save();
   ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
@@ -36,11 +46,18 @@ function drawCard(
   ctx.beginPath();
   if (ctx.roundRect) ctx.roundRect(-w/2, -h/2, w, h, 4);
   else ctx.rect(-w/2, -h/2, w, h);
-  const g = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
-  g.addColorStop(0, "#2d1b69");
-  g.addColorStop(1, "#1a0a3e");
-  ctx.fillStyle = g;
-  ctx.fill();
+  if (img) {
+    ctx.save();
+    ctx.clip();
+    ctx.drawImage(img, -w/2, -h/2, w, h);
+    ctx.restore();
+  } else {
+    const g = ctx.createLinearGradient(-w/2, -h/2, w/2, h/2);
+    g.addColorStop(0, "#2d1b69");
+    g.addColorStop(1, "#1a0a3e");
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
   ctx.strokeStyle = `rgba(${rgb},0.6)`;
   ctx.lineWidth = 1;
   ctx.stroke();
@@ -54,6 +71,19 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
   const doneRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
+  const cardImgRef = useRef<HTMLImageElement | null>(null);
+  const { selectedSkinId } = useSkinStore();
+
+  useEffect(() => {
+    let cancelled = false;
+    const url = getCardBackUrl(selectedSkinId);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => { if (!cancelled) cardImgRef.current = img; };
+    img.onerror = () => { if (!cancelled) cardImgRef.current = null; };
+    img.src = url;
+    return () => { cancelled = true; };
+  }, [selectedSkinId]);
 
   useEffect(() => {
     function safeComplete() {
@@ -73,10 +103,15 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d")!;
 
+    let cssW = 0, cssH = 0;
     const setSize = () => {
+      const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      cssW = rect.width;
+      cssH = rect.height;
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     setSize();
     const observer = new ResizeObserver(setSize);
@@ -89,15 +124,15 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;
     let startMs: number | null = null;
-    const cw = 34, ch = 54;
 
     function drawFinal() {
-      const W = canvas.width, H = canvas.height;
+      const W = cssW, H = cssH;
       const cx = W/2, cy = H/2;
+      const { cw, ch, fanSpread } = computeCardSize(W);
       ctx.clearRect(0, 0, W, H);
       for (let i = 0; i < N; i++) {
         const f = i/(N-1) - 0.5;
-        drawCard(ctx, cx + f*120, cy + Math.pow(f*2, 2)*15, cw, ch, f*0.4, 1, 0, rgb);
+        drawCard(ctx, cx + f*fanSpread, cy + Math.pow(f*2, 2)*ch*0.28, cw, ch, f*0.4, 1, 0, rgb, cardImgRef.current);
       }
       ctx.fillStyle = "rgba(196,181,253,0.95)";
       ctx.font = "14px serif";
@@ -115,8 +150,9 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
 
       if (!startMs) startMs = ts;
       const t = (ts - startMs) / 1000;
-      const W = canvas.width, H = canvas.height;
+      const W = cssW, H = cssH;
       const cx = W/2, cy = H/2;
+      const { cw, ch, fanSpread } = computeCardSize(W);
       ctx.clearRect(0, 0, W, H);
 
       if (t >= TOTAL_S) {
@@ -130,24 +166,24 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
         // ① 덱 컷
         const p = easeInOut(Math.min(t / 0.35, 1));
         const ret = t > 0.35 ? easeInOut((t - 0.35) / 0.15) : 0;
-        const upY = cy - lerp(0, 26, p) + lerp(0, 26, ret);
-        const dnY = cy + lerp(0, 20, p) - lerp(0, 20, ret);
+        const upY = cy - lerp(0, ch * 0.5, p) + lerp(0, ch * 0.5, ret);
+        const dnY = cy + lerp(0, ch * 0.37, p) - lerp(0, ch * 0.37, ret);
         const glow = p > 0.4 ? Math.min((p - 0.4) / 0.6, 1) * (1 - ret) * 0.8 : 0;
-        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, upY - i*2.5, cw, ch, 0, 1, glow*0.4, rgb);
-        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, dnY + i*2.5, cw, ch, 0, 1, glow*0.4, rgb);
+        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, upY - i*Math.round(cw * 0.07), cw, ch, 0, 1, glow*0.4, rgb, cardImgRef.current);
+        for (let i = 2; i >= 0; i--) drawCard(ctx, cx, dnY + i*Math.round(cw * 0.07), cw, ch, 0, 1, glow*0.4, rgb, cardImgRef.current);
       } else if (t < 0.7) {
         // ② 글로우 폭발
         const p = easeOut((t - 0.5) / 0.2);
         const fade = 1 - p;
-        const rr = ctx.createRadialGradient(cx, cy, 0, cx, cy, 120*p + 10);
+        const rr = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W * 0.35, 200) * p + 10);
         rr.addColorStop(0, `rgba(${rgb},${0.55*fade})`);
         rr.addColorStop(1, `rgba(${rgb},0)`);
         ctx.fillStyle = rr;
         ctx.fillRect(0, 0, W, H);
-        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, fade*0.9, rgb);
+        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*Math.round(cw * 0.06), cw, ch, 0, 1, fade*0.9, rgb, cardImgRef.current);
       } else if (t < 1.4) {
         // ③ 타이프라이터
-        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*2, cw, ch, 0, 1, 0, rgb);
+        for (let i = 3; i >= 0; i--) drawCard(ctx, cx, cy - i*Math.round(cw * 0.06), cw, ch, 0, 1, 0, rgb, cardImgRef.current);
         const count = Math.floor((t - 0.7) / 0.058);
         if (count > 0) {
           ctx.fillStyle = "rgba(196,181,253,0.95)";
@@ -161,7 +197,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
         const p = springFn(Math.min((t - 1.4) / 0.6, 1));
         for (let i = 0; i < N; i++) {
           const f = i/(N-1) - 0.5;
-          drawCard(ctx, cx + f*120*p, cy + Math.pow(f*2, 2)*15*p, cw, ch, f*0.4*p, 1, 0, rgb);
+          drawCard(ctx, cx + f*fanSpread*p, cy + Math.pow(f*2, 2)*ch*0.28*p, cw, ch, f*0.4*p, 1, 0, rgb, cardImgRef.current);
         }
         ctx.fillStyle = "rgba(196,181,253,0.95)";
         ctx.font = "14px serif";

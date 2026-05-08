@@ -163,3 +163,26 @@ session/page.tsx의 기존 5:5 레이아웃(캐릭터 `md:w-1/2` + 콘텐츠 `md
 - TTS 연동
 - 카드 뒤집기 전략 변경
 - 의식 이후 대기줄 스키마 확장
+
+---
+
+## 2026-05-09 사후 개선 (fix/tarot-selection-race 브랜치)
+
+카드 크기와 이미지가 실제 카드와 다른 버그 수정 + 화질 개선.
+
+### 변경 내용
+
+| 항목 | 이전 | 이후 |
+|------|------|------|
+| 카드 크기 | 하드코딩 `cw=34, ch=54` | `computeCardSize(W)` — 컨테이너 9%, 30-90px 클램프 |
+| 비율 | 1.588 (잘못됨) | `ch = cw * 1.5` (정확한 2:3) |
+| 팬 스프레드 | `f * 120` 고정 | `f * min(W * 0.65, 480)` 비례 |
+| 카드 이미지 | 보라 그라디언트 고정 | 선택된 스킨 뒷면 이미지 + 그라디언트 폴백 |
+| 화면 밀도 | CSS픽셀 = 물리픽셀 (흐림) | `devicePixelRatio` + `ctx.setTransform` (선명) |
+
+### 추가된 패턴
+
+- `computeCardSize(W)` — 순수 함수, 컨테이너 너비 기반 카드 크기 계산
+- `useSkinStore()` + `getCardBackUrl()` — 스킨 이미지 preload, 취소 플래그 있는 useEffect
+- `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` — ResizeObserver 중복 호출에 멱등적 (ctx.scale 사용 금지)
+- `cssW/cssH` 분리 — 물리픽셀 canvas에서 CSS픽셀 레이아웃 좌표계 유지
