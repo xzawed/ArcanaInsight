@@ -109,6 +109,28 @@ describe("TarotReadingSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("같은 cardId 중복 실패", () => {
+    const result = TarotReadingSchema.safeParse({
+      topic: "love",
+      cards: [
+        { cardId: "major-00", position: 0, isReversed: false },
+        { cardId: "major-00", position: 1, isReversed: true },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("같은 position 중복 실패", () => {
+    const result = TarotReadingSchema.safeParse({
+      topic: "love",
+      cards: [
+        { cardId: "major-00", position: 0, isReversed: false },
+        { cardId: "major-01", position: 0, isReversed: true },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 // ──────────────────────────────────────────────

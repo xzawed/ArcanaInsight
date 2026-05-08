@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { createSSEBody, mockSessionCreate, TAROT_READING_CHUNKS, TAROT_READING_RESULT } from "./helpers/sse-mock";
 
 test.describe("타로 서비스 플로우", () => {
   test("Step 1→2: 캐릭터 선택 → 주제 선택 전환", async ({ page }) => {
@@ -79,5 +80,48 @@ test.describe("타로 서비스 플로우", () => {
       await backBtn.click();
       await expect(characterCards.first()).toBeVisible({ timeout: 5_000 });
     }
+  });
+
+  test("카드 선택 중 중복/초과 클릭을 반복해도 리딩은 한 번만 시작된다", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await mockSessionCreate(page, "**/api/tarot/session");
+
+    let readingRequests = 0;
+    await page.route("**/api/tarot/reading", async (route) => {
+      readingRequests += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream",
+        headers: { "Cache-Control": "no-cache", "Connection": "keep-alive" },
+        body: createSSEBody(TAROT_READING_CHUNKS, { result: TAROT_READING_RESULT }),
+      });
+    });
+
+    await page.goto("/tarot");
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
+    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+    await characterCards.first().click();
+
+    await page.locator("[data-testid='topic-btn-general']").click();
+    await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
+    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+
+    const firstCard = page.locator("[data-testid='card-back-0']");
+    await expect(firstCard).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(700);
+
+    for (let i = 0; i < 8; i += 1) {
+      await firstCard.click({ force: true });
+    }
+
+    const proceedButton = page.getByRole("button", { name: /진행|Proceed|進む|확인|Confirm|確認/ });
+    if (await proceedButton.isVisible().catch(() => false)) {
+      await proceedButton.click({ force: true });
+      await proceedButton.click({ force: true }).catch(() => undefined);
+    }
+
+    await expect(page.locator("[data-testid='reading-content']")).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator("[data-testid='reading-error']")).toHaveCount(0);
+    expect(readingRequests).toBe(1);
   });
 });
