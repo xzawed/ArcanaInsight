@@ -19,7 +19,10 @@ export async function makeSessionRouteSetup<TSession>(
   mockDb.insert.mockResolvedValue(mockSession)
 
   const user = "user" in options ? options.user : MOCK_USER
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }))
+  vi.doMock("@/lib/db", () => ({
+    getDb: vi.fn().mockReturnValue(mockDb),
+    getAdminDb: vi.fn().mockReturnValue(mockDb),
+  }))
   vi.doMock("@/lib/auth", () => makeAuthMock(user))
 
   const route = await routeImport()
@@ -79,7 +82,10 @@ export async function makeStreamingRouteSetup(
     checkRateLimit: vi.fn().mockReturnValue(true),
     rateLimitResponse: vi.fn(),
   }))
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }))
+  vi.doMock("@/lib/db", () => ({
+    getDb: vi.fn().mockReturnValue(mockDb),
+    getAdminDb: vi.fn().mockReturnValue(mockDb),
+  }))
   vi.doMock("@/lib/auth", () => makeAuthMock())
   vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule())
 

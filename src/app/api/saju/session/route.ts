@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getDb } from "@/lib/db"
+import { getAdminDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const topic = rawTopic as Topic
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
-    const db = getDb()
+    const db = getAdminDb()
     const session = await db.insert("sessions", {
       user_id: user?.id ?? null,
       service_type: "saju",

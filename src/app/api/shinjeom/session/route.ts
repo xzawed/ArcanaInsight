@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getDb } from "@/lib/db"
+import { getAdminDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { ShinjeomSessionSchema } from "@/lib/validation/api-schemas"
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     let session = null
     try {
       const user = await getCurrentUser()
-      const db = getDb()
+      const db = getAdminDb()
       session = await db.insert("sessions", {
         service_type: "shinjeom",
         topic,

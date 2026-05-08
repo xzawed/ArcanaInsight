@@ -45,7 +45,7 @@ describe("locale wiring — sessions INSERT", () => {
   it("tarot/session: locale='en' 헤더 → sessions INSERT에 locale='en' 동봉", async () => {
     setupServerLocale("en");
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb }));
+    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb, getAdminDb: () => mockDb }));
     vi.doMock("@/lib/auth", () => ({ getCurrentUser: vi.fn().mockResolvedValue(null) }));
 
     const { POST } = await import("@/app/api/tarot/session/route");
@@ -59,7 +59,7 @@ describe("locale wiring — sessions INSERT", () => {
   it("saju/session: locale='ja' → sessions INSERT에 locale='ja' 동봉", async () => {
     setupServerLocale("ja");
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb }));
+    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb, getAdminDb: () => mockDb }));
     vi.doMock("@/lib/auth", () => ({ getCurrentUser: vi.fn().mockResolvedValue(null) }));
 
     const { POST } = await import("@/app/api/saju/session/route");
@@ -73,7 +73,7 @@ describe("locale wiring — sessions INSERT", () => {
   it("shinjeom/session: locale='ko' → sessions INSERT에 locale='ko' 동봉", async () => {
     setupServerLocale("ko");
     const mockDb = makeMockDb();
-    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb }));
+    vi.doMock("@/lib/db", () => ({ getDb: () => mockDb, getAdminDb: () => mockDb }));
     vi.doMock("@/lib/auth", () => ({ getCurrentUser: vi.fn().mockResolvedValue(null) }));
 
     const { POST } = await import("@/app/api/shinjeom/session/route");

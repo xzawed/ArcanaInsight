@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getDb } from "@/lib/db"
+import { getAdminDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { TarotService } from "@/services/tarot/tarot-service"
 import { SpreadResolver } from "@/services/tarot/spread-resolver"
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       ? spreadType
       : sessionData.spreadType
 
-    const db = getDb()
+    const db = getAdminDb()
     const session = await db.insert("sessions", {
       user_id: user?.id ?? null,
       service_type: sessionData.serviceType,
