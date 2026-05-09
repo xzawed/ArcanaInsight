@@ -10,9 +10,20 @@ Date: 2026-05-09
 
 ## Method
 
-- Resized RGBA PNGs from `1408 x 768` to `2816 x 1536` with Lanczos resampling.
-- Applied a light unsharp mask and subtle contrast adjustment to the color layer.
-- Preserved transparency while slightly cleaning the semi-transparent edge alpha.
+- Resized PNGs from `1408 x 768` to `2816 x 1536`.
+- Resized color with premultiplied alpha so transparent-edge RGB does not bleed into the cutout.
+- Preserved alpha exactly from the Lanczos-upscaled source alpha.
+- Reduced weathered pixel texture with low-radius surface smoothing in flat color areas.
+- Protected hair, eye, clothing, and alpha edges with a Sobel-derived edge mask.
+- Applied mild edge-only detail restoration instead of global sharpening.
+
+## Validation
+
+- Enhanced dimensions are exactly `2x` for every Arcana sample.
+- All enhanced files remain `RGBA` PNGs.
+- Alpha mismatch against the 2x source alpha is `0%`.
+- Alpha bounding box drift and alpha center-of-mass drift are `0`.
+- Luma edge ratio stays within `0.987 - 0.996`, preserving line identity while reducing noisy surface texture.
 
 ## Local Preview
 
