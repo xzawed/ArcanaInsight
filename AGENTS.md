@@ -42,50 +42,10 @@
 
 ---
 
-## 기술 스택
+## 기술 스택 · 프로젝트 구조 · 핵심 아키텍처
 
-| 영역 | 현재 기준 |
-|---|---|
-| 언어/프레임워크 | TypeScript strict, Next.js 16.2.3 App Router, React 19.2.4 |
-| 스타일/애니메이션 | Tailwind CSS v4, Framer Motion v12.38 |
-| AI | Grok API 우선, Claude API 자동 fallback |
-| 인증/DB | Supabase Auth + Supabase PostgreSQL 기본, `DB_PROVIDER=postgres` 전환 시 NextAuth.js v5 + Drizzle |
-| 상태/패키지 | Zustand v5, pnpm 10.33.0 |
-| i18n | 자체 translations 모듈, ko/en/ja, `ai_locale` 쿠키 |
-| 테스트 | Vitest, Playwright |
-| 배포 | GitHub Actions, Railway |
-
----
-
-## 프로젝트 구조
-
-```text
-src/
-├── app/             # App Router 페이지와 API
-├── components/      # card, character, chat, common, effects, home, layout, saju, shinjeom, skin, tarot
-├── data/            # cards, characters, home, saju, shinjeom, skins, spreads, topics
-├── hooks/           # Zustand store와 UI/streaming hooks
-├── i18n/            # locale 감지, Provider, useT, translations
-├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
-├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
-├── test-helpers/    # Vitest 공통 mock/setup
-└── types/           # 공유 타입 (변경 시 Claude 재진입)
-
-docs/                # architecture, conventions, workflow, operations
-e2e/                 # Playwright specs
-scripts/             # 유틸리티 스크립트
-supabase/migrations/ # Supabase SQL migrations
-```
-
----
-
-## 핵심 아키텍처 (구현 시 준수)
-
-- **AI 신뢰성**: `FallbackProvider`가 Grok 우선 → Claude API fallback. `src/services/core/` 참조
-- **DB 추상화**: 항상 `getDb()` / `getAdminDb()`를 경유. 직접 Supabase client 사용 금지
-- **API 보안 순서**: Rate Limit → Zod `safeParse` → Auth → 소유권 검증. 순서 변경 금지
-- **SSE 스트리밍**: `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴 준수
-- **i18n**: UI 텍스트는 `t()` / `useT()` 경유. 하드코딩 금지
+> 기술 스택, 구조 트리, 아키텍처 패턴 전체는 `CLAUDE.md`를 참조한다.
+> 구현 시 준수해야 할 아키텍처 규칙은 [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md)가 상세 정본이다.
 
 ---
 
@@ -104,18 +64,13 @@ pnpm build            # 프로덕션 빌드 성공 필수
 
 ## 환경변수
 
-전체 목록: [`docs/operations/env-variables.md`](docs/operations/env-variables.md)
-
-- Supabase 기본: `GROK_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`
-- PostgreSQL 모드 추가: `DB_PROVIDER=postgres`, `POSTGRES_URL`, `NEXTAUTH_SECRET`
+> 전체 목록 및 설정 절차: [`docs/operations/env-variables.md`](docs/operations/env-variables.md)
 
 ---
 
 ## 캐릭터/데이터 기준
 
-- 캐릭터 12명: `arcana`, `miko`, `seonhwa`, `hoshi`, `luna`, `rei`, `cairn`, `zero`, `haru`, `ren`, `lix`, `ethan`
-- 표정 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
-- 이미지 경로: `public/images/characters/[id]/nukki/[mood].png`
+> 캐릭터 목록, 표정 타입, 이미지 경로 규칙: `CLAUDE.md` 및 [`docs/architecture/data-model.md`](docs/architecture/data-model.md) 참조.
 
 ---
 
