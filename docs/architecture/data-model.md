@@ -27,6 +27,40 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 
 > `idle.png` 파일도 존재하며 `CharacterGallery` 컴포넌트에서 하드코딩으로 사용. `Mood` 타입에는 포함되지 않음.
 
+### CharacterConfig 인터페이스 (`src/types/character.ts`)
+
+```typescript
+export interface CharacterConfig {
+  id: CharacterId;          // 12종 CharacterId
+  name: string;             // 한국어 이름
+  nameJp: string;           // 일본어 이름
+  gender: Gender;           // "female" | "male"
+  greeting: string;         // 기본(한국어) 인사말
+  greetingEn?: string;
+  greetingJa?: string;
+  expressions: Record<Mood, string>;  // mood → 이미지 경로
+  idleAnimation: IdleAnimationType;   // "float" | "float-strong" | "bounce" | "breathe"
+  personality: string;
+  description: string;
+  descriptionEn?: string;
+  descriptionJa?: string;
+  speciality: string;
+  specialityEn?: string;
+  specialityJa?: string;
+  speechStyle: string;      // 말투 묘사
+  voiceTone: string;        // 목소리 톤 묘사
+  unlocked: boolean;
+  effectTheme: EffectTheme; // 파티클·글로우 색상 테마
+}
+
+export interface EffectTheme {
+  primary: string;                // hex 색상 — 주 글로우/파티클
+  secondary: string;              // hex 색상 — 보조
+  accent: string;                 // hex 색상 — 강조
+  particleStyle: ParticleStyle;   // "sparkle" | "flame" | "petal" | "star" | "snowflake" | "lightning" | "bubble" | "rune"
+}
+```
+
 ---
 
 ## 2. 세션 중 캐릭터 표정 규칙
