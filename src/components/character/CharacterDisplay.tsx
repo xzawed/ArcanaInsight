@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CharacterConfig, Mood } from "@/types/character";
 import { SpriteAnimator } from "./SpriteAnimator";
+import { CharacterAnimationLayer } from "./CharacterAnimationLayer";
 import { CharacterAuraLayer } from "./CharacterAuraLayer";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { hexToRgba } from "@/lib/color-utils";
@@ -100,14 +101,16 @@ export const CharacterDisplay = React.memo(function CharacterDisplay({ character
           maskComposite: "intersect, intersect, intersect",
         }}
       >
-        <SpriteAnimator
-          characterId={character.id}
-          mood={mood}
-          idleAnimation={character.idleAnimation}
-          primaryColor={character.effectTheme.primary}
-          onAnimationEnd={handleAnimationEnd}
-          className="w-full h-full"
-        />
+        <CharacterAnimationLayer mood={mood} effectTheme={character.effectTheme}>
+          <SpriteAnimator
+            characterId={character.id}
+            mood={mood}
+            idleAnimation={character.idleAnimation}
+            primaryColor={character.effectTheme.primary}
+            onAnimationEnd={handleAnimationEnd}
+            className="w-full h-full"
+          />
+        </CharacterAnimationLayer>
       </div>
     </div>
   );
