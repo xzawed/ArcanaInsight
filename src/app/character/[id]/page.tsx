@@ -8,6 +8,7 @@ import { getCharacterDescription, getCharacterSpeciality } from "@/data/characte
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
+import { getCharacterCutoutImageStyle } from "@/components/character/SpriteAnimator";
 
 const SERVICE_IDS = [
   { id: "tarot",    icon: "🃏" },
@@ -39,6 +40,7 @@ export default function CharacterPage() {
     desc: t(`character.service.${s.id}.desc`),
     disabled: "disabled" in s ? s.disabled : false,
   }));
+  const cutoutImageStyle = getCharacterCutoutImageStyle(character.effectTheme.primary);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -75,6 +77,7 @@ export default function CharacterPage() {
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover object-top"
+            style={cutoutImageStyle}
           />
         </div>
 

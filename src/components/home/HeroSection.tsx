@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { getCharacterById } from "@/data/characters";
 import { useThemeStore, type ThemeId } from "@/hooks/useTheme";
@@ -58,6 +58,7 @@ export function HeroSection() {
       </div>
 
       <ParticleOverlay density={particleDensity} className="z-10" />
+      <ThemeAtmosphere theme={activeTheme} intensity="hero" className="z-[11]" />
       <MysticBackground service="home" />
 
       <div className="flex-1 flex flex-col md:flex-row items-center z-20 px-4 md:px-8">
