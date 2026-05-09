@@ -85,24 +85,29 @@ const MOOD_ANIM_MAP: Partial<Record<Mood, MoodAnimConfig>> = {
   },
 };
 
-function MoodAnimLayer({ mood }: { readonly mood: Mood }) {
-  if (mood === "default" || mood === "mystical") return null;
-
+function CharacterMotionLayer({
+  mood,
+  children,
+}: {
+  readonly mood: Mood;
+  readonly children: React.ReactNode;
+}) {
   const config = MOOD_ANIM_MAP[mood];
-  if (!config) return null;
 
   return (
     <motion.div
-      key={mood}
-      animate={config.animate}
-      transition={config.transition}
+      key={`character-motion-${mood}`}
+      animate={config?.animate}
+      transition={config?.transition}
       style={{
-        position: "absolute",
-        inset: 0,
-        pointerEvents: "none",
-        zIndex: 6,
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        zIndex: 2,
       }}
-    />
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -137,9 +142,8 @@ export function CharacterAnimationLayer({ mood, effectTheme, children }: Charact
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <GlowOverlay mood={mood} effectTheme={effectTheme} />
-      {children}
+      <CharacterMotionLayer mood={mood}>{children}</CharacterMotionLayer>
       <EyeBlinkLayer mood={mood} />
-      <MoodAnimLayer mood={mood} />
     </div>
   );
 }
