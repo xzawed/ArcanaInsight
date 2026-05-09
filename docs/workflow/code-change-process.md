@@ -57,7 +57,7 @@ git push origin <branch-name>
 gh pr create --title "..." --body "..."
 ```
 
-### 5단계: CI 자동 검증 `[자동화 → Codex 수정]`
+### 5단계: CI 자동 검증 `[CI → Codex]`
 - GitHub Actions 자동 실행: `lint → build → e2e` (Chromium)
 - 상세: [`ci-cd.md`](ci-cd.md)
 - CI 실패 → Codex가 수정 → Claude가 재검토 후 2단계부터 반복
