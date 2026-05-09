@@ -9,7 +9,8 @@
 | 유형 | 형식 | 위치 | 규격 |
 |------|------|------|------|
 | 캐릭터 원본 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 원본별 상이 |
-| 캐릭터 운영본 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki-enhanced/[mood].png` | 원본의 2배 |
+| 캐릭터 고해상도 색상 원본 (12명) | RGB 이미지 | `characters/[id]/nukki/backup-v2/[mood].png` | 1408×768 |
+| 캐릭터 운영본 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki-enhanced/[mood].png` | 2816×1536 |
 | 카드 | SVG | `cards/major/`, `cards/cups/` 등 | — |
 | 배경 | JPG | `backgrounds/` | — |
 | 아이콘 | PNG RGBA (투명 배경) | `images/icons/` | 콘텐츠 크롭 |
@@ -24,7 +25,9 @@
 - 운영 표시용 2배 보정본: `nukki-enhanced/` 폴더
 - 예: `/images/characters/arcana/nukki-enhanced/default.png`
 - 7가지 mood: `default`, `idle`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- 루트 `nukki/` 이미지는 과거 원본 규격이 섞여 있으므로, 운영본 재생성 시 색상·디테일은 `nukki/backup-v2/`의 1408×768 파일을 기준 소스로 사용하고 투명 누끼 알파는 기존 운영본 또는 루트 `nukki/` 알파를 결합한다.
 - 원본은 보존하고, UI에서는 `nukki-enhanced`를 우선 사용한다.
+- Next.js 이미지 optimizer 출력은 WebP를 사용한다. 대형 투명 PNG를 AVIF로 즉석 변환하면 일부 모바일 Chromium 환경에서 첫 요청이 지연될 수 있다.
 
 ---
 

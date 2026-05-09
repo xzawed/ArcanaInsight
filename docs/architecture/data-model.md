@@ -51,9 +51,10 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 | 구분 | 형식 | 경로 패턴 | 해당 캐릭터 |
 |------|------|---------|------------|
 | 원본 nukki PNG | PNG (투명 배경) | `[id]/nukki/[mood].png` | 12명 전체 |
+| 고해상도 색상 기준 이미지 | RGB 이미지 | `[id]/nukki/backup-v2/[mood].png` | 12명 전체 |
 | 운영용 enhanced nukki PNG | PNG (투명 배경) | `[id]/nukki-enhanced/[mood].png` | 12명 전체 |
 
-- 원본 이미지 규격은 캐릭터·표정별로 다를 수 있으며, 운영용 enhanced 이미지는 각 원본의 정확한 2배 크기.
+- 루트 `nukki/` 이미지 규격은 캐릭터·표정별로 다를 수 있으며, 운영용 enhanced 이미지는 `nukki/backup-v2/`의 1408×768 색상 소스와 기존 누끼 알파를 결합해 생성한 2816×1536 PNG이다.
 - 예: `/images/characters/arcana/nukki-enhanced/default.png`
 - 예: `/images/characters/miko/nukki-enhanced/default.png`
 - 원본 `nukki`는 비교와 롤백을 위해 보존한다.
