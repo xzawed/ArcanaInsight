@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useShinjeomSessionStore } from "@/hooks/useShinjeomSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { ReadingText } from "@/components/common/ReadingText";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
@@ -18,6 +18,7 @@ import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { useThemeStore } from "@/hooks/useTheme";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
@@ -236,6 +237,7 @@ export default function ShinjeomSessionPage() {
     });
   };
 
+  const { activeTheme } = useThemeStore();
   if (!character) return null;
 
   return (
@@ -246,6 +248,7 @@ export default function ShinjeomSessionPage() {
       </div>
       <ParticleOverlay density="low" className="z-10" />
       <MysticBackground service="shinjeom" />
+      <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-shinjeom" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터 */}

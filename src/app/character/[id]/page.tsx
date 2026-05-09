@@ -9,6 +9,8 @@ import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { getCharacterCutoutImageStyle } from "@/components/character/SpriteAnimator";
+import { ThemeAtmosphere } from "@/components/effects/MysticBackground";
+import { useThemeStore } from "@/hooks/useTheme";
 
 const SERVICE_IDS = [
   { id: "tarot",    icon: "🃏" },
@@ -22,6 +24,7 @@ export default function CharacterPage() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
   const { t } = useT();
+  const { activeTheme } = useThemeStore();
   const id = typeof params.id === "string" ? params.id : "";
   const character = getCharacterById(id);
 
@@ -47,6 +50,7 @@ export default function CharacterPage() {
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />
+        <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" testId="character-theme-atmosphere" />
       </div>
       <ParticleOverlay density="low" className="z-10" />
 

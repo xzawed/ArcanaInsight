@@ -29,7 +29,7 @@ const ReadingProgressIndicator = dynamic(
   { loading: () => null },
 );
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
@@ -43,6 +43,7 @@ import { ReadingResult } from "@/types/service";
 import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useT } from "@/i18n/useT";
+import { useThemeStore } from "@/hooks/useTheme";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
 
@@ -556,6 +557,7 @@ export default function TarotSessionPage() {
   const particleDensityMap: Record<string, "low" | "medium" | "high"> = { reading: "medium", result: "low" };
   const particleDensity = particleDensityMap[phase] ?? "medium";
   const effectTheme = character?.effectTheme;
+  const { activeTheme } = useThemeStore();
 
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
@@ -576,6 +578,7 @@ export default function TarotSessionPage() {
         className="z-10"
       />
       <MysticBackground service="tarot" />
+      <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-tarot" />
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
