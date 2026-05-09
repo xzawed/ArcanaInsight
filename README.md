@@ -216,14 +216,14 @@ pnpm dev
 
 ### 캐릭터 이미지
 
-10캐릭터는 PNG 누끼, 2캐릭터(miko · seonhwa)는 JPG 레거시 경로를 사용합니다.
+12캐릭터 모두 운영 UI에서는 고해상도 보정 누끼 이미지를 사용합니다. 원본 `nukki/`는 비교·롤백용으로 보존하며, `nukki/backup-v2/` 색상 원본과 기존 누끼 알파를 결합해 `nukki-enhanced/` 운영본을 생성합니다.
 
 | 항목 | 규격 |
 |------|------|
-| 사이즈 | **1408×768** (grok-imagine-image-pro API 기본 출력) |
-| 포맷 (10캐릭터) | PNG (투명 배경) — `/images/characters/{id}/nukki/{mood}.png` |
-| 포맷 (miko · seonhwa) | JPG (레거시) — `/images/characters/{id}/{mood}.jpg` |
-| 표정 종류 | default · smile · serious · surprised · wink · mystical |
+| 운영본 사이즈 | **2816×1536** — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
+| 색상 기준 원본 | **1408×768** RGB 이미지 — `/images/characters/{id}/nukki/backup-v2/{mood}.png` |
+| 원본 누끼 | PNG (투명 배경, 규격 혼재) — `/images/characters/{id}/nukki/{mood}.png` |
+| 표정 종류 | default · idle · smile · serious · surprised · wink · mystical |
 
 ### 테두리 투명도 (CSS mask)
 

@@ -172,17 +172,92 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     }
   });
 
-  test("캐릭터 이미지 경로 — 메인 캐릭터 이미지 접근 가능", async ({ request }) => {
+  test("캐릭터 이미지 경로 — 운영용 enhanced 캐릭터 이미지 접근 가능", async ({ request }) => {
     const testPaths = [
-      "/images/characters/arcana/nukki/default.png",
-      "/images/characters/luna/nukki/default.png",
-      "/images/characters/miko/nukki/default.png",
-      "/images/characters/seonhwa/nukki/default.png",
+      "/images/characters/arcana/nukki-enhanced/default.png",
+      "/images/characters/miko/nukki-enhanced/default.png",
+      "/images/characters/seonhwa/nukki-enhanced/default.png",
+      "/images/characters/hoshi/nukki-enhanced/default.png",
+      "/images/characters/luna/nukki-enhanced/default.png",
+      "/images/characters/rei/nukki-enhanced/wink.png",
+      "/images/characters/cairn/nukki-enhanced/default.png",
+      "/images/characters/zero/nukki-enhanced/default.png",
+      "/images/characters/haru/nukki-enhanced/default.png",
+      "/images/characters/ren/nukki-enhanced/default.png",
+      "/images/characters/lix/nukki-enhanced/default.png",
+      "/images/characters/ethan/nukki-enhanced/default.png",
     ];
 
     for (const path of testPaths) {
       const response = await request.get(path);
       expect(response.status(), `${path} should be accessible`).toBeLessThan(400);
+
+      const body = await response.body();
+      expect(body.readUInt32BE(16), `${path} width`).toBe(2816);
+      expect(body.readUInt32BE(20), `${path} height`).toBe(1536);
+      expect(body.readUInt8(25), `${path} PNG color type`).toBe(6);
     }
+
+    const optimized = await request.get(
+      "/_next/image?url=%2Fimages%2Fcharacters%2Farcana%2Fnukki-enhanced%2Fidle.png&w=48&q=75",
+      { headers: { accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" } }
+    );
+    expect(optimized.status(), "optimized character thumbnail should load").toBeLessThan(400);
+    expect(optimized.headers()["content-type"]).toContain("image/webp");
+  });
+
+  test("캐릭터 이미지 에셋 — enhanced 전체 해상도와 투명 알파 유지", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "Desktop Chrome", "전체 캐릭터 원본 에셋 검사는 데스크톱 1회만 수행");
+
+    const characters = ["arcana", "miko", "seonhwa", "hoshi", "luna", "rei", "cairn", "zero", "haru", "ren", "lix", "ethan"];
+    const moods = ["default", "idle", "smile", "serious", "surprised", "wink", "mystical"];
+
+    await page.goto("/");
+    const failures = await page.evaluate(
+      async ({ characters, moods }) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 96;
+        canvas.height = 54;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) return ["canvas context unavailable"];
+
+        const loadImage = (src: string) =>
+          new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error(`failed to load ${src}`));
+            image.src = src;
+          });
+
+        const result: string[] = [];
+        for (const character of characters) {
+          for (const mood of moods) {
+            const src = `/images/characters/${character}/nukki-enhanced/${mood}.png`;
+            const image = await loadImage(src);
+            if (image.naturalWidth !== 2816 || image.naturalHeight !== 1536) {
+              result.push(`${src}: ${image.naturalWidth}x${image.naturalHeight}`);
+              continue;
+            }
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+            let transparent = 0;
+            let translucent = 0;
+            for (let index = 3; index < pixels.length; index += 4) {
+              if (pixels[index] === 0) transparent += 1;
+              if (pixels[index] > 0 && pixels[index] < 255) translucent += 1;
+            }
+            if (transparent === 0) result.push(`${src}: transparent alpha missing`);
+            if (translucent === 0) result.push(`${src}: antialias alpha missing`);
+          }
+        }
+
+        return result;
+      },
+      { characters, moods }
+    );
+
+    expect(failures).toEqual([]);
   });
 });

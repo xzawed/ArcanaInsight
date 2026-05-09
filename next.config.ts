@@ -37,7 +37,9 @@ const nextConfig: NextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
     ],
-    formats: ["image/avif", "image/webp"],
+    // Large transparent character PNGs can stall first-time AVIF optimization
+    // in Chromium mobile runs. WebP keeps alpha support with steadier latency.
+    formats: ["image/webp"],
   },
 };
 
