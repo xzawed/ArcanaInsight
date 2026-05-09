@@ -1,5 +1,8 @@
 # 코딩 컨벤션
 
+> **결정자**: Claude (규칙 정의·예외 승인) | **준수 의무**: Codex (모든 구현 코드)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙입니다.
 
 ---

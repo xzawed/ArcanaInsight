@@ -1,5 +1,8 @@
 # Zod 스키마 컨벤션 및 API 입력 검증
 
+> **결정자**: Claude (스키마 구조·null/undefined 규칙 결정) | **준수 의무**: Codex (API 라우트 구현 시)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 ---
 
 ## 1. `null` vs `undefined` 규칙 ⚠️ 중요
