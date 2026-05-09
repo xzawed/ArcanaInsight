@@ -76,7 +76,7 @@ export default function CharacterPage() {
           }}
         >
           <Image
-            src={`/images/characters/${character.id}/nukki/idle.png`}
+            src={`/images/characters/${character.id}/nukki-enhanced/idle.png`}
             alt={character.name}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

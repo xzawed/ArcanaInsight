@@ -40,7 +40,7 @@ export function CharacterGallery() {
                 >
                   <div className="relative aspect-[3/4] overflow-hidden">
                     <Image
-                      src={`/images/characters/${char.id}/nukki/idle.png`}
+                      src={`/images/characters/${char.id}/nukki-enhanced/idle.png`}
                       alt={`${char.name} - ${char.personality}`}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"

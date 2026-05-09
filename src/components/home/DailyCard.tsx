@@ -226,7 +226,7 @@ export function DailyCard() {
               }`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden">
-                <Image src={`/images/characters/${char.id}/nukki/idle.png`} alt="" width={20} height={20} className="object-cover" />
+                <Image src={`/images/characters/${char.id}/nukki-enhanced/idle.png`} alt="" width={20} height={20} className="object-cover" />
               </div>
               <span className="hidden sm:inline">{char.name}</span>
             </button>

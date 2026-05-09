@@ -30,7 +30,7 @@ export function BottomCTA() {
           <div className="flex justify-center gap-3 mt-8">
             {["arcana", "miko", "seonhwa", "hoshi"].map((id) => (
               <div key={id} className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30">
-                <Image src={`/images/characters/${id}/nukki/idle.png`} alt="" width={40} height={40} className="object-cover" />
+                <Image src={`/images/characters/${id}/nukki-enhanced/idle.png`} alt="" width={40} height={40} className="object-cover" />
               </div>
             ))}
           </div>
