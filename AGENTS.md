@@ -33,7 +33,7 @@
 
 | 파일/경로 | 이유 |
 |-----------|------|
-| `CLAUDE.md`, `AGENTS.md` | Claude 전용 — 직접 수정 금지 |
+| `CLAUDE.md`, `AGENTS.md` | Claude가 관리 — Codex 직접 수정 금지 |
 | `.claude/agents/*.md` | Claude가 관리하는 에이전트 정의 |
 | `src/types/**` (기존 타입 변경) | 타입 계약 변경은 재진입 조건 |
 | `src/i18n/translations/shared/keys.ts` | Claude가 키 네이밍 결정 |
