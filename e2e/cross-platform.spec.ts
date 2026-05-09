@@ -52,6 +52,21 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     for (let i = 0; i < Math.min(count, 20); i++) {
       const img = images.nth(i);
       if (await img.isVisible()) {
+        // iOS WebKit은 load 이벤트 이후에도 이미지 디코딩이 완료되지 않을 수 있으므로
+        // complete && naturalWidth > 0 조건을 폴링으로 대기한 뒤 확인한다.
+        const handle = await img.elementHandle();
+        if (handle) {
+          await page
+            .waitForFunction(
+              (el) =>
+                el instanceof HTMLImageElement && el.complete && el.naturalWidth > 0,
+              handle,
+              { timeout: 10000 }
+            )
+            .catch(() => {
+              /* 폴링 실패 시 아래 expect로 정상 fail */
+            });
+        }
         const naturalWidth = await img.evaluate((el: HTMLImageElement) => el.naturalWidth);
         // naturalWidth > 0이면 이미지 로드 성공
         expect(naturalWidth).toBeGreaterThan(0);
@@ -89,13 +104,23 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     await page.mouse.move(200, 400);
     await page.mouse.wheel(0, 500);
     // 고정 타임아웃 대신 스크롤 상태 폴링 (CI 환경 응답 지연 대응)
+    // iOS WebKit headless에서 scrollY가 즉시 반영되지 않으므로
+    // document.scrollingElement?.scrollTop fallback을 추가하고 timeout을 10000ms로 늘린다.
     await page.waitForFunction(
-      () => (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) > 0,
-      { timeout: 5000 }
+      () =>
+        (window.scrollY ||
+          document.scrollingElement?.scrollTop ||
+          document.documentElement.scrollTop ||
+          document.body.scrollTop) > 0,
+      { timeout: 10000 }
     );
 
     const scrolled = await page.evaluate(
-      () => window.scrollY || document.documentElement.scrollTop || document.body.scrollTop
+      () =>
+        window.scrollY ||
+        document.scrollingElement?.scrollTop ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop
     );
     expect(scrolled).toBeGreaterThan(0);
   });
