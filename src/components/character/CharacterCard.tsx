@@ -28,7 +28,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
     >
       <div className="relative w-full aspect-[2/3] mb-3 overflow-hidden rounded-xl">
         <Image
-          src={`/images/characters/${character.id}/nukki/idle.png`}
+          src={`/images/characters/${character.id}/nukki-enhanced/idle.png`}
           alt={character.name}
           fill
           sizes="(max-width: 768px) 33vw, (max-width: 1024px) 13vw, 9vw"

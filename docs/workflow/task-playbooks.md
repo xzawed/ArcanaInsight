@@ -10,8 +10,9 @@
 1. `src/data/characters/index.ts` — 캐릭터 메타데이터 추가
 2. `src/data/characters/waiting-lines.ts` — 대기 대사 추가
 3. `src/types/character.ts` — 타입 확인
-4. `public/images/characters/[id]/nukki/` — 이미지 6종 배치
-5. → `.claude/agents/character-add.md` 에이전트 활용
+4. `public/images/characters/[id]/nukki/` — 원본 이미지 7종 배치
+5. `public/images/characters/[id]/nukki-enhanced/` — 운영 표시용 2배 보정본 생성
+6. → `.claude/agents/character-add.md` 에이전트 활용
 
 참고: [`docs/architecture/data-model.md`](../architecture/data-model.md) — 캐릭터 이미지 경로 규칙
 

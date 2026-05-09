@@ -8,7 +8,8 @@
 
 | 유형 | 형식 | 위치 | 규격 |
 |------|------|------|------|
-| 캐릭터 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 1408×768 |
+| 캐릭터 원본 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki/[mood].png` | 원본별 상이 |
+| 캐릭터 운영본 (12명) | PNG 누끼 (투명 배경) | `characters/[id]/nukki-enhanced/[mood].png` | 원본의 2배 |
 | 카드 | SVG | `cards/major/`, `cards/cups/` 등 | — |
 | 배경 | JPG | `backgrounds/` | — |
 | 아이콘 | PNG RGBA (투명 배경) | `images/icons/` | 콘텐츠 크롭 |
@@ -19,9 +20,11 @@
 ## 2. 캐릭터 이미지 상세
 
 **12캐릭터** (arcana, miko, seonhwa, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan):
-- PNG 누끼, `nukki/` 폴더 경로
-- 예: `/images/characters/arcana/nukki/default.png`
+- 원본 PNG 누끼: `nukki/` 폴더
+- 운영 표시용 2배 보정본: `nukki-enhanced/` 폴더
+- 예: `/images/characters/arcana/nukki-enhanced/default.png`
 - 7가지 mood: `default`, `idle`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- 원본은 보존하고, UI에서는 `nukki-enhanced`를 우선 사용한다.
 
 ---
 
