@@ -1,5 +1,8 @@
 # 이미지 에셋 규칙
 
+> **결정자**: Claude (경로 규칙·포맷 기준 정의) | **준수 의무**: Codex (이미지 배치·생성·교체 작업)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 `public/images/` 하위 모든 이미지 에셋의 형식·생성·배치 규칙입니다.
 
 ---

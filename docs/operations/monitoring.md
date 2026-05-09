@@ -1,5 +1,8 @@
 # 모니터링 및 자동화
 
+> **담당**: Claude (알림 해석·대응 우선순위 결정) | Codex (수정 코드 구현·PR 생성)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 주간 QA 루프와 n8n 자동화 파이프라인 설명입니다.
 
 ---
@@ -21,11 +24,11 @@
 
 ### QA 실패 시 대응 절차
 
-1. 자동 생성된 GitHub Issue 확인
-2. 실패한 spec 파일 + 디바이스 조합 파악
-3. 로컬에서 재현: `pnpm test:e2e --grep "실패한 테스트명"`
-4. 수정 후 `fix/*` 브랜치에서 PR 생성
-5. PR 머지 → `qa-recheck.yml` 자동 재실행 → Issue 자동 닫기
+1. [Claude] 자동 생성된 GitHub Issue 확인 및 우선순위 판단
+2. [Claude] 실패한 spec 파일 + 디바이스 조합 파악
+3. [Codex] 로컬에서 재현: `pnpm test:e2e --grep "실패한 테스트명"`
+4. [Codex] 수정 후 `fix/*` 브랜치에서 PR 생성
+5. [Claude] PR 검토 후 머지 → `qa-recheck.yml` 자동 재실행 → Issue 자동 닫기
 
 ### Artifact 보존
 

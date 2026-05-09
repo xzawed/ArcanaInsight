@@ -1,5 +1,8 @@
 # Scripts 운영 정책
 
+> **담당**: Claude (`pnpm check:doc-links`, `pnpm check:env-docs` 결과 해석·대응 결정) | Codex (`pnpm type-check`, `pnpm lint`, `pnpm test:coverage`, `pnpm build` 실행)
+> 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
+
 > `scripts/` 디렉토리의 모든 스크립트를 호출 위치·용도·실행 빈도로 분류한 인덱스.
 
 ## 1. 자동 호출 (CI / git hook)

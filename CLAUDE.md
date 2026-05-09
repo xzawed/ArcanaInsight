@@ -124,18 +124,7 @@ pnpm i18n:check           # 번역 키 drift 검출
 **Claude 담당**: 기획·설계·아키텍처·문서·뼈대 스캐폴딩·PR 검토·머지 판단
 **Codex 담당**: 코드 구현·단위 테스트·E2E 수정·로컬 검증 4종 실행
 
-전체 협업 프로토콜(핸드오프 형식·재진입 조건·파일 소유권)은 [`docs/workflow/claude-codex-collaboration.md`](docs/workflow/claude-codex-collaboration.md)가 정본이다.
-
-### Claude가 Codex에게 전달 시 필수 포함
-- 참조 파일 목록 (읽을 순서)
-- 구현 범위 (생성·수정·금지 파일 구분)
-- 완료 조건 (DoD 체크리스트)
-- 재진입 조건 (명시적으로)
-
-### Codex 결과 수령 후 Claude가 검토
-- 아키텍처 정합성 (레이어 경계, FallbackProvider, DB 추상화)
-- 보안 순서 (Rate Limit → Zod → Auth → 소유권)
-- 문서 동기화 필요 여부 (`CLAUDE.md`, task-playbooks)
+핸드오프 형식·재진입 조건·파일 소유권·품질 게이트 전체는 [`docs/workflow/claude-codex-collaboration.md`](docs/workflow/claude-codex-collaboration.md)가 정본이다.
 
 ## Claude 자율 관리 규칙
 

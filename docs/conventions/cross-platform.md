@@ -1,5 +1,8 @@
 # 크로스 플랫폼 품질 규칙 (필수 준수)
 
+> **결정자**: Claude (규칙 정의·예외 승인) | **준수 의무**: Codex (컴포넌트·스타일 구현 시)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 모든 UI 변경 시 데스크탑(Chrome), 모바일(iOS Safari, Android Chrome) 동일 품질을 보장해야 합니다.
 
 ---

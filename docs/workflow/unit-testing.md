@@ -1,5 +1,8 @@
 # 단위 테스트 가이드
 
+> **담당**: Codex (테스트 작성·실행·커버리지 유지) | Claude (임계값 결정·패턴 정의)
+> 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
+
 Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ---

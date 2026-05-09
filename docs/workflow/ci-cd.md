@@ -1,5 +1,8 @@
 # CI/CD 파이프라인
 
+> **담당**: Claude (CI 실패 원인 분석·머지 판단) | Codex (실패 수정·재검증 실행)
+> 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
+
 GitHub Actions → Railway 자동 배포 파이프라인 설명입니다.
 
 ---

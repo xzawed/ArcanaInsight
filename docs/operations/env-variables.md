@@ -1,5 +1,8 @@
 # 환경변수 목록
 
+> **담당**: Claude (신규 환경변수 추가·변경 결정, `src/lib/env.ts` getter 설계) | Codex (로컬 `.env` 설정·확인, getter 함수 사용)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 `src/lib/env.ts`의 getter 함수와 대응하는 전체 환경변수 목록입니다.
 환경변수는 코드에 하드코딩 금지 — 반드시 `src/lib/env.ts`의 getter 함수를 통해 접근합니다.
 

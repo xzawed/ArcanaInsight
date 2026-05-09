@@ -1,11 +1,14 @@
 # 업무 유형별 파일 가이드 (Task Playbooks)
 
+> **담당**: Claude (스펙·스캐폴딩 결정) | Codex (파일 생성·구현·테스트)
+> 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
+
 반복 업무 시 불필요한 탐색 없이 바로 시작할 수 있도록 유형별 필수 파일을 정리합니다.
 에이전트가 있는 경우 에이전트를 **우선 활용**합니다.
 
 ---
 
-## 새 캐릭터 추가
+## 새 캐릭터 추가 `[Claude → Codex]`
 
 1. `src/data/characters/index.ts` — 캐릭터 메타데이터 추가
 2. `src/data/characters/waiting-lines.ts` — 대기 대사 추가
@@ -19,7 +22,7 @@
 
 ---
 
-## 새 운세 서비스(DivinationService) 추가
+## 새 운세 서비스(DivinationService) 추가 `[Claude → Codex]`
 
 1. `src/services/core/ai-provider.ts` — 인터페이스 확인
 2. `src/services/tarot/tarot-service.ts` — 기존 구현체 참조 패턴
@@ -32,7 +35,7 @@
 
 ---
 
-## 새 페이지 추가
+## 새 페이지 추가 `[Claude → Codex]`
 
 1. `src/app/layout.tsx` — 루트 레이아웃 확인
 2. `src/components/layout/Header.tsx` — 네비게이션 링크 추가
@@ -42,7 +45,7 @@
 
 ---
 
-## 테마·스타일 변경
+## 테마·스타일 변경 `[Codex]`
 
 1. `src/app/globals.css` — `@theme` 블록, `arcana-*` 커스텀 컬러
 2. `src/hooks/useTheme.ts` — 7종 테마 로직
@@ -50,7 +53,7 @@
 
 ---
 
-## 카드 스킨 추가·변경
+## 카드 스킨 추가·변경 `[Codex]`
 
 1. `src/data/skins/index.ts` — 스킨 정의
 2. `src/lib/storage/index.ts` — `getCardImageUrl()` 경로 로직
@@ -59,7 +62,7 @@
 
 ---
 
-## AI 프롬프트 수정
+## AI 프롬프트 수정 `[Claude → Codex]`
 
 1. `src/services/core/prompt-builder.ts` — 공통 프롬프트 빌더
    - `buildCharacterHeader(character, subtitle?)` — 타로·사주·신점 공통 캐릭터 헤더
@@ -72,7 +75,7 @@
 
 ---
 
-## DB 스키마 변경
+## DB 스키마 변경 `[Claude → Codex]`
 
 1. `supabase/migrations/` — 마지막 번호 확인 후 다음 번호로 신규 파일 생성
 2. `src/lib/db/schema/index.ts` — Drizzle 스키마 동기화 (PostgreSQL 모드)
@@ -82,7 +85,7 @@
 
 ---
 
-## 코드 품질 검증
+## 코드 품질 검증 `[Codex]`
 
 ```bash
 pnpm type-check && pnpm lint && pnpm build
@@ -92,7 +95,7 @@ pnpm type-check && pnpm lint && pnpm build
 
 ---
 
-## E2E 테스트 추가·수정
+## E2E 테스트 추가·수정 `[Codex]`
 
 1. `e2e/` — 관련 spec 파일
 2. `playwright.config.ts` — 디바이스 프로필 확인
@@ -111,7 +114,7 @@ Next.js `<Image>` DOM 렌더링: `/_next/image?url=%2Fpath` → `src*="/path/"` 
 
 ---
 
-## 새 API 라우트 추가
+## 새 API 라우트 추가 `[Claude → Codex]`
 
 1. [`docs/conventions/zod-schemas.md`](../conventions/zod-schemas.md) — Zod 스키마 먼저 정의 필수
 2. [`docs/architecture/auth-abstraction.md`](../architecture/auth-abstraction.md) — API 보안 패턴 (Rate Limit → Zod → Auth → IDOR)
@@ -127,7 +130,7 @@ Next.js `<Image>` DOM 렌더링: `/_next/image?url=%2Fpath` → `src*="/path/"` 
 
 ---
 
-## 환경변수 추가
+## 환경변수 추가 `[Claude → Codex]`
 
 1. `src/lib/env.ts` — getter 함수 추가 (하드코딩 금지)
 2. `docs/operations/env-variables.md` — 문서화
