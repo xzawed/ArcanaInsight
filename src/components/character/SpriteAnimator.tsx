@@ -35,29 +35,42 @@ function buildLoopMotion(primary: string): Record<string, Record<string, number[
     float: {
       y: [0, -6, 0],
       scale: [1, 1.01, 1],
-      filter: [sh(6, 0.25), sh(16, 0.6), sh(6, 0.25)],
+      filter: [sh(4, 0.18), sh(10, 0.36), sh(4, 0.18)],
     },
     "float-strong": {
       y: [0, -8, 0],
       scale: [1, 1.015, 1],
-      filter: [sh(8, 0.3), sh(22, 0.7), sh(8, 0.3)],
+      filter: [sh(5, 0.22), sh(12, 0.42), sh(5, 0.22)],
     },
     bounce: {
       y: [0, -12, 0],
       scale: [1, 1.02, 1],
-      filter: [sh(6, 0.2), sh(18, 0.55), sh(6, 0.2)],
+      filter: [sh(4, 0.16), sh(10, 0.34), sh(4, 0.16)],
     },
     breathe: {
       y: [0, -2, 0, -1, 0],
       scale: [1, 1.005, 1, 1.003, 1],
       opacity: [1, 1, 1, 0.88, 1],
-      filter: [sh(4, 0.2), sh(12, 0.5), sh(4, 0.2), sh(8, 0.35), sh(4, 0.2)],
+      filter: [sh(3, 0.16), sh(8, 0.32), sh(3, 0.16), sh(6, 0.24), sh(3, 0.16)],
     },
     mystical: {
       y: [0, -10, 0],
       scale: [1, 1.02, 1],
-      filter: [sh(8, 0.3), sh(20, 0.6), sh(8, 0.3)],
+      filter: [sh(5, 0.22), sh(12, 0.4), sh(5, 0.22)],
     },
+  };
+}
+
+export function getCharacterCutoutImageStyle(primaryColor = "#a78bfa"): React.CSSProperties {
+  return {
+    filter: [
+      "drop-shadow(0 0 0.35px rgba(255, 255, 255, 0.22))",
+      "drop-shadow(0 1px 0.6px rgba(10, 8, 18, 0.28))",
+      `drop-shadow(0 0 2px ${hexToRgba(primaryColor, 0.16)})`,
+    ].join(" "),
+    backfaceVisibility: "hidden",
+    transform: "translateZ(0)",
+    WebkitFontSmoothing: "antialiased",
   };
 }
 
@@ -133,6 +146,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
   const isLooping = config.loop;
   const activeLoopKey = mood === "default" ? idleAnimation : mood;
   const loopMotion = useMemo(() => buildLoopMotion(primaryColor ?? "#a78bfa"), [primaryColor]);
+  const cutoutImageStyle = useMemo(() => getCharacterCutoutImageStyle(primaryColor), [primaryColor]);
   const loopAnim = loopMotion[activeLoopKey] ?? loopMotion.float;
   const loopTransition = LOOP_TRANSITIONS[activeLoopKey] ?? LOOP_TRANSITIONS.float;
   const enterAnim = ENTER_MOTION[mood];
@@ -152,7 +166,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
             <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
               className="relative w-full h-full">
               <Image src={imageSrc} alt="" fill sizes="50vw"
-                className="object-contain object-center" priority />
+                className="object-contain object-center" style={cutoutImageStyle} priority />
             </motion.div>
           ) : (
             <motion.div
@@ -161,7 +175,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
               className="relative w-full h-full"
             >
               <Image src={imageSrc} alt="" fill sizes="50vw"
-                className="object-contain object-center" priority />
+                className="object-contain object-center" style={cutoutImageStyle} priority />
             </motion.div>
           )}
         </motion.div>

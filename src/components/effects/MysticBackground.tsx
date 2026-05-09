@@ -1,12 +1,21 @@
 "use client";
 
 import { useId } from "react";
+import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import type { ThemeId } from "@/hooks/useTheme";
+import { THEME_ATMOSPHERES, type AtmosphereParticle } from "./themeAtmosphere";
 
 type Service = "home" | "tarot" | "saju" | "shinjeom";
 
 interface MysticBackgroundProps {
   readonly service: Service;
+}
+
+interface ThemeAtmosphereProps {
+  readonly theme: ThemeId;
+  readonly intensity?: "hero" | "service";
+  readonly className?: string;
 }
 
 const MIST_COLOR: Record<Service, string> = {
@@ -51,6 +60,248 @@ const RUNE_POSITIONS = [
   { top: "30%", left: "87%", fontSize: 14, opacity: 0.15 },
   { top: "70%", left: "89%", fontSize: 12, opacity: 0.12 },
 ];
+
+const INTENSITY_OPACITY: Record<NonNullable<ThemeAtmosphereProps["intensity"]>, number> = {
+  hero: 1,
+  service: 0.56,
+};
+
+function particleStyle(particle: AtmosphereParticle): CSSProperties {
+  const base: CSSProperties = {
+    left: `${particle.x}%`,
+    top: `${particle.y}%`,
+    width: particle.size,
+    height: particle.size,
+    opacity: particle.opacity,
+  };
+
+  if (particle.kind === "mist") {
+    return {
+      ...base,
+      background: particle.color ?? "rgba(255, 255, 255, 0.22)",
+      borderRadius: "999px",
+      filter: "blur(18px)",
+    };
+  }
+
+  if (particle.kind === "petal") {
+    return {
+      ...base,
+      height: particle.size * 0.62,
+      background: "linear-gradient(135deg, rgba(252,231,243,0.82), rgba(244,114,182,0.5))",
+      borderRadius: "78% 22% 76% 24%",
+      transform: `rotate(${particle.rotate ?? 0}deg)`,
+      boxShadow: "0 0 12px rgba(249,168,212,0.18)",
+    };
+  }
+
+  if (particle.kind === "leaf") {
+    return {
+      ...base,
+      height: particle.size * 0.55,
+      background: particle.color ?? "rgba(217, 119, 6, 0.62)",
+      borderRadius: "90% 8% 86% 12%",
+      transform: `rotate(${particle.rotate ?? 0}deg)`,
+      boxShadow: "0 0 14px rgba(245,158,11,0.12)",
+    };
+  }
+
+  if (particle.kind === "firefly") {
+    return {
+      ...base,
+      background: "rgba(253, 224, 71, 0.92)",
+      borderRadius: "999px",
+      boxShadow: "0 0 10px rgba(253,224,71,0.85), 0 0 24px rgba(56,189,248,0.26)",
+    };
+  }
+
+  if (particle.kind === "ember") {
+    return {
+      ...base,
+      background: "rgba(251, 146, 60, 0.9)",
+      borderRadius: "999px",
+      boxShadow: "0 0 12px rgba(251,146,60,0.75)",
+    };
+  }
+
+  if (particle.kind === "snow") {
+    return {
+      ...base,
+      background: "rgba(240, 249, 255, 0.88)",
+      borderRadius: "999px",
+      boxShadow: "0 0 8px rgba(191,219,254,0.42)",
+    };
+  }
+
+  if (particle.kind === "dust") {
+    return {
+      ...base,
+      background: "rgba(253, 224, 171, 0.78)",
+      borderRadius: "999px",
+      boxShadow: "0 0 10px rgba(251,146,60,0.32)",
+    };
+  }
+
+  return {
+    ...base,
+    background: "rgba(255, 255, 255, 0.88)",
+    borderRadius: "999px",
+    boxShadow: "0 0 10px rgba(245,158,11,0.48)",
+  };
+}
+
+function particleMotion(particle: AtmosphereParticle, shouldReduceMotion: boolean) {
+  if (shouldReduceMotion) return { opacity: particle.opacity };
+
+  if (particle.kind === "petal" || particle.kind === "leaf") {
+    return {
+      x: [0, particle.kind === "petal" ? 18 : 24, 4],
+      y: [0, 28, 56],
+      rotate: [particle.rotate ?? 0, (particle.rotate ?? 0) + 18, (particle.rotate ?? 0) - 8],
+      opacity: [particle.opacity * 0.25, particle.opacity, particle.opacity * 0.2],
+    };
+  }
+
+  if (particle.kind === "snow") {
+    return {
+      x: [0, 10, -6, 8],
+      y: [0, 34, 68],
+      opacity: [particle.opacity * 0.35, particle.opacity, particle.opacity * 0.35],
+    };
+  }
+
+  if (particle.kind === "mist") {
+    return {
+      x: [0, 18, -10, 0],
+      scale: [0.96, 1.08, 1],
+      opacity: [particle.opacity * 0.65, particle.opacity, particle.opacity * 0.75],
+    };
+  }
+
+  if (particle.kind === "firefly") {
+    return {
+      x: [0, 10, -8, 6, 0],
+      y: [0, -12, 5, -8, 0],
+      opacity: [particle.opacity * 0.22, particle.opacity, particle.opacity * 0.36],
+      scale: [0.8, 1.25, 0.9],
+    };
+  }
+
+  if (particle.kind === "ember") {
+    return {
+      y: [0, -24, -54],
+      x: [0, 6, -4],
+      opacity: [particle.opacity * 0.2, particle.opacity, 0],
+    };
+  }
+
+  return {
+    opacity: [particle.opacity * 0.35, particle.opacity, particle.opacity * 0.45],
+    scale: [0.82, 1.18, 0.9],
+  };
+}
+
+export function ThemeAtmosphere({ theme, intensity = "hero", className = "" }: ThemeAtmosphereProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const config = THEME_ATMOSPHERES[theme];
+  const opacity = INTENSITY_OPACITY[intensity];
+
+  return (
+    <div
+      className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
+      style={{ opacity }}
+      aria-hidden
+    >
+      <motion.div
+        className="absolute inset-0"
+        style={{ background: config.baseGlow }}
+        animate={shouldReduceMotion ? { opacity: 0.82 } : { opacity: [0.72, 1, 0.76] }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {config.texture ? (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: config.texture,
+            backgroundSize: theme === "summer" ? "96px 96px" : "auto",
+            opacity: 0.62,
+          }}
+        />
+      ) : null}
+
+      {config.rays?.map((ray) => (
+        <motion.div
+          key={ray.id}
+          className="absolute -top-[12%] h-[86%] origin-top"
+          style={{
+            left: `${ray.left}%`,
+            width: `${ray.width}%`,
+            transform: `rotate(${ray.rotate}deg)`,
+            background: `linear-gradient(180deg, ${ray.color}, transparent 78%)`,
+            filter: "blur(10px)",
+            opacity: ray.opacity,
+          }}
+          animate={shouldReduceMotion ? { opacity: ray.opacity } : { opacity: [ray.opacity * 0.55, ray.opacity, ray.opacity * 0.62] }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: ray.delay }}
+        />
+      ))}
+
+      {config.ribbons ? (
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {config.ribbons.map((ribbon) => (
+            <motion.path
+              key={ribbon.id}
+              d={ribbon.path}
+              fill="none"
+              stroke={ribbon.color}
+              strokeLinecap="round"
+              strokeWidth="9"
+              opacity={ribbon.opacity}
+              filter="blur(5px)"
+              animate={shouldReduceMotion ? { pathLength: 1 } : { pathLength: [0.82, 1, 0.86], opacity: [ribbon.opacity * 0.55, ribbon.opacity, ribbon.opacity * 0.6] }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: ribbon.duration, repeat: Infinity, ease: "easeInOut", delay: ribbon.delay }}
+            />
+          ))}
+        </svg>
+      ) : null}
+
+      {config.lines ? (
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {config.lines.map((line) => (
+            <motion.line
+              key={line.id}
+              x1={line.x1}
+              y1={line.y1}
+              x2={line.x2}
+              y2={line.y2}
+              stroke="rgba(226, 232, 240, 0.72)"
+              strokeWidth="0.18"
+              opacity={line.opacity}
+              initial={shouldReduceMotion ? false : { pathLength: 0 }}
+              animate={shouldReduceMotion ? { opacity: line.opacity } : { pathLength: 1, opacity: [line.opacity * 0.45, line.opacity, line.opacity * 0.52] }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          ))}
+        </svg>
+      ) : null}
+
+      {config.particles.map((particle) => (
+        <motion.span
+          key={particle.id}
+          className="absolute block"
+          style={particleStyle(particle)}
+          animate={particleMotion(particle, Boolean(shouldReduceMotion))}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: particle.duration, repeat: Infinity, ease: "easeInOut", delay: particle.delay }
+          }
+        />
+      ))}
+    </div>
+  );
+}
 
 export function MysticBackground({ service }: MysticBackgroundProps) {
   const shouldReduceMotion = useReducedMotion();

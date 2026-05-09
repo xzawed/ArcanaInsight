@@ -1,6 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { useThemeStore } from "@/hooks/useTheme";
+import { ThemeAtmosphere } from "./MysticBackground";
 
 type ServiceType = "tarot" | "saju" | "shinjeom";
 
@@ -27,7 +29,7 @@ const OBANGSAEK_LAYERS = [
   { color: "#D1D5DB", angle: 180, delay: 4.8 },
 ];
 
-function TarotBackground() {
+function TarotBackground({ shouldReduceMotion }: { readonly shouldReduceMotion: boolean }) {
   return (
     <>
       <div className="absolute inset-0" style={{ backgroundColor: "#0F0A2E" }} />
@@ -46,35 +48,35 @@ function TarotBackground() {
             height: `${star.size}px`,
             willChange: "opacity",
           }}
-          animate={{ opacity: [0.2, 0.9, 0.2] }}
-          transition={{ duration: star.duration, repeat: Infinity, ease: "easeInOut", delay: star.delay }}
+          animate={shouldReduceMotion ? { opacity: 0.48 } : { opacity: [0.2, 0.9, 0.2] }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: star.duration, repeat: Infinity, ease: "easeInOut", delay: star.delay }}
         />
       ))}
     </>
   );
 }
 
-function SajuBackground() {
+function SajuBackground({ shouldReduceMotion }: { readonly shouldReduceMotion: boolean }) {
   return (
     <>
       <div className="absolute inset-0" style={{ backgroundColor: "#1A1209" }} />
       <motion.div
         className="absolute inset-0"
         style={{ background: "radial-gradient(ellipse 70% 40% at 50% 90%, rgba(217,119,6,0.35) 0%, transparent 65%)" }}
-        animate={{ opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        animate={shouldReduceMotion ? { opacity: 0.74 } : { opacity: [0.6, 1, 0.6] }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute inset-0"
         style={{ background: "radial-gradient(ellipse 40% 30% at 50% 10%, rgba(6,95,70,0.2) 0%, transparent 60%)" }}
-        animate={{ opacity: [0.4, 0.8, 0.4] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        animate={shouldReduceMotion ? { opacity: 0.52 } : { opacity: [0.4, 0.8, 0.4] }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
     </>
   );
 }
 
-function ShinjeomBackground() {
+function ShinjeomBackground({ shouldReduceMotion }: { readonly shouldReduceMotion: boolean }) {
   return (
     <>
       <div className="absolute inset-0" style={{ backgroundColor: "#120A18" }} />
@@ -85,26 +87,30 @@ function ShinjeomBackground() {
           style={{
             background: `linear-gradient(${layer.angle}deg, ${layer.color}28 0%, transparent 55%)`,
           }}
-          animate={{ opacity: [0.4, 0.85, 0.4] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: layer.delay }}
+          animate={shouldReduceMotion ? { opacity: 0.54 } : { opacity: [0.4, 0.85, 0.4] }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 5, repeat: Infinity, ease: "easeInOut", delay: layer.delay }}
         />
       ))}
       <motion.div
         className="absolute inset-0"
         style={{ background: "radial-gradient(ellipse 50% 40% at 50% 50%, rgba(139,92,246,0.15) 0%, transparent 60%)" }}
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={shouldReduceMotion ? { opacity: 0.42 } : { opacity: [0.3, 0.7, 0.3] }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
     </>
   );
 }
 
 export function ServiceBackground({ service }: ServiceBackgroundProps) {
+  const { activeTheme } = useThemeStore();
+  const shouldReduceMotion = Boolean(useReducedMotion());
+
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      {service === "tarot" && <TarotBackground />}
-      {service === "saju" && <SajuBackground />}
-      {service === "shinjeom" && <ShinjeomBackground />}
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden>
+      {service === "tarot" && <TarotBackground shouldReduceMotion={shouldReduceMotion} />}
+      {service === "saju" && <SajuBackground shouldReduceMotion={shouldReduceMotion} />}
+      {service === "shinjeom" && <ShinjeomBackground shouldReduceMotion={shouldReduceMotion} />}
+      <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" />
     </div>
   );
 }
