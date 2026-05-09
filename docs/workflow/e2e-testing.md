@@ -198,6 +198,13 @@ await tarotTab.evaluate((el) => (el as HTMLElement).click());
 await page.setViewportSize({ width: 390, height: 844 });
 ```
 
+#### Mobile iOS WebKit 입력·이미지 대기
+
+Mobile iOS 프로젝트(WebKit)는 `page.mouse.wheel()`을 지원하지 않는다. 스크롤 검증은
+`window.scrollTo()` 또는 터치 기반 액션으로 수행하고, 이미지 로드 검증은 lazy 이미지가
+뷰포트에 들어오도록 `locator.scrollIntoViewIfNeeded()` 후 `complete && naturalWidth > 0`을
+폴링한다.
+
 ### 4.3 셀렉터 우선순위
 
 1. `getByRole("button", { name: "전송" })` — 접근성 기반, 가장 안정
@@ -212,7 +219,8 @@ await page.setViewportSize({ width: 390, height: 844 });
 | 페이지 이동 완료 대기 | `page.waitForURL("**/tarot/session**")` |
 | 특정 요소 표시 대기 | `expect(locator).toBeVisible({ timeout: 10_000 })` |
 | SSE 응답 완료 대기 | `page.waitForTimeout(2000)` (mock 완료 후 렌더링 보장) |
-| 로딩 완료 | `page.waitForLoadState("networkidle")` |
+| 레이아웃/정적 UI 준비 | `page.goto(path, { waitUntil: "domcontentloaded" })` 후 핵심 요소 `toBeVisible()` |
+| API·이미지까지 포함한 로딩 완료 | `page.waitForLoadState("networkidle")` (외부 API를 mock한 경우에만 권장) |
 | 사용 금지 | `waitForTimeout` 단독 의존 — 대신 명시적 상태 체크 우선 |
 
 ---

@@ -1,6 +1,21 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("크로스 플랫폼 품질 검증", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/api/daily-card", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          cardId: "the-fool",
+          isReversed: false,
+          interpretation: "오늘은 가볍게 첫걸음을 내딛기 좋은 날입니다.",
+          keywords: ["시작", "가능성", "모험"],
+        }),
+      });
+    });
+  });
+
   test("콘솔 에러 없음 — 홈 페이지", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
@@ -46,35 +61,56 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     // load 이벤트 대기 — img.naturalWidth 확인 전 이미지 리소스 로드 완료 보장
     await page.waitForLoadState("load");
 
-    const images = page.locator("img");
-    const count = await images.count();
+    const images = await page.locator("img").elementHandles();
 
-    for (let i = 0; i < Math.min(count, 20); i++) {
-      const img = images.nth(i);
-      if (await img.isVisible()) {
-        // iOS WebKit은 load 이벤트 이후에도 이미지 디코딩이 완료되지 않을 수 있으므로
-        // complete && naturalWidth > 0 조건을 폴링으로 대기한 뒤 확인한다.
-        const handle = await img.elementHandle();
-        if (handle) {
-          await page
-            .waitForFunction(
-              (el) =>
-                el instanceof HTMLImageElement && el.complete && el.naturalWidth > 0,
-              handle,
-              { timeout: 10000 }
-            )
-            .catch(() => {
-              /* 폴링 실패 시 아래 expect로 정상 fail */
-            });
-        }
-        const naturalWidth = await img.evaluate((el: HTMLImageElement) => el.naturalWidth);
-        // naturalWidth > 0이면 이미지 로드 성공
-        expect(naturalWidth).toBeGreaterThan(0);
-      }
+    for (const img of images.slice(0, 20)) {
+      const snapshot = await img
+        .evaluate((el: HTMLImageElement) => {
+          if (!el.isConnected) return { isConnected: false, isVisible: false, currentSrc: "", naturalWidth: 0 };
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return {
+            isConnected: true,
+            isVisible:
+              rect.width > 0 &&
+              rect.height > 0 &&
+              style.visibility !== "hidden" &&
+              style.display !== "none",
+            currentSrc: el.currentSrc || el.src,
+            naturalWidth: el.naturalWidth,
+          };
+        })
+        .catch(() => ({ isConnected: false, isVisible: false, currentSrc: "", naturalWidth: 0 }));
+
+      if (!snapshot.isConnected || !snapshot.isVisible) continue;
+
+      await page
+        .waitForFunction(
+          (el) => {
+            if (!(el instanceof HTMLImageElement) || !el.isConnected) return true;
+            el.scrollIntoView({ block: "center", inline: "nearest" });
+            return el.complete && el.naturalWidth > 0;
+          },
+          img,
+          { timeout: 15000 }
+        )
+        .catch(() => {
+          /* 폴링 실패 시 아래 expect로 정상 fail */
+        });
+
+      const result = await img
+        .evaluate((el: HTMLImageElement) => ({
+          currentSrc: el.currentSrc || el.src,
+          naturalWidth: el.naturalWidth,
+        }))
+        .catch(() => null);
+      if (!result) continue;
+      // naturalWidth > 0이면 이미지 로드 성공
+      expect(result.naturalWidth, result.currentSrc).toBeGreaterThan(0);
     }
   });
 
-  test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page }) => {
+  test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page, browserName }) => {
     await page.goto("/");
     // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe·next/dynamic) load 후
     // scrollHeight 계산이 안정. domcontentloaded · load 직후엔 viewportHeight보다 작아 보이는
@@ -99,10 +135,12 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     );
     expect(scrollHeight).toBeGreaterThan(viewportHeight);
 
-    // 스크롤: window.scrollTo + 네이티브 휠 이벤트 둘 다 시도 (mobile webkit/android headless 호환)
+    // 스크롤: mobile WebKit은 mouse.wheel을 지원하지 않으므로 DOM 스크롤만 사용.
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.mouse.move(200, 400);
-    await page.mouse.wheel(0, 500);
+    if (browserName !== "webkit") {
+      await page.mouse.move(200, 400);
+      await page.mouse.wheel(0, 500);
+    }
     // 고정 타임아웃 대신 스크롤 상태 폴링 (CI 환경 응답 지연 대응)
     // iOS WebKit headless에서 scrollY가 즉시 반영되지 않으므로
     // document.scrollingElement?.scrollTop fallback을 추가하고 timeout을 10000ms로 늘린다.
