@@ -106,11 +106,11 @@ export function ServiceBackground({ service }: ServiceBackgroundProps) {
   const shouldReduceMotion = Boolean(useReducedMotion());
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden>
+    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden data-testid={`service-background-${service}`}>
       {service === "tarot" && <TarotBackground shouldReduceMotion={shouldReduceMotion} />}
       {service === "saju" && <SajuBackground shouldReduceMotion={shouldReduceMotion} />}
       {service === "shinjeom" && <ShinjeomBackground shouldReduceMotion={shouldReduceMotion} />}
-      <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" />
+      <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" testId={`service-theme-atmosphere-${service}`} />
     </div>
   );
 }

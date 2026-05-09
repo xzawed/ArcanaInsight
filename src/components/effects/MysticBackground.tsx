@@ -14,8 +14,9 @@ interface MysticBackgroundProps {
 
 interface ThemeAtmosphereProps {
   readonly theme: ThemeId;
-  readonly intensity?: "hero" | "service";
+  readonly intensity?: "hero" | "service" | "ambient";
   readonly className?: string;
+  readonly testId?: string;
 }
 
 const MIST_COLOR: Record<Service, string> = {
@@ -63,7 +64,8 @@ const RUNE_POSITIONS = [
 
 const INTENSITY_OPACITY: Record<NonNullable<ThemeAtmosphereProps["intensity"]>, number> = {
   hero: 1,
-  service: 0.56,
+  service: 0.74,
+  ambient: 0.46,
 };
 
 function particleStyle(particle: AtmosphereParticle): CSSProperties {
@@ -201,7 +203,7 @@ function particleMotion(particle: AtmosphereParticle, shouldReduceMotion: boolea
   };
 }
 
-export function ThemeAtmosphere({ theme, intensity = "hero", className = "" }: ThemeAtmosphereProps) {
+export function ThemeAtmosphere({ theme, intensity = "hero", className = "", testId }: ThemeAtmosphereProps) {
   const shouldReduceMotion = useReducedMotion();
   const config = THEME_ATMOSPHERES[theme];
   const opacity = INTENSITY_OPACITY[intensity];
@@ -211,6 +213,9 @@ export function ThemeAtmosphere({ theme, intensity = "hero", className = "" }: T
       className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}
       style={{ opacity }}
       aria-hidden
+      data-testid={testId ?? `theme-atmosphere-${theme}`}
+      data-theme-atmosphere={theme}
+      data-theme-atmosphere-intensity={intensity}
     >
       <motion.div
         className="absolute inset-0"

@@ -13,7 +13,7 @@ import { useCharacterStore } from "@/hooks/useCharacter";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
-import { MysticBackground } from "@/components/effects/MysticBackground";
+import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
@@ -24,6 +24,7 @@ import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
+import { useThemeStore } from "@/hooks/useTheme";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -230,6 +231,7 @@ export default function SajuSessionPage() {
   }, []);
 
   const birthYear = userInfo ? parseInt(userInfo.birthDate.split("-")[0]) : 2000;
+  const { activeTheme } = useThemeStore();
 
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
@@ -239,6 +241,7 @@ export default function SajuSessionPage() {
       </div>
       <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />
       <MysticBackground service="saju" />
+      <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-saju" />
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 좌측 컬럼: 캐릭터 + 대사 */}
