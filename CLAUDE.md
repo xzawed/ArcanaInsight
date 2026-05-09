@@ -119,6 +119,24 @@ pnpm i18n:check           # 번역 키 drift 검출
 | 배포/운영 | [`docs/operations/deployment.md`](docs/operations/deployment.md), [`docs/operations/operation-guide.md`](docs/operations/operation-guide.md) |
 | 미구현/기술부채 | [`docs/operations/known-issues.md`](docs/operations/known-issues.md) |
 
+## Claude & Codex 역할 분담
+
+**Claude 담당**: 기획·설계·아키텍처·문서·뼈대 스캐폴딩·PR 검토·머지 판단
+**Codex 담당**: 코드 구현·단위 테스트·E2E 수정·로컬 검증 4종 실행
+
+전체 협업 프로토콜(핸드오프 형식·재진입 조건·파일 소유권)은 [`docs/workflow/claude-codex-collaboration.md`](docs/workflow/claude-codex-collaboration.md)가 정본이다.
+
+### Claude가 Codex에게 전달 시 필수 포함
+- 참조 파일 목록 (읽을 순서)
+- 구현 범위 (생성·수정·금지 파일 구분)
+- 완료 조건 (DoD 체크리스트)
+- 재진입 조건 (명시적으로)
+
+### Codex 결과 수령 후 Claude가 검토
+- 아키텍처 정합성 (레이어 경계, FallbackProvider, DB 추상화)
+- 보안 순서 (Rate Limit → Zod → Auth → 소유권)
+- 문서 동기화 필요 여부 (`CLAUDE.md`, task-playbooks)
+
 ## Claude 자율 관리 규칙
 
 - `.claude/agents/`에는 반복 작업용 에이전트 정의가 있다.
