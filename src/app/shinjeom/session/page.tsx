@@ -20,6 +20,7 @@ import { t as translate } from "@/i18n/translations";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
+import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
@@ -55,6 +56,7 @@ export default function ShinjeomSessionPage() {
   const character = characterId ? getCharacterById(characterId) : null;
   const [inputText, setInputText] = useState("");
   const [sessionCreated, setSessionCreated] = useState(false);
+  const [showEnergyEffect, setShowEnergyEffect] = useState(true);
   const redirectedRef = useRef(false);
   const readingAbortRef = useRef<AbortController | null>(null);
 
@@ -250,6 +252,9 @@ export default function ShinjeomSessionPage() {
       <ParticleOverlay density="low" className="z-10" />
       <MysticBackground service="shinjeom" />
       <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-shinjeom" />
+      {showEnergyEffect && (
+        <ShinjeomEnergyEffect onComplete={() => setShowEnergyEffect(false)} />
+      )}
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터 */}
