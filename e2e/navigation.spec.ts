@@ -118,7 +118,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    const settingsIcon = page.locator("header a[href='/settings']");
+    const settingsIcon = page.locator("header .md\:hidden a[href='/settings']");
     await expect(settingsIcon).toBeVisible();
   });
 
@@ -127,7 +127,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await page.goto("/");
     await page.waitForLoadState("domcontentloaded");
 
-    const settingsIcon = page.locator("header a[href='/settings']");
+    const settingsIcon = page.locator("header .md\:hidden a[href='/settings']");
     await settingsIcon.click();
     await page.waitForURL("**/settings");
   });
