@@ -55,13 +55,13 @@ function collectCardTargets(): UploadTarget[] {
 
       if (stat.isDirectory()) {
         for (const file of fs.readdirSync(itemPath)) {
-          if (!file.endsWith('.png')) continue;
+          if (!file.endsWith('.png') && !file.endsWith('.webp')) continue;
           targets.push({
             localPath: path.join(itemPath, file),
             storagePath: `cards/${styleId}/${item}/${file}`,
           });
         }
-      } else if (item.endsWith('.png')) {
+      } else if (item.endsWith('.png') || item.endsWith('.webp')) {
         targets.push({
           localPath: itemPath,
           storagePath: `cards/${styleId}/${item}`,

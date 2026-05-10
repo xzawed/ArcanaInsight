@@ -29,7 +29,7 @@ export function getCardStyleImageUrl(styleId: CardStyleId, cardId: string): stri
 }
 
 export function getCardStyleBackUrl(styleId: CardStyleId): string {
-  return `${storageBase()}/cards/${styleId}/card-back.png`;
+  return `${storageBase()}/cards/${styleId}/card-back.webp`;
 }
 
 export function getServiceBackgroundUrl(service: ServiceType, theme: string): string {
