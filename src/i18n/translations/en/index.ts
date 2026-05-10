@@ -28,6 +28,7 @@ export const en: Partial<SharedKeys> = {
     "nav.saju": "Saju",
     "nav.shinjeom": "Shinjeom",
     "nav.mypage": "My Page",
+    "nav.settings": "Settings",
     "auth.login": "Sign in",
     "auth.logout": "Sign out",
     "auth.signup": "Sign up",
