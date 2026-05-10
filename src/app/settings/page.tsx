@@ -83,6 +83,7 @@ export default function SettingsPage() {
   const { genderFilter, setGenderFilter } = useGenderStore();
   const { reducedMotion, setReducedMotion } = useReducedMotionStore();
 
+  const [activeSection, setActiveSection] = useState<"style" | "skin">(() => styleOverride !== null ? "style" : "skin");
   const [confirmEachCard, setConfirmEachCard] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -108,6 +109,7 @@ export default function SettingsPage() {
 
   const handleSkinChange = (skinId: string) => {
     setSkin(skinId);
+    setActiveSection("skin");
     showToast();
   };
 
@@ -195,9 +197,9 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {/* 테마 자동 매핑 */}
               <button
-                onClick={() => { clearOverride(); showToast(); }}
+                onClick={() => { clearOverride(); setActiveSection("style"); showToast(); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
-                  styleOverride === null
+                  activeSection === "style" && styleOverride === null
                     ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                     : "border-arcana-border/50 hover:border-arcana-border"
                 }`}
@@ -213,9 +215,9 @@ export default function SettingsPage() {
               {cardStyles.map((style) => (
                 <button
                   key={style.id}
-                  onClick={() => { setStyleOverride(style.id); showToast(); }}
+                  onClick={() => { setStyleOverride(style.id); setActiveSection("style"); showToast(); }}
                   className={`p-3 rounded-xl border text-left transition-all ${
-                    styleOverride === style.id
+                    activeSection === "style" && styleOverride === style.id
                       ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                       : "border-arcana-border/50 hover:border-arcana-border"
                   }`}
@@ -234,7 +236,7 @@ export default function SettingsPage() {
                   key={skin.id}
                   onClick={() => handleSkinChange(skin.id)}
                   className={`p-3 rounded-xl border text-left transition-all ${
-                    selectedSkinId === skin.id
+                    activeSection === "skin" && selectedSkinId === skin.id
                       ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                       : "border-arcana-border/50 hover:border-arcana-border"
                   }`}
