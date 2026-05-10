@@ -31,17 +31,23 @@
 src/
 ├── app/             # App Router 페이지와 API
 ├── components/      # card, character, chat, common, effects, home, layout, saju, shinjeom, skin, tarot
+│   └── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
 ├── data/            # cards, characters, home, saju, shinjeom, skins, spreads, topics
+│   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
+│   └── useCardStyleStore.ts  # 카드 스타일 persist 스토어 (arcana-card-style)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
+│   └── storage/card-style.ts  # getCardStyleImageUrl, getCardStyleBackUrl
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
 ├── test-helpers/    # Vitest 공통 mock/setup
 └── types/           # 공유 타입
 
 docs/                # architecture, conventions, workflow, operations, archive
 e2e/                 # Playwright specs
-scripts/e2e-full/    # E2E 전수 검증 오케스트레이터
+scripts/
+├── e2e-full/        # E2E 전수 검증 오케스트레이터
+└── generate-assets/ # Replicate API 이미지 생성 (카드·배경·데코 341장)
 supabase/migrations/ # Supabase SQL migrations
 ```
 
@@ -52,6 +58,7 @@ supabase/migrations/ # Supabase SQL migrations
 - API 보안: Rate Limit -> Zod `safeParse` -> Auth -> 소유권 검증 순서. 새 API는 [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)를 먼저 확인.
 - SSE 스트리밍: 타로/사주/신점 리딩은 `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴을 사용. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - i18n: `middleware`가 locale을 결정하고 `x-locale` 헤더와 쿠키를 유지. 상세는 [`docs/architecture/i18n.md`](docs/architecture/i18n.md), [`docs/conventions/i18n-style.md`](docs/conventions/i18n-style.md).
+- 카드 아트 스타일: `CardStyleId`(dark-fantasy·art-nouveau·anime-mystical·modern-digital), `THEME_TO_STYLE_MAP`으로 테마 자동 매핑. `useCardStyleStore`가 사용자 override를 persist. `CardFace`/`CardBack`/`CardItem`은 styleId → skinId → SVG 순으로 이미지 우선순위 처리.
 
 ## 캐릭터/데이터 기준
 
@@ -75,6 +82,8 @@ pnpm sync:test-count      # 고정 테스트 수가 있는 문서 동기화
 pnpm check:env-docs       # env.ts와 env 문서 정합성
 pnpm check:doc-links      # 문서 링크 검증
 pnpm i18n:check           # 번역 키 drift 검출
+pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생성 (REPLICATE_API_KEY 필요)
+pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성
 ```
 
 명령어 정책은 [`docs/workflow/scripts.md`](docs/workflow/scripts.md), 테스트 정책은 [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md), [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)를 따른다.
@@ -106,6 +115,7 @@ pnpm i18n:check           # 번역 키 drift 검출
 - i18n: UI 텍스트는 번역 키를 우선 추가하고 `t()`/`useT()`로 노출한다.
 - 테스트 파일: API 라우트 테스트는 `src/__tests__/api/`에 둔다.
 - 패키지 추가: `pnpm-lock.yaml` 변동과 peer dependency 변화를 확인한다.
+- SonarCloud 동기화: 새 TS 파일 추가 시 `sonar.coverage.exclusions`와 `sonar.cpd.exclusions`를 `sonar-project.properties`에 함께 추가한다.
 
 ## 업무별 진입점
 

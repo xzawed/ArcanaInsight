@@ -1,6 +1,6 @@
 export const REPLICATE_MODEL = 'black-forest-labs/flux-1.1-pro-ultra';
-export const CONCURRENT_JOBS = 5;
-export const OUTPUT_FORMAT = 'webp' as const;
+export const CONCURRENT_JOBS = 1;
+export const OUTPUT_FORMAT = 'png' as const;
 export const OUTPUT_BASE_DIR = 'public/images/cards';
 export const BACKGROUNDS_DIR = 'public/images/backgrounds';
 export const BACKUP_DIR = `public/images/backup/${new Date().toISOString().slice(0, 10)}`;

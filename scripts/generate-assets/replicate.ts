@@ -5,12 +5,13 @@ import * as https from 'https';
 import * as http from 'http';
 import { REPLICATE_MODEL, OUTPUT_FORMAT } from './config';
 
-const apiKey = process.env.REPLICATE_API_KEY;
-if (!apiKey) {
-  throw new Error('REPLICATE_API_KEY 환경변수가 설정되지 않았습니다.');
+function getClient(): Replicate {
+  const apiKey = process.env.REPLICATE_API_KEY;
+  if (!apiKey) {
+    throw new Error('REPLICATE_API_KEY 환경변수가 설정되지 않았습니다. .env.local 파일을 확인하세요.');
+  }
+  return new Replicate({ auth: apiKey });
 }
-
-const replicate = new Replicate({ auth: apiKey });
 
 async function downloadImage(url: string, outputPath: string): Promise<void> {
   const dir = path.dirname(outputPath);
@@ -38,13 +39,18 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function parseRetryAfter(err: Error): number | null {
+  const match = err.message.match(/"retry_after"\s*:\s*(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
 export async function generateImage(prompt: string, outputPath: string): Promise<void> {
-  const maxRetries = 3;
+  const maxRetries = 5;
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const output = await replicate.run(REPLICATE_MODEL, {
+      const output = await getClient().run(REPLICATE_MODEL, {
         input: {
           prompt,
           output_format: OUTPUT_FORMAT,
@@ -64,8 +70,11 @@ export async function generateImage(prompt: string, outputPath: string): Promise
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       if (attempt < maxRetries) {
-        const delayMs = Math.pow(2, attempt - 1) * 1000;
-        console.warn(`  [재시도 ${attempt}/${maxRetries}] ${delayMs}ms 후 재시도 중...`);
+        const retryAfter = parseRetryAfter(lastError);
+        const delayMs = retryAfter != null
+          ? (retryAfter + 1) * 1000
+          : Math.pow(2, attempt) * 1000;
+        console.warn(`  [재시도 ${attempt}/${maxRetries}] ${delayMs / 1000}s 후 재시도 중...`);
         await sleep(delayMs);
       }
     }
