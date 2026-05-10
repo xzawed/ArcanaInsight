@@ -179,46 +179,43 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* 카드 아트 스타일 */}
-          <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
-            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">
-              {t('settings.section.card-style')}
-            </h2>
-            <p className="text-arcana-muted text-xs mb-4">
-              {t('settings.card-style.description')}
-            </p>
-            <CardStyleSelector />
-          </section>
-
           {/* 카드 스킨 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.card-skin")}</h2>
-            <p className="text-arcana-muted text-xs mb-4">{(() => {
-              const cur = cardSkins.find((s) => s.id === selectedSkinId);
-              const skinLabel = cur ? getSkinName(cur, locale) : t("settings.theme.auto");
-              return `${t("settings.theme.current")} ${skinLabel}`;
-            })()}</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {cardSkins.map((skin) => (
-                <button
-                  key={skin.id}
-                  onClick={() => handleSkinChange(skin.id)}
-                  className={`p-3 rounded-xl border text-left transition-all ${
-                    selectedSkinId === skin.id
-                      ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
-                      : "border-arcana-border/50 hover:border-arcana-border"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span
-                      className="w-4 h-4 rounded-full border border-white/20"
-                      style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
-                    />
-                    <span className="font-sans font-bold text-xs text-arcana-text">{getSkinName(skin, locale)}</span>
-                  </div>
-                  <p className="text-arcana-muted text-xs leading-relaxed">{getSkinDescription(skin, locale)}</p>
-                </button>
-              ))}
+
+            {/* 카드 아트 스타일 */}
+            <p className="text-arcana-muted text-xs mb-3">{t('settings.card-style.description')}</p>
+            <CardStyleSelector />
+
+            {/* 카드 스킨 팔레트 */}
+            <div className="mt-5 pt-4 border-t border-arcana-border/40">
+              <p className="text-arcana-muted text-xs mb-3">{(() => {
+                const cur = cardSkins.find((s) => s.id === selectedSkinId);
+                const skinLabel = cur ? getSkinName(cur, locale) : t("settings.theme.auto");
+                return `${t("settings.theme.current")} ${skinLabel}`;
+              })()}</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {cardSkins.map((skin) => (
+                  <button
+                    key={skin.id}
+                    onClick={() => handleSkinChange(skin.id)}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      selectedSkinId === skin.id
+                        ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
+                        : "border-arcana-border/50 hover:border-arcana-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span
+                        className="w-4 h-4 rounded-full border border-white/20"
+                        style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
+                      />
+                      <span className="font-sans font-bold text-xs text-arcana-text">{getSkinName(skin, locale)}</span>
+                    </div>
+                    <p className="text-arcana-muted text-xs leading-relaxed">{getSkinDescription(skin, locale)}</p>
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
 
