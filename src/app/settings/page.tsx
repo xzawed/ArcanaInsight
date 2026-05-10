@@ -11,6 +11,7 @@ import { cardSkins, getSkinName, getSkinDescription } from "@/data/skins";
 import { GenderFilter } from "@/types/character";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { CardStyleSelector } from "@/components/card/CardStyleSelector";
 
 const USER_INFO_KEY = "arcana_user_info";
 const USER_INFO_CONSENT_KEY = "arcana_privacy_agreed";
@@ -176,6 +177,17 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+          </section>
+
+          {/* 카드 아트 스타일 */}
+          <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
+            <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">
+              {t('settings.section.card-style')}
+            </h2>
+            <p className="text-arcana-muted text-xs mb-4">
+              {t('settings.card-style.description')}
+            </p>
+            <CardStyleSelector />
           </section>
 
           {/* 카드 스킨 */}

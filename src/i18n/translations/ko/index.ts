@@ -124,6 +124,10 @@ export const ko: SharedKeys = {
     "privacy.delete": "삭제",
     "theme.auto-label": "자동 (시간/계절)",
     "theme.current": "현재:",
+    "section.card-style": "카드 아트 스타일",
+    "card-style.description": "타로 카드의 아트 스타일을 선택합니다. 기본값은 현재 테마에 맞게 자동 설정됩니다.",
+    "card-style.auto-label": "테마 자동 매핑",
+    "card-style.auto-active": "현재 적용 중",
   },
   locale: {
     "modal.title": "언어를 선택하세요",

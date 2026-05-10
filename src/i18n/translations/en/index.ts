@@ -129,6 +129,10 @@ export const en: Partial<SharedKeys> = {
     "privacy.delete": "Delete",
     "theme.auto-label": "Auto (time/season)",
     "theme.current": "Current:",
+    "section.card-style": "Card Art Style",
+    "card-style.description": "Choose the art style for tarot cards. Defaults to auto-mapping based on the current theme.",
+    "card-style.auto-label": "Auto (Theme)",
+    "card-style.auto-active": "Currently active",
   },
   locale: {
     "modal.title": "Choose your language",
