@@ -6,7 +6,7 @@
 > **담당**: Codex (spec 작성·수정·실행) | Claude (테스트 시나리오 기획·셀렉터 전략 결정)
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 
-- **21개 spec 파일** / **141개 테스트** (Desktop Chrome 기준)
+- **23개 spec 파일** / **182개 테스트** (Desktop Chrome 기준)
 - **3개 디바이스 프로필**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
 - **Playwright 버전**: `v1.59.1` — CI Docker 이미지와 버전 고정, 임의 변경 금지
 

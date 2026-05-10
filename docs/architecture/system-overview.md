@@ -115,7 +115,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 6. **FAQ** — 아코디언 FAQ
 7. **BottomCTA** — 하단 행동 유도
 
-> GenderFilter 컴포넌트는 `components/home/`에 존재하지만 현재 `page.tsx`에서 미사용
+> `GenderFilterToggle` 컴포넌트는 `CharacterGallery` 내부에서 사용 중 (`components/home/CharacterGallery.tsx`)
 
 ## 다국어(i18n) 인프라
 

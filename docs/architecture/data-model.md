@@ -133,13 +133,67 @@ export interface EffectTheme {
 
 ---
 
-## 6. 카드 스킨
+## 6. 카드 비주얼 시스템
 
-`src/data/skins/index.ts` — 6종 정의
+카드 비주얼은 두 가지 독립적인 시스템으로 구성된다.
+
+### 6-1. 카드 아트 스타일 (CardStyles)
+
+`src/data/cardStyles.ts` — AI 생성 카드 이미지의 아트 스타일 4종
+
+| StyleId | 이름 | 설명 |
+|---------|------|------|
+| `dark-fantasy` | 다크 판타지 | 어둠의 마법과 고딕 판타지 |
+| `art-nouveau` | 아르누보 | 자연의 곡선과 금빛 장식 |
+| `anime-mystical` | 애니메 미스티컬 | 일본 애니메이션 스타일 |
+| `modern-digital` | 모던 디지털 | 홀로그램과 디지털 아트 |
+
+**테마 자동 매핑** (`THEME_TO_STYLE_MAP`):
+
+| 테마 | 자동 스타일 |
+|------|-----------|
+| `midnight` | `dark-fantasy` |
+| `dawn` | `art-nouveau` |
+| `sunset` | `modern-digital` |
+| `spring`, `summer` | `anime-mystical` |
+| `autumn` | `dark-fantasy` |
+| `winter` | `art-nouveau` |
+
+**사용자 오버라이드 스토어** (`src/hooks/useCardStyleStore.ts`):
+- `styleOverride: CardStyleId | null` — `null`이면 테마 자동 매핑 사용
+- `setStyleOverride(id)` / `clearOverride()` — 오버라이드 설정/해제
+- `resolvedStyle(activeTheme)` — 최종 적용 스타일 ID 반환
+- `persist` key: `'arcana-card-style'` (localStorage)
+
+**이미지 URL 헬퍼** (`src/lib/storage/card-style.ts`):
+- `getCardStyleImageUrl(cardId, styleId)` — Supabase Storage `card-styles` 버킷의 카드 앞면 URL
+- `getCardStyleBackUrl(styleId)` — 스타일별 카드 뒷면 URL (`card-back.webp`)
+
+---
+
+### 6-2. 카드 팔레트 스킨 (Skins)
+
+`src/data/skins/index.ts` — SVG 카드의 색상 팔레트 6종
+
+| SkinId | 이름 |
+|--------|------|
+| `gold-luxury` | 골드 럭셔리 |
+| `dark-gothic` | 다크 고딕 |
+| `celestial-mystic` | 셀레스티얼 미스틱 |
+| `pastel-dream` | 파스텔 드림 |
+| `neon-cyberpunk` | 네온 사이버펑크 |
+| `emerald-enchant` | 에메랄드 인챈트 |
 
 이미지 경로 로직: `src/lib/storage/index.ts` — `getCardImageUrl()`
 - `supabase` 모드: Supabase Storage URL
 - `postgres` 모드: `/images/skins/...` 정적 파일
+
+---
+
+### 6-3. 설정 페이지 통합
+
+`/settings` "카드 스킨" 섹션에서 두 시스템을 통합 표시한다.  
+아트 스타일 5개(테마 자동 포함) + 팔레트 스킨 6개 = **총 11개** 버튼이 동일한 그리드에 표시됨.
 
 ---
 
@@ -148,12 +202,13 @@ export interface EffectTheme {
 | 데이터 | 파일 |
 |--------|------|
 | 캐릭터 메타데이터 | `src/data/characters/index.ts` |
-| 대기 대사 | `src/data/characters/waiting-lines.ts` |
+| 대기 대사 | `src/data/characters/waiting-lines.ts` (ko/en/ja 분리) |
 | 타로 토픽 | `src/data/topics.ts` |
 | 스프레드 | `src/data/spreads/` |
 | 사주 상수 (천간·지지·오행) | `src/data/saju/constants.ts` |
 | 사주 카테고리 | `src/data/saju/categories.ts` |
-| 스킨 | `src/data/skins/index.ts` |
+| 카드 아트 스타일 | `src/data/cardStyles.ts` |
+| 팔레트 스킨 | `src/data/skins/index.ts` |
 | 출생시간(12시진) | `src/data/birth-hours.ts` |
 | 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
 | 에러 메시지 상수 | `src/data/error-messages.ts` |

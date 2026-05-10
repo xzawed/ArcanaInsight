@@ -23,6 +23,7 @@ export const ko: SharedKeys = {
     "nav.saju": "사주",
     "nav.shinjeom": "신점",
     "nav.mypage": "마이페이지",
+    "nav.settings": "설정",
     "auth.login": "로그인",
     "auth.logout": "로그아웃",
     "auth.signup": "회원가입",

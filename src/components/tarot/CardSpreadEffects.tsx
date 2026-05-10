@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface CardSpreadEffectsProps {
   readonly isActive: boolean;
@@ -16,7 +16,10 @@ const RUNE_MARKS = ["✦", "◈", "⊕", "❋", "✦", "◈", "⊕", "❋"] as c
  * isActive=true 로 바꾸면 1.6초 동안 애니메이션 후 자연스럽게 사라진다.
  */
 export function CardSpreadEffects({ isActive, color = "rgba(167,139,250,0.7)", size = 200 }: CardSpreadEffectsProps) {
+  const shouldReduceMotion = useReducedMotion();
   const cx = size / 2;
+
+  if (shouldReduceMotion) return null;
 
   return (
     <AnimatePresence>

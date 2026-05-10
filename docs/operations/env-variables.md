@@ -27,7 +27,7 @@
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
 | `DB_PROVIDER` | DB 공급자 선택 | `supabase` |
-| `GROK_MODEL` | Grok 텍스트 생성 모델 | `grok-3` (권장: `grok-4-fast-non-reasoning` — reasoning 토큰 소비 차단) |
+| `GROK_MODEL` | Grok 텍스트 생성 모델 | `grok-3` (CI 하드코딩값. `grok-4-fast-non-reasoning`은 reasoning 토큰 차단이 필요할 때의 선택적 대안) |
 | `GROK_REASONING_EFFORT` | Grok-3 계열 reasoning 노력 수준. `low`/`high`. 비-reasoning 모델은 무시됨 | `low` |
 | `ANTHROPIC_API_KEY` | Anthropic Claude API 키 (Grok 장애 시 자동 fallback) | 미설정 시 Grok 단독 사용 |
 
