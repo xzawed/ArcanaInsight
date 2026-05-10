@@ -186,8 +186,9 @@ export function Header() {
           <LanguageSwitcher variant="mobile" />
           <Link
             href="/settings"
+            data-testid="mobile-settings-link"
             className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label={t("header.nav.mypage")}
+            aria-label={t("header.nav.settings")}
           >
             <Icon id="ui-settings" size={20} />
           </Link>
