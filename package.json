@@ -42,6 +42,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -51,8 +52,8 @@
     "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "@anthropic-ai/sdk": "^0.92.0",
     "eslint-config-next": "16.2.3",
+    "replicate": "^1.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
