@@ -28,7 +28,7 @@ test.describe("설정 페이지", () => {
     await page.waitForLoadState("networkidle");
 
     const skinButtons = page.locator("section").filter({ hasText: "카드 스킨" }).locator("button");
-    expect(await skinButtons.count()).toBe(6);
+    expect(await skinButtons.count()).toBe(11);
   });
 
   test("성별 필터 — 3버튼 존재 + 클릭 동작", async ({ page }) => {
