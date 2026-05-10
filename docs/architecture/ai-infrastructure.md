@@ -134,7 +134,7 @@ for (let i = start; i < text.length; i++) {
 
 ## 클라이언트 타임아웃 패턴 (tarot/saju 세션 공통)
 
-타로·사주 세션 페이지는 180s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:
+타로·사주 세션 페이지는 240s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:
 
 ```ts
 const abortController = new AbortController();
