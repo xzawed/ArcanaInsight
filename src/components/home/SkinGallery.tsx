@@ -20,13 +20,18 @@ export function SkinGallery() {
   const activeTheme = useThemeStore((s) => s.activeTheme);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastName, setToastName] = useState("");
+  // 아트 스타일·팔레트 스킨 상호 배타적 선택 표시
+  const [activeSection, setActiveSection] = useState<"style" | "skin">(
+    () => styleOverride !== null ? "style" : "skin"
+  );
 
   const currentStyleId = resolvedStyle(activeTheme);
 
   const handleSkinSelect = (skinId: string) => {
-    if (skinId === selectedSkinId) return;
+    if (skinId === selectedSkinId && activeSection === "skin") return;
     const skin = cardSkins.find((s) => s.id === skinId);
     setSkin(skinId);
+    setActiveSection("skin");
     if (skin) {
       setToastName(skin.nameKo);
       setToastVisible(true);
@@ -34,9 +39,10 @@ export function SkinGallery() {
   };
 
   const handleStyleSelect = (styleId: CardStyleId) => {
-    if (styleId === styleOverride) return;
+    if (styleId === styleOverride && activeSection === "style") return;
     const style = cardStyles.find((s) => s.id === styleId);
     setStyleOverride(styleId);
+    setActiveSection("style");
     if (style) {
       setToastName(style.nameKo);
       setToastVisible(true);
@@ -66,7 +72,7 @@ export function SkinGallery() {
             <ScrollReveal key={style.id} delay={index * 0.08}>
               <StyleSelector
                 style={style}
-                isSelected={currentStyleId === style.id}
+                isSelected={activeSection === "style" && currentStyleId === style.id}
                 onSelect={handleStyleSelect}
               />
             </ScrollReveal>
@@ -75,7 +81,7 @@ export function SkinGallery() {
             <ScrollReveal key={skin.id} delay={(cardStyles.length + index) * 0.08}>
               <SkinSelector
                 skin={skin}
-                isSelected={selectedSkinId === skin.id}
+                isSelected={activeSection === "skin" && selectedSkinId === skin.id}
                 onSelect={handleSkinSelect}
               />
             </ScrollReveal>
