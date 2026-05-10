@@ -27,6 +27,7 @@ export interface SharedKeys {
     "nav.saju": string;
     "nav.shinjeom": string;
     "nav.mypage": string;
+    "nav.settings": string;
     "auth.login": string;
     "auth.logout": string;
     "auth.signup": string;

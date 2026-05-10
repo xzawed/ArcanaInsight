@@ -15,6 +15,7 @@ export const ja: Partial<SharedKeys> = {
     "nav.saju": "四柱",
     "nav.shinjeom": "神占",
     "nav.mypage": "マイページ",
+    "nav.settings": "設定",
     "auth.login": "ログイン",
     "auth.logout": "ログアウト",
     "auth.signup": "新規登録",
