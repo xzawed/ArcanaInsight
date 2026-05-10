@@ -7,7 +7,10 @@ import { hexToRgbComponents } from "@/lib/color-utils";
 import { t as translate } from "@/i18n/translations";
 import { useT } from "@/i18n/useT";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
 import { getCardBackUrl } from "@/lib/storage";
+import { getCardStyleBackUrl } from "@/lib/storage/card-style";
 
 interface ShuffleCeremonyProps {
   readonly characterId: string;
@@ -73,17 +76,33 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
   onCompleteRef.current = onComplete;
   const cardImgRef = useRef<HTMLImageElement | null>(null);
   const { selectedSkinId } = useSkinStore();
+  const { activeTheme } = useThemeStore();
+  const { resolvedStyle } = useCardStyleStore();
+  const styleId = resolvedStyle(activeTheme);
 
   useEffect(() => {
     let cancelled = false;
-    const url = getCardBackUrl(selectedSkinId);
+    const url = getCardStyleBackUrl(styleId) ?? getCardBackUrl(selectedSkinId);
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => { if (!cancelled) cardImgRef.current = img; };
-    img.onerror = () => { if (!cancelled) cardImgRef.current = null; };
+    img.onerror = () => {
+      if (!cancelled) {
+        const fallbackUrl = getCardBackUrl(selectedSkinId);
+        if (fallbackUrl !== url) {
+          const fallbackImg = new Image();
+          fallbackImg.crossOrigin = "anonymous";
+          fallbackImg.onload = () => { if (!cancelled) cardImgRef.current = fallbackImg; };
+          fallbackImg.onerror = () => { if (!cancelled) cardImgRef.current = null; };
+          fallbackImg.src = fallbackUrl;
+        } else {
+          cardImgRef.current = null;
+        }
+      }
+    };
     img.src = url;
     return () => { cancelled = true; };
-  }, [selectedSkinId]);
+  }, [styleId, selectedSkinId]);
 
   useEffect(() => {
     function safeComplete() {

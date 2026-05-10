@@ -25,6 +25,7 @@ import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
 import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -236,7 +237,7 @@ export default function SajuSessionPage() {
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
+        <Image src={getServiceBackgroundUrl('saju', activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />

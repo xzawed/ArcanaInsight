@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import {
   getCardStyleImageUrl,
   getCardStyleBackUrl,
+  getServiceBackgroundUrl,
 } from '@/lib/storage/card-style';
 
 const SUPABASE_URL = 'https://test.supabase.co';
@@ -62,6 +63,20 @@ describe('getCardStyleBackUrl', () => {
     );
     expect(getCardStyleBackUrl('anime-mystical')).toBe(
       `${BASE}/cards/anime-mystical/card-back.png`
+    );
+  });
+});
+
+describe('getServiceBackgroundUrl', () => {
+  it('서비스·테마 배경 URL을 올바르게 반환한다', () => {
+    expect(getServiceBackgroundUrl('tarot', 'midnight')).toBe(
+      `${BASE}/backgrounds/tarot/midnight.png`
+    );
+    expect(getServiceBackgroundUrl('saju', 'spring')).toBe(
+      `${BASE}/backgrounds/saju/spring.png`
+    );
+    expect(getServiceBackgroundUrl('shinjeom', 'winter')).toBe(
+      `${BASE}/backgrounds/shinjeom/winter.png`
     );
   });
 });

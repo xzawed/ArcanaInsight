@@ -6,6 +6,8 @@ import { SelectedCard } from "@/types/card";
 import { SpreadDefinition, SpreadPosition } from "@/types/session";
 import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { hexToRgbBase } from "@/lib/color-utils";
 import { getPositionLabel } from "@/data/spreads";
@@ -98,6 +100,9 @@ function computeLayout(
 export const CardSpread = React.memo(
   function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
   const { selectedSkinId } = useSkinStore();
+  const { activeTheme } = useThemeStore();
+  const { resolvedStyle } = useCardStyleStore();
+  const styleId = resolvedStyle(activeTheme);
   const locale = useLocaleStore((s) => s.locale);
   const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -169,6 +174,7 @@ export const CardSpread = React.memo(
                     width={layout.cardW}
                     height={layout.cardH}
                     skinId={selectedSkinId}
+                    styleId={styleId}
                     glowColor={glowColor}
                   />
                 </div>

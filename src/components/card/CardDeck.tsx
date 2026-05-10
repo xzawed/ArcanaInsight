@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { TarotCard } from "@/types/card";
 import { CardItem } from "./CardItem";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
 
 interface CardDeckProps {
   readonly cards: TarotCard[];
@@ -44,6 +46,9 @@ function getCardTransform({ index, totalCards, overlap, cardH, effectivelySpread
 
 export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selectedIndices, onCardSelect }: CardDeckProps) {
   const { selectedSkinId } = useSkinStore();
+  const { activeTheme } = useThemeStore();
+  const { resolvedStyle } = useCardStyleStore();
+  const styleId = resolvedStyle(activeTheme);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
@@ -158,6 +163,7 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
               width={layout.cardW}
               height={layout.cardH}
               skinId={selectedSkinId}
+              styleId={styleId}
             />
           </motion.div>
         );
