@@ -167,8 +167,8 @@ flowchart LR
 |------|-----------------|-------|
 | **매일 09:00** | 리딩 품질 자동 평가 → 낮으면 Issue 생성 | n8n Cloud |
 | **금요일 18:00** | 주간 운영 리포트 → Issue 생성 | n8n Cloud |
-| **토요일 09:00** | 전체 QA 테스트 (3개 디바이스) → 실패 시 Issue | GitHub Actions |
-| **PR 생성 시** | 코드 품질 검증 (린트 + 빌드 + E2E) | GitHub Actions |
+| **토요일 09:00** | 전체 QA 테스트 (3개 디바이스: Desktop + Android + iOS) → 실패 시 Issue | GitHub Actions (`weekly-qa.yml`) |
+| **PR 생성 시** | 코드 품질 검증 (린트 + 빌드 + E2E 2개 디바이스: Desktop + Android) | GitHub Actions (`deploy.yml`) |
 | **main 머지 시** | Railway 자동 배포 + QA Issue 재검증 | Railway + GitHub |
 | **spec Issue 생성 시** | n8n이 즉시 감지 → 구현 안내 코멘트 | n8n Cloud |
 
