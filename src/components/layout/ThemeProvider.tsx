@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useThemeStore, themes } from "@/hooks/useTheme";
+import { ThemeEffectEngine } from "@/components/effects/ThemeEffectEngine";
 
 /** CSS 변수를 :root에 동적 적용하고, 시간 경과 시 자동 갱신 */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -39,5 +40,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [mode, refresh]);
 
-  return <>{children}</>;
+  return <><ThemeEffectEngine />{children}</>;
 }

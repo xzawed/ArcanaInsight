@@ -20,6 +20,7 @@ interface CardFaceProps {
   readonly className?: string;
   readonly skinId?: string;
   readonly styleId?: CardStyleId;
+  readonly showLabel?: boolean;
 }
 
 const sizeDimensions = {
@@ -28,7 +29,7 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId, styleId }: CardFaceProps) {
+export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId, styleId, showLabel = true }: CardFaceProps) {
   const [imageError, setImageError] = useState(false);
   const locale = useLocaleStore((s) => s.locale);
   const preset = sizeDimensions[size];
@@ -150,15 +151,18 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
           </g>
         )}
 
-        <text x={cx} y={h * 0.82} textAnchor="middle" dominantBaseline="central"
-          fill="#e2e8f0" fontSize={fontSize} fontFamily="serif" letterSpacing="1">
-          {card.name.toUpperCase()}
-        </text>
-
-        <text x={cx} y={h * 0.92} textAnchor="middle" dominantBaseline="central"
-          fill="#94a3b8" fontSize={fontSize - 2}>
-          {getCardName(card, locale)}
-        </text>
+        {showLabel && (
+          <>
+            <text x={cx} y={h * 0.82} textAnchor="middle" dominantBaseline="central"
+              fill="#e2e8f0" fontSize={fontSize} fontFamily="serif" letterSpacing="1">
+              {card.name.toUpperCase()}
+            </text>
+            <text x={cx} y={h * 0.92} textAnchor="middle" dominantBaseline="central"
+              fill="#94a3b8" fontSize={fontSize - 2}>
+              {getCardName(card, locale)}
+            </text>
+          </>
+        )}
       </svg>
 
       {isReversed && (
