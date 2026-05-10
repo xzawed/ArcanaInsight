@@ -5,6 +5,7 @@ import { TarotCard } from "@/types/card";
 import { CardFace } from "./CardFace";
 import { CardBack } from "./CardBack";
 import { hexToRgbBase } from "@/lib/color-utils";
+import type { CardStyleId } from "@/data/cardStyles";
 
 interface CardItemProps {
   readonly card: TarotCard;
@@ -17,12 +18,13 @@ interface CardItemProps {
   readonly height?: number;
   readonly className?: string;
   readonly skinId?: string;
+  readonly styleId?: CardStyleId;
   readonly glowColor?: string;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
 
-export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, glowColor }: CardItemProps) {
+export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, styleId, glowColor }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
 
   const mouseX = useMotionValue(0);
@@ -89,14 +91,14 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
             } : {}),
           }}
         >
-          <CardBack size={size} width={width} height={height} className="w-full h-full" skinId={skinId} />
+          <CardBack size={size} width={width} height={height} className="w-full h-full" skinId={skinId} styleId={styleId} />
         </div>
 
         <div
           className="absolute inset-0"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", borderRadius: "0.5rem" }}
         >
-          <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" skinId={skinId} />
+          <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" skinId={skinId} styleId={styleId} />
         </div>
       </motion.div>
 

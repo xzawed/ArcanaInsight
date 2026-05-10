@@ -116,6 +116,10 @@ export const ja: Partial<SharedKeys> = {
     "privacy.delete": "削除",
     "theme.auto-label": "自動（時間/季節）",
     "theme.current": "現在：",
+    "section.card-style": "カードアートスタイル",
+    "card-style.description": "タロットカードのアートスタイルを選択します。デフォルトは現在のテーマに応じて自動設定されます。",
+    "card-style.auto-label": "テーマ自動マッピング",
+    "card-style.auto-active": "現在適用中",
   },
   common: {
     "skip-link": "メインコンテンツへ移動",

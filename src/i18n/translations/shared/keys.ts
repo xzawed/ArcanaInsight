@@ -131,6 +131,10 @@ export interface SharedKeys {
     "privacy.delete": string;
     "theme.auto-label": string;
     "theme.current": string;
+    "section.card-style": string;
+    "card-style.description": string;
+    "card-style.auto-label": string;
+    "card-style.auto-active": string;
   };
   locale: {
     "modal.title": string;

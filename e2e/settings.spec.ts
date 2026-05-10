@@ -17,8 +17,9 @@ test.describe("설정 페이지", () => {
     await page.goto("/settings");
     await page.waitForLoadState("networkidle");
 
-    // 자동 + 7개 테마 = 8개
-    const themeButtons = page.locator("section").filter({ hasText: "테마" }).locator("button");
+    // 자동 + 7개 테마 = 8개 — h2로 정확히 테마 섹션만 매칭 (카드 스타일 섹션 제외)
+    const themeSection = page.locator("section").filter({ has: page.locator("h2").filter({ hasText: "테마" }) });
+    const themeButtons = themeSection.locator("button");
     expect(await themeButtons.count()).toBe(8);
   });
 

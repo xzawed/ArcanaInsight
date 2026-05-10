@@ -5,9 +5,11 @@ import Image from "next/image";
 import { TarotCard } from "@/types/card";
 import { majorSymbols, suitSymbols } from "@/data/cards/symbols";
 import { getCardImageUrl } from "@/lib/storage";
+import { getCardStyleImageUrl } from "@/lib/storage/card-style";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getCardName } from "@/data/cards/locale-helpers";
 import { t } from "@/i18n/translations";
+import type { CardStyleId } from "@/data/cardStyles";
 
 interface CardFaceProps {
   readonly card: TarotCard;
@@ -17,6 +19,7 @@ interface CardFaceProps {
   readonly height?: number;
   readonly className?: string;
   readonly skinId?: string;
+  readonly styleId?: CardStyleId;
 }
 
 const sizeDimensions = {
@@ -25,7 +28,7 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId }: CardFaceProps) {
+export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId, styleId }: CardFaceProps) {
   const [imageError, setImageError] = useState(false);
   const locale = useLocaleStore((s) => s.locale);
   const preset = sizeDimensions[size];
@@ -47,6 +50,30 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
   const romanNumerals = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
     "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI"];
   const numeral = card.type === "major" ? romanNumerals[card.number] : `${card.number}`;
+
+  if (styleId && !imageError) {
+    return (
+      <div
+        className={`relative rounded-lg overflow-hidden ${isReversed ? "rotate-180" : ""} ${className}`}
+        style={{ width: w, height: h }}
+      >
+        <Image
+          src={getCardStyleImageUrl(styleId, card.id)}
+          alt={getCardName(card, locale)}
+          fill
+          sizes={`${Math.max(w, h)}px`}
+          unoptimized
+          onError={() => setImageError(true)}
+          className="object-cover"
+        />
+        {isReversed && (
+          <span className="absolute top-1 right-1 text-[8px] text-red-400 bg-red-900/40 px-1 rounded rotate-180">
+            {t("tarot.result.card.reversed-badge", locale)}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   if (skinId && !imageError) {
     return (

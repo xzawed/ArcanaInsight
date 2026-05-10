@@ -25,7 +25,9 @@
     "check:env-docs": "tsx scripts/check-env-docs.ts",
     "i18n:check": "tsx scripts/check-translation-keys.ts",
     "sync:test-count": "tsx scripts/sync-test-count.ts",
-    "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts"
+    "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts",
+    "generate:assets": "npx tsx scripts/generate-assets/index.ts",
+    "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -42,6 +44,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -51,8 +54,8 @@
     "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "@anthropic-ai/sdk": "^0.92.0",
     "eslint-config-next": "16.2.3",
+    "replicate": "^1.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
