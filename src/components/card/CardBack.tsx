@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getCardBackUrl } from "@/lib/storage";
+import { getCardStyleBackUrl } from "@/lib/storage/card-style";
 import { useT } from "@/i18n/useT";
+import type { CardStyleId } from "@/data/cardStyles";
 
 interface CardBackProps {
   readonly size?: "sm" | "md" | "lg";
@@ -11,6 +13,7 @@ interface CardBackProps {
   readonly height?: number;
   readonly className?: string;
   readonly skinId?: string;
+  readonly styleId?: CardStyleId;
 }
 
 const sizeDimensions = {
@@ -19,7 +22,7 @@ const sizeDimensions = {
   lg: { w: 128, h: 192 },
 };
 
-export function CardBack({ size = "md", width, height, className = "", skinId }: CardBackProps) {
+export function CardBack({ size = "md", width, height, className = "", skinId, styleId }: CardBackProps) {
   const { t } = useT();
   const [imageError, setImageError] = useState(false);
   const preset = sizeDimensions[size];
@@ -32,6 +35,22 @@ export function CardBack({ size = "md", width, height, className = "", skinId }:
   const r3 = r1 * 0.35;
   const sizeDetails = { sm: { starSize: 6, cornerStarSize: 4, inset: 4 }, md: { starSize: 8, cornerStarSize: 5, inset: 6 }, lg: { starSize: 10, cornerStarSize: 6, inset: 8 } };
   const { starSize, cornerStarSize, inset } = sizeDetails[size];
+
+  if (styleId && !imageError) {
+    return (
+      <div className={`relative rounded-lg overflow-hidden ${className}`} style={{ width: w, height: h }}>
+        <Image
+          src={getCardStyleBackUrl(styleId)}
+          alt={t("common.card.back-alt")}
+          fill
+          sizes={`${Math.max(w, h)}px`}
+          unoptimized
+          onError={() => setImageError(true)}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
 
   if (skinId && !imageError) {
     return (
