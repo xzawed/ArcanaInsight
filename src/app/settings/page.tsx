@@ -8,10 +8,18 @@ import { useSkinStore } from "@/hooks/useSkinStore";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 import { cardSkins, getSkinName, getSkinDescription } from "@/data/skins";
+import { cardStyles, getStyleName, getStyleDescription } from "@/data/cardStyles";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
 import { GenderFilter } from "@/types/character";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
-import { CardStyleSelector } from "@/components/card/CardStyleSelector";
+
+const STYLE_COLORS: Record<string, string> = {
+  "dark-fantasy": "linear-gradient(135deg, #1a0a2e, #6b21a8)",
+  "art-nouveau": "linear-gradient(135deg, #7c5c1e, #d4af37)",
+  "anime-mystical": "linear-gradient(135deg, #1e3a8a, #60a5fa)",
+  "modern-digital": "linear-gradient(135deg, #0f2944, #00b4d8)",
+};
 
 const USER_INFO_KEY = "arcana_user_info";
 const USER_INFO_CONSENT_KEY = "arcana_privacy_agreed";
@@ -71,6 +79,7 @@ export default function SettingsPage() {
   const locale = useLocaleStore((s) => s.locale);
   const { mode, activeTheme, setMode } = useThemeStore();
   const { selectedSkinId, setSkin } = useSkinStore();
+  const { styleOverride, setStyleOverride, clearOverride, resolvedStyle } = useCardStyleStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const { reducedMotion, setReducedMotion } = useReducedMotionStore();
 
@@ -179,43 +188,67 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* 카드 스킨 */}
+          {/* 카드 스킨 (아트 스타일 5 + 팔레트 6 = 11) */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.card-skin")}</h2>
+            <p className="text-arcana-muted text-xs mb-4">{t("settings.card-style.description")}</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {/* 테마 자동 매핑 */}
+              <button
+                onClick={() => { clearOverride(); showToast(); }}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  styleOverride === null
+                    ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
+                    : "border-arcana-border/50 hover:border-arcana-border"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[10px]">🎨</span>
+                  <span className="font-sans font-bold text-xs text-arcana-text">{t("settings.card-style.auto-label")}</span>
+                </div>
+                <p className="text-arcana-muted text-xs leading-relaxed">{t("settings.card-style.auto-active")} ({resolvedStyle(activeTheme)})</p>
+              </button>
 
-            {/* 카드 아트 스타일 */}
-            <p className="text-arcana-muted text-xs mb-3">{t('settings.card-style.description')}</p>
-            <CardStyleSelector />
+              {/* 4개 아트 스타일 */}
+              {cardStyles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => { setStyleOverride(style.id); showToast(); }}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    styleOverride === style.id
+                      ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
+                      : "border-arcana-border/50 hover:border-arcana-border"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-4 h-4 rounded-full border border-white/20" style={{ background: STYLE_COLORS[style.id] }} />
+                    <span className="font-sans font-bold text-xs text-arcana-text">{getStyleName(style, locale)}</span>
+                  </div>
+                  <p className="text-arcana-muted text-xs leading-relaxed">{getStyleDescription(style, locale)}</p>
+                </button>
+              ))}
 
-            {/* 카드 스킨 팔레트 */}
-            <div className="mt-5 pt-4 border-t border-arcana-border/40">
-              <p className="text-arcana-muted text-xs mb-3">{(() => {
-                const cur = cardSkins.find((s) => s.id === selectedSkinId);
-                const skinLabel = cur ? getSkinName(cur, locale) : t("settings.theme.auto");
-                return `${t("settings.theme.current")} ${skinLabel}`;
-              })()}</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {cardSkins.map((skin) => (
-                  <button
-                    key={skin.id}
-                    onClick={() => handleSkinChange(skin.id)}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      selectedSkinId === skin.id
-                        ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
-                        : "border-arcana-border/50 hover:border-arcana-border"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span
-                        className="w-4 h-4 rounded-full border border-white/20"
-                        style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
-                      />
-                      <span className="font-sans font-bold text-xs text-arcana-text">{getSkinName(skin, locale)}</span>
-                    </div>
-                    <p className="text-arcana-muted text-xs leading-relaxed">{getSkinDescription(skin, locale)}</p>
-                  </button>
-                ))}
-              </div>
+              {/* 6개 팔레트 스킨 */}
+              {cardSkins.map((skin) => (
+                <button
+                  key={skin.id}
+                  onClick={() => handleSkinChange(skin.id)}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    selectedSkinId === skin.id
+                      ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
+                      : "border-arcana-border/50 hover:border-arcana-border"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span
+                      className="w-4 h-4 rounded-full border border-white/20"
+                      style={{ background: `linear-gradient(135deg, ${skin.palette.primary}, ${skin.palette.secondary})` }}
+                    />
+                    <span className="font-sans font-bold text-xs text-arcana-text">{getSkinName(skin, locale)}</span>
+                  </div>
+                  <p className="text-arcana-muted text-xs leading-relaxed">{getSkinDescription(skin, locale)}</p>
+                </button>
+              ))}
             </div>
           </section>
 
