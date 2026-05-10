@@ -133,3 +133,13 @@ DB_PROVIDER=supabase
 i18n 자체에는 신규 환경변수 없음 — 쿠키(`ai_locale`)와 헤더(`x-locale`)로 처리.
 
 상세: [`../architecture/i18n.md`](../architecture/i18n.md)
+
+---
+
+## 개발 도구 (런타임 불필요)
+
+로컬 개발·에셋 생성 스크립트에서만 사용하며, 서버 런타임에는 불필요합니다.
+
+| 변수 | 설명 | 비고 |
+|------|------|------|
+| `REPLICATE_API_KEY` | Replicate API 인증 키 | 이미지 생성 스크립트(`generate:assets`) 실행 시 필수. 런타임에는 불필요. |
