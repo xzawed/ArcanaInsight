@@ -74,8 +74,8 @@ SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
 
 | 구분 | 경로 패턴 | 비고 |
 |------|---------|------|
-| 카드 앞면 | `{styleId}/{cardId}.webp` | 4종 스타일 × 카드 수 |
-| 카드 뒷면 | `{styleId}/card-back.webp` | 스타일별 전용 뒷면 |
+| 카드 앞면 | `{styleId}/{suit}/{number}.png` | 4종 스타일 × 카드 수 (`.png`) |
+| 카드 뒷면 | `{styleId}/card-back.webp` | 스타일별 전용 뒷면 (`.webp`) |
 
 - 이미지 URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()`로 조회
 - 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요)
