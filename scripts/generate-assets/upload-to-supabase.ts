@@ -22,7 +22,9 @@ function getSupabaseAdmin() {
   return createClient(url, key);
 }
 
-async function ensureBucket(supabase: ReturnType<typeof createClient>): Promise<void> {
+type SupabaseAdminClient = ReturnType<typeof getSupabaseAdmin>;
+
+async function ensureBucket(supabase: SupabaseAdminClient): Promise<void> {
   const { data: buckets } = await supabase.storage.listBuckets();
   const exists = buckets?.some((b) => b.name === BUCKET);
   if (!exists) {
@@ -94,7 +96,7 @@ function collectBackgroundTargets(): UploadTarget[] {
 }
 
 async function uploadFile(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseAdminClient,
   target: UploadTarget
 ): Promise<void> {
   const fileBuffer = fs.readFileSync(target.localPath);
