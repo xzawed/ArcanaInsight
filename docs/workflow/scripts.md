@@ -21,6 +21,8 @@
 | `pnpm check:env-docs` | `check-env-docs.ts` | `src/lib/env.ts` ↔ `docs/operations/env-variables.md` 정합성 |
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·unit-testing.md 자동 갱신 |
 | `pnpm download:skins` | `download-skin-images.ts` | Supabase Storage 스킨 이미지 로컬 다운로드 (관리자) |
+| `pnpm upload:assets` | `upload-to-supabase.ts` | 로컬 카드·배경·데코 이미지를 Supabase Storage 업로드 |
+| `pnpm upload:assets:skip` | `upload-to-supabase.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 업로드 |
 | `pnpm test:e2e:full` | `e2e-full/orchestrator.ts --mode=full --workers=6` | 전수 E2E (실서버 + 실 API 키 필요) |
 | `pnpm test:e2e:full:ci` | `e2e-full/orchestrator.ts --mode=ci` | CI 대표 12 조합 |
 
