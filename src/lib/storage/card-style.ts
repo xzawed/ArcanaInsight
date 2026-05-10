@@ -20,17 +20,17 @@ function parseCardId(cardId: string): ParsedCardId {
 
 /**
  * 카드 스타일 이미지 URL을 반환한다.
- * 경로: /images/cards/[styleId]/[suit]/[number].webp
+ * 경로: /images/cards/[styleId]/[suit]/[number].png
  */
 export function getCardStyleImageUrl(styleId: CardStyleId, cardId: string): string {
   const { suit, number } = parseCardId(cardId);
-  return `/images/cards/${styleId}/${suit}/${number}.webp`;
+  return `/images/cards/${styleId}/${suit}/${number}.png`;
 }
 
 /**
  * 카드 뒷면 스타일 이미지 URL을 반환한다.
- * 경로: /images/cards/[styleId]/card-back.webp
+ * 경로: /images/cards/[styleId]/card-back.png
  */
 export function getCardStyleBackUrl(styleId: CardStyleId): string {
-  return `/images/cards/${styleId}/card-back.webp`;
+  return `/images/cards/${styleId}/card-back.png`;
 }

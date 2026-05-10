@@ -1,3 +1,6 @@
+import { config } from 'dotenv';
+config({ path: '.env.local' });
+
 import * as fs from 'fs';
 import * as path from 'path';
 import {
@@ -58,7 +61,7 @@ function buildAllCardTargets(): CardTarget[] {
         suit: 'major',
         number,
         cardName,
-        outputPath: path.join(OUTPUT_BASE_DIR, styleId, 'major', `${number}.webp`),
+        outputPath: path.join(OUTPUT_BASE_DIR, styleId, 'major', `${number}.png`),
       });
     }
 
@@ -71,7 +74,7 @@ function buildAllCardTargets(): CardTarget[] {
           suit,
           number,
           cardName,
-          outputPath: path.join(OUTPUT_BASE_DIR, styleId, suit, `${number}.webp`),
+          outputPath: path.join(OUTPUT_BASE_DIR, styleId, suit, `${number}.png`),
         });
       }
     }
@@ -97,7 +100,7 @@ function buildAllBackgroundTargets(): BackgroundTarget[] {
       targets.push({
         service,
         theme,
-        outputPath: path.join(BACKGROUNDS_DIR, service, `${theme}.webp`),
+        outputPath: path.join(BACKGROUNDS_DIR, service, `${theme}.png`),
       });
     }
   }
@@ -108,7 +111,7 @@ function buildAllBackgroundTargets(): BackgroundTarget[] {
 function buildAllDecoTargets(): DecoTarget[] {
   return STYLE_IDS.map((styleId) => ({
     styleId,
-    outputPath: path.join(BACKGROUNDS_DIR, 'deco', `${styleId}.webp`),
+    outputPath: path.join(BACKGROUNDS_DIR, 'deco', `${styleId}.png`),
   }));
 }
 
@@ -183,7 +186,9 @@ async function main(): Promise<void> {
       const { label } = await task();
       tracker.tick(true, label);
     } catch (err) {
-      tracker.tick(false, String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`\nERROR: ${msg}\n`);
+      tracker.tick(false, msg);
     }
   });
 
