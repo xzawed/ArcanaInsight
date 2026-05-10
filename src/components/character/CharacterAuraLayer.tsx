@@ -51,6 +51,14 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
             opacity: 0.5,
           }}
         />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "radial-gradient(ellipse 70% 90% at 50% 65%, var(--theme-aura-color, rgba(167,139,250,0.1)) 0%, transparent 60%)",
+            mixBlendMode: "screen",
+            opacity: 0.6,
+          }}
+        />
       </div>
     );
   }
@@ -66,6 +74,15 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
         }}
         animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.85, 0.5] }}
         transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* 테마 오라 오버레이 — ThemeEffectEngine CSS 변수 사용 */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 70% 90% at 50% 65%, var(--theme-aura-color, rgba(167,139,250,0.1)) 0%, transparent 60%)",
+          mixBlendMode: "screen",
+        }}
       />
 
       {/* 상시 파티클 3개 */}

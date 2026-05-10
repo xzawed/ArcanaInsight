@@ -121,6 +121,67 @@
     70% { transform: translateY(-50px) scale(1.2); opacity: 0.3; }
     100% { transform: translateY(-100px) scale(0.6); opacity: 0; }
   }
+
+  /* 테마 이펙트 animate 토큰 */
+  --animate-rune-float: rune-float 6s ease-in-out infinite;
+  --animate-aurora-shift: aurora-shift 12s ease-in-out infinite;
+  --animate-firefly-blink: firefly-blink 3s ease-in-out infinite;
+  --animate-meteor-streak: meteor-streak 4s ease-out infinite;
+  --animate-scanline: scanline 6s linear infinite;
+  --animate-glitch: glitch 8s steps(1) infinite;
+  --animate-haze-warp: haze-warp 5s ease-in-out infinite;
+  --animate-ice-shimmer: ice-shimmer 4s ease-in-out infinite;
+  --animate-sakura-fall: sakura-fall 8s ease-in infinite;
+
+  @keyframes rune-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+    50% { transform: translateY(-15px) rotate(180deg); opacity: 0.8; }
+  }
+
+  @keyframes aurora-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes firefly-blink {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+  }
+
+  @keyframes meteor-streak {
+    0% { transform: translateX(0) translateY(0); opacity: 1; }
+    100% { transform: translateX(200px) translateY(200px); opacity: 0; }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  @keyframes glitch {
+    0%, 90%, 100% { transform: none; filter: none; }
+    92% { transform: skew(-2deg); filter: hue-rotate(90deg); }
+    94% { transform: skew(2deg); }
+    96% { transform: none; filter: hue-rotate(-90deg); }
+  }
+
+  @keyframes haze-warp {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.02) skewX(0.5deg); }
+  }
+
+  @keyframes ice-shimmer {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+  }
+
+  @keyframes sakura-fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 0.8; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
 }
 
 @layer base {

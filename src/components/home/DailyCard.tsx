@@ -9,6 +9,9 @@ import { DeckManager } from "@/services/tarot/deck-manager";
 import { CardFace } from "@/components/card/CardFace";
 import { CardBack } from "@/components/card/CardBack";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
+import type { CardStyleId } from "@/data/cardStyles";
 import { useT } from "@/i18n/useT";
 import { getCardName } from "@/data/cards/locale-helpers";
 
@@ -32,11 +35,12 @@ interface CardSlotProps {
   currentData: DailyCardData | undefined;
   isFlipped: boolean;
   selectedSkinId: string;
+  styleId: CardStyleId;
   onFlip: () => void;
   tr: (key: string) => string;
 }
 
-function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, selectedSkinId, onFlip, tr }: CardSlotProps) {
+function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, selectedSkinId, styleId, onFlip, tr }: CardSlotProps) {
   if (isLoading) {
     return (
       <div className="w-32 h-48 rounded-lg bg-arcana-card/60 border border-arcana-border flex items-center justify-center">
@@ -60,10 +64,10 @@ function renderCardSlot({ isLoading, currentCard, currentData, isFlipped, select
           className="relative w-32 h-48"
         >
           <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
-            <CardBack size="lg" className="w-full h-full" skinId={selectedSkinId} />
+            <CardBack size="lg" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
           </div>
           <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
-            <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} />
+            <CardFace card={currentCard} isReversed={currentData.isReversed} size="lg" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
           </div>
         </motion.div>
         {!isFlipped && <p className="text-arcana-muted text-xs text-center mt-2">{tr("home.daily-card.tap-hint")}</p>}
@@ -145,6 +149,9 @@ export function DailyCard() {
   const { t: tr, locale } = useT();
   const characters = getAvailableCharacters();
   const { selectedSkinId } = useSkinStore();
+  const { activeTheme } = useThemeStore();
+  const { resolvedStyle } = useCardStyleStore();
+  const styleId = resolvedStyle(activeTheme);
   const [activeTab, setActiveTab] = useState(characters[0].id);
   const [data, setData] = useState<Record<string, DailyCardData>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -250,6 +257,7 @@ export function DailyCard() {
                 currentData,
                 isFlipped,
                 selectedSkinId,
+                styleId,
                 onFlip: () => handleFlip(activeTab),
                 tr,
               })}

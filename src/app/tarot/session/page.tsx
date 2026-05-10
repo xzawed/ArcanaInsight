@@ -44,6 +44,7 @@ import { SpreadDefinition, ChatMessage } from "@/types/session";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useT } from "@/i18n/useT";
 import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
 
@@ -563,7 +564,7 @@ export default function TarotSessionPage() {
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       {/* 배경 */}
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
+        <Image src={getServiceBackgroundUrl('tarot', activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
         <div className="absolute inset-0 bg-arcana-bg/50" />
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at center, transparent 40%, rgba(10,10,26,0.7) 100%)",

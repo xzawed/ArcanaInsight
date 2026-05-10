@@ -17,6 +17,7 @@ import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBa
 import { SajuChart } from "@/components/saju/SajuChart";
 import { OhaengGraph } from "@/components/saju/OhaengGraph";
 import { DaeunTimeline } from "@/components/saju/DaeunTimeline";
+import { SajuChartReveal } from "@/components/saju/SajuChartReveal";
 import { getCharacterById } from "@/data/characters";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
@@ -25,6 +26,7 @@ import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
 import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -236,7 +238,7 @@ export default function SajuSessionPage() {
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
+        <Image src={getServiceBackgroundUrl('saju', activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />
@@ -266,13 +268,13 @@ export default function SajuSessionPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
               className="w-full flex-1 flex flex-col overflow-hidden py-4">
               <div ref={resultContainerRef} className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}>
+                <SajuChartReveal index={0}>
                   <SajuChart pillars={sajuData.pillars} dayMaster={sajuData.dayMaster}
                     dayMasterElement={sajuData.dayMasterElement} isStrong={sajuData.isStrong} yongsin={sajuData.yongsin} />
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25, ease: "easeOut" }}>
+                </SajuChartReveal>
+                <SajuChartReveal index={1}>
                   <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
-                </motion.div>
+                </SajuChartReveal>
 
                 {readingResult.overallReading && (
                   <motion.div
@@ -304,9 +306,9 @@ export default function SajuSessionPage() {
                   </motion.div>
                 )}
 
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}>
+                <SajuChartReveal index={4}>
                   <DaeunTimeline majorFortunes={sajuData.majorFortunes} yearlyFortune={sajuData.yearlyFortune} birthYear={birthYear} />
-                </motion.div>
+                </SajuChartReveal>
 
                 {readingResult.advice && (
                   <motion.div

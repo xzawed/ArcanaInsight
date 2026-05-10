@@ -19,6 +19,8 @@ import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
+import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
@@ -54,6 +56,7 @@ export default function ShinjeomSessionPage() {
   const character = characterId ? getCharacterById(characterId) : null;
   const [inputText, setInputText] = useState("");
   const [sessionCreated, setSessionCreated] = useState(false);
+  const [showEnergyEffect, setShowEnergyEffect] = useState(true);
   const redirectedRef = useRef(false);
   const readingAbortRef = useRef<AbortController | null>(null);
 
@@ -243,12 +246,15 @@ export default function ShinjeomSessionPage() {
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" priority  sizes="100vw" />
+        <Image src={getServiceBackgroundUrl('shinjeom', activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density="low" className="z-10" />
       <MysticBackground service="shinjeom" />
       <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-shinjeom" />
+      {showEnergyEffect && (
+        <ShinjeomEnergyEffect onComplete={() => setShowEnergyEffect(false)} />
+      )}
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 캐릭터 */}

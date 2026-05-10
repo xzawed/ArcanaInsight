@@ -2,6 +2,8 @@ import type { CardStyleId } from '@/data/cardStyles';
 
 const BUCKET = 'card-styles';
 
+type ServiceType = 'tarot' | 'saju' | 'shinjeom';
+
 function storageBase(): string {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!url) throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set');
@@ -28,4 +30,8 @@ export function getCardStyleImageUrl(styleId: CardStyleId, cardId: string): stri
 
 export function getCardStyleBackUrl(styleId: CardStyleId): string {
   return `${storageBase()}/cards/${styleId}/card-back.png`;
+}
+
+export function getServiceBackgroundUrl(service: ServiceType, theme: string): string {
+  return `${storageBase()}/backgrounds/${service}/${theme}.png`;
 }

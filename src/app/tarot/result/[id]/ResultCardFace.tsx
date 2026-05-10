@@ -2,6 +2,8 @@
 
 import { CardFace } from "@/components/card/CardFace";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
 import { TarotCard } from "@/types/card";
 
 interface ResultCardFaceProps {
@@ -11,5 +13,8 @@ interface ResultCardFaceProps {
 
 export function ResultCardFace({ card, isReversed }: ResultCardFaceProps) {
   const { selectedSkinId } = useSkinStore();
-  return <CardFace card={card} isReversed={isReversed} size="sm" skinId={selectedSkinId} />;
+  const { activeTheme } = useThemeStore();
+  const { resolvedStyle } = useCardStyleStore();
+  const styleId = resolvedStyle(activeTheme);
+  return <CardFace card={card} isReversed={isReversed} size="sm" skinId={selectedSkinId} styleId={styleId} />;
 }
