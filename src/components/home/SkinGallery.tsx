@@ -4,17 +4,26 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { SkinSelector } from "@/components/skin/SkinSelector";
+import { StyleSelector } from "@/components/skin/StyleSelector";
 import { cardSkins } from "@/data/skins";
+import { cardStyles } from "@/data/cardStyles";
+import type { CardStyleId } from "@/data/cardStyles";
 import { useSkinStore } from "@/hooks/useSkinStore";
+import { useCardStyleStore } from "@/hooks/useCardStyleStore";
+import { useThemeStore } from "@/hooks/useTheme";
 
 const TOAST_VISIBILITY_MS = 2000
 
 export function SkinGallery() {
   const { selectedSkinId, setSkin } = useSkinStore();
+  const { styleOverride, setStyleOverride, resolvedStyle } = useCardStyleStore();
+  const activeTheme = useThemeStore((s) => s.activeTheme);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastName, setToastName] = useState("");
 
-  const handleSelect = (skinId: string) => {
+  const currentStyleId = resolvedStyle(activeTheme);
+
+  const handleSkinSelect = (skinId: string) => {
     if (skinId === selectedSkinId) return;
     const skin = cardSkins.find((s) => s.id === skinId);
     setSkin(skinId);
@@ -24,7 +33,16 @@ export function SkinGallery() {
     }
   };
 
-  // 2초 후 토스트 자동 숨김
+  const handleStyleSelect = (styleId: CardStyleId) => {
+    if (styleId === styleOverride) return;
+    const style = cardStyles.find((s) => s.id === styleId);
+    setStyleOverride(styleId);
+    if (style) {
+      setToastName(style.nameKo);
+      setToastVisible(true);
+    }
+  };
+
   useEffect(() => {
     if (!toastVisible) return;
     const timer = setTimeout(() => setToastVisible(false), TOAST_VISIBILITY_MS);
@@ -42,21 +60,30 @@ export function SkinGallery() {
           </p>
         </ScrollReveal>
 
-        {/* 스킨 그리드 */}
+        {/* 카드 디자인 그리드 — 아트 스타일 4개 + 팔레트 스킨 6개 */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {cardStyles.map((style, index) => (
+            <ScrollReveal key={style.id} delay={index * 0.08}>
+              <StyleSelector
+                style={style}
+                isSelected={currentStyleId === style.id}
+                onSelect={handleStyleSelect}
+              />
+            </ScrollReveal>
+          ))}
           {cardSkins.map((skin, index) => (
-            <ScrollReveal key={skin.id} delay={index * 0.08}>
+            <ScrollReveal key={skin.id} delay={(cardStyles.length + index) * 0.08}>
               <SkinSelector
                 skin={skin}
                 isSelected={selectedSkinId === skin.id}
-                onSelect={handleSelect}
+                onSelect={handleSkinSelect}
               />
             </ScrollReveal>
           ))}
         </div>
       </div>
 
-      {/* 스킨 변경 토스트 알림 */}
+      {/* 스킨/스타일 변경 토스트 알림 */}
       <AnimatePresence>
         {toastVisible && (
           <motion.div
