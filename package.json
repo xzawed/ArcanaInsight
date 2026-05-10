@@ -27,7 +27,9 @@
     "sync:test-count": "tsx scripts/sync-test-count.ts",
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts",
     "generate:assets": "npx tsx scripts/generate-assets/index.ts",
-    "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing"
+    "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing",
+    "upload:assets": "npx tsx scripts/generate-assets/upload-to-supabase.ts",
+    "upload:assets:skip": "npx tsx scripts/generate-assets/upload-to-supabase.ts --skip-existing"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
