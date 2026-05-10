@@ -67,13 +67,30 @@
 
 ---
 
-## 5. 이미지 생성 스크립트
+## 5. 카드 아트 스타일 이미지 (Supabase Storage)
+
+AI 생성 타로 카드 이미지는 Supabase Storage `card-styles` 버킷에 저장된다.  
+SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
+
+| 구분 | 경로 패턴 | 비고 |
+|------|---------|------|
+| 카드 앞면 | `{styleId}/{cardId}.webp` | 4종 스타일 × 카드 수 |
+| 카드 뒷면 | `{styleId}/card-back.webp` | 스타일별 전용 뒷면 |
+
+- 이미지 URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()`로 조회
+- 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요)
+- 업로드: `pnpm upload:assets` / `pnpm upload:assets:skip`
+
+---
+
+## 6. 이미지 생성 스크립트
 
 | 스크립트 | 용도 |
 |---------|------|
 | `scripts/generate-character-images-v2.mjs` | 신규 캐릭터 이미지 생성 (Grok 이미지 API) |
 | `scripts/generate-nukki-images.mjs` | 누끼(배경제거) 이미지 생성 |
 | `scripts/regenerate-all-nukki.mjs` | 전체 캐릭터 누끼 재생성 |
+| `scripts/generate-assets/` | 카드 아트 스타일 이미지 생성·업로드 오케스트레이터 |
 | `scripts/generate-skin-images.ts` | 카드 스킨 이미지 생성 |
 | `scripts/upload-skin-images.ts` | 생성된 스킨 → Supabase Storage 업로드 |
 | `scripts/download-skin-images.ts` | Supabase Storage → `public/images/skins/` 다운로드 |
