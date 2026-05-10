@@ -7,7 +7,7 @@ GitHub Actions → Railway 자동 배포 파이프라인 설명입니다.
 
 ---
 
-## CI 워크플로우 4개
+## CI 워크플로우 5개
 
 ### 1. `deploy.yml` — PR CI (lint → build → E2E)
 
@@ -59,6 +59,18 @@ pnpm exec tsx scripts/check-doc-links.ts  # docs 상대 링크 검증
 ```
 
 > **sync-test-count**: 테스트 실행이 너무 느려 PR CI에서 제외. 로컬 수동 실행만: `pnpm exec tsx scripts/sync-test-count.ts --check`
+
+### 5. `sonar.yml` — SonarCloud 코드 품질 분석
+
+**트리거**: PR → main 및 main push (`.md`·`docs/`·`n8n/` 변경 제외)
+
+```
+pnpm test:coverage   # Vitest + lcov 커버리지 생성
+→ SonarCloud Scan    # 코드 품질·커버리지 분석 및 PR 코멘트
+→ Codecov 업로드     # coverage/lcov.info (unit flag)
+```
+
+- `sonar-coverage-report` artifact 14일 보존 (lcov.info, coverage-summary.json, junit.xml)
 
 ---
 
