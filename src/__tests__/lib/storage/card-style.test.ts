@@ -59,10 +59,10 @@ describe('getCardStyleImageUrl', () => {
 describe('getCardStyleBackUrl', () => {
   it('카드 뒷면 URL을 올바르게 반환한다', () => {
     expect(getCardStyleBackUrl('dark-fantasy')).toBe(
-      `${BASE}/cards/dark-fantasy/card-back.png`
+      `${BASE}/cards/dark-fantasy/card-back.webp`
     );
     expect(getCardStyleBackUrl('anime-mystical')).toBe(
-      `${BASE}/cards/anime-mystical/card-back.png`
+      `${BASE}/cards/anime-mystical/card-back.webp`
     );
   });
 });
