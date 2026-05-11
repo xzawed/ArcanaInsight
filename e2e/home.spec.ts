@@ -46,8 +46,8 @@ test.describe("홈 페이지", () => {
     expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test("DailyCard — 섹션 존재 및 탭 전환", async ({ page }) => {
-    const section = page.locator("#daily-card");
+  test("DailyFortune — 섹션 존재 및 탭 전환", async ({ page }) => {
+    const section = page.locator("#daily-fortune");
     await section.scrollIntoViewIfNeeded();
     await expect(section).toBeVisible();
 
