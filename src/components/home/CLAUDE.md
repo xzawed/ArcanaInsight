@@ -9,7 +9,7 @@
 | `HeroSection.tsx` | 최상단 히어로 배너, 캐릭터 소개 |
 | `CharacterGallery.tsx` | 12캐릭터 갤러리, 캐릭터 선택 UI |
 | `SkinGallery.tsx` | 카드 스타일(4종) + 팔레트 스킨(6종) 선택 — 홈 전용, 총 10개 |
-| `DailyCard.tsx` | 오늘의 타로 카드 |
+| `DailyFortune.tsx` | 오늘의 운세 (5개 영역: 종합·연애·직장·건강·재물) |
 | `ServiceFlow.tsx` | 서비스 이용 흐름 설명 |
 | `GenderFilter.tsx` | 캐릭터 성별 필터 |
 | `BottomCTA.tsx` | 하단 CTA 버튼 |

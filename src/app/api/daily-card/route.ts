@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const db = getDb()
     const cached = await db.findOne<{
       card_id: string; is_reversed: boolean; interpretation: string; keywords: string[]
-    }>("daily_cards", { date, character_id: characterId });
+    }>("daily_cards", { date, character_id: characterId, area: "general" });
 
     if (cached) {
       return NextResponse.json({
@@ -88,11 +88,12 @@ export async function POST(request: NextRequest) {
     await db.upsert("daily_cards", {
       date,
       character_id: characterId,
+      area: "general",
       card_id: card.id,
       is_reversed: isReversed,
       interpretation,
       keywords,
-    }, "date,character_id");
+    }, "date,character_id,area");
 
     return NextResponse.json({ cardId: card.id, isReversed, interpretation, keywords });
   } catch (error) {

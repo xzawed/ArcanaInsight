@@ -2,15 +2,18 @@ import { test, expect } from "@playwright/test";
 
 test.describe("반응형 레이아웃", () => {
   test.beforeEach(async ({ page }) => {
-    await page.route("**/api/daily-card", async (route) => {
+    await page.route("**/api/daily-fortune", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          cardId: "the-fool",
-          isReversed: false,
-          interpretation: "오늘은 가볍게 첫걸음을 내딛기 좋은 날입니다.",
-          keywords: ["시작", "가능성", "모험"],
+          areas: [
+            { area: "general", cardId: "major-00", isReversed: false, interpretation: "테스트 해석", keywords: ["테스트"] },
+            { area: "love", cardId: "major-06", isReversed: false, interpretation: "연애 해석", keywords: ["인연"] },
+            { area: "career", cardId: "major-01", isReversed: false, interpretation: "직장 해석", keywords: ["의지"] },
+            { area: "health", cardId: "major-14", isReversed: false, interpretation: "건강 해석", keywords: ["균형"] },
+            { area: "wealth", cardId: "major-10", isReversed: false, interpretation: "재물 해석", keywords: ["행운"] },
+          ],
         }),
       });
     });
