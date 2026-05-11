@@ -73,7 +73,12 @@ function AreaCardSlot({
             </div>
             <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
               {card && (
-                <CardFace card={card} isReversed={areaResult.isReversed} size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
+                <CardFace card={card} isReversed={false} size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
+              )}
+              {areaResult.isReversed && (
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-red-400 bg-red-900/50 px-1.5 py-0.5 rounded-full pointer-events-none">
+                  {tr("tarot.result.card.reversed-badge")}
+                </span>
               )}
             </div>
           </motion.div>
