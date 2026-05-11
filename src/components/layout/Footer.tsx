@@ -29,7 +29,7 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/#daily-card" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
+              <Link href="/#daily-fortune" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
                 {t("footer.link.daily-card")}
               </Link>
             </li>

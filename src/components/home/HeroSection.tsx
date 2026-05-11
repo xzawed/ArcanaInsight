@@ -38,7 +38,7 @@ export function HeroSection() {
   const particleDensity = activeTheme === "midnight" ? "high" : "medium";
 
   const scrollToDaily = () => {
-    document.getElementById("daily-card")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("daily-fortune")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
