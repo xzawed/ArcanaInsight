@@ -202,6 +202,9 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
   });
 
   test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
+    // /tarot load + 홈 load 두 번의 waitForLoadState("load")로 합산 30s 초과 (Mobile Android CI)
+    test.setTimeout(60_000);
+
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/tarot");
     // Mobile Android Pixel 7 에뮬에서 layout 안정화 시간 확보 (2026-05-08 PR #265 회귀 핫픽스)

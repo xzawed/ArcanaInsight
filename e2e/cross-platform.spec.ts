@@ -173,6 +173,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
   });
 
   test("캐릭터 이미지 경로 — 운영용 enhanced 캐릭터 이미지 접근 가능", async ({ request }) => {
+    // 2816×1536 PNG 12개 전체 다운로드 → CI 30s 초과 방지: timeout 연장 + Range 헤더로 PNG IHDR만 수신
+    test.setTimeout(90_000);
+
     const testPaths = [
       "/images/characters/arcana/nukki-enhanced/default.png",
       "/images/characters/miko/nukki-enhanced/default.png",
@@ -189,7 +192,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     ];
 
     for (const path of testPaths) {
-      const response = await request.get(path);
+      // Range: bytes=0-32 — PNG signature(8) + IHDR chunk(4+4+13) = bytes 0-28로 width/height/color type 검증 가능
+      const response = await request.get(path, { headers: { range: "bytes=0-32" } });
+      // 206 Partial Content(Range 지원) 또는 200 OK(Range 미지원) 모두 허용
       expect(response.status(), `${path} should be accessible`).toBeLessThan(400);
 
       const body = await response.body();
