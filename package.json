@@ -29,7 +29,9 @@
     "generate:assets": "npx tsx scripts/generate-assets/index.ts",
     "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing",
     "upload:assets": "npx tsx scripts/generate-assets/upload-to-supabase.ts",
-    "upload:assets:skip": "npx tsx scripts/generate-assets/upload-to-supabase.ts --skip-existing"
+    "upload:assets:skip": "npx tsx scripts/generate-assets/upload-to-supabase.ts --skip-existing",
+    "enhance:images": "node scripts/enhance-character-images.mjs",
+    "polish:images": "python scripts/polish-character-images.py"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
