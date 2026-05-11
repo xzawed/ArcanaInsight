@@ -91,6 +91,13 @@ export interface SharedKeys {
     "daily-card.reversed": string;
     "daily-card.upright": string;
     "daily-card.share-text": string;
+    "daily-fortune.title": string;
+    "daily-fortune.tap-hint": string;
+    "daily-fortune.area.general": string;
+    "daily-fortune.area.love": string;
+    "daily-fortune.area.career": string;
+    "daily-fortune.area.health": string;
+    "daily-fortune.area.wealth": string;
     "gallery.title": string;
     "gallery.desc": string;
   };
@@ -321,6 +328,7 @@ export interface SharedKeys {
     "reading-error": string;
     "ai-config-error": string;
     "daily-card-error": string;
+    "daily-fortune-error": string;
   };
   meta: {
     "site-description": string;
