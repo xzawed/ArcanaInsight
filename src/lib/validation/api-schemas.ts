@@ -55,6 +55,12 @@ export const DailyCardSchema = z.object({
   date: dateStr,
 });
 
+// 일일 운세는 홈에서 즐겨찾기 캐릭터를 강제 선택해 호출 — characterId 필수 + 빈 문자열 거부
+export const DailyFortuneSchema = z.object({
+  characterId: z.string().min(1).max(50),
+  date: dateStr,
+});
+
 export const TarotReadingSchema = z.object({
   sessionId: uuidOrNull,
   topic: topicStr,
