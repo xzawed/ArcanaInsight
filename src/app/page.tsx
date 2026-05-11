@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { HeroSection } from "@/components/home/HeroSection";
-import { DailyCard } from "@/components/home/DailyCard";
+import { DailyFortune } from "@/components/home/DailyFortune";
 import { SkinGallery } from "@/components/home/SkinGallery";
 import { ServiceFlow } from "@/components/home/ServiceFlow";
 import { FAQ } from "@/components/home/FAQ";
@@ -34,7 +34,7 @@ export default function HomePage() {
     <div className="min-h-screen">
       <HeroSection />
       <CharacterGallery />
-      <DailyCard />
+      <DailyFortune />
       <SkinGallery />
       <ServiceFlow />
       <FAQ />
