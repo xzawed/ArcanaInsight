@@ -137,6 +137,8 @@ docker run --rm \
 | `cross-platform.spec.ts` | 콘솔 에러 · 이미지 로드 · safe-area · 링크 200 응답 | — | Desktop + Mobile |
 | `ui-quality.spec.ts` | JSON 잔여물 감지 · 핵심 텍스트 존재 · 레이아웃 깨짐 · 빈 페이지 감지 | — | 없음 |
 | `theme.spec.ts` | 테마 드롭다운 · 7종 테마 전환 · 3개 디바이스 | — | 없음 |
+| `i18n-matrix.spec.ts` | ko/en/ja 3개 locale 전환 · UI 텍스트 렌더링 검증 | — | 없음 |
+| `theme-atmosphere.spec.ts` | 7종 테마 분위기 이펙트 · 파티클·배경 렌더링 | — | 없음 |
 | `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) — 파일 상단 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수 | — | ⚠️ 실 세션 필요 |
 
 ---

@@ -82,6 +82,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 | 주제 | 노출 스프레드 |
 |------|-------------|
+| 연애 (전체) | 원카드, 쓰리카드, 5장 켈틱, 관계 스프레드, 10장 켈틱 |
 | 연애 (솔로) | 원카드, 쓰리카드, 5장 켈틱, 10장 켈틱 |
 | 연애 (커플) | 원카드, 쓰리카드, 관계 스프레드, 10장 켈틱 |
 | 직장/진로 | 원카드, 쓰리카드, 5장 켈틱, 말굽, 10장 켈틱 |
@@ -109,13 +110,13 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 1. **HeroSection** — 풀스크린 히어로 (캐릭터 + 카피 + CTA)
 2. **CharacterGallery** — 12캐릭터 갤러리 (카드형, 성별 필터 내장)
-3. **DailyCard** — 캐릭터별 일일 운세 (탭 전환 + 카드 뒤집기 + 공유)
+3. **DailyFortune** — 캐릭터별 일일 운세 (5개 영역 1+4 레이아웃)
 4. **SkinGallery** — 카드 스킨 갤러리 (6종)
 5. **ServiceFlow** — 서비스 이용 흐름 소개
 6. **FAQ** — 아코디언 FAQ
 7. **BottomCTA** — 하단 행동 유도
 
-> `GenderFilterToggle` 컴포넌트는 `CharacterGallery` 내부에서 사용 중 (`components/home/CharacterGallery.tsx`)
+> `GenderFilterToggle` 컴포넌트는 `components/home/GenderFilter.tsx`에 정의되며 `CharacterGallery.tsx`에서 import해 사용
 
 ## 다국어(i18n) 인프라
 

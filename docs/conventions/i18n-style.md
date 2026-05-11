@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 ## 키 네이밍
 
 - 형식: `namespace.key` 또는 `namespace.section.key`
-- namespace: 5개 (`common`·`header`·`footer`·`home`·`settings`·`locale`)
+- namespace: 16개 (`common`·`header`·`footer`·`home`·`settings`·`locale`·`tarot`·`saju`·`mypage`·`character`·`auth`·`share`·`chat`·`api`·`meta`·`shinjeom`) — 전체 목록은 `src/i18n/translations/shared/keys.ts` 참조
 - 케이스: dot-notation, kebab-case 단어 분리 (`skip-link`, `nav.daily-card`)
 - 예: `header.nav.tarot`, `footer.section.services`, `home.hero.title`, `locale.modal.confirm`
 

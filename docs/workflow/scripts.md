@@ -11,6 +11,7 @@
 |---|---|---|
 | `pre-push-checks.sh` | `.claude/settings.json` PreToolUse hook | `tsc --noEmit` + `eslint` + `next build` 통과 확인 후 push 허용 |
 | `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크·앵커 검증, 깨진 링크 보고 |
+| `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
 
 ## 2. 명령어 등록 (`pnpm <name>`)
@@ -19,10 +20,13 @@
 |---|---|---|
 | `pnpm check:doc-links` | `check-doc-links.ts` | docs 링크 검증 (로컬·CI) |
 | `pnpm check:env-docs` | `check-env-docs.ts` | `src/lib/env.ts` ↔ `docs/operations/env-variables.md` 정합성 |
+| `pnpm i18n:check` | `check-translation-keys.ts` | 번역 키 drift 검출 (로컬·CI) |
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·unit-testing.md 자동 갱신 |
+| `pnpm generate:assets` | `generate-assets/index.ts` | Replicate API로 카드·배경·데코 이미지 생성 (`REPLICATE_API_KEY` 필요) |
+| `pnpm generate:assets:skip` | `generate-assets/index.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 생성 |
 | `pnpm download:skins` | `download-skin-images.ts` | Supabase Storage 스킨 이미지 로컬 다운로드 (관리자) |
-| `pnpm upload:assets` | `upload-to-supabase.ts` | 로컬 카드·배경·데코 이미지를 Supabase Storage 업로드 |
-| `pnpm upload:assets:skip` | `upload-to-supabase.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 업로드 |
+| `pnpm upload:assets` | `generate-assets/upload-to-supabase.ts` | 로컬 카드·배경·데코 이미지를 Supabase Storage 업로드 |
+| `pnpm upload:assets:skip` | `generate-assets/upload-to-supabase.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 업로드 |
 | `pnpm test:e2e:full` | `e2e-full/orchestrator.ts --mode=full --workers=6` | 전수 E2E (실서버 + 실 API 키 필요) |
 | `pnpm test:e2e:full:ci` | `e2e-full/orchestrator.ts --mode=ci` | CI 대표 12 조합 |
 
@@ -32,7 +36,8 @@
 
 | 스크립트 | 용도 |
 |---|---|
-| `generate-characters.ts` | 캐릭터 이미지 생성 (Grok 이미지 API) |
+| `generate-characters.ts` | 캐릭터 이미지 생성 (Grok 이미지 API, 구버전) |
+| `generate-character-images-v2.mjs` | 캐릭터 누끼 이미지 생성 v2 (현행 기준) |
 | `generate-card-images.ts` | 타로 카드 이미지 생성 |
 | `generate-skin-images.ts` | 카드 스킨 이미지 생성 |
 | `generate-backgrounds.ts` | 배경 이미지 생성 |

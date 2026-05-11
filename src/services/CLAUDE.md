@@ -48,7 +48,7 @@ interface DivinationService {
   startSession(topic: Topic): Omit<Session, "id" | "createdAt">;
   getSystemPrompt(characterId?: string, locale?: string): string;
   getReadingPrompt(context: SessionContext): string;
-  parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult;
+  parseResult(aiResponse: string): ReadingResult;
 }
 ```
 

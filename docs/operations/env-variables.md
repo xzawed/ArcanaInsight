@@ -4,7 +4,8 @@
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 
 `src/lib/env.ts`의 getter 함수와 대응하는 전체 환경변수 목록입니다.
-환경변수는 코드에 하드코딩 금지 — 반드시 `src/lib/env.ts`의 getter 함수를 통해 접근합니다.
+환경변수는 코드에 하드코딩 금지 — 원칙적으로 `src/lib/env.ts`의 getter 함수를 통해 접근합니다.
+단, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`은 Supabase 클라이언트 초기화 코드에서 `process.env.*`로 직접 접근합니다 (Next.js NEXT_PUBLIC_ 패턴 준수).
 
 ---
 
@@ -109,7 +110,7 @@ DB_PROVIDER=supabase
 
 ## 관련 파일
 
-- `src/lib/env.ts` — 모든 getter 함수 정의 (16개)
+- `src/lib/env.ts` — 모든 getter 함수 정의 (17개)
 - `src/lib/auth/index.ts` — DB_PROVIDER 기반 auth 전환
 - `src/lib/db/index.ts` — DB_PROVIDER 기반 DB 전환
 - `src/lib/storage/index.ts` — DB_PROVIDER 기반 이미지 URL 전환

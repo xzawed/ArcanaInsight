@@ -36,13 +36,14 @@ API Route
 
 ```
 src/lib/db/
-├── index.ts              # getDb() 팩토리
-├── types.ts              # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
-├── supabase-adapter.ts   # Supabase 구현체
-├── postgres-adapter.ts   # Drizzle ORM 구현체
-├── reading-saver.ts      # DB 저장 추상화 — 3회 retry + 지수 백오프
-├── character-context.ts  # getRecentCharacterMemory() / fetchMemoryPrompt() — 캐릭터 메모리 공통 추출 (tarot/saju/shinjeom 3개 라우트에서 import)
-└── schema/index.ts       # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
+├── index.ts                    # getDb() 팩토리
+├── types.ts                    # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
+├── supabase-adapter.ts         # Supabase 구현체
+├── supabase-admin-adapter.ts   # service_role 기반 RLS 우회 어댑터 (Supabase 전용)
+├── postgres-adapter.ts         # Drizzle ORM 구현체
+├── reading-saver.ts            # DB 저장 추상화 — 3회 retry + 지수 백오프
+├── character-context.ts        # getRecentCharacterMemory() / fetchMemoryPrompt() — 캐릭터 메모리 공통 추출 (tarot/saju/shinjeom 3개 라우트에서 import)
+└── schema/index.ts             # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
 ```
 
 ---
@@ -66,6 +67,7 @@ src/lib/db/
 | `012_spread_type_expand.sql` | sessions.spread_type CHECK 제약 확장 (10개 스프레드, PR #216) |
 | `013_*` ~ `015_fix_sessions_rls.sql` | RLS 보강 (PR #219·#221 — share_token USING(true), 익명 세션 SELECT 허용 등) |
 | `016_locale_columns.sql` | 5개 테이블 locale 컬럼 + idx_sessions_user_locale (PR #223) |
+| `017_daily_fortune_areas.sql` | daily_cards.area 컬럼 추가 + UNIQUE(date, character_id, area) 재구성 (DailyFortune 5영역) |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
@@ -90,7 +92,7 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 
 ```typescript
 // 호출 패턴 (fire-and-forget, 스트림 차단 없음)
-void saveTarotReading(db, sessionId, result, cards).catch(
+void saveTarotReading(db, sessionId, result, cards, locale).catch(
   (e) => console.error("타로 DB 저장 최종 실패:", e)
 )
 ```
