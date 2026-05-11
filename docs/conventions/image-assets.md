@@ -17,7 +17,7 @@
 | 카드 | SVG | `cards/major/`, `cards/cups/` 등 | — |
 | 배경 | JPG | `backgrounds/` | — |
 | 아이콘 | PNG RGBA (투명 배경) | `images/icons/` | 콘텐츠 크롭 |
-| 카드 스킨 | PNG/JPG | `images/skins/` | — |
+| 카드 스킨 | PNG/JPG | `images/skins/` (`pnpm download:skins` 실행 후 생성) | — |
 
 ---
 

@@ -10,7 +10,7 @@
 |------|------|
 | `getCurrentUser()` | 현재 로그인 사용자 반환. 비로그인 시 `null` |
 | `requireUser()` | 로그인 필수. 비로그인 시 `Error("Unauthorized")` throw |
-| `assertSessionOwnership(sessionId)` | 세션 소유자 확인. 불일치 시 403, 세션 없으면 404 |
+| `assertSessionOwnership(sessionId)` | 세션 소유자 확인. 불일치 시 403, 세션 없으면 404. 소유자 없는 세션(`user_id=null`)은 누구나 허용 |
 | `assertReadingAccess(sessionId, mode)` | `"public"` = 항상 허용, `"owner"` = 소유자만 허용 |
 
 ---

@@ -166,7 +166,7 @@ export interface EffectTheme {
 - `persist` key: `'arcana-card-style'` (localStorage)
 
 **이미지 URL 헬퍼** (`src/lib/storage/card-style.ts`):
-- `getCardStyleImageUrl(cardId, styleId)` — Supabase Storage `card-styles` 버킷의 카드 앞면 URL
+- `getCardStyleImageUrl(styleId, cardId)` — Supabase Storage `card-styles` 버킷의 카드 앞면 URL
 - `getCardStyleBackUrl(styleId)` — 스타일별 카드 뒷면 URL (`card-back.webp`)
 
 ---

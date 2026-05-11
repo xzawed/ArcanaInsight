@@ -23,8 +23,8 @@ jobs:
 
 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` 환경변수가 모든 워크플로우에 전역 적용되어 있습니다.
 
-- 3개 job이 모두 통과해야 PR 머지 가능 (branch protection rule)
-- E2E 실패 → 스크린샷·비디오 artifact 90일 보존
+- 5개 job(Lint, Unit Tests, Build, E2E Desktop, E2E Android) 중 branch protection 필수 체크 3개(`Lint & Type Check`, `Build`, `E2E Tests`)가 통과해야 PR 머지 가능
+- E2E 실패 → 스크린샷·비디오 artifact **7일** 보존
 - **GitHub Free 플랜**: 월 2,000분 한도, 예상 사용 ~100분
 
 ### 2. `weekly-qa.yml` — 주간 QA
@@ -54,8 +54,9 @@ jobs:
 **트리거**: PR마다 실행
 
 ```
-pnpm exec tsx scripts/check-env-docs.ts   # env-variables.md 정합성
-pnpm exec tsx scripts/check-doc-links.ts  # docs 상대 링크 검증
+pnpm exec tsx scripts/check-env-docs.ts        # env-variables.md 정합성
+pnpm exec tsx scripts/check-doc-links.ts       # docs 상대 링크 검증
+pnpm exec tsx scripts/check-translation-keys.ts  # i18n 번역 키 drift 검출
 ```
 
 > **sync-test-count**: 테스트 실행이 너무 느려 PR CI에서 제외. 로컬 수동 실행만: `pnpm exec tsx scripts/sync-test-count.ts --check`

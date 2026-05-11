@@ -28,13 +28,14 @@ Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수�
 
 | Secret | 설명 | 사용 워크플로우 |
 |--------|------|----------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL | deploy.yml, sonar.yml, weekly-qa.yml |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 익명 키 | deploy.yml, sonar.yml, weekly-qa.yml |
-| `NEXT_PUBLIC_SITE_URL` | 사이트 URL | deploy.yml, sonar.yml, weekly-qa.yml |
-| `GROK_API_KEY` | Grok API 키 | deploy.yml, sonar.yml, weekly-qa.yml |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 키 | deploy.yml, sonar.yml, weekly-qa.yml |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL | deploy.yml, weekly-qa.yml |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase 익명 키 | deploy.yml, weekly-qa.yml |
+| `GROK_API_KEY` | Grok API 키 | deploy.yml, weekly-qa.yml |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase 서비스 키 | deploy.yml, weekly-qa.yml |
 | `SONAR_TOKEN` | SonarCloud 분석 토큰 | sonar.yml |
 | `CODECOV_TOKEN` | Codecov 업로드 토큰 | sonar.yml |
+
+> `NEXT_PUBLIC_SITE_URL`은 CI에서 `http://localhost:3000`으로 하드코딩되어 있어 GitHub Secret 불필요.
 
 ---
 

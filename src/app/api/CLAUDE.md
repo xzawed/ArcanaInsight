@@ -16,10 +16,12 @@ api/
 │   └── result/[id]/route.ts
 ├── shinjeom/
 │   ├── session/route.ts
-│   └── reading/route.ts    # SSE 스트리밍 메시지 (POST)
+│   ├── message/route.ts    # SSE 스트리밍 메시지 (POST)
+│   └── result/[id]/route.ts
 ├── auth/
 │   └── [...nextauth]/      # NextAuth.js (DB_PROVIDER=postgres 모드)
 ├── daily-card/route.ts
+├── daily-fortune/route.ts
 ├── locale/route.ts
 └── profile/
     └── favorite-character/route.ts
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
 
 ## SSE 스트리밍 패턴
 
-`tarot/reading`, `saju/reading`, `shinjeom/reading`(message)은 SSE로 응답한다.
+`tarot/reading`, `saju/reading`, `shinjeom/message`은 SSE로 응답한다.
 
 ```ts
 import { SSE_HEADERS } from "@/lib/request-utils";
