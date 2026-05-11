@@ -43,8 +43,8 @@ test.describe("API 에러 처리 — mock 응답", () => {
     await page.waitForLoadState("networkidle");
   });
 
-  test("일일 카드 API 타임아웃 → 에러 처리", async ({ page }) => {
-    await page.route("**/api/daily-card", (route) => {
+  test("일일 운세 API 타임아웃 → 에러 처리", async ({ page }) => {
+    await page.route("**/api/daily-fortune", (route) => {
       // 10초 지연 후 에러 반환 (타임아웃 시뮬레이션)
       setTimeout(() => {
         route.fulfill({
@@ -57,7 +57,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
 
     await page.goto("/");
     await page.waitForLoadState("networkidle");
-    // 홈 페이지의 DailyCard가 에러 상태에서도 페이지가 깨지지 않아야 함
+    // 홈 페이지의 DailyFortune이 에러 상태에서도 페이지가 깨지지 않아야 함
     const body = await page.textContent("body");
     expect(body?.length ?? 0).toBeGreaterThan(100);
   });
