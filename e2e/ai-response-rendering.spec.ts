@@ -10,6 +10,11 @@ import {
   SAJU_DATA,
   JSON_ARTIFACTS,
 } from "./helpers/sse-mock";
+import {
+  enterShinjeomSession,
+  enterTarotSession,
+  enterSajuSession,
+} from "./helpers/service-navigation";
 
 /**
  * AI 응답 렌더링 검증 — Mock SSE로 실제 응답 렌더링을 테스트
@@ -18,69 +23,6 @@ import {
  * - 기존: UI 요소 존재 여부 + 네비게이션만 확인
  * - 이번: API 성공 응답이 화면에 올바르게 렌더링되는지 검증 (JSON 미노출, 텍스트 정상 표시)
  */
-
-// ── 신점 진입 헬퍼 ──
-async function enterShinjeomSession(page: import("@playwright/test").Page) {
-  await page.goto("/shinjeom");
-  await page.waitForLoadState("networkidle");
-
-  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
-  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-  await characterCards.first().click();
-
-  await page.locator("text=신수").first().click();
-  await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
-  await expect(page.locator("text=고민").first()).toBeVisible({ timeout: 10_000 });
-}
-
-// ── 타로 진입 헬퍼 ──
-async function enterTarotSession(page: import("@playwright/test").Page) {
-  await page.goto("/tarot");
-  await page.waitForLoadState("networkidle");
-
-  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
-  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-  await characterCards.first().click();
-
-  // 주제 선택 (종합)
-  await expect(page.locator("text=종합").first()).toBeVisible({ timeout: 5_000 });
-  await page.locator("text=종합").first().click();
-
-  // 스프레드 선택 (원카드)
-  // step 전환 후 원카드 버튼 — evaluate로 직접 DOM click (헤더 가로채기 완전 우회)
-  const spreadBtn = page.locator("button").filter({ hasText: "원카드" }).first();
-  await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
-  await spreadBtn.evaluate((el) => (el as HTMLElement).click());
-
-  await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
-}
-
-// ── 사주 진입 헬퍼 ──
-async function enterSajuSession(page: import("@playwright/test").Page) {
-  await page.goto("/saju");
-  await page.waitForLoadState("networkidle");
-
-  const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
-  await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-  await characterCards.first().click();
-
-  // 개인정보 입력
-  const birthInput = page.locator("input[type='date']");
-  await birthInput.waitFor({ state: "visible", timeout: 5_000 }).catch(() => {});
-  if (await birthInput.isVisible()) {
-    await birthInput.fill("2000-01-15");
-    // 성별 선택
-    const genderSelect = page.locator("select").filter({ hasText: /남|여/ }).first();
-    if (await genderSelect.isVisible()) {
-      await genderSelect.selectOption({ index: 1 });
-    }
-    // 제출
-    const submitBtn = page.locator("button").filter({ hasText: /다음|시작|확인/ }).first();
-    if (await submitBtn.isVisible() && await submitBtn.isEnabled()) {
-      await submitBtn.click();
-    }
-  }
-}
 
 test.describe("AI 응답 렌더링 — 신점", () => {
   test("중간 대화 — 텍스트 정상 렌더링 + JSON 미노출", async ({ page }) => {
