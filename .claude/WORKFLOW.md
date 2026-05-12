@@ -66,6 +66,7 @@
 | i18n 텍스트 | `ai_locale` 쿠키 → `x-locale` 헤더 → `getRequestLocale()` 흐름 |
 | API 400/500 | Rate Limit → Zod `safeParse` → Auth → 소유권 검증 순서 |
 | E2E 실패 | `playwright.config.ts` `locale:"ko"` 설정. hidden 요소 셀렉터 오탐 확인 |
+| UI 컴포넌트 변경 후 E2E 실패 | **수정 전** `grep -r "[변경된 셀렉터 패턴]" e2e/` 로 영향 파일 전수 파악 → 일괄 수정. `e2e/helpers/service-navigation.ts` 공통 helper 활용 |
 | DB 오류 | `DB_PROVIDER` 환경변수 확인. `getAdminDb()` vs `getDb()` 구분 |
 
 ---
@@ -199,6 +200,7 @@ pnpm check:doc-links   # 문서 링크 유효
 - [ ] 관련 문서를 코드와 함께 업데이트했는가?
 - [ ] 새 TS 파일을 추가했다면 `sonar-project.properties` exclusions 동기화했는가?
 - [ ] UI 텍스트 변경 시 E2E 셀렉터(`hasText`/`getByText`)도 같이 수정했는가?
+- [ ] UI 컴포넌트 DOM 구조 변경 시 `grep -r "[변경 패턴]" e2e/` 로 영향 파일 사전 파악했는가? (`e2e/helpers/service-navigation.ts` 우선 수정)
 - [ ] feature 브랜치 → PR → 머지 순서를 지켰는가? (main 직접 커밋 금지)
 
 ---
