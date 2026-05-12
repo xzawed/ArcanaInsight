@@ -26,7 +26,7 @@ const VALID_BODY = {
   characterId: "arcana",
   userInfo: {
     birthDate: "1990-01-15",
-    birthHour: "자시 (23시~01시)",
+    birthTime: "00:00",
     gender: "female",
   },
 };
