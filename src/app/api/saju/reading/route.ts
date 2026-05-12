@@ -79,14 +79,18 @@ export async function POST(request: NextRequest) {
     const calcOptions = resolveCalcOptions(timeRange, includeMonthly ?? false);
     const sajuResult = calculateSaju({
       birthDate: userInfo.birthDate,
-      birthHour: userInfo.birthHour,
+      birthTime: userInfo.birthTime,
       gender: userInfo.gender,
       name: userInfo.name,
+      mbti: userInfo.mbti,
     }, calcOptions);
 
     const systemPrompt = sajuService.getSystemPrompt(characterId ?? undefined, locale);
-    const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, userInfo)
-      + buildFreeQuestionPrompt(freeQuestion);
+    const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, {
+      name: userInfo.name,
+      birthTime: userInfo.birthTime,
+      mbti: userInfo.mbti,
+    }) + buildFreeQuestionPrompt(freeQuestion);
 
     const db = sessionId ? getAdminDb() : null
 
@@ -132,7 +136,7 @@ export async function POST(request: NextRequest) {
             void saveSajuReading(db, sessionId, {
               session_id: sessionId,
               birth_date: userInfo.birthDate,
-              birth_hour: userInfo.birthHour,
+              birth_hour: userInfo.birthTime,
               gender: userInfo.gender,
               birth_name: userInfo.name || null,
               pillars: sajuResult.pillars,
