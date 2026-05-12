@@ -169,6 +169,15 @@ describe("buildUserInfoPrompt", () => {
     });
     expect(result).not.toContain("\n홍");
   });
+  it("birthTime 형식은 맞지만 시진 변환 불가(24시) → 시각 문자열 직접 표시", () => {
+    const result = buildUserInfoPrompt({
+      name: "홍길동",
+      birthDate: "1990-01-01",
+      gender: "male",
+      birthTime: "24:00",
+    });
+    expect(result).toContain("24:00");
+  });
 });
 
 // ─────────────────────────── buildSystemPrompt ───────────────────────────
