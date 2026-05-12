@@ -45,8 +45,7 @@ test.describe("테마 atmosphere 적용 범위", () => {
 
     await page.locator("input[type='date']").fill("1995-06-15");
     await page.getByRole("button", { name: "여성" }).click();
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) await hourSelect.selectOption({ index: 1 });
+    await page.locator("label").filter({ hasText: "시간을 모릅니다" }).locator("input[type='checkbox']").check();
     await page.locator("button").filter({ hasText: /시작|다음|확인/ }).last().click();
 
     await expect(page.locator("[data-testid^='saju-time-btn-']").first()).toBeVisible({ timeout: 5_000 });

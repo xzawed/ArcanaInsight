@@ -56,3 +56,5 @@ playwright/.cache/
 docs/e2e-reports/
 scripts/e2e-full/results/
 scripts/e2e-full/cases/
+
+.superpowers/

@@ -16,7 +16,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     session_id: string;
     share_token: string | null;
     birth_date: string;
-    birth_hour: string;
+    birth_hour: string | null;
     gender: string;
     birth_name: string | null;
     pillars: unknown;

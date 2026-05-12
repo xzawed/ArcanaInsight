@@ -2,6 +2,7 @@ import { CharacterConfig } from "@/types/character";
 import { SelectedCard } from "@/types/card";
 import { Topic, SpreadDefinition } from "@/types/session";
 import type { CharacterMemoryEntry } from "@/lib/db/character-context";
+import { timeToSijin } from "@/lib/time-utils";
 
 const topicLabels: Partial<Record<Topic, string>> = {
   love: "연애/관계", "love-single": "연애/관계 (솔로)", "love-couple": "연애/관계 (커플)",
@@ -164,15 +165,27 @@ function sanitizeField(value: string, maxLength = 100): string {
   return value.replace(/[\r\n]/g, " ").slice(0, maxLength);
 }
 
-export function buildUserInfoPrompt(userInfo?: { name: string; birthDate: string; gender: string; birthHour: string } | null): string {
+export function buildUserInfoPrompt(
+  userInfo?: { name: string; birthDate: string; gender: string; birthTime: string | null; mbti?: string } | null
+): string {
   if (!userInfo) return "";
   const genderMap: Record<string, string> = { male: "남성", female: "여성", other: "기타" };
-  const birthHourMap: Record<string, string> = { unknown: "모름" };
   const name = sanitizeField(userInfo.name, 50);
   const birthDate = sanitizeField(userInfo.birthDate, 20);
   const gender = sanitizeField(genderMap[userInfo.gender] || userInfo.gender, 10);
-  const birthHour = sanitizeField(birthHourMap[userInfo.birthHour] || userInfo.birthHour, 20);
-  return `\n\n상담자 정보:\n- 이름: ${name}\n- 생년월일: ${birthDate}\n- 성별: ${gender}\n- 태어난 시: ${birthHour}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
+
+  let birthTimeStr: string;
+  if (!userInfo.birthTime) {
+    birthTimeStr = "알 수 없음";
+  } else {
+    const sijin = timeToSijin(userInfo.birthTime);
+    birthTimeStr = sijin
+      ? `${userInfo.birthTime} (${sijin.label}, ${sijin.hanja})`
+      : sanitizeField(userInfo.birthTime, 20);
+  }
+
+  const mbtiLine = userInfo.mbti ? `\n- MBTI: ${sanitizeField(userInfo.mbti, 10)}` : "";
+  return `\n\n상담자 정보:\n- 이름: ${name}\n- 생년월일: ${birthDate}\n- 성별: ${gender}\n- 태어난 시: ${birthTimeStr}${mbtiLine}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
 }
 
 /** 사용자 자유 질문을 프롬프트에 추가 (최대 200자, 인젝션 방지) */
