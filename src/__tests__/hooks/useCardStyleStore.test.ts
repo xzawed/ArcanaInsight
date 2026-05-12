@@ -3,7 +3,7 @@ import { useCardStyleStore } from '@/hooks/useCardStyleStore';
 
 describe('useCardStyleStore', () => {
   beforeEach(() => {
-    useCardStyleStore.setState({ styleOverride: null });
+    useCardStyleStore.setState({ styleOverride: null, useSkinMode: false });
   });
 
   describe('resolvedStyle — 테마 자동 매핑', () => {
@@ -51,6 +51,40 @@ describe('useCardStyleStore', () => {
       useCardStyleStore.getState().setStyleOverride('anime-mystical');
       useCardStyleStore.getState().clearOverride();
       expect(useCardStyleStore.getState().styleOverride).toBeNull();
+      expect(useCardStyleStore.getState().resolvedStyle('midnight')).toBe('dark-fantasy');
+    });
+  });
+
+  describe('useSkinMode — 팔레트 스킨 모드', () => {
+    it('enableSkinMode 호출 시 useSkinMode가 true가 된다', () => {
+      useCardStyleStore.getState().enableSkinMode();
+      expect(useCardStyleStore.getState().useSkinMode).toBe(true);
+    });
+
+    it('skin 모드일 때 resolvedStyle은 테마와 무관하게 null을 반환한다', () => {
+      useCardStyleStore.getState().enableSkinMode();
+      expect(useCardStyleStore.getState().resolvedStyle('midnight')).toBeNull();
+      expect(useCardStyleStore.getState().resolvedStyle('dawn')).toBeNull();
+    });
+
+    it('skin 모드일 때 styleOverride가 있어도 resolvedStyle은 null을 반환한다', () => {
+      useCardStyleStore.getState().setStyleOverride('anime-mystical');
+      useCardStyleStore.getState().enableSkinMode();
+      expect(useCardStyleStore.getState().styleOverride).toBe('anime-mystical');
+      expect(useCardStyleStore.getState().resolvedStyle('midnight')).toBeNull();
+    });
+
+    it('setStyleOverride 호출 시 useSkinMode가 false로 초기화된다', () => {
+      useCardStyleStore.getState().enableSkinMode();
+      useCardStyleStore.getState().setStyleOverride('anime-mystical');
+      expect(useCardStyleStore.getState().useSkinMode).toBe(false);
+      expect(useCardStyleStore.getState().resolvedStyle('midnight')).toBe('anime-mystical');
+    });
+
+    it('clearOverride 호출 시 useSkinMode가 false로 초기화된다', () => {
+      useCardStyleStore.getState().enableSkinMode();
+      useCardStyleStore.getState().clearOverride();
+      expect(useCardStyleStore.getState().useSkinMode).toBe(false);
       expect(useCardStyleStore.getState().resolvedStyle('midnight')).toBe('dark-fantasy');
     });
   });

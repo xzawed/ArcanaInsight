@@ -174,7 +174,7 @@ export const CardSpread = React.memo(
                     width={layout.cardW}
                     height={layout.cardH}
                     skinId={selectedSkinId}
-                    styleId={styleId}
+                    styleId={styleId ?? undefined}
                     glowColor={glowColor}
                   />
                 </div>

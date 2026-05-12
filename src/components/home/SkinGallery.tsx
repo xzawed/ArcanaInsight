@@ -16,22 +16,19 @@ const TOAST_VISIBILITY_MS = 2000
 
 export function SkinGallery() {
   const { selectedSkinId, setSkin } = useSkinStore();
-  const { styleOverride, setStyleOverride, resolvedStyle } = useCardStyleStore();
+  const { setStyleOverride, enableSkinMode, resolvedStyle, useSkinMode } = useCardStyleStore();
   const activeTheme = useThemeStore((s) => s.activeTheme);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastName, setToastName] = useState("");
-  // 아트 스타일·팔레트 스킨 상호 배타적 선택 표시
-  const [activeSection, setActiveSection] = useState<"style" | "skin">(
-    () => styleOverride !== null ? "style" : "skin"
-  );
 
   const currentStyleId = resolvedStyle(activeTheme);
+  const isStyleMode = !useSkinMode;
 
   const handleSkinSelect = (skinId: string) => {
-    if (skinId === selectedSkinId && activeSection === "skin") return;
+    if (skinId === selectedSkinId && useSkinMode) return;
     const skin = cardSkins.find((s) => s.id === skinId);
     setSkin(skinId);
-    setActiveSection("skin");
+    enableSkinMode();
     if (skin) {
       setToastName(skin.nameKo);
       setToastVisible(true);
@@ -39,10 +36,9 @@ export function SkinGallery() {
   };
 
   const handleStyleSelect = (styleId: CardStyleId) => {
-    if (styleId === styleOverride && activeSection === "style") return;
+    if (styleId === currentStyleId && isStyleMode) return;
     const style = cardStyles.find((s) => s.id === styleId);
     setStyleOverride(styleId);
-    setActiveSection("style");
     if (style) {
       setToastName(style.nameKo);
       setToastVisible(true);
@@ -72,7 +68,7 @@ export function SkinGallery() {
             <ScrollReveal key={style.id} delay={index * 0.08}>
               <StyleSelector
                 style={style}
-                isSelected={activeSection === "style" && currentStyleId === style.id}
+                isSelected={isStyleMode && currentStyleId === style.id}
                 onSelect={handleStyleSelect}
               />
             </ScrollReveal>
@@ -81,7 +77,7 @@ export function SkinGallery() {
             <ScrollReveal key={skin.id} delay={(cardStyles.length + index) * 0.08}>
               <SkinSelector
                 skin={skin}
-                isSelected={activeSection === "skin" && selectedSkinId === skin.id}
+                isSelected={useSkinMode && selectedSkinId === skin.id}
                 onSelect={handleSkinSelect}
               />
             </ScrollReveal>

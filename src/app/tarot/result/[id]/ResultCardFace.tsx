@@ -16,5 +16,5 @@ export function ResultCardFace({ card, isReversed }: ResultCardFaceProps) {
   const { activeTheme } = useThemeStore();
   const { resolvedStyle } = useCardStyleStore();
   const styleId = resolvedStyle(activeTheme);
-  return <CardFace card={card} isReversed={isReversed} size="sm" skinId={selectedSkinId} styleId={styleId} />;
+  return <CardFace card={card} isReversed={isReversed} size="sm" skinId={selectedSkinId} styleId={styleId ?? undefined} />;
 }
