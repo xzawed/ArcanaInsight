@@ -7,10 +7,10 @@ const VALID_STEMS = Object.keys(STEM_KO);
 const VALID_BRANCHES = Object.keys(BRANCH_KO);
 const VALID_ELEMENTS = ["wood", "fire", "earth", "metal", "water"] as const;
 
-const MALE_1990: SajuInput = { birthDate: "1990-05-15", birthHour: "ja", gender: "male" };
-const FEMALE_2000: SajuInput = { birthDate: "2000-01-01", birthHour: "o", gender: "female" };
-const MALE_1985: SajuInput = { birthDate: "1985-07-07", birthHour: "in", gender: "male" };
-const FEMALE_1975: SajuInput = { birthDate: "1975-03-20", birthHour: "hae", gender: "female" };
+const MALE_1990: SajuInput = { birthDate: "1990-05-15", birthTime: "00:00", gender: "male" };
+const FEMALE_2000: SajuInput = { birthDate: "2000-01-01", birthTime: "11:00", gender: "female" };
+const MALE_1985: SajuInput = { birthDate: "1985-07-07", birthTime: "03:00", gender: "male" };
+const FEMALE_1975: SajuInput = { birthDate: "1975-03-20", birthTime: "21:00", gender: "female" };
 
 describe("calculateSaju", () => {
   describe("기본 구조 검증", () => {
@@ -194,16 +194,16 @@ describe("calculateSaju", () => {
     it("신약(isStrong=false) 케이스 → determineYongsin else 분기 커버", () => {
       // 기존 4개 픽스처는 모두 신강 → 신약 케이스를 다양한 날짜에서 탐색
       const candidates: SajuInput[] = [
-        { birthDate: "1986-05-20", birthHour: "o", gender: "male" },
-        { birthDate: "1976-07-15", birthHour: "o", gender: "female" },
-        { birthDate: "2004-08-10", birthHour: "o", gender: "male" },
-        { birthDate: "1962-03-28", birthHour: "o", gender: "female" },
-        { birthDate: "1999-08-25", birthHour: "o", gender: "male" },
-        { birthDate: "2016-06-18", birthHour: "o", gender: "female" },
-        { birthDate: "1971-09-09", birthHour: "o", gender: "male" },
-        { birthDate: "1955-07-22", birthHour: "o", gender: "female" },
-        { birthDate: "2008-04-05", birthHour: "o", gender: "male" },
-        { birthDate: "1943-11-11", birthHour: "o", gender: "female" },
+        { birthDate: "1986-05-20", birthTime: "11:00", gender: "male" },
+        { birthDate: "1976-07-15", birthTime: "11:00", gender: "female" },
+        { birthDate: "2004-08-10", birthTime: "11:00", gender: "male" },
+        { birthDate: "1962-03-28", birthTime: "11:00", gender: "female" },
+        { birthDate: "1999-08-25", birthTime: "11:00", gender: "male" },
+        { birthDate: "2016-06-18", birthTime: "11:00", gender: "female" },
+        { birthDate: "1971-09-09", birthTime: "11:00", gender: "male" },
+        { birthDate: "1955-07-22", birthTime: "11:00", gender: "female" },
+        { birthDate: "2008-04-05", birthTime: "11:00", gender: "male" },
+        { birthDate: "1943-11-11", birthTime: "11:00", gender: "female" },
       ];
       const sinYak = candidates.find(input => calculateSaju(input).isStrong === false);
       expect(sinYak, "신약 케이스를 찾을 수 없음 — 후보 날짜 추가 필요").toBeDefined();
@@ -332,8 +332,10 @@ describe("calculateSaju", () => {
   });
 
   describe("다양한 입력값 처리", () => {
-    it("birthHour unknown (-1)는 tyme4ts가 거부하여 오류가 발생한다", () => {
-      expect(() => calculateSaju({ ...MALE_1990, birthHour: "unknown" })).toThrow();
+    it("birthTime null 이면 자시(0시) 기준으로 계산하며 오류 없음", () => {
+      expect(() => calculateSaju({ ...MALE_1990, birthTime: null })).not.toThrow();
+      const result = calculateSaju({ ...MALE_1990, birthTime: null });
+      expect(result.pillars.hour).toBeDefined();
     });
 
     it("여성 입력을 처리한다", () => {

@@ -1,5 +1,5 @@
 import { SolarTime, SolarDay, ChildLimit, Gender, SixtyCycle, SixtyCycleYear, SixtyCycleDay, HeavenStem } from "tyme4ts";
-import { OhaengType, STEM_ELEMENT, BRANCH_ELEMENT, STEM_KO, BRANCH_KO, TEN_STARS, TWELVE_STAGES, BIRTH_HOUR_MAP } from "@/data/saju/constants";
+import { OhaengType, STEM_ELEMENT, BRANCH_ELEMENT, STEM_KO, BRANCH_KO, TEN_STARS, TWELVE_STAGES } from "@/data/saju/constants";
 import { SajuInput, SajuResult, Pillar, MonthlyFortune, DailyFortune } from "./saju-types";
 
 export interface SajuCalculateOptions {
@@ -17,7 +17,10 @@ function ohaengLookup(map: Record<string, OhaengType>, key: string): OhaengType 
 /** 사주팔자 전체 계산 */
 export function calculateSaju(input: SajuInput, options?: SajuCalculateOptions): SajuResult {
   const [y, m, d] = input.birthDate.split("-").map(Number);
-  const hourVal = BIRTH_HOUR_MAP[input.birthHour] ?? 0;
+  // birthTime null = 시간 모름 → 자시(0시) 기준으로 계산 (시주는 AI 프롬프트에서 '알 수 없음' 처리)
+  const hourVal = input.birthTime
+    ? parseInt(input.birthTime.split(":")[0], 10)
+    : 0;
   const gender = input.gender === "female" ? Gender.WOMAN : Gender.MAN;
 
   const solarTime = SolarTime.fromYmdHms(y, m, d, hourVal, 0, 0);
