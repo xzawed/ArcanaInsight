@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import {
+  selectFirstCharacter,
+  fillSajuForm,
+  submitSajuForm,
+} from "./helpers/service-navigation";
 
 async function forceTheme(page: Page, theme = "winter") {
   await page.addInitScript((themeId) => {
@@ -14,19 +19,13 @@ async function expectAtmosphere(page: Page, testId: string, theme = "winter") {
   await expect(atmosphere.locator("span.absolute.block").first()).toBeAttached({ timeout: 5_000 });
 }
 
-async function selectFirstCounselor(page: Page) {
-  const cards = page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ });
-  await expect(cards.first()).toBeVisible({ timeout: 10_000 });
-  await cards.first().click();
-}
-
 test.describe("테마 atmosphere 적용 범위", () => {
   test("타로 상담사/카테고리/리딩 방식 선택 단계에 테마 atmosphere가 유지된다", async ({ page }) => {
     await forceTheme(page);
     await page.goto("/tarot");
 
     await expectAtmosphere(page, "service-theme-atmosphere-tarot");
-    await selectFirstCounselor(page);
+    await selectFirstCharacter(page);
 
     await expect(page.locator("[data-testid='topic-btn-general']")).toBeVisible({ timeout: 5_000 });
     await expectAtmosphere(page, "service-theme-atmosphere-tarot");
@@ -41,12 +40,10 @@ test.describe("테마 atmosphere 적용 범위", () => {
     await page.goto("/saju");
 
     await expectAtmosphere(page, "service-theme-atmosphere-saju");
-    await selectFirstCounselor(page);
+    await selectFirstCharacter(page);
 
-    await page.locator("input[type='date']").fill("1995-06-15");
-    await page.getByRole("button", { name: "여성" }).click();
-    await page.locator("label").filter({ hasText: "시간을 모릅니다" }).locator("input[type='checkbox']").check();
-    await page.locator("button").filter({ hasText: /시작|다음|확인/ }).last().click();
+    await fillSajuForm(page);
+    await submitSajuForm(page);
 
     await expect(page.locator("[data-testid^='saju-time-btn-']").first()).toBeVisible({ timeout: 5_000 });
     await expect(page.locator("[data-testid^='saju-area-btn-']").first()).toBeVisible({ timeout: 5_000 });
@@ -58,7 +55,7 @@ test.describe("테마 atmosphere 적용 범위", () => {
     await page.goto("/shinjeom");
 
     await expectAtmosphere(page, "service-theme-atmosphere-shinjeom");
-    await selectFirstCounselor(page);
+    await selectFirstCharacter(page);
 
     await expect(page.locator("[data-testid^='shinjeom-topic-btn-']").first()).toBeVisible({ timeout: 5_000 });
     await expectAtmosphere(page, "service-theme-atmosphere-shinjeom");
