@@ -82,7 +82,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
 
   useEffect(() => {
     let cancelled = false;
-    const url = getCardStyleBackUrl(styleId) ?? getCardBackUrl(selectedSkinId);
+    const url = styleId ? getCardStyleBackUrl(styleId) : getCardBackUrl(selectedSkinId);
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => { if (!cancelled) cardImgRef.current = img; };

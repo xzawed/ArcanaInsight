@@ -2,7 +2,13 @@
 
 import { useThemeStore } from '@/hooks/useTheme';
 import { useCardStyleStore } from '@/hooks/useCardStyleStore';
-import { cardStyles, getStyleName, getStyleDescription } from '@/data/cardStyles';
+import {
+  cardStyles,
+  getStyleName,
+  getStyleDescription,
+  THEME_TO_STYLE_MAP,
+  DEFAULT_STYLE_ID,
+} from '@/data/cardStyles';
 import { useLocaleStore } from '@/hooks/useLocaleStore';
 import { useT } from '@/i18n/useT';
 
@@ -10,9 +16,10 @@ export function CardStyleSelector() {
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);
   const { activeTheme } = useThemeStore();
-  const { styleOverride, setStyleOverride, clearOverride, resolvedStyle } = useCardStyleStore();
+  const { styleOverride, useSkinMode, setStyleOverride, clearOverride } = useCardStyleStore();
 
-  const activeStyleId = resolvedStyle(activeTheme);
+  const isStyleMode = !useSkinMode;
+  const autoMappedStyle = THEME_TO_STYLE_MAP[activeTheme] ?? DEFAULT_STYLE_ID;
 
   return (
     <div className="space-y-3">
@@ -20,16 +27,16 @@ export function CardStyleSelector() {
       <button
         onClick={clearOverride}
         className={`w-full flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-all ${
-          styleOverride === null
+          isStyleMode && styleOverride === null
             ? 'border-arcana-purple bg-arcana-purple/15 text-arcana-purple shadow-sm'
             : 'border-arcana-border/50 text-arcana-muted hover:border-arcana-border'
         }`}
       >
         <span className="text-base">🎨</span>
         <span className="font-sans font-medium">{t('settings.card-style.auto-label')}</span>
-        {styleOverride === null && (
+        {isStyleMode && styleOverride === null && (
           <span className="ml-auto text-xs text-arcana-muted">
-            {t('settings.card-style.auto-active')} ({activeStyleId})
+            {t('settings.card-style.auto-active')} ({autoMappedStyle})
           </span>
         )}
       </button>
@@ -37,7 +44,7 @@ export function CardStyleSelector() {
       {/* 4개 스타일 버튼 */}
       <div className="grid grid-cols-2 gap-2">
         {cardStyles.map((style) => {
-          const isActive = styleOverride === style.id;
+          const isActive = isStyleMode && styleOverride === style.id;
           return (
             <button
               key={style.id}

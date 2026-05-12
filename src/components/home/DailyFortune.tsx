@@ -40,7 +40,7 @@ function AreaCardSlot({
   isFlipped: boolean;
   isLoading: boolean;
   selectedSkinId: string;
-  styleId: CardStyleId;
+  styleId: CardStyleId | undefined;
   onFlip: () => void;
   areaLabel: string;
   tr: (key: string) => string;
@@ -111,7 +111,7 @@ export function DailyFortune() {
   const { selectedSkinId } = useSkinStore();
   const { activeTheme } = useThemeStore();
   const { resolvedStyle } = useCardStyleStore();
-  const styleId = resolvedStyle(activeTheme);
+  const styleId = resolvedStyle(activeTheme) ?? undefined;
 
   const [selectedCharId, setSelectedCharId] = useState<CharacterId>(characters[0].id);
   const [fortuneData, setFortuneData] = useState<FortuneData | null>(null);

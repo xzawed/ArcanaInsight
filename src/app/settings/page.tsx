@@ -8,7 +8,7 @@ import { useSkinStore } from "@/hooks/useSkinStore";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 import { cardSkins, getSkinName, getSkinDescription } from "@/data/skins";
-import { cardStyles, getStyleName, getStyleDescription } from "@/data/cardStyles";
+import { cardStyles, getStyleName, getStyleDescription, THEME_TO_STYLE_MAP, DEFAULT_STYLE_ID } from "@/data/cardStyles";
 import { useCardStyleStore } from "@/hooks/useCardStyleStore";
 import { GenderFilter } from "@/types/character";
 import { useT } from "@/i18n/useT";
@@ -79,11 +79,11 @@ export default function SettingsPage() {
   const locale = useLocaleStore((s) => s.locale);
   const { mode, activeTheme, setMode } = useThemeStore();
   const { selectedSkinId, setSkin } = useSkinStore();
-  const { styleOverride, setStyleOverride, clearOverride, resolvedStyle } = useCardStyleStore();
+  const { styleOverride, useSkinMode, setStyleOverride, clearOverride, enableSkinMode } = useCardStyleStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const { reducedMotion, setReducedMotion } = useReducedMotionStore();
 
-  const [activeSection, setActiveSection] = useState<"style" | "skin">(() => styleOverride !== null ? "style" : "skin");
+  const isStyleMode = !useSkinMode;
   const [confirmEachCard, setConfirmEachCard] = useState(false);
   const [hasSavedInfo, setHasSavedInfo] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
@@ -109,7 +109,7 @@ export default function SettingsPage() {
 
   const handleSkinChange = (skinId: string) => {
     setSkin(skinId);
-    setActiveSection("skin");
+    enableSkinMode();
     showToast();
   };
 
@@ -197,9 +197,9 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {/* 테마 자동 매핑 */}
               <button
-                onClick={() => { clearOverride(); setActiveSection("style"); showToast(); }}
+                onClick={() => { clearOverride(); showToast(); }}
                 className={`p-3 rounded-xl border text-left transition-all ${
-                  activeSection === "style" && styleOverride === null
+                  isStyleMode && styleOverride === null
                     ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                     : "border-arcana-border/50 hover:border-arcana-border"
                 }`}
@@ -208,16 +208,16 @@ export default function SettingsPage() {
                   <span className="w-4 h-4 rounded-full border border-white/20 flex items-center justify-center text-[10px]">🎨</span>
                   <span className="font-sans font-bold text-xs text-arcana-text">{t("settings.card-style.auto-label")}</span>
                 </div>
-                <p className="text-arcana-muted text-xs leading-relaxed">{t("settings.card-style.auto-active")} ({resolvedStyle(activeTheme)})</p>
+                <p className="text-arcana-muted text-xs leading-relaxed">{t("settings.card-style.auto-active")} ({THEME_TO_STYLE_MAP[activeTheme] ?? DEFAULT_STYLE_ID})</p>
               </button>
 
               {/* 4개 아트 스타일 */}
               {cardStyles.map((style) => (
                 <button
                   key={style.id}
-                  onClick={() => { setStyleOverride(style.id); setActiveSection("style"); showToast(); }}
+                  onClick={() => { setStyleOverride(style.id); showToast(); }}
                   className={`p-3 rounded-xl border text-left transition-all ${
-                    activeSection === "style" && styleOverride === style.id
+                    isStyleMode && styleOverride === style.id
                       ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                       : "border-arcana-border/50 hover:border-arcana-border"
                   }`}
@@ -236,7 +236,7 @@ export default function SettingsPage() {
                   key={skin.id}
                   onClick={() => handleSkinChange(skin.id)}
                   className={`p-3 rounded-xl border text-left transition-all ${
-                    activeSection === "skin" && selectedSkinId === skin.id
+                    useSkinMode && selectedSkinId === skin.id
                       ? "border-arcana-purple bg-arcana-purple/10 shadow-sm shadow-arcana-purple/10"
                       : "border-arcana-border/50 hover:border-arcana-border"
                   }`}

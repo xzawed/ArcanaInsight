@@ -161,8 +161,11 @@ export interface EffectTheme {
 
 **사용자 오버라이드 스토어** (`src/hooks/useCardStyleStore.ts`):
 - `styleOverride: CardStyleId | null` — `null`이면 테마 자동 매핑 사용
-- `setStyleOverride(id)` / `clearOverride()` — 오버라이드 설정/해제
-- `resolvedStyle(activeTheme)` — 최종 적용 스타일 ID 반환
+- `useSkinMode: boolean` — `true`이면 카드가 아트 스타일 대신 팔레트 스킨(`useSkinStore.selectedSkinId`)을 렌더링
+- `setStyleOverride(id)` — 오버라이드 설정 + `useSkinMode`를 `false`로 초기화
+- `clearOverride()` — 오버라이드 해제(자동 매핑 복귀) + `useSkinMode`를 `false`로 초기화
+- `enableSkinMode()` — 팔레트 스킨 모드로 전환
+- `resolvedStyle(activeTheme)` — 최종 적용 스타일 ID 반환. 스킨 모드면 `null` 반환(consumer는 `?? undefined`로 변환해 `CardFace`/`CardBack`에 전달)
 - `persist` key: `'arcana-card-style'` (localStorage)
 
 **이미지 URL 헬퍼** (`src/lib/storage/card-style.ts`):

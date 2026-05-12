@@ -163,7 +163,7 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
               width={layout.cardW}
               height={layout.cardH}
               skinId={selectedSkinId}
-              styleId={styleId}
+              styleId={styleId ?? undefined}
             />
           </motion.div>
         );

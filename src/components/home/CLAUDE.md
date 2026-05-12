@@ -17,33 +17,34 @@
 
 ## SkinGallery 핵심 패턴
 
-카드 스타일(아트)과 팔레트 스킨은 **상호 배타적 단일 선택**이다. `activeSection: "style" | "skin"` 상태로 구분한다.
+카드 스타일(아트)과 팔레트 스킨은 **상호 배타적 단일 선택**이며, 이 모드는 `useCardStyleStore.useSkinMode`로 전역 관리한다 (로컬 state 금지 — 카드 렌더링 컴포넌트가 같은 모드를 참조해야 동기화된다).
 
 ```tsx
-const [activeSection, setActiveSection] = useState<"style" | "skin">(
-  () => styleOverride !== null ? "style" : "skin"
-);
+const { useSkinMode, setStyleOverride, enableSkinMode, resolvedStyle } = useCardStyleStore();
+const isStyleMode = !useSkinMode;
+const currentStyleId = resolvedStyle(activeTheme); // 스킨 모드면 null
 
-// 스타일 선택 → activeSection = "style"
+// 스타일 선택 → setStyleOverride가 자동으로 useSkinMode를 false로 초기화
 const handleStyleSelect = (styleId: CardStyleId) => {
   setStyleOverride(styleId);
-  setActiveSection("style");
 };
 
-// 스킨 선택 → activeSection = "skin"
+// 스킨 선택 → enableSkinMode() 호출로 카드 렌더링이 styleId 대신 skinId를 사용
 const handleSkinSelect = (skinId: string) => {
   setSkin(skinId);
-  setActiveSection("skin");
+  enableSkinMode();
 };
 ```
 
-선택 강조 조건: `activeSection === "style" && styleOverride === style.id` (스타일) / `activeSection === "skin" && selectedSkinId === skin.id` (스킨). 두 조건이 동시에 true가 되지 않도록 `activeSection`이 중재한다.
+선택 강조 조건: `isStyleMode && currentStyleId === style.id` (스타일) / `useSkinMode && selectedSkinId === skin.id` (스킨).
+
+**중요**: 카드 consumer(`CardDeck`, `CardSpread`, `DailyFortune`, `ShuffleCeremony`, `ResultCardFace`)는 `resolvedStyle()`이 `null`이면 `styleId`를 `undefined`로 전달해 `CardFace`/`CardBack`이 `skinId` 경로를 타도록 한다.
 
 ## 스토어 의존성
 
 ```
 useSkinStore         → selectedSkinId, setSkin (persist: arcana-skin)
-useCardStyleStore    → styleOverride, setStyleOverride, resolvedStyle, clearOverride (persist: arcana-card-style)
+useCardStyleStore    → styleOverride, useSkinMode, setStyleOverride, clearOverride, enableSkinMode, resolvedStyle (persist: arcana-card-style)
 useThemeStore        → activeTheme (테마 → 스타일 자동 매핑에 사용)
 ```
 
@@ -57,5 +58,5 @@ useThemeStore        → activeTheme (테마 → 스타일 자동 매핑에 사�
 ## 주의사항
 
 - `SkinGallery`는 홈 페이지 전용이며 **10개** 버튼(아트 스타일 4 + 팔레트 스킨 6). 설정 페이지의 `src/app/settings/page.tsx`는 테마 자동 매핑 버튼 1개가 추가되어 **11개**.
-- 홈 페이지에서 `activeSection` 패턴을 수정하면 설정 페이지도 동일하게 수정해야 한다 (두 곳에 같은 패턴 존재).
+- 홈 페이지에서 `useSkinMode` 모드 전환 패턴을 수정하면 설정 페이지도 동일하게 수정해야 한다 (두 곳에 같은 패턴 존재).
 - 텍스트는 `useT()` / `t()` 훅으로 노출. 하드코딩 금지.
