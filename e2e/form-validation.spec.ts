@@ -27,21 +27,19 @@ test.describe("폼 유효성 — 사주 개인정보 입력", () => {
     await navigateToSajuForm(page);
     await page.locator("input[type='date']").fill("1995-06-15");
     await page.getByRole("button", { name: "여성" }).click();
-    // 사주 모드는 태어난 시(birthHour)도 필수 (isValid = birthDate && birthHour && gender)
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) {
-      await hourSelect.selectOption({ index: 1 }); // 첫 번째 시진 선택 (index 0 = "선택하세요")
-    }
+    // 사주 모드는 시·분 입력 또는 "시간을 모릅니다" 체크 필수
+    await page.locator("input[type='number']").first().fill("14");
+    await page.locator("input[type='number']").nth(1).fill("30");
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
     await expect(submitBtn).toBeEnabled({ timeout: 3_000 });
   });
 
-  test("태어난 시 선택 가능", async ({ page }) => {
+  test("태어난 시 입력 가능", async ({ page }) => {
     await navigateToSajuForm(page);
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) {
-      await hourSelect.selectOption({ index: 2 });
-    }
+    await page.locator("input[type='number']").first().fill("14");
+    await page.locator("input[type='number']").nth(1).fill("30");
+    // 자동 시진 변환 레이블 표시 확인
+    await expect(page.locator("text=미시").first()).toBeVisible({ timeout: 2_000 });
   });
 });
 
