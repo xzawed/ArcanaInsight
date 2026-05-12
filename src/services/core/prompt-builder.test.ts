@@ -115,95 +115,59 @@ const makeSelectedCard = (card: TarotCard, position: number, isReversed: boolean
 // ─────────────────────────── buildUserInfoPrompt ───────────────────────────
 
 describe("buildUserInfoPrompt", () => {
-  it("userInfo가 undefined이면 빈 문자열을 반환한다", () => {
+  it("undefined → 빈 문자열", () => {
     expect(buildUserInfoPrompt(undefined)).toBe("");
   });
-
-  it("userInfo가 null이면 빈 문자열을 반환한다", () => {
+  it("null → 빈 문자열", () => {
     expect(buildUserInfoPrompt(null)).toBe("");
   });
-
-  it("userInfo가 있으면 이름을 포함한다", () => {
+  it("birthTime HH:MM → 시각+시진 포함", () => {
     const result = buildUserInfoPrompt({
       name: "홍길동",
-      birthDate: "1990-01-15",
-      gender: "male",
-      birthHour: "자시",
-    });
-    expect(result).toContain("홍길동");
-  });
-
-  it("userInfo가 있으면 생년월일을 포함한다", () => {
-    const result = buildUserInfoPrompt({
-      name: "테스트",
-      birthDate: "1995-06-20",
-      gender: "female",
-      birthHour: "오시",
-    });
-    expect(result).toContain("1995-06-20");
-  });
-
-  it("male 성별을 '남성'으로 변환한다", () => {
-    const result = buildUserInfoPrompt({
-      name: "테스트",
       birthDate: "1990-01-01",
       gender: "male",
-      birthHour: "자시",
+      birthTime: "14:30",
     });
-    expect(result).toContain("남성");
-    expect(result).not.toContain("male");
+    expect(result).toContain("14:30");
+    expect(result).toContain("미시");
+    expect(result).toContain("未時");
   });
-
-  it("female 성별을 '여성'으로 변환한다", () => {
+  it("birthTime null → '알 수 없음' 표시", () => {
     const result = buildUserInfoPrompt({
-      name: "테스트",
-      birthDate: "1990-01-01",
-      gender: "female",
-      birthHour: "자시",
-    });
-    expect(result).toContain("여성");
-    expect(result).not.toContain("female");
-  });
-
-  it("other 성별을 '기타'로 변환한다", () => {
-    const result = buildUserInfoPrompt({
-      name: "테스트",
-      birthDate: "1990-01-01",
-      gender: "other",
-      birthHour: "자시",
-    });
-    expect(result).toContain("기타");
-  });
-
-  it("birthHour가 unknown이면 '모름'으로 변환한다", () => {
-    const result = buildUserInfoPrompt({
-      name: "테스트",
+      name: "홍길동",
       birthDate: "1990-01-01",
       gender: "male",
-      birthHour: "unknown",
+      birthTime: null,
     });
-    expect(result).toContain("모름");
-    expect(result).not.toContain("unknown");
+    expect(result).toContain("알 수 없음");
   });
-
-  it("알 수 없는 birthHour는 원래 값 그대로 포함한다", () => {
+  it("mbti 있을 때 포함", () => {
     const result = buildUserInfoPrompt({
-      name: "테스트",
+      name: "홍길동",
       birthDate: "1990-01-01",
       gender: "male",
-      birthHour: "자시",
+      birthTime: "14:30",
+      mbti: "INTJ",
     });
-    expect(result).toContain("자시");
+    expect(result).toContain("MBTI: INTJ");
   });
-
-  it("개인화 리딩 안내 문구를 포함한다", () => {
+  it("mbti 없을 때 MBTI 행 생략", () => {
     const result = buildUserInfoPrompt({
-      name: "테스트",
+      name: "홍길동",
       birthDate: "1990-01-01",
-      gender: "female",
-      birthHour: "오시",
+      gender: "male",
+      birthTime: "14:30",
     });
-    expect(result).toContain("개인화된 리딩");
+    expect(result).not.toContain("MBTI");
+  });
+  it("주입 공격 문자 제거", () => {
+    const result = buildUserInfoPrompt({
+      name: "홍\n길동",
+      birthDate: "1990-01-01",
+      gender: "male",
+      birthTime: "14:30",
+    });
+    expect(result).not.toContain("\n홍");
   });
 });
 
