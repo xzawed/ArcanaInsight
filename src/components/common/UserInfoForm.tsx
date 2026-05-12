@@ -125,6 +125,7 @@ async function persistProfileToSupabase(data: UserInfo, birthDate: string): Prom
     }
   } catch (e) {
     console.error("프로필 저장 오류:", e);
+    return false;
   }
   return true;
 }
@@ -320,7 +321,12 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
             min={0}
             max={23}
             value={birthHourNum}
-            onChange={(e) => setBirthHourNum(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "") { setBirthHourNum(""); return; }
+              const n = parseInt(v, 10);
+              if (!isNaN(n) && n >= 0 && n <= 23) setBirthHourNum(String(n));
+            }}
             disabled={timeUnknown}
             placeholder="시"
             className={`${inputClasses} w-20 text-center disabled:opacity-40`}
@@ -331,7 +337,12 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
             min={0}
             max={59}
             value={birthMinuteNum}
-            onChange={(e) => setBirthMinuteNum(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "") { setBirthMinuteNum(""); return; }
+              const n = parseInt(v, 10);
+              if (!isNaN(n) && n >= 0 && n <= 59) setBirthMinuteNum(String(n));
+            }}
             disabled={timeUnknown}
             placeholder="분"
             className={`${inputClasses} w-20 text-center disabled:opacity-40`}
