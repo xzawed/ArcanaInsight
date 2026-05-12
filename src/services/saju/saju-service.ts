@@ -176,7 +176,12 @@ export class SajuService implements DivinationService {
   }
 
   /** 사주 전용 프롬프트 생성 */
-  buildSajuPrompt(topic: Topic, timeRange: SajuTimeRange, sajuResult: SajuResult, userInfo?: { name?: string }): string {
+  buildSajuPrompt(
+    topic: Topic,
+    timeRange: SajuTimeRange,
+    sajuResult: SajuResult,
+    userInfo?: { name?: string; birthTime?: string | null; mbti?: string }
+  ): string {
     const timeOption = sajuTimeOptions.find((t) => t.id === timeRange);
     const timeLabel = timeOption?.label ?? timeRange;
     const timeDesc = timeOption?.desc ?? "";
@@ -186,8 +191,15 @@ export class SajuService implements DivinationService {
     const timeContext = resolveTimeContext(timeRange);
     const instruction = resolveTopicInstruction(topic);
 
+    const birthTimeNote = userInfo?.birthTime === null
+      ? "\n[참고: 출생 시각 미입력 — 시주는 자시(0시) 기준으로 계산됨, 해석 시 참고만 할 것]"
+      : "";
+    const mbtiNote = userInfo?.mbti
+      ? `\n[MBTI: ${userInfo.mbti} — 심리 유형을 사주 해석에 교차 참조할 것]`
+      : "";
+
     return `상담 주제: ${TOPIC_LABELS[topic] ?? topic} / 시간 범위: ${timeLabel}(${timeDesc})
-${userInfo?.name ? `상담자: ${userInfo.name}` : ""}
+${userInfo?.name ? `상담자: ${userInfo.name}` : ""}${birthTimeNote}${mbtiNote}
 
 ${pillarSection}${additionalSections.join("")}
 

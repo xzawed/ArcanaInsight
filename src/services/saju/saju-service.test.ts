@@ -238,6 +238,28 @@ describe("SajuService", () => {
     });
   });
 
+  describe("buildSajuPrompt — birthTimeNote & mbtiNote", () => {
+    it("birthTime=null 이면 출생 시각 미입력 주석이 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "this-year",
+        makeSajuResult(),
+        { birthTime: null }
+      );
+      expect(prompt).toContain("출생 시각 미입력");
+    });
+
+    it("mbti 있을 때 MBTI 교차 참조 주석이 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general",
+        "this-year",
+        makeSajuResult(),
+        { mbti: "INTJ" }
+      );
+      expect(prompt).toContain("MBTI: INTJ");
+    });
+  });
+
   describe("buildSajuPrompt — 추가 fortune 섹션", () => {
     it("'this-month' + monthlyFortunes 제공 시 이번 달 운세 섹션이 포함된다", () => {
       const thisMonth = new Date().getMonth() + 1;

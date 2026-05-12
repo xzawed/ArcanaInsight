@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { birthHours } from "@/data/birth-hours";
+import { timeToSijin } from "@/lib/time-utils";
+import { MBTI_TYPES } from "@/data/mbti";
 import { PrivacyConsentModal } from "./PrivacyConsentModal";
 import { createClient } from "@/lib/supabase/client";
 import { UserInfo } from "@/types/user-info";
@@ -22,7 +23,10 @@ type ProfileSetters = {
   setName: (v: string) => void;
   setBirthDate: (v: string) => void;
   setGender: (v: "male" | "female" | "other") => void;
-  setBirthHour: (v: string) => void;
+  setBirthHourNum: (v: string) => void;
+  setBirthMinuteNum: (v: string) => void;
+  setTimeUnknown: (v: boolean) => void;
+  setMbti: (v: string) => void;
   setSaveInfo: (v: boolean) => void;
   setHasSavedInfo: (v: boolean) => void;
 };
@@ -60,7 +64,7 @@ async function applySupabaseProfile(userId: string, setters: ProfileSetters): Pr
   const supabase = createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("birth_name, birth_date, gender, birth_hour, privacy_agreed_at")
+    .select("birth_name, birth_date, gender, birth_hour, mbti, privacy_agreed_at")
     .eq("id", userId)
     .single();
 
@@ -68,7 +72,16 @@ async function applySupabaseProfile(userId: string, setters: ProfileSetters): Pr
   if (profile.birth_name) setters.setName(profile.birth_name);
   setters.setBirthDate(profile.birth_date);
   if (profile.gender) setters.setGender(profile.gender as "male" | "female" | "other");
-  if (profile.birth_hour) setters.setBirthHour(profile.birth_hour);
+  if (profile.birth_hour) {
+    const [h, m] = profile.birth_hour.split(":");
+    if (h !== undefined && m !== undefined) {
+      setters.setBirthHourNum(String(parseInt(h, 10)));
+      setters.setBirthMinuteNum(String(parseInt(m, 10)));
+    }
+  } else {
+    setters.setTimeUnknown(true);
+  }
+  if (profile.mbti) setters.setMbti(profile.mbti);
   if (profile.privacy_agreed_at) setters.setSaveInfo(true);
   setters.setHasSavedInfo(true);
 }
@@ -79,7 +92,16 @@ function applyLocalProfile(setters: ProfileSetters): void {
   if (local.name) setters.setName(local.name);
   if (local.birthDate) setters.setBirthDate(local.birthDate);
   if (local.gender) setters.setGender(local.gender);
-  if (local.birthHour) setters.setBirthHour(local.birthHour);
+  if (local.birthTime) {
+    const [h, m] = local.birthTime.split(":");
+    if (h !== undefined && m !== undefined) {
+      setters.setBirthHourNum(String(parseInt(h, 10)));
+      setters.setBirthMinuteNum(String(parseInt(m, 10)));
+    }
+  } else if (local.birthTime === null) {
+    setters.setTimeUnknown(true);
+  }
+  if (local.mbti) setters.setMbti(local.mbti);
   setters.setSaveInfo(true);
   setters.setHasSavedInfo(true);
 }
@@ -93,7 +115,8 @@ async function persistProfileToSupabase(data: UserInfo, birthDate: string): Prom
       birth_name: data.name,
       birth_date: birthDate,
       gender: data.gender,
-      birth_hour: data.birthHour,
+      birth_hour: data.birthTime,
+      mbti: data.mbti ?? null,
       privacy_agreed_at: new Date().toISOString(),
     }).eq("id", user.id);
     if (error) {
@@ -102,6 +125,7 @@ async function persistProfileToSupabase(data: UserInfo, birthDate: string): Prom
     }
   } catch (e) {
     console.error("프로필 저장 오류:", e);
+    return false;
   }
   return true;
 }
@@ -111,7 +135,10 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState(""); // "YYYY-MM-DD"
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
-  const [birthHour, setBirthHour] = useState("");
+  const [birthHourNum, setBirthHourNum] = useState("");
+  const [birthMinuteNum, setBirthMinuteNum] = useState("");
+  const [timeUnknown, setTimeUnknown] = useState(false);
+  const [mbti, setMbti] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -121,7 +148,13 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
   // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: sessionStorage)
   useEffect(() => {
-    const setters: ProfileSetters = { setName, setBirthDate, setGender: (v) => setGender(v), setBirthHour, setSaveInfo, setHasSavedInfo };
+    const setters: ProfileSetters = {
+      setName, setBirthDate,
+      setGender: (v) => setGender(v),
+      setBirthHourNum, setBirthMinuteNum, setTimeUnknown,
+      setMbti,
+      setSaveInfo, setHasSavedInfo,
+    };
     const loadUserInfo = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -136,9 +169,18 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     loadUserInfo();
   }, []);
 
+  const birthTime: string | null = timeUnknown
+    ? null
+    : (birthHourNum !== "" && birthMinuteNum !== ""
+      ? `${birthHourNum.padStart(2, "0")}:${birthMinuteNum.padStart(2, "0")}`
+      : null);
+
+  const sijin = birthTime ? timeToSijin(birthTime) : null;
+
   // mode별 유효성 검증
+  const timeProvided = timeUnknown || birthTime !== null;
   const isValid = mode === "saju"
-    ? !!(birthDate && birthHour && gender)
+    ? !!(birthDate && gender && timeProvided)
     : !!(name.trim() && birthDate && gender);
 
   const handleSubmit = async () => {
@@ -148,7 +190,8 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       name: name.trim(),
       birthDate,
       gender: gender as "male" | "female" | "other",
-      birthHour: birthHour || "unknown",
+      birthTime,
+      mbti: mbti || undefined,
     };
 
     if (saveInfo) {
@@ -183,11 +226,6 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
   const inputClasses =
     "w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-3 py-2.5 text-arcana-text text-sm focus:border-arcana-purple focus:outline-none";
-
-  // saju 모드에서는 "모름" 항목 제외 (사주 계산에 출생시간 필수)
-  const hourOptions = mode === "saju"
-    ? birthHours.filter((h) => h.value !== "unknown")
-    : birthHours;
 
   const backLabel = mode === "saju" ? t("common.back-arrow") : t("tarot.page.spread-select.back");
   const title = mode === "saju" ? t("user-info.title.saju") : t("user-info.title.tarot");
@@ -272,26 +310,84 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
         </div>
       </div>
 
-      {/* 태어난 시 */}
+      {/* 태어난 시각 */}
       <div>
-        <label htmlFor="userinfo-birthhour" className="text-arcana-muted text-xs font-serif mb-1.5 block">
-          태어난 시 {mode === "saju" ? "*" : "(선택)"}
+        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
+          태어난 시각 {mode === "saju" ? "*" : "(선택)"}
+        </label>
+        <div className="flex items-center gap-2 mb-2">
+          <input
+            type="number"
+            min={0}
+            max={23}
+            value={birthHourNum}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "") { setBirthHourNum(""); return; }
+              const n = parseInt(v, 10);
+              if (!isNaN(n) && n >= 0 && n <= 23) setBirthHourNum(String(n));
+            }}
+            disabled={timeUnknown}
+            placeholder="시"
+            className={`${inputClasses} w-20 text-center disabled:opacity-40`}
+          />
+          <span className="text-arcana-muted text-lg">:</span>
+          <input
+            type="number"
+            min={0}
+            max={59}
+            value={birthMinuteNum}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "") { setBirthMinuteNum(""); return; }
+              const n = parseInt(v, 10);
+              if (!isNaN(n) && n >= 0 && n <= 59) setBirthMinuteNum(String(n));
+            }}
+            disabled={timeUnknown}
+            placeholder="분"
+            className={`${inputClasses} w-20 text-center disabled:opacity-40`}
+          />
+          {sijin && !timeUnknown && (
+            <span className="text-arcana-purple/80 text-xs font-serif ml-1">
+              → {sijin.label}({sijin.hanja})
+            </span>
+          )}
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={timeUnknown}
+            onChange={(e) => {
+              setTimeUnknown(e.target.checked);
+              if (e.target.checked) {
+                setBirthHourNum("");
+                setBirthMinuteNum("");
+              }
+            }}
+            className="w-4 h-4 rounded border-arcana-border accent-arcana-purple"
+          />
+          <span className="text-arcana-muted text-xs">시간을 모릅니다</span>
+        </label>
+      </div>
+
+      {/* MBTI (선택) */}
+      <div>
+        <label htmlFor="userinfo-mbti" className="text-arcana-muted text-xs font-serif mb-1.5 block">
+          MBTI (선택)
         </label>
         <div className="relative">
-        <select
-          id="userinfo-birthhour"
-          value={birthHour}
-          onChange={(e) => setBirthHour(e.target.value)}
-          className={`${inputClasses} appearance-none pr-8`}
-        >
-          <option value="">선택하세요</option>
-          {hourOptions.map((h) => (
-            <option key={h.value} value={h.value}>
-              {h.label}{h.time ? ` (${h.time})` : ""}
-            </option>
-          ))}
-        </select>
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-arcana-muted pointer-events-none text-xs">▼</span>
+          <select
+            id="userinfo-mbti"
+            value={mbti}
+            onChange={(e) => setMbti(e.target.value)}
+            className={`${inputClasses} appearance-none pr-8`}
+          >
+            <option value="">선택 안 함</option>
+            {MBTI_TYPES.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-arcana-muted pointer-events-none text-xs">▼</span>
         </div>
       </div>
 

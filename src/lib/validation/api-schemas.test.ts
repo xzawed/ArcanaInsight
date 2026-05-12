@@ -21,7 +21,7 @@ describe("TarotReadingSchema", () => {
       topic: "love",
       spreadType: "one-card",
       characterId: "arcana",
-      userInfo: { name: "홍길동", birthDate: "1990-01-01", gender: "male", birthHour: "자시" },
+      userInfo: { name: "홍길동", birthDate: "1990-01-01", gender: "male", birthTime: "00:00" },
       cards: validCards,
     });
     expect(result.success).toBe(true);
@@ -141,7 +141,7 @@ describe("SajuReadingSchema", () => {
     topic: "saju-general",
     timeRange: "this-year",
     includeMonthly: false,
-    userInfo: { birthDate: "1990-01-01", birthHour: "자시", gender: "male" as const },
+    userInfo: { birthDate: "1990-01-01", birthTime: "00:00", gender: "male" as const },
   };
 
   it("정상 요청 통과", () => {

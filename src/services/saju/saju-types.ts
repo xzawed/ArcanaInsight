@@ -18,9 +18,10 @@ export interface DailyFortune {
 
 export interface SajuInput {
   birthDate: string;   // "1990-05-15" (양력)
-  birthHour: string;   // "ja" (12시진 코드)
+  birthTime: string | null;  // "HH:MM" | null (null = 시간 모름)
   gender: "male" | "female" | "other";
   name?: string;
+  mbti?: string;
 }
 
 export interface Pillar {

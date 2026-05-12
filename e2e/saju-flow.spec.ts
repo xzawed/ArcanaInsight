@@ -32,11 +32,8 @@ test.describe("사주 서비스 플로우", () => {
     // 성별 선택 (여성)
     await page.getByRole("button", { name: "여성" }).click();
 
-    // 태어난 시 선택
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) {
-      await hourSelect.selectOption({ index: 1 });
-    }
+    // 시간을 모릅니다 체크 → saju 제출 조건 충족
+    await page.locator("label").filter({ hasText: "시간을 모릅니다" }).locator("input[type='checkbox']").check();
 
     // 제출 버튼 활성화 확인
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
@@ -54,11 +51,7 @@ test.describe("사주 서비스 플로우", () => {
     // 폼 입력
     await page.locator("input[type='date']").fill("1995-06-15");
     await page.getByRole("button", { name: "여성" }).click();
-
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) {
-      await hourSelect.selectOption({ index: 1 });
-    }
+    await page.locator("label").filter({ hasText: "시간을 모릅니다" }).locator("input[type='checkbox']").check();
 
     // 제출
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
@@ -79,8 +72,7 @@ test.describe("사주 서비스 플로우", () => {
 
     await page.locator("input[type='date']").fill("1995-06-15");
     await page.getByRole("button", { name: "여성" }).click();
-    const hourSelect = page.locator("select");
-    if (await hourSelect.isVisible()) await hourSelect.selectOption({ index: 1 });
+    await page.locator("label").filter({ hasText: "시간을 모릅니다" }).locator("input[type='checkbox']").check();
 
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
     await submitBtn.click();
