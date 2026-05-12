@@ -1,15 +1,10 @@
 import { test, expect } from "@playwright/test";
+import {
+  navigateToSajuForm,
+  navigateToShinjeomSession,
+} from "./helpers/service-navigation";
 
 test.describe("폼 유효성 — 사주 개인정보 입력", () => {
-  /** 사주 캐릭터 선택 → 정보 입력 화면까지 진입 */
-  async function navigateToSajuForm(page: import("@playwright/test").Page) {
-    await page.goto("/saju");
-    const cards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
-    await expect(cards.first()).toBeVisible({ timeout: 10_000 });
-    await cards.first().click();
-    await expect(page.locator("text=생년월일").first()).toBeVisible({ timeout: 5_000 });
-  }
-
   test("모든 필드 비어있으면 제출 버튼 비활성화", async ({ page }) => {
     await navigateToSajuForm(page);
     const submitBtn = page.locator("button").filter({ hasText: /시작|다음|확인/ }).last();
@@ -44,15 +39,6 @@ test.describe("폼 유효성 — 사주 개인정보 입력", () => {
 });
 
 test.describe("폼 유효성 — 신점 메시지 입력", () => {
-  async function navigateToShinjeomSession(page: import("@playwright/test").Page) {
-    await page.goto("/shinjeom");
-    const cards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
-    await expect(cards.first()).toBeVisible({ timeout: 10_000 });
-    await cards.first().click();
-    await page.locator("text=신수").first().click();
-    await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
-  }
-
   test("빈 메시지 전송 차단", async ({ page }) => {
     await navigateToShinjeomSession(page);
     const sendBtn = page.locator("button").filter({ hasText: "전송" });
