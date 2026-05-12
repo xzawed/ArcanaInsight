@@ -70,7 +70,8 @@ export const TarotReadingSchema = z.object({
     name: z.string().max(50),
     birthDate: dateStr,
     gender: z.string().max(10),
-    birthHour: z.string().max(20),
+    birthTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+    mbti: z.string().max(10).optional(),
   }).nullish(),
   freeQuestion: z.string().max(200).nullish(),
   cards: z.array(z.object({
@@ -123,8 +124,9 @@ export const SajuReadingSchema = z.object({
   userInfo: z.object({
     name: z.string().max(50).optional(),
     birthDate: dateStr,
-    birthHour: z.string().max(20),
+    birthTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
     gender: z.enum(["male", "female", "other"]),
+    mbti: z.string().max(10).optional(),
   }),
 });
 
