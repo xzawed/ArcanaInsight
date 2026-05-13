@@ -24,11 +24,11 @@ const grokProvider = new FallbackProvider();
  * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다.
  */
 function computeSajuReadingMaxTokens(timeRange: SajuTimeRange, includeMonthly: boolean): number {
-  if (includeMonthly) return 20000;          // 월운 12개월 상세 포함
-  if (timeRange === "five-year") return 15000;
-  if (timeRange === "three-year" || timeRange === "next-year") return 13000;
-  if (timeRange === "full-fortune") return 17000;
-  return 10000;                              // this-week / this-month / this-year 기본
+  if (includeMonthly) return 28000;          // 월운 12개월 상세 포함
+  if (timeRange === "five-year") return 22000;
+  if (timeRange === "full-fortune") return 25000;
+  if (timeRange === "three-year" || timeRange === "next-year") return 20000;
+  return 16000;                              // this-week / this-month / this-year 기본
 }
 
 const VALID_TOPICS: Topic[] = [
