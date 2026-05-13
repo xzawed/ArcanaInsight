@@ -136,9 +136,10 @@ export async function POST(request: NextRequest) {
             void saveSajuReading(db, sessionId, {
               session_id: sessionId,
               birth_date: userInfo.birthDate,
-              birth_hour: userInfo.birthTime,
+              birth_hour: userInfo.birthTime ?? null,
               gender: userInfo.gender,
               birth_name: userInfo.name || null,
+              mbti: userInfo.mbti ?? null,
               pillars: sajuResult.pillars,
               day_master: sajuResult.dayMaster,
               day_master_element: sajuResult.dayMasterElement,
