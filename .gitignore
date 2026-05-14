@@ -47,6 +47,8 @@ playwright/.cache/
 
 # Git worktrees
 .worktrees/
+.claude/worktrees/
+.codex/
 .claude.local.md
 
 # MCP 설정 (토큰 포함 가능 — git 제외 필수)

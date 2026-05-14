@@ -34,7 +34,7 @@ src/
 ├── app/             # App Router 페이지와 API
 ├── components/      # card, character, chat, common, effects, home, layout, saju, shinjeom, skin, tarot
 │   ├── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
-│   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner
+│   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput
 │   └── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │                    # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
@@ -45,6 +45,9 @@ src/
 │   ├── useShinjeomSession.ts  # 신점 세션 상태 스토어 (UserInfo 포함)
 │   ├── useSajuSession.ts      # 사주 세션 상태 스토어
 │   ├── useSession.ts          # 타로 세션 상태 스토어
+│   ├── useUserInfoForm.ts     # UserInfoForm 상태·핸들러 추출 훅 (mode: tarot|saju|shinjeom)
+│   ├── usePreselectCharacter.ts  # URL ?character= 파라미터 + 선호 상담사 자동 선택
+│   ├── useResetScrollOnStep.ts   # step 변경 시 스크롤 최상단 초기화 (3페이지 공통)
 │   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
