@@ -73,8 +73,9 @@ export const dailyCards = pgTable("daily_cards", {
   interpretation: text("interpretation").notNull(),
   keywords: text("keywords").array().default([]),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  area: text("area").notNull().default("general"),
 }, (t) => [
-  uniqueIndex("daily_cards_date_character_id_key").on(t.date, t.characterId),
+  uniqueIndex("daily_cards_date_character_area_key").on(t.date, t.characterId, t.area),
 ])
 
 export const sajuReadings = pgTable("saju_readings", {

@@ -35,7 +35,7 @@ export async function saveTarotReading(
   db: DbClient,
   sessionId: string,
   reading: { cardInterpretations?: unknown; overallReading: string; advice: string },
-  cards: { cardId: string; position: number; isReversed: boolean }[],
+  cards: { cardId: string; position: number; isReversed: boolean; selectedAt?: Date }[],
   locale: string = "ko"
 ): Promise<void> {
   const lc = safeLocale(locale);
@@ -58,6 +58,7 @@ export async function saveTarotReading(
           card_id: c.cardId,
           position: c.position,
           is_reversed: c.isReversed,
+          ...(c.selectedAt ? { selected_at: c.selectedAt.toISOString() } : {}),
         }))
       ),
     ])

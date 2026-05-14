@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
       session = await db.insert("sessions", {
         service_type: "shinjeom",
         topic,
+        spread_type: null,
         character_id: characterId,
         user_id: user?.id ?? null,
         status: "in_progress",
