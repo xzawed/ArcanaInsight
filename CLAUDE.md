@@ -18,7 +18,7 @@
 
 | 영역 | 현재 기준 |
 |---|---|
-| 언어/프레임워크 | TypeScript strict, Next.js 16.2.3 App Router, React 19.2.4 |
+| 언어/프레임워크 | TypeScript strict, Next.js 16.2.6 App Router, React 19.2.4 |
 | 스타일/애니메이션 | Tailwind CSS v4, Framer Motion v12.38 |
 | AI | Grok API 우선, Claude API 자동 fallback |
 | 인증/DB | Supabase Auth + Supabase PostgreSQL 기본, `DB_PROVIDER=postgres` 전환 시 NextAuth.js v5 + Drizzle |
@@ -37,11 +37,15 @@ src/
 │   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom" — 신점은 전 필드 선택 입력)
 │   └── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │                    # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
-├── data/            # cards, characters, home, saju, shinjeom, skins, spreads, topics
+├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
 │   ├── useCardStyleStore.ts   # 카드 스타일 persist 스토어 (arcana-card-style)
-│   └── useReadingReveal.ts    # 타로 카드 텍스트 reveal 타이밍 제어 스토어
+│   ├── useReadingReveal.ts    # 타로 카드 텍스트 reveal 타이밍 제어 스토어
+│   ├── useShinjeomSession.ts  # 신점 세션 상태 스토어 (UserInfo 포함)
+│   ├── useSajuSession.ts      # 사주 세션 상태 스토어
+│   ├── useSession.ts          # 타로 세션 상태 스토어
+│   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
 │   └── storage/card-style.ts  # getCardStyleImageUrl, getCardStyleBackUrl
