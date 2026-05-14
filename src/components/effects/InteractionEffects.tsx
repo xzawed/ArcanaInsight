@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useThemeEffectVars } from "./ThemeEffectEngine";
 
@@ -28,17 +28,21 @@ export function InteractionClickParticles() {
   const effectVars = useThemeEffectVars();
   const shouldReduceMotion = useReducedMotion();
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (shouldReduceMotion) return;
+  const removeParticle = useCallback(
+    (id: number) => setParticles((prev) => prev.filter((p) => p.id !== id)),
+    [],
+  );
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const handleClick = (e: MouseEvent) => {
       const id = particleIdCounter++;
       setParticles((prev) => [...prev, { id, x: e.clientX, y: e.clientY }]);
-      setTimeout(() => {
-        setParticles((prev) => prev.filter((p) => p.id !== id));
-      }, 900);
-    },
-    [shouldReduceMotion],
-  );
+      setTimeout(removeParticle, 900, id);
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [shouldReduceMotion, removeParticle]);
 
   return (
     <div
@@ -70,12 +74,6 @@ export function InteractionClickParticles() {
           )),
         )}
       </AnimatePresence>
-      {/* 클릭 감지를 위한 투명 이벤트 캡처 레이어 */}
-      <div
-        className="absolute inset-0 pointer-events-auto"
-        onClick={handleClick}
-        aria-hidden
-      />
     </div>
   );
 }
