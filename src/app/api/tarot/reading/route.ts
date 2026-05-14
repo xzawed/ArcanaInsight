@@ -126,7 +126,9 @@ export async function POST(request: NextRequest) {
           // DB 저장 — fire-and-forget. parseError 있는 부분 결과는 영구 저장하지 않는다
           // (result/[id] 진입 시 빈 화면 방지). 클라이언트는 in_progress 세션을 재시도 가능.
           if (db && sessionId && !result.parseError) {
-            void saveTarotReading(db, sessionId, result, cards, locale).catch(
+            void saveTarotReading(db, sessionId, result, selectedCards.map((c) => ({
+              cardId: c.card.id, position: c.position, isReversed: c.isReversed, selectedAt: c.selectedAt,
+            })), locale).catch(
               (e) => console.error("타로 DB 저장 최종 실패:", e)
             )
           }
