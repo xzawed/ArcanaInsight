@@ -358,5 +358,7 @@ export const ja: Partial<SharedKeys> = {
     "session.input.placeholder.followup": "返信を入力してください...",
     "session.btn.send": "送信",
     "session.btn.get-result": "神占の結果を受ける",
+    "session.btn.share": "結果をシェア",
+    "session.share.title": "神占鑑定結果",
   },
 };

@@ -53,16 +53,27 @@ describe("saveSajuReading", () => {
 describe("saveShinjeomFinalReading", () => {
   it("insert + update 호출", async () => {
     const db = makeMockDb();
-    db.insert.mockResolvedValue({ id: "sh-1" });
+    db.insert.mockResolvedValue({ id: "sh-1", share_token: "tok-sh-1" });
     db.update.mockResolvedValue(null);
 
-    await saveShinjeomFinalReading(db, "sess-3", { overallReading: "신점 결과", advice: "조언" });
+    const result = await saveShinjeomFinalReading(db, "sess-3", { overallReading: "신점 결과", advice: "조언" });
 
     expect(db.insert).toHaveBeenCalledWith("shinjeom_readings", expect.objectContaining({
       session_id: "sess-3",
       overall_reading: "신점 결과",
     }));
     expect(db.update).toHaveBeenCalledWith("sessions", { id: "sess-3" }, expect.objectContaining({ status: "completed" }));
+    expect(result.shareToken).toBe("tok-sh-1");
+  });
+
+  it("insert에서 share_token 없을 때 shareToken은 null", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "sh-2" });
+    db.update.mockResolvedValue(null);
+
+    const result = await saveShinjeomFinalReading(db, "sess-3b", { overallReading: "결과", advice: "조언" });
+
+    expect(result.shareToken).toBeNull();
   });
 });
 

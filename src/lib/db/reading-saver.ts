@@ -84,17 +84,18 @@ export async function saveSajuReading(
   );
 }
 
-/** 신점 최종 리딩 결과 + 세션 완료 저장 (3회 retry). locale은 shinjeom_readings 테이블 컬럼. */
+/** 신점 최종 리딩 결과 + 세션 완료 저장 (3회 retry). locale은 shinjeom_readings 테이블 컬럼.
+ *  저장된 행의 share_token을 반환한다 (공유 URL 생성에 사용). */
 export async function saveShinjeomFinalReading(
   db: DbClient,
   sessionId: string,
   result: { overallReading: string; topicReading?: string; advice: string },
   locale: string = "ko"
-): Promise<void> {
+): Promise<{ shareToken: string | null }> {
   const lc = safeLocale(locale);
-  await withRetry(() =>
+  const [reading] = await withRetry(() =>
     Promise.all([
-      db.insert("shinjeom_readings", {
+      db.insert<{ share_token?: string | null }>("shinjeom_readings", {
         session_id: sessionId,
         overall_reading: result.overallReading,
         topic_reading: result.topicReading || "",
@@ -107,6 +108,7 @@ export async function saveShinjeomFinalReading(
       }),
     ])
   );
+  return { shareToken: reading?.share_token ?? null };
 }
 
 /** 신점 중간 대화 메시지 쌍 저장 (3회 retry) */

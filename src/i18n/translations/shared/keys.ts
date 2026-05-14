@@ -366,6 +366,8 @@ export interface SharedKeys {
     "session.input.placeholder.followup": string;
     "session.btn.send": string;
     "session.btn.get-result": string;
+    "session.btn.share": string;
+    "session.share.title": string;
   };
 }
 

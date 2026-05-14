@@ -216,10 +216,14 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // Mobile Android 에뮬에서 scrollTo 반영이 늦거나 무시될 수 있으므로 soft 대기
     await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 }).catch(() => {});
 
-    // 홈으로 이동 (evaluate로 nextjs-portal 우회)
+    // 홈으로 이동 — evaluate와 waitForURL 병렬 실행.
+    // evaluate 내 click()이 네비게이션을 트리거하면 페이지 컨텍스트가 즉시 닫혀
+    // evaluate가 "Target page closed"를 throw하므로 catch로 무시하고 URL 전환만 기다린다.
     const homeTab = page.locator("nav a[href='/']").last();
-    await homeTab.evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL(/\/$/);
+    await Promise.all([
+      page.waitForURL(/\/$/),
+      homeTab.evaluate((el) => (el as HTMLElement).click()).catch(() => {}),
+    ]);
     await page.waitForLoadState("load");
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
