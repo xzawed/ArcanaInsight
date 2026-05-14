@@ -1,6 +1,6 @@
 # Visual Overhaul Phase 2: 테마 통합 이펙트 강화 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 7개 테마가 배경 파티클을 넘어 버튼·카드 테두리·다이얼로그·캐릭터 오라·네비게이션 등 전체 UI에 화려하게 침투하는 5-레이어 이펙트 시스템을 구축한다.
 
@@ -70,11 +70,11 @@ Layer 1 (최하단): 배경 레이어          — AI 배경 이미지 + 동적 
 **파일:** `src/components/effects/ThemeEffectEngine.tsx` (신규)
 **소요:** ~3분
 
-- [ ] `THEME_EFFECT_VARS` Record 상수 정의 (7개 테마 × 8개 CSS 변수)
-- [ ] `ThemeEffectEngine` 컴포넌트 구현 — `useThemeStore`로 activeTheme 구독, useEffect에서 `:root`에 변수 주입
-- [ ] `useThemeEffectVars()` hook 구현 — 현재 테마의 이펙트 vars 객체 반환 (컴포넌트가 직접 소비할 때 사용)
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add ThemeEffectEngine CSS variable injection"`
+- [x] `THEME_EFFECT_VARS` Record 상수 정의 (7개 테마 × 8개 CSS 변수)
+- [x] `ThemeEffectEngine` 컴포넌트 구현 — `useThemeStore`로 activeTheme 구독, useEffect에서 `:root`에 변수 주입
+- [x] `useThemeEffectVars()` hook 구현 — 현재 테마의 이펙트 vars 객체 반환 (컴포넌트가 직접 소비할 때 사용)
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add ThemeEffectEngine CSS variable injection"`
 
 ```typescript
 // src/components/effects/ThemeEffectEngine.tsx
@@ -206,10 +206,10 @@ export function useThemeEffectVars(): ThemeEffectVars {
 **파일:** `src/app/globals.css` (수정)
 **소요:** ~2분
 
-- [ ] `@theme` 블록 내 새 keyframes 8개 추가
-- [ ] 새 animate 토큰 8개 추가 (`--animate-rune-float` 등)
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add theme-effect keyframes to globals.css"`
+- [x] `@theme` 블록 내 새 keyframes 8개 추가
+- [x] 새 animate 토큰 8개 추가 (`--animate-rune-float` 등)
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add theme-effect keyframes to globals.css"`
 
 ```css
 /* globals.css @theme 블록 내부에 추가 */
@@ -283,16 +283,16 @@ export function useThemeEffectVars(): ThemeEffectVars {
 **파일:** `src/components/effects/themeAtmosphere.ts` (수정)
 **소요:** ~5분
 
-- [ ] `DriftParticleKind` 타입에 새 종류 추가: `"rune" | "meteor" | "butterfly" | "hexagon" | "sparkle" | "lantern" | "snowflake"`
-- [ ] midnight: 기존 9개 star → star(9개) + rune(5개) + meteor(3개) = 17개
-- [ ] dawn: 기존 4개 mist → mist(8개) + butterfly(4개) = 12개
-- [ ] sunset: 기존 7개 dust → hexagon(10개) + dust(5개) = 15개
-- [ ] spring: 기존 6개 petal → petal(12개) + sparkle(8개) = 20개
-- [ ] summer: 기존 7개 firefly → firefly(15개) + lantern(4개) = 19개
-- [ ] autumn: 기존 7개 leaf/ember → leaf(10개) + ember(6개) = 16개 (데이터 확장만)
-- [ ] winter: 기존 8개 snow → snowflake(15개) + snow(6개) = 21개
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: expand themeAtmosphere particle data 2-3x"`
+- [x] `DriftParticleKind` 타입에 새 종류 추가: `"rune" | "meteor" | "butterfly" | "hexagon" | "sparkle" | "lantern" | "snowflake"`
+- [x] midnight: 기존 9개 star → star(9개) + rune(5개) + meteor(3개) = 17개
+- [x] dawn: 기존 4개 mist → mist(8개) + butterfly(4개) = 12개
+- [x] sunset: 기존 7개 dust → hexagon(10개) + dust(5개) = 15개
+- [x] spring: 기존 6개 petal → petal(12개) + sparkle(8개) = 20개
+- [x] summer: 기존 7개 firefly → firefly(15개) + lantern(4개) = 19개
+- [x] autumn: 기존 7개 leaf/ember → leaf(10개) + ember(6개) = 16개 (데이터 확장만)
+- [x] winter: 기존 8개 snow → snowflake(15개) + snow(6개) = 21개
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: expand themeAtmosphere particle data 2-3x"`
 
 ```typescript
 // 타입 확장 — 기존 DriftParticleKind 교체
@@ -440,10 +440,10 @@ const SNOWFLAKE_PARTICLES: readonly AtmosphereParticle[] = [
 **파일:** `src/components/effects/MysticBackground.tsx` (수정)
 **소요:** ~4분
 
-- [ ] `particleStyle()` 함수에 `rune`, `meteor`, `butterfly`, `hexagon`, `sparkle`, `lantern`, `snowflake` 케이스 추가
-- [ ] `particleMotion()` 함수에 종류별 동작 추가
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add new particle kind renderers in MysticBackground"`
+- [x] `particleStyle()` 함수에 `rune`, `meteor`, `butterfly`, `hexagon`, `sparkle`, `lantern`, `snowflake` 케이스 추가
+- [x] `particleMotion()` 함수에 종류별 동작 추가
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add new particle kind renderers in MysticBackground"`
 
 ```typescript
 // particleStyle() 내부 추가 케이스들
@@ -603,11 +603,11 @@ if (particle.kind === "snowflake") {
 **파일:** `src/components/effects/ThemeAtmosphereLayer.tsx` (신규)
 **소요:** ~4분
 
-- [ ] 각 테마별 미드그라운드 오브젝트 정의 (aurora, light-pillar, scanline 등)
-- [ ] `useReducedMotion()` 시 정적 폴백 렌더
-- [ ] `intensity: 'low' | 'medium' | 'high'` prop 지원, low에서는 특수 레이어 비활성화
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add ThemeAtmosphereLayer midground objects"`
+- [x] 각 테마별 미드그라운드 오브젝트 정의 (aurora, light-pillar, scanline 등)
+- [x] `useReducedMotion()` 시 정적 폴백 렌더
+- [x] `intensity: 'low' | 'medium' | 'high'` prop 지원, low에서는 특수 레이어 비활성화
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add ThemeAtmosphereLayer midground objects"`
 
 ```typescript
 // src/components/effects/ThemeAtmosphereLayer.tsx
@@ -807,13 +807,13 @@ export function ThemeAtmosphereLayer({ intensity = "high", className = "" }: The
 **파일:** `src/components/effects/InteractionEffects.tsx` (신규)
 **소요:** ~4분
 
-- [ ] `useMotionValue` + `useSpring`으로 마우스 위치 추적
-- [ ] 클릭 시 테마 색상 파티클 6개 방사 (고정 오프셋 배열 — SSR 안전)
-- [ ] `InteractionClickParticles` 컴포넌트: 클릭 이벤트 받아 파티클 AnimatePresence
-- [ ] `useInteractionEffects` hook: 버튼 등 소비 컴포넌트용
-- [ ] `prefers-reduced-motion` 시 비활성화
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add InteractionEffects click/hover particles"`
+- [x] `useMotionValue` + `useSpring`으로 마우스 위치 추적
+- [x] 클릭 시 테마 색상 파티클 6개 방사 (고정 오프셋 배열 — SSR 안전)
+- [x] `InteractionClickParticles` 컴포넌트: 클릭 이벤트 받아 파티클 AnimatePresence
+- [x] `useInteractionEffects` hook: 버튼 등 소비 컴포넌트용
+- [x] `prefers-reduced-motion` 시 비활성화
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add InteractionEffects click/hover particles"`
 
 ```typescript
 // src/components/effects/InteractionEffects.tsx
@@ -920,9 +920,9 @@ export function useInteractionGlow() {
 **파일:** `src/components/layout/ThemeProvider.tsx` (수정)
 **소요:** ~2분
 
-- [ ] `ThemeEffectEngine` import 및 children 상위에 렌더
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: mount ThemeEffectEngine in ThemeProvider"`
+- [x] `ThemeEffectEngine` import 및 children 상위에 렌더
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: mount ThemeEffectEngine in ThemeProvider"`
 
 ```typescript
 // ThemeProvider.tsx — 수정 부분만 표기
@@ -980,11 +980,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 **파일:** `src/components/effects/ServiceBackground.tsx` (수정)
 **소요:** ~3분
 
-- [ ] `ThemeAtmosphereLayer` import
-- [ ] 모바일 감지 로직 추가 (useEffect + useState, SSR 안전)
-- [ ] `ServiceBackground` 반환부에 `ThemeAtmosphereLayer` 추가 (intensity 조건부)
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: integrate ThemeAtmosphereLayer into ServiceBackground"`
+- [x] `ThemeAtmosphereLayer` import
+- [x] 모바일 감지 로직 추가 (useEffect + useState, SSR 안전)
+- [x] `ServiceBackground` 반환부에 `ThemeAtmosphereLayer` 추가 (intensity 조건부)
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: integrate ThemeAtmosphereLayer into ServiceBackground"`
 
 ```typescript
 // ServiceBackground.tsx — 수정 부분
@@ -1044,11 +1044,11 @@ export function ServiceBackground({ service }: ServiceBackgroundProps) {
 **파일:** `src/components/character/CharacterAuraLayer.tsx` (수정)
 **소요:** ~3분
 
-- [ ] `useThemeEffectVars` import
-- [ ] `primaryColor` prop 대신 `--theme-aura-color`/`--theme-aura-intense` CSS 변수를 우선 사용하는 로직 추가
-- [ ] 기존 `hexToRgba(primaryColor, ...)` 폴백 유지
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: wire CharacterAuraLayer to theme CSS variables"`
+- [x] `useThemeEffectVars` import
+- [x] `primaryColor` prop 대신 `--theme-aura-color`/`--theme-aura-intense` CSS 변수를 우선 사용하는 로직 추가
+- [x] 기존 `hexToRgba(primaryColor, ...)` 폴백 유지
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: wire CharacterAuraLayer to theme CSS variables"`
 
 ```typescript
 // CharacterAuraLayer.tsx — 수정 부분 (상단 import 추가, 로직 변경)
@@ -1141,13 +1141,13 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
 **파일:** `src/app/layout.tsx` 또는 `src/components/layout/` 루트 레이아웃 (수정)
 **소요:** ~3분
 
-- [ ] `InteractionClickParticles` import 및 `<body>` 직계 자식으로 마운트
-- [ ] Chrome DevTools Performance 탭에서 60fps 유지 확인
+- [x] `InteractionClickParticles` import 및 `<body>` 직계 자식으로 마운트
+- [x] Chrome DevTools Performance 탭에서 60fps 유지 확인
   - 타로 서비스 진입 → 카드 10회 hover → 3회 클릭
   - Long Tasks(>50ms) 없는지 확인
   - GPU 레이어 수: 20개 이하 목표
-- [ ] 검증: `pnpm type-check && pnpm lint && pnpm build`
-- [ ] 커밋: `git commit -m "feat: mount InteractionClickParticles globally + verify 60fps"`
+- [x] 검증: `pnpm type-check && pnpm lint && pnpm build`
+- [x] 커밋: `git commit -m "feat: mount InteractionClickParticles globally + verify 60fps"`
 
 ```typescript
 // src/app/layout.tsx — 수정 부분
@@ -1174,11 +1174,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 **파일:** `src/styles/theme-effects.css` (신규)
 **소요:** ~3분
 
-- [ ] 파일 생성: `src/styles/theme-effects.css`
-- [ ] `globals.css`에서 `@import "./theme-effects.css"` 추가
-- [ ] utility class 정의 (테마 CSS 변수를 소비하는 클래스)
-- [ ] 검증: `pnpm type-check && pnpm lint && pnpm build`
-- [ ] 커밋: `git commit -m "feat: add theme-effects.css utility classes"`
+- [x] 파일 생성: `src/styles/theme-effects.css`
+- [x] `globals.css`에서 `@import "./theme-effects.css"` 추가
+- [x] utility class 정의 (테마 CSS 변수를 소비하는 클래스)
+- [x] 검증: `pnpm type-check && pnpm lint && pnpm build`
+- [x] 커밋: `git commit -m "feat: add theme-effects.css utility classes"`
 
 ```css
 /* src/styles/theme-effects.css */
@@ -1239,13 +1239,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 **파일:** `src/__tests__/effects/ThemeEffectEngine.test.ts` (신규)
 **소요:** ~4분
 
-- [ ] `ThemeEffectEngine` 렌더 시 `:root`에 CSS 변수 7개 주입 여부 검증
-- [ ] `useThemeEffectVars` — 테마 변경 시 올바른 변수 반환 검증
-- [ ] 각 7개 테마의 `THEME_EFFECT_VARS` 스냅샷 테스트
-- [ ] `ThemeAtmosphereLayer` — `intensity="low"` 시 null 반환 검증
-- [ ] `InteractionEffects` — `prefers-reduced-motion` 시 파티클 미생성 검증
-- [ ] 검증: `pnpm test:coverage`
-- [ ] 커밋: `git commit -m "test: add ThemeEffectEngine and InteractionEffects unit tests"`
+- [x] `ThemeEffectEngine` 렌더 시 `:root`에 CSS 변수 7개 주입 여부 검증
+- [x] `useThemeEffectVars` — 테마 변경 시 올바른 변수 반환 검증
+- [x] 각 7개 테마의 `THEME_EFFECT_VARS` 스냅샷 테스트
+- [x] `ThemeAtmosphereLayer` — `intensity="low"` 시 null 반환 검증
+- [x] `InteractionEffects` — `prefers-reduced-motion` 시 파티클 미생성 검증
+- [x] 검증: `pnpm test:coverage`
+- [x] 커밋: `git commit -m "test: add ThemeEffectEngine and InteractionEffects unit tests"`
 
 ```typescript
 // src/__tests__/effects/ThemeEffectEngine.test.ts
@@ -1305,12 +1305,12 @@ describe("THEME_EFFECT_VARS", () => {
 **파일:** `e2e/theme-effects.spec.ts` (신규)
 **소요:** ~4분
 
-- [ ] 타로 페이지 진입 후 `data-testid="theme-atmosphere-layer-midnight"` 존재 확인
-- [ ] 테마 변경(sunset) 후 `--theme-scanline` CSS 변수 값 변경 확인
-- [ ] `data-testid="interaction-click-particles"` 존재 확인
-- [ ] `prefers-reduced-motion: reduce` 미디어 쿼리 시뮬레이션 후 파티클 레이어 미렌더 확인
-- [ ] 검증: `pnpm test:e2e`
-- [ ] 커밋: `git commit -m "test: add E2E smoke tests for theme effect layers"`
+- [x] 타로 페이지 진입 후 `data-testid="theme-atmosphere-layer-midnight"` 존재 확인
+- [x] 테마 변경(sunset) 후 `--theme-scanline` CSS 변수 값 변경 확인
+- [x] `data-testid="interaction-click-particles"` 존재 확인
+- [x] `prefers-reduced-motion: reduce` 미디어 쿼리 시뮬레이션 후 파티클 레이어 미렌더 확인
+- [x] 검증: `pnpm test:e2e`
+- [x] 커밋: `git commit -m "test: add E2E smoke tests for theme effect layers"`
 
 ```typescript
 // e2e/theme-effects.spec.ts
@@ -1359,15 +1359,15 @@ test.describe("Theme Effect Layers", () => {
 
 **소요:** ~3분
 
-- [ ] `pnpm type-check` — 에러 0개
-- [ ] `pnpm lint` — 에러 0개
-- [ ] `pnpm build` — 빌드 성공
-- [ ] `pnpm test:coverage` — 기존 임계치 유지 (branches 92%, 나머지 98%)
-- [ ] `pnpm test:e2e:full:ci` — 대표 케이스 통과
-- [ ] Chrome DevTools Performance: 60fps, Long Tasks 없음
-- [ ] PR 제목: `feat: Visual Overhaul Phase 2 — 5-layer theme effect system`
-- [ ] PR 설명: 5-레이어 구조, 신규 파일 목록, 성능 측정 결과 포함
-- [ ] 커밋: `git commit -m "chore: finalize Phase 2 visual overhaul — theme effect system"`
+- [x] `pnpm type-check` — 에러 0개
+- [x] `pnpm lint` — 에러 0개
+- [x] `pnpm build` — 빌드 성공
+- [x] `pnpm test:coverage` — 기존 임계치 유지 (branches 92%, 나머지 98%)
+- [x] `pnpm test:e2e:full:ci` — 대표 케이스 통과
+- [x] Chrome DevTools Performance: 60fps, Long Tasks 없음
+- [x] PR 제목: `feat: Visual Overhaul Phase 2 — 5-layer theme effect system`
+- [x] PR 설명: 5-레이어 구조, 신규 파일 목록, 성능 측정 결과 포함
+- [x] 커밋: `git commit -m "chore: finalize Phase 2 visual overhaul — theme effect system"`
 
 ---
 

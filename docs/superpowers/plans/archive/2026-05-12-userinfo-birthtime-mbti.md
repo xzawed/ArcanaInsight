@@ -1,6 +1,6 @@
 # UserInfo 출생 시각 정밀 입력 + MBTI 선택 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** `UserInfo`의 출생 시 입력을 12시진 드롭다운에서 HH:MM 직접 입력으로 교체하고, "시간 모름" 체크박스 + 선택적 MBTI 입력을 전체 서비스(타로·사주)에 추가한다.
 
@@ -44,7 +44,7 @@
 - Create: `src/lib/time-utils.ts`
 - Create: `src/lib/time-utils.test.ts`
 
-- [ ] **Step 1: 테스트 파일 작성**
+- [x] **Step 1: 테스트 파일 작성**
 
 `src/lib/time-utils.test.ts`:
 ```ts
@@ -80,14 +80,14 @@ describe("timeToSijin", () => {
 });
 ```
 
-- [ ] **Step 2: 테스트 실패 확인**
+- [x] **Step 2: 테스트 실패 확인**
 
 ```bash
 pnpm exec vitest run src/lib/time-utils.test.ts
 ```
 Expected: FAIL — `Cannot find module './time-utils'`
 
-- [ ] **Step 3: 구현 파일 작성**
+- [x] **Step 3: 구현 파일 작성**
 
 `src/lib/time-utils.ts`:
 ```ts
@@ -130,14 +130,14 @@ export function timeToSijin(time: string | null | undefined): Sijin | null {
 }
 ```
 
-- [ ] **Step 4: 테스트 통과 확인**
+- [x] **Step 4: 테스트 통과 확인**
 
 ```bash
 pnpm exec vitest run src/lib/time-utils.test.ts
 ```
 Expected: 모든 테스트 PASS
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add src/lib/time-utils.ts src/lib/time-utils.test.ts
@@ -151,7 +151,7 @@ git commit -m "feat: timeToSijin — HH:MM → 시진 변환 유틸"
 **Files:**
 - Create: `src/data/mbti.ts`
 
-- [ ] **Step 1: 파일 작성**
+- [x] **Step 1: 파일 작성**
 
 `src/data/mbti.ts`:
 ```ts
@@ -165,7 +165,7 @@ export const MBTI_TYPES = [
 export type MbtiType = typeof MBTI_TYPES[number];
 ```
 
-- [ ] **Step 2: 커밋**
+- [x] **Step 2: 커밋**
 
 ```bash
 git add src/data/mbti.ts
@@ -180,7 +180,7 @@ git commit -m "feat: MBTI 16타입 상수 추가"
 - Modify: `src/types/user-info.ts`
 - Modify: `src/services/saju/saju-types.ts`
 
-- [ ] **Step 1: `src/types/user-info.ts` 수정**
+- [x] **Step 1: `src/types/user-info.ts` 수정**
 
 전체 파일 교체:
 ```ts
@@ -193,7 +193,7 @@ export interface UserInfo {
 }
 ```
 
-- [ ] **Step 2: `src/services/saju/saju-types.ts` 수정**
+- [x] **Step 2: `src/services/saju/saju-types.ts` 수정**
 
 `SajuInput` 인터페이스만 변경 (다른 인터페이스 유지):
 ```ts
@@ -206,14 +206,14 @@ export interface SajuInput {
 }
 ```
 
-- [ ] **Step 3: tsc로 타입 오류 확인**
+- [x] **Step 3: tsc로 타입 오류 확인**
 
 ```bash
 pnpm type-check 2>&1 | head -40
 ```
 Expected: 여러 오류 — `birthHour` 참조들이 오류로 표시됨. 이후 태스크에서 순차 수정.
 
-- [ ] **Step 4: 커밋**
+- [x] **Step 4: 커밋**
 
 ```bash
 git add src/types/user-info.ts src/services/saju/saju-types.ts
@@ -227,7 +227,7 @@ git commit -m "feat: UserInfo·SajuInput birthHour → birthTime, mbti 추가"
 **Files:**
 - Modify: `src/lib/validation/api-schemas.ts`
 
-- [ ] **Step 1: `TarotReadingSchema.userInfo` 수정**
+- [x] **Step 1: `TarotReadingSchema.userInfo` 수정**
 
 `api-schemas.ts`에서 `TarotReadingSchema` 내 userInfo 부분을:
 ```ts
@@ -249,7 +249,7 @@ git commit -m "feat: UserInfo·SajuInput birthHour → birthTime, mbti 추가"
   }).nullish(),
 ```
 
-- [ ] **Step 2: `SajuReadingSchema.userInfo` 수정**
+- [x] **Step 2: `SajuReadingSchema.userInfo` 수정**
 
 ```ts
   userInfo: z.object({
@@ -270,7 +270,7 @@ git commit -m "feat: UserInfo·SajuInput birthHour → birthTime, mbti 추가"
   }),
 ```
 
-- [ ] **Step 3: 커밋**
+- [x] **Step 3: 커밋**
 
 ```bash
 git add src/lib/validation/api-schemas.ts
@@ -285,7 +285,7 @@ git commit -m "feat: api-schemas birthHour → birthTime, mbti 추가"
 - Modify: `src/services/saju/saju-calculator.ts`
 - Modify: `src/services/saju/saju-calculator.test.ts`
 
-- [ ] **Step 1: `saju-calculator.test.ts` 픽스처 업데이트**
+- [x] **Step 1: `saju-calculator.test.ts` 픽스처 업데이트**
 
 파일 상단 4개 상수 픽스처 변경:
 ```ts
@@ -302,7 +302,7 @@ const MALE_1985: SajuInput = { birthDate: "1985-07-07", birthTime: "03:00", gend
 const FEMALE_1975: SajuInput = { birthDate: "1975-03-20", birthTime: "21:00", gender: "female" };
 ```
 
-- [ ] **Step 2: 테스트 내 나머지 `birthHour` 픽스처 교체**
+- [x] **Step 2: 테스트 내 나머지 `birthHour` 픽스처 교체**
 
 테스트 파일의 인라인 픽스처들 변경 (197~206행 부근):
 ```ts
@@ -313,7 +313,7 @@ const FEMALE_1975: SajuInput = { birthDate: "1975-03-20", birthTime: "21:00", ge
 ```
 동일 패턴으로 해당 블록의 모든 `birthHour: "o"` → `birthTime: "11:00"` 변경.
 
-- [ ] **Step 3: `birthHour: "unknown"` 테스트 케이스 교체**
+- [x] **Step 3: `birthHour: "unknown"` 테스트 케이스 교체**
 
 테스트 335~336행 부근:
 ```ts
@@ -330,14 +330,14 @@ it("birthTime null 이면 자시(0시) 기준으로 계산하며 오류 없음",
 });
 ```
 
-- [ ] **Step 4: 테스트 실패 확인**
+- [x] **Step 4: 테스트 실패 확인**
 
 ```bash
 pnpm exec vitest run src/services/saju/saju-calculator.test.ts
 ```
 Expected: FAIL — `birthHour` property missing 오류
 
-- [ ] **Step 5: `saju-calculator.ts` 수정**
+- [x] **Step 5: `saju-calculator.ts` 수정**
 
 `BIRTH_HOUR_MAP` import 제거 및 계산 로직 변경:
 
@@ -361,14 +361,14 @@ const hourVal = input.birthTime
   : 0;
 ```
 
-- [ ] **Step 6: 테스트 통과 확인**
+- [x] **Step 6: 테스트 통과 확인**
 
 ```bash
 pnpm exec vitest run src/services/saju/saju-calculator.test.ts
 ```
 Expected: 모든 테스트 PASS
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add src/services/saju/saju-calculator.ts src/services/saju/saju-calculator.test.ts
@@ -383,7 +383,7 @@ git commit -m "feat: saju-calculator birthTime(HH:MM) 직접 파싱, null → �
 - Modify: `src/services/core/prompt-builder.ts`
 - Modify: `src/services/core/prompt-builder.test.ts`
 
-- [ ] **Step 1: `prompt-builder.test.ts` 업데이트 — 실패 테스트 먼저 작성**
+- [x] **Step 1: `prompt-builder.test.ts` 업데이트 — 실패 테스트 먼저 작성**
 
 `prompt-builder.test.ts`의 `describe("buildUserInfoPrompt")` 블록 전체 교체:
 ```ts
@@ -446,7 +446,7 @@ describe("buildUserInfoPrompt", () => {
 });
 ```
 
-- [ ] **Step 2: `prompt-builder.ts` 수정**
+- [x] **Step 2: `prompt-builder.ts` 수정**
 
 파일 상단에 import 추가:
 ```ts
@@ -479,14 +479,14 @@ export function buildUserInfoPrompt(
 }
 ```
 
-- [ ] **Step 3: 테스트 통과 확인**
+- [x] **Step 3: 테스트 통과 확인**
 
 ```bash
 pnpm exec vitest run src/services/core/prompt-builder.test.ts
 ```
 Expected: 모든 테스트 PASS
 
-- [ ] **Step 4: 커밋**
+- [x] **Step 4: 커밋**
 
 ```bash
 git add src/services/core/prompt-builder.ts src/services/core/prompt-builder.test.ts
@@ -500,7 +500,7 @@ git commit -m "feat: buildUserInfoPrompt birthTime + MBTI 반영"
 **Files:**
 - Modify: `src/services/saju/saju-service.ts`
 
-- [ ] **Step 1: `buildSajuPrompt` 시그니처 + 내용 수정**
+- [x] **Step 1: `buildSajuPrompt` 시그니처 + 내용 수정**
 
 `buildSajuPrompt` 메서드의 `userInfo` 매개변수 타입 확장:
 ```ts
@@ -539,14 +539,14 @@ ${instruction}
 종합적인 사주 해석과 함께, 선택한 시간 범위와 주제에 특화된 구체적 조언을 포함해주세요.`;
 ```
 
-- [ ] **Step 2: tsc 확인**
+- [x] **Step 2: tsc 확인**
 
 ```bash
 pnpm type-check 2>&1 | grep saju-service
 ```
 Expected: 오류 없음
 
-- [ ] **Step 3: 커밋**
+- [x] **Step 3: 커밋**
 
 ```bash
 git add src/services/saju/saju-service.ts
@@ -562,7 +562,7 @@ git commit -m "feat: buildSajuPrompt null birthTime 주석 + MBTI 교차 참조 
 - Modify: `src/app/api/tarot/reading/route.ts`
 - Modify: `src/app/saju/result/[id]/page.tsx`
 
-- [ ] **Step 1: `saju/reading/route.ts` — calculateSaju 호출 변경**
+- [x] **Step 1: `saju/reading/route.ts` — calculateSaju 호출 변경**
 
 라인 80~85 부근:
 ```ts
@@ -584,7 +584,7 @@ const sajuResult = calculateSaju({
 }, calcOptions);
 ```
 
-- [ ] **Step 2: `saju/reading/route.ts` — buildSajuPrompt 호출 변경**
+- [x] **Step 2: `saju/reading/route.ts` — buildSajuPrompt 호출 변경**
 
 라인 88~89 부근:
 ```ts
@@ -600,7 +600,7 @@ const readingPrompt = sajuService.buildSajuPrompt(topic, timeRange, sajuResult, 
 }) + buildFreeQuestionPrompt(freeQuestion);
 ```
 
-- [ ] **Step 3: `saju/reading/route.ts` — DB 저장 변경**
+- [x] **Step 3: `saju/reading/route.ts` — DB 저장 변경**
 
 라인 135 부근:
 ```ts
@@ -611,11 +611,11 @@ birth_hour: userInfo.birthHour,
 birth_hour: userInfo.birthTime,
 ```
 
-- [ ] **Step 4: `tarot/reading/route.ts` — buildUserInfoPrompt 호출 확인**
+- [x] **Step 4: `tarot/reading/route.ts` — buildUserInfoPrompt 호출 확인**
 
 라인 81 부근 확인. `buildUserInfoPrompt(userInfo)`는 이미 `TarotReadingSchema`에서 파싱된 `userInfo`를 받는다. 스키마를 `birthTime`으로 이미 변경했으므로 타입이 자동으로 맞음. 추가 변경 불필요.
 
-- [ ] **Step 5: `src/app/saju/result/[id]/page.tsx` 타입 수정**
+- [x] **Step 5: `src/app/saju/result/[id]/page.tsx` 타입 수정**
 
 `SajuReadingRow` 인터페이스의 `birth_hour` 타입 변경:
 ```ts
@@ -626,14 +626,14 @@ birth_hour: string;
 birth_hour: string | null;
 ```
 
-- [ ] **Step 6: tsc 확인**
+- [x] **Step 6: tsc 확인**
 
 ```bash
 pnpm type-check 2>&1 | grep -E "saju/reading|tarot/reading|result"
 ```
 Expected: 오류 없음
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add src/app/api/saju/reading/route.ts src/app/api/tarot/reading/route.ts src/app/saju/result/[id]/page.tsx
@@ -647,7 +647,7 @@ git commit -m "feat: API 라우트 birthTime 전달 + DB 저장 업데이트"
 **Files:**
 - Modify: `src/components/common/UserInfoForm.tsx`
 
-- [ ] **Step 1: import + ProfileSetters 업데이트**
+- [x] **Step 1: import + ProfileSetters 업데이트**
 
 파일 상단 import 변경:
 ```ts
@@ -685,7 +685,7 @@ type ProfileSetters = {
 };
 ```
 
-- [ ] **Step 2: `applySupabaseProfile` 업데이트**
+- [x] **Step 2: `applySupabaseProfile` 업데이트**
 
 ```ts
 async function applySupabaseProfile(userId: string, setters: ProfileSetters): Promise<void> {
@@ -715,7 +715,7 @@ async function applySupabaseProfile(userId: string, setters: ProfileSetters): Pr
 }
 ```
 
-- [ ] **Step 3: `applyLocalProfile` 업데이트**
+- [x] **Step 3: `applyLocalProfile` 업데이트**
 
 ```ts
 function applyLocalProfile(setters: ProfileSetters): void {
@@ -739,7 +739,7 @@ function applyLocalProfile(setters: ProfileSetters): void {
 }
 ```
 
-- [ ] **Step 4: `persistProfileToSupabase` 업데이트**
+- [x] **Step 4: `persistProfileToSupabase` 업데이트**
 
 ```ts
 async function persistProfileToSupabase(data: UserInfo, birthDate: string): Promise<boolean> {
@@ -766,7 +766,7 @@ async function persistProfileToSupabase(data: UserInfo, birthDate: string): Prom
 }
 ```
 
-- [ ] **Step 5: `UserInfoForm` 컴포넌트 state + 유효성 검증 업데이트**
+- [x] **Step 5: `UserInfoForm` 컴포넌트 state + 유효성 검증 업데이트**
 
 함수 내 state 변경:
 ```ts
@@ -819,7 +819,7 @@ const data: UserInfo = {
 };
 ```
 
-- [ ] **Step 6: `hourOptions` 제거 + 시진 자동 표시 변수 추가**
+- [x] **Step 6: `hourOptions` 제거 + 시진 자동 표시 변수 추가**
 
 제거:
 ```ts
@@ -834,7 +834,7 @@ const hourOptions = mode === "saju"
 const sijin = birthTime ? timeToSijin(birthTime) : null;
 ```
 
-- [ ] **Step 7: JSX 교체 — 태어난 시 영역**
+- [x] **Step 7: JSX 교체 — 태어난 시 영역**
 
 기존 `<select>` 블록 전체(라인 275~296)를 교체:
 ```tsx
@@ -889,7 +889,7 @@ const sijin = birthTime ? timeToSijin(birthTime) : null;
 </div>
 ```
 
-- [ ] **Step 8: JSX 추가 — MBTI 선택 영역 (태어난 시 아래)**
+- [x] **Step 8: JSX 추가 — MBTI 선택 영역 (태어난 시 아래)**
 
 ```tsx
 {/* MBTI (선택) */}
@@ -914,7 +914,7 @@ const sijin = birthTime ? timeToSijin(birthTime) : null;
 </div>
 ```
 
-- [ ] **Step 9: tsc + lint 확인**
+- [x] **Step 9: tsc + lint 확인**
 
 ```bash
 pnpm type-check 2>&1 | grep UserInfoForm
@@ -922,7 +922,7 @@ pnpm lint 2>&1 | grep UserInfoForm
 ```
 Expected: 오류 없음
 
-- [ ] **Step 10: 커밋**
+- [x] **Step 10: 커밋**
 
 ```bash
 git add src/components/common/UserInfoForm.tsx
@@ -937,7 +937,7 @@ git commit -m "feat: UserInfoForm 시·분 직접 입력 + 시간 모름 체크�
 - Create: `supabase/migrations/018_birthtime_mbti.sql`
 - Modify: `sonar-project.properties`
 
-- [ ] **Step 1: 마이그레이션 파일 작성**
+- [x] **Step 1: 마이그레이션 파일 작성**
 
 `supabase/migrations/018_birthtime_mbti.sql`:
 ```sql
@@ -950,7 +950,7 @@ WHERE birth_hour IS NOT NULL
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS mbti text;
 ```
 
-- [ ] **Step 2: `sonar-project.properties` exclusions 동기화**
+- [x] **Step 2: `sonar-project.properties` exclusions 동기화**
 
 `sonar.coverage.exclusions` 목록에 두 파일 추가 (다른 제외 패턴과 동일 형식):
 ```
@@ -960,7 +960,7 @@ src/data/mbti.ts,\
 
 `sonar.cpd.exclusions`에도 동일하게 추가.
 
-- [ ] **Step 3: 커밋**
+- [x] **Step 3: 커밋**
 
 ```bash
 git add supabase/migrations/018_birthtime_mbti.sql sonar-project.properties
@@ -975,7 +975,7 @@ git commit -m "feat: migration 018 birth_hour null 처리 + mbti 컬럼 추가"
 - Modify: `src/__tests__/api/saju-reading.test.ts`
 - Modify: `src/__tests__/api/tarot-reading.test.ts`
 
-- [ ] **Step 1: `saju-reading.test.ts` — `birthHour` → `birthTime` 전체 교체**
+- [x] **Step 1: `saju-reading.test.ts` — `birthHour` → `birthTime` 전체 교체**
 
 파일 내 `birthHour:` 를 모두 `birthTime:` 으로 변경:
 - `birthHour: "mi"` → `birthTime: "13:00"`
@@ -988,7 +988,7 @@ grep -n "birthHour" src/__tests__/api/saju-reading.test.ts
 ```
 Expected: 0건 — 모두 교체됨
 
-- [ ] **Step 2: `tarot-reading.test.ts` — `birthHour` → `birthTime` 교체**
+- [x] **Step 2: `tarot-reading.test.ts` — `birthHour` → `birthTime` 교체**
 
 파일 내 `birthHour:` 를 모두 `birthTime:` 으로 변경:
 - `birthHour: "mi"` → `birthTime: "13:00"`
@@ -999,14 +999,14 @@ grep -n "birthHour" src/__tests__/api/tarot-reading.test.ts
 ```
 Expected: 0건
 
-- [ ] **Step 3: 전체 테스트 실행**
+- [x] **Step 3: 전체 테스트 실행**
 
 ```bash
 pnpm test:coverage
 ```
 Expected: PASS, 커버리지 임계치(branches 92 / functions 98 / lines 98 / statements 98) 유지
 
-- [ ] **Step 4: 커밋**
+- [x] **Step 4: 커밋**
 
 ```bash
 git add src/__tests__/api/saju-reading.test.ts src/__tests__/api/tarot-reading.test.ts
@@ -1017,41 +1017,41 @@ git commit -m "test: saju/tarot API 테스트 birthHour → birthTime 픽스처 
 
 ## Task 12: 통합 검증 + 테스트 수 동기화
 
-- [ ] **Step 1: 전체 정적 검사**
+- [x] **Step 1: 전체 정적 검사**
 
 ```bash
 pnpm type-check && pnpm lint
 ```
 Expected: 오류 없음
 
-- [ ] **Step 2: 전체 테스트 + 커버리지**
+- [x] **Step 2: 전체 테스트 + 커버리지**
 
 ```bash
 pnpm test:coverage
 ```
 Expected: PASS, 커버리지 임계치 유지
 
-- [ ] **Step 3: 테스트 수 동기화**
+- [x] **Step 3: 테스트 수 동기화**
 
 ```bash
 pnpm sync:test-count
 ```
 
-- [ ] **Step 4: i18n drift 검사**
+- [x] **Step 4: i18n drift 검사**
 
 ```bash
 pnpm i18n:check
 ```
 Expected: 오류 없음 (새 UI 텍스트는 하드코딩 한국어이므로 번역키 추가 불필요, 필요시 별도 PR)
 
-- [ ] **Step 5: 빌드 확인**
+- [x] **Step 5: 빌드 확인**
 
 ```bash
 pnpm build
 ```
 Expected: 빌드 성공
 
-- [ ] **Step 6: feature 브랜치 PR 생성**
+- [x] **Step 6: feature 브랜치 PR 생성**
 
 ```bash
 gh pr create --title "feat: 출생 시각 HH:MM 직접 입력 + MBTI 선택 추가" --body "$(cat <<'EOF'
@@ -1063,13 +1063,13 @@ gh pr create --title "feat: 출생 시각 HH:MM 직접 입력 + MBTI 선택 추�
 - 타입: `birthHour: string` → `birthTime: string | null`, `mbti?: string`
 
 ## Test plan
-- [ ] `pnpm test:coverage` — 임계치 유지
-- [ ] `pnpm type-check` — 오류 없음
-- [ ] `pnpm build` — 빌드 성공
-- [ ] 사주 페이지 직접 접속 → 시·분 입력, 시진 자동 표시 확인
-- [ ] "시간을 모릅니다" 체크 → 입력 비활성화, 사주 리딩 정상 진행 확인
-- [ ] MBTI 선택 → AI 리딩에 반영 확인
-- [ ] 타로 페이지 동일 확인
+- [x] `pnpm test:coverage` — 임계치 유지
+- [x] `pnpm type-check` — 오류 없음
+- [x] `pnpm build` — 빌드 성공
+- [x] 사주 페이지 직접 접속 → 시·분 입력, 시진 자동 표시 확인
+- [x] "시간을 모릅니다" 체크 → 입력 비활성화, 사주 리딩 정상 진행 확인
+- [x] MBTI 선택 → AI 리딩에 반영 확인
+- [x] 타로 페이지 동일 확인
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
