@@ -52,7 +52,7 @@ fetchSSEStream({
 **Files:**
 - Modify: `src/app/shinjeom/session/page.tsx`
 
-- [ ] **Step 1: import 수정 — fetchSSEStream 추가, 로컬 함수 제거**
+- [x] **Step 1: import 수정 — fetchSSEStream 추가, 로컬 함수 제거**
 
 파일 상단의 import 블록에 추가:
 ```typescript
@@ -65,7 +65,7 @@ function parseSseLine(line: string): Record<string, unknown> | null { ... }
 async function drainSseChunks(...): Promise<void> { ... }
 ```
 
-- [ ] **Step 2: readingAbortRef 추가 + cleanup useEffect**
+- [x] **Step 2: readingAbortRef 추가 + cleanup useEffect**
 
 `ShinjeomSessionPage` 컴포넌트 내부, `redirectedRef` 선언 직후에 추가:
 ```typescript
@@ -79,7 +79,7 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 3: handleSend 전체 교체**
+- [x] **Step 3: handleSend 전체 교체**
 
 기존 `const handleSend = async () => { ... }` (L129~L177) 전체를 아래로 교체:
 
@@ -146,7 +146,7 @@ const handleSend = () => {
 };
 ```
 
-- [ ] **Step 4: handleEndConsultation 전체 교체**
+- [x] **Step 4: handleEndConsultation 전체 교체**
 
 기존 `const handleEndConsultation = async () => { ... }` (L179~L233) 전체를 아래로 교체:
 
@@ -222,7 +222,7 @@ const handleEndConsultation = () => {
 };
 ```
 
-- [ ] **Step 5: 타입 검사 + 린트**
+- [x] **Step 5: 타입 검사 + 린트**
 
 ```bash
 cd f:/DEVELOPMENT/SOURCE/CLAUDE/ArcanaInsight
@@ -231,7 +231,7 @@ pnpm type-check && pnpm lint
 
 Expected: 에러 없음. `parseSseLine`·`drainSseChunks` 미사용 경고가 남아 있다면 Step 1을 다시 확인.
 
-- [ ] **Step 6: 개발 서버에서 수동 검증**
+- [x] **Step 6: 개발 서버에서 수동 검증**
 
 ```bash
 pnpm dev
@@ -242,7 +242,7 @@ pnpm dev
 2. "결과 받기" 클릭 → 결과 화면 전환 확인
 3. DevTools → Network → `/api/shinjeom/message` 요청이 Pending 없이 완료되는지 확인
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git checkout -b fix/shinjeom-abort-controller
@@ -259,21 +259,21 @@ git commit -m "fix(shinjeom): AbortController + 180s 타임아웃 적용 — fet
 **Files:**
 - Modify: `src/app/saju/session/page.tsx`
 
-- [ ] **Step 1: readingAbortRef 추가**
+- [x] **Step 1: readingAbortRef 추가**
 
 `resultContainerRef` 선언(L94) 바로 아래에 추가:
 ```typescript
 const readingAbortRef = useRef<AbortController | null>(null);
 ```
 
-- [ ] **Step 2: startReading 내 abortController ref 저장**
+- [x] **Step 2: startReading 내 abortController ref 저장**
 
 `startReading()` 함수 내부(L143), `const abortController = new AbortController();` 바로 다음 줄에 추가:
 ```typescript
 readingAbortRef.current = abortController;
 ```
 
-- [ ] **Step 3: cleanup useEffect 추가**
+- [x] **Step 3: cleanup useEffect 추가**
 
 스크롤 `useEffect`(L217) 바로 뒤에 추가:
 ```typescript
@@ -282,7 +282,7 @@ useEffect(() => {
 }, []);
 ```
 
-- [ ] **Step 4: 타입 검사 + 커밋**
+- [x] **Step 4: 타입 검사 + 커밋**
 
 ```bash
 pnpm type-check && pnpm lint
@@ -302,7 +302,7 @@ git commit -m "fix(saju): AbortController useRef 보관 — 언마운트 cleanup
 - Modify: `src/components/layout/ThemeDropdown.tsx:33`
 - Modify: `e2e/theme.spec.ts`
 
-- [ ] **Step 1: ThemeDropdown auto 버튼에 testid 추가**
+- [x] **Step 1: ThemeDropdown auto 버튼에 testid 추가**
 
 `src/components/layout/ThemeDropdown.tsx` L33~L44의 `<button` 여는 태그에 속성 추가:
 ```typescript
@@ -313,7 +313,7 @@ git commit -m "fix(saju): AbortController useRef 보관 — 언마운트 cleanup
 >
 ```
 
-- [ ] **Step 2: e2e/theme.spec.ts 셀렉터 업데이트**
+- [x] **Step 2: e2e/theme.spec.ts 셀렉터 업데이트**
 
 `e2e/theme.spec.ts`에서 auto 버튼을 `text=` 셀렉터로 참조하는 부분을 검색:
 ```bash
@@ -322,7 +322,7 @@ grep -n "자동" e2e/theme.spec.ts
 
 찾은 모든 `text=자동 (시간/계절)` 패턴을 `[data-testid='theme-option-auto']` 또는 `[data-testid='mobile-theme-option-auto']`로 교체. 데스크탑(1280px viewport) 컨텍스트는 `theme-option-auto`, 모바일(390px) 컨텍스트는 `mobile-theme-option-auto`.
 
-- [ ] **Step 3: 타입 검사 + 커밋**
+- [x] **Step 3: 타입 검사 + 커밋**
 
 ```bash
 pnpm type-check && pnpm lint
@@ -339,7 +339,7 @@ git commit -m "fix(e2e): ThemeDropdown auto 버튼 data-testid 추가 — i18n �
 **Files:**
 - Modify: `src/components/card/CardSpread.tsx`
 
-- [ ] **Step 1: import 추가**
+- [x] **Step 1: import 추가**
 
 파일 상단 import 블록에 추가 (기존 `hexToRgbBase` import 아래):
 ```typescript
@@ -347,14 +347,14 @@ import { getPositionLabel } from "@/data/spreads";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 ```
 
-- [ ] **Step 2: locale 구독 추가**
+- [x] **Step 2: locale 구독 추가**
 
 `CardSpread` 컴포넌트 함수 내부 최상단 (기존 `const containerRef = useRef...` 바로 위)에 추가:
 ```typescript
 const locale = useLocaleStore((s) => s.locale);
 ```
 
-- [ ] **Step 3: pos.labelKo 두 곳 교체**
+- [x] **Step 3: pos.labelKo 두 곳 교체**
 
 L176 (카드 공개 후 라벨):
 ```typescript
@@ -372,7 +372,7 @@ L188 (카드 미선택 플레이스홀더 라벨):
 {getPositionLabel(pos, locale)}
 ```
 
-- [ ] **Step 4: 타입 검사 + 수동 검증**
+- [x] **Step 4: 타입 검사 + 수동 검증**
 
 ```bash
 pnpm type-check && pnpm lint
@@ -380,7 +380,7 @@ pnpm type-check && pnpm lint
 
 브라우저 `/tarot` → 상담사·주제·스프레드 선택 → 카드 선택 화면: 위치 라벨이 정상 표시되는지 확인.
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add src/components/card/CardSpread.tsx
@@ -397,7 +397,7 @@ git commit -m "fix(i18n): CardSpread 위치 라벨 locale 적용 — labelKo 하
 - Modify: `src/app/saju/page.tsx`
 - Modify: `src/app/shinjeom/page.tsx`
 
-- [ ] **Step 1: saju/page.tsx 시간 범위 버튼 testid 추가**
+- [x] **Step 1: saju/page.tsx 시간 범위 버튼 testid 추가**
 
 `SajuSelectStep` 컴포넌트의 `sajuTimeOptions.map()` 내부 `<button` 태그에 추가:
 ```typescript
@@ -409,7 +409,7 @@ git commit -m "fix(i18n): CardSpread 위치 라벨 locale 적용 — labelKo 하
 >
 ```
 
-- [ ] **Step 2: saju/page.tsx 영역 버튼 testid 추가**
+- [x] **Step 2: saju/page.tsx 영역 버튼 testid 추가**
 
 `SajuSelectStep`의 `sajuAreaOptions.map()` 내부 `<button` 태그에 추가:
 ```typescript
@@ -421,7 +421,7 @@ git commit -m "fix(i18n): CardSpread 위치 라벨 locale 적용 — labelKo 하
 >
 ```
 
-- [ ] **Step 3: shinjeom/page.tsx 주제 버튼 testid 추가**
+- [x] **Step 3: shinjeom/page.tsx 주제 버튼 testid 추가**
 
 `TopicSelectStep`의 `TOPIC_CONFIGS.map()` 내부 `<motion.button` 태그에 추가:
 ```typescript
@@ -432,7 +432,7 @@ git commit -m "fix(i18n): CardSpread 위치 라벨 locale 적용 — labelKo 하
 >
 ```
 
-- [ ] **Step 4: 타입 검사 + 커밋**
+- [x] **Step 4: 타입 검사 + 커밋**
 
 ```bash
 pnpm type-check && pnpm lint
@@ -453,7 +453,7 @@ git commit -m "feat(e2e): saju/shinjeom 선택 버튼 data-testid 표준화"
 **Files:**
 - Modify: `e2e/shinjeom-flow.spec.ts`
 
-- [ ] **Step 1: 기존 spec 파일 확인**
+- [x] **Step 1: 기존 spec 파일 확인**
 
 ```bash
 cat e2e/shinjeom-flow.spec.ts
@@ -461,7 +461,7 @@ cat e2e/shinjeom-flow.spec.ts
 
 마지막 `test.describe` 블록 끝에 추가할 위치 파악.
 
-- [ ] **Step 2: 메시지 전송 플로우 test 추가**
+- [x] **Step 2: 메시지 전송 플로우 test 추가**
 
 ```typescript
 test.describe("신점 세션 — 메시지 전송 플로우", () => {
@@ -508,7 +508,7 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
 });
 ```
 
-- [ ] **Step 3: lint + 커밋**
+- [x] **Step 3: lint + 커밋**
 
 ```bash
 pnpm lint
@@ -525,7 +525,7 @@ git commit -m "test(e2e): 신점 세션 메시지 전송 플로우 E2E 추가"
 **Files:**
 - Modify or Create: `src/__tests__/lib/character-context.test.ts`
 
-- [ ] **Step 1: 기존 파일 확인**
+- [x] **Step 1: 기존 파일 확인**
 
 ```bash
 cat src/__tests__/lib/character-context.test.ts 2>/dev/null || echo "file not found"
@@ -533,7 +533,7 @@ cat src/__tests__/lib/character-context.test.ts 2>/dev/null || echo "file not fo
 
 파일이 있으면 기존 `describe` 블록 뒤에 추가. 없으면 새로 생성.
 
-- [ ] **Step 2: fetchMemoryPrompt 테스트 추가**
+- [x] **Step 2: fetchMemoryPrompt 테스트 추가**
 
 파일에 추가할 내용:
 
@@ -581,7 +581,7 @@ describe("fetchMemoryPrompt", () => {
 });
 ```
 
-- [ ] **Step 3: 실제 fetchMemoryPrompt 시그니처 확인 후 코드 조정**
+- [x] **Step 3: 실제 fetchMemoryPrompt 시그니처 확인 후 코드 조정**
 
 ```bash
 cat src/lib/db/character-context.ts | grep -A 10 "fetchMemoryPrompt"
@@ -589,7 +589,7 @@ cat src/lib/db/character-context.ts | grep -A 10 "fetchMemoryPrompt"
 
 함수 시그니처·의존 import 경로를 확인하고 위 테스트 코드의 vi.mock 경로를 실제 경로로 맞춤.
 
-- [ ] **Step 4: 테스트 실행**
+- [x] **Step 4: 테스트 실행**
 
 ```bash
 pnpm test --reporter=verbose src/__tests__/lib/character-context.test.ts
@@ -597,7 +597,7 @@ pnpm test --reporter=verbose src/__tests__/lib/character-context.test.ts
 
 Expected: 3개 테스트 PASS.
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add src/__tests__/lib/character-context.test.ts
@@ -614,7 +614,7 @@ git commit -m "test: fetchMemoryPrompt 직접 테스트 추가 — getCurrentUse
 - Modify: `src/components/character/CharacterDisplay.tsx`
 - Modify: `src/components/chat/DialogueBox.tsx`
 
-- [ ] **Step 1: CharacterDisplay.tsx 파일 내용 확인**
+- [x] **Step 1: CharacterDisplay.tsx 파일 내용 확인**
 
 ```bash
 head -30 src/components/character/CharacterDisplay.tsx
@@ -622,7 +622,7 @@ head -30 src/components/character/CharacterDisplay.tsx
 
 현재 export 방식 확인 (`export function` vs `const` vs 이미 `React.memo`인지).
 
-- [ ] **Step 2: CharacterDisplay React.memo 적용**
+- [x] **Step 2: CharacterDisplay React.memo 적용**
 
 현재 `export function CharacterDisplay(...)` 형태라면:
 
@@ -644,7 +644,7 @@ CharacterDisplay.displayName = "CharacterDisplay";
 import React from "react";
 ```
 
-- [ ] **Step 3: DialogueBox React.memo 적용**
+- [x] **Step 3: DialogueBox React.memo 적용**
 
 ```bash
 head -30 src/components/chat/DialogueBox.tsx
@@ -652,7 +652,7 @@ head -30 src/components/chat/DialogueBox.tsx
 
 동일 패턴으로 `React.memo` + `displayName` 적용.
 
-- [ ] **Step 4: 타입 검사 + 커밋**
+- [x] **Step 4: 타입 검사 + 커밋**
 
 ```bash
 pnpm type-check && pnpm lint
@@ -669,13 +669,13 @@ git commit -m "perf(components): CharacterDisplay·DialogueBox React.memo 적용
 **Files:**
 - Modify: `src/app/tarot/session/page.tsx` (CardSpread dynamic import, L23~L27)
 
-- [ ] **Step 1: 현재 dynamic import 확인**
+- [x] **Step 1: 현재 dynamic import 확인**
 
 ```bash
 grep -A 4 "CardSpread = dynamic" src/app/tarot/session/page.tsx
 ```
 
-- [ ] **Step 2: CardSpread loading 플레이스홀더 교체**
+- [x] **Step 2: CardSpread loading 플레이스홀더 교체**
 
 ```typescript
 // 변경 전
@@ -691,7 +691,7 @@ const CardSpread = dynamic(
 );
 ```
 
-- [ ] **Step 3: 타입 검사 + 커밋**
+- [x] **Step 3: 타입 검사 + 커밋**
 
 ```bash
 pnpm type-check && pnpm lint
