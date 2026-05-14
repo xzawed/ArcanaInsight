@@ -25,18 +25,13 @@ import { getTopicLabel, getTopicDesc, getTopicIconId } from "@/data/topics-meta"
 
 const TAROT_TOPIC_IDS: Topic[] = ["love-single", "love-couple", "career", "finance", "health", "general"];
 
-const topicSpreads: Record<Topic, SpreadType[]> = {
+const topicSpreads: Partial<Record<Topic, SpreadType[]>> = {
   "love-single": ["one-card", "three-card", "five-card", "celtic-cross"],
   "love-couple": ["one-card", "three-card", "relationship", "celtic-cross"],
   career: ["one-card", "three-card", "five-card", "horseshoe", "celtic-cross"],
   finance: ["one-card", "three-card", "horseshoe", "decision", "celtic-cross"],
   health: ["one-card", "three-card", "five-card"],
   general: ["one-card", "three-card", "five-card", "celtic-cross", "week-ahead", "zodiac", "tree-of-life"],
-  "saju-general": [], "saju-love-single": [], "saju-love-couple": [],
-  "saju-career": [], "saju-health": [], "saju-personality": [],
-  "saju-compatibility": [], "saju-auspicious-date": [],
-  "shinjeom-general": [], "shinjeom-love": [], "shinjeom-wealth": [], "shinjeom-health": [],
-  "shinjeom-career": [], "shinjeom-auspicious": [],
   love: ["one-card", "three-card", "five-card", "relationship", "celtic-cross"],
 };
 

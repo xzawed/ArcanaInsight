@@ -3,7 +3,7 @@ import { Topic, ChatMessage } from "@/types/session";
 import { ReadingResult } from "@/types/service";
 import { UserInfo } from "@/types/user-info";
 
-export type ShinjeomPhase = "character-select" | "topic-select" | "conversation" | "result";
+export type ShinjeomPhase = "character-select" | "conversation" | "result";
 
 interface ShinjeomSessionState {
   phase: ShinjeomPhase;

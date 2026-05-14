@@ -30,6 +30,8 @@ const TOPIC_CONFIGS: { id: Topic; iconId: string }[] = [
 
 type PageStep = "character-select" | "topic-select" | "user-info";
 
+const topicKey = (id: Topic): string => id.replace("shinjeom-", "");
+
 // ─── Step sub-components ────────────────────────────────────────────────────
 
 function CharacterSelectStep({ characters, genderFilter, setGenderFilter, selectedCharacter, onSelect }: Readonly<{
@@ -74,15 +76,12 @@ function CharacterSelectStep({ characters, genderFilter, setGenderFilter, select
   );
 }
 
-function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<{
-  selectedCharacter: CharacterConfig | null;
+function TopicSelectStep({ onBack, onTopicSelect }: Readonly<{
   onBack: () => void;
   onTopicSelect: (topic: Topic) => void;
 }>) {
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);
-
-  const topicKey = (id: Topic): string => id.replace("shinjeom-", "");
 
   return (
     <motion.div key="topic-select" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
@@ -113,7 +112,6 @@ function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<
           </motion.button>
         ))}
       </div>
-      {selectedCharacter && <p className="sr-only">{selectedCharacter.name}</p>}
     </motion.div>
   );
 }
@@ -240,7 +238,7 @@ function ShinjeomPageContent() {
             selectedCharacter={selectedCharacter} onSelect={handleCharacterSelect} />
         )}
         {step === "topic-select" && (
-          <TopicSelectStep selectedCharacter={selectedCharacter} onBack={handleBack} onTopicSelect={handleTopicSelect} />
+          <TopicSelectStep onBack={handleBack} onTopicSelect={handleTopicSelect} />
         )}
         {step === "user-info" && (
           <UserInfoStep selectedCharacter={selectedCharacter} onBack={handleUserInfoBack}
