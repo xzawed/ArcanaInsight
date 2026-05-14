@@ -33,15 +33,19 @@
 src/
 ├── app/             # App Router 페이지와 API
 ├── components/      # card, character, chat, common, effects, home, layout, saju, shinjeom, skin, tarot
-│   └── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
+│   ├── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
+│   └── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
+│                    # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 ├── data/            # cards, characters, home, saju, shinjeom, skins, spreads, topics
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
-│   └── useCardStyleStore.ts  # 카드 스타일 persist 스토어 (arcana-card-style)
+│   ├── useCardStyleStore.ts   # 카드 스타일 persist 스토어 (arcana-card-style)
+│   └── useReadingReveal.ts    # 타로 카드 텍스트 reveal 타이밍 제어 스토어
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
 │   └── storage/card-style.ts  # getCardStyleImageUrl, getCardStyleBackUrl
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
+├── styles/          # theme-effects.css — CSS variable 기반 5-레이어 이펙트 정의
 ├── test-helpers/    # Vitest 공통 mock/setup
 └── types/           # 공유 타입
 
@@ -61,6 +65,8 @@ supabase/migrations/ # Supabase SQL migrations
 - SSE 스트리밍: 타로/사주/신점 리딩은 `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴을 사용. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - i18n: `middleware`가 locale을 결정하고 `x-locale` 헤더와 쿠키를 유지. 상세는 [`docs/architecture/i18n.md`](docs/architecture/i18n.md), [`docs/conventions/i18n-style.md`](docs/conventions/i18n-style.md).
 - 카드 아트 스타일: `CardStyleId`(dark-fantasy·art-nouveau·anime-mystical·modern-digital), `THEME_TO_STYLE_MAP`으로 테마 자동 매핑. `useCardStyleStore`가 사용자 override를 persist. `CardFace`/`CardBack`/`CardItem`은 styleId → skinId → SVG 순으로 이미지 우선순위 처리.
+- 테마 이펙트: `ThemeEffectEngine`이 CSS 변수(`--theme-glow-color`, `--theme-particle-color` 등)를 주입. `ThemeAtmosphereLayer`(글로우·파티클 5-레이어), `InteractionEffects`(`InteractionClickParticles` — `document.addEventListener` 방식, pointer-events-none), `ServiceBackground`, `src/styles/theme-effects.css` 로 구성.
+- 타로 텍스트 reveal: `useReadingReveal` 스토어가 `showLabel` 플래그를 관리. `CardFace` → `CardItem` → `CardSpread` → 타로 세션 페이지로 prop 체인 전달. result phase 진입 시에만 카드명 텍스트 노출.
 
 ## 캐릭터/데이터 기준
 
