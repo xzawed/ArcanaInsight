@@ -12,13 +12,14 @@ import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { Icon } from "@/components/common/Icon";
-import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { ServiceBackground } from "@/components/effects/ServiceBackground";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { CulturalReadingDisplay } from "@/components/shinjeom/CulturalReadingDisplay";
 import { PageSpinner } from "@/components/common/PageSpinner";
+import { useResetScrollOnStep } from "@/hooks/useResetScrollOnStep";
+import { usePreselectCharacter } from "@/hooks/usePreselectCharacter";
 
 const TOPIC_CONFIGS: { id: Topic; iconId: string }[] = [
   { id: "shinjeom-general",    iconId: "shinjeom-general" },
@@ -155,6 +156,7 @@ function ShinjeomPageContent() {
   const { genderFilter, setGenderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
 
+  // URL 파라미터 기반 동기 초기화 (flash 방지 — useSearchParams는 Suspense로 래핑된 상태)
   const preselectedCharId = searchParams.get("character");
   const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
 
@@ -168,33 +170,18 @@ function ShinjeomPageContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // NOSONAR
 
-  // URL 파라미터로 캐릭터가 프리셀렉트된 경우 스토어에 반영
-  useEffect(() => {
-    if (preselectedChar) {
-      setCharacterId(preselectedChar.id);
-    }
-  }, [preselectedChar, setCharacterId]);
-
-  // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
-  const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
-  useEffect(() => {
-    if (favoriteCharacter && !selectedCharacter) {
-      setSelectedCharacter(favoriteCharacter);
-      setCharacterId(favoriteCharacter.id);
+  // 프리셀렉트 + 즐겨찾기 fallback: 캐릭터 선택 시 스토어 반영 + 스텝 전환
+  usePreselectCharacter({
+    currentCharacter: selectedCharacter,
+    onSelect: (character) => {
+      setSelectedCharacter(character);
+      setCharacterId(character.id);
       setStep("topic-select");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favoriteCharacter]); // NOSONAR
+    },
+  });
 
-  // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
-  useEffect(() => {
-    const resetScroll = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']").forEach((el) => { el.scrollTop = 0; });
-    };
-    resetScroll();
-    requestAnimationFrame(() => { resetScroll(); requestAnimationFrame(resetScroll); });
-  }, [step]);
+  // 스텝 전환 시 스크롤 최상단 초기화
+  useResetScrollOnStep(step);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Topic, SpreadType, ChatMessage, SpreadDefinition } from "@/types/session";
@@ -13,7 +13,6 @@ import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { UserInfo } from "@/types/user-info";
 import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { getCharacterGreeting } from "@/data/characters/locale-helpers";
-import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { spreads, getSpreadName, getSpreadShortDesc, getSpreadDetail } from "@/data/spreads";
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
@@ -23,6 +22,8 @@ import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getTopicLabel, getTopicDesc, getTopicIconId } from "@/data/topics-meta";
 import { PageSpinner } from "@/components/common/PageSpinner";
+import { useResetScrollOnStep } from "@/hooks/useResetScrollOnStep";
+import { usePreselectCharacter } from "@/hooks/usePreselectCharacter";
 
 const TAROT_TOPIC_IDS: Topic[] = ["love-single", "love-couple", "career", "finance", "health", "general"];
 
@@ -231,12 +232,13 @@ function UserInfoStep({ selectedCharacter, onSubmit, onBack }: Readonly<{
 
 function TarotPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const locale = useLocaleStore((s) => s.locale);
   const { setTopic, setSpreadType, setPhase, setCharacterId, setFreeQuestion } = useSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const availableCharacters = getCharactersByGender(genderFilter);
 
+  // URL 파라미터 기반 동기 초기화 (flash 방지 — useSearchParams는 Suspense로 래핑된 상태)
+  const searchParams = useSearchParams();
   const preselectedCharId = searchParams.get("character");
   const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
 
@@ -246,35 +248,19 @@ function TarotPageContent() {
   const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
   const [localFreeQuestion, setLocalFreeQuestion] = useState("");
 
-  // 프리셀렉트된 캐릭터: 스토어 반영 + 인사 메시지 생성 (클라이언트 마운트 후 — new Date() SSR 비결정 방지)
-  useEffect(() => {
-    if (preselectedChar) {
-      setCharacterId(preselectedChar.id);
-      setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(preselectedChar, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 선호 상담사 fallback: URL 파라미터 없이 직접 접속한 경우 자동 선택
-  const { favoriteCharacter } = useFavoriteCharacter(!!preselectedChar);
-  useEffect(() => {
-    if (favoriteCharacter && !selectedCharacter) {
-      setSelectedCharacter(favoriteCharacter);
-      setCharacterId(favoriteCharacter.id);
-      setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(favoriteCharacter, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
+  // 프리셀렉트 + 즐겨찾기 fallback: 캐릭터 선택 시 스토어 반영 + 인사 메시지 생성 + 스텝 전환
+  usePreselectCharacter({
+    currentCharacter: selectedCharacter,
+    onSelect: (character) => {
+      setSelectedCharacter(character);
+      setCharacterId(character.id);
+      setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(character, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
       setStep("topic-select");
-    }
-  }, [favoriteCharacter, selectedCharacter, setCharacterId]);
+    },
+  });
 
-  // 스텝 전환 시 스크롤 최상단 초기화 (3중 보정: 즉시 + rAF + rAF)
-  useEffect(() => {
-    const resetScroll = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.querySelectorAll("[class*='overflow-y-auto'], [class*='overflow-auto']").forEach((el) => { el.scrollTop = 0; });
-    };
-    resetScroll();
-    requestAnimationFrame(() => { resetScroll(); requestAnimationFrame(resetScroll); });
-  }, [step]);
+  // 스텝 전환 시 스크롤 최상단 초기화
+  useResetScrollOnStep(step);
 
   const handleCharacterSelect = (character: CharacterConfig) => {
     setSelectedCharacter(character);
