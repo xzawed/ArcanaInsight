@@ -1,16 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { timeToSijin } from "@/lib/time-utils";
 import { MBTI_TYPES } from "@/data/mbti";
 import { PrivacyConsentModal } from "./PrivacyConsentModal";
-import { createClient } from "@/lib/supabase/client";
+import { BirthTimeInput } from "./BirthTimeInput";
 import { UserInfo } from "@/types/user-info";
 import { useT } from "@/i18n/useT";
-
-const STORAGE_KEY = "arcana_user_info";
-const CONSENT_KEY = "arcana_privacy_agreed";
+import { useUserInfoForm } from "@/hooks/useUserInfoForm";
 
 interface UserInfoFormProps {
   readonly mode: "tarot" | "saju" | "shinjeom";
@@ -19,202 +15,27 @@ interface UserInfoFormProps {
   readonly characterName?: string;
 }
 
-type ProfileSetters = {
-  setName: (v: string) => void;
-  setBirthDate: (v: string) => void;
-  setGender: (v: "male" | "female" | "other") => void;
-  setBirthHourNum: (v: string) => void;
-  setBirthMinuteNum: (v: string) => void;
-  setTimeUnknown: (v: boolean) => void;
-  setMbti: (v: string) => void;
-  setSaveInfo: (v: boolean) => void;
-  setHasSavedInfo: (v: boolean) => void;
-};
-
-/** sessionStorage에 저장된 정보 로드 (동의한 경우만, 탭 종료 시 자동 삭제) */
-function loadLocalInfo(): UserInfo | null {
-  try {
-    const consent = sessionStorage.getItem(CONSENT_KEY);
-    if (!consent) return null;
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as UserInfo;
-  } catch {
-    return null;
-  }
-}
-
-/** sessionStorage에 정보 저장 (탭 종료 시 자동 삭제) */
-function saveLocalInfo(info: UserInfo): void {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(info));
-    sessionStorage.setItem(CONSENT_KEY, new Date().toISOString());
-  } catch { /* 시크릿 모드 등 sessionStorage 차단 시 무시 */ } // NOSONAR
-}
-
-/** sessionStorage에서 정보 삭제 (동의 철회) */
-function clearLocalInfo(): void {
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-    sessionStorage.removeItem(CONSENT_KEY);
-  } catch { /* sessionStorage 차단 시 무시 */ } // NOSONAR
-}
-
-function applyBirthTime(
-  timeStr: string | null | undefined,
-  setHour: (v: string) => void,
-  setMinute: (v: string) => void,
-  setUnknown: (v: boolean) => void,
-): void {
-  if (!timeStr) { setUnknown(true); return; }
-  const [h, m] = timeStr.split(":");
-  setHour(h !== undefined ? String(parseInt(h, 10)) : "");
-  setMinute(m !== undefined ? String(parseInt(m, 10)) : "");
-}
-
-async function applySupabaseProfile(userId: string, setters: ProfileSetters): Promise<void> {
-  const supabase = createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("birth_name, birth_date, gender, birth_hour, mbti, privacy_agreed_at")
-    .eq("id", userId)
-    .single();
-
-  if (!profile?.birth_date) return;
-  if (profile.birth_name) setters.setName(profile.birth_name);
-  setters.setBirthDate(profile.birth_date);
-  if (profile.gender) setters.setGender(profile.gender as "male" | "female" | "other");
-  applyBirthTime(profile.birth_hour, setters.setBirthHourNum, setters.setBirthMinuteNum, setters.setTimeUnknown);
-  if (profile.mbti) setters.setMbti(profile.mbti);
-  if (profile.privacy_agreed_at) setters.setSaveInfo(true);
-  setters.setHasSavedInfo(true);
-}
-
-function applyLocalProfile(setters: ProfileSetters): void {
-  const local = loadLocalInfo();
-  if (!local) return;
-  if (local.name) setters.setName(local.name);
-  if (local.birthDate) setters.setBirthDate(local.birthDate);
-  if (local.gender) setters.setGender(local.gender);
-  if (local.birthTime !== undefined) {
-    applyBirthTime(local.birthTime, setters.setBirthHourNum, setters.setBirthMinuteNum, setters.setTimeUnknown);
-  }
-  if (local.mbti) setters.setMbti(local.mbti);
-  setters.setSaveInfo(true);
-  setters.setHasSavedInfo(true);
-}
-
-async function persistProfileToSupabase(data: UserInfo, birthDate: string): Promise<boolean> {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return true;
-    const { error } = await supabase.from("profiles").update({
-      birth_name: data.name,
-      birth_date: birthDate,
-      gender: data.gender,
-      birth_hour: data.birthTime,
-      mbti: data.mbti ?? null,
-      privacy_agreed_at: new Date().toISOString(),
-    }).eq("id", user.id);
-    if (error) {
-      console.error("프로필 저장 실패:", error);
-      return false;
-    }
-  } catch (e) {
-    console.error("프로필 저장 오류:", e);
-    return false;
-  }
-  return true;
-}
-
 export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfoFormProps) {
   const { t } = useT();
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState(""); // "YYYY-MM-DD"
-  const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
-  const [birthHourNum, setBirthHourNum] = useState("");
-  const [birthMinuteNum, setBirthMinuteNum] = useState("");
-  const [timeUnknown, setTimeUnknown] = useState(false);
-  const [mbti, setMbti] = useState("");
-  const [saveInfo, setSaveInfo] = useState(false);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasSavedInfo, setHasSavedInfo] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saveWarning, setSaveWarning] = useState(false);
-
-  // 저장된 정보 자동 채우기 (로그인: Supabase / 비로그인: sessionStorage)
-  useEffect(() => {
-    const setters: ProfileSetters = {
-      setName, setBirthDate,
-      setGender: (v) => setGender(v),
-      setBirthHourNum, setBirthMinuteNum, setTimeUnknown,
-      setMbti,
-      setSaveInfo, setHasSavedInfo,
-    };
-    const loadUserInfo = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setIsLoggedIn(true);
-        await applySupabaseProfile(user.id, setters);
-      } else {
-        applyLocalProfile(setters);
-      }
-      setLoading(false);
-    };
-    loadUserInfo();
-  }, []);
-
-  const birthTime: string | null = timeUnknown
-    ? null
-    : (birthHourNum !== "" && birthMinuteNum !== ""
-      ? `${birthHourNum.padStart(2, "0")}:${birthMinuteNum.padStart(2, "0")}`
-      : null);
-
-  const sijin = birthTime ? timeToSijin(birthTime) : null;
-
-  // mode별 유효성 검증
-  const timeProvided = timeUnknown || birthTime !== null;
-  const isValid = mode === "saju"
-    ? !!(birthDate && gender && timeProvided)
-    : mode === "shinjeom"
-    ? true
-    : !!(name.trim() && birthDate && gender);
-
-  const handleSubmit = async () => {
-    if (!isValid) return;
-
-    const data: UserInfo = {
-      name: name.trim(),
-      birthDate,
-      gender: (gender || "other") as "male" | "female" | "other",
-      birthTime,
-      mbti: mbti || undefined,
-    };
-
-    if (saveInfo) {
-      if (isLoggedIn) {
-        const saved = await persistProfileToSupabase(data, birthDate);
-        if (!saved) setSaveWarning(true);
-      } else {
-        saveLocalInfo(data);
-      }
-    }
-
-    onSubmit(data);
-  };
-
-  /** 동의 철회 시 저장된 데이터도 삭제 */
-  const handleSaveToggle = () => {
-    if (!saveInfo) {
-      setShowPrivacyModal(true);
-    } else {
-      setSaveInfo(false);
-      if (!isLoggedIn) clearLocalInfo();
-    }
-  };
+  const {
+    name, setName,
+    birthDate, setBirthDate,
+    birthHourNum, setBirthHourNum,
+    birthMinuteNum, setBirthMinuteNum,
+    gender, setGender,
+    timeUnknown, setTimeUnknown,
+    mbti, setMbti,
+    saveInfo, setSaveInfo,
+    showPrivacyModal, setShowPrivacyModal,
+    loading,
+    isLoggedIn,
+    hasSavedInfo,
+    saveWarning,
+    sijin,
+    isValid,
+    handleSubmit,
+    handleSaveToggle,
+  } = useUserInfoForm(mode, onSubmit);
 
   if (loading) {
     return (
@@ -316,59 +137,16 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
         <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
           태어난 시각 {mode === "saju" ? "*" : "(선택)"}
         </label>
-        <div className="flex items-center gap-2 mb-2">
-          <input
-            type="number"
-            min={0}
-            max={23}
-            value={birthHourNum}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "") { setBirthHourNum(""); return; }
-              const n = parseInt(v, 10);
-              if (!isNaN(n) && n >= 0 && n <= 23) setBirthHourNum(String(n));
-            }}
-            disabled={timeUnknown}
-            placeholder="시"
-            className={`${inputClasses} w-20 text-center disabled:opacity-40`}
-          />
-          <span className="text-arcana-muted text-lg">:</span>
-          <input
-            type="number"
-            min={0}
-            max={59}
-            value={birthMinuteNum}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v === "") { setBirthMinuteNum(""); return; }
-              const n = parseInt(v, 10);
-              if (!isNaN(n) && n >= 0 && n <= 59) setBirthMinuteNum(String(n));
-            }}
-            disabled={timeUnknown}
-            placeholder="분"
-            className={`${inputClasses} w-20 text-center disabled:opacity-40`}
-          />
-          {sijin && !timeUnknown && (
-            <span className="text-arcana-purple/80 text-xs font-serif ml-1">
-              → {sijin.label}({sijin.hanja})
-            </span>
-          )}
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={timeUnknown}
-            onChange={(e) => {
-              setTimeUnknown(e.target.checked);
-              if (e.target.checked) {
-                setBirthHourNum("");
-                setBirthMinuteNum("");
-              }
-            }}
-            className="w-4 h-4 rounded border-arcana-border accent-arcana-purple"
-          />
-          <span className="text-arcana-muted text-xs">시간을 모릅니다</span>
-        </label>
+        <BirthTimeInput
+          hour={birthHourNum}
+          minute={birthMinuteNum}
+          unknown={timeUnknown}
+          sijin={sijin}
+          onHourChange={setBirthHourNum}
+          onMinuteChange={setBirthMinuteNum}
+          onUnknownChange={setTimeUnknown}
+          inputClasses={inputClasses}
+        />
       </div>
 
       {/* MBTI (선택) */}
