@@ -15,6 +15,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        ├─ UI 레이어 (src/components/)
        │    ├─ card/         — CardFace, CardBack, CardItem, CardStyleSelector
        │    ├─ character/    — 캐릭터 등장 컴포넌트
+       │    ├─ effects/      — ThemeEffectEngine, ParticleOverlay, MysticBackground 등 5-레이어 이펙트
        │    └─ chat/home/tarot/saju/shinjeom/...
        ├─ 상태 (src/hooks/)
        │    ├─ useCardStyleStore  — 카드 스타일 persist (arcana-card-style)

@@ -25,7 +25,7 @@
 |---|-----------|--------|
 | C1 | 기능 요구사항 분석 및 스펙 문서 작성 | `docs/superpowers/specs/*.md` |
 | C2 | 아키텍처 설계·기술 결정 문서 | `docs/architecture/*.md` 갱신 |
-| C3 | 에이전트 정의 및 Task Playbook | `.claude/agents/*.md`, `docs/workflow/task-playbooks.md` |
+| C3 | 에이전트 정의 및 Task Playbook | `.claude/agents/*.md`, `docs/workflow/task-playbooks.md` — 현재 6종: `character-add`, `divination-scaffold`, `page-builder`, `skin-manager`, `theme-creator`, `quality-gate` |
 | C4 | DB 스키마 설계 및 마이그레이션 계획 | SQL 초안, Drizzle 스키마 구조 명세 |
 | C5 | 새 서비스·페이지 뼈대 스캐폴딩 | 파일 구조, 인터페이스, 타입 정의, 빈 함수 시그니처 |
 | C6 | `CLAUDE.md` / `AGENTS.md` 최신화 | 구조 트리, 아키텍처 섹션 갱신 |
