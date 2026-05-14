@@ -356,5 +356,7 @@ export const en: Partial<SharedKeys> = {
     "session.input.placeholder.followup": "Type your reply...",
     "session.btn.send": "Send",
     "session.btn.get-result": "Get Shinjeom result",
+    "session.btn.share": "Share result",
+    "session.share.title": "Shinjeom Reading Result",
   },
 };

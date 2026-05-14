@@ -351,5 +351,7 @@ export const ko: SharedKeys = {
     "session.input.placeholder.followup": "답변을 입력하세요...",
     "session.btn.send": "전송",
     "session.btn.get-result": "신점 결과 받기",
+    "session.btn.share": "결과 공유하기",
+    "session.share.title": "신점 상담 결과",
   },
 };

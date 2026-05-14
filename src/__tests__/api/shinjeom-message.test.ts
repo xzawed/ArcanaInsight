@@ -138,8 +138,8 @@ describe("POST /api/shinjeom/message", () => {
     expect(text).toContain("done");
   });
 
-  it("isFinalTurn=true + sessionId → saveShinjeomFinalReading fire-and-forget 호출", async () => {
-    const mockSaveFinal = vi.fn().mockResolvedValue(undefined);
+  it("isFinalTurn=true + sessionId → saveShinjeomFinalReading 호출 및 shareToken 수신", async () => {
+    const mockSaveFinal = vi.fn().mockResolvedValue({ shareToken: "test-token-123" });
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomFinalReading: mockSaveFinal,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
@@ -154,9 +154,10 @@ describe("POST /api/shinjeom/message", () => {
     vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
     const { POST } = await import("@/app/api/shinjeom/message/route");
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-final", isFinalTurn: true }));
-    await readSSEStream(res);
+    const text = await readSSEStream(res);
     await Promise.resolve();
     expect(mockSaveFinal).toHaveBeenCalledWith(mockDb, "sess-final", expect.any(Object), expect.any(String));
+    expect(text).toContain("test-token-123");
   });
 
   it("AI 오류 → 스트림 내부 catch에서 errMsg 전송", async () => {
@@ -182,7 +183,7 @@ describe("POST /api/shinjeom/message", () => {
     const mockSaveFail = vi.fn().mockRejectedValue(new Error("DB connection lost"));
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomMessages: mockSaveFail,
-      saveShinjeomFinalReading: vi.fn().mockResolvedValue(undefined),
+      saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: null }),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -204,7 +205,7 @@ describe("POST /api/shinjeom/message", () => {
     const mockSaveMsg = vi.fn().mockResolvedValue(undefined);
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomMessages: mockSaveMsg,
-      saveShinjeomFinalReading: vi.fn().mockResolvedValue(undefined),
+      saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: null }),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -294,7 +295,7 @@ describe("POST /api/shinjeom/message", () => {
 
   // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────
   it("isFinalTurn=true + parseError(missing_fields) → saveShinjeomFinalReading 미호출", async () => {
-    const mockSave = vi.fn().mockResolvedValue(undefined);
+    const mockSave = vi.fn().mockResolvedValue({ shareToken: null });
     // overallReading 채움 + advice 빈 문자 → parseResult가 missing_fields 부여
     const partialJson = JSON.stringify({ overallReading: "결과 본문", topicReading: "주제", advice: "" });
     const provider = {

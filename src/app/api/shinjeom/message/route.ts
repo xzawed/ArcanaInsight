@@ -81,16 +81,21 @@ export async function POST(request: NextRequest) {
               });
             }
 
-            // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget, 3회 retry).
-            // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result })}\n\n`));
-
             // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 빈 화면 방지).
+            // DB 저장 후 share_token을 result에 포함하여 클라이언트에 전송 (공유 URL 생성용).
+            let shareToken: string | null = null;
             if (db && sessionId && !result.parseError) {
-              void saveShinjeomFinalReading(db, sessionId, result, locale).catch(
-                (e) => console.error("신점 최종 DB 저장 최종 실패:", e)
-              );
+              try {
+                const saved = await saveShinjeomFinalReading(db, sessionId, result, locale);
+                shareToken = saved.shareToken;
+              } catch (e) {
+                console.error("신점 최종 DB 저장 최종 실패:", e);
+              }
             }
+
+            // 결과를 클라이언트에 전송 (share_token 포함).
+            // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result: { ...result, shareToken } })}\n\n`));
           } else {
             // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 (3회 retry)
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));

@@ -17,10 +17,50 @@ import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
+
+const SITE_NAME = "ArcanaInsight";
+
+async function shareWithUrl(title: string, text: string, url: string, locale: Locale): Promise<void> {
+  if (navigator.share) {
+    try { await navigator.share({ title, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+  } else {
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert(translate("common.share.link-copied", locale));
+    } catch (e) { console.warn("clipboard write failed:", e); }
+  }
+}
+
+async function shareWithText(title: string, text: string, locale: Locale): Promise<void> {
+  if (navigator.share) {
+    try { await navigator.share({ title, text }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
+  } else {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(translate("common.share.text-copied", locale));
+    } catch (e) { console.warn("clipboard write failed:", e); }
+  }
+}
+
+async function handleShinjeomShare(r: { shareToken?: string | null; overallReading?: string | null } | null, locale: Locale): Promise<void> {
+  const shareToken = r?.shareToken;
+  const title = `${translate("shinjeom.session.share.title", locale)} - ${SITE_NAME}`;
+  if (shareToken) {
+    const url = `${globalThis.location?.origin}/shinjeom/result/${shareToken}`;
+    const text = `🔮 ${title}`;
+    await shareWithUrl(title, text, url, locale);
+  } else {
+    const summary = r?.overallReading
+      ? `🔮 ${title}\n\n${r.overallReading.slice(0, 100)}...\n\n- ${SITE_NAME}`
+      : `🔮 ${title}\n\n- ${SITE_NAME}`;
+    await shareWithText(title, summary, locale);
+  }
+}
 
 function getErrorMsg(charId: string | null | undefined, type: "api" | "reading", locale: string): string {
   const wl = getWaitingLinesData(locale);
@@ -333,6 +373,12 @@ export default function ShinjeomSessionPage() {
                   className="flex-1 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm"
                 >
                   {t("tarot.session.btn.new-session")}
+                </button>
+                <button
+                  onClick={() => handleShinjeomShare(useShinjeomSessionStore.getState().readingResult, locale)}
+                  className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
+                >
+                  {t("shinjeom.session.btn.share")}
                 </button>
               </div>
             </motion.div>
