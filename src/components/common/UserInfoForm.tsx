@@ -60,6 +60,18 @@ function clearLocalInfo(): void {
   } catch { /* sessionStorage 차단 시 무시 */ } // NOSONAR
 }
 
+function applyBirthTime(
+  timeStr: string | null | undefined,
+  setHour: (v: string) => void,
+  setMinute: (v: string) => void,
+  setUnknown: (v: boolean) => void,
+): void {
+  if (!timeStr) { setUnknown(true); return; }
+  const [h, m] = timeStr.split(":");
+  setHour(h !== undefined ? String(parseInt(h, 10)) : "");
+  setMinute(m !== undefined ? String(parseInt(m, 10)) : "");
+}
+
 async function applySupabaseProfile(userId: string, setters: ProfileSetters): Promise<void> {
   const supabase = createClient();
   const { data: profile } = await supabase
@@ -72,15 +84,7 @@ async function applySupabaseProfile(userId: string, setters: ProfileSetters): Pr
   if (profile.birth_name) setters.setName(profile.birth_name);
   setters.setBirthDate(profile.birth_date);
   if (profile.gender) setters.setGender(profile.gender as "male" | "female" | "other");
-  if (profile.birth_hour) {
-    const [h, m] = profile.birth_hour.split(":");
-    if (h !== undefined && m !== undefined) {
-      setters.setBirthHourNum(String(parseInt(h, 10)));
-      setters.setBirthMinuteNum(String(parseInt(m, 10)));
-    }
-  } else {
-    setters.setTimeUnknown(true);
-  }
+  applyBirthTime(profile.birth_hour, setters.setBirthHourNum, setters.setBirthMinuteNum, setters.setTimeUnknown);
   if (profile.mbti) setters.setMbti(profile.mbti);
   if (profile.privacy_agreed_at) setters.setSaveInfo(true);
   setters.setHasSavedInfo(true);
@@ -92,14 +96,8 @@ function applyLocalProfile(setters: ProfileSetters): void {
   if (local.name) setters.setName(local.name);
   if (local.birthDate) setters.setBirthDate(local.birthDate);
   if (local.gender) setters.setGender(local.gender);
-  if (local.birthTime) {
-    const [h, m] = local.birthTime.split(":");
-    if (h !== undefined && m !== undefined) {
-      setters.setBirthHourNum(String(parseInt(h, 10)));
-      setters.setBirthMinuteNum(String(parseInt(m, 10)));
-    }
-  } else if (local.birthTime === null) {
-    setters.setTimeUnknown(true);
+  if (local.birthTime !== undefined) {
+    applyBirthTime(local.birthTime, setters.setBirthHourNum, setters.setBirthMinuteNum, setters.setTimeUnknown);
   }
   if (local.mbti) setters.setMbti(local.mbti);
   setters.setSaveInfo(true);

@@ -18,6 +18,7 @@ import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { CulturalReadingDisplay } from "@/components/shinjeom/CulturalReadingDisplay";
+import { PageSpinner } from "@/components/common/PageSpinner";
 
 const TOPIC_CONFIGS: { id: Topic; iconId: string }[] = [
   { id: "shinjeom-general",    iconId: "shinjeom-general" },
@@ -251,11 +252,7 @@ function ShinjeomPageContent() {
 
 export default function ShinjeomPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<PageSpinner />}>
       <ShinjeomPageContent />
     </Suspense>
   );

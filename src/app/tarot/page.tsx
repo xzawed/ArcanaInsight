@@ -22,6 +22,7 @@ import { ServiceBackground } from "@/components/effects/ServiceBackground";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getTopicLabel, getTopicDesc, getTopicIconId } from "@/data/topics-meta";
+import { PageSpinner } from "@/components/common/PageSpinner";
 
 const TAROT_TOPIC_IDS: Topic[] = ["love-single", "love-couple", "career", "finance", "health", "general"];
 
@@ -338,11 +339,7 @@ function TarotPageContent() {
 
 export default function TarotPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<PageSpinner />}>
       <TarotPageContent />
     </Suspense>
   );

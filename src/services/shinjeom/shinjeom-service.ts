@@ -4,6 +4,7 @@ import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter } from "@/services/core/prompt-builder";
+import { UserInfo } from "@/types/user-info";
 
 const topicLabels: Record<string, string> = {
   "shinjeom-general": "신수 (종합운)",
@@ -68,7 +69,7 @@ export class ShinjeomService implements DivinationService {
     currentMessage: string | undefined,
     chatHistory: ChatMessage[],
     isFinalTurn: boolean,
-    userInfo?: { name: string; birthDate: string; gender: string; birthTime: string | null; mbti?: string } | null,
+    userInfo?: UserInfo | null,
   ): string {
     const topicLabel = topicLabels[topic] || topic;
     const userInfoText = buildUserInfoPrompt(userInfo);
