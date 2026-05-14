@@ -20,11 +20,13 @@ interface CardItemProps {
   readonly skinId?: string;
   readonly styleId?: CardStyleId;
   readonly glowColor?: string;
+  /** false이면 카드 하단 텍스트를 숨긴다 (CardFace에 전달). 기본값: true */
+  readonly showLabel?: boolean;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
 
-export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, styleId, glowColor }: CardItemProps) {
+export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, styleId, glowColor, showLabel = true }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
 
   const mouseX = useMotionValue(0);
@@ -98,7 +100,7 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
           className="absolute inset-0"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", borderRadius: "0.5rem" }}
         >
-          <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" skinId={skinId} styleId={styleId} />
+          <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" skinId={skinId} styleId={styleId} showLabel={showLabel} />
         </div>
       </motion.div>
 
