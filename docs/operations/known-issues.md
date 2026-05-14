@@ -43,6 +43,20 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
 
 ---
 
+## Visual Overhaul 진행 현황
+
+카드 아트 스타일 시스템(Visual Overhaul) Phase별 상태:
+
+| Phase | 내용 | 상태 | 비고 |
+|-------|------|------|------|
+| Phase 1 | AI 생성 카드 이미지 (Replicate API) — 4종 스타일 × 78장 앞면 + 뒷면 | ⚠️ 이미지 미생성 | `pnpm generate:assets` + `pnpm upload:assets` 실행 필요. `REPLICATE_API_KEY` 환경변수 필요 |
+| Phase 2 | `CardStyleSelector` UI, `useCardStyleStore`, `CardFace`/`CardBack` styleId 지원 | ✅ 완료 | 코드 구현 완료. 이미지 없으면 SVG fallback 렌더링 |
+| Phase 3 | 설정 페이지 CardStyleSelector 통합, SkinGallery 연동, 테마 자동 매핑 표시 | ✅ 완료 | `/settings` 카드 스킨 섹션에 11개 버튼 통합 |
+
+> Phase 1 이미지 미생성 상태에서도 서비스는 SVG 스킨으로 정상 동작함.
+
+---
+
 ## Verum 침투적 통합 제거 이력
 
 비침투적 재도입 준비를 위해 `src/lib/verum/` SDK 및 모든 관련 코드를 제거한 작업 (2026-04-25).

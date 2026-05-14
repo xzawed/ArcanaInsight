@@ -62,6 +62,20 @@
 
 ---
 
+## 카드 아트 스타일 이미지 생성·업로드 `[Codex]`
+
+1. `src/data/cardStyles.ts` — `CardStyleId` 4종 및 `THEME_TO_STYLE_MAP` 확인
+2. `src/hooks/useCardStyleStore.ts` — `styleOverride`, `useSkinMode`, `resolvedStyle()` 스토어 확인
+3. `src/lib/storage/card-style.ts` — `getCardStyleImageUrl()` / `getCardStyleBackUrl()` 헬퍼
+4. `src/components/card/CardStyleSelector.tsx` — 스타일 선택 UI (설정 페이지)
+5. `scripts/generate-assets/` — Replicate API 생성 오케스트레이터
+6. 생성: `pnpm generate:assets` 또는 `pnpm generate:assets:skip`
+7. 업로드: `pnpm upload:assets` 또는 `pnpm upload:assets:skip`
+
+이미지 경로 규칙: [`docs/conventions/image-assets.md`](../conventions/image-assets.md) §5
+
+---
+
 ## AI 프롬프트 수정 `[Claude → Codex]`
 
 1. `src/services/core/prompt-builder.ts` — 공통 프롬프트 빌더

@@ -1,5 +1,8 @@
 # 데이터 모델 — 캐릭터·카드·스킨
 
+> **담당**: Claude (데이터 구조·타입 계약 설계) | Codex (데이터 파일 작성·검증)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모델을 정의합니다.
 
 ---

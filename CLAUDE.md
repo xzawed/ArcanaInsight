@@ -96,9 +96,6 @@ pnpm upload:assets:skip   # 이미 존재하는 이미지 건너뛰고 업로드
 
 전체 목록과 전환 절차는 [`docs/operations/env-variables.md`](docs/operations/env-variables.md)가 정본이다.
 
-- Supabase 기본 필수: `GROK_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`
-- PostgreSQL 모드 추가: `DB_PROVIDER=postgres`, `POSTGRES_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-
 ## 변경 프로세스
 
 상세 절차는 [`docs/workflow/code-change-process.md`](docs/workflow/code-change-process.md)를 따른다.
