@@ -1,6 +1,6 @@
 # Visual Overhaul Phase 1: 이미지 재생성 시스템 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replicate API(Flux 1.1 Pro Ultra)로 타로 카드 312장·배경 21장·데코 12장을 4가지 아트 스타일로 자동 생성하고, 테마-스타일 자동 매핑 + 사용자 오버라이드가 가능한 카드 스타일 시스템을 구축한다.
 
@@ -39,13 +39,13 @@ public/images/backgrounds/deco/[styleId].webp         (4장)
 
 **파일:** `src/data/cardStyles.ts` (신규)
 
-- [ ] `CardStyleId` 타입 정의 (`'dark-fantasy' | 'art-nouveau' | 'anime-mystical' | 'modern-digital'`)
-- [ ] `CardStyle` 인터페이스 정의 (id, name, nameKo, nameJa, description, descriptionEn, descriptionJa, previewCards)
-- [ ] 4개 스타일 데이터 배열 `cardStyles` 정의
-- [ ] 테마 → 스타일 매핑 `THEME_TO_STYLE_MAP` 상수 정의
-- [ ] 헬퍼 함수 `getStyleById`, `getStyleName`, `getStyleDescription` 추가
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add CardStyle types and theme-to-style mapping"`
+- [x] `CardStyleId` 타입 정의 (`'dark-fantasy' | 'art-nouveau' | 'anime-mystical' | 'modern-digital'`)
+- [x] `CardStyle` 인터페이스 정의 (id, name, nameKo, nameJa, description, descriptionEn, descriptionJa, previewCards)
+- [x] 4개 스타일 데이터 배열 `cardStyles` 정의
+- [x] 테마 → 스타일 매핑 `THEME_TO_STYLE_MAP` 상수 정의
+- [x] 헬퍼 함수 `getStyleById`, `getStyleName`, `getStyleDescription` 추가
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add CardStyle types and theme-to-style mapping"`
 
 ```typescript
 // src/data/cardStyles.ts
@@ -142,10 +142,10 @@ export function getStyleDescription(style: CardStyle, locale: string): string {
 
 **파일:** `src/hooks/useCardStyleStore.ts` (신규)
 
-- [ ] `CardStyleState` 인터페이스 정의: `styleOverride`, `setStyleOverride`, `clearOverride`, `resolvedStyle` 셀렉터
-- [ ] `useCardStyleStore` Zustand persist 스토어 생성 (스토리지 키: `"arcana-card-style"`)
-- [ ] `resolvedStyle(activeTheme)` 헬퍼 함수: override 있으면 override 반환, 없으면 `THEME_TO_STYLE_MAP[activeTheme]` 반환
-- [ ] 커밋: `git commit -m "feat: add useCardStyleStore with theme-to-style auto mapping"`
+- [x] `CardStyleState` 인터페이스 정의: `styleOverride`, `setStyleOverride`, `clearOverride`, `resolvedStyle` 셀렉터
+- [x] `useCardStyleStore` Zustand persist 스토어 생성 (스토리지 키: `"arcana-card-style"`)
+- [x] `resolvedStyle(activeTheme)` 헬퍼 함수: override 있으면 override 반환, 없으면 `THEME_TO_STYLE_MAP[activeTheme]` 반환
+- [x] 커밋: `git commit -m "feat: add useCardStyleStore with theme-to-style auto mapping"`
 
 ```typescript
 // src/hooks/useCardStyleStore.ts
@@ -195,12 +195,12 @@ export const useCardStyleStore = create<CardStyleState>()(
 
 **파일:** `src/lib/storage/card-style.ts` (신규)
 
-- [ ] `getCardStyleImageUrl(styleId, cardId)` 함수 구현: cardId 파싱 → `/images/cards/${styleId}/${suit}/${number}.webp` 반환
-- [ ] `getCardStyleBackUrl(styleId)` 함수 구현: `/images/cards/${styleId}/card-back.webp` 반환
-- [ ] cardId 파싱 로직: `"major-00"` → `{ suit: "major", number: "00" }`, `"cups-01"` → `{ suit: "cups", number: "01" }` 등
-- [ ] 단위 테스트 파일 `src/__tests__/lib/storage/card-style.test.ts` 작성
-- [ ] 검증: `pnpm type-check && pnpm lint && pnpm test:coverage`
-- [ ] 커밋: `git commit -m "feat: add getCardStyleImageUrl and unit tests"`
+- [x] `getCardStyleImageUrl(styleId, cardId)` 함수 구현: cardId 파싱 → `/images/cards/${styleId}/${suit}/${number}.webp` 반환
+- [x] `getCardStyleBackUrl(styleId)` 함수 구현: `/images/cards/${styleId}/card-back.webp` 반환
+- [x] cardId 파싱 로직: `"major-00"` → `{ suit: "major", number: "00" }`, `"cups-01"` → `{ suit: "cups", number: "01" }` 등
+- [x] 단위 테스트 파일 `src/__tests__/lib/storage/card-style.test.ts` 작성
+- [x] 검증: `pnpm type-check && pnpm lint && pnpm test:coverage`
+- [x] 커밋: `git commit -m "feat: add getCardStyleImageUrl and unit tests"`
 
 ```typescript
 // src/lib/storage/card-style.ts
@@ -314,11 +314,11 @@ describe('getCardStyleBackUrl', () => {
 
 우선순위: `styleId` → `skinId` → SVG fallback
 
-- [ ] `CardFace`: `styleId?: CardStyleId` prop 추가, `getCardStyleImageUrl` import, `styleId && !imageError` 분기를 `skinId && !imageError` 분기 위에 추가
-- [ ] `CardBack`: `styleId?: CardStyleId` prop 추가, `getCardStyleBackUrl` import, `styleId && !imageError` 분기를 `skinId && !imageError` 분기 위에 추가
-- [ ] `CardItem`: `styleId?: CardStyleId` prop 추가, `CardFace`/`CardBack` 전달
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add styleId prop to CardFace, CardBack, CardItem"`
+- [x] `CardFace`: `styleId?: CardStyleId` prop 추가, `getCardStyleImageUrl` import, `styleId && !imageError` 분기를 `skinId && !imageError` 분기 위에 추가
+- [x] `CardBack`: `styleId?: CardStyleId` prop 추가, `getCardStyleBackUrl` import, `styleId && !imageError` 분기를 `skinId && !imageError` 분기 위에 추가
+- [x] `CardItem`: `styleId?: CardStyleId` prop 추가, `CardFace`/`CardBack` 전달
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add styleId prop to CardFace, CardBack, CardItem"`
 
 ```typescript
 // src/components/card/CardFace.tsx — 수정 부분만 발췌
@@ -413,12 +413,12 @@ export function CardItem({ ..., skinId, styleId, glowColor }: CardItemProps) {
 
 **파일:** `src/__tests__/hooks/useCardStyleStore.test.ts` (신규)
 
-- [ ] `resolvedStyle` 함수 테스트: 테마별 자동 매핑 7가지 모두 검증
-- [ ] `setStyleOverride` / `clearOverride` 동작 검증
-- [ ] override가 null일 때 테마 매핑 사용 확인
-- [ ] override가 설정됐을 때 테마 무관하게 override 반환 확인
-- [ ] 검증: `pnpm test:coverage`
-- [ ] 커밋: `git commit -m "test: add useCardStyleStore unit tests"`
+- [x] `resolvedStyle` 함수 테스트: 테마별 자동 매핑 7가지 모두 검증
+- [x] `setStyleOverride` / `clearOverride` 동작 검증
+- [x] override가 null일 때 테마 매핑 사용 확인
+- [x] override가 설정됐을 때 테마 무관하게 override 반환 확인
+- [x] 검증: `pnpm test:coverage`
+- [x] 커밋: `git commit -m "test: add useCardStyleStore unit tests"`
 
 ```typescript
 // src/__tests__/hooks/useCardStyleStore.test.ts
@@ -505,13 +505,13 @@ describe('useCardStyleStore', () => {
 
 **파일:** `src/components/card/CardStyleSelector.tsx` (신규)
 
-- [ ] 4개 스타일 버튼 그리드 렌더링 (현재 선택 스타일 하이라이트)
-- [ ] "테마 자동 매핑" 버튼 포함 (override 해제)
-- [ ] 스타일 선택 시 `setStyleOverride` / "자동" 선택 시 `clearOverride` 호출
-- [ ] 현재 활성 테마 표시 (`useThemeStore` 연동)
-- [ ] i18n: 번역 키 `settings.card-style.*` 사용 (translations에 추가 필요)
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add CardStyleSelector component"`
+- [x] 4개 스타일 버튼 그리드 렌더링 (현재 선택 스타일 하이라이트)
+- [x] "테마 자동 매핑" 버튼 포함 (override 해제)
+- [x] 스타일 선택 시 `setStyleOverride` / "자동" 선택 시 `clearOverride` 호출
+- [x] 현재 활성 테마 표시 (`useThemeStore` 연동)
+- [x] i18n: 번역 키 `settings.card-style.*` 사용 (translations에 추가 필요)
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add CardStyleSelector component"`
 
 ```typescript
 // src/components/card/CardStyleSelector.tsx
@@ -586,12 +586,12 @@ export function CardStyleSelector() {
 
 **파일:** `src/app/settings/page.tsx` (수정)
 
-- [ ] `CardStyleSelector` import 추가
-- [ ] `useSkinStore` import와 스킨 섹션은 유지 (기존 palette 시스템 보존)
-- [ ] 테마 섹션 바로 아래에 카드 스타일 섹션(`<section>`) 추가
-- [ ] i18n 번역 키 `settings.section.card-style`, `settings.card-style.auto-label`, `settings.card-style.auto-active` 추가 (ko/en/ja 모두)
-- [ ] 검증: `pnpm type-check && pnpm lint && pnpm i18n:check`
-- [ ] 커밋: `git commit -m "feat: integrate CardStyleSelector into settings page"`
+- [x] `CardStyleSelector` import 추가
+- [x] `useSkinStore` import와 스킨 섹션은 유지 (기존 palette 시스템 보존)
+- [x] 테마 섹션 바로 아래에 카드 스타일 섹션(`<section>`) 추가
+- [x] i18n 번역 키 `settings.section.card-style`, `settings.card-style.auto-label`, `settings.card-style.auto-active` 추가 (ko/en/ja 모두)
+- [x] 검증: `pnpm type-check && pnpm lint && pnpm i18n:check`
+- [x] 커밋: `git commit -m "feat: integrate CardStyleSelector into settings page"`
 
 ```typescript
 // src/app/settings/page.tsx — 추가 import
@@ -638,16 +638,16 @@ import { CardStyleSelector } from '@/components/card/CardStyleSelector';
 
 **파일:** `scripts/generate-assets/config.ts` (신규)
 
-- [ ] `REPLICATE_MODEL` 상수 (`black-forest-labs/flux-1.1-pro-ultra`)
-- [ ] `CONCURRENT_JOBS` 상수 (`5`)
-- [ ] `OUTPUT_FORMAT` 상수 (`"webp"`)
-- [ ] 카드 슈트별 ID 배열 (major 22장, cups/wands/swords/pentacles 각 14장)
-- [ ] `STYLE_IDS` 배열 (`['dark-fantasy', 'art-nouveau', 'anime-mystical', 'modern-digital']`)
-- [ ] `MAJOR_ARCANA_NAMES` 매핑 (0~21번 영어 이름)
-- [ ] `SUIT_RANK_NAMES` 매핑 (1~14번: Ace~10, Page, Knight, Queen, King)
-- [ ] `OUTPUT_BASE_DIR` 상수 (`"public/images/cards"`)
-- [ ] `BACKUP_DIR` 상수 (`\`public/images/backup/${new Date().toISOString().slice(0, 10)}\``)
-- [ ] 커밋: `git commit -m "feat: add generate-assets config"`
+- [x] `REPLICATE_MODEL` 상수 (`black-forest-labs/flux-1.1-pro-ultra`)
+- [x] `CONCURRENT_JOBS` 상수 (`5`)
+- [x] `OUTPUT_FORMAT` 상수 (`"webp"`)
+- [x] 카드 슈트별 ID 배열 (major 22장, cups/wands/swords/pentacles 각 14장)
+- [x] `STYLE_IDS` 배열 (`['dark-fantasy', 'art-nouveau', 'anime-mystical', 'modern-digital']`)
+- [x] `MAJOR_ARCANA_NAMES` 매핑 (0~21번 영어 이름)
+- [x] `SUIT_RANK_NAMES` 매핑 (1~14번: Ace~10, Page, Knight, Queen, King)
+- [x] `OUTPUT_BASE_DIR` 상수 (`"public/images/cards"`)
+- [x] `BACKUP_DIR` 상수 (`\`public/images/backup/${new Date().toISOString().slice(0, 10)}\``)
+- [x] 커밋: `git commit -m "feat: add generate-assets config"`
 
 ```typescript
 // scripts/generate-assets/config.ts
@@ -741,12 +741,12 @@ export interface DecoTarget {
 
 **파일:** `scripts/generate-assets/replicate.ts` (신규)
 
-- [ ] `pnpm add -D replicate` 실행 (lockfile 변동 확인)
-- [ ] Replicate API 클라이언트 초기화 (`REPLICATE_API_KEY` 환경변수 검증)
-- [ ] `generateImage(prompt, outputPath)` 함수: Replicate API 호출 → WebP 다운로드 → 파일 저장
-- [ ] 재시도 로직: 최대 3회, 지수 백오프 (1s, 2s, 4s)
-- [ ] `downloadImage(url, outputPath)` 헬퍼: HTTP 응답을 파일로 스트리밍
-- [ ] 커밋: `git commit -m "feat: add Replicate API client for image generation"`
+- [x] `pnpm add -D replicate` 실행 (lockfile 변동 확인)
+- [x] Replicate API 클라이언트 초기화 (`REPLICATE_API_KEY` 환경변수 검증)
+- [x] `generateImage(prompt, outputPath)` 함수: Replicate API 호출 → WebP 다운로드 → 파일 저장
+- [x] 재시도 로직: 최대 3회, 지수 백오프 (1s, 2s, 4s)
+- [x] `downloadImage(url, outputPath)` 헬퍼: HTTP 응답을 파일로 스트리밍
+- [x] 커밋: `git commit -m "feat: add Replicate API client for image generation"`
 
 ```typescript
 // scripts/generate-assets/replicate.ts
@@ -838,12 +838,12 @@ export async function generateImage(prompt: string, outputPath: string): Promise
 
 **파일:** `scripts/generate-assets/prompts.ts` (신규)
 
-- [ ] `buildCardPrompt(styleId, suit, number, cardName)` 함수: 스타일별 base prompt + 카드별 subject 조합
-- [ ] `buildBackPrompt(styleId)` 함수: 카드 뒷면 프롬프트
-- [ ] `buildBackgroundPrompt(service, theme)` 함수: 서비스/테마별 배경 프롬프트
-- [ ] `buildDecoPrompt(styleId)` 함수: 데코 이미지 프롬프트
-- [ ] 모든 프롬프트에 "no text, no letters, no watermarks, no signatures" 포함
-- [ ] 커밋: `git commit -m "feat: add image generation prompts for all 4 styles"`
+- [x] `buildCardPrompt(styleId, suit, number, cardName)` 함수: 스타일별 base prompt + 카드별 subject 조합
+- [x] `buildBackPrompt(styleId)` 함수: 카드 뒷면 프롬프트
+- [x] `buildBackgroundPrompt(service, theme)` 함수: 서비스/테마별 배경 프롬프트
+- [x] `buildDecoPrompt(styleId)` 함수: 데코 이미지 프롬프트
+- [x] 모든 프롬프트에 "no text, no letters, no watermarks, no signatures" 포함
+- [x] 커밋: `git commit -m "feat: add image generation prompts for all 4 styles"`
 
 ```typescript
 // scripts/generate-assets/prompts.ts
@@ -954,12 +954,12 @@ export function getCardNameForPrompt(suit: 'major' | Suit, numberStr: string): s
 
 **파일:** `scripts/generate-assets/progress.ts` (신규)
 
-- [ ] `ProgressTracker` 클래스: total/completed/failed 카운터, 진행률 표시
-- [ ] `log(message)` 메서드: 타임스탬프 + 메시지 출력
-- [ ] `tick(success, label)` 메서드: 카운터 업데이트 + 인라인 진행률 표시
-- [ ] `summary()` 메서드: 최종 성공/실패 요약 출력
-- [ ] `PQueue` 기반 병렬 큐 유틸리티 함수 `runConcurrent(tasks, concurrency)` 구현
-- [ ] 커밋: `git commit -m "feat: add progress tracker and concurrent task runner"`
+- [x] `ProgressTracker` 클래스: total/completed/failed 카운터, 진행률 표시
+- [x] `log(message)` 메서드: 타임스탬프 + 메시지 출력
+- [x] `tick(success, label)` 메서드: 카운터 업데이트 + 인라인 진행률 표시
+- [x] `summary()` 메서드: 최종 성공/실패 요약 출력
+- [x] `PQueue` 기반 병렬 큐 유틸리티 함수 `runConcurrent(tasks, concurrency)` 구현
+- [x] 커밋: `git commit -m "feat: add progress tracker and concurrent task runner"`
 
 ```typescript
 // scripts/generate-assets/progress.ts
@@ -1039,14 +1039,14 @@ export async function runConcurrent<T>(
 
 **파일:** `scripts/generate-assets/index.ts` (신규)
 
-- [ ] `backupExistingImages()`: `public/images/cards/` 하위 파일을 `BACKUP_DIR`로 복사
-- [ ] `buildAllCardTargets()`: STYLE_IDS × (major 22 + 4 suits 14) = 312개 `CardTarget` 생성
-- [ ] `buildAllBackTargets()`: STYLE_IDS × 1 = 4개 카드뒷면 타겟 생성
-- [ ] `buildAllBackgroundTargets()`: 3 services × 7 themes = 21개 배경 타겟 생성
-- [ ] `buildAllDecoTargets()`: STYLE_IDS × 1 = 4개 데코 타겟 생성
-- [ ] 메인 함수: backup → 타겟 목록 구성 → `runConcurrent(CONCURRENT_JOBS)` 실행 → progress.summary()
-- [ ] 기존 파일 존재 시 스킵 옵션 (`--skip-existing` 플래그)
-- [ ] 커밋: `git commit -m "feat: add main image generation orchestrator"`
+- [x] `backupExistingImages()`: `public/images/cards/` 하위 파일을 `BACKUP_DIR`로 복사
+- [x] `buildAllCardTargets()`: STYLE_IDS × (major 22 + 4 suits 14) = 312개 `CardTarget` 생성
+- [x] `buildAllBackTargets()`: STYLE_IDS × 1 = 4개 카드뒷면 타겟 생성
+- [x] `buildAllBackgroundTargets()`: 3 services × 7 themes = 21개 배경 타겟 생성
+- [x] `buildAllDecoTargets()`: STYLE_IDS × 1 = 4개 데코 타겟 생성
+- [x] 메인 함수: backup → 타겟 목록 구성 → `runConcurrent(CONCURRENT_JOBS)` 실행 → progress.summary()
+- [x] 기존 파일 존재 시 스킵 옵션 (`--skip-existing` 플래그)
+- [x] 커밋: `git commit -m "feat: add main image generation orchestrator"`
 
 ```typescript
 // scripts/generate-assets/index.ts
@@ -1261,11 +1261,11 @@ main().catch((err) => {
 
 **파일:** `package.json` (수정)
 
-- [ ] `"generate:assets"` 스크립트 추가: `"npx tsx scripts/generate-assets/index.ts"`
-- [ ] `"generate:assets:skip"` 스크립트 추가: `"npx tsx scripts/generate-assets/index.ts --skip-existing"`
-- [ ] `REPLICATE_API_KEY` 환경변수 문서화: `docs/operations/env-variables.md`에 추가
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋: `git commit -m "feat: add generate:assets npm scripts and document REPLICATE_API_KEY"`
+- [x] `"generate:assets"` 스크립트 추가: `"npx tsx scripts/generate-assets/index.ts"`
+- [x] `"generate:assets:skip"` 스크립트 추가: `"npx tsx scripts/generate-assets/index.ts --skip-existing"`
+- [x] `REPLICATE_API_KEY` 환경변수 문서화: `docs/operations/env-variables.md`에 추가
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋: `git commit -m "feat: add generate:assets npm scripts and document REPLICATE_API_KEY"`
 
 ```json
 // package.json scripts 섹션에 추가:
@@ -1285,16 +1285,16 @@ main().catch((err) => {
 
 ## Task 14: 전체 통합 검증 및 마무리
 
-- [ ] `pnpm type-check` — 타입 오류 0개 확인
-- [ ] `pnpm lint` — ESLint 오류 0개 확인
-- [ ] `pnpm test:coverage` — 신규 단위 테스트 2개 모두 통과 확인
-- [ ] `pnpm i18n:check` — 번역 키 drift 없음 확인
-- [ ] `pnpm check:doc-links` — 문서 링크 정합성 확인
-- [ ] `pnpm build` — 프로덕션 빌드 성공 확인
-- [ ] (선택) 테스트 이미지 1장 생성: `REPLICATE_API_KEY=xxx npx tsx scripts/generate-assets/index.ts --skip-existing`
-- [ ] 생성 후 검증: `ls public/images/cards/dark-fantasy/major/ | wc -l` → `22` 확인
-- [ ] PR 생성: `git push && gh pr create --title "feat: Visual Overhaul Phase 1 - Card Style System & Image Generation Scripts"`
-- [ ] 최종 커밋: `git commit -m "docs: update env-variables.md with REPLICATE_API_KEY"`
+- [x] `pnpm type-check` — 타입 오류 0개 확인
+- [x] `pnpm lint` — ESLint 오류 0개 확인
+- [x] `pnpm test:coverage` — 신규 단위 테스트 2개 모두 통과 확인
+- [x] `pnpm i18n:check` — 번역 키 drift 없음 확인
+- [x] `pnpm check:doc-links` — 문서 링크 정합성 확인
+- [x] `pnpm build` — 프로덕션 빌드 성공 확인
+- [x] (선택) 테스트 이미지 1장 생성: `REPLICATE_API_KEY=xxx npx tsx scripts/generate-assets/index.ts --skip-existing`
+- [x] 생성 후 검증: `ls public/images/cards/dark-fantasy/major/ | wc -l` → `22` 확인
+- [x] PR 생성: `git push && gh pr create --title "feat: Visual Overhaul Phase 1 - Card Style System & Image Generation Scripts"`
+- [x] 최종 커밋: `git commit -m "docs: update env-variables.md with REPLICATE_API_KEY"`
 
 ---
 

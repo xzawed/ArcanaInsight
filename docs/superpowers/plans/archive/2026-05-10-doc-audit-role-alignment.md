@@ -1,6 +1,6 @@
 # 문서 감사 및 역할 정렬 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 모든 workflow/conventions/operations 문서를 Claude(설계·결정) / Codex(구현·검증) 협업 모델에 맞게 전면 재작성하고, CLAUDE.md·AGENTS.md 간 중복을 제거한다.
 
@@ -33,7 +33,7 @@
 
 현재 "Claude & Codex 역할 분담" 섹션(122~138줄)에서 두 서브섹션을 제거하고 링크로 대체한다.
 
-- [ ] **Step 1: CLAUDE.md 역할 분담 섹션 수정**
+- [x] **Step 1: CLAUDE.md 역할 분담 섹션 수정**
 
 `CLAUDE.md`에서 아래 블록을 찾아 교체한다.
 
@@ -68,7 +68,7 @@
 핸드오프 형식·재진입 조건·파일 소유권·품질 게이트 전체는 [`docs/workflow/claude-codex-collaboration.md`](docs/workflow/claude-codex-collaboration.md)가 정본이다.
 ```
 
-- [ ] **Step 2: 줄 수 확인**
+- [x] **Step 2: 줄 수 확인**
 
 수정 후 `CLAUDE.md`의 총 줄 수가 250 이하인지 확인한다.
 
@@ -78,7 +78,7 @@
 
 예상: 140줄 내외 (기존 149줄에서 11줄 감소)
 
-- [ ] **Step 3: 커밋**
+- [x] **Step 3: 커밋**
 
 ```bash
 git add CLAUDE.md
@@ -94,7 +94,7 @@ git commit -m "docs: CLAUDE.md 역할 분담 섹션 — 상세 목록 제거, �
 
 기술 스택·프로젝트 구조·핵심 아키텍처·환경변수·캐릭터/데이터 섹션(총 ~53줄)을 참조 링크로 교체한다.
 
-- [ ] **Step 1: 기술 스택·구조·아키텍처 섹션 교체**
+- [x] **Step 1: 기술 스택·구조·아키텍처 섹션 교체**
 
 `AGENTS.md`에서 아래 세 섹션을 찾아 통합 1줄로 교체한다.
 
@@ -156,7 +156,7 @@ supabase/migrations/ # Supabase SQL migrations
 > 구현 시 준수해야 할 아키텍처 규칙은 [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md)가 상세 정본이다.
 ```
 
-- [ ] **Step 2: 환경변수 섹션 교체**
+- [x] **Step 2: 환경변수 섹션 교체**
 
 제거 대상:
 ```markdown
@@ -175,7 +175,7 @@ supabase/migrations/ # Supabase SQL migrations
 > 전체 목록 및 설정 절차: [`docs/operations/env-variables.md`](docs/operations/env-variables.md)
 ```
 
-- [ ] **Step 3: 캐릭터/데이터 기준 섹션 교체**
+- [x] **Step 3: 캐릭터/데이터 기준 섹션 교체**
 
 제거 대상:
 ```markdown
@@ -193,7 +193,7 @@ supabase/migrations/ # Supabase SQL migrations
 > 캐릭터 목록, 표정 타입, 이미지 경로 규칙: `CLAUDE.md` 및 [`docs/architecture/data-model.md`](docs/architecture/data-model.md) 참조.
 ```
 
-- [ ] **Step 4: AGENTS.md 상단에 Codex 메타 블록 추가**
+- [x] **Step 4: AGENTS.md 상단에 Codex 메타 블록 추가**
 
 파일 최상단 H1 바로 아래(role 요약 앞)에 삽입:
 
@@ -209,7 +209,7 @@ supabase/migrations/ # Supabase SQL migrations
 
 변경 없음 — 이미 Codex 역할 명시가 되어 있으므로 유지.
 
-- [ ] **Step 5: 줄 수 확인**
+- [x] **Step 5: 줄 수 확인**
 
 ```bash
 (Get-Content AGENTS.md).Count
@@ -217,7 +217,7 @@ supabase/migrations/ # Supabase SQL migrations
 
 예상: 130줄 내외 (기존 186줄에서 ~53줄 감소 + 교체 6줄 추가)
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add AGENTS.md
@@ -233,7 +233,7 @@ git commit -m "docs: AGENTS.md 중복 섹션 제거 — 기술 스택·구조·�
 
 현재 "Claude CLI가 기획+구현+검토 모두 수행" 서두를 제거하고 Claude+Codex 이중 흐름으로 재작성한다.
 
-- [ ] **Step 1: 파일 상단 메타 블록 + 서두 교체**
+- [x] **Step 1: 파일 상단 메타 블록 + 서두 교체**
 
 현재 서두:
 ```markdown
@@ -252,7 +252,7 @@ git commit -m "docs: AGENTS.md 중복 섹션 제거 — 기술 스택·구조·�
 모든 코드 변경에 적용되는 7단계 프로세스입니다. Claude가 설계·검토를 담당하고, Codex가 구현·검증을 담당합니다.
 ```
 
-- [ ] **Step 2: 7단계에 역할 레이블 추가**
+- [x] **Step 2: 7단계에 역할 레이블 추가**
 
 각 단계 제목을 아래와 같이 수정한다:
 
@@ -297,7 +297,7 @@ git commit -m "docs: AGENTS.md 중복 섹션 제거 — 기술 스택·구조·�
 ### 7단계: CLAUDE.md 최신화 `[Claude]` (필수, 예외 없음)
 ```
 
-- [ ] **Step 3: 전체 흐름도 교체**
+- [x] **Step 3: 전체 흐름도 교체**
 
 기존 흐름도 블록을 새 이중 흐름도로 교체:
 
@@ -320,7 +320,7 @@ git commit -m "docs: AGENTS.md 중복 섹션 제거 — 기술 스택·구조·�
 ```
 ```
 
-- [ ] **Step 4: 커밋**
+- [x] **Step 4: 커밋**
 
 ```bash
 git add docs/workflow/code-change-process.md
@@ -334,7 +334,7 @@ git commit -m "docs: code-change-process — Claude+Codex 이중 흐름 모델�
 **Files:**
 - Modify: `docs/workflow/task-playbooks.md`
 
-- [ ] **Step 1: 파일 상단 메타 블록 추가**
+- [x] **Step 1: 파일 상단 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -342,7 +342,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 2: 각 업무 섹션 제목에 역할 레이블 추가**
+- [x] **Step 2: 각 업무 섹션 제목에 역할 레이블 추가**
 
 ```markdown
 ## 새 캐릭터 추가 `[Claude → Codex]`
@@ -370,7 +370,7 @@ H1 바로 아래에 삽입:
 
 나머지 섹션도 동일 패턴으로 확인 후 레이블 추가. 섹션이 없으면 `[Claude]`, `[Codex]`, `[Claude → Codex]` 중 적합한 것 선택.
 
-- [ ] **Step 3: 커밋**
+- [x] **Step 3: 커밋**
 
 ```bash
 git add docs/workflow/task-playbooks.md
@@ -387,7 +387,7 @@ git commit -m "docs: task-playbooks — 업무별 Claude/Codex 역할 레이블 
 - Modify: `docs/workflow/ci-cd.md`
 - Modify: `docs/workflow/scripts.md`
 
-- [ ] **Step 1: unit-testing.md 메타 블록 추가**
+- [x] **Step 1: unit-testing.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -395,7 +395,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 2: e2e-testing.md 메타 블록 추가**
+- [x] **Step 2: e2e-testing.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -403,7 +403,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 3: ci-cd.md 메타 블록 추가**
+- [x] **Step 3: ci-cd.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -411,7 +411,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 4: scripts.md 메타 블록 추가**
+- [x] **Step 4: scripts.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -419,7 +419,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add docs/workflow/unit-testing.md docs/workflow/e2e-testing.md docs/workflow/ci-cd.md docs/workflow/scripts.md
@@ -440,49 +440,49 @@ git commit -m "docs: workflow/ 나머지 4개 파일 — 담당자 메타 블록
 
 내용 변경 없음. 각 파일 H1 바로 아래에 메타 블록만 삽입.
 
-- [ ] **Step 1: coding-style.md**
+- [x] **Step 1: coding-style.md**
 
 ```markdown
 > **결정자**: Claude (규칙 정의·예외 승인) | **준수 의무**: Codex (모든 구현 코드)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 2: cross-platform.md**
+- [x] **Step 2: cross-platform.md**
 
 ```markdown
 > **결정자**: Claude (규칙 정의·예외 승인) | **준수 의무**: Codex (컴포넌트·스타일 구현 시)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 3: i18n-style.md**
+- [x] **Step 3: i18n-style.md**
 
 ```markdown
 > **결정자**: Claude (키 네이밍·구조 결정) | **준수 의무**: Codex (번역 값 작성·`useT()` 사용)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 4: image-assets.md**
+- [x] **Step 4: image-assets.md**
 
 ```markdown
 > **결정자**: Claude (경로 규칙·포맷 기준 정의) | **준수 의무**: Codex (이미지 배치·생성·교체 작업)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 5: layout-rules.md**
+- [x] **Step 5: layout-rules.md**
 
 ```markdown
 > **결정자**: Claude (5:5 비율·모바일 배치 기준 정의) | **준수 의무**: Codex (캐릭터 등장 페이지 구현 시)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 6: zod-schemas.md**
+- [x] **Step 6: zod-schemas.md**
 
 ```markdown
 > **결정자**: Claude (스키마 구조·null/undefined 규칙 결정) | **준수 의무**: Codex (API 라우트 구현 시)
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add docs/conventions/
@@ -500,7 +500,7 @@ git commit -m "docs: conventions/ 6개 파일 — 결정자/준수 의무 메타
 - Modify: `docs/operations/monitoring.md`
 - Modify: `docs/operations/operation-guide.md`
 
-- [ ] **Step 1: deployment.md 메타 블록 추가**
+- [x] **Step 1: deployment.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -508,7 +508,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 2: env-variables.md 메타 블록 추가**
+- [x] **Step 2: env-variables.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -516,7 +516,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 3: known-issues.md 메타 블록 + 담당 컬럼 추가**
+- [x] **Step 3: known-issues.md 메타 블록 + 담당 컬럼 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -549,7 +549,7 @@ H1 바로 아래에 삽입:
 ```
 각 항목 → `파기 확정 (Claude 결정)`
 
-- [ ] **Step 4: monitoring.md 메타 블록 추가**
+- [x] **Step 4: monitoring.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -568,7 +568,7 @@ QA 실패 대응 절차 섹션에 역할 주석 추가:
 5. [Claude] PR 검토 후 머지 → `qa-recheck.yml` 자동 재실행 → Issue 자동 닫기
 ```
 
-- [ ] **Step 5: operation-guide.md 메타 블록 추가**
+- [x] **Step 5: operation-guide.md 메타 블록 추가**
 
 H1 바로 아래에 삽입:
 ```markdown
@@ -576,7 +576,7 @@ H1 바로 아래에 삽입:
 > 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
 ```
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add docs/operations/
@@ -590,7 +590,7 @@ git commit -m "docs: operations/ 5개 파일 — 역할 메타 블록 추가, kn
 **Files:**
 - Read-only verification
 
-- [ ] **Step 1: 문서 링크 검증**
+- [x] **Step 1: 문서 링크 검증**
 
 ```bash
 pnpm check:doc-links
@@ -598,7 +598,7 @@ pnpm check:doc-links
 
 예상: 0 broken links. 실패 시 해당 파일로 이동해 링크 수정 후 재실행.
 
-- [ ] **Step 2: 변경 파일 목록 확인**
+- [x] **Step 2: 변경 파일 목록 확인**
 
 ```bash
 git diff main...HEAD --stat
@@ -627,7 +627,7 @@ git diff main...HEAD --stat
 - `docs/superpowers/specs/2026-05-10-doc-audit-role-alignment-design.md` (이미 커밋됨)
 - `docs/superpowers/plans/2026-05-10-doc-audit-role-alignment.md` (이 파일)
 
-- [ ] **Step 3: PR 생성**
+- [x] **Step 3: PR 생성**
 
 ```bash
 git push origin docs/doc-audit-cleanup-2026-05-09
@@ -642,11 +642,11 @@ gh pr create --title "docs: 전체 문서 감사 — Claude·Codex 역할 정렬
 
 ## Test plan
 
-- [ ] `pnpm check:doc-links` 통과 확인
-- [ ] AGENTS.md 130줄 이하 확인
-- [ ] CLAUDE.md 250줄 이하 확인
-- [ ] code-change-process.md에 이중 흐름도 포함 확인
-- [ ] known-issues.md 담당 컬럼 확인
+- [x] `pnpm check:doc-links` 통과 확인
+- [x] AGENTS.md 130줄 이하 확인
+- [x] CLAUDE.md 250줄 이하 확인
+- [x] code-change-process.md에 이중 흐름도 포함 확인
+- [x] known-issues.md 담당 컬럼 확인
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF

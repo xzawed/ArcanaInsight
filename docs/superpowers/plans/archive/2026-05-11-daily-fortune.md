@@ -1,6 +1,6 @@
 # Daily Fortune Widget 구현 계획
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 홈 화면의 DailyCard 위젯을 5개 영역(종합운·연애·직장·건강·재물) 운세를 한 번에 보여주는 DailyFortune 위젯으로 교체한다.
 
@@ -40,7 +40,7 @@
 **Files:**
 - Create: `supabase/migrations/017_daily_fortune_areas.sql`
 
-- [ ] **Step 1: 마이그레이션 파일 생성**
+- [x] **Step 1: 마이그레이션 파일 생성**
 
 ```sql
 -- 017_daily_fortune_areas.sql
@@ -56,7 +56,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS daily_cards_date_character_area_key
   ON daily_cards (date, character_id, area);
 ```
 
-- [ ] **Step 2: 커밋**
+- [x] **Step 2: 커밋**
 
 ```bash
 git add supabase/migrations/017_daily_fortune_areas.sql
@@ -73,7 +73,7 @@ git commit -m "feat(db): daily_cards에 area 컬럼 추가 — 5개 운세 영�
 - Modify: `src/i18n/translations/en/index.ts`
 - Modify: `src/i18n/translations/ja/index.ts`
 
-- [ ] **Step 1: DailyFortuneSchema 추가**
+- [x] **Step 1: DailyFortuneSchema 추가**
 
 `src/lib/validation/api-schemas.ts`의 `DailyCardSchema` 아래에 추가:
 
@@ -85,7 +85,7 @@ export const DailyFortuneSchema = z.object({
 });
 ```
 
-- [ ] **Step 2: ko 번역 키 추가**
+- [x] **Step 2: ko 번역 키 추가**
 
 `src/i18n/translations/ko/index.ts`의 `home` 객체 끝(`"gallery.desc"` 다음)에 추가:
 
@@ -105,7 +105,7 @@ export const DailyFortuneSchema = z.object({
     "daily-fortune-error": "오늘의 운세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
 ```
 
-- [ ] **Step 3: en 번역 키 추가**
+- [x] **Step 3: en 번역 키 추가**
 
 `src/i18n/translations/en/index.ts`의 `home` 객체에 추가:
 
@@ -125,7 +125,7 @@ export const DailyFortuneSchema = z.object({
     "daily-fortune-error": "Failed to load today's fortune. Please try again shortly.",
 ```
 
-- [ ] **Step 4: ja 번역 키 추가**
+- [x] **Step 4: ja 번역 키 추가**
 
 `src/i18n/translations/ja/index.ts`의 `home` 객체에 추가:
 
@@ -145,7 +145,7 @@ export const DailyFortuneSchema = z.object({
     "daily-fortune-error": "今日の運勢を取得できませんでした。しばらくしてから再度お試しください。",
 ```
 
-- [ ] **Step 5: i18n drift 검사 실행**
+- [x] **Step 5: i18n drift 검사 실행**
 
 ```bash
 pnpm i18n:check
@@ -153,7 +153,7 @@ pnpm i18n:check
 
 기대 출력: `KO 313개 | EN 313개 | JA 313개` (이전보다 8개 증가), `✅ 번역 키 drift 없음`
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add src/lib/validation/api-schemas.ts src/i18n/translations/ko/index.ts src/i18n/translations/en/index.ts src/i18n/translations/ja/index.ts
@@ -168,7 +168,7 @@ git commit -m "feat(i18n): DailyFortune Zod 스키마 + 번역 키 8개 추가"
 - Create: `src/__tests__/api/daily-fortune.test.ts`
 - Create: `src/app/api/daily-fortune/route.ts`
 
-- [ ] **Step 1: 실패하는 테스트 작성**
+- [x] **Step 1: 실패하는 테스트 작성**
 
 `src/__tests__/api/daily-fortune.test.ts` 전체 파일:
 
@@ -315,7 +315,7 @@ describe("POST /api/daily-fortune", () => {
 });
 ```
 
-- [ ] **Step 2: 테스트 실패 확인**
+- [x] **Step 2: 테스트 실패 확인**
 
 ```bash
 pnpm test src/__tests__/api/daily-fortune.test.ts 2>&1 | head -20
@@ -323,7 +323,7 @@ pnpm test src/__tests__/api/daily-fortune.test.ts 2>&1 | head -20
 
 기대 출력: `Cannot find module '@/app/api/daily-fortune/route'`
 
-- [ ] **Step 3: API 라우트 구현**
+- [x] **Step 3: API 라우트 구현**
 
 `src/app/api/daily-fortune/route.ts` 전체 파일:
 
@@ -442,7 +442,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-- [ ] **Step 4: 테스트 실행 → 통과 확인**
+- [x] **Step 4: 테스트 실행 → 통과 확인**
 
 ```bash
 pnpm test src/__tests__/api/daily-fortune.test.ts
@@ -450,7 +450,7 @@ pnpm test src/__tests__/api/daily-fortune.test.ts
 
 기대 출력: `✓ 10 tests passed`
 
-- [ ] **Step 5: `/api/daily-card` upsert 패치**
+- [x] **Step 5: `/api/daily-card` upsert 패치**
 
 마이그레이션 후 기존 `/api/daily-card/route.ts`의 upsert 충돌키가 깨집니다. 아래 두 곳을 수정합니다.
 
@@ -489,7 +489,7 @@ const cached = await db.findOne<{...}>("daily_cards", { date, character_id: char
 const cached = await db.findOne<{...}>("daily_cards", { date, character_id: characterId, area: "general" });
 ```
 
-- [ ] **Step 6: daily-card 기존 테스트 확인**
+- [x] **Step 6: daily-card 기존 테스트 확인**
 
 ```bash
 pnpm test src/__tests__/api/daily-card.test.ts
@@ -497,7 +497,7 @@ pnpm test src/__tests__/api/daily-card.test.ts
 
 기대 출력: `✓ 모든 테스트 통과` (mock이 findOne을 그대로 사용하므로 변경 없이 통과)
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add src/__tests__/api/daily-fortune.test.ts src/app/api/daily-fortune/route.ts src/app/api/daily-card/route.ts
@@ -514,7 +514,7 @@ git commit -m "feat(api): /api/daily-fortune 엔드포인트 — 5개 영역 일
 - Modify: `src/components/layout/MobileNav.tsx`
 - Delete: `src/components/home/DailyCard.tsx`
 
-- [ ] **Step 1: DailyFortune.tsx 생성**
+- [x] **Step 1: DailyFortune.tsx 생성**
 
 `src/components/home/DailyFortune.tsx` 전체 파일:
 
@@ -747,7 +747,7 @@ export function DailyFortune() {
 }
 ```
 
-- [ ] **Step 2: page.tsx에서 DailyCard → DailyFortune 교체**
+- [x] **Step 2: page.tsx에서 DailyCard → DailyFortune 교체**
 
 `src/app/page.tsx`에서:
 
@@ -763,7 +763,7 @@ import { DailyFortune } from "@/components/home/DailyFortune";
       <DailyFortune />
 ```
 
-- [ ] **Step 3: MobileNav 앵커 문자열 업데이트**
+- [x] **Step 3: MobileNav 앵커 문자열 업데이트**
 
 `src/components/layout/MobileNav.tsx`에서:
 
@@ -775,13 +775,13 @@ const isActive = item.href === "/" || item.href === "/#daily-card"
 const isActive = item.href === "/" || item.href === "/#daily-fortune"
 ```
 
-- [ ] **Step 4: DailyCard.tsx 삭제**
+- [x] **Step 4: DailyCard.tsx 삭제**
 
 ```bash
 git rm src/components/home/DailyCard.tsx
 ```
 
-- [ ] **Step 5: 타입·린트 검사**
+- [x] **Step 5: 타입·린트 검사**
 
 ```bash
 pnpm type-check 2>&1 | tail -5
@@ -790,7 +790,7 @@ pnpm lint 2>&1 | tail -5
 
 기대 출력: 오류 없음
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add src/components/home/DailyFortune.tsx src/app/page.tsx src/components/layout/MobileNav.tsx
@@ -809,7 +809,7 @@ git commit -m "feat(ui): DailyFortune 위젯 — 5개 영역 1+4 레이아웃, D
 - Modify: `e2e/responsive.spec.ts`
 - Modify: `sonar-project.properties`
 
-- [ ] **Step 1: daily-card.spec.ts → DailyFortune 셀렉터로 전환**
+- [x] **Step 1: daily-card.spec.ts → DailyFortune 셀렉터로 전환**
 
 `e2e/daily-card.spec.ts` 전체 파일 교체:
 
@@ -860,7 +860,7 @@ test.describe("DailyFortune — 오늘의 운세", () => {
 });
 ```
 
-- [ ] **Step 2: home.spec.ts — #daily-card → #daily-fortune**
+- [x] **Step 2: home.spec.ts — #daily-card → #daily-fortune**
 
 `e2e/home.spec.ts`에서 `#daily-card`를 `#daily-fortune`으로 변경:
 
@@ -872,7 +872,7 @@ const section = page.locator("#daily-card");
 const section = page.locator("#daily-fortune");
 ```
 
-- [ ] **Step 3: api-error-handling.spec.ts — API 경로·응답 형식 업데이트**
+- [x] **Step 3: api-error-handling.spec.ts — API 경로·응답 형식 업데이트**
 
 `e2e/api-error-handling.spec.ts`에서 daily-card mock을 daily-fortune으로 변경:
 
@@ -888,7 +888,7 @@ await page.route("**/api/daily-fortune", (route) => {
 });
 ```
 
-- [ ] **Step 4: cross-platform.spec.ts — API mock 업데이트**
+- [x] **Step 4: cross-platform.spec.ts — API mock 업데이트**
 
 `e2e/cross-platform.spec.ts`에서:
 
@@ -915,11 +915,11 @@ await page.route("**/api/daily-fortune", async (route) => {
 });
 ```
 
-- [ ] **Step 5: responsive.spec.ts — API mock 업데이트**
+- [x] **Step 5: responsive.spec.ts — API mock 업데이트**
 
 `e2e/responsive.spec.ts`에서 cross-platform.spec.ts와 동일하게 `**/api/daily-card` → `**/api/daily-fortune`으로 변경하고, 응답 형식을 위의 `areas` 배열 형식으로 업데이트.
 
-- [ ] **Step 6: sonar-project.properties — 신규 파일 동기화**
+- [x] **Step 6: sonar-project.properties — 신규 파일 동기화**
 
 `sonar-project.properties`에서 `sonar.coverage.exclusions`와 `sonar.cpd.exclusions`의 `src/app/api/daily-card/route.ts` 항목이 있는지 확인 후, 패턴에 따라 `src/components/home/DailyFortune.tsx`를 `sonar.cpd.exclusions`에 추가. (API route는 테스트가 있으므로 coverage 제외 불필요)
 
@@ -928,7 +928,7 @@ await page.route("**/api/daily-fortune", async (route) => {
   src/components/home/DailyFortune.tsx,\
 ```
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add e2e/daily-card.spec.ts e2e/home.spec.ts e2e/api-error-handling.spec.ts e2e/cross-platform.spec.ts e2e/responsive.spec.ts sonar-project.properties
@@ -939,7 +939,7 @@ git commit -m "test(e2e): DailyCard → DailyFortune E2E 셀렉터·API mock 업
 
 ## Task 6: 최종 검증
 
-- [ ] **Step 1: 단위 테스트 전체 실행**
+- [x] **Step 1: 단위 테스트 전체 실행**
 
 ```bash
 pnpm test:coverage 2>&1 | tail -20
@@ -947,7 +947,7 @@ pnpm test:coverage 2>&1 | tail -20
 
 기대 출력: 기존 대비 테스트 수 증가 (daily-fortune 10개), 커버리지 임계치 통과
 
-- [ ] **Step 2: 빌드 확인**
+- [x] **Step 2: 빌드 확인**
 
 ```bash
 pnpm build 2>&1 | tail -10
@@ -955,7 +955,7 @@ pnpm build 2>&1 | tail -10
 
 기대 출력: `✓ Compiled successfully`
 
-- [ ] **Step 3: 최종 커밋 (feature 브랜치 완성)**
+- [x] **Step 3: 최종 커밋 (feature 브랜치 완성)**
 
 ```bash
 git log --oneline -6
@@ -967,7 +967,7 @@ git log --oneline -6
 
 ## 주의사항 체크리스트
 
-- [ ] `DeckManager.getCardById()`가 `null`을 반환할 수 있으므로 컴포넌트에서 optional chaining 사용
-- [ ] `getAvailableCharacters()` 첫 번째 캐릭터 이미지 경로는 `nukki-enhanced/default.png` (기존 DailyCard는 `idle.png` 사용 — 수정 필요)
-- [ ] `daily_cards` 마이그레이션이 적용되기 전 로컬 개발 시 `area` 컬럼 오류 발생 가능 — Supabase 대시보드에서 마이그레이션 먼저 적용할 것
-- [ ] `FallbackProvider`는 파일 상단 모듈 레벨에서 1회만 `new`할 것 (CircuitBreaker 쿨다운 보존)
+- [x] `DeckManager.getCardById()`가 `null`을 반환할 수 있으므로 컴포넌트에서 optional chaining 사용
+- [x] `getAvailableCharacters()` 첫 번째 캐릭터 이미지 경로는 `nukki-enhanced/default.png` (기존 DailyCard는 `idle.png` 사용 — 수정 필요)
+- [x] `daily_cards` 마이그레이션이 적용되기 전 로컬 개발 시 `area` 컬럼 오류 발생 가능 — Supabase 대시보드에서 마이그레이션 먼저 적용할 것
+- [x] `FallbackProvider`는 파일 상단 모듈 레벨에서 1회만 `new`할 것 (CircuitBreaker 쿨다운 보존)

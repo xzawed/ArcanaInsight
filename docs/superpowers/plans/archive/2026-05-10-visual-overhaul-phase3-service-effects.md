@@ -1,6 +1,6 @@
 # Visual Overhaul Phase 3: 서비스 페이지 이펙트 강화 + 카드 텍스트 비노출 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 타로 카드 스프레드·뒤집기·셔플 등 서비스 플로우 전반의 애니메이션을 극적으로 강화하고, 카드 앞면 이미지는 보이되 AI 리딩 완료 전까지 하단 텍스트(카드명·문구)를 숨기는 기능을 구현한다.
 
@@ -55,8 +55,8 @@
 
 ## Task 1: 브랜치 생성 및 useReadingReveal hook 구현
 
-- [ ] 브랜치 생성: `git checkout -b feat/visual-overhaul-phase3`
-- [ ] `src/hooks/useReadingReveal.ts` 파일 생성:
+- [x] 브랜치 생성: `git checkout -b feat/visual-overhaul-phase3`
+- [x] `src/hooks/useReadingReveal.ts` 파일 생성:
 
 ```typescript
 // src/hooks/useReadingReveal.ts
@@ -78,8 +78,8 @@ export const useReadingReveal = create<ReadingRevealState>((set) => ({
 }));
 ```
 
-- [ ] 검증: `pnpm type-check`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check`
+- [x] 커밋:
   ```bash
   git add src/hooks/useReadingReveal.ts
   git commit -m "feat: add useReadingReveal Zustand hook for card-by-card text reveal state"
@@ -91,7 +91,7 @@ export const useReadingReveal = create<ReadingRevealState>((set) => ({
 
 `src/components/card/CardFace.tsx`의 interface와 SVG 텍스트 블록을 수정한다.
 
-- [ ] interface에 `showLabel?: boolean` 추가, 함수 시그니처에 destructure 추가:
+- [x] interface에 `showLabel?: boolean` 추가, 함수 시그니처에 destructure 추가:
 
 ```typescript
 // 변경 전 (12-20줄)
@@ -121,7 +121,7 @@ interface CardFaceProps {
 }
 ```
 
-- [ ] 함수 시그니처 수정 (`src/components/card/CardFace.tsx` 28줄):
+- [x] 함수 시그니처 수정 (`src/components/card/CardFace.tsx` 28줄):
 
 ```typescript
 // 변경 전
@@ -133,7 +133,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
 export function CardFace({ card, isReversed, size = "md", width, height, className = "", skinId, showLabel = true }: CardFaceProps) {
 ```
 
-- [ ] SVG 텍스트 블록(126-134줄)을 조건부 렌더링으로 교체:
+- [x] SVG 텍스트 블록(126-134줄)을 조건부 렌더링으로 교체:
 
 ```typescript
 // 변경 전 (126-134줄)
@@ -164,15 +164,15 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
         )}
 ```
 
-- [ ] 스킨 이미지 경로(51-73줄)의 `return` 블록에도 showLabel을 반영한다. 스킨 이미지는 파일 자체에 텍스트가 없으므로 별도 처리 불필요 — 주석만 추가:
+- [x] 스킨 이미지 경로(51-73줄)의 `return` 블록에도 showLabel을 반영한다. 스킨 이미지는 파일 자체에 텍스트가 없으므로 별도 처리 불필요 — 주석만 추가:
 
 ```typescript
 // skinId 분기: 이미지 파일 자체에 카드명이 없으므로 showLabel은 SVG 전용.
 // 스킨 사용 시 텍스트 숨김은 기본 적용됨.
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/card/CardFace.tsx
   git commit -m "feat(card): add showLabel prop to CardFace — conditionally hide card name/text in SVG"
@@ -182,7 +182,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
 
 ## Task 3: CardItem.tsx — showLabel prop 전달
 
-- [ ] `src/components/card/CardItem.tsx` interface에 `showLabel?: boolean` 추가:
+- [x] `src/components/card/CardItem.tsx` interface에 `showLabel?: boolean` 추가:
 
 ```typescript
 // 변경 전 (9-21줄)
@@ -220,7 +220,7 @@ interface CardItemProps {
 }
 ```
 
-- [ ] 함수 시그니처 수정 (25줄):
+- [x] 함수 시그니처 수정 (25줄):
 
 ```typescript
 // 변경 전
@@ -232,7 +232,7 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
 export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, glowColor, showLabel = true }: CardItemProps) {
 ```
 
-- [ ] CardFace 렌더링(99줄)에 showLabel 전달:
+- [x] CardFace 렌더링(99줄)에 showLabel 전달:
 
 ```typescript
 // 변경 전
@@ -244,8 +244,8 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
           <CardFace card={card} isReversed={isReversed} size={size} width={width} height={height} className="w-full h-full" skinId={skinId} showLabel={showLabel} />
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/card/CardItem.tsx
   git commit -m "feat(card): propagate showLabel prop from CardItem to CardFace"
@@ -255,7 +255,7 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
 
 ## Task 4: CardFace showLabel 단위 테스트
 
-- [ ] `src/__tests__/components/card/CardFace.showLabel.test.tsx` 생성:
+- [x] `src/__tests__/components/card/CardFace.showLabel.test.tsx` 생성:
 
 ```typescript
 // src/__tests__/components/card/CardFace.showLabel.test.tsx
@@ -329,8 +329,8 @@ describe("CardFace showLabel prop", () => {
 });
 ```
 
-- [ ] 검증: `pnpm test:coverage -- --testPathPattern="CardFace.showLabel"`
-- [ ] 커밋:
+- [x] 검증: `pnpm test:coverage -- --testPathPattern="CardFace.showLabel"`
+- [x] 커밋:
   ```bash
   git add "src/__tests__/components/card/CardFace.showLabel.test.tsx"
   git commit -m "test(card): add unit tests for CardFace showLabel prop"
@@ -340,7 +340,7 @@ describe("CardFace showLabel prop", () => {
 
 ## Task 5: CardFlipEffect.tsx 구현
 
-- [ ] `src/components/tarot/CardFlipEffect.tsx` 생성:
+- [x] `src/components/tarot/CardFlipEffect.tsx` 생성:
 
 ```typescript
 // src/components/tarot/CardFlipEffect.tsx
@@ -426,8 +426,8 @@ export function CardFlipEffect({ isFlipping, color = "#a78bfa", onFlipComplete }
 }
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/tarot/CardFlipEffect.tsx
   git commit -m "feat(effects): add CardFlipEffect component — light burst + 8-direction particles on card flip"
@@ -439,7 +439,7 @@ export function CardFlipEffect({ isFlipping, color = "#a78bfa", onFlipComplete }
 
 CardItem이 뒤집힐 때(`isFlipped`가 false→true로 바뀔 때) CardFlipEffect를 1회 재생한다.
 
-- [ ] `src/components/card/CardItem.tsx`에 import 추가 및 flip 감지 state 추가:
+- [x] `src/components/card/CardItem.tsx`에 import 추가 및 flip 감지 state 추가:
 
 ```typescript
 // 추가 import
@@ -447,7 +447,7 @@ import { useEffect, useRef, useState } from "react";
 import { CardFlipEffect } from "@/components/tarot/CardFlipEffect";
 ```
 
-- [ ] 함수 내부 hook 추가 (기존 useMotionValue 아래):
+- [x] 함수 내부 hook 추가 (기존 useMotionValue 아래):
 
 ```typescript
   // 뒤집힘 감지: false → true 전환 시 1회 이펙트 재생
@@ -461,7 +461,7 @@ import { CardFlipEffect } from "@/components/tarot/CardFlipEffect";
   }, [isFlipped]);
 ```
 
-- [ ] 반환 JSX의 `motion.div` 루트 안에 CardFlipEffect 추가 (isFlipped && 블록 바로 위):
+- [x] 반환 JSX의 `motion.div` 루트 안에 CardFlipEffect 추가 (isFlipped && 블록 바로 위):
 
 ```typescript
       {/* 뒤집기 빛 폭발 이펙트 */}
@@ -472,8 +472,8 @@ import { CardFlipEffect } from "@/components/tarot/CardFlipEffect";
       />
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/card/CardItem.tsx
   git commit -m "feat(card): integrate CardFlipEffect into CardItem — play on flip transition"
@@ -485,7 +485,7 @@ import { CardFlipEffect } from "@/components/tarot/CardFlipEffect";
 
 ShuffleCeremony는 Canvas 기반(`useRef + requestAnimationFrame`)이므로 기존 패턴을 유지하면서 궤적 잔상(trail)과 완료 시 빛 폭발을 추가한다.
 
-- [ ] `src/components/tarot/ShuffleCeremony.tsx` 파일을 열어 기존 `drawCard` 함수 아래에 trail 드로어 추가:
+- [x] `src/components/tarot/ShuffleCeremony.tsx` 파일을 열어 기존 `drawCard` 함수 아래에 trail 드로어 추가:
 
 ```typescript
 /** 카드 이동 경로 잔상: 이전 위치를 투명도 감쇠로 그린다 */
@@ -513,7 +513,7 @@ function drawTrail(
 }
 ```
 
-- [ ] 각 카드 state에 `trail` 배열 추가하고, 셔플 단계마다 이전 위치를 push(최대 6개 유지):
+- [x] 각 카드 state에 `trail` 배열 추가하고, 셔플 단계마다 이전 위치를 push(최대 6개 유지):
 
 ```typescript
 // 카드 상태 타입에 trail 추가 (기존 cards state 배열 내부)
@@ -527,14 +527,14 @@ card.trail.push({ x: card.x, y: card.y, angle: card.angle });
 if (card.trail.length > 6) card.trail.shift();
 ```
 
-- [ ] drawCard 호출 직전에 drawTrail 호출 삽입:
+- [x] drawCard 호출 직전에 drawTrail 호출 삽입:
 
 ```typescript
 drawTrail(ctx, card.trail, cw, ch, rgb);
 drawCard(ctx, card.x, card.y, cw, ch, card.angle, card.alpha, card.glow, rgb, img);
 ```
 
-- [ ] 완료(onComplete) 직전 burst 이펙트: 0.3초 동안 전체 카드에 글로우 max로 설정하는 단계 추가:
+- [x] 완료(onComplete) 직전 burst 이펙트: 0.3초 동안 전체 카드에 글로우 max로 설정하는 단계 추가:
 
 ```typescript
 // TOTAL_S 이후 burst 단계 (기존 onComplete 호출 직전)
@@ -549,8 +549,8 @@ if (phase === "burst") {
 }
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/tarot/ShuffleCeremony.tsx
   git commit -m "feat(shuffle): add motion trail and burst flash to ShuffleCeremony canvas animation"
@@ -562,7 +562,7 @@ if (phase === "burst") {
 
 착지 ripple과 마법진 SVG 오버레이를 제공하는 래퍼 컴포넌트를 만든다.
 
-- [ ] `src/components/tarot/CardSpreadEffects.tsx` 생성:
+- [x] `src/components/tarot/CardSpreadEffects.tsx` 생성:
 
 ```typescript
 // src/components/tarot/CardSpreadEffects.tsx
@@ -664,8 +664,8 @@ export function MagicCircleOverlay({ isActive, color = "#a78bfa", size = 240 }: 
 }
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/tarot/CardSpreadEffects.tsx
   git commit -m "feat(effects): add CardLandRipple and MagicCircleOverlay to CardSpreadEffects"
@@ -675,13 +675,13 @@ export function MagicCircleOverlay({ isActive, color = "#a78bfa", size = 240 }: 
 
 ## Task 9: CardSpread.tsx — 착지 ripple + 마법진 오버레이 + showLabel 전달
 
-- [ ] `src/components/card/CardSpread.tsx`에 import 추가:
+- [x] `src/components/card/CardSpread.tsx`에 import 추가:
 
 ```typescript
 import { CardLandRipple, MagicCircleOverlay } from "@/components/tarot/CardSpreadEffects";
 ```
 
-- [ ] `CardSpreadProps` interface에 prop 추가:
+- [x] `CardSpreadProps` interface에 prop 추가:
 
 ```typescript
 interface CardSpreadProps {
@@ -694,13 +694,13 @@ interface CardSpreadProps {
 }
 ```
 
-- [ ] 함수 시그니처 수정:
+- [x] 함수 시그니처 수정:
 
 ```typescript
 function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showLabel = true }: CardSpreadProps) {
 ```
 
-- [ ] 내부 `landedSet` state 추가 (착지 ripple 트리거용):
+- [x] 내부 `landedSet` state 추가 (착지 ripple 트리거용):
 
 ```typescript
   // 착지 ripple: 새로 추가된 카드 index를 0.8초간 landedSet에 보관
@@ -713,14 +713,14 @@ function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showL
   }, [selectedCards.length]); // selectedCards.length 변경 시만 트리거
 ```
 
-- [ ] 스프레드 완성 여부 계산:
+- [x] 스프레드 완성 여부 계산:
 
 ```typescript
   const isSpreadComplete = spread.positions.length > 0 &&
     selectedCards.length >= spread.positions.length;
 ```
 
-- [ ] 컨테이너 div에 `MagicCircleOverlay` 추가 (첫 번째 자식으로):
+- [x] 컨테이너 div에 `MagicCircleOverlay` 추가 (첫 번째 자식으로):
 
 ```typescript
     <div ref={containerRef} className="relative w-full h-full">
@@ -732,7 +732,7 @@ function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showL
       {/* ... 기존 카드 렌더링 */}
 ```
 
-- [ ] `CardItem` 렌더링(164줄 부근)에 `showLabel`과 `CardLandRipple` 추가:
+- [x] `CardItem` 렌더링(164줄 부근)에 `showLabel`과 `CardLandRipple` 추가:
 
 ```typescript
                   <div className="relative">
@@ -755,7 +755,7 @@ function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showL
                   </div>
 ```
 
-- [ ] React.memo comparator에 `showLabel` 추가 (201-206줄 부근):
+- [x] React.memo comparator에 `showLabel` 추가 (201-206줄 부근):
 
 ```typescript
   (prev, next) =>
@@ -767,8 +767,8 @@ function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showL
     prev.revealedPositions.every((v, i) => v === next.revealedPositions[i]),
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/card/CardSpread.tsx
   git commit -m "feat(spread): add showLabel prop, CardLandRipple on card placement, MagicCircleOverlay on completion"
@@ -778,19 +778,19 @@ function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showL
 
 ## Task 10: tarot/session/page.tsx — showLabel + useReadingReveal 통합
 
-- [ ] `src/app/tarot/session/page.tsx` import 추가:
+- [x] `src/app/tarot/session/page.tsx` import 추가:
 
 ```typescript
 import { useReadingReveal } from "@/hooks/useReadingReveal";
 ```
 
-- [ ] 컴포넌트 내부 hook 호출 추가 (기존 상태 선언 블록 아래):
+- [x] 컴포넌트 내부 hook 호출 추가 (기존 상태 선언 블록 아래):
 
 ```typescript
   const { revealedCardIds, revealAll, resetReveal } = useReadingReveal();
 ```
 
-- [ ] phase가 바뀔 때 reset: `useEffect` 추가:
+- [x] phase가 바뀔 때 reset: `useEffect` 추가:
 
 ```typescript
   useEffect(() => {
@@ -800,7 +800,7 @@ import { useReadingReveal } from "@/hooks/useReadingReveal";
   }, [phase, resetReveal]);
 ```
 
-- [ ] `readingResult` 완성 시 `revealAll` 호출: 기존 `setReadingResult` 호출 바로 아래에 추가:
+- [x] `readingResult` 완성 시 `revealAll` 호출: 기존 `setReadingResult` 호출 바로 아래에 추가:
 
 ```typescript
   // 기존 코드: setReadingResult(result);
@@ -808,7 +808,7 @@ import { useReadingReveal } from "@/hooks/useReadingReveal";
   revealAll(); // 리딩 완료 → 카드 텍스트 공개
 ```
 
-- [ ] `phase === "reading"` 또는 `phase === "card-select"` 블록에서 `CardSpread`에 `showLabel` 전달:
+- [x] `phase === "reading"` 또는 `phase === "card-select"` 블록에서 `CardSpread`에 `showLabel` 전달:
 
 ```typescript
   // showLabel: result가 없으면(리딩 미완료) 텍스트 숨김
@@ -826,8 +826,8 @@ import { useReadingReveal } from "@/hooks/useReadingReveal";
   />
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint && pnpm build`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint && pnpm build`
+- [x] 커밋:
   ```bash
   git add src/app/tarot/session/page.tsx
   git commit -m "feat(tarot-session): integrate useReadingReveal — hide card labels until AI reading completes"
@@ -837,7 +837,7 @@ import { useReadingReveal } from "@/hooks/useReadingReveal";
 
 ## Task 11: SajuChartReveal.tsx 구현 + saju/session/page.tsx 통합
 
-- [ ] `src/components/saju/SajuChartReveal.tsx` 생성:
+- [x] `src/components/saju/SajuChartReveal.tsx` 생성:
 
 ```typescript
 // src/components/saju/SajuChartReveal.tsx
@@ -895,7 +895,7 @@ export function SajuRevealSequence({ children, isRevealed, staggerDelay = 0.15 }
 }
 ```
 
-- [ ] `src/app/saju/session/page.tsx`에서 결과 렌더링 블록(SajuChart, OhaengGraph, DaeunTimeline)을 `SajuRevealSequence`로 감싸기:
+- [x] `src/app/saju/session/page.tsx`에서 결과 렌더링 블록(SajuChart, OhaengGraph, DaeunTimeline)을 `SajuRevealSequence`로 감싸기:
 
 ```typescript
 // import 추가
@@ -913,8 +913,8 @@ import { SajuRevealSequence } from "@/components/saju/SajuChartReveal";
 </SajuRevealSequence>
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/saju/SajuChartReveal.tsx src/app/saju/session/page.tsx
   git commit -m "feat(saju): add SajuChartReveal sequential reveal wrapper and integrate into saju session page"
@@ -924,7 +924,7 @@ import { SajuRevealSequence } from "@/components/saju/SajuChartReveal";
 
 ## Task 12: ShinjeomEnergyEffect.tsx 구현 + shinjeom/session/page.tsx 통합
 
-- [ ] `src/components/shinjeom/ShinjeomEnergyEffect.tsx` 생성:
+- [x] `src/components/shinjeom/ShinjeomEnergyEffect.tsx` 생성:
 
 ```typescript
 // src/components/shinjeom/ShinjeomEnergyEffect.tsx
@@ -1031,7 +1031,7 @@ export function ShinjeomEnergyEffect({ isActive, onComplete }: ShinjeomEnergyEff
 }
 ```
 
-- [ ] `src/app/shinjeom/session/page.tsx`에서 세션 진입 시(첫 AI 응답 시작 전) `ShinjeomEnergyEffect` 렌더링:
+- [x] `src/app/shinjeom/session/page.tsx`에서 세션 진입 시(첫 AI 응답 시작 전) `ShinjeomEnergyEffect` 렌더링:
 
 ```typescript
 // import 추가
@@ -1051,8 +1051,8 @@ const [showEnergyEffect, setShowEnergyEffect] = useState(true);
 />
 ```
 
-- [ ] 검증: `pnpm type-check && pnpm lint`
-- [ ] 커밋:
+- [x] 검증: `pnpm type-check && pnpm lint`
+- [x] 커밋:
   ```bash
   git add src/components/shinjeom/ShinjeomEnergyEffect.tsx src/app/shinjeom/session/page.tsx
   git commit -m "feat(shinjeom): add ohaeng energy intro effect for shinjeom session entry"
@@ -1062,7 +1062,7 @@ const [showEnergyEffect, setShowEnergyEffect] = useState(true);
 
 ## Task 13: E2E 테스트 — 카드 텍스트 숨김→등장 시나리오
 
-- [ ] `e2e/tarot-text-reveal.spec.ts` 생성:
+- [x] `e2e/tarot-text-reveal.spec.ts` 생성:
 
 ```typescript
 // e2e/tarot-text-reveal.spec.ts
@@ -1151,8 +1151,8 @@ test.describe("타로 카드 텍스트 reveal 흐름", () => {
 });
 ```
 
-- [ ] 검증: `pnpm test:e2e -- --grep "타로 카드 텍스트 reveal"`
-- [ ] 커밋:
+- [x] 검증: `pnpm test:e2e -- --grep "타로 카드 텍스트 reveal"`
+- [x] 커밋:
   ```bash
   git add e2e/tarot-text-reveal.spec.ts
   git commit -m "test(e2e): add tarot card text reveal scenario — hidden on card-select, visible on result"
@@ -1162,24 +1162,24 @@ test.describe("타로 카드 텍스트 reveal 흐름", () => {
 
 ## Task 14: 전체 검증 및 PR 준비
 
-- [ ] 전체 정적 검사 + 빌드:
+- [x] 전체 정적 검사 + 빌드:
   ```bash
   pnpm type-check && pnpm lint && pnpm build
   ```
-- [ ] 커버리지 확인:
+- [x] 커버리지 확인:
   ```bash
   pnpm test:coverage
   ```
   - branches 92%, 나머지 98% 이상 유지 확인
-- [ ] 신규 파일 문서 링크 검증:
+- [x] 신규 파일 문서 링크 검증:
   ```bash
   pnpm check:doc-links
   ```
-- [ ] i18n drift 검사:
+- [x] i18n drift 검사:
   ```bash
   pnpm i18n:check
   ```
-- [ ] 구현 결과 요약 확인:
+- [x] 구현 결과 요약 확인:
   - `src/hooks/useReadingReveal.ts` — Zustand reveal store
   - `src/components/tarot/CardFlipEffect.tsx` — 빛 폭발 이펙트
   - `src/components/tarot/CardSpreadEffects.tsx` — ripple + 마법진
@@ -1192,7 +1192,7 @@ test.describe("타로 카드 텍스트 reveal 흐름", () => {
   - `src/app/tarot/session/page.tsx` — useReadingReveal 통합
   - `src/app/saju/session/page.tsx` — SajuChartReveal 통합
   - `src/app/shinjeom/session/page.tsx` — ShinjeomEnergyEffect 통합
-- [ ] PR 생성:
+- [x] PR 생성:
   ```bash
   gh pr create \
     --base main \
@@ -1205,13 +1205,13 @@ test.describe("타로 카드 텍스트 reveal 흐름", () => {
   - showLabel 단위 테스트 + 카드 텍스트 reveal E2E 시나리오 추가
 
   ## Test plan
-  - [ ] pnpm type-check 통과
-  - [ ] pnpm lint 통과
-  - [ ] pnpm build 통과
-  - [ ] pnpm test:coverage — branches 92%, 나머지 98% 이상
-  - [ ] CardFace showLabel 단위 테스트 통과
-  - [ ] tarot-text-reveal E2E 통과
-  - [ ] 모바일 화면(375px)에서 ripple·마법진 성능 확인"
+  - [x] pnpm type-check 통과
+  - [x] pnpm lint 통과
+  - [x] pnpm build 통과
+  - [x] pnpm test:coverage — branches 92%, 나머지 98% 이상
+  - [x] CardFace showLabel 단위 테스트 통과
+  - [x] tarot-text-reveal E2E 통과
+  - [x] 모바일 화면(375px)에서 ripple·마법진 성능 확인"
   ```
 
 ---

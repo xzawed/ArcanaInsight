@@ -76,14 +76,14 @@ PR-B4: operations/ + CLAUDE.md 재작성
 ## 체크리스트
 
 착수 전:
-- [ ] PR #335·#336·#337 모두 머지 확인
-- [ ] `pnpm check:doc-links` 로컬 통과 확인
-- [ ] `pnpm test:coverage` 861개 이상 통과 확인
+- [x] PR #335·#336·#337 모두 머지 확인
+- [x] `pnpm check:doc-links` 로컬 통과 확인
+- [x] `pnpm test:coverage` 861개 이상 통과 확인
 
 착수 후 각 PR:
-- [ ] 재작성 내용이 실제 코드와 일치하는지 교차검증 에이전트 실행
-- [ ] `pnpm check:doc-links` 통과
-- [ ] CLAUDE.md 200행 이내 유지
+- [x] 재작성 내용이 실제 코드와 일치하는지 교차검증 에이전트 실행
+- [x] `pnpm check:doc-links` 통과
+- [x] CLAUDE.md 200행 이내 유지
 
 ---
 
