@@ -134,6 +134,13 @@ export const ShinjeomMessageSchema = z.object({
   sessionId: uuidOrNull,
   topic: topicStr,
   characterId: charIdStr,
+  userInfo: z.object({
+    name: z.string().max(50),
+    birthDate: dateStr,
+    gender: z.string().max(10),
+    birthTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
+    mbti: z.string().max(10).optional(),
+  }).nullish(),
   currentMessage: z.string().max(2000).optional(),
   chatHistory: z.array(z.object({
     id: z.string().max(100),

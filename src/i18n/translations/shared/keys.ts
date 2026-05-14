@@ -19,6 +19,7 @@ export interface SharedKeys {
     "card.back-alt": string;
     // PR 11
     "skin.preview-alt": string;
+    "skip": string;
   };
   header: {
     "logo.alt": string;
@@ -295,11 +296,14 @@ export interface SharedKeys {
   "user-info": {
     "title.saju": string;
     "title.tarot": string;
+    "title.shinjeom": string;
     "subtitle.saju": string;
     "subtitle.tarot.with-name": string;
     "subtitle.tarot.default": string;
+    "subtitle.shinjeom": string;
     "submit.saju": string;
     "submit.tarot": string;
+    "submit.shinjeom": string;
     "name-placeholder": string;
     "gender.male": string;
     "gender.female": string;

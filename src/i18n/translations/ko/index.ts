@@ -15,6 +15,7 @@ export const ko: SharedKeys = {
     "modal.close-aria": "모달 닫기",
     "card.back-alt": "카드 뒷면",
     "skin.preview-alt": "{name} 카드 미리보기",
+    "skip": "건너뛰기",
   },
   header: {
     "logo.alt": "ArcanaInsight",
@@ -281,11 +282,14 @@ export const ko: SharedKeys = {
   "user-info": {
     "title.saju": "생년월일 정보 입력",
     "title.tarot": "상담 정보 입력",
+    "title.shinjeom": "신점 상담 정보 입력",
     "subtitle.saju": "정확한 사주 분석을 위해 필수 정보입니다",
     "subtitle.tarot.with-name": "{name}가 더 정확한 리딩을 위해 필요한 정보예요",
     "subtitle.tarot.default": "더 정확한 리딩을 위해 정보를 입력해주세요",
+    "subtitle.shinjeom": "더 정확한 신점 상담을 위해 정보를 입력해주세요",
     "submit.saju": "사주 분석 시작",
     "submit.tarot": "상담 시작하기",
+    "submit.shinjeom": "상담 시작하기",
     "name-placeholder": "이름을 입력하세요",
     "gender.male": "남성",
     "gender.female": "여성",
