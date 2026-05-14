@@ -34,6 +34,7 @@ src/
 ├── app/             # App Router 페이지와 API
 ├── components/      # card, character, chat, common, effects, home, layout, saju, shinjeom, skin, tarot
 │   ├── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
+│   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom" — 신점은 전 필드 선택 입력)
 │   └── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │                    # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 ├── data/            # cards, characters, home, saju, shinjeom, skins, spreads, topics
