@@ -13,7 +13,7 @@ const STORAGE_KEY = "arcana_user_info";
 const CONSENT_KEY = "arcana_privacy_agreed";
 
 interface UserInfoFormProps {
-  readonly mode: "tarot" | "saju";
+  readonly mode: "tarot" | "saju" | "shinjeom";
   readonly onSubmit: (data: UserInfo) => void;
   readonly onBack: () => void;
   readonly characterName?: string;
@@ -181,6 +181,8 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
   const timeProvided = timeUnknown || birthTime !== null;
   const isValid = mode === "saju"
     ? !!(birthDate && gender && timeProvided)
+    : mode === "shinjeom"
+    ? true
     : !!(name.trim() && birthDate && gender);
 
   const handleSubmit = async () => {
@@ -189,7 +191,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     const data: UserInfo = {
       name: name.trim(),
       birthDate,
-      gender: gender as "male" | "female" | "other",
+      gender: (gender || "other") as "male" | "female" | "other",
       birthTime,
       mbti: mbti || undefined,
     };
@@ -228,14 +230,15 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     "w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-3 py-2.5 text-arcana-text text-sm focus:border-arcana-purple focus:outline-none";
 
   const backLabel = mode === "saju" ? t("common.back-arrow") : t("tarot.page.spread-select.back");
-  const title = mode === "saju" ? t("user-info.title.saju") : t("user-info.title.tarot");
+  const title = mode === "saju" ? t("user-info.title.saju") : mode === "shinjeom" ? t("user-info.title.shinjeom") : t("user-info.title.tarot");
   const computeSubtitle = (): string => {
     if (mode === "saju") return t("user-info.subtitle.saju");
+    if (mode === "shinjeom") return t("user-info.subtitle.shinjeom");
     if (characterName) return t("user-info.subtitle.tarot.with-name").replace("{name}", characterName);
     return t("user-info.subtitle.tarot.default");
   };
   const subtitle = computeSubtitle();
-  const submitLabel = mode === "saju" ? t("user-info.submit.saju") : t("user-info.submit.tarot");
+  const submitLabel = mode === "saju" ? t("user-info.submit.saju") : mode === "shinjeom" ? t("user-info.submit.shinjeom") : t("user-info.submit.tarot");
 
   return (
     <div className="space-y-5">
@@ -277,7 +280,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 생년월일 — 단일 date input */}
       <div>
-        <label htmlFor="userinfo-birthdate" className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 *</label>
+        <label htmlFor="userinfo-birthdate" className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 {mode === "shinjeom" ? "(선택)" : "*"}</label>
         <input
           id="userinfo-birthdate"
           type="date"
@@ -291,7 +294,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 성별 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">성별 *</label>
+        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">성별 {mode === "shinjeom" ? "(선택)" : "*"}</label>
         <div className="grid grid-cols-3 gap-2">
           {(["male", "female", "other"] as const).map((val) => (
             <button

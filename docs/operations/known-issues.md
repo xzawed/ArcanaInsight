@@ -71,14 +71,15 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
 
 ---
 
-## i18n 다국어 — 미해결·후속 PR 의존 (2026-05-06 multi-agent 감사)
+## i18n 다국어 — 잔여 항목 (2026-05-14 기준)
+
+모든 PR (#230~#235 포함 9건) 머지 완료. 아래는 의도적으로 보류 중인 항목이다.
 
 | 항목 | 영역 | 상태·근거 |
 |------|------|-----------|
-| **AuthUser 타입 locale 필드 미포함** | `src/lib/auth/index.ts` | PR-4 예정. 현재는 쿠키(`ai_locale`)가 SSOT, `profiles.locale`은 보조 동기화. cross-locale 쿼리 필요 시 PR-4에서 `getCurrentUser()` 반환 타입 확장. |
-| **`daily_cards` 테이블 locale 컬럼 의도적 미포함** | `supabase/migrations/003_daily_cards.sql` | 옵션 B 확정 — `(date, character_id)` UNIQUE 단일 사전 정책. locale 분리 시 4×용량 폭증. 표시 시점 locale 분리는 PR-3·PR-5에서 처리. |
-| **PR-2 사전 정의됨, 페이지 미적용 i18n 키 19개** | `src/i18n/translations/ko/index.ts` (`home.*` 8 + `settings.*` 11) | PR-2에서 사전만 정의됨 (정의 자체는 정상). 페이지 코드(`src/app/page.tsx`·`src/app/settings/page.tsx`) `t()` 적용은 PR-3 영역. SharedKeys 타입은 모든 locale 강제하므로 정의됨 미사용 키도 타입 안전 유지. |
-| **translations 사전 SonarCloud 중복도 모니터링** | `src/i18n/translations/{ko,en,ja}/index.ts` | 현재 4 파일(인덱스+공유키+3 locale). PR-3·PR-5에서 카드·캐릭터 데이터가 추가되면 중복도 누적 위험. `shared/keys.ts` 공통 베이스 + `flatten()` 헬퍼로 1차 방어 중. SonarCloud `new_duplicated_lines_density` 3% 임계 모니터링 필요. |
-| **외부 번역가 발주 시점 미결정** | `docs/i18n/glossary.md`·`character-voice-guide.md` | PR-3 진입 시점에 발주 권장 (사용자 결정). 발주 자료는 PR-3·PR-4 시 작성될 예정. 현재 영어 사전은 1차 임시 직역 placeholder. |
+| **AuthUser 타입 locale 필드 미포함** | `src/lib/auth/index.ts` | 현재 쿠키(`ai_locale`)가 SSOT, `profiles.locale`은 보조 동기화로 충분. cross-locale 쿼리 필요 시 별도 PR에서 `getCurrentUser()` 반환 타입 확장. |
+| **`daily_cards` 테이블 locale 컬럼 의도적 미포함** | `supabase/migrations/003_daily_cards.sql` | 옵션 B 확정 — `(date, character_id)` UNIQUE 단일 사전 정책. locale 분리 시 4×용량 폭증 우려. |
+| **translations 사전 SonarCloud 중복도 모니터링** | `src/i18n/translations/{ko,en,ja}/index.ts` | `shared/keys.ts` 공통 베이스로 1차 방어 중. SonarCloud `new_duplicated_lines_density` 3% 임계 모니터링 필요. |
+| **외부 번역가 미사용** | — | **사용자 확정(2026-05-14)**: 외부 번역 발주 계획 없음. 현행 직역 사전으로 운영 지속. |
 
 상세 인프라: [`../architecture/i18n.md`](../architecture/i18n.md) / 컨벤션: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)

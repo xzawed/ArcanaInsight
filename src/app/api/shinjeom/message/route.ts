@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Zod 입력 검증 (chatHistory 100개 상한으로 토큰 과소비 방어)
     const parsed = ShinjeomMessageSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
-    const { sessionId, characterId, currentMessage, isFinalTurn, messageIndex, topic: rawTopic } = parsed.data;
+    const { sessionId, characterId, userInfo, currentMessage, isFinalTurn, messageIndex, topic: rawTopic } = parsed.data;
     if (!SHINJEOM_TOPICS.includes(rawTopic)) return jsonError("Invalid topic");
     const topic = rawTopic as Topic;
     // timestamp는 네트워크 전송 시 문자열/숫자로 직렬화되므로 Date로 복원
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
 
     const systemPrompt = shinjeomService.getSystemPrompt(characterId ?? undefined, locale);
-    const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn);
+    const userPrompt = shinjeomService.buildConversationPrompt(topic, currentMessage, chatHistory, isFinalTurn, userInfo);
 
     const db = sessionId ? getAdminDb() : null;
 

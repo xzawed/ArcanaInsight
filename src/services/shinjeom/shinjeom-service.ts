@@ -3,7 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
-import { buildCharacterHeader, getLanguageFooter } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter } from "@/services/core/prompt-builder";
 
 const topicLabels: Record<string, string> = {
   "shinjeom-general": "신수 (종합운)",
@@ -68,15 +68,17 @@ export class ShinjeomService implements DivinationService {
     currentMessage: string | undefined,
     chatHistory: ChatMessage[],
     isFinalTurn: boolean,
+    userInfo?: { name: string; birthDate: string; gender: string; birthTime: string | null; mbti?: string } | null,
   ): string {
     const topicLabel = topicLabels[topic] || topic;
+    const userInfoText = buildUserInfoPrompt(userInfo);
     const historyText = chatHistory
       .filter((m) => m.role === "user" || m.role === "character")
       .map((m) => `${m.role === "user" ? "사용자" : "상담사"}: ${m.content}`)
       .join("\n\n");
 
     if (!isFinalTurn) {
-      return `상담 주제: ${topicLabel}
+      return `상담 주제: ${topicLabel}${userInfoText}
 
 이전 대화:
 ${historyText}
@@ -91,7 +93,7 @@ ${historyText}
     }
 
     // 사용자 종료 요청 → 전체 대화 종합하여 최종 결과
-    return `상담 주제: ${topicLabel}
+    return `상담 주제: ${topicLabel}${userInfoText}
 
 전체 대화:
 ${historyText}

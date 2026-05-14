@@ -143,6 +143,7 @@ export const ja: Partial<SharedKeys> = {
     "modal.close-aria": "モーダルを閉じる",
     "card.back-alt": "カード裏面",
     "skin.preview-alt": "{name} カードプレビュー",
+    "skip": "スキップ",
   },
   locale: {
     "modal.title": "言語を選択してください",
@@ -288,11 +289,14 @@ export const ja: Partial<SharedKeys> = {
   "user-info": {
     "title.saju": "生年月日情報入力",
     "title.tarot": "相談情報入力",
+    "title.shinjeom": "霊視相談情報入力",
     "subtitle.saju": "正確な四柱分析のため必須情報です",
     "subtitle.tarot.with-name": "{name}様とより正確な鑑定のため情報を入力してください",
     "subtitle.tarot.default": "より正確な鑑定のため情報を入力してください",
+    "subtitle.shinjeom": "より正確な霊視相談のため情報を入力してください",
     "submit.saju": "四柱分析を開始",
     "submit.tarot": "相談を開始",
+    "submit.shinjeom": "相談を開始",
     "name-placeholder": "お名前を入力してください",
     "gender.male": "男性",
     "gender.female": "女性",

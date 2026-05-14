@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Topic, ChatMessage } from "@/types/session";
 import { ReadingResult } from "@/types/service";
+import { UserInfo } from "@/types/user-info";
 
 export type ShinjeomPhase = "character-select" | "topic-select" | "conversation" | "result";
 
@@ -9,7 +10,7 @@ interface ShinjeomSessionState {
   sessionId: string | null;
   characterId: string | null;
   topic: Topic | null;
-  userInfo: { name?: string; birthDate?: string; gender?: string } | null;
+  userInfo: UserInfo | null;
   chatMessages: ChatMessage[];
   turnCount: number; // 사용자 메시지 횟수
   readingResult: ReadingResult | null;

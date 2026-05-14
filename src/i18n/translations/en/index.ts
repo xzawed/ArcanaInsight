@@ -20,6 +20,7 @@ export const en: Partial<SharedKeys> = {
     "modal.close-aria": "Close modal",
     "card.back-alt": "Card back",
     "skin.preview-alt": "{name} card preview",
+    "skip": "Skip",
   },
   header: {
     "logo.alt": "ArcanaInsight",
@@ -286,11 +287,14 @@ export const en: Partial<SharedKeys> = {
   "user-info": {
     "title.saju": "Birth Information",
     "title.tarot": "Consultation Information",
+    "title.shinjeom": "Spiritual Reading Information",
     "subtitle.saju": "Required for accurate Saju analysis",
     "subtitle.tarot.with-name": "Share your details for a more personal reading with {name}",
     "subtitle.tarot.default": "Share your details for a more accurate reading",
+    "subtitle.shinjeom": "Enter your details for a more accurate spiritual reading",
     "submit.saju": "Begin Saju analysis",
     "submit.tarot": "Begin consultation",
+    "submit.shinjeom": "Begin consultation",
     "name-placeholder": "Enter your name",
     "gender.male": "Male",
     "gender.female": "Female",

@@ -142,6 +142,7 @@ export default function ShinjeomSessionPage() {
       body: {
         sessionId: useShinjeomSessionStore.getState().sessionId,
         topic, characterId,
+        userInfo: useShinjeomSessionStore.getState().userInfo,
         currentMessage: message,
         chatHistory: useShinjeomSessionStore.getState().chatMessages,
         isFinalTurn: false,
@@ -203,6 +204,7 @@ export default function ShinjeomSessionPage() {
       body: {
         sessionId: useShinjeomSessionStore.getState().sessionId,
         topic, characterId,
+        userInfo: useShinjeomSessionStore.getState().userInfo,
         currentMessage: undefined,
         chatHistory: currentChatMessages,
         isFinalTurn: true,

@@ -10,9 +10,11 @@ import { getCharactersByGender, getCharacterById } from "@/data/characters";
 import { CharacterConfig } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
+import { UserInfo } from "@/types/user-info";
 import { Icon } from "@/components/common/Icon";
 import { useFavoriteCharacter } from "@/hooks/useFavoriteCharacter";
 import { ServiceBackground } from "@/components/effects/ServiceBackground";
+import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { CulturalReadingDisplay } from "@/components/shinjeom/CulturalReadingDisplay";
@@ -26,7 +28,7 @@ const TOPIC_CONFIGS: { id: Topic; iconId: string }[] = [
   { id: "shinjeom-auspicious", iconId: "shinjeom-auspicious" },
 ];
 
-type PageStep = "character-select" | "topic-select";
+type PageStep = "character-select" | "topic-select" | "user-info";
 
 // ─── Step sub-components ────────────────────────────────────────────────────
 
@@ -116,12 +118,41 @@ function TopicSelectStep({ selectedCharacter, onBack, onTopicSelect }: Readonly<
   );
 }
 
+// ─── UserInfo step ──────────────────────────────────────────────────────────
+
+function UserInfoStep({ selectedCharacter, onBack, onSubmit, onSkip }: Readonly<{
+  selectedCharacter: CharacterConfig | null;
+  onBack: () => void;
+  onSubmit: (data: UserInfo) => void;
+  onSkip: () => void;
+}>) {
+  const { t } = useT();
+  return (
+    <motion.div key="user-info" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+      className="relative z-20 max-w-lg mx-auto px-4 py-8">
+      <UserInfoForm
+        mode="shinjeom"
+        onSubmit={onSubmit}
+        onBack={onBack}
+        characterName={selectedCharacter?.name}
+      />
+      <button
+        type="button"
+        onClick={onSkip}
+        className="mt-4 w-full text-arcana-muted text-sm hover:text-arcana-purple transition-colors text-center py-2"
+      >
+        {t("common.skip")}
+      </button>
+    </motion.div>
+  );
+}
+
 // ─── Page state + routing ───────────────────────────────────────────────────
 
 function ShinjeomPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setCharacterId, setTopic, setPhase } = useShinjeomSessionStore();
+  const { setCharacterId, setTopic, setPhase, setUserInfo } = useShinjeomSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
 
@@ -174,6 +205,18 @@ function ShinjeomPageContent() {
 
   const handleTopicSelect = (topic: Topic) => {
     setTopic(topic);
+    setStep("user-info");
+  };
+
+  const handleUserInfoSubmit = (data: UserInfo) => {
+    const hasData = data.name.trim() || data.birthDate;
+    setUserInfo(hasData ? data : null);
+    setPhase("conversation");
+    router.push("/shinjeom/session");
+  };
+
+  const handleUserInfoSkip = () => {
+    setUserInfo(null);
     setPhase("conversation");
     router.push("/shinjeom/session");
   };
@@ -181,6 +224,10 @@ function ShinjeomPageContent() {
   const handleBack = () => {
     setStep("character-select");
     setSelectedCharacter(null);
+  };
+
+  const handleUserInfoBack = () => {
+    setStep("topic-select");
   };
 
   return (
@@ -194,6 +241,10 @@ function ShinjeomPageContent() {
         )}
         {step === "topic-select" && (
           <TopicSelectStep selectedCharacter={selectedCharacter} onBack={handleBack} onTopicSelect={handleTopicSelect} />
+        )}
+        {step === "user-info" && (
+          <UserInfoStep selectedCharacter={selectedCharacter} onBack={handleUserInfoBack}
+            onSubmit={handleUserInfoSubmit} onSkip={handleUserInfoSkip} />
         )}
       </AnimatePresence>
     </div>
