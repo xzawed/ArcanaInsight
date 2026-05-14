@@ -12,6 +12,7 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from "@/i18n/con
 import { t as translate } from "@/i18n/translations";
 import { ToastHost } from "@/components/common/Toast";
 import { LocaleConfirmModal } from "@/components/common/LocaleConfirmModal";
+import { InteractionClickParticles } from "@/components/effects/InteractionEffects";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -84,6 +85,7 @@ export default async function RootLayout({
             <MobileNav />
             <ToastHost />
             <LocaleConfirmModal />
+            <InteractionClickParticles />
           </ThemeProvider>
         </LocaleProvider>
       </body>
