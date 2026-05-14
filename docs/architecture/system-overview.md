@@ -16,7 +16,9 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    └─ chat/home/tarot/saju/shinjeom/...
        ├─ 상태 (src/hooks/)
        │    ├─ useCardStyleStore  — 카드 스타일 persist (arcana-card-style)
-       │    └─ useSkinStore, useTheme, ...
+       │    ├─ useSession / useSajuSession / useShinjeomSession  — 서비스별 세션 상태
+       │    ├─ useLocaleStore / useGenderStore / useSkinStore  — 전역 설정
+       │    └─ useReadingReveal, useFavoriteCharacter, ...
        ├─ API 라우트 (src/app/api/)  — SSE 스트리밍 + Zod 검증 + Auth
        └─ 서비스 레이어 (src/services/)
             ├─ core/FallbackProvider  — Grok 우선 → Claude API fallback
@@ -38,14 +40,14 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 ### 타로 (4단계)
 
 1. **캐릭터 선택** → 12명 중 선택 (성별 필터 지원). 선호 상담사 설정 시 자동 스킵
-2. **개인정보 입력** → 생년월일, 출생시간(12시진), 성별, 혈액형 + 제3자 제공 동의
+2. **개인정보 입력** → 이름(선택), 생년월일, 출생시간, 성별, MBTI(선택)
 3. **주제 선택 + 카드 뽑기** → 주제 선택 → 스프레드 선택 → 카드 선택
 4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 → 결과 공유(share_token URL)
 
 ### 사주 (4단계)
 
 1. **캐릭터 선택** → 12명 중 선택 (성별 필터 지원). 선호 상담사 설정 시 자동 스킵
-2. **개인정보 입력** → 생년월일, 출생시간(12시진), 성별, 혈액형 + 제3자 제공 동의
+2. **개인정보 입력** → 이름(선택), 생년월일, 출생시간, 성별, MBTI(선택)
 3. **시간단위 × 분석영역 선택** → 시간단위(7) + 분석영역(8) 동시 선택, 년단위 시 "월별 상세" 토글
 4. **AI 리딩 결과** → Grok AI가 SSE 스트리밍으로 해석 → 결과 공유
 
@@ -54,7 +56,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 1. **캐릭터 선택** → 12명 중 선택. 선호 상담사 설정 시 자동 스킵
 2. **주제 선택** → 신수(종합운), 연애/궁합, 재물/사업운, 직장/이직, 건강/액막이, 택일
 3. **개인정보 입력 (선택)** → `UserInfoForm mode="shinjeom"` — 이름·생년월일·성별·MBTI 모두 선택 입력. "건너뛰기" 버튼으로 생략 가능. 입력 시 AI 프롬프트에 반영
-4. **대화형 상담** → 무제한 문답 → "신점 결과 받기" 버튼으로 종료 (1턴 이상 후 활성화)
+4. **대화형 상담** (`/shinjeom/session`) → 무제한 문답 → "신점 결과 받기" 버튼으로 종료 (1턴 이상 후 활성화)
 
 > 신점 결과 공유 페이지(`/shinjeom/result/[id]`) 구현 완료 (PR #142) — mypage 링크 활성화
 
@@ -141,7 +143,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 1. **HeroSection** — 풀스크린 히어로 (캐릭터 + 카피 + CTA)
 2. **CharacterGallery** — 12캐릭터 갤러리 (카드형, 성별 필터 내장)
 3. **DailyFortune** — 캐릭터별 일일 운세 (5개 영역 1+4 레이아웃)
-4. **SkinGallery** — 카드 스킨 갤러리 (6종)
+4. **SkinGallery** — 카드 스킨 갤러리 (아트 스타일 4종 + 팔레트 스킨 6종 = 10종)
 5. **ServiceFlow** — 서비스 이용 흐름 소개
 6. **FAQ** — 아코디언 FAQ
 7. **BottomCTA** — 하단 행동 유도
