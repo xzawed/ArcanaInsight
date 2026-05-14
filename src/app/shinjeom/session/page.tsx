@@ -22,8 +22,8 @@ import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
 
-function getErrorMsg(charId: string | null | undefined, type: "api" | "reading"): string {
-  const wl = getWaitingLinesData(useLocaleStore.getState().locale);
+function getErrorMsg(charId: string | null | undefined, type: "api" | "reading", locale: string): string {
+  const wl = getWaitingLinesData(locale);
   const lines = (charId && wl.characterErrorLines[charId]) || wl.defaultErrorLines;
   return lines[type];
 }
@@ -131,7 +131,7 @@ export default function ShinjeomSessionPage() {
       if (finished) return;
       finished = true;
       abortController.abort();
-      updateMessageContent(msgId, getErrorMsg(characterId, "api"));
+      updateMessageContent(msgId, getErrorMsg(characterId, "api", locale));
       setMood("default");
       setLoading(false);
     }, 240_000);
@@ -161,7 +161,7 @@ export default function ShinjeomSessionPage() {
         if (finished) return;
         finished = true;
         clearTimeout(timeoutId);
-        updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+        updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
         setMood("default");
         setLoading(false);
       },
@@ -193,7 +193,7 @@ export default function ShinjeomSessionPage() {
       if (finished) return;
       finished = true;
       abortController.abort();
-      updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+      updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
       setMood("default");
       setLoading(false);
     }, 240_000);
@@ -217,7 +217,7 @@ export default function ShinjeomSessionPage() {
         clearTimeout(timeoutId);
         const result = data.result as { parseError?: string } | undefined;
         if (!result) {
-          updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+          updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
           setMood("default");
           setLoading(false);
           return;
@@ -228,7 +228,7 @@ export default function ShinjeomSessionPage() {
           result.parseError === "missing_fields"
         ) {
           console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
-          updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+          updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
           setMood("default");
           setLoading(false);
           return;
@@ -243,7 +243,7 @@ export default function ShinjeomSessionPage() {
         if (finished) return;
         finished = true;
         clearTimeout(timeoutId);
-        updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+        updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
         setMood("default");
         setLoading(false);
       },

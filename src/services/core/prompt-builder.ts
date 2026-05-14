@@ -3,6 +3,7 @@ import { SelectedCard } from "@/types/card";
 import { Topic, SpreadDefinition } from "@/types/session";
 import type { CharacterMemoryEntry } from "@/lib/db/character-context";
 import { timeToSijin } from "@/lib/time-utils";
+import { UserInfo } from "@/types/user-info";
 
 const topicLabels: Partial<Record<Topic, string>> = {
   love: "연애/관계", "love-single": "연애/관계 (솔로)", "love-couple": "연애/관계 (커플)",
@@ -166,7 +167,7 @@ function sanitizeField(value: string, maxLength = 100): string {
 }
 
 export function buildUserInfoPrompt(
-  userInfo?: { name: string; birthDate: string; gender: string; birthTime: string | null; mbti?: string } | null
+  userInfo?: UserInfo | null
 ): string {
   if (!userInfo) return "";
   const genderMap: Record<string, string> = { male: "남성", female: "여성", other: "기타" };

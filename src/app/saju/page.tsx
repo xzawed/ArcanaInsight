@@ -23,6 +23,7 @@ import { ServiceBackground } from "@/components/effects/ServiceBackground";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
+import { PageSpinner } from "@/components/common/PageSpinner";
 
 /** "{name}" placeholder 치환 — saju.page.after-info-msg 전용 */
 function buildAfterInfoMsg(name: string, locale: Locale): string {
@@ -336,11 +337,7 @@ function SajuPageContent() {
 
 export default function SajuPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<PageSpinner />}>
       <SajuPageContent />
     </Suspense>
   );
