@@ -69,7 +69,7 @@ export const TarotReadingSchema = z.object({
   userInfo: z.object({
     name: z.string().max(50),
     birthDate: dateStr,
-    gender: z.string().max(10),
+    gender: z.enum(["male", "female", "other"]),
     birthTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
     mbti: z.string().max(10).optional(),
   }).nullish(),
@@ -136,8 +136,8 @@ export const ShinjeomMessageSchema = z.object({
   characterId: charIdStr,
   userInfo: z.object({
     name: z.string().max(50),
-    birthDate: dateStr,
-    gender: z.string().max(10),
+    birthDate: z.union([dateStr, z.literal("")]),
+    gender: z.enum(["male", "female", "other"]),
     birthTime: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
     mbti: z.string().max(10).optional(),
   }).nullish(),

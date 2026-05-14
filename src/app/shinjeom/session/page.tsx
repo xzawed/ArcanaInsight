@@ -216,8 +216,18 @@ export default function ShinjeomSessionPage() {
         finished = true;
         clearTimeout(timeoutId);
         const result = data.result as { parseError?: string } | undefined;
-        if (!result || result.parseError) {
-          if (result?.parseError) console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
+        if (!result) {
+          updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
+          setMood("default");
+          setLoading(false);
+          return;
+        }
+        // fallback_text — overallReading에 정제된 본문이 있으므로 결과 표시
+        if (
+          result.parseError === "invalid_json" ||
+          result.parseError === "missing_fields"
+        ) {
+          console.warn("[shinjeom-session] 결과 표시 불가:", { parseError: result.parseError });
           updateMessageContent(msgId, getErrorMsg(characterId, "reading"));
           setMood("default");
           setLoading(false);

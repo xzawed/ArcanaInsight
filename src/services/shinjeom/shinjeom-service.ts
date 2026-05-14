@@ -2,7 +2,7 @@ import { DivinationService, ReadingResult, SessionContext } from "@/types/servic
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
-import { cleanReadingText, parseJsonSafe } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter } from "@/services/core/prompt-builder";
 
 const topicLabels: Record<string, string> = {
@@ -137,7 +137,7 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
 
     // 라우트는 isFinalTurn=true일 때만 parseResult를 호출하므로 JSON 파싱 실패 = 모델이 형식 위반.
     // raw 텍스트는 살아남지만 advice가 빠져 있으므로 parseError로 신호.
-    const cleanText = cleanReadingText(aiResponse);
+    const cleanText = extractFallbackText(aiResponse);
     return {
       overallReading: cleanText || "해석 결과를 처리하는 중 문제가 발생했습니다.",
       advice: "",
