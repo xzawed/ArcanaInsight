@@ -33,6 +33,9 @@ test.describe("신점 서비스 플로우", () => {
     // 주제 선택 (신수)
     await page.locator("text=신수").first().click();
 
+    // user-info 스텝: 건너뛰기로 즉시 세션 진입
+    await page.locator("button:has-text('건너뛰기')").click();
+
     // 세션 페이지 이동
     await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
     expect(page.url()).toContain("/shinjeom/session");
@@ -45,6 +48,8 @@ test.describe("신점 서비스 플로우", () => {
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
     await page.locator("text=신수").first().click();
+    // user-info 스텝: 건너뛰기
+    await page.locator("button:has-text('건너뛰기')").click();
     await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
 
     // 인사말 메시지 존재
@@ -93,7 +98,7 @@ test.describe("신점 서비스 플로우", () => {
 
 test.describe("신점 세션 — 메시지 전송 플로우", () => {
   test.beforeEach(async ({ page }) => {
-    // 신점 세션 진입: 첫 번째 캐릭터 선택 → 첫 번째 주제 선택
+    // 신점 세션 진입: 첫 번째 캐릭터 선택 → 첫 번째 주제 선택 → user-info 건너뛰기
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/shinjeom");
     await page.waitForLoadState("domcontentloaded");
@@ -105,6 +110,8 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
     const firstTopic = page.locator("[data-testid^='shinjeom-topic-btn-']").first();
     await expect(firstTopic).toBeVisible({ timeout: 5000 });
     await firstTopic.click();
+    // user-info 스텝: 건너뛰기
+    await page.locator("button:has-text('건너뛰기')").click();
     await page.waitForURL("**/shinjeom/session", { timeout: 10000 });
   });
 

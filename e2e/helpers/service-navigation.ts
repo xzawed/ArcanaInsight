@@ -78,6 +78,8 @@ export async function navigateToShinjeomSession(page: Page) {
   await page.goto("/shinjeom");
   await selectFirstCharacter(page);
   await page.locator("text=신수").first().click();
+  // user-info 스텝: 건너뛰기로 즉시 세션 진입
+  await page.locator("button:has-text('건너뛰기')").click();
   await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
 }
 
@@ -86,6 +88,8 @@ export async function enterShinjeomSession(page: Page) {
   await page.waitForLoadState("networkidle");
   await selectFirstCharacter(page);
   await page.locator("text=신수").first().click();
+  // user-info 스텝: 건너뛰기로 즉시 세션 진입
+  await page.locator("button:has-text('건너뛰기')").click();
   await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
   await expect(page.locator("text=고민").first()).toBeVisible({ timeout: 10_000 });
 }
