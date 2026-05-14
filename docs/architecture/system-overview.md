@@ -1,6 +1,36 @@
 # 서비스 아키텍처 — 전체 흐름 개요
 
+> **담당**: Claude (아키텍처 설계·변경 결정) | Codex (구현·검증)
+> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
+
 ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 및 데이터 모델을 정의합니다.
+
+---
+
+## 개요 — 레이어 다이어그램
+
+```
+사용자 브라우저
+  └─ Next.js App Router (src/app/)
+       ├─ UI 레이어 (src/components/)
+       │    ├─ card/         — CardFace, CardBack, CardItem, CardStyleSelector
+       │    ├─ character/    — 캐릭터 등장 컴포넌트
+       │    └─ chat/home/tarot/saju/shinjeom/...
+       ├─ 상태 (src/hooks/)
+       │    ├─ useCardStyleStore  — 카드 스타일 persist (arcana-card-style)
+       │    └─ useSkinStore, useTheme, ...
+       ├─ API 라우트 (src/app/api/)  — SSE 스트리밍 + Zod 검증 + Auth
+       └─ 서비스 레이어 (src/services/)
+            ├─ core/FallbackProvider  — Grok 우선 → Claude API fallback
+            ├─ tarot/, saju/, shinjeom/
+            └─ core/prompt-builder, text-cleaner, circuit-breaker
+
+데이터 레이어
+  ├─ Supabase (기본)     — Auth + PostgreSQL + Storage(card-styles 버킷)
+  └─ PostgreSQL 모드     — NextAuth.js v5 + Drizzle (DB_PROVIDER=postgres 시)
+```
+
+**API 보안 순서** (변경 금지): Rate Limit → Zod `safeParse` → Auth → 소유권 검증
 
 ---
 
