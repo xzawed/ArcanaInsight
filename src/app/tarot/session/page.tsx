@@ -47,6 +47,7 @@ import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
+import { useReadingRevealStore } from "@/hooks/useReadingReveal";
 
 /** "위치 N" / "Position N" / "位置 N" — locale별 fallback 라벨 */
 function fallbackPosLabel(position: number, locale: Locale): string {
@@ -164,6 +165,8 @@ export default function TarotSessionPage() {
 
   const character = characterId ? getCharacterById(characterId) : null;
 
+  const { isRevealComplete, revealAll: revealAllCards, reset: resetReveal } = useReadingRevealStore();
+
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
@@ -211,6 +214,13 @@ export default function TarotSessionPage() {
       }
     };
   }, []);
+
+  // phase가 초기화되면 reveal 상태도 리셋
+  useEffect(() => {
+    if (phase === "card-shuffle" || phase === "card-select") {
+      resetReveal();
+    }
+  }, [phase, resetReveal]);
 
   useEffect(() => {
     if (!topic || !character || !spreadType) {
@@ -510,6 +520,7 @@ export default function TarotSessionPage() {
         // 정상 흐름 (또는 부분 결과) — 카드 뒤집기 완료 + 결과 phase 진입
         setRevealedPositions(cards.map((c) => c.position));
         setReadingResult(result);
+        revealAllCards(cards.map((c) => c.card.id)); // 리딩 완료 → 카드 텍스트 공개
         const currentSpread = spreadType ? spreads[spreadType] : null;
         addReadingResultMessages(result, cards, currentSpread, addChatMessage, locale);
         setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
@@ -555,6 +566,8 @@ export default function TarotSessionPage() {
   }, [chatMessages, phase]);
 
   const spread = spreadType ? spreads[spreadType] : null;
+  // showLabel: AI 리딩 완료(result phase + reveal complete) 시에만 카드 텍스트 공개
+  const showCardLabel = phase === "result" && isRevealComplete;
   const particleDensityMap: Record<string, "low" | "medium" | "high"> = { reading: "medium", result: "low" };
   const particleDensity = particleDensityMap[phase] ?? "medium";
   const effectTheme = character?.effectTheme;
@@ -691,6 +704,7 @@ export default function TarotSessionPage() {
                   spread={spread}
                   revealedPositions={revealedPositions}
                   glowColor={effectTheme?.primary}
+                  showLabel={showCardLabel}
                 />
                 {/* 카드 뒤집기 연출 + 진행 인디케이터 동시 노출. 인디케이터는 화면 하단 fixed 미니 배너. */}
                 {phase === "reading" && isLoading && !readingError && (
