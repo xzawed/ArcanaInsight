@@ -202,6 +202,7 @@ pnpm check:doc-links   # 문서 링크 유효
 - [ ] UI 텍스트 변경 시 E2E 셀렉터(`hasText`/`getByText`)도 같이 수정했는가?
 - [ ] UI 컴포넌트 DOM 구조 변경 시 `grep -r "[변경 패턴]" e2e/` 로 영향 파일 사전 파악했는가? (`e2e/helpers/service-navigation.ts` 우선 수정)
 - [ ] feature 브랜치 → PR → 머지 순서를 지켰는가? (main 직접 커밋 금지)
+- [ ] **상수(max_tokens 등) 변경 시 해당 상수를 기댓값으로 쓰는 테스트도 동시에 수정했는가?** (`grep -r "toBe([변경 전 값]" src/__tests__/` 로 확인)
 
 ---
 

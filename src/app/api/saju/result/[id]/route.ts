@@ -3,7 +3,7 @@ import { getAdminDb } from "@/lib/db"
 import { pickFields } from "@/lib/request-utils"
 
 const SAFE_KEYS = [
-  "id", "birth_date", "birth_hour", "gender", "birth_name",
+  "id", "birth_date", "birth_hour", "gender", "birth_name", "mbti",
   "pillars", "day_master", "day_master_element", "is_strong",
   "elements", "ten_stars", "twelve_stages", "interactions",
   "yongsin", "major_fortunes", "yearly_fortune",

@@ -49,6 +49,7 @@ jobs:
 
       # ── SonarCloud 분석 ──────────────────────────────────────────────────
       - name: SonarCloud Scan
+        if: always()
         uses: SonarSource/sonarqube-scan-action@v6.0.0
         with:
           args: >
