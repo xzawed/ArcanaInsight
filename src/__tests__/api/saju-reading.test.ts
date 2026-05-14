@@ -161,6 +161,71 @@ describe("POST /api/saju/reading", () => {
     expect(mockSave).toHaveBeenCalledWith(mockDb, "sess-saju", expect.any(Object), expect.any(String));
   });
 
+  it("birthTime=null → birth_hour: null 로 저장 (NOT NULL 위반 방지)", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      sessionId: "sess-no-time",
+      userInfo: { ...VALID_BODY.userInfo, birthTime: null },
+    }));
+    await readSSEStream(res);
+    await Promise.resolve();
+    const savedData = mockSave.mock.calls[0]?.[2] as Record<string, unknown>;
+    expect(savedData?.birth_hour).toBeNull();
+  });
+
+  it("mbti 입력 시 saju_readings에 저장", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({
+      ...VALID_BODY,
+      sessionId: "sess-mbti",
+      userInfo: { ...VALID_BODY.userInfo, mbti: "INFP" },
+    }));
+    await readSSEStream(res);
+    await Promise.resolve();
+    const savedData = mockSave.mock.calls[0]?.[2] as Record<string, unknown>;
+    expect(savedData?.mbti).toBe("INFP");
+  });
+
+  it("mbti 미입력 시 mbti: null 로 저장", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-no-mbti" }));
+    await readSSEStream(res);
+    await Promise.resolve();
+    const savedData = mockSave.mock.calls[0]?.[2] as Record<string, unknown>;
+    expect(savedData?.mbti).toBeNull();
+  });
+
   it("topicReading 없는 AI 응답 → topic_reading || '' 분기 커버", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
     const noTopicReading = JSON.stringify({ overallReading: "전반 결과", advice: "조언" });
