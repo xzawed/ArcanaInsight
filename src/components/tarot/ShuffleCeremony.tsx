@@ -26,6 +26,30 @@ function easeOut(t: number)   { return 1 - Math.pow(1-t, 3); }
 function springFn(t: number)  { return 1 - Math.cos(t * Math.PI * 2.5) * Math.pow(1-t, 2.5); }
 function lerp(a: number, b: number, t: number) { return a + (b-a)*t; }
 
+/** 카드 이동 경로 잔상: 이전 위치를 투명도 감쇠로 그린다 */
+function drawTrail(
+  ctx: CanvasRenderingContext2D,
+  trail: Array<{ x: number; y: number; angle: number }>,
+  w: number, h: number,
+  rgb: string,
+) {
+  trail.forEach((pt, i) => {
+    const alpha = (i / trail.length) * 0.18;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(pt.x, pt.y);
+    ctx.rotate(pt.angle);
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = `rgba(${rgb},0.5)`;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-w / 2, -h / 2, w, h, 4);
+    else ctx.rect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = `rgba(${rgb},0.25)`;
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
 function computeCardSize(W: number) {
   const cw = Math.max(30, Math.min(Math.round(W * 0.09), 90));
   const ch = Math.round(cw * 1.5);
@@ -143,6 +167,8 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     const rgb = hexToRgbComponents(primaryColor);
     let rafId: number;
     let startMs: number | null = null;
+    // 부채꼴 펼침 단계 trail 버퍼 (카드당 최대 6 포지션)
+    const cardTrails: Array<Array<{ x: number; y: number; angle: number }>> = Array.from({ length: N }, () => []);
 
     function drawFinal() {
       const W = cssW, H = cssH;
@@ -212,11 +238,24 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
           ctx.fillText(textChars.slice(0, Math.min(count, textChars.length)).join(""), cx, H - 24);
         }
       } else {
-        // ④ 부채꼴 펼침
-        const p = springFn(Math.min((t - 1.4) / 0.6, 1));
+        // ④ 부채꼴 펼침 (trail 잔상 포함)
+        const rawP = Math.min((t - 1.4) / 0.6, 1);
+        const p = springFn(rawP);
+        // burst: TOTAL_S 직전 0.3초 동안 glow 최대 → 완료 직전 시각적 강조
+        const burstT = Math.max(0, (t - (TOTAL_S - 0.3)) / 0.3);
+        const burstGlow = rawP >= 1 ? Math.max(0, 1 - burstT) * 0.8 : 0;
         for (let i = 0; i < N; i++) {
           const f = i/(N-1) - 0.5;
-          drawCard(ctx, cx + f*fanSpread*p, cy + Math.pow(f*2, 2)*ch*0.28*p, cw, ch, f*0.4*p, 1, 0, rgb, cardImgRef.current);
+          const cx_ = cx + f*fanSpread*p;
+          const cy_ = cy + Math.pow(f*2, 2)*ch*0.28*p;
+          const angle_ = f*0.4*p;
+          // trail 버퍼 갱신 (직전 위치 push, 최대 6개)
+          if (rawP > 0 && rawP < 1) {
+            cardTrails[i].push({ x: cx_, y: cy_, angle: angle_ });
+            if (cardTrails[i].length > 6) cardTrails[i].shift();
+          }
+          drawTrail(ctx, cardTrails[i], cw, ch, rgb);
+          drawCard(ctx, cx_, cy_, cw, ch, angle_, 1, burstGlow, rgb, cardImgRef.current);
         }
         ctx.fillStyle = "rgba(196,181,253,0.95)";
         ctx.font = "14px serif";

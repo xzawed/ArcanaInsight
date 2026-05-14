@@ -17,6 +17,8 @@ interface CardSpreadProps {
   readonly spread: SpreadDefinition;
   readonly revealedPositions: number[];
   readonly glowColor?: string;
+  /** false이면 모든 카드의 하단 텍스트 숨김. 기본값: true */
+  readonly showLabel?: boolean;
 }
 
 /**
@@ -98,7 +100,7 @@ function computeLayout(
 }
 
 export const CardSpread = React.memo(
-  function CardSpread({ selectedCards, spread, revealedPositions, glowColor }: CardSpreadProps) {
+  function CardSpread({ selectedCards, spread, revealedPositions, glowColor, showLabel = true }: CardSpreadProps) {
   const { selectedSkinId } = useSkinStore();
   const { activeTheme } = useThemeStore();
   const { resolvedStyle } = useCardStyleStore();
@@ -176,6 +178,7 @@ export const CardSpread = React.memo(
                     skinId={selectedSkinId}
                     styleId={styleId ?? undefined}
                     glowColor={glowColor}
+                    showLabel={showLabel}
                   />
                 </div>
                 <span
@@ -207,6 +210,7 @@ export const CardSpread = React.memo(
   (prev, next) =>
     prev.spread === next.spread &&
     prev.glowColor === next.glowColor &&
+    prev.showLabel === next.showLabel &&
     prev.selectedCards === next.selectedCards &&
     prev.revealedPositions.length === next.revealedPositions.length &&
     prev.revealedPositions.every((v, i) => v === next.revealedPositions[i]),
