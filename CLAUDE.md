@@ -39,7 +39,7 @@ src/
 │   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 │   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
-│   └── tarot/       # CardInterpretationList (타로 카드별 해석 목록) 등
+│   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널)
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
@@ -51,6 +51,7 @@ src/
 │   ├── useUserInfoForm.ts     # UserInfoForm 상태·핸들러 추출 훅 (mode: tarot|saju|shinjeom)
 │   ├── usePreselectCharacter.ts  # URL ?character= 파라미터 + 선호 상담사 자동 선택
 │   ├── useResetScrollOnStep.ts   # step 변경 시 스크롤 최상단 초기화 (3페이지 공통)
+│   ├── useTarotReading.ts        # 타로 SSE 스트리밍·대기 연출·elapsed 카운터
 │   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
