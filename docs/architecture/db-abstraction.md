@@ -68,6 +68,8 @@ src/lib/db/
 | `013_*` ~ `015_fix_sessions_rls.sql` | RLS 보강 (PR #219·#221 — share_token USING(true), 익명 세션 SELECT 허용 등) |
 | `016_locale_columns.sql` | 5개 테이블 locale 컬럼 + idx_sessions_user_locale (PR #223) |
 | `017_daily_fortune_areas.sql` | daily_cards.area 컬럼 추가 + UNIQUE(date, character_id, area) 재구성 (DailyFortune 5영역) |
+| `018_birthtime_mbti.sql` | profiles.birth_hour HH:MM 형식 외 NULL 처리 + profiles.mbti 컬럼 추가 |
+| `019_fix_saju_readings.sql` | saju_readings.birth_hour NOT NULL 제약 해제 + saju_readings.mbti 컬럼 추가 (018 누락분) |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 

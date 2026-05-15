@@ -42,7 +42,7 @@ jobs:
   e2e (matrix)  — Desktop Chrome + Mobile Android + Mobile iOS (WebKit)
                     └─ matrix.browser로 chromium/webkit 분기 처리
 - artifact 30일 보존
-- 실패 시 GitHub Issue 자동 생성 (QA Failure 라벨)
+- 실패 시 GitHub Issue 자동 생성 (`bug`, `qa` 라벨)
 ```
 
 ### 3. `qa-recheck.yml` — QA 자동 재검증
@@ -132,7 +132,7 @@ E2E 실행 방법, Docker 스크립트, 디바이스 프로필:
 토요일 09:00 KST
   └─ weekly-qa.yml 실행 (3개 디바이스)
        ├─ 통과: 정상 종료
-       └─ 실패: GitHub Issue 자동 생성 (QA Failure 라벨)
+       └─ 실패: GitHub Issue 자동 생성 (`bug`, `qa` 라벨)
             └─ main push 감지 시 (qa-recheck.yml)
                  └─ E2E 재실행
                       ├─ 통과: Issue 자동 닫기
