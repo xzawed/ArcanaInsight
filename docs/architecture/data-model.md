@@ -216,7 +216,6 @@ export interface EffectTheme {
 | 사주 카테고리 | `src/data/saju/categories.ts` |
 | 카드 아트 스타일 | `src/data/cardStyles.ts` |
 | 팔레트 스킨 | `src/data/skins/index.ts` |
-| 출생시간(12시진) | `src/data/birth-hours.ts` |
 | 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
 | 에러 메시지 상수 | `src/data/error-messages.ts` |
 | MBTI 16타입 상수 | `src/data/mbti.ts` |

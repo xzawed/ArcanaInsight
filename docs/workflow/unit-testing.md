@@ -47,7 +47,7 @@ import { POST } from "@/app/api/tarot/reading/route";
 현재 `src/__tests__/api/` 파일 목록 (13개):
 - `tarot-session.test.ts` (14개), `saju-session.test.ts` (12개), `shinjeom-session.test.ts` (13개)
 - `tarot-result.test.ts` (4개), `saju-result.test.ts` (4개), `shinjeom-result.test.ts` (5개)
-- `tarot-reading.test.ts` (23개), `saju-reading.test.ts` (19개), `shinjeom-message.test.ts` (19개)
+- `tarot-reading.test.ts` (23개), `saju-reading.test.ts` (22개), `shinjeom-message.test.ts` (20개)
 - `favorite-character.test.ts` (11개), `daily-card.test.ts` (10개), `locale-wiring.test.ts` (15개)
 - `daily-fortune.test.ts`
 

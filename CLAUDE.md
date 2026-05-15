@@ -33,14 +33,17 @@
 src/
 ├── app/             # App Router 페이지와 API
 ├── components/      # card, character, chat, common, effects, home, layout, saju, session, shinjeom, skin, tarot
-│   ├── card/        # CardFace, CardBack, CardItem, CardStyleSelector (스타일 선택 UI)
-│   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput
+│   ├── card/        # CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector (스타일 선택 UI)
+│   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput,
+│   │                # ResultPageShell, ResultShareButton, ReadingText, Toast, Icon,
+│   │                # LocaleConfirmModal, PrivacyConsentModal
 │   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 │   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
-│   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널)
-├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
+│   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
+│                    # ShuffleCeremony, CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
+├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta, error-messages
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
 │   ├── useCardStyleStore.ts   # 카드 스타일 persist 스토어 (arcana-card-style)

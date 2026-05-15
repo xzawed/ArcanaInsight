@@ -10,17 +10,26 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 사용자 브라우저
   └─ Next.js App Router (src/app/)
        ├─ UI 레이어 (src/components/)
-       │    ├─ card/         — CardFace, CardBack, CardItem, CardStyleSelector
+       │    ├─ card/         — CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector
        │    ├─ character/    — 캐릭터 등장 컴포넌트
+       │    ├─ common/       — UserInfoForm, PageSpinner, BirthTimeInput, ResultPageShell,
+       │    │                  ResultShareButton, ReadingText, Toast, Icon, 모달 컴포넌트
        │    ├─ effects/      — ThemeEffectEngine, ParticleOverlay, MysticBackground 등 5-레이어 이펙트
        │    │                  mysticUtils.ts — particleStyle·particleMotion 순수 함수
+       │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
        │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
-       │    ├─ tarot/        — CardInterpretationList (카드별 해석 목록) 등
+       │    ├─ skin/         — 카드 스킨 관련 컴포넌트
+       │    ├─ tarot/        — CardInterpretationList, TarotResultPanel, ShuffleCeremony,
+       │    │                  CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
        │    └─ chat/home/saju/shinjeom/...
        ├─ 상태 (src/hooks/)
        │    ├─ useCardStyleStore  — 카드 스타일 persist (arcana-card-style)
        │    ├─ useSession / useSajuSession / useShinjeomSession  — 서비스별 세션 상태
        │    ├─ useLocaleStore / useGenderStore / useSkinStore  — 전역 설정
+       │    ├─ useUserInfoForm  — UserInfoForm 상태·핸들러 추출 훅 (mode: tarot|saju|shinjeom)
+       │    ├─ usePreselectCharacter  — URL ?character= 파라미터 + 선호 상담사 자동 선택
+       │    ├─ useResetScrollOnStep  — step 변경 시 스크롤 최상단 초기화 (3페이지 공통)
+       │    ├─ useTarotReading  — 타로 SSE 스트리밍·대기 연출·elapsed 카운터
        │    └─ useReadingReveal, useFavoriteCharacter, ...
        ├─ API 라우트 (src/app/api/)  — SSE 스트리밍 + Zod 검증 + Auth
        └─ 서비스 레이어 (src/services/)
