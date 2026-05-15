@@ -15,15 +15,19 @@ GitHub Actions → Railway 자동 배포 파이프라인 설명입니다.
 
 ```
 jobs:
-  1. Lint & Type Check  (pnpm lint && pnpm type-check)
-  2. Unit Tests         (pnpm test:coverage — Vitest, artifact 7일 보존)
-  3. Build              (pnpm build)
-  4. E2E Tests          (Desktop Chrome + Mobile Android, Playwright v1.59.1)
+  static  — Lint & Type Check  (pnpm lint && pnpm type-check)
+  unit    — Unit Tests          (pnpm test:coverage — Vitest, artifact 7일 보존) ← static과 병렬
+  build   — Production Build    (pnpm build, needs: static)
+              └─ .next/cache GHA 캐시 재사용 → warm build 30-70% 단축
+              └─ artifact에 .next/cache/** 제외 (E2E 전송 비용 감소)
+  e2e     — E2E matrix          (Desktop Chrome + Mobile Android, needs: build만)
+              └─ unit 완료 대기 없이 build 완료 즉시 시작
 ```
 
 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` 환경변수가 모든 워크플로우에 전역 적용되어 있습니다.
 
-- 5개 job(Lint, Unit Tests, Build, E2E Desktop, E2E Android) 중 branch protection 필수 체크 3개(`Lint & Type Check`, `Build`, `E2E Tests`)가 통과해야 PR 머지 가능
+- 4개 job(static, unit, build, e2e matrix) — e2e는 `strategy.matrix`로 Desktop/Android 병렬 실행
+- branch protection 필수 체크: `Lint & Type Check`, `Production Build`, `E2E — Desktop Chrome`, `E2E — Mobile Android`
 - E2E 실패 → 스크린샷·비디오 artifact **7일** 보존
 - **GitHub Free 플랜**: 월 2,000분 한도, 예상 사용 ~100분
 
@@ -32,7 +36,11 @@ jobs:
 **트리거**: 매주 토요일 09:00 KST (Cron)
 
 ```
-- 3개 디바이스: Desktop Chrome + Mobile Android + Mobile iOS (WebKit)
+jobs:
+  quality-check — Lint & Type Check & Build
+                    └─ .next/cache GHA 캐시 재사용
+  e2e (matrix)  — Desktop Chrome + Mobile Android + Mobile iOS (WebKit)
+                    └─ matrix.browser로 chromium/webkit 분기 처리
 - artifact 30일 보존
 - 실패 시 GitHub Issue 자동 생성 (QA Failure 라벨)
 ```
@@ -103,7 +111,7 @@ Railway 환경변수: DB_PROVIDER=supabase (즉시 적용)
 
 | 설정 | 값 |
 |------|-----|
-| Required status checks | `Lint & Type Check`, `Build`, `E2E Tests` |
+| Required status checks | `Lint & Type Check`, `Production Build`, `E2E — Desktop Chrome`, `E2E — Mobile Android` |
 | Require branches to be up to date | ✓ |
 | Restrict pushes | main에 직접 push 금지 (PR만 허용) |
 
