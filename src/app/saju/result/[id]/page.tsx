@@ -8,6 +8,14 @@ import { ReadingText } from "@/components/common/ReadingText";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultPageShell } from "@/components/common/ResultPageShell";
 import type { SajuResult } from "@/services/saju/saju-types";
+import type { OhaengType } from "@/data/saju/constants";
+
+const OHAENG_VALUES = ["wood", "fire", "earth", "metal", "water"] as const;
+
+function toOhaengType(v: string): OhaengType {
+  if ((OHAENG_VALUES as readonly string[]).includes(v)) return v as OhaengType;
+  return "wood";
+}
 
 export default async function SajuResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -50,7 +58,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
   const sajuData: SajuResult = {
     pillars: reading.pillars as SajuResult["pillars"],
     dayMaster: reading.day_master,
-    dayMasterElement: reading.day_master_element as unknown as SajuResult["dayMasterElement"],
+    dayMasterElement: toOhaengType(reading.day_master_element),
     isStrong: reading.is_strong,
     elements: reading.elements as SajuResult["elements"],
     tenStars: reading.ten_stars as SajuResult["tenStars"],

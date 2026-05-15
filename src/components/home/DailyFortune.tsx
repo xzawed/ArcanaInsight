@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { getAvailableCharacters } from "@/data/characters";
@@ -117,16 +117,11 @@ export function DailyFortune() {
   const [fortuneData, setFortuneData] = useState<FortuneData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [flipped, setFlipped] = useState<Record<Area, boolean>>({ general: false, love: false, career: false, health: false, wealth: false });
-  const [today, setToday] = useState("");
-  const [todayLabel, setTodayLabel] = useState("");
-
-  useEffect(() => {
-    const d = new Date();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setToday(d.toISOString().split("T")[0]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setTodayLabel(d.toLocaleDateString(DATE_LOCALE[locale] ?? DATE_LOCALE.ko, { year: "numeric", month: "long", day: "numeric", weekday: "long" }));
-  }, [locale]);
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const todayLabel = useMemo(
+    () => new Date().toLocaleDateString(DATE_LOCALE[locale] ?? DATE_LOCALE.ko, { year: "numeric", month: "long", day: "numeric", weekday: "long" }),
+    [locale],
+  );
 
   const fetchFortune = useCallback(async (charId: string, date: string) => {
     if (!date) return;
