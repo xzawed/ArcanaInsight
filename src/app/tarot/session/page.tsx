@@ -5,8 +5,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ResultTextCard } from "@/components/session/ResultTextCard";
-import { SessionActionButtons } from "@/components/session/SessionActionButtons";
 import { ReadingErrorState } from "@/components/session/ReadingErrorState";
 import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
@@ -33,18 +31,13 @@ const ReadingProgressIndicator = dynamic(
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { getCharacterById } from "@/data/characters";
-import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
-import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
-import { getCardName } from "@/data/cards/locale-helpers";
 import { getCharacterGreeting } from "@/data/characters/locale-helpers";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { DeckManager } from "@/services/tarot/deck-manager";
-import { spreads, getPositionLabel, fallbackPosLabel } from "@/data/spreads";
-import { CardInterpretationList } from "@/components/tarot/CardInterpretationList";
+import { spreads } from "@/data/spreads";
+import { TarotResultPanel } from "@/components/tarot/TarotResultPanel";
 import { TarotCard, SelectedCard } from "@/types/card";
-import { ReadingResult } from "@/types/service";
-import { SpreadDefinition, ChatMessage } from "@/types/session";
-import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { ChatMessage } from "@/types/session";
 import { useT } from "@/i18n/useT";
 import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
@@ -52,30 +45,10 @@ import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { useReadingRevealStore } from "@/hooks/useReadingReveal";
+import { useTarotReading } from "@/hooks/useTarotReading";
 
 
 const deckManager = new DeckManager();
-
-/** startWaitingSequence 내부 setTimeout 콜백 — 중첩 5단계 초과 해소용 헬퍼 */
-function buildRevealStep(
-  sc: SelectedCard,
-  currentSpread: SpreadDefinition | null,
-  charId: string,
-  locale: Locale,
-  revealPos: React.Dispatch<React.SetStateAction<number[]>>,
-  addMsg: (msg: ChatMessage) => void,
-): () => void {
-  return () => {
-    revealPos((prev) => [...prev, sc.position]);
-    const pos = currentSpread?.positions[sc.position];
-    const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(sc.position, locale);
-    const keywords = sc.isReversed ? sc.card.reversed.keywords : sc.card.upright.keywords;
-    const wl = getWaitingLinesData(locale);
-    const cardName = getCardName(sc.card, locale);
-    const preview = wl.buildCardPreviewLine(charId, cardName, keywords, posLabel);
-    addMsg({ id: crypto.randomUUID(), role: "character", content: preview, mood: "mystical", timestamp: new Date() });
-  };
-}
 
 /** 타로 결과 공유 버튼 핸들러 — CC 22 → 모듈 레벨 추출 */
 async function shareTarotResult(locale: Locale): Promise<void> {
@@ -96,44 +69,6 @@ async function shareTarotResult(locale: Locale): Promise<void> {
   }
 }
 
-/** SSE 에러 메시지에서 캐릭터 말투의 사용자 표시 텍스트를 결정한다 */
-function getReadingErrorText(msg: string, charId: string | null | undefined): string {
-  const wl = getWaitingLinesData(useLocaleStore.getState().locale);
-  const lines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
-  if (msg.includes("GROK_API_KEY")) return lines.api;
-  return lines.reading;
-}
-
-/** 정상 리딩 결과를 채팅 메시지로 변환하여 addChatMessage를 호출한다 */
-function addReadingResultMessages(
-  result: ReadingResult,
-  cards: SelectedCard[],
-  currentSpread: SpreadDefinition | null,
-  addChatMessage: (msg: ChatMessage) => void,
-  locale: Locale,
-): void {
-  if (Array.isArray(result.cardInterpretations) && result.cardInterpretations.length > 0) {
-    for (const interp of result.cardInterpretations) {
-      const card = cards.find((c) => c.card.id === interp.cardId);
-      const pos = currentSpread?.positions[interp.position];
-      const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: `[${posLabel}] ${card?.card ? getCardName(card.card, locale) : ""}\n\n${interp.interpretation}`,
-        mood: "smile", timestamp: new Date(),
-      });
-    }
-  }
-  if (result.overallReading) {
-    const header = translate("tarot.session.msg.overall-header", locale);
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `${header}\n\n${result.overallReading}`, mood: "smile", timestamp: new Date() });
-  }
-  if (result.advice) {
-    const header = translate("tarot.session.msg.advice-header", locale);
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: `${header}\n\n${result.advice}`, mood: "smile", timestamp: new Date() });
-  }
-}
-
 export default function TarotSessionPage() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
@@ -143,25 +78,23 @@ export default function TarotSessionPage() {
   const {
     phase, topic, characterId, spreadType, requiredCards, selectedCards, chatMessages, readingResult, isLoading,
     setPhase, setSessionId, setAvailableCards,
-    selectCard, addChatMessage, setReadingResult, setLoading,
+    selectCard, addChatMessage,
   } = useSessionStore();
 
   const character = characterId ? getCharacterById(characterId) : null;
 
-  const { isRevealComplete, revealAll: revealAllCards, reset: resetReveal } = useReadingRevealStore();
+  const { isRevealComplete, reset: resetReveal } = useReadingRevealStore();
 
   const [shuffledDeck, setShuffledDeck] = useState<TarotCard[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [revealedPositions, setRevealedPositions] = useState<number[]>([]);
-  const [readingError, setReadingError] = useState(false);
-  const [readingErrorReason, setReadingErrorReason] = useState<"timeout" | "generic">("generic");
-  const [readingStartedAt, setReadingStartedAt] = useState<number | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const readingAbortRef = useRef<AbortController | null>(null);
   const [pendingConfirm, _setPendingConfirm] = useState(false);
   const pendingConfirmRef = useRef(false);
   const setPendingConfirm = (v: boolean) => { pendingConfirmRef.current = v; _setPendingConfirm(v); };
+
+  const { readingError, readingErrorReason, isConnecting, elapsedSec, readingAbortRef, startReading, setReadingError } =
+    useTarotReading({ setRevealedPositions, setPendingConfirm });
+
   const [confirmEachCard, setConfirmEachCard] = useState(false);
   const resultContainerRef = useRef<HTMLDivElement>(null);
   const redirectedRef = useRef(false);
@@ -169,9 +102,6 @@ export default function TarotSessionPage() {
   const selectionLockRef = useRef(false);
   // 마지막 카드 자동 시작 setTimeout 이중 큐잉 차단
   const autoStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // 자동 시작 타이머와 확인 버튼이 동시에 startReading을 호출하는 race 차단
-  const readingInFlightRef = useRef(false);
-
   const toggleConfirmMode = () => {
     setConfirmEachCard((prev) => {
       const next = !prev;
@@ -362,184 +292,6 @@ export default function TarotSessionPage() {
     setMood("default");
   }, [addChatMessage, setMood, locale]);
 
-  // 대기 연출: 카드 순차 뒤집기 + 캐릭터 대사 + 카드 미리보기
-  const startWaitingSequence = useCallback((cards: SelectedCard[], charId: string) => {
-    const wl = getWaitingLinesData(locale);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const currentSpread = spreadType ? spreads[spreadType] : null;
-    const lines = wl.waitingLines[charId] || wl.defaultWaitingLines;
-
-    // 1단계: 카드 순차 뒤집기 (2초 간격) + 카드 정보 미리보기
-    cards.forEach((sc, i) => {
-      timers.push(setTimeout(
-        buildRevealStep(sc, currentSpread, charId, locale, setRevealedPositions, addChatMessage),
-        (i + 1) * 2000,
-      ));
-    });
-
-    // 2단계: 캐릭터 대기 대사 (카드 뒤집기 끝난 후 3초 간격)
-    // CLAUDE.md 규칙: 대기 대사 중 표정 변경 금지 — setMood 호출 제거
-    const baseDelay = (cards.length + 1) * 2000;
-    lines.forEach((line, i) => {
-      timers.push(setTimeout(() => {
-        addChatMessage({ id: crypto.randomUUID(), role: "character", content: line.content, mood: line.mood, timestamp: new Date() });
-      }, baseDelay + i * 3000));
-    });
-
-    return () => timers.forEach(clearTimeout);
-  }, [locale, spreadType, addChatMessage]);
-
-  const startReading = async (cards: SelectedCard[]) => {
-    if (readingInFlightRef.current) return;
-    const { requiredCards: required } = useSessionStore.getState();
-    if (!cards || cards.length !== required) {
-      console.warn("[tarot-session] startReading aborted: card count mismatch", cards?.length ?? 0, "/", required);
-      setPendingConfirm(false);
-      setLoading(false);
-      return;
-    }
-    readingInFlightRef.current = true;
-    setPendingConfirm(false);
-    setPhase("reading"); setLoading(true); setMood("mystical"); setReadingError(false);
-    setReadingErrorReason("generic");
-    setIsConnecting(true);
-    setElapsedSec(0);
-    setReadingStartedAt(Date.now());
-    // 카드 뒤집기 초기화 (reading 시작 시 전부 뒷면으로)
-    setRevealedPositions([]);
-    addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.cards-gathered", locale), mood: "mystical", timestamp: new Date() });
-
-    // 대기 연출 시작 (API 호출과 동시 실행)
-    const stopSequence = startWaitingSequence(cards, characterId || "arcana");
-
-    // sessionId 확보 대기 (최대 3초) — race condition 방지
-    let sessionId = useSessionStore.getState().sessionId;
-    if (!sessionId) {
-      for (let i = 0; i < 6; i++) {
-        await new Promise((r) => setTimeout(r, 500));
-        sessionId = useSessionStore.getState().sessionId;
-        if (sessionId) break;
-      }
-    }
-
-    if (!sessionId) {
-      stopSequence();
-      addChatMessage({
-        id: crypto.randomUUID(), role: "character",
-        content: getReadingErrorText(translate("tarot.session.msg.connection-failed", locale), characterId ?? "arcana"),
-        mood: "default", timestamp: new Date(),
-      });
-      setMood("default");
-      setReadingError(true);
-      setLoading(false);
-      setReadingStartedAt(null);
-      setIsConnecting(false);
-      readingInFlightRef.current = false;
-      return;
-    }
-
-    setIsConnecting(false);
-
-    // 클라이언트 hard timeout (240초). 서버 AI_TIMEOUT_MS와 동조 — 10장+ 카드 리딩(max_tokens 24500+)은
-    // reasoning 흡수 + 한국어 비효율 + JSON stream으로 200~400s 소요 가능. 120s/180s에서는 본문 잘림 빈발.
-    const abortController = new AbortController();
-    readingAbortRef.current = abortController;
-    let finished = false;
-    const timeoutId = setTimeout(() => {
-      if (finished) return;
-      finished = true;
-      abortController.abort();
-      stopSequence();
-      console.warn("[tarot-session] 클라이언트 타임아웃 (240s)");
-      setMood("default");
-      setReadingErrorReason("timeout");
-      setReadingError(true);
-      setLoading(false);
-      setReadingStartedAt(null);
-      readingInFlightRef.current = false;
-    }, 240_000);
-
-    await fetchSSEStream({
-      url: "/api/tarot/reading",
-      signal: abortController.signal,
-      body: {
-        sessionId, topic, spreadType, characterId,
-        userInfo: useSessionStore.getState().userInfo,
-        freeQuestion: useSessionStore.getState().freeQuestion,
-        cards: cards.map((c) => ({ cardId: c.card.id, position: c.position, isReversed: c.isReversed })),
-      },
-      onChunk: () => { /* 청크별 화면 표시 없음 — 대기 연출 + 인디케이터 사용 */ },
-      onDone: (data) => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeoutId);
-        stopSequence();
-        const result = data.result as ReadingResult | undefined;
-        if (!result) {
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
-          setMood("default"); setReadingError(true);
-          readingInFlightRef.current = false;
-          return;
-        }
-
-        // 결과 표시 불가 — fallback_text는 정제된 본문이 있으므로 세션 화면에서는 표시한다.
-        if (
-          result.parseError === "invalid_json" ||
-          result.parseError === "missing_fields"
-        ) {
-          console.warn("[tarot-session] 결과 표시 불가:", { parseError: result.parseError, expected: result.expectedCardCount });
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.no-result", locale), mood: "default", timestamp: new Date() });
-          setMood("default"); setReadingError(true);
-          readingInFlightRef.current = false;
-          return;
-        }
-
-        // 부분/대체 파싱 — 받은 해석은 그대로 표시하고 안내 메시지 추가
-        if (result.parseError === "truncated" || result.parseError === "fallback_text") {
-          console.warn("[tarot-session] 부분 파싱 응답:", { expected: result.expectedCardCount, got: result.cardInterpretations?.length ?? 0 });
-          addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.partial-result", locale), mood: "default", timestamp: new Date() });
-        }
-
-        // 정상 흐름 (또는 부분 결과) — 카드 뒤집기 완료 + 결과 phase 진입
-        setRevealedPositions(cards.map((c) => c.position));
-        setReadingResult(result);
-        revealAllCards(cards.map((c) => c.card.id)); // 리딩 완료 → 카드 텍스트 공개
-        const currentSpread = spreadType ? spreads[spreadType] : null;
-        addReadingResultMessages(result, cards, currentSpread, addChatMessage, locale);
-        setPhase("result"); setMood(CHARACTER_RESULT_MOODS[characterId ?? ""] ?? "smile");
-        readingInFlightRef.current = false;
-      },
-      onError: (msg) => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeoutId);
-        stopSequence();
-        console.error("리딩 SSE 에러:", msg);
-        addChatMessage({
-          id: crypto.randomUUID(), role: "character",
-          content: getReadingErrorText(msg, characterId),
-          mood: "default", timestamp: new Date(),
-        });
-        setMood("default"); setReadingError(true);
-        readingInFlightRef.current = false;
-      },
-    });
-    if (!finished) clearTimeout(timeoutId);
-    setLoading(false);
-    setReadingStartedAt(null);
-    readingInFlightRef.current = false;
-  };
-
-  // elapsed 카운터 — phase=reading + isLoading 동안 1초 단위로 갱신.
-  // CLAUDE.md SSR 패턴: 초기값 0, useEffect 안에서만 setInterval, cleanup 필수.
-  useEffect(() => {
-    if (phase !== "reading" || !isLoading || readingStartedAt === null) return undefined;
-    const interval = setInterval(() => {
-      setElapsedSec(Math.floor((Date.now() - readingStartedAt) / 1000));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [phase, isLoading, readingStartedAt]);
-
   // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방지)
   useEffect(() => {
     if (phase === "result") {
@@ -720,35 +472,18 @@ export default function TarotSessionPage() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="w-full flex-1 flex flex-col overflow-hidden py-4"
               >
-                {/* 리딩 결과만 표시 (캐릭터 대사 제외) */}
-                <div ref={resultContainerRef} data-testid="reading-content" className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
-                  {/* 카드별 해석 — 순차 공개 */}
-                  {readingResult.cardInterpretations && readingResult.cardInterpretations.length > 0 && (
-                    <CardInterpretationList
-                      interpretations={readingResult.cardInterpretations}
-                      selectedCards={selectedCards}
-                      spread={spread ?? null}
-                      locale={locale}
-                    />
-                  )}
-
-                  {/* 종합 해석 */}
-                  {readingResult.overallReading && (
-                    <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={t("tarot.result.overall")} delay={1} colorScheme="purple" />
-                  )}
-
-                  {/* 조언 */}
-                  {readingResult.advice && (
-                    <ResultTextCard text={readingResult.advice} emoji="✨" label={t("tarot.result.advice")} delay={1.4} colorScheme="gold" />
-                  )}
-
-                </div>
-
-                <SessionActionButtons
-                  onNewSession={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
-                  onShare={() => shareTarotResult(locale)}
+                <TarotResultPanel
+                  readingResult={readingResult}
+                  spread={spread ?? null}
+                  selectedCards={selectedCards}
+                  locale={locale}
+                  overallLabel={t("tarot.result.overall")}
+                  adviceLabel={t("tarot.result.advice")}
                   newSessionLabel={t("tarot.session.btn.new-session")}
                   shareLabel={t("tarot.session.btn.share")}
+                  containerRef={resultContainerRef}
+                  onNewSession={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                  onShare={() => shareTarotResult(locale)}
                 />
               </motion.div>
             )}
