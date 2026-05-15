@@ -1,4 +1,6 @@
 import { SpreadDefinition, SpreadType, Topic } from "@/types/session";
+import { t as translate } from "@/i18n/translations";
+import type { Locale } from "@/i18n/config";
 
 export const spreads: Record<SpreadType, SpreadDefinition> = {
   "one-card": {
@@ -237,4 +239,9 @@ export function getPositionLabel(position: { label: string; labelKo: string; lab
   if (locale === "en") return position.label;
   if (locale === "ja" && position.labelJa) return position.labelJa;
   return position.labelKo;
+}
+
+/** "위치 N" / "Position N" / "位置 N" — locale별 fallback 라벨 */
+export function fallbackPosLabel(position: number, locale: Locale): string {
+  return translate("tarot.session.position-fallback", locale).replace("{n}", String(position + 1));
 }
