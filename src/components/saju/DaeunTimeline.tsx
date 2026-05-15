@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { OHAENG, getStemReadingFromKo, getBranchReadingFromKo, getStemHanjaFromKo, getBranchHanjaFromKo } from "@/data/saju/constants";
 import type { SajuResult } from "@/services/saju/saju-types";
 import { useT } from "@/i18n/useT";
@@ -26,12 +25,7 @@ function formatAgeRange(startAge: number, endAge: number, locale: Locale): strin
 export function DaeunTimeline({ majorFortunes, yearlyFortune, birthYear }: DaeunTimelineProps) {
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);
-  const [currentAge, setCurrentAge] = useState(0);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentAge(new Date().getFullYear() - birthYear);
-  }, [birthYear]);
+  const currentAge = new Date().getFullYear() - birthYear;
 
   return (
     <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5">
