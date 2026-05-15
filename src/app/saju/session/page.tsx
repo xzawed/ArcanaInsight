@@ -3,8 +3,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ReadingText } from "@/components/common/ReadingText";
 import { fetchSSEStream } from "@/hooks/useSSEStream";
+import { ResultTextCard } from "@/components/session/ResultTextCard";
+import { SessionActionButtons } from "@/components/session/SessionActionButtons";
+import { ReadingErrorState } from "@/components/session/ReadingErrorState";
+import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
 import { motion } from "framer-motion";
@@ -42,28 +45,6 @@ function buildSajuInitMsg(name: string, charId: string | null, locale: Locale): 
       .replace("{name}", "");
   }
   return template.replace("{name}", name);
-}
-
-async function shareWithUrl(title: string, text: string, url: string, locale: Locale): Promise<void> {
-  if (navigator.share) {
-    try { await navigator.share({ title, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-  } else {
-    try {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      alert(translate("common.share.link-copied", locale));
-    } catch (e) { console.warn("clipboard write failed:", e); }
-  }
-}
-
-async function shareWithText(title: string, text: string, locale: Locale): Promise<void> {
-  if (navigator.share) {
-    try { await navigator.share({ title, text }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-  } else {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert(translate("common.share.text-copied", locale));
-    } catch (e) { console.warn("clipboard write failed:", e); }
-  }
 }
 
 async function handleSajuShare(r: { shareToken?: string | null; overallReading?: string | null } | null, locale: Locale): Promise<void> {
@@ -277,33 +258,11 @@ export default function SajuSessionPage() {
                 </SajuChartReveal>
 
                 {readingResult.overallReading && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-                    className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">☯</span>
-                      <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("saju.result.overall")}</span>
-                    </div>
-                    <ReadingText text={readingResult.overallReading} />
-                  </motion.div>
+                  <ResultTextCard text={readingResult.overallReading} emoji="☯" label={t("saju.result.overall")} delay={0.4} colorScheme="purple" />
                 )}
 
                 {readingResult.topicReading && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.55, ease: "easeOut" }}
-                    className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">🔍</span>
-                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.topic")}</span>
-                    </div>
-                    <ReadingText text={readingResult.topicReading || ""} />
-                  </motion.div>
+                  <ResultTextCard text={readingResult.topicReading} emoji="🔍" label={t("saju.result.topic")} delay={0.55} colorScheme="card" />
                 )}
 
                 <SajuChartReveal index={4}>
@@ -311,56 +270,29 @@ export default function SajuSessionPage() {
                 </SajuChartReveal>
 
                 {readingResult.advice && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.85, ease: "easeOut" }}
-                    className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">✨</span>
-                      <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.advice")}</span>
-                    </div>
-                    <ReadingText text={readingResult.advice} />
-                  </motion.div>
+                  <ResultTextCard text={readingResult.advice} emoji="✨" label={t("saju.result.advice")} delay={0.85} colorScheme="gold" />
                 )}
               </div>
 
-              <div className="flex gap-3 pt-5 flex-shrink-0">
-                <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
-                  className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
-                  {t("tarot.session.btn.new-session")}
-                </button>
-                <button onClick={() => handleSajuShare(useSajuSessionStore.getState().readingResult, locale)}
-                  className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20">
-                  {t("tarot.session.btn.share")}
-                </button>
-              </div>
+              <SessionActionButtons
+                onNewSession={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
+                onShare={() => handleSajuShare(useSajuSessionStore.getState().readingResult, locale)}
+                newSessionLabel={t("tarot.session.btn.new-session")}
+                shareLabel={t("tarot.session.btn.share")}
+              />
             </motion.div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
               {readingError ? (
-                <div className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-arcana-card/90 border border-red-500/40 shadow-xl backdrop-blur-md max-w-sm" data-testid="reading-error">
-                  <p className="text-arcana-text text-sm md:text-base font-serif font-bold text-center">
-                    {t("tarot.session.error.title")}
-                  </p>
-                  <p className="text-arcana-muted text-xs md:text-sm font-sans text-center">
-                    {readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      data-testid="reading-retry"
-                      onClick={() => { setReadingError(false); startReading(); }}
-                      disabled={isLoading}
-                      className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
-                      {t("tarot.session.btn.try-again")}
-                    </button>
-                    <button onClick={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
-                      className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors">
-                      {t("tarot.session.btn.new-session")}
-                    </button>
-                  </div>
-                </div>
+                <ReadingErrorState
+                  titleText={t("tarot.session.error.title")}
+                  errorText={readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
+                  tryAgainText={t("tarot.session.btn.try-again")}
+                  newSessionText={t("tarot.session.btn.new-session")}
+                  onRetry={() => { setReadingError(false); startReading(); }}
+                  onNewSession={() => { useSajuSessionStore.getState().reset(); router.push("/saju"); }}
+                  isRetrying={isLoading}
+                />
               ) : (
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-10 h-10 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />

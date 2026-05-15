@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ReadingText } from "@/components/common/ReadingText";
 import { motion, AnimatePresence } from "framer-motion";
+import { ResultTextCard } from "@/components/session/ResultTextCard";
+import { SessionActionButtons } from "@/components/session/SessionActionButtons";
+import { ReadingErrorState } from "@/components/session/ReadingErrorState";
 import { useSessionStore } from "@/hooks/useSession";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { useCardAnimationStore } from "@/hooks/useCardAnimation";
@@ -47,6 +50,7 @@ import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
+import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { useReadingRevealStore } from "@/hooks/useReadingReveal";
 
 /** "위치 N" / "Position N" / "位置 N" — locale별 fallback 라벨 */
@@ -84,32 +88,16 @@ async function shareTarotResult(locale: Locale): Promise<void> {
   const shareToken = result?.shareToken;
   const siteName = "ArcanaInsight";
   const shareTitle = `${translate("tarot.session.share.title", locale)} - ${siteName}`;
-  const linkCopied = translate("common.share.link-copied", locale);
-  const textCopied = translate("common.share.text-copied", locale);
 
   if (shareToken) {
     const url = `${globalThis.location?.origin}/tarot/result/${shareToken}`;
     const text = `🔮 ${shareTitle}`;
-    if (navigator.share) {
-      try { await navigator.share({ title: shareTitle, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-    } else {
-      try {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
-        alert(linkCopied);
-      } catch (e) { console.warn("clipboard write failed:", e); }
-    }
+    await shareWithUrl(shareTitle, text, url, locale);
   } else {
     const summary = result?.overallReading
       ? `🔮 ${shareTitle}\n\n${result.overallReading}\n\n- ${siteName}`
       : `🔮 ${shareTitle}\n\n- ${siteName}`;
-    if (navigator.share) {
-      try { await navigator.share({ title: shareTitle, text: summary }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-    } else {
-      try {
-        await navigator.clipboard.writeText(summary);
-        alert(textCopied);
-      } catch (e) { console.warn("clipboard write failed:", e); }
-    }
+    await shareWithText(shareTitle, summary, locale);
   }
 }
 
@@ -715,31 +703,16 @@ export default function TarotSessionPage() {
                   />
                 )}
                 {readingError && !isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10" data-testid="reading-error">
-                    <div className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-arcana-card/90 border border-red-500/40 shadow-xl backdrop-blur-md max-w-sm">
-                      <p className="text-arcana-text text-sm md:text-base font-serif font-bold text-center">
-                        {t("tarot.session.error.title")}
-                      </p>
-                      <p className="text-arcana-muted text-xs md:text-sm font-sans text-center">
-                        {readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
-                      </p>
-                      <div className="flex gap-3">
-                        <button
-                          data-testid="reading-retry"
-                          onClick={() => { setReadingError(false); startReading(selectedCards); }}
-                          disabled={isLoading}
-                          className="px-6 py-2 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {t("tarot.session.btn.try-again")}
-                        </button>
-                        <button
-                          onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
-                          className="px-6 py-2 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
-                        >
-                          {t("tarot.session.btn.new-session")}
-                        </button>
-                      </div>
-                    </div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <ReadingErrorState
+                      titleText={t("tarot.session.error.title")}
+                      errorText={readingErrorReason === "timeout" ? t("tarot.session.error.timeout") : t("tarot.session.error.reading")}
+                      tryAgainText={t("tarot.session.btn.try-again")}
+                      newSessionText={t("tarot.session.btn.new-session")}
+                      onRetry={() => { setReadingError(false); startReading(selectedCards); }}
+                      onNewSession={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                      isRetrying={isLoading}
+                    />
                   </div>
                 )}
               </motion.div>
@@ -781,57 +754,22 @@ export default function TarotSessionPage() {
 
                   {/* 종합 해석 */}
                   {readingResult.overallReading && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 1, ease: "easeOut" }}
-                      className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-5"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-lg">🔮</span>
-                        <span className="text-arcana-purple font-serif font-bold text-base md:text-lg">{t("tarot.result.overall")}</span>
-                      </div>
-                      <ReadingText text={readingResult.overallReading} />
-                    </motion.div>
+                    <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={t("tarot.result.overall")} delay={1} colorScheme="purple" />
                   )}
 
                   {/* 조언 */}
                   {readingResult.advice && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 1.4, ease: "easeOut" }}
-                      className="bg-arcana-gold/5 backdrop-blur-sm border border-arcana-gold/30 rounded-2xl p-4 md:p-5"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-lg">✨</span>
-                        <span className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("tarot.result.advice")}</span>
-                      </div>
-                      <ReadingText text={readingResult.advice} />
-                    </motion.div>
+                    <ResultTextCard text={readingResult.advice} emoji="✨" label={t("tarot.result.advice")} delay={1.4} colorScheme="gold" />
                   )}
 
                 </div>
 
-                {/* 액션 버튼 */}
-                <div className="flex gap-3 pt-5 flex-shrink-0">
-                  <button
-                    onClick={() => {
-                      useSessionStore.getState().reset();
-                      useCardAnimationStore.getState().reset();
-                      router.push("/tarot");
-                    }}
-                    className="flex-1 px-6 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm hover:bg-arcana-purple/10 transition-colors"
-                  >
-                    {t("tarot.session.btn.new-session")}
-                  </button>
-                  <button
-                    onClick={() => shareTarotResult(locale)}
-                    className="flex-1 px-6 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
-                  >
-                    {t("tarot.session.btn.share")}
-                  </button>
-                </div>
+                <SessionActionButtons
+                  onNewSession={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                  onShare={() => shareTarotResult(locale)}
+                  newSessionLabel={t("tarot.session.btn.new-session")}
+                  shareLabel={t("tarot.session.btn.share")}
+                />
               </motion.div>
             )}
           </AnimatePresence>

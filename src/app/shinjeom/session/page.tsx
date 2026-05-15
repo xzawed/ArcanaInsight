@@ -8,7 +8,9 @@ import { useShinjeomSessionStore } from "@/hooks/useShinjeomSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
-import { ReadingText } from "@/components/common/ReadingText";
+import { ResultTextCard } from "@/components/session/ResultTextCard";
+import { SessionActionButtons } from "@/components/session/SessionActionButtons";
+import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { getCharacterById } from "@/data/characters";
 import { useCharacterStore } from "@/hooks/useCharacter";
 import { CHARACTER_RESULT_MOODS } from "@/data/characters/waiting-lines";
@@ -24,28 +26,6 @@ import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
 
 const SITE_NAME = "ArcanaInsight";
-
-async function shareWithUrl(title: string, text: string, url: string, locale: Locale): Promise<void> {
-  if (navigator.share) {
-    try { await navigator.share({ title, text, url }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-  } else {
-    try {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      alert(translate("common.share.link-copied", locale));
-    } catch (e) { console.warn("clipboard write failed:", e); }
-  }
-}
-
-async function shareWithText(title: string, text: string, locale: Locale): Promise<void> {
-  if (navigator.share) {
-    try { await navigator.share({ title, text }); } catch { /* 사용자가 공유를 취소함 */ } // NOSONAR
-  } else {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert(translate("common.share.text-copied", locale));
-    } catch (e) { console.warn("clipboard write failed:", e); }
-  }
-}
 
 async function handleShinjeomShare(r: { shareToken?: string | null; overallReading?: string | null } | null, locale: Locale): Promise<void> {
   const shareToken = r?.shareToken;
@@ -324,63 +304,23 @@ export default function ShinjeomSessionPage() {
           {phase === "result" && readingResult ? (
             /* 최종 결과 */
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                className="bg-arcana-purple/10 border border-arcana-purple/30 rounded-2xl p-4"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-lg">🔮</span>
-                  <span className="text-arcana-purple font-serif font-bold">{t("shinjeom.result.overall")}</span>
-                </div>
-                <ReadingText text={readingResult.overallReading} />
-              </motion.div>
+              <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={t("shinjeom.result.overall")} delay={0.1} colorScheme="purple" />
 
               {readingResult.topicReading && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
-                  className="bg-arcana-gold/5 border border-arcana-gold/30 rounded-2xl p-4"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg">🔍</span>
-                    <span className="text-arcana-gold font-serif font-bold">{t("shinjeom.result.topic")}</span>
-                  </div>
-                  <ReadingText text={readingResult.topicReading} />
-                </motion.div>
+                <ResultTextCard text={readingResult.topicReading} emoji="🔍" label={t("shinjeom.result.topic")} delay={0.35} colorScheme="gold" />
               )}
 
               {readingResult.advice && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
-                  className="bg-arcana-card/70 border border-arcana-border rounded-2xl p-4"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg">✨</span>
-                    <span className="text-arcana-gold font-serif font-bold">{t("shinjeom.result.advice")}</span>
-                  </div>
-                  <ReadingText text={readingResult.advice} />
-                </motion.div>
+                <ResultTextCard text={readingResult.advice} emoji="✨" label={t("shinjeom.result.advice")} delay={0.6} colorScheme="card" />
               )}
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => { reset(); router.push("/shinjeom"); }}
-                  className="flex-1 py-2.5 rounded-full border border-arcana-purple text-arcana-purple font-serif font-bold text-sm"
-                >
-                  {t("tarot.session.btn.new-session")}
-                </button>
-                <button
-                  onClick={() => handleShinjeomShare(useShinjeomSessionStore.getState().readingResult, locale)}
-                  className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-arcana-purple to-arcana-indigo text-white font-serif font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-arcana-purple/20"
-                >
-                  {t("shinjeom.session.btn.share")}
-                </button>
-              </div>
+              <SessionActionButtons
+                onNewSession={() => { reset(); router.push("/shinjeom"); }}
+                onShare={() => handleShinjeomShare(useShinjeomSessionStore.getState().readingResult, locale)}
+                newSessionLabel={t("tarot.session.btn.new-session")}
+                shareLabel={t("shinjeom.session.btn.share")}
+                className="pt-2"
+              />
             </motion.div>
           ) : (
             /* 대화 */
