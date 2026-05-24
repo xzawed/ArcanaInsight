@@ -9,7 +9,7 @@ import { buildUserInfoPrompt, buildFreeQuestionPrompt } from "@/services/core/pr
 import { assertSessionOwnership } from "@/lib/auth";
 import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { getAdminDb } from "@/lib/db";
-import { TAROT_TOPICS } from "@/data/topics";
+import { isTarotTopic } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
     const { sessionId, topic: rawTopic, spreadType, characterId, userInfo, freeQuestion, cards } = parsed.data;
 
     // 입력 검증
-    if (!TAROT_TOPICS.includes(rawTopic as Topic)) return jsonError("Invalid topic");
-    const topic = rawTopic as Topic;
+    if (!isTarotTopic(rawTopic)) return jsonError("Invalid topic");
+    const topic: Topic = rawTopic;
 
     // 세션 소유권 검증 (sessionId 있을 때만 — 익명 리딩은 허용)
     if (sessionId) {

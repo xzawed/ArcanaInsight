@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { TAROT_TOPICS, SAJU_TOPICS, SHINJEOM_TOPICS, ALL_TOPICS } from "./topics";
+import { TAROT_TOPICS, SAJU_TOPICS, SHINJEOM_TOPICS, ALL_TOPICS, isTopic } from "./topics";
 
 describe("TAROT_TOPICS", () => {
   it("7개 항목이 있다", () => {
@@ -118,16 +118,16 @@ describe("ALL_TOPICS", () => {
   });
 
   it("유효한 토픽 값이 포함된다", () => {
-    expect(ALL_TOPICS.includes("love")).toBe(true);
-    expect(ALL_TOPICS.includes("saju-general")).toBe(true);
-    expect(ALL_TOPICS.includes("shinjeom-general")).toBe(true);
+    expect(isTopic("love")).toBe(true);
+    expect(isTopic("saju-general")).toBe(true);
+    expect(isTopic("shinjeom-general")).toBe(true);
   });
 
   it("존재하지 않는 값은 포함되지 않는다", () => {
-    expect(ALL_TOPICS.includes("invalid")).toBe(false);
-    expect(ALL_TOPICS.includes("")).toBe(false);
-    expect(ALL_TOPICS.includes("saju")).toBe(false);
-    expect(ALL_TOPICS.includes("shinjeom")).toBe(false);
+    expect(isTopic("invalid")).toBe(false);
+    expect(isTopic("")).toBe(false);
+    expect(isTopic("saju")).toBe(false);
+    expect(isTopic("shinjeom")).toBe(false);
   });
 
   it("모든 요소가 string 타입이다", () => {

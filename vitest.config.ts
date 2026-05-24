@@ -36,6 +36,7 @@ export default defineConfig({
         "src/app/api/saju/result/[id]/route.ts",      // PR C
         "src/app/api/profile/favorite-character/route.ts", // PR C
         "src/app/api/daily-card/route.ts",            // PR C
+        "src/app/api/daily-fortune/route.ts",         // PR C
         "src/app/api/tarot/reading/route.ts",         // PR C
         "src/app/api/saju/reading/route.ts",          // PR C
         "src/app/api/shinjeom/message/route.ts",      // PR C

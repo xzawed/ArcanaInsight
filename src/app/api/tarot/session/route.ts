@@ -5,7 +5,7 @@ import { TarotService } from "@/services/tarot/tarot-service"
 import { SpreadResolver } from "@/services/tarot/spread-resolver"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
-import { TAROT_TOPICS } from "@/data/topics"
+import { isTarotTopic } from "@/data/topics"
 import { TarotSessionSchema } from "@/lib/validation/api-schemas"
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp } from "@/lib/request-utils"
@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
     const { topic: rawTopic, characterId, spreadType } = parsed.data
-    if (!TAROT_TOPICS.includes(rawTopic as Topic)) {
+    if (!isTarotTopic(rawTopic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
-    const topic = rawTopic as Topic
+    const topic: Topic = rawTopic
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const sessionData = tarotService.startSession(topic)

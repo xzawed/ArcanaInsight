@@ -6,7 +6,7 @@ import { makeMockAiModule } from "@/test-helpers/mock-ai";
 
 setupDoMock();
 
-const TODAY = "2026-05-11";
+const TODAY = new Date().toISOString().split("T")[0];
 const VALID_BODY = { characterId: "arcana", date: TODAY };
 
 const CACHED_ROWS = [

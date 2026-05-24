@@ -3,7 +3,7 @@ import { getAdminDb } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { getCharacterById } from "@/data/characters"
 import { Topic } from "@/types/session"
-import { SAJU_TOPICS } from "@/data/topics"
+import { isSajuTopic } from "@/data/topics"
 import { SajuSessionSchema } from "@/lib/validation/api-schemas"
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp } from "@/lib/request-utils"
@@ -21,10 +21,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
     const { topic: rawTopic, characterId } = parsed.data
-    if (!SAJU_TOPICS.includes(rawTopic as Topic)) {
+    if (!isSajuTopic(rawTopic)) {
       return NextResponse.json({ error: "Invalid topic" }, { status: 400 })
     }
-    const topic = rawTopic as Topic
+    const topic: Topic = rawTopic
     const validCharId = characterId && getCharacterById(characterId) ? characterId : null
     const user = await getCurrentUser()
     const db = getAdminDb()
