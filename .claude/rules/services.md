@@ -1,5 +1,4 @@
 ---
-description: src/services/ 작업 시 적용되는 AI 프로바이더·DivinationService 패턴 규칙
 paths:
   - "src/services/**"
 ---

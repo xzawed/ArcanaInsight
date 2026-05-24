@@ -1,7 +1,8 @@
 # ArcanaInsight 업무 프로세스 가이드
 
+<!-- 전역 규칙 — paths 미설정 시 모든 세션에서 자동 로드됨 -->
+
 > Claude가 작업 유형을 자동 판단하고 올바른 순서로 진행하기 위한 결정 트리.
-> 루트 `CLAUDE.md` → 이 파일 순서로 읽는다.
 
 ---
 
@@ -250,7 +251,7 @@ PR 머지 완료 후 반드시 수행:
 
 ## 참고 문서
 
-- 플레이북: [`docs/workflow/task-playbooks.md`](../docs/workflow/task-playbooks.md)
-- Claude·Codex 협업: [`docs/workflow/claude-codex-collaboration.md`](../docs/workflow/claude-codex-collaboration.md)
-- 컨벤션: [`docs/conventions/coding-style.md`](../docs/conventions/coding-style.md)
-- 운영 가이드: [`docs/operations/operation-guide.md`](../docs/operations/operation-guide.md)
+- 플레이북: [`docs/workflow/task-playbooks.md`](../../docs/workflow/task-playbooks.md)
+- Claude·Codex 협업: [`docs/workflow/claude-codex-collaboration.md`](../../docs/workflow/claude-codex-collaboration.md)
+- 컨벤션: [`docs/conventions/coding-style.md`](../../docs/conventions/coding-style.md)
+- 운영 가이드: [`docs/operations/operation-guide.md`](../../docs/operations/operation-guide.md)

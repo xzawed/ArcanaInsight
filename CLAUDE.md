@@ -4,7 +4,7 @@
 
 이 파일은 세션 시작용 빠른 지도입니다. 세부 규칙과 긴 설명은 `docs/`의 주제별 문서를 정본으로 삼습니다.
 
-업무 유형별 진행 순서는 [`.claude/WORKFLOW.md`](.claude/WORKFLOW.md)를 참고한다.
+업무 유형별 진행 순서는 `.claude/rules/workflow.md`에 정의되어 있으며 매 세션 자동 로드된다.
 
 ## 세션 시작 순서
 

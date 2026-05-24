@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(pnpm dev)",
@@ -23,9 +24,11 @@
       "Bash(git pull*)",
       "Bash(git rev-parse*)",
       "Bash(git remote*)",
+      "Bash(git fetch*)",
+      "Bash(git rebase*)",
       "Bash(npx next*)",
-      "Bash(bash scripts/pre-push-checks.sh)",
-      "Bash(bash scripts/pre-pr-checks.sh)",
+      "Bash(bash ${CLAUDE_PROJECT_DIR}/scripts/pre-push-checks.sh)",
+      "Bash(bash ${CLAUDE_PROJECT_DIR}/scripts/pre-pr-checks.sh)",
       "Bash(gh pr*)",
       "Bash(gh run*)"
     ],
@@ -43,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $(git rev-parse --show-toplevel) && bash scripts/pre-push-checks.sh",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/pre-push-checks.sh",
             "timeout": 300,
             "statusMessage": "push 전 검증 중 (tsc + lint + test:coverage + 문서 정합성)..."
           }
@@ -54,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd $(git rev-parse --show-toplevel) && bash scripts/pre-pr-checks.sh",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/pre-pr-checks.sh",
             "timeout": 600,
             "statusMessage": "PR 생성 전 종합 검증 중 (7단계 품질 게이트)..."
           }
