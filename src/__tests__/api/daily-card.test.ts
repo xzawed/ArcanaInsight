@@ -6,7 +6,7 @@ import { makeMockAiModule } from "@/test-helpers/mock-ai";
 
 setupDoMock();
 
-const TODAY = "2026-04-24";
+const TODAY = new Date().toISOString().split("T")[0];
 const CACHED_CARD = { card_id: "major-00", is_reversed: false, interpretation: "캐시된 해석", keywords: ["새로운 시작"] };
 const VALID_BODY = { characterId: "arcana", date: TODAY };
 

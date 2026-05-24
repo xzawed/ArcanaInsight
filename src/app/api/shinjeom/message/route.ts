@@ -11,7 +11,7 @@ import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
 import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
-import { SHINJEOM_TOPICS } from "@/data/topics";
+import { isShinjeomTopic } from "@/data/topics";
 
 const shinjeomService = new ShinjeomService();
 const aiProvider = new FallbackProvider();
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
     const parsed = ShinjeomMessageSchema.safeParse(rawBody);
     if (!parsed.success) return jsonError("Invalid request");
     const { sessionId, characterId, userInfo, currentMessage, isFinalTurn, messageIndex, topic: rawTopic } = parsed.data;
-    if (!SHINJEOM_TOPICS.includes(rawTopic)) return jsonError("Invalid topic");
-    const topic = rawTopic as Topic;
+    if (!isShinjeomTopic(rawTopic)) return jsonError("Invalid topic");
+    const topic: Topic = rawTopic;
     // timestamp는 네트워크 전송 시 문자열/숫자로 직렬화되므로 Date로 복원
     const chatHistory: ChatMessage[] = parsed.data.chatHistory.map((m) => ({
       ...m,
