@@ -118,6 +118,9 @@ export interface SharedKeys {
     "back-home": string;
     "toast.saved": string;
     "section.card-skin": string;
+    "section.card-skin.title": string;
+    "section.card-skin.subtitle": string;
+    "section.card-skin.toast": string;
     "section.gender-filter": string;
     "section.gender-filter.desc": string;
     "gender.all": string;
@@ -311,6 +314,32 @@ export interface SharedKeys {
     "save-info.with-account": string;
     "save-info.local": string;
     "saved-info-banner": string;
+    "label.name": string;
+    "label.birthdate": string;
+    "label.gender": string;
+    "label.birth-time": string;
+    "label.mbti": string;
+    "label.optional": string;
+    "mbti.none": string;
+    "save-warning": string;
+  };
+  "birth-time": {
+    "hour-placeholder": string;
+    "minute-placeholder": string;
+    "unknown": string;
+  };
+  "privacy-consent": {
+    "title": string;
+    "items.label": string;
+    "items.content": string;
+    "purpose.label": string;
+    "purpose.content": string;
+    "retention.label": string;
+    "retention.content": string;
+    "note": string;
+    "policy-link": string;
+    "cancel": string;
+    "agree": string;
   };
   auth: {
     "login.fallback-error": string;

@@ -73,7 +73,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     <ResultPageShell service="saju">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("saju.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
+          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
         </div>
 
         <div className="space-y-4 md:space-y-5">

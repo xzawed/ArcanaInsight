@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/i18n/useT";
+
 interface BirthTimeInputProps {
   readonly hour: string;
   readonly minute: string;
@@ -23,6 +25,7 @@ export function BirthTimeInput({
   disabled = false,
   inputClasses,
 }: BirthTimeInputProps) {
+  const { t } = useT();
   return (
     <>
       <div className="flex items-center gap-2 mb-2">
@@ -38,7 +41,7 @@ export function BirthTimeInput({
             if (!isNaN(n) && n >= 0 && n <= 23) onHourChange(String(n));
           }}
           disabled={disabled || unknown}
-          placeholder="시"
+          placeholder={t("birth-time.hour-placeholder")}
           className={`${inputClasses} w-20 text-center disabled:opacity-40`}
         />
         <span className="text-arcana-muted text-lg">:</span>
@@ -54,7 +57,7 @@ export function BirthTimeInput({
             if (!isNaN(n) && n >= 0 && n <= 59) onMinuteChange(String(n));
           }}
           disabled={disabled || unknown}
-          placeholder="분"
+          placeholder={t("birth-time.minute-placeholder")}
           className={`${inputClasses} w-20 text-center disabled:opacity-40`}
         />
         {sijin && !unknown && (
@@ -76,7 +79,7 @@ export function BirthTimeInput({
           }}
           className="w-4 h-4 rounded border-arcana-border accent-arcana-purple"
         />
-        <span className="text-arcana-muted text-xs">시간을 모릅니다</span>
+        <span className="text-arcana-muted text-xs">{t("birth-time.unknown")}</span>
       </label>
     </>
   );
