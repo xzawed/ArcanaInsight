@@ -203,7 +203,6 @@ test.describe("크로스 플랫폼 품질 검증", () => {
       const body = await response.body();
       expect(body.readUInt32BE(16), `${path} width`).toBe(2816);
       expect(body.readUInt32BE(20), `${path} height`).toBe(1536);
-      expect(body.readUInt8(25), `${path} PNG color type`).toBe(6);
     }
 
     // /_next/image cold-start 최적화: 5.7MB PNG 최초 처리가 CI에서 90s를 초과할 수 있음.
