@@ -26,7 +26,10 @@ async function setup(options: {
     mockAiModule.FallbackProvider.mockImplementation(() => provider);
   }
 
-  vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb) }));
+  vi.doMock("@/lib/db", () => ({
+    getDb: vi.fn().mockReturnValue(mockDb),
+    getAdminDb: vi.fn().mockReturnValue(mockDb),
+  }));
   vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
   vi.doMock("@/lib/rate-limit", () => ({
     checkRateLimit: vi.fn().mockResolvedValue(!options.rateLimited),

@@ -45,6 +45,10 @@ export async function makeResultRouteSetup(
 }> {
   const mockDb = makeMockDb()
   const mockAdminDb = makeMockDb()
+  vi.doMock("@/lib/rate-limit", () => ({
+    checkRateLimit: vi.fn().mockResolvedValue(true),
+    rateLimitResponse: vi.fn(),
+  }))
   vi.doMock("@/lib/db", () => ({
     getDb: vi.fn().mockReturnValue(mockDb),
     getAdminDb: vi.fn().mockReturnValue(mockAdminDb),

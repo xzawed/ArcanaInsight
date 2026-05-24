@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { getDb, getAdminDb } from "@/lib/db";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getCharacterById } from "@/data/characters";
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
       for (const ac of missingCards) {
         const interpretation = interpretations[ac.area] ?? "";
-        await db.upsert("daily_cards", {
+        await getAdminDb().upsert("daily_cards", {
           date, character_id: characterId, area: ac.area,
           card_id: ac.cardId, is_reversed: ac.isReversed, interpretation, keywords: ac.keywords,
         }, "date,character_id,area");

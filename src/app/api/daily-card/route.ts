@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { getDb, getAdminDb } from "@/lib/db";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { getCharacterById } from "@/data/characters";
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const keywords = meanings.keywords.slice(0, 3);
 
     // 캐시 저장 (동시 요청 시 중복 방지 — 충돌 무시)
-    await db.upsert("daily_cards", {
+    await getAdminDb().upsert("daily_cards", {
       date,
       character_id: characterId,
       area: "general",
