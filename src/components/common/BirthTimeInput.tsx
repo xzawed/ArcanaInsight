@@ -34,8 +34,8 @@ export function BirthTimeInput({
           onChange={(e) => {
             const v = e.target.value;
             if (v === "") { onHourChange(""); return; }
-            const n = parseInt(v, 10);
-            if (!isNaN(n) && n >= 0 && n <= 23) onHourChange(String(n));
+            const n = Number.parseInt(v, 10);
+            if (!Number.isNaN(n) && n >= 0 && n <= 23) onHourChange(String(n));
           }}
           disabled={disabled || unknown}
           placeholder="시"
@@ -50,8 +50,8 @@ export function BirthTimeInput({
           onChange={(e) => {
             const v = e.target.value;
             if (v === "") { onMinuteChange(""); return; }
-            const n = parseInt(v, 10);
-            if (!isNaN(n) && n >= 0 && n <= 59) onMinuteChange(String(n));
+            const n = Number.parseInt(v, 10);
+            if (!Number.isNaN(n) && n >= 0 && n <= 59) onMinuteChange(String(n));
           }}
           disabled={disabled || unknown}
           placeholder="분"

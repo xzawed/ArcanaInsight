@@ -61,7 +61,6 @@ export default defineConfig({
         "src/data/spreads/**",
         "src/data/saju/constants.ts",
         "src/data/saju/categories.ts",
-        "src/data/error-messages.ts",
         // hooks — useSSEStream 제외한 나머지 (jsdom 필요)
         "src/hooks/useCardAnimation.ts",
         "src/hooks/useCharacter.ts",

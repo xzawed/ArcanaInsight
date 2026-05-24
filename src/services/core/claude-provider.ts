@@ -109,7 +109,7 @@ export class ClaudeProvider implements AIProvider {
       }
       const totalMs = Date.now() - startedAt;
       const ttfbMs = ref.firstChunkAt !== null ? ref.firstChunkAt - startedAt : null;
-      console.log(`[Claude] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms stop=${ref.stopReason ?? "?"} max_tokens=${effectiveMaxTokens} output_tokens=${ref.outputTokens ?? "?"}`);
+      if (process.env.NODE_ENV !== "production") console.log(`[Claude] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms stop=${ref.stopReason ?? "?"} max_tokens=${effectiveMaxTokens} output_tokens=${ref.outputTokens ?? "?"}`);
       if (ref.stopReason === "max_tokens") {
         console.warn(`[Claude] ⚠️ TRUNCATED: max_tokens(${effectiveMaxTokens}) 초과로 본문 잘림 — output_tokens=${ref.outputTokens ?? "?"}`);
       }

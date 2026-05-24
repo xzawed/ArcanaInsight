@@ -18,6 +18,7 @@ const grokCircuit = new CircuitBreaker({ prefix: "FallbackProvider/Grok", global
 
 /** 테스트 전용 리셋 — 프로덕션 코드에서 호출 금지 */
 export function __resetFallbackCircuitForTests(): void {
+  if (process.env.NODE_ENV === "production") return;
   grokCircuit.resetForTests();
 }
 
