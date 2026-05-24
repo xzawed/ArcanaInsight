@@ -55,7 +55,7 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 1. **사주 계산 엔진** (5개) — 알려진 사주, 윤년, 십성, 12운성, 대운
 2. **상수 데이터 무결성** (4개) — 천간 10개, 지지 12개, 오행 5개, 12시진
 3. **카드 데이터** (2개) — 메이저 22장, 스프레드 10종
-4. **캐릭터 데이터** (2개) — 전체 캐릭터 수 12명, 모든 expressions가 nukki PNG 경로(`/nukki/*.png`) 형식
+4. **캐릭터 데이터** (2개) — 전체 캐릭터 수 12명, 모든 expressions가 nukki-enhanced PNG 경로(`/nukki-enhanced/*.png`) 형식
 5. **API 입력 검증** (2개) — 유효 토픽(15개 / 사주 8개+타로 7개), 스프레드 타입(10종)
 6. **SSE 패턴** (4개) — 버퍼링, error 처리, done+break, 사주 동일 패턴
 7. **타입 안전성** (4개) — spreadType nullable, cardInterpretations optional, 타임아웃, 플레이스홀더
@@ -65,7 +65,7 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 ### Phase 4: 이미지 에셋 검증
 
 모든 캐릭터 디렉토리를 확인:
-- **모든 12캐릭터**: PNG 누끼 경로 (`/images/characters/{id}/nukki/default.png` 형식)
+- **모든 12캐릭터**: PNG 누끼 경로 (`/images/characters/{id}/nukki-enhanced/default.png` 형식)
 - 필수 표정 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 - SpriteAnimator MOOD_TO_FILE 매핑과 파일명 일치
 - expressions 경로가 실제 파일과 일치
@@ -73,7 +73,7 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
   ```bash
   python3 -c "
   from PIL import Image; import glob
-  files = glob.glob('public/images/characters/*/nukki/*.png')
+  files = glob.glob('public/images/characters/*/nukki-enhanced/*.png')
   bad = [f for f in files if Image.open(f).size != (1408, 768)]
   print(f'전체 {len(files)}개 | 비표준: {len(bad)}개')
   for f in bad: print(' !!', f, Image.open(f).size)
@@ -84,7 +84,7 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 - **[필수] 캐릭터 이미지 테두리 투명도 — 표준 mask 값 일치 확인**:
   캐릭터 이미지를 직접 표시하는 모든 컴포넌트/페이지에서 아래 표준값이 그대로 사용되는지 grep으로 확인:
   ```bash
-  grep -rn "black 14%\|black 18%\|black 10%" src/ --include="*.tsx"
+  grep -rn "black 14%\|black 18%\|black 10%" src/ --include="*.tsx" --include="*.ts"
   ```
   `CharacterDisplay.tsx` 외에 캐릭터 이미지를 직접 렌더링하는 곳(예: `character/[id]/page.tsx`)도 동일한 수치를 사용해야 한다.
   수치가 다르면 표준값(`top: 14%, bottom: 18%, left/right: 10%`)으로 수정한다.

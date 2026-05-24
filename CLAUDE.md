@@ -40,6 +40,7 @@ src/
 │   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
 │   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
+│   │                # themeAtmosphere.ts — ThemeAtmosphereLayer 전용 파티클 종류·설정
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
 │   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
 │                    # ShuffleCeremony, CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects

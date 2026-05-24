@@ -12,7 +12,7 @@
 
 | 화면 | 구조 |
 |------|------|
-| **데스크탑(md 이상)** | 좌측 캐릭터 `md:w-1/2` + 우측 콘텐츠 `md:w-1/2` — 가로 5:5 flex |
+| **데스크탑(md 이상)** | 좌측 캐릭터 `md:w-[50%]` + 우측 콘텐츠 `md:w-[50%]` — 가로 5:5 flex |
 | **모바일(md 미만)** | `flex-col` 세로 배치 — 캐릭터 → 콘텐츠 순서 |
 
 ---
@@ -70,12 +70,12 @@ style={{
 
 ```tsx
 // 모바일 캐릭터 영역
-<div className="h-[25%] md:h-auto md:w-1/2">
+<div className="h-[25%] md:h-auto md:w-[50%]">
   <CharacterDisplay ... />
 </div>
 
 // 콘텐츠 영역
-<div className="flex-1 overflow-y-auto md:w-1/2">
+<div className="flex-1 overflow-y-auto md:w-[50%]">
   {/* 콘텐츠 */}
 </div>
 ```

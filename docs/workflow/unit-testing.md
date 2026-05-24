@@ -31,7 +31,7 @@ src/lib/env.test.ts       ← 같은 디렉토리
 
 ### API 라우트 테스트 ⚠️ 중요
 
-`vitest.config.ts`의 `exclude: ["src/app/**"]` 설정이 테스트 파일도 제외합니다.
+`vitest.config.ts`의 `exclude: ["src/app/**", "src/components/**"]` 설정이 테스트 파일도 제외합니다.
 
 ```
 src/app/api/tarot/reading/route.test.ts  ← ❌ 수집 불가

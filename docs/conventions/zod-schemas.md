@@ -48,10 +48,11 @@ const body = await request.json() as { field1: string };
 
 ## 3. 기존 스키마 목록
 
-`src/lib/validation/api-schemas.ts` — 9종:
+`src/lib/validation/api-schemas.ts` — 10종:
 
 | 스키마 | 용도 |
 |--------|------|
+| `LocaleSchema` | locale 설정 요청 |
 | `TarotReadingSchema` | 타로 리딩 요청 |
 | `SajuReadingSchema` | 사주 리딩 요청 |
 | `ShinjeomMessageSchema` | 신점 메시지 요청 |
