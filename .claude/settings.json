@@ -6,36 +6,69 @@
       "Bash(pnpm lint)",
       "Bash(pnpm type-check)",
       "Bash(pnpm test)",
+      "Bash(pnpm test:coverage)",
       "Bash(pnpm tsc*)",
       "Bash(pnpm install*)",
       "Bash(pnpm add*)",
+      "Bash(pnpm check:*)",
+      "Bash(pnpm i18n:check)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
       "Bash(git add*)",
       "Bash(git commit*)",
       "Bash(git push*)",
+      "Bash(git checkout*)",
+      "Bash(git pull*)",
       "Bash(git rev-parse*)",
+      "Bash(git remote*)",
       "Bash(npx next*)",
-      "Bash(bash scripts/pre-push-checks.sh)"
+      "Bash(bash scripts/pre-push-checks.sh)",
+      "Bash(bash scripts/pre-pr-checks.sh)",
+      "Bash(gh pr*)",
+      "Bash(gh run*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
-      "Bash(git push --force origin*)",
+      "Bash(git push --force origin main*)",
+      "Bash(git push --force origin master*)",
       "Bash(git reset --hard*)"
     ]
   },
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash(git push*)",
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git push*)",
             "command": "cd $(git rev-parse --show-toplevel) && bash scripts/pre-push-checks.sh",
-            "timeout": 180,
-            "statusMessage": "코드 품질 검증 중 (tsc + lint + build)..."
+            "timeout": 300,
+            "statusMessage": "push 전 검증 중 (tsc + lint + test:coverage + 문서 정합성)..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(gh pr create*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $(git rev-parse --show-toplevel) && bash scripts/pre-pr-checks.sh",
+            "timeout": 600,
+            "statusMessage": "PR 생성 전 종합 검증 중 (7단계 품질 게이트)..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(gh pr merge*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '' && echo '╔═══════════════════════════════════════════════╗' && echo '║  ✅ 머지 완료 — 포스트 머지 문서 동기화 필요   ║' && echo '╠═══════════════════════════════════════════════╣' && echo '║  post-merge-doc-refresher 에이전트를 실행하여  ║' && echo '║  전체 문서를 Anthropic 기준으로 갱신하세요.    ║' && echo '║                                               ║' && echo '║  명령: \"포스트 머지 문서 정리해줘\"             ║' && echo '╚═══════════════════════════════════════════════╝' && echo ''",
+            "timeout": 10,
+            "statusMessage": "머지 후 문서 동기화 안내 중..."
           }
         ]
       }

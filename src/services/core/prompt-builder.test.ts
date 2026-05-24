@@ -339,7 +339,7 @@ describe("buildReadingPrompt", () => {
     expect(result).toContain("3~4문단");
   });
 
-  it("5장 스프레드 시 '2~3문단' 깊이 가이드를 포함한다 (4~7장 범위)", () => {
+  it("5장 스프레드도 '3~4문단' 깊이 가이드를 포함한다 (카드 수 무관 균일 깊이)", () => {
     const fiveCardSpread: SpreadDefinition = {
       type: "five-card",
       name: "Five Card",
@@ -357,15 +357,15 @@ describe("buildReadingPrompt", () => {
       makeSelectedCard(dummyCard, i, false)
     );
     const result = buildReadingPrompt("general", selected, fiveCardSpread);
-    expect(result).toContain("2~3문단");
+    expect(result).toContain("3~4문단");
   });
 
-  it("10장 스프레드 시 '1~2문단' 깊이 가이드를 포함한다 (8장 이상)", () => {
+  it("10장 스프레드도 '3~4문단' 깊이 가이드를 포함한다 (카드 수 무관 균일 깊이)", () => {
     const selected = Array.from({ length: 10 }, (_, i) =>
       makeSelectedCard(dummyCard, i, false)
     );
     const result = buildReadingPrompt("general", selected, tenCardSpread);
-    expect(result).toContain("1~2문단");
+    expect(result).toContain("3~4문단");
   });
 
   it("스프레드 이름(nameKo)이 프롬프트에 포함된다", () => {
