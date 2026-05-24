@@ -2,13 +2,14 @@ import { create } from "zustand";
 import { Topic, ChatMessage } from "@/types/session";
 import { ReadingResult } from "@/types/service";
 import { UserInfo } from "@/types/user-info";
+import type { CharacterId } from "@/types/character";
 
 export type ShinjeomPhase = "character-select" | "conversation" | "result";
 
 interface ShinjeomSessionState {
   phase: ShinjeomPhase;
   sessionId: string | null;
-  characterId: string | null;
+  characterId: CharacterId | null;
   topic: Topic | null;
   userInfo: UserInfo | null;
   chatMessages: ChatMessage[];
@@ -18,7 +19,7 @@ interface ShinjeomSessionState {
 
   setPhase: (phase: ShinjeomPhase) => void;
   setSessionId: (id: string) => void;
-  setCharacterId: (id: string) => void;
+  setCharacterId: (id: CharacterId) => void;
   setTopic: (topic: Topic) => void;
   setUserInfo: (info: ShinjeomSessionState["userInfo"]) => void;
   addChatMessage: (message: ChatMessage) => void;

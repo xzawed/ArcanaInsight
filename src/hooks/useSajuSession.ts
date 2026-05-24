@@ -3,6 +3,7 @@ import { ChatMessage, Topic, SajuTimeRange } from "@/types/session";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
 import { UserInfo } from "@/types/user-info";
+import type { CharacterId } from "@/types/character";
 
 export type { UserInfo };
 
@@ -11,7 +12,7 @@ type SajuPhase = "info-input" | "topic-select" | "reading" | "result";
 interface SajuSessionState {
   phase: SajuPhase;
   sessionId: string | null;
-  characterId: string | null;
+  characterId: CharacterId | null;
   topic: Topic | null;
   timeRange: SajuTimeRange | null;
   includeMonthly: boolean;
@@ -24,7 +25,7 @@ interface SajuSessionState {
 
   setPhase: (phase: SajuPhase) => void;
   setSessionId: (id: string) => void;
-  setCharacterId: (id: string) => void;
+  setCharacterId: (id: CharacterId) => void;
   setTopic: (topic: Topic) => void;
   setTimeRange: (range: SajuTimeRange) => void;
   setIncludeMonthly: (v: boolean) => void;

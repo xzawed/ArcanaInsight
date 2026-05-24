@@ -4,6 +4,7 @@ import { SelectedCard, TarotCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
 import { Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
+import type { CharacterId } from "@/types/character";
 
 export type { UserInfo };
 
@@ -12,7 +13,7 @@ type SessionPhase = "topic-select" | "card-shuffle" | "card-select" | "reading" 
 interface SessionState {
   phase: SessionPhase;
   sessionId: string | null;
-  characterId: string | null;
+  characterId: CharacterId | null;
   topic: Topic | null;
   spreadType: SpreadType | null;
   requiredCards: number;
@@ -27,7 +28,7 @@ interface SessionState {
   setTopic: (topic: Topic) => void;
   setSpreadType: (type: SpreadType, required: number) => void;
   setSessionId: (id: string) => void;
-  setCharacterId: (id: string) => void;
+  setCharacterId: (id: CharacterId) => void;
   setAvailableCards: (cards: TarotCard[]) => void;
   selectCard: (card: SelectedCard) => boolean;
   addChatMessage: (message: ChatMessage) => void;
