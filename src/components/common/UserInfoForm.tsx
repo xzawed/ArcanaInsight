@@ -85,7 +85,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       {/* 이름 */}
       <div>
         <label htmlFor="userinfo-name" className="text-arcana-muted text-xs font-serif mb-1.5 block">
-          이름 {mode === "tarot" ? "*" : "(선택)"}
+          {t("user-info.label.name")} {mode === "tarot" ? "*" : t("user-info.label.optional")}
         </label>
         <input
           id="userinfo-name"
@@ -99,7 +99,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 생년월일 — 단일 date input */}
       <div>
-        <label htmlFor="userinfo-birthdate" className="text-arcana-muted text-xs font-serif mb-1.5 block">생년월일 {mode === "shinjeom" ? "(선택)" : "*"}</label>
+        <label htmlFor="userinfo-birthdate" className="text-arcana-muted text-xs font-serif mb-1.5 block">{t("user-info.label.birthdate")} {mode === "shinjeom" ? t("user-info.label.optional") : "*"}</label>
         <input
           id="userinfo-birthdate"
           type="date"
@@ -113,7 +113,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
 
       {/* 성별 */}
       <div>
-        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">성별 {mode === "shinjeom" ? "(선택)" : "*"}</label>
+        <label className="text-arcana-muted text-xs font-serif mb-1.5 block">{t("user-info.label.gender")} {mode === "shinjeom" ? t("user-info.label.optional") : "*"}</label>
         <div className="grid grid-cols-3 gap-2">
           {(["male", "female", "other"] as const).map((val) => (
             <button
@@ -135,7 +135,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       {/* 태어난 시각 */}
       <div>
         <label className="text-arcana-muted text-xs font-serif mb-1.5 block">
-          태어난 시각 {mode === "saju" ? "*" : "(선택)"}
+          {t("user-info.label.birth-time")} {mode === "saju" ? "*" : t("user-info.label.optional")}
         </label>
         <BirthTimeInput
           hour={birthHourNum}
@@ -152,7 +152,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       {/* MBTI (선택) */}
       <div>
         <label htmlFor="userinfo-mbti" className="text-arcana-muted text-xs font-serif mb-1.5 block">
-          MBTI (선택)
+          {t("user-info.label.mbti")} {t("user-info.label.optional")}
         </label>
         <div className="relative">
           <select
@@ -161,7 +161,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
             onChange={(e) => setMbti(e.target.value)}
             className={`${inputClasses} appearance-none pr-8`}
           >
-            <option value="">선택 안 함</option>
+            <option value="">{t("user-info.mbti.none")}</option>
             {MBTI_TYPES.map((type) => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -201,7 +201,7 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
       </motion.button>
 
       {saveWarning && (
-        <p className="text-xs text-yellow-400/70 text-center">프로필 저장에 실패했습니다. 리딩에는 영향이 없습니다.</p>
+        <p className="text-xs text-yellow-400/70 text-center">{t("user-info.save-warning")}</p>
       )}
 
       <PrivacyConsentModal

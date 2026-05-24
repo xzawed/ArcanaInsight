@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getAdminDb } from "@/lib/db";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { cleanReadingText } from "@/services/core/text-cleaner";
-import { spreads, getSpreadName } from "@/data/spreads";
+import { spreads, getSpreadName, getPositionLabel, fallbackPosLabel } from "@/data/spreads";
 import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
@@ -58,7 +58,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("tarot.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString("ko-KR")}</p>
+          <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
         </div>
 
         {/* 데스크탑 5:5 레이아웃 / 모바일 세로 배치 */}
@@ -81,7 +81,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   return (
                     <div key={interp.cardId} className="flex flex-col items-center gap-1">
                       <ResultCardFace card={card} isReversed={!!interp.isReversed} />
-                      <span className="text-arcana-gold text-[10px] font-serif font-bold text-center leading-tight">{pos?.labelKo}</span>
+                      <span className="text-arcana-gold text-[10px] font-serif font-bold text-center leading-tight">{pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale)}</span>
                       <span className="text-arcana-text text-[10px] text-center max-w-[60px] truncate">{getCardName(card, locale)}</span>
                     </div>
                   );
@@ -127,7 +127,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <span className="inline-block text-arcana-gold text-sm font-serif font-bold mb-1">{pos?.labelKo}</span>
+                      <span className="inline-block text-arcana-gold text-sm font-serif font-bold mb-1">{pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale)}</span>
                       <div className="flex items-baseline gap-2">
                         <span className="text-arcana-text font-bold">{card ? getCardName(card, locale) : undefined}</span>
                         <span className="text-arcana-muted text-xs md:text-sm">{card?.name}</span>

@@ -11,10 +11,14 @@ import type { CardStyleId } from "@/data/cardStyles";
 import { useSkinStore } from "@/hooks/useSkinStore";
 import { useCardStyleStore } from "@/hooks/useCardStyleStore";
 import { useThemeStore } from "@/hooks/useTheme";
+import { useT } from "@/i18n/useT";
+import { getSkinName } from "@/data/skins";
+import { getStyleName } from "@/data/cardStyles";
 
 const TOAST_VISIBILITY_MS = 2000
 
 export function SkinGallery() {
+  const { t, locale } = useT();
   const { selectedSkinId, setSkin } = useSkinStore();
   const { setStyleOverride, enableSkinMode, resolvedStyle, useSkinMode } = useCardStyleStore();
   const activeTheme = useThemeStore((s) => s.activeTheme);
@@ -30,7 +34,7 @@ export function SkinGallery() {
     setSkin(skinId);
     enableSkinMode();
     if (skin) {
-      setToastName(skin.nameKo);
+      setToastName(getSkinName(skin, locale));
       setToastVisible(true);
     }
   };
@@ -40,7 +44,7 @@ export function SkinGallery() {
     const style = cardStyles.find((s) => s.id === styleId);
     setStyleOverride(styleId);
     if (style) {
-      setToastName(style.nameKo);
+      setToastName(getStyleName(style, locale));
       setToastVisible(true);
     }
   };
@@ -56,9 +60,9 @@ export function SkinGallery() {
       <div className="max-w-5xl mx-auto">
         {/* 섹션 헤더 */}
         <ScrollReveal className="text-center mb-10">
-          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">나만의 카드 디자인</h2>
+          <h2 className="text-xl md:text-2xl font-display font-bold mb-3">{t("section.card-skin.title")}</h2>
           <p className="text-arcana-muted text-sm md:text-base max-w-lg mx-auto">
-            취향에 맞는 카드 스킨을 선택해보세요
+            {t("section.card-skin.subtitle")}
           </p>
         </ScrollReveal>
 
@@ -95,7 +99,7 @@ export function SkinGallery() {
             transition={{ duration: 0.25 }}
             className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-full bg-arcana-gold text-[#08081a] text-sm font-display font-bold shadow-xl whitespace-nowrap pointer-events-none"
           >
-            ✨ {toastName} 스킨이 적용되었습니다
+            ✨ {t("section.card-skin.toast").replace("{name}", toastName)}
           </motion.div>
         )}
       </AnimatePresence>
