@@ -80,7 +80,19 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
 
 `buildCardPreviewLine` 함수 내 `cardPreviewTemplates` 객체에 새 캐릭터 ID 키 추가 (switch/case 구조가 아닌 Record 객체).
 
-### 4. 이미지 디렉토리 생성
+### 4. 이미지 생성 전 백업 (필수)
+
+**이미지 생성·교체·수정 전 반드시 백업을 먼저 수행한다.**
+
+```bash
+# 기존 이미지가 있는 경우 backup-v2/에 백업
+mkdir -p public/images/characters/{id}/backup-v2
+cp -r public/images/characters/{id}/nukki/* public/images/characters/{id}/backup-v2/ 2>/dev/null || true
+```
+
+백업 없이 이미지를 덮어쓰면 복구 불가 → 재생성 비용 발생.
+
+### 5. 이미지 디렉토리 생성
 ```bash
 mkdir -p public/images/characters/{id}/nukki
 ```
@@ -158,6 +170,20 @@ pnpm tsc --noEmit
 pnpm lint
 ```
 
+### SonarCloud exclusions 동기화 (신규 파일 추가 시)
+
+새 `.ts` 파일이 추가된 경우 `sonar-project.properties`에 경로를 등록한다.  
+캐릭터 데이터 파일(`src/data/characters/*.ts`)은 `sonar.coverage.exclusions`에 추가:
+
+```properties
+# sonar-project.properties
+sonar.coverage.exclusions=\
+  ...,\
+  src/data/characters/{id}.ts
+```
+
+등록 누락 시 SonarCloud "new code coverage" 게이트 실패 (PR #219 패턴).
+
 검증 항목:
 - [ ] `characters` 배열에 추가됨
 - [ ] `expressions` 경로가 실제 파일과 일치
@@ -167,3 +193,5 @@ pnpm lint
 - [ ] **모든 nukki 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
 - [ ] **캐릭터 이미지 표시 시 표준 mask 스타일 적용** (CharacterDisplay 사용 또는 직접 스타일 명시)
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치
+- [ ] **이미지 생성 전 backup-v2/ 백업 완료**
+- [ ] **신규 .ts 파일 추가 시 sonar-project.properties exclusions 동기화 완료**

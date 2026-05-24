@@ -194,6 +194,8 @@ pnpm type-check        # TypeScript 오류 없음
 pnpm lint              # ESLint 통과
 pnpm test:coverage     # 임계값: branches 92 / functions·lines·statements 98
 pnpm check:doc-links   # 문서 링크 유효
+pnpm check:env-docs    # env.ts ↔ env-variables.md 정합성
+pnpm i18n:check        # 번역 키 drift 없음
 ```
 
 추가 확인:
@@ -204,17 +206,41 @@ pnpm check:doc-links   # 문서 링크 유효
 - [ ] feature 브랜치 → PR → 머지 순서를 지켰는가? (main 직접 커밋 금지)
 - [ ] **상수(max_tokens 등) 변경 시 해당 상수를 기댓값으로 쓰는 테스트도 동시에 수정했는가?** (`grep -r "toBe([변경 전 값]" src/__tests__/` 로 확인)
 
+## 8. 포스트 머지 워크플로우
+
+PR 머지 완료 후 반드시 수행:
+
+```
+1. main 브랜치 최신화
+   git checkout main && git pull origin main
+
+2. 포스트 머지 문서 동기화 (post-merge-doc-refresher 에이전트)
+   → "포스트 머지 문서 정리해줘" 명령으로 에이전트 호출
+   → 4개 영역(CLAUDE.md, 아키텍처, 워크플로우/컨벤션, Anthropic 기준) 병렬 검증
+   → 변경된 문서 커밋
+
+3. 테스트 수 변동 시 문서 동기화
+   pnpm sync:test-count
+
+4. Railway 배포 상태 확인
+   Railway 대시보드에서 배포 성공 여부 확인
+```
+
+> 포스트 머지 훅(PostToolUse)이 안내 메시지를 자동 출력한다.
+
 ---
 
-## 8. 에이전트 활용 가이드
+## 9. 에이전트 활용 가이드
 
 | 에이전트 | 사용 시점 |
 |---------|---------|
-| `character-add` | 새 캐릭터 12명 외 추가 |
-| `skin-manager` | 카드 스킨 추가·이미지 생성 |
-| `divination-scaffold` | 새 운세 서비스(타로/사주/신점 외) 추가 |
+| `character-add` | 새 캐릭터 추가 (backup-v2/ 백업 포함) |
+| `skin-manager` | 카드 스킨 추가·이미지 생성 (backup-v2/ 백업 포함) |
+| `divination-scaffold` | 새 운세 서비스 추가 (sonar exclusions 동기화 포함) |
 | `page-builder` | 새 페이지 생성 |
-| `quality-gate` | 전체 코드 품질 검증 |
+| `quality-gate` | 전체 코드 품질 검증 (sonar 동기화 포함) |
+| `i18n-manager` | 번역 키 추가·수정·검증 (3개 언어 동시 처리) |
+| `post-merge-doc-refresher` | 머지 후 전체 문서 Anthropic 기준 동기화 |
 | `Explore` | 코드베이스 심층 탐색 (읽기 전용) |
 | `codex:codex-rescue` | Claude가 막힐 때 Codex에 구현 위임 |
 

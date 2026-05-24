@@ -115,6 +115,25 @@ pnpm tsc --noEmit   # 타입 에러 확인
 pnpm lint           # ESLint 확인
 ```
 
+### SonarCloud exclusions 동기화 (필수)
+
+신규 서비스 추가 시 `sonar-project.properties`에 경로를 등록한다.  
+등록 누락 시 SonarCloud CI가 0% 커버리지로 오산정 → "new code" 게이트 실패.
+
+**coverage.include에 추가 (테스트 있는 파일)**:
+```
+src/services/{serviceName}/{serviceName}-service.ts
+```
+
+**sonar.coverage.exclusions에 추가 (테스트 없는 파일)**:
+```
+src/app/{serviceName}/**,
+src/hooks/use{ServiceName}Session.ts,
+src/app/api/{serviceName}/**  ← coverage.include에 추가한 경우 제외
+```
+
+또한 `vitest.config.ts`의 `coverage.include` 배열에도 서비스 파일 경로를 추가한다.
+
 타입 에러 발생 시:
 1. `src/types/session.ts`의 `Topic` 유니온에 새 토픽 추가됐는지 확인
 2. DivinationService 인터페이스 메서드가 모두 구현됐는지 확인

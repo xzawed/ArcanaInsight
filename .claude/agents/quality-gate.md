@@ -1,6 +1,12 @@
 ---
 name: quality-gate
 description: 코드 품질 검증을 강도 높게 수행한다. "코드 검증", "품질 검사", "전체 테스트", "코드 품질 향상" 등의 요청에 사용한다.
+model: claude-sonnet-4-6
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
 ---
 
 # quality-gate 에이전트
@@ -83,7 +89,19 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
   `CharacterDisplay.tsx` 외에 캐릭터 이미지를 직접 렌더링하는 곳(예: `character/[id]/page.tsx`)도 동일한 수치를 사용해야 한다.
   수치가 다르면 표준값(`top: 14%, bottom: 18%, left/right: 10%`)으로 수정한다.
 
-### Phase 5: 문서 일관성
+### Phase 5: SonarCloud exclusions 동기화 검사
+
+신규 `.ts`/`.tsx` 파일 추가 여부를 확인:
+
+```bash
+git diff HEAD~1 --name-only --diff-filter=A | grep "^src/.*\.tsx\?$"
+```
+
+발견된 신규 파일이 `sonar-project.properties`의 `sonar.coverage.exclusions` 또는
+`sonar.cpd.exclusions`에 등록되어 있는지 확인한다.  
+누락 시 등록 후 `vitest.config.ts`의 `coverage.include/exclude`도 동기화.
+
+### Phase 6: 문서 일관성
 
 - `README.md` — 캐릭터 수, 기능 목록이 코드와 일치
 - `CLAUDE.md` — 프로젝트 구조, 캐릭터 테이블이 현재 코드와 일치

@@ -58,7 +58,19 @@ card-skins/
 
 **`src/data/skins/index.ts`**: skins 배열에 추가
 
-### 3. 이미지 생성
+### 3. 이미지 생성 전 백업 (필수)
+
+**이미지 생성·교체 전 반드시 기존 이미지를 backup-v2/에 백업한다.**
+
+```bash
+mkdir -p scripts/backup-v2/{skinId}
+cp -r public/skins/{skinId}/* scripts/backup-v2/{skinId}/ 2>/dev/null || true
+# Supabase Storage 이미지는 다운로드 후 백업
+```
+
+백업 없이 덮어쓰면 재생성 비용 발생 (Grok 이미지 API 과금).
+
+### 4. 이미지 생성
 
 ```bash
 # Grok 이미지 API(grok-2-image)로 79장 생성 (앞면 78장 + 뒷면 1장)
@@ -68,8 +80,17 @@ GROK_API_KEY=키 pnpm tsx scripts/generate-skin-images.ts --skin={skinId}
 SUPABASE_SERVICE_ROLE_KEY=키 pnpm tsx scripts/upload-skin-images.ts --skin={skinId}
 ```
 
-### 4. 검증
+### 5. 검증
 
 - `pnpm tsc --noEmit` — 0 error
 - SkinSelector에 새 스킨이 표시되는지
 - CardFace/CardBack에서 skinId 전달 시 이미지 로드되는지
+
+### 완료 체크리스트
+
+- [ ] **이미지 생성 전 backup-v2/ 백업 완료**
+- [ ] `src/data/skins/index.ts` 스킨 배열 추가
+- [ ] 이미지 79장 생성 완료
+- [ ] Supabase Storage 업로드 완료
+- [ ] `pnpm tsc --noEmit` 통과
+- [ ] SkinSelector UI 표시 확인
