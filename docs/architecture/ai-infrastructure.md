@@ -132,6 +132,26 @@ for (let i = start; i < text.length; i++) {
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
 
+## 4. max_tokens 정책 (`computeReadingMaxTokens`)
+
+`src/app/api/tarot/reading/route.ts` — 카드 수 비례 동적 산정
+
+| 카드 수 | max_tokens |
+|---------|-----------|
+| 1장 | 6,000 |
+| 2–3장 | 10,000 |
+| 4–5장 | 14,000 |
+| 6–7장 | 18,000 |
+| 8–9장 | 22,000 |
+| 10장+ | `min(4000 + n×2500 + 5000, 60000)` |
+
+- 모델 cap 60,000: Claude Sonnet 4.6 / Haiku 4.5 max output 64K 안전마진
+- `perCard 2500`: 한국어 토큰 비율(영어 대비 ×1.3) + JSON 구조 오버헤드 반영
+- `reasoningBuffer 5000`: Grok-3 reasoning 토큰을 max_tokens 예산에서 함께 소비하는 특성 대응
+- `base 4000`: system prompt + overallReading + advice 고정 오버헤드
+
+---
+
 ## 클라이언트 타임아웃 패턴 (tarot/saju 세션 공통)
 
 타로·사주 세션 페이지는 240s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:

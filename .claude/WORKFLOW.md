@@ -86,6 +86,7 @@
    - 새 캐릭터: character-add 에이전트
    - 새 DivinationService: divination-scaffold 에이전트
    - 새 카드 스킨: skin-manager 에이전트
+   - 새 테마 추가/색상 수정: theme-creator 에이전트
 
 4. 구현 (Codex 위임 가능)
    Claude = 설계·뼈대·PR 검토
@@ -236,6 +237,7 @@ PR 머지 완료 후 반드시 수행:
 |---------|---------|
 | `character-add` | 새 캐릭터 추가 (backup-v2/ 백업 포함) |
 | `skin-manager` | 카드 스킨 추가·이미지 생성 (backup-v2/ 백업 포함) |
+| `theme-creator` | 새 테마 추가 또는 기존 테마 색상 수정 |
 | `divination-scaffold` | 새 운세 서비스 추가 (sonar exclusions 동기화 포함) |
 | `page-builder` | 새 페이지 생성 |
 | `quality-gate` | 전체 코드 품질 검증 (sonar 동기화 포함) |

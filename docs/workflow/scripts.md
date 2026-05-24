@@ -29,6 +29,10 @@
 | `pnpm upload:assets:skip` | `generate-assets/upload-to-supabase.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 업로드 |
 | `pnpm test:e2e:full` | `e2e-full/orchestrator.ts --mode=full --workers=6` | 전수 E2E (실서버 + 실 API 키 필요) |
 | `pnpm test:e2e:full:ci` | `e2e-full/orchestrator.ts --mode=ci` | CI 대표 12 조합 |
+| `pnpm enhance:images` | `enhance-character-images.mjs` | 캐릭터 이미지 보정 (Node.js) |
+| `pnpm polish:images` | `polish-character-images.py` | 캐릭터 이미지 후처리 (Python) |
+| `pnpm remove:bg:pilot` | `remove-character-bg.mjs --pilot` | 배경 제거 파일럿 (1장 테스트) |
+| `pnpm remove:bg:full` | `remove-character-bg.mjs --full` | 전체 캐릭터 배경 제거 |
 
 ## 3. 수동 자산 생성 (`tsx scripts/<name>.ts` 직접 실행)
 

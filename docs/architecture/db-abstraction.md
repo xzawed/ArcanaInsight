@@ -65,7 +65,9 @@ src/lib/db/
 | `010_share_token_default_fix.sql` | readings share_token NULL 백필 |
 | `011_saju_shinjeom_share_token_defaults.sql` | saju/shinjeom share_token NULL 백필 |
 | `012_spread_type_expand.sql` | sessions.spread_type CHECK 제약 확장 (10개 스프레드, PR #216) |
-| `013_*` ~ `015_fix_sessions_rls.sql` | RLS 보강 (PR #219·#221 — share_token USING(true), 익명 세션 SELECT 허용 등) |
+| `013_shinjeom_rls.sql` | shinjeom_messages RLS 추가 (008에서 누락) |
+| `014_fix_share_token_rls.sql` | readings/saju_readings share_token 전체 공개 정책 제거 — service_role 서버 레이어로 대체 |
+| `015_fix_sessions_rls.sql` | sessions SELECT: 익명 세션(user_id IS NULL) 조회 허용 (assertSessionOwnership 지원) |
 | `016_locale_columns.sql` | 5개 테이블 locale 컬럼 + idx_sessions_user_locale (PR #223) |
 | `017_daily_fortune_areas.sql` | daily_cards.area 컬럼 추가 + UNIQUE(date, character_id, area) 재구성 (DailyFortune 5영역) |
 | `018_birthtime_mbti.sql` | profiles.birth_hour HH:MM 형식 외 NULL 처리 + profiles.mbti 컬럼 추가 |

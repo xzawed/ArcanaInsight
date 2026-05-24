@@ -6,7 +6,7 @@
 > **담당**: Codex (spec 작성·수정·실행) | Claude (테스트 시나리오 기획·셀렉터 전략 결정)
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 
-- **23개 spec 파일** / **182개 테스트** (Desktop Chrome 기준)
+- **25개 spec 파일** (Desktop Chrome 기준; 실제 테스트 수는 `npx playwright test --list --project="Desktop Chrome"` 기준)
 - **3개 디바이스 프로필**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
 - **Playwright 버전**: `v1.59.1` — CI Docker 이미지와 버전 고정, 임의 변경 금지
 
@@ -99,6 +99,8 @@ docker run --rm \
 
 **문서 변경(*.md, docs/, n8n/)만의 PR/push는 E2E를 자동 스킵합니다.**
 
+> ⚠️ **CI 재현성 필수**: `playwright.config.ts`의 `use.locale: "ko"` 절대 제거 금지. CI 브라우저 기본값은 en-US이므로 제거 시 SSR이 영어로 렌더링되어 한국어 단언이 전부 실패합니다 (PR #243, 25개 실패 사례).
+
 ### QA 자동 루프
 
 ```
@@ -139,6 +141,8 @@ docker run --rm \
 | `theme.spec.ts` | 테마 드롭다운 · 7종 테마 전환 · 3개 디바이스 | — | 없음 |
 | `i18n-matrix.spec.ts` | ko/en/ja 3개 locale 전환 · UI 텍스트 렌더링 검증 | — | 없음 |
 | `theme-atmosphere.spec.ts` | 7종 테마 분위기 이펙트 · 파티클·배경 렌더링 | — | 없음 |
+| `tarot-text-reveal.spec.ts` | 타로 showLabel 제어 동작 — result phase 진입 전 카드명 텍스트 미노출 검증 | — | 없음 |
+| `theme-effects.spec.ts` | ThemeAtmosphereLayer 렌더링 검증 — 테마별 레이어 DOM 존재 확인 | — | 없음 |
 | `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) — 파일 상단 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수 | — | ⚠️ 실 세션 필요 |
 
 ---
@@ -232,7 +236,30 @@ Mobile iOS 프로젝트(WebKit)는 `page.mouse.wheel()`을 지원하지 않는�
 
 ## 5. Helper 사용 가이드
 
-> 참조: [`e2e/helpers/sse-mock.ts`](../../e2e/helpers/sse-mock.ts)
+> 참조: [`e2e/helpers/sse-mock.ts`](../../e2e/helpers/sse-mock.ts), [`e2e/helpers/service-navigation.ts`](../../e2e/helpers/service-navigation.ts)
+
+### service-navigation.ts
+
+서비스 진입 로직(캐릭터 선택, 타로/사주/신점 페이지 이동, 폼 입력)을 집중 관리합니다.
+UI 변경 시 이 파일을 **먼저** 수정하면 이 파일을 import하는 모든 spec 파일이 자동 대응됩니다.
+
+```ts
+import {
+  selectFirstCharacter,        // 캐릭터 목록에서 첫 번째 캐릭터 클릭
+  navigateToSajuForm,          // /saju 이동 후 캐릭터 선택 → 사주 폼 진입
+  fillSajuForm,                // 생년월일·성별·시간 입력
+  submitSajuForm,              // 사주 폼 제출
+  enterSajuSession,            // 사주 세션까지 전체 진입
+  navigateToShinjeomSession,   // /shinjeom 이동 후 캐릭터·주제 선택
+  enterShinjeomSession,        // 신점 세션 진입 (주제 선택 + 첫 메시지 전송)
+  enterTarotSession,           // /tarot 이동 후 캐릭터·주제·스프레드 선택까지
+} from "../helpers/service-navigation";
+```
+
+**변경 전 영향 파일 확인 필수**:
+```bash
+grep -rn "service-navigation" e2e/ --include="*.ts"
+```
 
 AI 응답 렌더링 테스트(`ai-response-rendering.spec.ts`)에서 실제 API 호출 없이 SSE 스트리밍을 mock합니다.
 
@@ -454,7 +481,7 @@ await enterShinjeomSession(page);
 
 ```bash
 # 재검증 커맨드
-ls e2e/*.spec.ts | wc -l                              # spec 파일 수
+ls e2e/*.spec.ts | wc -l                                         # spec 파일 수 (현재 25개)
 npx playwright test --list --project="Desktop Chrome" | tail -1  # 테스트 수
 ```
 

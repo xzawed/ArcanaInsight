@@ -7,6 +7,7 @@
       "Bash(pnpm type-check)",
       "Bash(pnpm test)",
       "Bash(pnpm test:coverage)",
+      "Bash(pnpm test:e2e*)",
       "Bash(pnpm tsc*)",
       "Bash(pnpm install*)",
       "Bash(pnpm add*)",

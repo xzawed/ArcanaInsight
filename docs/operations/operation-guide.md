@@ -245,7 +245,7 @@ flowchart TB
 3. **DB locale 동기화 확인** — 인증 사용자: `profiles.locale` SELECT로 확인. 쿠키와 불일치하면 `/api/locale` POST가 한 번 실패한 케이스.
 4. **`<html lang>` 검증** — DevTools Elements 탭에서 `<html lang="en">` 등 확인. `ko`로 표시되면 쿠키가 SSR에 도달하지 못한 상태 (middleware 동작 의심).
 
-### locale별 카드·캐릭터 표시가 한국어로 나오는 경우 (PR-3·4·5 진행 중 정상)
-- 카드 데이터 영문화는 PR-3, 캐릭터 페르소나는 PR-4, 일본어 전체 채움은 PR-5에서 진행. 현재는 ko fallback이 의도된 동작.
+### locale별 카드·캐릭터 표시가 한국어로 나오는 경우
+- i18n 다국어 PR (#230~#235 포함 9건) 전체 머지 완료 (2026-05-14). 현재 ko fallback은 의도된 동작 — 외부 번역가 미사용, 직역 사전으로 운영 지속 (사용자 확정).
 
 상세: [`../architecture/i18n.md`](../architecture/i18n.md)

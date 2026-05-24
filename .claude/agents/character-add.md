@@ -43,12 +43,12 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
   id: "{id}", name: "{name}", nameJp: "{nameJp}", gender: "{gender}",
   greeting: "{greeting}",
   expressions: {
-    default: "/images/characters/{id}/nukki/default.png",
-    smile: "/images/characters/{id}/nukki/smile.png",
-    serious: "/images/characters/{id}/nukki/serious.png",
-    surprised: "/images/characters/{id}/nukki/surprised.png",
-    wink: "/images/characters/{id}/nukki/wink.png",
-    mystical: "/images/characters/{id}/nukki/mystical.png",
+    default: "/images/characters/{id}/nukki-enhanced/default.png",
+    smile: "/images/characters/{id}/nukki-enhanced/smile.png",
+    serious: "/images/characters/{id}/nukki-enhanced/serious.png",
+    surprised: "/images/characters/{id}/nukki-enhanced/surprised.png",
+    wink: "/images/characters/{id}/nukki-enhanced/wink.png",
+    mystical: "/images/characters/{id}/nukki-enhanced/mystical.png",
   },
   idleAnimation: "float",
   personality: "{personality}",
@@ -87,25 +87,25 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
 ```bash
 # 기존 이미지가 있는 경우 backup-v2/에 백업
 mkdir -p public/images/characters/{id}/backup-v2
-cp -r public/images/characters/{id}/nukki/* public/images/characters/{id}/backup-v2/ 2>/dev/null || true
+cp -r public/images/characters/{id}/nukki-enhanced/* public/images/characters/{id}/backup-v2/ 2>/dev/null || true
 ```
 
 백업 없이 이미지를 덮어쓰면 복구 불가 → 재생성 비용 발생.
 
 ### 5. 이미지 디렉토리 생성
 ```bash
-mkdir -p public/images/characters/{id}/nukki
+mkdir -p public/images/characters/{id}/nukki-enhanced
 ```
 
-필요한 파일 (6개 고유 이미지):
-- `nukki/default.png`
-- `nukki/smile.png`
-- `nukki/serious.png`
-- `nukki/surprised.png`
-- `nukki/wink.png`
-- `nukki/mystical.png`
+필요한 파일 (7개 — 6개 고유 표정 + idle):
+- `nukki-enhanced/default.png`
+- `nukki-enhanced/smile.png`
+- `nukki-enhanced/serious.png`
+- `nukki-enhanced/surprised.png`
+- `nukki-enhanced/wink.png`
+- `nukki-enhanced/mystical.png`
 
-> `idle.png`은 `default.png`과 동일한 이미지이므로, 필요 시 복사하거나 동일 파일을 사용한다.
+> `idle.png`은 `SpriteAnimator`가 `default` 무드에 사용하는 파일명이다. `default.png`을 복사해 `idle.png`으로 저장한다.
 
 **이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용.
 
@@ -123,7 +123,7 @@ node scripts/generate-character-images-v2.mjs {id} smile
 > ```bash
 > python3 -c "
 > from PIL import Image; import glob
-> files = sorted(glob.glob('public/images/characters/{id}/nukki/*.png'))
+> files = sorted(glob.glob('public/images/characters/{id}/nukki-enhanced/*.png'))
 > bad = [(f, Image.open(f).size) for f in files if Image.open(f).size != (1408, 768)]
 > print('비표준 파일:', bad if bad else '없음 (모두 1408x768)')
 > "
@@ -189,9 +189,9 @@ sonar.coverage.exclusions=\
 - [ ] `expressions` 경로가 실제 파일과 일치
 - [ ] `waitingLines`에 대사 추가됨
 - [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
-- [ ] 누끼 이미지 6개(default/smile/serious/surprised/wink/mystical) 존재
-- [ ] **모든 nukki 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
+- [ ] nukki-enhanced 이미지 7개(default/idle/smile/serious/surprised/wink/mystical) 존재
+- [ ] **모든 nukki-enhanced 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
 - [ ] **캐릭터 이미지 표시 시 표준 mask 스타일 적용** (CharacterDisplay 사용 또는 직접 스타일 명시)
-- [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치
+- [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치 (default→idle.png)
 - [ ] **이미지 생성 전 backup-v2/ 백업 완료**
 - [ ] **신규 .ts 파일 추가 시 sonar-project.properties exclusions 동기화 완료**

@@ -22,12 +22,12 @@ ArcanaInsight의 카드 스킨 시스템을 관리한다.
 
 | ID | 이름 | 설명 |
 |----|------|------|
-| gold-luxury | 골드 럭셔리 | 금박 + 다크 톤 |
-| dark-gothic | 다크 고딕 | 고딕 + 블랙 |
-| celestial-mystic | 천상 미스틱 | 우주/천체 테마 |
-| pastel-dream | 파스텔 드림 | 파스텔톤 |
-| neon-cyberpunk | 네온 사이버 | 사이버펑크 |
-| emerald-enchant | 에메랄드 인챈트 | 에메랄드/자연 |
+| gold-luxury | 골드 럭셔리 | 미드나잇 블루와 금박의 최고급 아르데코 |
+| dark-gothic | 다크 고딕 | 핏빛 악센트의 어둡고 강렬한 중세 오컬트 |
+| celestial-mystic | 셀레스티얼 미스틱 | 별자리와 달빛의 천상 세계 |
+| pastel-dream | 파스텔 드림 | 수채화처럼 번지는 몽환적 라벤더 세계 |
+| neon-cyberpunk | 네온 사이버펑크 | 홀로그램 회로와 네온의 미래적 디지털 오라클 |
+| emerald-enchant | 에메랄드 인챈트 | 에메랄드 보석과 숲의 자연 마법 |
 
 ## 스킨 이미지 구조
 
@@ -52,7 +52,7 @@ card-skins/
 - `nameKo` — 한국어 이름
 - `description` — 설명 (1줄)
 - `previewColor` — 미리보기 색상 (hex)
-- `stylePrompt` — Grok 이미지 생성 API(`grok-2-image` 모델) 스타일 프롬프트
+- `stylePrompt` — Grok 이미지 생성 API(`grok-imagine-image-pro` 모델) 스타일 프롬프트
 
 ### 2. 수정 파일
 
