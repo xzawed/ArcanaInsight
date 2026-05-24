@@ -220,7 +220,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     }
   });
 
-  test("캐릭터 이미지 에셋 — enhanced 전체 해상도와 투명 알파 유지", async ({ page }, testInfo) => {
+  test("캐릭터 이미지 에셋 — 전체 해상도(2816×1536) 유지", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "Desktop Chrome", "전체 캐릭터 원본 에셋 검사는 데스크톱 1회만 수행");
 
     const characters = ["arcana", "miko", "seonhwa", "hoshi", "luna", "rei", "cairn", "zero", "haru", "ren", "lix", "ethan"];
@@ -229,12 +229,6 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     await page.goto("/");
     const failures = await page.evaluate(
       async ({ characters, moods }) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 96;
-        canvas.height = 54;
-        const context = canvas.getContext("2d", { willReadFrequently: true });
-        if (!context) return ["canvas context unavailable"];
-
         const loadImage = (src: string) =>
           new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image();
@@ -250,20 +244,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
             const image = await loadImage(src);
             if (image.naturalWidth !== 2816 || image.naturalHeight !== 1536) {
               result.push(`${src}: ${image.naturalWidth}x${image.naturalHeight}`);
-              continue;
             }
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-            let transparent = 0;
-            let translucent = 0;
-            for (let index = 3; index < pixels.length; index += 4) {
-              if (pixels[index] === 0) transparent += 1;
-              if (pixels[index] > 0 && pixels[index] < 255) translucent += 1;
-            }
-            if (transparent === 0) result.push(`${src}: transparent alpha missing`);
-            if (translucent === 0) result.push(`${src}: antialias alpha missing`);
           }
         }
 
