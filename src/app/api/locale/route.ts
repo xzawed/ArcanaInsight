@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "@/i18n/config";
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config";
 import { LocaleSchema } from "@/lib/validation/api-schemas";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
+import { getRequestLocale } from "@/i18n/server-locale";
 
 export async function POST(request: NextRequest) {
+  let reqLocaleForRateLimit: Locale = DEFAULT_LOCALE;
   try {
+    const detectedLocale = await getRequestLocale();
+    if (isLocale(detectedLocale)) reqLocaleForRateLimit = detectedLocale;
+    const ip = getClientIp(request.headers);
+    if (!(await checkRateLimit(`locale:${ip}`, 30, 60_000))) return rateLimitResponse(reqLocaleForRateLimit);
+
     const parsed = LocaleSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid locale" }, { status: 400 });
