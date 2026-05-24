@@ -40,7 +40,7 @@ function buildRevealStep(
 function getReadingErrorText(msg: string, charId: string | null | undefined): string {
   const wl = getWaitingLinesData(useLocaleStore.getState().locale);
   const lines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
-  if (msg.includes("GROK_API_KEY")) return lines.api;
+  if (msg.includes("API_KEY")) return lines.api;
   return lines.reading;
 }
 
@@ -160,7 +160,7 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
     setRevealedPositions([]);
     addChatMessage({ id: crypto.randomUUID(), role: "character", content: translate("tarot.session.msg.cards-gathered", locale), mood: "mystical", timestamp: new Date() });
 
-    const stopSequence = startWaitingSequence(cards, characterId || "arcana");
+    const stopSequence = startWaitingSequence(cards, characterId ?? "");
 
     // sessionId 확보 대기 (최대 3초) — race condition 방지
     let sessionId = storeSessionId;
@@ -176,7 +176,7 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
       stopSequence();
       addChatMessage({
         id: crypto.randomUUID(), role: "character",
-        content: getReadingErrorText(translate("tarot.session.msg.connection-failed", locale), characterId ?? "arcana"),
+        content: getReadingErrorText(translate("tarot.session.msg.connection-failed", locale), characterId),
         mood: "default", timestamp: new Date(),
       });
       setMood("default");
