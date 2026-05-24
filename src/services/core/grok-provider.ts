@@ -143,7 +143,7 @@ export class GrokProvider implements AIProvider {
       const totalMs = Date.now() - startedAt;
       const ttfbMs = ref.firstChunkAt !== null ? ref.firstChunkAt - startedAt : null;
       const reasoningTokens = ref.usage?.completion_tokens_details?.reasoning_tokens;
-      console.log(`[Grok] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms finish=${ref.finishReason ?? "?"} max_tokens=${effectiveMaxTokens} usage=${JSON.stringify(ref.usage)}`);
+      if (process.env.NODE_ENV !== "production") console.log(`[Grok] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms finish=${ref.finishReason ?? "?"} max_tokens=${effectiveMaxTokens} usage=${JSON.stringify(ref.usage)}`);
       if (ref.finishReason === "length") {
         console.warn(`[Grok] ⚠️ TRUNCATED: max_tokens(${effectiveMaxTokens}) 초과로 본문 잘림 — reasoning=${reasoningTokens ?? "?"} completion=${ref.usage?.completion_tokens ?? "?"}`);
       }
