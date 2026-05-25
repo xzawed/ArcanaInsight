@@ -54,6 +54,10 @@ playwright/.cache/
 # MCP 설정 (토큰 포함 가능 — git 제외 필수)
 .mcp.json
 
+# Claude Code 로컬 전용 설정 (개인 오버라이드 — git 제외 필수)
+.claude/settings.local.json
+CLAUDE.local.md
+
 # E2E Full Run 결과 (대용량, 로컬 전용)
 docs/e2e-reports/
 scripts/e2e-full/results/

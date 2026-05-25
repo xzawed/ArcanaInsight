@@ -1,5 +1,4 @@
 ---
-description: src/app/api/ 작업 시 적용되는 보안·패턴 규칙
 paths:
   - "src/app/api/**"
 ---

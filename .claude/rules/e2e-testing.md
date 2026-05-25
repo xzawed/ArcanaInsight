@@ -1,5 +1,4 @@
 ---
-description: e2e/ 작업 시 적용되는 Playwright 셀렉터·CI 재현성 규칙
 paths:
   - "e2e/**"
 ---

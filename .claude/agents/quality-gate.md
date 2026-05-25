@@ -2,11 +2,7 @@
 name: quality-gate
 description: 코드 품질 검증을 강도 높게 수행한다. "코드 검증", "품질 검사", "전체 테스트", "코드 품질 향상" 등의 요청에 사용한다.
 model: claude-sonnet-4-6
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+tools: Read, Grep, Glob, Bash
 ---
 
 # quality-gate 에이전트
