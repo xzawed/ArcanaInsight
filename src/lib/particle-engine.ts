@@ -47,12 +47,17 @@ export interface Particle {
 
 export const RUNE_GLYPHS = ["ᚱ", "ᚦ", "ᚨ", "ᚷ", "ᚹ", "ᛟ", "ᛏ", "ᛇ", "ᛞ", "ᛗ"] as const;
 
+// 파티클 위치/속도는 보안 무관 시각 효과용 — 암호학적 무작위성 불필요
 function rand(min: number, max: number): number {
-  return min + Math.random() * (max - min);
+  return min + Math.random() * (max - min); // NOSONAR
 }
 
 function pick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)]; // NOSONAR
+}
+
+function randBool(): boolean {
+  return Math.random() > 0.5; // NOSONAR
 }
 
 export const THEME_EFFECTS: Record<ThemeIdForParticle, ParticleEmitterSpec[]> = {
@@ -107,7 +112,7 @@ export function createParticle(spec: ParticleEmitterSpec, w: number, h: number):
     speed: sp,
     shape,
     motion,
-    glyphIndex: shape === "rune" ? Math.floor(Math.random() * RUNE_GLYPHS.length) : undefined,
+    glyphIndex: shape === "rune" ? Math.floor(rand(0, RUNE_GLYPHS.length)) : undefined,
   };
 
   if (motion === "orbit") {
@@ -115,7 +120,7 @@ export function createParticle(spec: ParticleEmitterSpec, w: number, h: number):
     base.cy = rand(h * 0.2, h * 0.8);
     base.r = rand(30, 90);
     base.angle = rand(0, Math.PI * 2);
-    base.aSpeed = rand(0.003, 0.012) * (Math.random() > 0.5 ? 1 : -1);
+    base.aSpeed = rand(0.003, 0.012) * (randBool() ? 1 : -1);
     base.x = base.cx + Math.cos(base.angle) * base.r;
     base.y = base.cy + Math.sin(base.angle) * base.r;
   }
@@ -132,20 +137,20 @@ export function stepParticle(p: Particle, w: number, h: number): void {
     case "fall-rotate":
       p.x += p.vx + Math.sin(p.t * 1.2) * 0.4;
       p.y += p.vy;
-      if (p.y > h + p.size * 2) { p.y = -p.size * 2; p.x = Math.random() * w; p.t = 0; }
+      if (p.y > h + p.size * 2) { p.y = -p.size * 2; p.x = rand(0, w); p.t = 0; }
       break;
 
     case "rise":
       p.x += p.vx + Math.sin(p.t * 0.9) * 0.3;
       p.y += p.vy;
-      if (p.y < -p.size * 2) { p.y = h + p.size; p.x = Math.random() * w; p.t = 0; }
+      if (p.y < -p.size * 2) { p.y = h + p.size; p.x = rand(0, w); p.t = 0; }
       break;
 
     case "drift":
       p.x += Math.sin(p.t * 0.7) * 0.6 + p.vx * 0.3;
       p.y += p.vy * 0.4 + Math.cos(p.t * 0.5) * 0.3;
       p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 0.8));
-      if (p.y > h + p.size) { p.y = -p.size; p.x = Math.random() * w; p.t = 0; }
+      if (p.y > h + p.size) { p.y = -p.size; p.x = rand(0, w); p.t = 0; }
       if (p.y < -p.size) { p.y = h + p.size; p.t = 0; }
       break;
 
@@ -159,17 +164,17 @@ export function stepParticle(p: Particle, w: number, h: number): void {
       p.x += Math.sin(p.t * 2) * 1.2 + p.vx * 0.5;
       p.y += Math.cos(p.t * 1.5) * 0.9 + p.vy * 0.5;
       p.alpha = 0.1 + 0.8 * Math.abs(Math.sin(p.t * 2.5));
-      if (p.x < -20) p.x = w + 20;
-      if (p.x > w + 20) p.x = -20;
-      if (p.y < -20) p.y = h + 20;
-      if (p.y > h + 20) p.y = -20;
+      if (p.x < -20) { p.x = w + 20; }
+      if (p.x > w + 20) { p.x = -20; }
+      if (p.y < -20) { p.y = h + 20; }
+      if (p.y > h + 20) { p.y = -20; }
       break;
 
     case "wind":
       p.x += p.vy * 1.5 + Math.sin(p.t * 1.2) * 0.8;
       p.y += p.vx * 0.3 + Math.cos(p.t * 0.8) * 0.5;
       p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 1.2));
-      if (p.x > w + p.size) { p.x = -p.size; p.y = Math.random() * h; p.t = 0; }
+      if (p.x > w + p.size) { p.x = -p.size; p.y = rand(0, h); p.t = 0; }
       break;
 
     case "streak":
@@ -177,7 +182,7 @@ export function stepParticle(p: Particle, w: number, h: number): void {
       p.y += p.vy * 1.5;
       p.alpha *= 0.985;
       if (p.alpha < 0.02 || p.y > h + 20) {
-        p.x = Math.random() * w; p.y = -10; p.alpha = rand(0.5, 0.9); p.t = 0;
+        p.x = rand(0, w); p.y = -10; p.alpha = rand(0.5, 0.9); p.t = 0;
       }
       break;
 
@@ -376,7 +381,7 @@ export function createAuraParticle(
   cy: number,
   maxR: number,
 ): Particle {
-  const angle = Math.random() * Math.PI * 2;
+  const angle = rand(0, Math.PI * 2);
   const r = rand(maxR * 0.3, maxR);
   return {
     x: cx + Math.cos(angle) * r,
@@ -389,7 +394,7 @@ export function createAuraParticle(
     alpha: rand(0.3, 0.7),
     rot: angle,
     vrot: rand(-0.01, 0.01),
-    t: Math.random() * Math.PI * 2,
+    t: rand(0, Math.PI * 2),
     speed: rand(10, 30),
     shape,
     motion: "orbit",
@@ -397,6 +402,6 @@ export function createAuraParticle(
     cy,
     r,
     angle,
-    aSpeed: rand(0.005, 0.02) * (Math.random() > 0.5 ? 1 : -1),
+    aSpeed: rand(0.005, 0.02) * (randBool() ? 1 : -1),
   };
 }
