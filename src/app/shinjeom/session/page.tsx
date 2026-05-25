@@ -24,6 +24,7 @@ import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
+import { ServiceIllustrations } from "@/components/effects/ServiceIllustrations";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -299,7 +300,11 @@ export default function ShinjeomSessionPage() {
         </div>
 
         {/* 대화 영역 */}
-        <div className="flex-1 md:w-[50%] flex flex-col px-3 md:px-4 overflow-hidden">
+        <div className="flex-1 md:w-[50%] flex flex-col px-3 md:px-4 overflow-hidden relative">
+          {/* 데스크탑 전용 서비스 일러스트 */}
+          <div className="absolute inset-0 hidden md:block pointer-events-none">
+            <ServiceIllustrations service="shinjeom" />
+          </div>
 
           {phase === "result" && readingResult ? (
             /* 최종 결과 */

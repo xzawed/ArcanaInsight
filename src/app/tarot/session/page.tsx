@@ -46,6 +46,7 @@ import type { Locale } from "@/i18n/config";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { useReadingRevealStore } from "@/hooks/useReadingReveal";
 import { useTarotReading } from "@/hooks/useTarotReading";
+import { ServiceIllustrations } from "@/components/effects/ServiceIllustrations";
 
 
 const deckManager = new DeckManager();
@@ -354,7 +355,11 @@ export default function TarotSessionPage() {
         </div>
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
-        <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden">
+        <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden relative">
+          {/* 데스크탑 전용 서비스 일러스트 */}
+          <div className="absolute inset-0 hidden md:block pointer-events-none">
+            <ServiceIllustrations service="tarot" />
+          </div>
           {phase === "card-shuffle" && (
             <ShuffleCeremony
               characterId={characterId ?? "arcana"}
