@@ -8,6 +8,7 @@ import { useSessionStore } from "@/hooks/useSession";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { CharacterCard } from "@/components/character/CharacterCard";
 import { DialogueBox } from "@/components/chat/DialogueBox";
+import Image from "next/image";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { UserInfo } from "@/types/user-info";
@@ -17,7 +18,8 @@ import { spreads, getSpreadName, getSpreadShortDesc, getSpreadDetail } from "@/d
 import { CharacterConfig, GenderFilter } from "@/types/character";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { Icon } from "@/components/common/Icon";
-import { ServiceBackground } from "@/components/effects/ServiceBackground";
+import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { getTopicLabel, getTopicDesc, getTopicIconId } from "@/data/topics-meta";
@@ -233,6 +235,7 @@ function UserInfoStep({ selectedCharacter, onSubmit, onBack }: Readonly<{
 function TarotPageContent() {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
+  const { activeTheme } = useThemeStore();
   const { setTopic, setSpreadType, setPhase, setCharacterId, setFreeQuestion } = useSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const availableCharacters = getCharactersByGender(genderFilter);
@@ -297,7 +300,10 @@ function TarotPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <ServiceBackground service="tarot" />
+      <div className="absolute inset-0 -z-10">
+        <Image src={getServiceBackgroundUrl("tarot", activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
+        <div className="absolute inset-0 bg-arcana-bg/50" />
+      </div>
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (

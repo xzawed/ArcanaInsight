@@ -18,7 +18,9 @@ import { ChatMessage, SajuTimeRange, Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { sajuTimeOptions, sajuAreaOptions, getSajuTimeLabel, getSajuTimeDesc, getSajuAreaLabel, getSajuAreaDesc } from "@/data/saju/categories";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
-import { ServiceBackground } from "@/components/effects/ServiceBackground";
+import Image from "next/image";
+import { useThemeStore } from "@/hooks/useTheme";
+import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { useT } from "@/i18n/useT";
 import { t as translate } from "@/i18n/translations";
 import type { Locale } from "@/i18n/config";
@@ -227,6 +229,7 @@ function SajuPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const locale = useLocaleStore((s) => s.locale);
+  const { activeTheme } = useThemeStore();
   const { setTopic, setTimeRange, setIncludeMonthly, setCharacterId, setUserInfo, setPhase, setFreeQuestion } = useSajuSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const sajuCharacters = getCharactersByGender(genderFilter);
@@ -298,7 +301,10 @@ function SajuPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <ServiceBackground service="saju" />
+      <div className="absolute inset-0 -z-10">
+        <Image src={getServiceBackgroundUrl("saju", activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
+        <div className="absolute inset-0 bg-arcana-bg/50" />
+      </div>
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (
