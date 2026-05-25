@@ -226,6 +226,10 @@ export default function SajuSessionPage() {
       <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />
       <MysticBackground service="saju" />
       <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-saju" />
+      {/* 서비스 일러스트 — 전체화면 레이어 (데스크탑) */}
+      <div className="absolute inset-0 z-[8] hidden md:block pointer-events-none">
+        <ServiceIllustrations service="saju" />
+      </div>
 
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
         {/* 좌측 컬럼: 캐릭터 + 대사 */}
@@ -246,10 +250,6 @@ export default function SajuSessionPage() {
         </div>
 
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden relative">
-          {/* 데스크탑 전용 서비스 일러스트 */}
-          <div className="absolute inset-0 hidden md:block pointer-events-none">
-            <ServiceIllustrations service="saju" />
-          </div>
           {phase === "result" && readingResult && sajuData ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }}
               className="w-full flex-1 flex flex-col overflow-hidden py-4">

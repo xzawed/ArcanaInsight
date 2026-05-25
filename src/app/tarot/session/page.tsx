@@ -329,6 +329,10 @@ export default function TarotSessionPage() {
       />
       <MysticBackground service="tarot" />
       <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-tarot" />
+      {/* 서비스 일러스트 — 전체화면 레이어 (데스크탑) */}
+      <div className="absolute inset-0 z-[8] hidden md:block pointer-events-none">
+        <ServiceIllustrations service="tarot" />
+      </div>
 
       {/* 무대: 모바일 세로 / 데스크탑 가로 5:5 */}
       <div className="relative flex-1 min-h-0 flex flex-col md:flex-row z-20">
@@ -356,10 +360,6 @@ export default function TarotSessionPage() {
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden relative">
-          {/* 데스크탑 전용 서비스 일러스트 */}
-          <div className="absolute inset-0 hidden md:block pointer-events-none">
-            <ServiceIllustrations service="tarot" />
-          </div>
           {phase === "card-shuffle" && (
             <ShuffleCeremony
               characterId={characterId ?? "arcana"}

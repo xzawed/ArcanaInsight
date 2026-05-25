@@ -285,6 +285,10 @@ export default function ShinjeomSessionPage() {
       <ParticleOverlay density="low" className="z-10" />
       <MysticBackground service="shinjeom" />
       <ThemeAtmosphere theme={activeTheme} intensity="ambient" className="z-[6] mix-blend-screen" testId="session-theme-atmosphere-shinjeom" />
+      {/* 서비스 일러스트 — 전체화면 레이어 (데스크탑) */}
+      <div className="absolute inset-0 z-[8] hidden md:block pointer-events-none">
+        <ServiceIllustrations service="shinjeom" />
+      </div>
       {showEnergyEffect && (
         <ShinjeomEnergyEffect onComplete={() => setShowEnergyEffect(false)} />
       )}
@@ -301,11 +305,6 @@ export default function ShinjeomSessionPage() {
 
         {/* 대화 영역 */}
         <div className="flex-1 md:w-[50%] flex flex-col px-3 md:px-4 overflow-hidden relative">
-          {/* 데스크탑 전용 서비스 일러스트 */}
-          <div className="absolute inset-0 hidden md:block pointer-events-none">
-            <ServiceIllustrations service="shinjeom" />
-          </div>
-
           {phase === "result" && readingResult ? (
             /* 최종 결과 */
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
