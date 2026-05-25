@@ -2,6 +2,18 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const BURST_SPARKS = Array.from({ length: 10 }, (_, i) => {
+  const angle = (i / 10) * 360;
+  const dist = 38 + (i % 3) * 14;
+  const rad = (angle * Math.PI) / 180;
+  return {
+    id: i,
+    x: Math.cos(rad) * dist,
+    y: Math.sin(rad) * dist,
+    delay: i * 0.045,
+  };
+});
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { getAvailableCharacters } from "@/data/characters";
 import { DeckManager } from "@/services/tarot/deck-manager";
@@ -46,6 +58,15 @@ function AreaCardSlot({
   tr: (key: string) => string;
 }) {
   const card = areaResult ? deckManager.getCardById(areaResult.cardId) : undefined;
+  const [burstPlaying, setBurstPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!isFlipped) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBurstPlaying(true);
+    const t = setTimeout(() => setBurstPlaying(false), 850);
+    return () => clearTimeout(t);
+  }, [isFlipped]);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -55,34 +76,59 @@ function AreaCardSlot({
           <div className="w-5 h-5 border-2 border-arcana-purple/30 border-t-arcana-purple rounded-full animate-spin" />
         </div>
       ) : (
-        <motion.div
-          onClick={onFlip}
-          className="cursor-pointer"
-          style={{ perspective: "1000px" }}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-        >
+        <div className="relative">
+          {burstPlaying && (
+            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 20, overflow: "visible" }}>
+              {BURST_SPARKS.map((spark) => (
+                <motion.div
+                  key={spark.id}
+                  className="absolute rounded-full"
+                  style={{
+                    left: "50%",
+                    top: "50%",
+                    width: 5,
+                    height: 5,
+                    marginLeft: -2.5,
+                    marginTop: -2.5,
+                    background: "var(--theme-particle-color, #a78bfa)",
+                    boxShadow: "0 0 6px var(--theme-glow-color, rgba(167,139,250,0.8))",
+                  }}
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 1.2 }}
+                  animate={{ x: spark.x, y: spark.y, opacity: 0, scale: 0 }}
+                  transition={{ duration: 0.65, delay: spark.delay, ease: "easeOut" }}
+                />
+              ))}
+            </div>
+          )}
           <motion.div
-            animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ duration: 0.55 }}
-            style={{ transformStyle: "preserve-3d" }}
-            className="relative w-24 h-36"
+            onClick={onFlip}
+            className="cursor-pointer"
+            style={{ perspective: "1000px" }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
           >
-            <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
-              <CardBack size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
-            </div>
-            <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
-              {card && (
-                <CardFace card={card} isReversed={false} size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
-              )}
-              {areaResult.isReversed && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-red-400 bg-red-900/50 px-1.5 py-0.5 rounded-full pointer-events-none">
-                  {tr("tarot.result.card.reversed-badge")}
-                </span>
-              )}
-            </div>
+            <motion.div
+              animate={{ rotateY: isFlipped ? 180 : 0 }}
+              transition={{ duration: 0.55 }}
+              style={{ transformStyle: "preserve-3d" }}
+              className="relative w-24 h-36"
+            >
+              <div style={{ backfaceVisibility: "hidden" }} className="absolute inset-0">
+                <CardBack size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
+              </div>
+              <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }} className="absolute inset-0">
+                {card && (
+                  <CardFace card={card} isReversed={false} size="md" className="w-full h-full" skinId={selectedSkinId} styleId={styleId} />
+                )}
+                {areaResult.isReversed && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] text-red-400 bg-red-900/50 px-1.5 py-0.5 rounded-full pointer-events-none">
+                    {tr("tarot.result.card.reversed-badge")}
+                  </span>
+                )}
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
       {!isFlipped && !isLoading && areaResult && (
         <p className="text-arcana-muted text-xs text-center">{tr("home.daily-fortune.tap-hint")}</p>
