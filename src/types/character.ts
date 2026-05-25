@@ -9,7 +9,7 @@ export type Mood = "default" | "smile" | "serious" | "surprised" | "wink" | "mys
 export type Gender = "female" | "male";
 export type GenderFilter = "female" | "male" | "all";
 export type ParticleStyle = "sparkle" | "flame" | "petal" | "star" | "snowflake" | "lightning" | "bubble" | "rune";
-export type IdleAnimationType = "float" | "float-strong" | "bounce" | "breathe";
+export type IdleAnimationType = "float" | "float-strong" | "bounce" | "breathe" | "drift";
 
 export interface EffectTheme {
   primary: string;
