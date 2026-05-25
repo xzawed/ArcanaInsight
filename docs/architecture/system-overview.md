@@ -17,6 +17,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    ├─ effects/      — ThemeEffectEngine, ParticleOverlay, MysticBackground 등 5-레이어 이펙트
        │    │                  ServiceIllustrations — TarotScene·SajuScene·ShinjeomScene CSS 애니메이션 장면 (useMouseParallax FAR/MID/NEAR 3레이어, 데스크탑 전용)
        │    │                  mysticUtils.ts — particleStyle·particleMotion 순수 함수
+       │    │                  (홈 히어로 카드 덱 스타일: src/styles/home-effects.css — hero-tarot-card, hero-card-idle keyframe)
        │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
        │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
        │    ├─ skin/         — 카드 스킨 관련 컴포넌트
@@ -153,9 +154,9 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 7개 섹션을 순서대로 조합:
 
-1. **HeroSection** — 풀스크린 히어로 (캐릭터 + 카피 + CTA)
+1. **HeroSection** — 풀스크린 히어로 (캐릭터 + 카피 + CTA + `HeroCardDeck` 11장 팬 카드 덱, 데스크탑 전용)
 2. **CharacterGallery** — 12캐릭터 갤러리 (카드형, 성별 필터 내장)
-3. **DailyFortune** — 캐릭터별 일일 운세 (5개 영역 1+4 레이아웃)
+3. **DailyFortune** — 캐릭터별 일일 운세 (5개 영역 1+4 레이아웃, 카드 플립 시 10방향 스파크 버스트)
 4. **SkinGallery** — 카드 스킨 갤러리 (아트 스타일 4종 + 팔레트 스킨 6종 = 10종)
 5. **ServiceFlow** — 서비스 이용 흐름 소개
 6. **FAQ** — 아코디언 FAQ

@@ -87,7 +87,7 @@ function TarotScene({ far, mid, near }: LayerOffsets) {
                   key={c.label}
                   className="tarot-mini"
                   style={{
-                    transform: `rotate(${(i / TAROT_CARDS.length) * 360}deg) translate(0, -180px) rotate(${-(i / TAROT_CARDS.length) * 360}deg)`,
+                    transform: `rotate(${(i / TAROT_CARDS.length) * 360}deg) translate(0, -240px) rotate(${-(i / TAROT_CARDS.length) * 360}deg)`,
                     animationDelay: `${i * 0.4}s`,
                   }}
                 >
@@ -158,7 +158,7 @@ function SajuScene({ far, mid, near }: LayerOffsets) {
                 key={g}
                 className="saju-glyph"
                 style={{
-                  transform: `rotate(${(i / 12) * 360}deg) translate(0, -210px) rotate(${-(i / 12) * 360}deg)`,
+                  transform: `rotate(${(i / 12) * 360}deg) translate(0, -260px) rotate(${-(i / 12) * 360}deg)`,
                 }}
               >
                 {g}
@@ -171,7 +171,7 @@ function SajuScene({ far, mid, near }: LayerOffsets) {
                 key={g}
                 className="saju-glyph saju-glyph-inner"
                 style={{
-                  transform: `rotate(${(i / 10) * 360}deg) translate(0, -140px) rotate(${-(i / 10) * 360}deg)`,
+                  transform: `rotate(${(i / 10) * 360}deg) translate(0, -172px) rotate(${-(i / 10) * 360}deg)`,
                 }}
               >
                 {g}
@@ -243,7 +243,7 @@ function ShinjeomScene({ far, mid, near }: LayerOffsets) {
                 key={i}
                 className="crystal-mini"
                 style={{
-                  transform: `rotate(${(i / 6) * 360}deg) translate(0, -200px) rotate(${-(i / 6) * 360}deg)`,
+                  transform: `rotate(${(i / 6) * 360}deg) translate(0, -264px) rotate(${-(i / 6) * 360}deg)`,
                   animationDelay: `${i * 0.6}s`,
                 }}
               >

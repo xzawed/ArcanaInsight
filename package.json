@@ -28,6 +28,8 @@
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts",
     "generate:assets": "npx tsx scripts/generate-assets/index.ts",
     "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing",
+    "generate:service-bg": "npx tsx scripts/generate-service-backgrounds.ts",
+    "generate:service-bg:skip": "npx tsx scripts/generate-service-backgrounds.ts --skip",
     "upload:assets": "npx tsx scripts/generate-assets/upload-to-supabase.ts",
     "upload:assets:skip": "npx tsx scripts/generate-assets/upload-to-supabase.ts --skip-existing",
     "enhance:images": "node scripts/enhance-character-images.mjs",
