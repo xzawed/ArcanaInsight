@@ -32,7 +32,14 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
       const errors: string[] = [];
       page.on("pageerror", (err) => errors.push(err.message));
       await page.goto(p.path);
-      await page.waitForLoadState("networkidle");
+      if (p.path === "/") {
+        // 홈 페이지는 StyleSelector가 Supabase Storage 카드 이미지를 next/image로 로드함.
+        // CI에서 외부 Storage 응답이 느리면 networkidle 30s를 초과하므로 load + 콘텐츠 대기로 대체.
+        await page.waitForLoadState("load");
+        await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, { timeout: 15_000 });
+      } else {
+        await page.waitForLoadState("networkidle");
+      }
       const bodyText = await page.textContent("body");
 
       for (const pattern of JSON_ARTIFACTS) {
@@ -46,7 +53,9 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
 test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
   test("홈 — 필수 섹션 타이틀", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("load");
+    // CharacterGallery는 dynamic import이므로 "상담사" 텍스트가 hydration 후 렌더링될 때까지 대기
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
 
     const body = await page.textContent("body");
     expect(body).toContain("상담사");
