@@ -31,7 +31,7 @@ export function ServiceBackground({ service }: ServiceBackgroundProps) {
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden data-testid={`service-background-${service}`}>
-      <Image src={getServiceBackgroundUrl(service, activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
+      <Image src={getServiceBackgroundUrl(service, activeTheme)} alt="" fill className="object-cover" sizes="100vw" unoptimized />
       <div className="absolute inset-0 bg-arcana-bg/50" />
       <CanvasParticleLayer density={isMobile ? "low" : "medium"} />
       <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" testId={`service-theme-atmosphere-${service}`} />
