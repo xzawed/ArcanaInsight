@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useThemeStore } from "@/hooks/useTheme";
 import { ThemeAtmosphere } from "./MysticBackground";
 import { ThemeAtmosphereLayer } from "./ThemeAtmosphereLayer";
+import { CanvasParticleLayer } from "./CanvasParticleLayer";
 
 type ServiceType = "tarot" | "saju" | "shinjeom";
 
@@ -124,6 +125,7 @@ export function ServiceBackground({ service }: ServiceBackgroundProps) {
       {service === "tarot" && <TarotBackground shouldReduceMotion={shouldReduceMotion} />}
       {service === "saju" && <SajuBackground shouldReduceMotion={shouldReduceMotion} />}
       {service === "shinjeom" && <ShinjeomBackground shouldReduceMotion={shouldReduceMotion} />}
+      <CanvasParticleLayer density={isMobile ? "low" : "medium"} />
       <ThemeAtmosphere theme={activeTheme} intensity="service" className="mix-blend-screen" testId={`service-theme-atmosphere-${service}`} />
       <ThemeAtmosphereLayer intensity={atmosphereIntensity} className="mix-blend-screen" />
     </div>
