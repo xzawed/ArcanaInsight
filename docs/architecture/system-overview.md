@@ -15,6 +15,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    ├─ common/       — UserInfoForm, PageSpinner, BirthTimeInput, ResultPageShell,
        │    │                  ResultShareButton, ReadingText, Toast, Icon, 모달 컴포넌트
        │    ├─ effects/      — ThemeEffectEngine, ParticleOverlay, MysticBackground 등 5-레이어 이펙트
+       │    │                  ServiceIllustrations — TarotScene·SajuScene·ShinjeomScene CSS 애니메이션 장면 (useMouseParallax FAR/MID/NEAR 3레이어, 데스크탑 전용)
        │    │                  mysticUtils.ts — particleStyle·particleMotion 순수 함수
        │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
        │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)

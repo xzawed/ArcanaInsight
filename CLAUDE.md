@@ -38,7 +38,8 @@ src/
 │   │                # ResultPageShell, ResultShareButton, ReadingText, Toast, Icon,
 │   │                # LocaleConfirmModal, PrivacyConsentModal
 │   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
-│   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal
+│   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal,
+│   │                # ServiceIllustrations (TarotScene·SajuScene·ShinjeomScene + useMouseParallax FAR/MID/NEAR 3레이어)
 │   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
 │   │                # themeAtmosphere.ts — ThemeAtmosphereLayer 전용 파티클 종류·설정
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
@@ -63,6 +64,7 @@ src/
 │   └── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
 ├── styles/          # theme-effects.css — CSS variable 기반 5-레이어 이펙트 정의
+│                    # service-illustrations.css — 장면별 CSS 클래스 + 11개 keyframe (orbit-spin, spark-twinkle, ember-drift, mist-rise, crystal-pulse 등)
 ├── test-helpers/    # Vitest 공통 mock/setup
 └── types/           # 공유 타입
 
