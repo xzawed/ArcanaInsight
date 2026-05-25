@@ -47,3 +47,23 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--theme-glow-color, rgba(255,255,255,0.1));
 }
+
+/* 캐릭터 idle 애니메이션 — Phase 1 추가 */
+@keyframes char-drift {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20%       { transform: translateX(-2px) rotate(-0.15deg); }
+  45%       { transform: translateX(3px) rotate(0.12deg); }
+  65%       { transform: translateX(0) rotate(0deg); }
+  82%       { transform: translateX(-1px) rotate(-0.08deg); }
+}
+
+@keyframes char-breath {
+  0%, 100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+  40%       { transform: scaleX(1.008) scaleY(1.005); opacity: 0.96; }
+  80%       { transform: scaleX(1.004) scaleY(1.003); opacity: 0.88; }
+}
+
+@keyframes char-bob {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50%       { transform: translateY(-6px) scaleY(1.01); }
+}
