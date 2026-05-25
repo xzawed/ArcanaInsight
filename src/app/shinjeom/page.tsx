@@ -12,9 +12,7 @@ import { useGenderStore } from "@/hooks/useGenderStore";
 import { Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import { Icon } from "@/components/common/Icon";
-import Image from "next/image";
-import { useThemeStore } from "@/hooks/useTheme";
-import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
+import { ServiceBackground } from "@/components/effects/ServiceBackground";
 import { UserInfoForm } from "@/components/common/UserInfoForm";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
@@ -154,7 +152,6 @@ function UserInfoStep({ selectedCharacter, onBack, onSubmit, onSkip }: Readonly<
 function ShinjeomPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { activeTheme } = useThemeStore();
   const { setCharacterId, setTopic, setPhase, setUserInfo } = useShinjeomSessionStore();
   const { genderFilter, setGenderFilter } = useGenderStore();
   const characters = getCharactersByGender(genderFilter);
@@ -221,10 +218,7 @@ function ShinjeomPageContent() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <Image src={getServiceBackgroundUrl("shinjeom", activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
-        <div className="absolute inset-0 bg-arcana-bg/50" />
-      </div>
+      <ServiceBackground service="shinjeom" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
         {step === "character-select" && (
