@@ -47,6 +47,34 @@ grep -rn "service-navigation" e2e/ --include="*.ts"
    모바일 뷰포트에서 데스크탑 전용 요소가 hidden 처리되므로,  
    `toBeVisible()` 단언 전에 뷰포트 컨텍스트 확인.
 
+## 컴포넌트 삭제·교체 전 testId 사전 점검
+
+컴포넌트를 삭제하거나 다른 컴포넌트로 교체하기 전에 E2E가 의존하는 testId가 없는지 확인한다.
+
+```bash
+# 변경 전 필수 실행
+grep -rn "getByTestId\|data-testid" e2e/ --include="*.ts" | grep "<변경할 컴포넌트명>"
+```
+
+testId가 발견되면 새 컴포넌트에 동일한 testId를 유지하거나 E2E를 동시 수정한다.  
+**같은 커밋에 포함하지 않으면 CI에서 즉시 실패한다.** (PR #412 1차 실패 원인)
+
+## 외부 URL Image에 priority 금지
+
+Supabase Storage 등 외부 URL을 `src`로 쓰는 `<Image>`에는 **`priority` 속성을 붙이지 않는다.**
+
+```tsx
+// ❌ 금지 — <link rel="preload"> 가 window.load 를 블로킹
+<Image src="https://...supabase.co/..." priority ... />
+
+// ✅ 권장 — loading="lazy" 기본값, window.load 비블로킹
+<Image src="https://...supabase.co/..." ... />
+```
+
+`priority` 는 `<link rel="preload">` 를 `<head>` 에 추가하므로 CI 환경에서 외부 이미지 응답이
+느리면 `waitForLoadState("load")` 가 20-30s 블로킹 → E2E 타임아웃 유발.  
+LCP 요소(히어로 이미지 등)가 아닌 배경·데코 이미지에는 절대 사용하지 않는다. (PR #412 2차 실패 원인)
+
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 
 버튼·레이블 텍스트를 변경할 때는 **같은 커밋**에 E2E 셀렉터도 수정한다.

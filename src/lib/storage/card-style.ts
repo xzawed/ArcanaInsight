@@ -1,4 +1,5 @@
 import type { CardStyleId } from '@/data/cardStyles';
+import type { ThemeId } from '@/hooks/useTheme';
 
 const BUCKET = 'card-styles';
 
@@ -32,6 +33,6 @@ export function getCardStyleBackUrl(styleId: CardStyleId): string {
   return `${storageBase()}/cards/${styleId}/card-back.webp`;
 }
 
-export function getServiceBackgroundUrl(service: ServiceType, theme: string): string {
+export function getServiceBackgroundUrl(service: ServiceType, theme: ThemeId): string {
   return `${storageBase()}/backgrounds/${service}/${theme}.png`;
 }
