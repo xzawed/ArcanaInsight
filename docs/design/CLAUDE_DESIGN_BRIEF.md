@@ -256,23 +256,42 @@
 
 ## 8. 첨부 파일 체크리스트
 
-### 스크린샷 (직접 캡처 필요)
-- [ ] `screenshot_home.png` — 홈 페이지 전체
-- [ ] `screenshot_tarot_select.png` — 타로 세션 카드 선택 화면
-- [ ] `screenshot_tarot_reading.png` — 타로 리딩 중 (스트리밍 상태)
-- [ ] `screenshot_tarot_result.png` — 타로 결과 완료 화면
-- [ ] `screenshot_saju.png` — 사주 세션 화면
-- [ ] `screenshot_shinjeom.png` — 신점 채팅 화면
-- [ ] `screenshot_theme_midnight.png` — midnight 테마 적용
-- [ ] `screenshot_theme_spring.png` — spring 테마 적용
-- [ ] `screenshot_mobile_session.png` — 모바일 세션 화면
+> **모든 파일은 `docs/design/` 하위에 준비 완료** (Playwright 자동 캡처 + 이미지 복사)
 
-### 캐릭터 이미지
-- [ ] `arcana_default.png` — `public/images/characters/arcana/nukki-enhanced/default.png`
-- [ ] `zero_default.png` — `public/images/characters/zero/nukki-enhanced/default.png`
-- [ ] `hoshi_default.png` — `public/images/characters/hoshi/nukki-enhanced/default.png`
-- [ ] `ethan_default.png` — `public/images/characters/ethan/nukki-enhanced/default.png`
-- [ ] `arcana_mystical.png` — `public/images/characters/arcana/nukki-enhanced/mystical.png`
+### 스크린샷 — `docs/design/screenshots/` (13장)
+- [x] `screenshot_home.png` — 홈 페이지 (1440×900, spring 테마)
+- [x] `screenshot_tarot_select.png` — 타로 카드 선택 화면 (아르카나 세션)
+- [x] `screenshot_tarot_topic.png` — 타로 주제 선택 화면
+- [x] `screenshot_tarot_spread.png` — 타로 스프레드 선택 화면
+- [x] `screenshot_tarot_reading.png` — 타로 리딩 중 (AI 스트리밍)
+- [x] `screenshot_tarot_result.png` — 타로 결과 완료 화면
+- [x] `screenshot_saju.png` — 사주 서비스 화면
+- [x] `screenshot_shinjeom.png` — 신점 서비스 화면
+- [x] `screenshot_theme_midnight.png` — 한밤의 신비(midnight) 테마
+- [x] `screenshot_theme_spring.png` — 벚꽃 봄바람(spring) 테마
+- [x] `screenshot_theme_panel.png` — 테마 선택 패널 UI
+- [x] `screenshot_mobile_session.png` — 모바일(390×844) 타로 세션
+- [x] `screenshot_mobile_home.png` — 모바일(390×844) 홈 화면
+
+### 캐릭터 이미지 — `docs/design/characters/` (12명 × 7표정 = 84장)
+
+> 파일명 규칙: `{캐릭터ID}_{표정}.png` / 원본: `public/images/characters/{id}/nukki-enhanced/{mood}.png`  
+> 표정 7종: `default` · `idle` · `mystical` · `serious` · `smile` · `surprised` · `wink`
+
+| 캐릭터 | 성별 | 오라 | 파티클 | 이미지 파일 (7장) |
+|---|---|---|---|---|
+| arcana (아르카나) | 여 | `#a78bfa`/`#c084fc` | sparkle | `arcana_default/idle/mystical/serious/smile/surprised/wink.png` |
+| miko (미코) | 여 | `#ef4444`/`#fbbf24` | petal | `miko_default/idle/mystical/serious/smile/surprised/wink.png` |
+| seonhwa (선화) | 여 | `#f9a8d4`/`#fde68a` | petal | `seonhwa_default/idle/mystical/serious/smile/surprised/wink.png` |
+| hoshi (호시) | 여 | `#60a5fa`/`#c084fc` | star | `hoshi_default/idle/mystical/serious/smile/surprised/wink.png` |
+| luna (루나) | 여 | `#93c5fd`/`#c4b5fd` | bubble | `luna_default/idle/mystical/serious/smile/surprised/wink.png` |
+| rei (레이) | 여 | `#f8fafc`/`#dc2626` | snowflake | `rei_default/idle/mystical/serious/smile/surprised/wink.png` |
+| cairn (카이른) | 남 | `#fbbf24`/`#1e3a5f` | sparkle | `cairn_default/idle/mystical/serious/smile/surprised/wink.png` |
+| zero (제로) | 남 | `#dc2626`/`#1a1a2e` | flame | `zero_default/idle/mystical/serious/smile/surprised/wink.png` |
+| haru (하루) | 남 | `#fbbf24`/`#fb923c` | star | `haru_default/idle/mystical/serious/smile/surprised/wink.png` |
+| ren (렌) | 남 | `#2dd4bf`/`#064e3b` | rune | `ren_default/idle/mystical/serious/smile/surprised/wink.png` |
+| lix (릭스) | 남 | `#4ade80`/`#a855f7` | lightning | `lix_default/idle/mystical/serious/smile/surprised/wink.png` |
+| ethan (에단) | 남 | `#fbbf24`/`#10b981` | rune | `ethan_default/idle/mystical/serious/smile/surprised/wink.png` |
 
 ---
 
