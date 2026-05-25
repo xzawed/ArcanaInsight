@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/theme-effects.css";
+@import "../styles/service-illustrations.css";
 
 @theme {
   /* ArcanaInsight color palette */
