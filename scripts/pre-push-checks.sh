@@ -4,7 +4,17 @@
 
 set -e
 
-export PATH="/c/Program Files/nodejs:/c/Users/dirtc/AppData/Roaming/npm:/c/Users/dirtc/AppData/Local/pnpm:$PATH"
+# pnpm PATH 설정 — 이식 가능 (환경별 자동 탐지, 하드코딩 없음)
+if ! command -v pnpm &> /dev/null; then
+  for candidate in \
+    "${LOCALAPPDATA}/pnpm" \
+    "${APPDATA}/npm" \
+    "/c/Program Files/nodejs" \
+    "$HOME/.local/share/pnpm" \
+    "$HOME/.pnpm"; do
+    [ -d "$candidate" ] && export PATH="$candidate:$PATH" && break
+  done
+fi
 cd "$(git rev-parse --show-toplevel)"
 
 echo "=== [1/5] TypeScript 타입 체크 ==="

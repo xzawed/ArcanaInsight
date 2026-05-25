@@ -244,8 +244,9 @@ PR 머지 완료 후 반드시 수행:
 | `quality-gate` | 전체 코드 품질 검증 (sonar 동기화 포함) |
 | `i18n-manager` | 번역 키 추가·수정·검증 (3개 언어 동시 처리) |
 | `post-merge-doc-refresher` | 머지 후 전체 문서 Anthropic 기준 동기화 |
-| `Explore` | 코드베이스 심층 탐색 (읽기 전용) |
 | `codex:codex-rescue` | Claude가 막힐 때 Codex에 구현 위임 |
+
+> **`Explore`** 는 Claude Code 내장 기능(서브에이전트 타입)이다. `.claude/agents/`에 파일이 없으며, Agent 툴의 `subagent_type: "Explore"` 로 직접 호출한다.
 
 ---
 

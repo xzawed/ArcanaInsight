@@ -2,7 +2,7 @@
 name: generate-reading-prompt
 description: 타로/사주/신점 AI 리딩 프롬프트를 검토하고 개선한다. "프롬프트 검토", "리딩 품질 개선", "AI 응답이 짧다", "프롬프트 수정", "리딩 텍스트 깊이" 등의 요청에 사용한다.
 when_to_use: prompt-builder.ts, tarot/reading/route.ts, saju/reading/route.ts, shinjeom 관련 파일 수정 시. AI 리딩 결과가 기대에 못 미칠 때.
-allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm test:coverage)
+allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:coverage)
 ---
 
 # AI 리딩 프롬프트 검토·개선 가이드
@@ -20,14 +20,18 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm test:coverage)
 
 현재 `computeReadingMaxTokens` 정책:
 
+전 구간 단일 공식: `min(4000 + cardCount × 2500 + 5000, 60000)`
+
 | 카드 수 | max_tokens | 비고 |
 |---------|-----------|------|
-| ≤1장 | 6,000 | reasoning 토큰 버퍼 포함 |
-| ≤3장 | 10,000 | |
-| ≤5장 | 14,000 | |
-| ≤7장 | 18,000 | |
-| ≤9장 | 22,000 | |
-| 10장+ | min(4000 + n×2500 + 5000, 60000) | |
+| 1장 | 11,500 | |
+| 3장 | 16,500 | |
+| 5장 | 21,500 | |
+| 7장 | 26,500 | |
+| 9장 | 31,500 | |
+| 10장 | 34,000 | |
+| 12장(zodiac) | 39,000 | |
+| 20장 이상 | 60,000 (cap) | |
 
 > **주의**: Grok-3은 reasoning 토큰이 output max_tokens 예산을 공유한다.  
 > reasoning ~1500토큰 소모 시 실제 출력 가능 토큰이 그만큼 줄어든다.

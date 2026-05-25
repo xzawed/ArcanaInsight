@@ -3,6 +3,7 @@
 # pre-push-checks.sh(tsc+lint+build)보다 엄격한 전체 검증 수행
 #
 # 검증 항목:
+#   0. 프로덕션 빌드 (경고만 — 네트워크 의존 빌드 오류 허용)
 #   1. TypeScript 타입 체크
 #   2. ESLint
 #   3. 단위·통합 테스트 + 커버리지 임계값 (branches 92 / 나머지 98)
@@ -13,7 +14,17 @@
 
 set -e
 
-export PATH="/c/Program Files/nodejs:/c/Users/dirtc/AppData/Roaming/npm:/c/Users/dirtc/AppData/Local/pnpm:$PATH"
+# pnpm PATH 설정 — 이식 가능 (환경별 자동 탐지, 하드코딩 없음)
+if ! command -v pnpm &> /dev/null; then
+  for candidate in \
+    "${LOCALAPPDATA}/pnpm" \
+    "${APPDATA}/npm" \
+    "/c/Program Files/nodejs" \
+    "$HOME/.local/share/pnpm" \
+    "$HOME/.pnpm"; do
+    [ -d "$candidate" ] && export PATH="$candidate:$PATH" && break
+  done
+fi
 cd "$(git rev-parse --show-toplevel)"
 
 MAIN_BRANCH=$(git remote show origin 2>/dev/null | grep "HEAD branch" | awk '{print $3}' || echo "main")
@@ -25,28 +36,36 @@ echo "╔═══════════════════════�
 echo "║         ArcanaInsight — PR 전 종합 품질 게이트         ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo ""
+echo "=== [0/8] 프로덕션 빌드 ==="
+# 네트워크 의존 빌드는 경고만 — CI에서 최종 검증
+if pnpm build > /dev/null 2>&1; then
+  echo "✅ 빌드 성공"
+else
+  echo "⚠️  빌드 실패 (Google Fonts CDN 등 네트워크 이슈 가능) — CI에서 재검증됩니다"
+fi
+echo ""
 
 # ── 1. TypeScript 타입 체크 ──────────────────────────────
-echo "=== [1/7] TypeScript 타입 체크 ==="
+echo "=== [1/8] TypeScript 타입 체크 ==="
 pnpm tsc --noEmit
 echo "✅ 타입 체크 통과"
 echo ""
 
 # ── 2. ESLint ────────────────────────────────────────────
-echo "=== [2/7] ESLint ==="
+echo "=== [2/8] ESLint ==="
 pnpm lint
 echo "✅ 린트 통과"
 echo ""
 
 # ── 3. 단위·통합 테스트 + 커버리지 임계값 ────────────────
-echo "=== [3/7] 단위·통합 테스트 + 커버리지 임계값 ==="
+echo "=== [3/8] 단위·통합 테스트 + 커버리지 임계값 ==="
 echo "    (branches 92 / functions·lines·statements 98)"
 pnpm test:coverage
 echo "✅ 테스트 + 커버리지 통과"
 echo ""
 
 # ── 4. 문서 정합성 3종 ───────────────────────────────────
-echo "=== [4/7] 문서 정합성 검사 ==="
+echo "=== [4/8] 문서 정합성 검사 ==="
 echo "    [4a] env.ts ↔ env-variables.md"
 pnpm check:env-docs
 echo "    [4b] docs/** 링크 유효성"
@@ -57,7 +76,7 @@ echo "✅ 문서 정합성 통과"
 echo ""
 
 # ── 5. SonarCloud exclusions 동기화 검사 ─────────────────
-echo "=== [5/7] SonarCloud exclusions 동기화 검사 ==="
+echo "=== [5/8] SonarCloud exclusions 동기화 검사 ==="
 SONAR_FAIL=false
 if [ -n "$NEW_TS_FILES" ]; then
   while IFS= read -r file; do
@@ -84,7 +103,7 @@ echo "✅ SonarCloud exclusions 동기화 확인"
 echo ""
 
 # ── 6. E2E 셀렉터 영향 경고 (차단 없음) ──────────────────
-echo "=== [6/7] E2E 셀렉터 영향 검사 ==="
+echo "=== [6/8] E2E 셀렉터 영향 검사 ==="
 UI_CHANGED=$(echo "$CHANGED_FILES" | grep -E \
   "(src/app/.*/page\.tsx|src/components/common/UserInfoForm\.tsx|src/components/home/SkinGallery\.tsx|src/i18n/translations/)" \
   || true)
@@ -104,7 +123,7 @@ fi
 echo ""
 
 # ── 7. playwright.config.ts locale:"ko" 유지 확인 ────────
-echo "=== [7/7] playwright.config.ts locale 확인 ==="
+echo "=== [7/8] playwright.config.ts locale 확인 ==="
 if ! grep -q 'locale.*:.*"ko"' playwright.config.ts 2>/dev/null; then
   echo "  ❌ playwright.config.ts에 locale:\"ko\" 설정이 없습니다!"
   echo ""
