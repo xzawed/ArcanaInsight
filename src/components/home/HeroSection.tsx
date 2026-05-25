@@ -12,6 +12,36 @@ import { useThemeStore, type ThemeId } from "@/hooks/useTheme";
 import { getDailyCharacterId } from "@/lib/daily-character";
 import { useT } from "@/i18n/useT";
 
+const HERO_DECK_COUNT = 11;
+const HERO_DECK = Array.from({ length: HERO_DECK_COUNT }, (_, i) => {
+  const center = (HERO_DECK_COUNT - 1) / 2;
+  const rel = i - center;
+  return {
+    id: i,
+    angle: rel * 5.5,
+    lift: Math.abs(rel) * 2.5,
+    x: rel * 18,
+    delay: i * 0.18,
+  };
+});
+
+function HeroCardDeck() {
+  return (
+    <div className="hero-card-deck hidden md:block mt-8 w-full" aria-hidden="true">
+      {HERO_DECK.map((card) => (
+        <div
+          key={card.id}
+          className="hero-tarot-card"
+          style={{
+            transform: `translateX(${card.x}px) rotate(${card.angle}deg) translateY(${card.lift}px)`,
+            animationDelay: `${card.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // 시간대별 분위기 오버레이 (hero-bg.jpg 위에 합성)
 const THEME_OVERLAY: Record<ThemeId, string> = {
   midnight: "radial-gradient(ellipse 80% 55% at 50% 30%, rgba(88,28,135,0.55) 0%, rgba(10,10,26,0.88) 100%)",
@@ -122,6 +152,7 @@ export function HeroSection() {
               {t("home.hero.cta-daily")}
             </button>
           </div>
+          <HeroCardDeck />
         </motion.div>
       </div>
 
