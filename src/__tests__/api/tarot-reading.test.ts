@@ -249,13 +249,13 @@ describe("POST /api/tarot/reading", () => {
   });
 
   it("computeReadingMaxTokens 정책 — 모든 분기가 streamReading에 정확히 전달", async () => {
-    // 1~9장: 고정값 (reasoning 토큰 버퍼 포함). 10장+: 4000 + cardCount*2500 + 5000 (모델 cap 60000)
+    // 전 구간 단일 공식: 4000 + cardCount*2500 + 5000 (모델 cap 60000)
     const cases: { count: number; expected: number }[] = [
-      { count: 1, expected: 6000 },
-      { count: 3, expected: 10000 },
-      { count: 5, expected: 14000 },
-      { count: 7, expected: 18000 },
-      { count: 9, expected: 22000 },
+      { count: 1, expected: 11500 },   // 4000 + 2500 + 5000
+      { count: 3, expected: 16500 },   // 4000 + 7500 + 5000
+      { count: 5, expected: 21500 },   // 4000 + 12500 + 5000
+      { count: 7, expected: 26500 },   // 4000 + 17500 + 5000
+      { count: 9, expected: 31500 },   // 4000 + 22500 + 5000
       { count: 10, expected: 34000 },  // 4000 + 25000 + 5000
       { count: 12, expected: 39000 },  // 4000 + 30000 + 5000 (zodiac)
       { count: 15, expected: 46500 },  // 4000 + 37500 + 5000 (미래 spread)
@@ -342,6 +342,34 @@ describe("POST /api/tarot/reading", () => {
     const payload = JSON.parse(doneLine!.slice(5).trim());
     expect(payload.result.parseError).toBe("fallback_text");
     expect(payload.result.overallReading).toContain("카드들이 말하는 핵심");
+  });
+
+  it("parseError 있을 때 saveTarotReading 미호출 — 빈 리딩 DB 저장 방지", async () => {
+    const saveSpy = vi.fn();
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveTarotReading: saveSpy }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => ({
+      FallbackProvider: vi.fn().mockImplementation(() => ({
+        streamReading: vi.fn().mockImplementation(async function* () {
+          yield "JSON 아닌 텍스트 응답 — parseError 유발";
+        }),
+      })),
+    }));
+
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "s-1" }));
+    const text = await readSSEStream(res);
+    const doneLine = text.split("\n").find((l) => l.startsWith("data:") && l.includes('"done":true'));
+    const payload = JSON.parse(doneLine!.slice(5).trim());
+    expect(payload.result.parseError).toBeDefined();
+    // parseError가 있으면 saveTarotReading은 호출되지 않아야 한다
+    await new Promise((r) => setTimeout(r, 10)); // fire-and-forget 대기
+    expect(saveSpy).not.toHaveBeenCalled();
   });
 
   it("freeQuestion 포함 요청 → SSE 스트림 응답", async () => {

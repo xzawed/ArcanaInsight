@@ -23,7 +23,7 @@ const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
 
 /**
- * 카드 수에 비례한 max_tokens 정책 — 확장 가능한 동적 산정.
+ * 카드 수에 비례한 max_tokens 정책 — 전 구간 단일 공식 적용.
  *
  * 한국어는 영어 대비 토큰 효율 ~1.3x 낮고, JSON 구조 오버헤드 ~15%, Grok-3 reasoning 모델은
  * 내부 reasoning(thinking) 토큰을 max_tokens 안에서 함께 소비한다.
@@ -36,12 +36,7 @@ const spreadResolver = new SpreadResolver();
  * 모델 cap 60000은 Claude Sonnet 4.6/Haiku 4.5 max output 64K 안전마진.
  */
 function computeReadingMaxTokens(cardCount: number): number {
-  if (cardCount <= 1) return 6000;
-  if (cardCount <= 3) return 10000;
-  if (cardCount <= 5) return 14000;
-  if (cardCount <= 7) return 18000;
-  if (cardCount <= 9) return 22000;
-  // 10장+ 동적 산정 — 12장(zodiac), 미래 15·20장 spread도 자동 대응
+  // 전 구간 단일 공식 — 경계값 불연속 없이 카드 수에 비례해 선형 증가
   return Math.min(4000 + cardCount * 2500 + 5000, 60000);
 }
 
