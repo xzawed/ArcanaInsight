@@ -304,25 +304,37 @@ describe("POST /api/saju/reading", () => {
       return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
     }
 
-    it("includeMonthly=true → max_tokens 28000", async () => {
-      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: true })).toBe(28000);
+    it("includeMonthly=true → max_tokens 60000 (cap)", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: true })).toBe(60000);
     });
 
-    it("timeRange='full-fortune' → max_tokens 25000", async () => {
-      expect(await captureMaxTokens({ timeRange: "full-fortune", includeMonthly: false })).toBe(25000);
+    it("timeRange='full-fortune' → max_tokens 60000 (cap)", async () => {
+      expect(await captureMaxTokens({ timeRange: "full-fortune", includeMonthly: false })).toBe(60000);
     });
 
-    it("timeRange='five-year' → max_tokens 22000", async () => {
-      expect(await captureMaxTokens({ timeRange: "five-year", includeMonthly: false })).toBe(22000);
+    it("timeRange='five-year' → max_tokens 60000 (cap)", async () => {
+      expect(await captureMaxTokens({ timeRange: "five-year", includeMonthly: false })).toBe(60000);
     });
 
-    it("timeRange='three-year' → max_tokens 20000", async () => {
-      expect(await captureMaxTokens({ timeRange: "three-year", includeMonthly: false })).toBe(20000);
+    it("timeRange='three-year' → max_tokens 60000 (cap)", async () => {
+      expect(await captureMaxTokens({ timeRange: "three-year", includeMonthly: false })).toBe(60000);
     });
 
-    it("기본 (this-month, monthly 미포함) → max_tokens 16000", async () => {
-      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: false })).toBe(16000);
+    it("기본 (this-month, monthly 미포함) → max_tokens 48000 (3배 확장)", async () => {
+      expect(await captureMaxTokens({ timeRange: "this-month", includeMonthly: false })).toBe(48000);
     });
+  });
+
+  // ─── sajuSections 구조 검증 ───────────────────────────────────────────────
+  it("sajuSections 포함 AI 응답 → done 청크에 sajuSections 전달", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest(VALID_BODY));
+    const text = await readSSEStream(res);
+    expect(text).toContain("sajuSections");
+    expect(text).toContain("structure");
+    expect(text).toContain("elements");
+    expect(text).toContain("fortune");
+    expect(text).toContain("guidance");
   });
 
   // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────

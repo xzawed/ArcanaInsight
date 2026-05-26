@@ -306,13 +306,25 @@ describe("POST /api/shinjeom/message", () => {
       return provider.streamReading.mock.calls[0]?.[2] as number | undefined;
     }
 
-    it("isFinalTurn=true → max_tokens 16000 (truncated 방지 상향)", async () => {
-      expect(await captureMaxTokens({ isFinalTurn: true })).toBe(16000);
+    it("isFinalTurn=true → max_tokens 48000 (3배 확장, truncated 방지)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: true })).toBe(48000);
     });
 
-    it("isFinalTurn=false → max_tokens 3000 (중간 대화)", async () => {
-      expect(await captureMaxTokens({ isFinalTurn: false })).toBe(3000);
+    it("isFinalTurn=false → max_tokens 6000 (중간 대화 3배 확장)", async () => {
+      expect(await captureMaxTokens({ isFinalTurn: false })).toBe(6000);
     });
+  });
+
+  // ─── shinjeomSections 구조 검증 ─────────────────────────────────────────
+  it("isFinalTurn=true + shinjeomSections 포함 AI 응답 → done 청크에 shinjeomSections 전달", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest({ ...VALID_BODY, isFinalTurn: true }));
+    const text = await readSSEStream(res);
+    expect(text).toContain("shinjeomSections");
+    expect(text).toContain("spiritual");
+    expect(text).toContain("current");
+    expect(text).toContain("obstacles");
+    expect(text).toContain("future");
   });
 
   // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────

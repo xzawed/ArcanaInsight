@@ -206,6 +206,9 @@ export const ja: Partial<SharedKeys> = {
     "session.progress.elapsed": "{n}秒経過",
     "session.error.title": "解釈中に問題が発生しました",
     "session.error.timeout": "応答に時間がかかりすぎています。もう一度お試しください。",
+    "section.symbolism": "カードの象徴",
+    "section.situation": "現在の状況",
+    "section.action": "行動ガイド",
   },
   saju: {
     "result.title": "四柱分析結果",
@@ -246,6 +249,10 @@ export const ja: Partial<SharedKeys> = {
     "chart.pillar.year": "年柱",
     "chart.age-range": "{from}〜{to}歳",
     "chart.age-until": "〜{to}歳",
+    "section.structure": "四柱の構造",
+    "section.elements": "五行の分布",
+    "section.fortune": "大運・歳運の流れ",
+    "section.guidance": "実践ガイド",
   },
   mypage: {
     "page.title": "マイページ",
@@ -389,5 +396,9 @@ export const ja: Partial<SharedKeys> = {
     "session.btn.get-result": "神占の結果を受ける",
     "session.btn.share": "結果をシェア",
     "session.share.title": "神占鑑定結果",
+    "section.spiritual": "霊的サイン",
+    "section.current": "現在の状況",
+    "section.obstacles": "障害",
+    "section.future": "未来の方向",
   },
 };

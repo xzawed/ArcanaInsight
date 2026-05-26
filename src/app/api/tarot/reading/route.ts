@@ -30,14 +30,14 @@ const spreadResolver = new SpreadResolver();
  *
  * 카드 1장이든 12장이든 3~4문단의 충분한 깊이를 보장해야 하므로 reasoning 흡수 버퍼를 포함한
  * 넉넉한 상한을 설정한다. 출력 토큰만 과금되므로 상한 자체는 비용 영향 없음.
- *   - perCard 2500 = 카드별 3~4문단 해석 분량 (한국어 1.3x + JSON 오버헤드)
- *   - reasoningBuffer 5000 = Grok-3 reasoning low 흡수 마진
- *   - base 4000 = system + overallReading(4~5문단) + advice(2~3문단) 오버헤드
+ *   - perCard 7500 = 카드별 3개 섹션(symbolism/situation/action) × 각 3~4문단 (한국어 1.3x + JSON 오버헤드)
+ *   - reasoningBuffer 15000 = Grok-3 reasoning 흡수 마진 (3배 확장)
+ *   - base 12000 = system + overallReading(5~6문단) + advice(3~4문단) 오버헤드
  * 모델 cap 60000은 Claude Sonnet 4.6/Haiku 4.5 max output 64K 안전마진.
  */
 function computeReadingMaxTokens(cardCount: number): number {
-  // 전 구간 단일 공식 — 경계값 불연속 없이 카드 수에 비례해 선형 증가
-  return Math.min(4000 + cardCount * 2500 + 5000, 60000);
+  // 전 구간 단일 공식 — 3-섹션(symbolism/situation/action) 기준 3배 확장
+  return Math.min(12000 + cardCount * 7500 + 15000, 60000);
 }
 
 export async function POST(request: NextRequest) {

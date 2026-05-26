@@ -209,6 +209,9 @@ export interface SharedKeys {
     "session.progress.elapsed": string;
     "session.error.title": string;
     "session.error.timeout": string;
+    "section.symbolism": string;
+    "section.situation": string;
+    "section.action": string;
   };
   saju: {
     "result.title": string;
@@ -252,6 +255,10 @@ export interface SharedKeys {
     "chart.pillar.year": string;
     "chart.age-range": string;
     "chart.age-until": string;
+    "section.structure": string;
+    "section.elements": string;
+    "section.fortune": string;
+    "section.guidance": string;
   };
   mypage: {
     "page.title": string;
@@ -397,6 +404,10 @@ export interface SharedKeys {
     "session.btn.get-result": string;
     "session.btn.share": string;
     "session.share.title": string;
+    "section.spiritual": string;
+    "section.current": string;
+    "section.obstacles": string;
+    "section.future": string;
   };
 }
 

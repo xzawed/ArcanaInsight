@@ -18,8 +18,8 @@ const aiProvider = new FallbackProvider();
 
 // 최종 턴(결과 요청) vs 일반 대화 max_tokens 상수
 // 한국어 토큰 비효율 + JSON 오버헤드 + Grok 내부 reasoning(thinking) 토큰 흡수까지 고려한 안전 마진.
-const SHINJEOM_TOKENS_FINAL = 16000;
-const SHINJEOM_TOKENS_CHAT = 3000;
+const SHINJEOM_TOKENS_FINAL = 48000;
+const SHINJEOM_TOKENS_CHAT = 6000;
 
 export async function POST(request: NextRequest) {
   try {
