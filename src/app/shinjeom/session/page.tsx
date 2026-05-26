@@ -311,10 +311,10 @@ export default function ShinjeomSessionPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
               {readingResult.shinjeomSections && (
                 <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
-                  <ReadingSectionBlock icon="🌙" label="영적 신호" content={readingResult.shinjeomSections.spiritual} />
-                  <ReadingSectionBlock icon="🔍" label="현재 상황" content={readingResult.shinjeomSections.current} />
-                  <ReadingSectionBlock icon="⚠" label="장애물" content={readingResult.shinjeomSections.obstacles} />
-                  <ReadingSectionBlock icon="🌟" label="미래 방향" content={readingResult.shinjeomSections.future} />
+                  <ReadingSectionBlock icon="🌙" label={t("shinjeom.section.spiritual")} content={readingResult.shinjeomSections.spiritual} />
+                  <ReadingSectionBlock icon="🔍" label={t("shinjeom.section.current")} content={readingResult.shinjeomSections.current} />
+                  <ReadingSectionBlock icon="⚠" label={t("shinjeom.section.obstacles")} content={readingResult.shinjeomSections.obstacles} />
+                  <ReadingSectionBlock icon="🌟" label={t("shinjeom.section.future")} content={readingResult.shinjeomSections.future} />
                 </div>
               )}
 

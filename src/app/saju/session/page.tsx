@@ -265,10 +265,10 @@ export default function SajuSessionPage() {
 
                 {readingResult.sajuSections && (
                   <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
-                    <ReadingSectionBlock icon="🏛" label="사주 구조" content={readingResult.sajuSections.structure} />
-                    <ReadingSectionBlock icon="⚡" label="오행 분포" content={readingResult.sajuSections.elements} />
-                    <ReadingSectionBlock icon="🌊" label="대운·세운 흐름" content={readingResult.sajuSections.fortune} />
-                    <ReadingSectionBlock icon="🧭" label="실용 가이드" content={readingResult.sajuSections.guidance} />
+                    <ReadingSectionBlock icon="🏛" label={t("saju.section.structure")} content={readingResult.sajuSections.structure} />
+                    <ReadingSectionBlock icon="⚡" label={t("saju.section.elements")} content={readingResult.sajuSections.elements} />
+                    <ReadingSectionBlock icon="🌊" label={t("saju.section.fortune")} content={readingResult.sajuSections.fortune} />
+                    <ReadingSectionBlock icon="🧭" label={t("saju.section.guidance")} content={readingResult.sajuSections.guidance} />
                   </div>
                 )}
 
