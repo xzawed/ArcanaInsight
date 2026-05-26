@@ -199,6 +199,9 @@ export const ko: SharedKeys = {
     "session.progress.elapsed": "{n}초 경과",
     "session.error.title": "해석 중 문제가 발생했어요",
     "session.error.timeout": "응답이 너무 오래 걸려요. 다시 시도해주세요.",
+    "section.symbolism": "카드 상징",
+    "section.situation": "현재 상황",
+    "section.action": "실천 행동",
   },
   saju: {
     "result.title": "사주 분석 결과",
@@ -239,6 +242,10 @@ export const ko: SharedKeys = {
     "chart.pillar.year": "연주",
     "chart.age-range": "{from}~{to}세",
     "chart.age-until": "~{to}세",
+    "section.structure": "사주 구조",
+    "section.elements": "오행 분포",
+    "section.fortune": "대운·세운 흐름",
+    "section.guidance": "실용 가이드",
   },
   mypage: {
     "page.title": "마이페이지",
@@ -382,5 +389,9 @@ export const ko: SharedKeys = {
     "session.btn.get-result": "신점 결과 받기",
     "session.btn.share": "결과 공유하기",
     "session.share.title": "신점 상담 결과",
+    "section.spiritual": "영적 신호",
+    "section.current": "현재 상황",
+    "section.obstacles": "장애물",
+    "section.future": "미래 방향",
   },
 };

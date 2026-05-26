@@ -103,9 +103,15 @@ ${historyText}
 
 응답 형식 — 반드시 아래 JSON:
 {
-  "overallReading": "【신명의 메시지】전체 기운과 신명이 전하는 핵심 메시지\\n\\n【현재 흐름】지금 이 시기의 운세 에너지와 상황 맥락\\n\\n【환경과 주변 기운】주변 인물·환경이 미치는 영향\\n\\n【어려움의 영적 원인】현재 겪고 있는 문제의 근원적 의미\\n\\n【가까운 미래 전망】앞으로 3~6개월의 흐름 예측\\n\\n【중요한 시기】특히 주의하거나 기회가 되는 구체적 시점\\n\\n【삶의 방향】이 상황이 삶 전체에서 갖는 의미와 성장 포인트. 각 섹션 2~4문장 이상으로 충분히 서술.",
-  "topicReading": "선택 주제에 대한 심층 신점 해석.\\n\\n긍정적 기운과 도전 요소를 균형 있게 분석.\\n\\n시기별 구체적 흐름(이번 달·3개월·6개월).\\n\\n이 주제와 관련된 중요 인물·환경·기운 분석.\\n\\n상황이 바뀌는 전환점 예측. 최소 5문단 이상.",
-  "advice": "【지금 당장 할 것】오늘부터 실천 가능한 구체적 행동 2~3가지\\n\\n【기도·의식】정화와 좋은 기운을 부르는 방법 (구체적 방법과 시기)\\n\\n【액막이·보호】현재 상황에 맞는 영적 보호 방법\\n\\n【관계·환경 조언】주변 사람·공간·물건에 관한 실질 조언\\n\\n【마음가짐】내면의 변화를 위한 조언과 앞으로 나아갈 방향. 최소 4문단 이상."
+  "shinjeomSections": {
+    "spiritual": "신명이 감지하는 핵심 기운과 영적 메시지. 현재 상황의 영적 의미와 흐름을 5~6문단으로 서술.",
+    "current": "지금 이 시기의 운세 에너지, 상황 맥락, 주변 인물·환경이 미치는 영향을 5~6문단으로 구체적으로 분석.",
+    "obstacles": "현재 겪고 있는 어려움의 영적 원인, 장애물의 본질, 주의해야 할 에너지를 5~6문단으로 서술.",
+    "future": "앞으로 3~6개월의 흐름 예측, 전환점, 기회가 되는 시기, 삶의 방향과 성장 포인트를 5~6문단으로 서술."
+  },
+  "overallReading": "【신명의 메시지】전체 기운과 신명이 전하는 핵심 메시지\\n\\n【현재 흐름】지금 이 시기의 운세 에너지와 상황 맥락\\n\\n【환경과 주변 기운】주변 인물·환경이 미치는 영향\\n\\n【어려움의 영적 원인】현재 겪고 있는 문제의 근원적 의미\\n\\n【가까운 미래 전망】앞으로 3~6개월의 흐름 예측\\n\\n【중요한 시기】특히 주의하거나 기회가 되는 구체적 시점\\n\\n【삶의 방향】이 상황이 삶 전체에서 갖는 의미와 성장 포인트. 각 섹션 3~5문장 이상으로 충분히 서술.",
+  "topicReading": "선택 주제에 대한 심층 신점 해석.\\n\\n긍정적 기운과 도전 요소를 균형 있게 분석.\\n\\n시기별 구체적 흐름(이번 달·3개월·6개월).\\n\\n이 주제와 관련된 중요 인물·환경·기운 분석.\\n\\n상황이 바뀌는 전환점 예측. 최소 6문단 이상.",
+  "advice": "【지금 당장 할 것】오늘부터 실천 가능한 구체적 행동 2~3가지\\n\\n【기도·의식】정화와 좋은 기운을 부르는 방법 (구체적 방법과 시기)\\n\\n【액막이·보호】현재 상황에 맞는 영적 보호 방법\\n\\n【관계·환경 조언】주변 사람·공간·물건에 관한 실질 조언\\n\\n【마음가짐】내면의 변화를 위한 조언과 앞으로 나아갈 방향. 최소 5문단 이상."
 }
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.
@@ -132,6 +138,16 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
         topicReading: cleanReadingText(typeof parsed.topicReading === "string" ? parsed.topicReading : ""),
         advice,
       };
+      // shinjeomSections 추출 (새 형식)
+      if (parsed.shinjeomSections && typeof parsed.shinjeomSections === "object") {
+        const s = parsed.shinjeomSections as Record<string, unknown>;
+        result.shinjeomSections = {
+          spiritual: cleanReadingText(String(s.spiritual || "")),
+          current: cleanReadingText(String(s.current || "")),
+          obstacles: cleanReadingText(String(s.obstacles || "")),
+          future: cleanReadingText(String(s.future || "")),
+        };
+      }
       if (!overallReading || !advice) result.parseError = "missing_fields";
       return result;
     }

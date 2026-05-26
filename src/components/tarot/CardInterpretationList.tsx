@@ -2,26 +2,29 @@
 
 import { motion } from "framer-motion";
 import { ReadingText } from "@/components/common/ReadingText";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { getCardName } from "@/data/cards/locale-helpers";
 import { getPositionLabel, fallbackPosLabel } from "@/data/spreads";
 import type { SelectedCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
+import type { CardInterpretationItem } from "@/types/service";
 import type { Locale } from "@/i18n/config";
 
-interface CardInterpretation {
-  cardId: string;
-  position: number;
-  interpretation: string;
-}
+const SECTION_LABELS: Record<string, { symbolism: string; situation: string; action: string }> = {
+  ko: { symbolism: "카드 상징", situation: "현재 상황", action: "실천 행동" },
+  en: { symbolism: "Card Symbolism", situation: "Current Situation", action: "Action Guide" },
+  ja: { symbolism: "カードの象徴", situation: "現在の状況", action: "行動ガイド" },
+};
 
 interface CardInterpretationListProps {
-  interpretations: CardInterpretation[];
+  interpretations: CardInterpretationItem[];
   selectedCards: SelectedCard[];
   spread: SpreadDefinition | null;
   locale: Locale;
 }
 
 export function CardInterpretationList({ interpretations, selectedCards, spread, locale }: CardInterpretationListProps) {
+  const labels = SECTION_LABELS[locale] ?? SECTION_LABELS.ko;
   return (
     <>
       {interpretations.map((interp, i) => {
@@ -31,6 +34,7 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
         const displayName = card?.card ? getCardName(card.card, locale) : fallbackCard?.card ? getCardName(fallbackCard.card, locale) : "";
         const pos = spread?.positions[interp.position];
         const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
+        const hasNewFormat = !!(interp.symbolism || interp.situation || interp.action);
         return (
           <motion.div
             key={`card-${i}`}
@@ -43,7 +47,15 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
               <span className="text-arcana-gold text-xs md:text-sm font-serif font-bold px-2 py-0.5 bg-arcana-gold/10 rounded-full">{posLabel}</span>
               <span className="text-arcana-text font-bold text-sm md:text-base">{displayName}</span>
             </div>
-            <ReadingText text={interp.interpretation} />
+            {hasNewFormat ? (
+              <div>
+                <ReadingSectionBlock icon="✦" label={labels.symbolism} content={interp.symbolism ?? ""} />
+                <ReadingSectionBlock icon="◈" label={labels.situation} content={interp.situation ?? ""} />
+                <ReadingSectionBlock icon="▶" label={labels.action} content={interp.action ?? ""} />
+              </div>
+            ) : (
+              <ReadingText text={interp.interpretation ?? ""} />
+            )}
           </motion.div>
         );
       })}
