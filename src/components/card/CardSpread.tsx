@@ -179,6 +179,7 @@ export const CardSpread = React.memo(
                     styleId={styleId ?? undefined}
                     glowColor={glowColor}
                     showLabel={showLabel}
+                    positionIndex={pos.index}
                   />
                 </div>
                 {showLabel && (
