@@ -10,10 +10,10 @@ import type { SpreadDefinition } from "@/types/session";
 import type { CardInterpretationItem } from "@/types/service";
 import type { Locale } from "@/i18n/config";
 
-const SECTION_LABELS: Record<string, { symbolism: string; situation: string; action: string }> = {
-  ko: { symbolism: "카드 상징", situation: "현재 상황", action: "실천 행동" },
-  en: { symbolism: "Card Symbolism", situation: "Current Situation", action: "Action Guide" },
-  ja: { symbolism: "カードの象徴", situation: "現在の状況", action: "行動ガイド" },
+const SECTION_LABELS: Record<string, { symbolism: string; situation: string }> = {
+  ko: { symbolism: "카드 상징", situation: "현재 상황" },
+  en: { symbolism: "Card Symbolism", situation: "Current Situation" },
+  ja: { symbolism: "カードの象徴", situation: "現在の状況" },
 };
 
 interface CardInterpretationListProps {
@@ -34,7 +34,7 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
         const displayName = card?.card ? getCardName(card.card, locale) : fallbackCard?.card ? getCardName(fallbackCard.card, locale) : "";
         const pos = spread?.positions[interp.position];
         const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
-        const hasNewFormat = !!(interp.symbolism || interp.situation || interp.action);
+        const hasNewFormat = !!(interp.symbolism || interp.situation);
         return (
           <motion.div
             key={`card-${i}`}
@@ -51,7 +51,6 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
               <div>
                 <ReadingSectionBlock icon="✦" label={labels.symbolism} content={interp.symbolism ?? ""} />
                 <ReadingSectionBlock icon="◈" label={labels.situation} content={interp.situation ?? ""} />
-                <ReadingSectionBlock icon="▶" label={labels.action} content={interp.action ?? ""} />
               </div>
             ) : (
               <ReadingText text={interp.interpretation ?? ""} />

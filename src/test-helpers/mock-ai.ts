@@ -7,7 +7,6 @@ const MOCK_JSON_RESPONSE = JSON.stringify({
       position: 0,
       symbolism: "테스트 상징 해석",
       situation: "테스트 현재 상황 해석",
-      action: "테스트 행동 가이드",
       isReversed: false,
     },
   ],
