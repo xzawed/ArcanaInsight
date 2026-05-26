@@ -211,7 +211,6 @@ export interface SharedKeys {
     "session.error.timeout": string;
     "section.symbolism": string;
     "section.situation": string;
-    "section.action": string;
   };
   saju: {
     "result.title": string;

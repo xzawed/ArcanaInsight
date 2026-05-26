@@ -201,7 +201,6 @@ export const ko: SharedKeys = {
     "session.error.timeout": "응답이 너무 오래 걸려요. 다시 시도해주세요.",
     "section.symbolism": "카드 상징",
     "section.situation": "현재 상황",
-    "section.action": "실천 행동",
   },
   saju: {
     "result.title": "사주 분석 결과",

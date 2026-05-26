@@ -181,25 +181,20 @@ export const CardSpread = React.memo(
                     showLabel={showLabel}
                   />
                 </div>
-                <span
-                  className="text-arcana-gold font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)] truncate text-center"
-                  style={{ fontSize: Math.max(layout.cardW * 0.18, 8), maxWidth: layout.cardW * 1.5 }}
-                >
-                  {getPositionLabel(pos, locale)}
-                </span>
+                {showLabel && (
+                  <span
+                    className="text-arcana-gold font-serif font-bold drop-shadow-[0_0_4px_rgba(212,175,55,0.4)] truncate text-center"
+                    style={{ fontSize: Math.max(layout.cardW * 0.18, 8), maxWidth: layout.cardW * 1.5 }}
+                  >
+                    {getPositionLabel(pos, locale)}
+                  </span>
+                )}
               </div>
             ) : (
               <div
                 className="rounded border border-dashed border-arcana-purple/30 flex items-center justify-center bg-arcana-purple/5"
                 style={{ width: layout.cardW, height: layout.cardH }}
-              >
-                <span
-                  className="text-arcana-gold/60 font-serif font-bold truncate"
-                  style={{ fontSize: Math.max(layout.cardW * 0.18, 8) }}
-                >
-                  {getPositionLabel(pos, locale)}
-                </span>
-              </div>
+              />
             )}
           </motion.div>
         );

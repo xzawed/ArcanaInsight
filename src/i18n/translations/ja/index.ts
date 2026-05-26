@@ -208,7 +208,6 @@ export const ja: Partial<SharedKeys> = {
     "session.error.timeout": "応答に時間がかかりすぎています。もう一度お試しください。",
     "section.symbolism": "カードの象徴",
     "section.situation": "現在の状況",
-    "section.action": "行動ガイド",
   },
   saju: {
     "result.title": "四柱分析結果",

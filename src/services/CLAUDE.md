@@ -48,13 +48,19 @@ interface DivinationService {
   startSession(topic: Topic): Omit<Session, "id" | "createdAt">;
   getSystemPrompt(characterId?: string, locale?: string): string;
   getReadingPrompt(context: SessionContext): string;
-  parseResult(aiResponse: string): ReadingResult;
+  parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult;
+  // 타로: expectedCardCount로 truncated 감지
+  // 사주: ReadingResult에 sajuSections(structure/elements/fortune/guidance) 포함
+  // 신점: ReadingResult에 shinjeomSections(spiritual/current/obstacles/future) 포함
 }
 ```
 
-### max_tokens 정책 (타로)
+### max_tokens 정책 (3-섹션 프리미엄 리딩 기준)
 
-카드 수 비례 동적 산정 — `src/app/api/tarot/reading/route.ts`의 `computeReadingMaxTokens()` 함수 기준. 신규 스프레드 추가 시 이 함수에 케이스를 추가한다.
+- **타로**: `computeReadingMaxTokens(cardCount)` — `min(12000 + cardCount × 7500 + 15000, 60000)`. 3-섹션(symbolism/situation/action) 기준 3배 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
+- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap. sajuSections(structure/elements/fortune/guidance) 4-섹션 대응.
+- **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`. shinjeomSections(spiritual/current/obstacles/future) 4-섹션 대응.
+- **신점 중간 대화**: `SHINJEOM_TOKENS_CHAT = 6,000`.
 
 ## 테스트 위치
 
