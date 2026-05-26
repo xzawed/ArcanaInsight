@@ -41,7 +41,7 @@ export function TarotResultPanel({
       <div ref={containerRef} data-testid="reading-content" className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
         {readingResult.cardInterpretations && readingResult.cardInterpretations.length > 0 && (
           <CardInterpretationList
-            interpretations={readingResult.cardInterpretations.filter(item => item.interpretation) as Array<{ cardId: string; position: number; interpretation: string }>}
+            interpretations={readingResult.cardInterpretations}
             selectedCards={selectedCards}
             spread={spread}
             locale={locale}
