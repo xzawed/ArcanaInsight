@@ -132,27 +132,44 @@ for (let i = start; i < text.length; i++) {
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
 
-## 4. max_tokens 정책 (`computeReadingMaxTokens`)
+## 4. max_tokens 정책 (3-섹션 프리미엄 리딩 기준 — PR #414)
 
-`src/app/api/tarot/reading/route.ts` — 카드 수 비례 동적 산정
+### 타로 (`computeReadingMaxTokens`) — `src/app/api/tarot/reading/route.ts`
 
-전 구간 단일 공식: `min(4000 + cardCount × 2500 + 5000, 60000)`
+카드 수 비례 동적 산정. 3-섹션(symbolism/situation/action) 기준 3배 확장 공식 적용.
+
+전 구간 단일 공식: `min(12000 + cardCount × 7500 + 15000, 60000)`
 
 | 카드 수 | max_tokens |
 |---------|-----------|
-| 1장 | 11,500 |
-| 3장 | 16,500 |
-| 5장 | 21,500 |
-| 7장 | 26,500 |
-| 9장 | 31,500 |
-| 10장 | 34,000 |
-| 12장(zodiac) | 39,000 |
-| 20장 이상 | 60,000 (cap) |
+| 1장 | 34,500 |
+| 3장 | 49,500 |
+| 5장 | 60,000 (cap) |
+| 7장 이상 | 60,000 (cap) |
 
 - 모델 cap 60,000: Claude Sonnet 4.6 / Haiku 4.5 max output 64K 안전마진
-- `perCard 2500`: 한국어 토큰 비율(영어 대비 ×1.3) + JSON 구조 오버헤드 반영
-- `reasoningBuffer 5000`: Grok-3 reasoning 토큰을 max_tokens 예산에서 함께 소비하는 특성 대응
-- `base 4000`: system prompt + overallReading + advice 고정 오버헤드
+- `perCard 7500`: 카드별 3개 섹션(symbolism/situation/action) × 각 3~4문단 (한국어 1.3x + JSON 오버헤드)
+- `reasoningBuffer 15000`: Grok-3 reasoning 흡수 마진 (3배 확장)
+- `base 12000`: system prompt + overallReading(5~6문단) + advice(3~4문단) 오버헤드
+
+### 사주 (`computeSajuReadingMaxTokens`) — `src/app/api/saju/reading/route.ts`
+
+| 시간범위 | max_tokens |
+|---------|-----------|
+| this-week / this-month / this-year 기본 | 48,000 |
+| includeMonthly=true (월운 12개월) | 60,000 (cap) |
+| five-year / full-fortune / three-year / next-year | 60,000 (cap) |
+
+sajuSections(structure/elements/fortune/guidance) 4-섹션 기준 3배 확장 적용.
+
+### 신점 — `src/app/api/shinjeom/message/route.ts`
+
+| 턴 유형 | 상수 |
+|---------|------|
+| 최종 턴 (`isFinalTurn=true`) | `SHINJEOM_TOKENS_FINAL = 48,000` |
+| 중간 대화 | `SHINJEOM_TOKENS_CHAT = 6,000` |
+
+shinjeomSections(spiritual/current/obstacles/future) 4-섹션 기준 3배 확장 적용 (최종 턴).
 
 ---
 

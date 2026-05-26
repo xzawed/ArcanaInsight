@@ -43,7 +43,7 @@ src/
 │   │                # ServiceIllustrations (TarotScene·SajuScene·ShinjeomScene + useMouseParallax FAR/MID/NEAR 3레이어)
 │   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
 │   │                # themeAtmosphere.ts — ThemeAtmosphereLayer 전용 파티클 종류·설정
-│   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
+│   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (3서비스 공통)
 │   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
 │                    # ShuffleCeremony, CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta, error-messages
@@ -88,6 +88,7 @@ supabase/migrations/ # Supabase SQL migrations
 - 카드 아트 스타일: `CardStyleId`(dark-fantasy·art-nouveau·anime-mystical·modern-digital), `THEME_TO_STYLE_MAP`으로 테마 자동 매핑. `useCardStyleStore`가 사용자 override를 persist. `CardFace`/`CardBack`/`CardItem`은 styleId → skinId → SVG 순으로 이미지 우선순위 처리.
 - 테마 이펙트: `ThemeEffectEngine`이 CSS 변수(`--theme-glow-color`, `--theme-particle-color` 등)를 주입. `ThemeAtmosphereLayer`(글로우·파티클 5-레이어), `InteractionEffects`(`InteractionClickParticles` — `document.addEventListener` 방식, pointer-events-none), `ServiceBackground`(AI 배경 이미지 `getServiceBackgroundUrl(service, activeTheme)` + `CanvasParticleLayer` + `ThemeAtmosphere` 내장 — `fixed inset-0 -z-10`, `loading="lazy"` 으로 `window.load` 비블로킹), `src/styles/theme-effects.css` 로 구성.
 - 타로 텍스트 reveal: `useReadingReveal` 스토어가 `showLabel` 플래그를 관리. `CardFace` → `CardItem` → `CardSpread` → 타로 세션 페이지로 prop 체인 전달. result phase 진입 시에만 카드명 텍스트 노출.
+- 프리미엄 리딩 3-섹션 구조 (PR #414): 타로 `CardInterpretationItem`에 `symbolism`/`situation`/`action` 3-섹션 추가. 사주 `SajuSections`(structure/elements/fortune/guidance), 신점 `ShinjeomSections`(spiritual/current/obstacles/future)가 `ReadingResult`에 optional로 포함. `ReadingSectionBlock` 컴포넌트가 3서비스 공통 섹션 UI 렌더링. AI 토큰 예산 3배 확장(타로 cap 60,000 / 사주·신점 최대 60,000). 하위 호환: `interpretation` 필드 기존 데이터 fallback 유지.
 
 ## 캐릭터/데이터 기준
 

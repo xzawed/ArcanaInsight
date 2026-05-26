@@ -19,7 +19,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    │                  mysticUtils.ts — particleStyle·particleMotion 순수 함수
        │    │                  (홈 히어로 카드 덱 스타일: src/styles/home-effects.css — hero-tarot-card, hero-card-idle keyframe)
        │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
-       │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState (3서비스 공통)
+       │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (3서비스 공통 — 섹션별 UI 블록)
        │    ├─ skin/         — 카드 스킨 관련 컴포넌트
        │    ├─ tarot/        — CardInterpretationList, TarotResultPanel, ShuffleCeremony,
        │    │                  CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
