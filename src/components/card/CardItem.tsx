@@ -22,11 +22,13 @@ interface CardItemProps {
   readonly glowColor?: string;
   /** false이면 카드 하단 텍스트를 숨긴다 (CardFace에 전달). 기본값: true */
   readonly showLabel?: boolean;
+  /** 스프레드 내 위치 인덱스 — 지정 시 애니메이션 글로우 이펙트 활성화 (위치별 페이즈 오프셋) */
+  readonly positionIndex?: number;
 }
 
 const sizeClasses = { sm: "w-10 h-[60px]", md: "w-24 h-36", lg: "w-32 h-48" };
 
-export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, styleId, glowColor, showLabel = true }: CardItemProps) {
+export function CardItem({ card, isFlipped, isSelected, isReversed = false, onClick, size = "md", width, height, className = "", skinId, styleId, glowColor, showLabel = true, positionIndex }: CardItemProps) {
   const useCustomSize = width !== undefined && height !== undefined;
 
   const mouseX = useMotionValue(0);
@@ -47,6 +49,9 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
   }
 
   const rgb = glowColor ? hexToRgbBase(glowColor) : "212, 175, 55";
+  const pIdx = positionIndex ?? 0;
+  // positionIndex가 있을 때만 스프레드 선택 글로우 표시 (CardDeck 선택 카드는 제외)
+  const showSelectionGlow = isSelected && positionIndex !== undefined;
 
   return (
     <motion.div
@@ -77,6 +82,55 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
         />
       )}
 
+      {/* 스프레드 선택 카드 글로우: 펄스 링 + 회전 빛 아크 (positionIndex별 페이즈 다름) */}
+      {showSelectionGlow && (
+        <>
+          <motion.div
+            className="absolute inset-0 rounded-lg pointer-events-none"
+            animate={{
+              boxShadow: [
+                `0 0 0 1.5px rgba(${rgb},0.65), 0 0 8px rgba(${rgb},0.25), 0 0 18px rgba(${rgb},0.1)`,
+                `0 0 0 2.5px rgba(${rgb},1), 0 0 16px rgba(${rgb},0.55), 0 0 32px rgba(${rgb},0.22)`,
+                `0 0 0 1.5px rgba(${rgb},0.65), 0 0 8px rgba(${rgb},0.25), 0 0 18px rgba(${rgb},0.1)`,
+              ],
+            }}
+            transition={{
+              duration: 1.8 + pIdx * 0.4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: pIdx * 0.55,
+            }}
+          />
+          <motion.div
+            className="absolute pointer-events-none"
+            style={{
+              top: -2, right: -2, bottom: -2, left: -2,
+              borderRadius: "0.625rem",
+              padding: "2px",
+              background: `conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                transparent 252deg,
+                rgba(${rgb},0.45) 290deg,
+                rgba(255,255,255,0.92) 312deg,
+                rgba(${rgb},0.45) 334deg,
+                transparent 360deg
+              )`,
+              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+            }}
+            animate={{ rotate: [0, 360] }}
+            transition={{
+              duration: 2.5 + pIdx * 0.5,
+              repeat: Infinity,
+              ease: "linear",
+              delay: pIdx * 0.75,
+            }}
+          />
+        </>
+      )}
+
       <motion.div
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -88,9 +142,6 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
           style={{
             backfaceVisibility: "hidden",
             borderRadius: "0.5rem",
-            ...(isSelected ? {
-              boxShadow: `0 0 0 2px rgba(${rgb},0.9), 0 4px 16px rgba(${rgb},0.3)`,
-            } : {}),
           }}
         >
           <CardBack size={size} width={width} height={height} className="w-full h-full" skinId={skinId} styleId={styleId} />
