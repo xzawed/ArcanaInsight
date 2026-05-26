@@ -7,6 +7,7 @@ import { fetchSSEStream } from "@/hooks/useSSEStream";
 import { ResultTextCard } from "@/components/session/ResultTextCard";
 import { SessionActionButtons } from "@/components/session/SessionActionButtons";
 import { ReadingErrorState } from "@/components/session/ReadingErrorState";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { ReadingResult } from "@/types/service";
 import { SajuResult } from "@/services/saju/saju-types";
@@ -261,6 +262,15 @@ export default function SajuSessionPage() {
                 <SajuChartReveal index={1}>
                   <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
                 </SajuChartReveal>
+
+                {readingResult.sajuSections && (
+                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
+                    <ReadingSectionBlock icon="🏛" label="사주 구조" content={readingResult.sajuSections.structure} />
+                    <ReadingSectionBlock icon="⚡" label="오행 분포" content={readingResult.sajuSections.elements} />
+                    <ReadingSectionBlock icon="🌊" label="대운·세운 흐름" content={readingResult.sajuSections.fortune} />
+                    <ReadingSectionBlock icon="🧭" label="실용 가이드" content={readingResult.sajuSections.guidance} />
+                  </div>
+                )}
 
                 {readingResult.overallReading && (
                   <ResultTextCard text={readingResult.overallReading} emoji="☯" label={t("saju.result.overall")} delay={0.4} colorScheme="purple" />
