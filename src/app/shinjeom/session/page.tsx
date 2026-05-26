@@ -9,6 +9,7 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { ResultTextCard } from "@/components/session/ResultTextCard";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { SessionActionButtons } from "@/components/session/SessionActionButtons";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { getCharacterById } from "@/data/characters";
@@ -308,6 +309,15 @@ export default function ShinjeomSessionPage() {
           {phase === "result" && readingResult ? (
             /* 최종 결과 */
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
+              {readingResult.shinjeomSections && (
+                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
+                  <ReadingSectionBlock icon="🌙" label="영적 신호" content={readingResult.shinjeomSections.spiritual} />
+                  <ReadingSectionBlock icon="🔍" label="현재 상황" content={readingResult.shinjeomSections.current} />
+                  <ReadingSectionBlock icon="⚠" label="장애물" content={readingResult.shinjeomSections.obstacles} />
+                  <ReadingSectionBlock icon="🌟" label="미래 방향" content={readingResult.shinjeomSections.future} />
+                </div>
+              )}
+
               <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={t("shinjeom.result.overall")} delay={0.1} colorScheme="purple" />
 
               {readingResult.topicReading && (
