@@ -249,17 +249,17 @@ describe("POST /api/tarot/reading", () => {
   });
 
   it("computeReadingMaxTokens 정책 — 모든 분기가 streamReading에 정확히 전달", async () => {
-    // 전 구간 단일 공식: 4000 + cardCount*2500 + 5000 (모델 cap 60000)
+    // 전 구간 단일 공식: 12000 + cardCount*7500 + 15000 (모델 cap 60000)
     const cases: { count: number; expected: number }[] = [
-      { count: 1, expected: 11500 },   // 4000 + 2500 + 5000
-      { count: 3, expected: 16500 },   // 4000 + 7500 + 5000
-      { count: 5, expected: 21500 },   // 4000 + 12500 + 5000
-      { count: 7, expected: 26500 },   // 4000 + 17500 + 5000
-      { count: 9, expected: 31500 },   // 4000 + 22500 + 5000
-      { count: 10, expected: 34000 },  // 4000 + 25000 + 5000
-      { count: 12, expected: 39000 },  // 4000 + 30000 + 5000 (zodiac)
-      { count: 15, expected: 46500 },  // 4000 + 37500 + 5000 (미래 spread)
-      { count: 20, expected: 59000 },  // 4000 + 50000 + 5000 (미래 spread)
+      { count: 1, expected: 34500 },   // 12000 + 7500 + 15000
+      { count: 3, expected: 49500 },   // 12000 + 22500 + 15000
+      { count: 5, expected: 60000 },   // 12000 + 37500 + 15000 → cap
+      { count: 7, expected: 60000 },   // 12000 + 52500 + 15000 → cap
+      { count: 9, expected: 60000 },   // 12000 + 67500 + 15000 → cap
+      { count: 10, expected: 60000 },  // 12000 + 75000 + 15000 → cap
+      { count: 12, expected: 60000 },  // 12000 + 90000 + 15000 → cap (zodiac)
+      { count: 15, expected: 60000 },  // 12000 + 112500 + 15000 → cap
+      { count: 20, expected: 60000 },  // 12000 + 150000 + 15000 → cap
     ];
     for (const { count, expected } of cases) {
       vi.resetModules();
