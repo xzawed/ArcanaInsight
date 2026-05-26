@@ -22,7 +22,6 @@ export interface CardInterpretationItem {
   interpretation?: string;
   symbolism?: string;
   situation?: string;
-  action?: string;
   isReversed?: boolean;
 }
 

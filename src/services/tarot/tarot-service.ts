@@ -41,14 +41,13 @@ export class TarotService implements DivinationService {
 
     if (parsed) {
       const cardInterpretations = (Array.isArray(parsed.cardInterpretations) ? parsed.cardInterpretations : []).map(
-        (interp: { cardId: string; position: number; interpretation?: string; symbolism?: string; situation?: string; action?: string; isReversed?: boolean }) => ({
+        (interp: { cardId: string; position: number; interpretation?: string; symbolism?: string; situation?: string; isReversed?: boolean }) => ({
           cardId: interp.cardId,
           position: interp.position,
           isReversed: interp.isReversed,
-          // new 3-section fields
+          // 2-section fields
           ...(interp.symbolism !== undefined ? { symbolism: cleanReadingText(String(interp.symbolism)) } : {}),
           ...(interp.situation !== undefined ? { situation: cleanReadingText(String(interp.situation)) } : {}),
-          ...(interp.action !== undefined ? { action: cleanReadingText(String(interp.action)) } : {}),
           // deprecated backward-compat field
           ...(interp.interpretation !== undefined ? { interpretation: cleanReadingText(String(interp.interpretation)) } : {}),
         })

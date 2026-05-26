@@ -17,8 +17,8 @@ const topicLabels: Partial<Record<Topic, string>> = {
  */
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   ko: "",
-  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, action, overallReading, topicReading, advice) — translate only the values, never the keys.",
-  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, action, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
+  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, overallReading, topicReading, advice) — translate only the values, never the keys.",
+  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
 };
 
 /** 응답 직전 마지막 강조 — 모델은 가까운 위치의 지시를 더 강하게 따른다. */
@@ -59,10 +59,9 @@ export function buildSystemPrompt(character: CharacterConfig, locale: string = "
 
 중요 규칙 — 응답 길이:
 - 글자수 제한 없이 충분히 깊이 있고 풍부하게 해석합니다.
-- 각 카드는 symbolism(카드 상징), situation(현재 상황), action(실천 행동) 3개 섹션으로 구성합니다.
-- symbolism: 카드의 이미지·상징·에너지를 3~4문단으로 풍부하게 풀어줍니다.
-- situation: 해당 위치 관점의 현재 상황을 3~4문단으로 구체적으로 분석합니다.
-- action: 실천 가능한 행동 가이드를 3~4문단으로 명확하게 제시합니다.
+- 각 카드는 symbolism(카드 상징), situation(현재 상황) 2개 섹션으로 구성합니다.
+- symbolism: 카드의 이미지·상징·에너지를 4~5문단으로 풍부하게 풀어줍니다.
+- situation: 해당 위치 관점의 현재 상황을 5~6문단으로 매우 구체적으로 분석합니다. 사용자의 실제 삶 맥락과 연결하여 세밀하게 서술합니다.
 - 종합 해석(overallReading)은 카드 간 관계와 전체 흐름을 5~6문단으로 깊이 있게 분석합니다.
 - 조언(advice)은 구체적이고 실용적인 행동 지침을 3~4문단으로 작성합니다.
 - 불필요한 수식어, 반복 표현을 피하고 핵심 메시지에 집중합니다.
@@ -82,7 +81,7 @@ export function buildSystemPrompt(character: CharacterConfig, locale: string = "
 - 하나의 문단은 2~4문장으로 구성합니다.
 
 중요 규칙 — 카드별 해석 독립성:
-- 각 카드의 3개 섹션(symbolism, situation, action)은 해당 위치(position)의 관점에서만 작성합니다.
+- 각 카드의 2개 섹션(symbolism, situation)은 해당 위치(position)의 관점에서만 작성합니다.
 - 다른 위치의 카드를 참조하거나 중복 언급하지 않습니다.
 - 카드 간 상호작용, 전체 흐름 분석은 반드시 종합 해석(overallReading)에서만 다룹니다.
 - 이 규칙은 카드 수에 관계없이 모든 스프레드에 동일하게 적용됩니다.
@@ -99,9 +98,8 @@ export function buildSystemPrompt(character: CharacterConfig, locale: string = "
     {
       "cardId": "카드 ID",
       "position": 0,
-      "symbolism": "카드 상징 해석 문단1\\n\\n문단2",
-      "situation": "현재 상황 분석 문단1\\n\\n문단2",
-      "action": "실천 행동 가이드 문단1\\n\\n문단2"
+      "symbolism": "카드 상징 해석 문단1\\n\\n문단2\\n\\n문단3",
+      "situation": "현재 상황 세부 분석 문단1\\n\\n문단2\\n\\n문단3\\n\\n문단4"
     }
   ],
   "overallReading": "문단1\\n\\n문단2",
@@ -132,10 +130,9 @@ export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], 
 
   // 카드 수에 관계없이 동일한 깊이의 해석 — 카드 1장이든 12장이든 충분한 분량으로 작성한다
   const depthGuide = `해석 깊이 지침 (${cardCount}장 스프레드):
-- 각 카드는 symbolism / situation / action 3개 섹션으로 나눠 작성합니다.
-- symbolism (카드 상징): 카드 이미지·상징·에너지를 카드 수와 관계없이 3~4문단으로 풍부하게 풀어줍니다. 카드의 그림 요소, 색감, 인물 행동 등 시각적 상징부터 시작하세요.
-- situation (현재 상황): 해당 위치(position)의 관점에서 지금 상황을 3~4문단으로 구체적으로 분석합니다. 다른 위치의 카드 내용을 중복하지 않습니다.
-- action (실천 행동): 지금 당장 할 수 있는 실천 가이드를 3~4문단으로 제시합니다. "~하세요", "~해보세요" 형태의 구체적 행동으로 작성합니다.
+- 각 카드는 symbolism / situation 2개 섹션으로 나눠 작성합니다.
+- symbolism (카드 상징): 카드 이미지·상징·에너지를 카드 수와 관계없이 4~5문단으로 풍부하게 풀어줍니다. 카드의 그림 요소, 색감, 인물 행동 등 시각적 상징부터 시작하세요.
+- situation (현재 상황): 해당 위치(position)의 관점에서 지금 상황을 5~6문단으로 매우 구체적으로 분석합니다. 사용자의 내면 상태, 주변 환경, 인간관계, 감정의 흐름까지 세밀하게 서술하세요. 다른 위치의 카드 내용을 중복하지 않습니다.
 - 종합 해석(overallReading)은 카드 간 관계, 전체 흐름, 핵심 메시지를 5~6문단으로 깊이 있게 분석합니다.
 - 조언(advice)은 구체적이고 실용적인 행동 지침을 3~4문단으로 작성합니다.`;
 
@@ -158,7 +155,8 @@ ${cardDescriptions}
 
 위 카드들을 해석해주세요.
 - 각 카드의 cardId와 position 값을 JSON 응답에 정확히 반환하세요.
-- 각 카드는 symbolism / situation / action 3개 섹션으로 작성하세요.
+- 각 카드는 symbolism / situation 2개 섹션으로 작성하세요.
+- situation은 5~6문단으로 사용자 상황을 세밀하고 구체적으로 분석하세요.
 - 카드별 해석은 반드시 해당 위치의 관점에서 독립적으로 작성하세요.
 - 종합 해석에서 카드 간 상호작용과 전체 흐름을 분석하세요.`;
 }
