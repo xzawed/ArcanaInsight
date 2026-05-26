@@ -222,9 +222,15 @@ export class SajuService implements DivinationService {
 - <think> 같은 태그·메타 텍스트도 출력 금지 (응답 토큰 한도 내에 JSON 본문이 모두 들어가야 함).
 - JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
 {
-  "overallReading": "【사주 전체 구조】일간 특성·신강신약·격국 → 【오행 분포】과잉·부족 기운의 삶에 대한 영향 → 【용신·희신】핵심 에너지와 활용법 → 【대운 흐름】현재 대운이 일간에 미치는 영향 → 【세운】올해 세운과 대운의 교차 작용 → 【전반 전망】현재 위치와 앞으로의 큰 흐름. 최소 6문단 이상, 각 문단을 충분히 서술.",
-  "topicReading": "선택한 주제와 시간 범위에 특화된 심층 분석. 시기별 구체적 흐름(월별·분기별 포함), 기회가 열리는 시기, 주의해야 할 구간, 십성·12운성이 이 주제에 어떻게 작용하는지. 최소 4문단 이상.",
-  "advice": "용신·희신 기반의 실용적 행동 지침. 지금 당장 강화해야 할 것, 피해야 할 것, 일상에서 실천 가능한 구체적 방법, 마음가짐 조언. 최소 3문단 이상."
+  "sajuSections": {
+    "structure": "일간 특성·신강신약·격국 분석. 타고난 기질, 삶의 방향성, 에너지 구조를 5~6문단으로 깊이 있게 서술.",
+    "elements": "오행 분포 분석. 과잉·부족 기운이 성격·건강·환경에 미치는 구체적 영향, 용신·희신·기신의 역할을 5~6문단으로 서술.",
+    "fortune": "대운·세운 흐름 분석. 현재 대운이 일간에 미치는 영향, 올해 세운과 대운의 교차 작용, 앞으로의 흐름을 5~6문단으로 서술.",
+    "guidance": "용신·희신 기반 실용 가이드. 지금 당장 강화할 것, 피해야 할 것, 일상 실천 방법을 5~6문단으로 서술."
+  },
+  "overallReading": "【사주 전체 구조】일간 특성·신강신약·격국 → 【오행 분포】과잉·부족 기운의 삶에 대한 영향 → 【용신·희신】핵심 에너지와 활용법 → 【대운 흐름】현재 대운이 일간에 미치는 영향 → 【세운】올해 세운과 대운의 교차 작용 → 【전반 전망】현재 위치와 앞으로의 큰 흐름. 최소 8문단 이상, 각 문단을 충분히 서술.",
+  "topicReading": "선택한 주제와 시간 범위에 특화된 심층 분석. 시기별 구체적 흐름(월별·분기별 포함), 기회가 열리는 시기, 주의해야 할 구간, 십성·12운성이 이 주제에 어떻게 작용하는지. 최소 6문단 이상.",
+  "advice": "용신·희신 기반의 실용적 행동 지침. 지금 당장 강화해야 할 것, 피해야 할 것, 일상에서 실천 가능한 구체적 방법, 마음가짐 조언. 최소 4문단 이상."
 }${getLanguageFooter(locale ?? "ko")}`;
   }
 
@@ -264,10 +270,14 @@ ${pillarSection}${additionalSections.join("")}
 ${timeContext}
 ${instruction}
 
-[분량 기준]
-- overallReading: 사주팔자 전체 구조(일간→오행→용신→대운→세운)를 최소 6문단 이상, 각 문단은 3~5문장으로 풍부하게 서술
-- topicReading: 위 주제·시간 범위에 맞게 시기별 흐름, 기회·주의 구간, 구체적 상황 예측을 최소 4문단 이상
-- advice: 용신·희신 기반의 실용적 행동 지침과 일상 실천 방법을 최소 3문단 이상`;
+[분량 기준 — 3배 프리미엄 리딩]
+- sajuSections.structure: 일간·신강신약·격국을 최소 5~6문단으로 깊이 있게 서술
+- sajuSections.elements: 오행·용신·희신·기신을 최소 5~6문단으로 서술
+- sajuSections.fortune: 대운·세운 흐름을 최소 5~6문단으로 서술
+- sajuSections.guidance: 실용 행동 가이드를 최소 5~6문단으로 서술
+- overallReading: 사주팔자 전체 구조(일간→오행→용신→대운→세운)를 최소 8문단 이상, 각 문단은 3~5문장으로 풍부하게 서술
+- topicReading: 위 주제·시간 범위에 맞게 시기별 흐름, 기회·주의 구간, 구체적 상황 예측을 최소 6문단 이상
+- advice: 용신·희신 기반의 실용적 행동 지침과 일상 실천 방법을 최소 4문단 이상`;
   }
 
   parseResult(aiResponse: string): ReadingResult {
@@ -281,6 +291,16 @@ ${instruction}
         topicReading: cleanReadingText(String(parsed.topicReading || "")),
         advice,
       };
+      // sajuSections 추출 (새 형식)
+      if (parsed.sajuSections && typeof parsed.sajuSections === "object") {
+        const s = parsed.sajuSections as Record<string, unknown>;
+        result.sajuSections = {
+          structure: cleanReadingText(String(s.structure || "")),
+          elements: cleanReadingText(String(s.elements || "")),
+          fortune: cleanReadingText(String(s.fortune || "")),
+          guidance: cleanReadingText(String(s.guidance || "")),
+        };
+      }
       // 핵심 필드(overallReading 또는 advice) 빈 문자 = 부분 파싱
       if (!overallReading || !advice) result.parseError = "missing_fields";
       return result;
