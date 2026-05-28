@@ -30,7 +30,7 @@ ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙�
 - **named export** 사용 (default export 지양)
 - **Props**: `interface`로 정의
 - **`React.memo`**: 부모 re-render로 불필요하게 재렌더링되는 무거운 컴포넌트에 적용. props 비교가 복잡하면 두 번째 인자 `areEqual` 함수 사용 (CardSpread 참조).
-- **`next/dynamic`**: 초기 번들 크기 감소 목적으로 세션 페이지 진입 전 필요하지 않은 컴포넌트에 적용. ShuffleCeremony는 `ssr: false` 필수 (Canvas rAF 사용). 적용 예: `ShuffleCeremony`, `CardDeck`, `CardSpread`, `ReadingProgressIndicator`.
+- **`next/dynamic`**: 초기 번들 크기 감소 목적으로 세션 페이지 진입 전 필요하지 않은 컴포넌트에 적용. Canvas rAF를 사용하는 컴포넌트는 `ssr: false` 필수. 적용 예: `CardDeck`, `CardSpread`, `ReadingProgressIndicator`.
 - **`ThemeDropdown`**: `src/components/layout/ThemeDropdown.tsx` — `variant="desktop"|"mobile"` + `onClose` prop. Header에서 데스크탑/모바일 각각 분리 인스턴스 사용.
 - **`color-utils`**: `src/lib/color-utils.ts` — `hexToRgba(hex, alpha, fallback?)`, `hexToRgbBase(hex)` 공통 유틸. 컴포넌트 내 inline hex 변환 금지, 반드시 이 모듈 사용.
 

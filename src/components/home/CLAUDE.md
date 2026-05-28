@@ -38,7 +38,7 @@ const handleSkinSelect = (skinId: string) => {
 
 선택 강조 조건: `isStyleMode && currentStyleId === style.id` (스타일) / `useSkinMode && selectedSkinId === skin.id` (스킨).
 
-**중요**: 카드 consumer(`CardDeck`, `CardSpread`, `DailyFortune`, `ShuffleCeremony`, `ResultCardFace`)는 `resolvedStyle()`이 `null`이면 `styleId`를 `undefined`로 전달해 `CardFace`/`CardBack`이 `skinId` 경로를 타도록 한다.
+**중요**: 카드 consumer(`CardDeck`, `CardSpread`, `DailyFortune`, `ResultCardFace`)는 `resolvedStyle()`이 `null`이면 `styleId`를 `undefined`로 전달해 `CardFace`/`CardBack`이 `skinId` 경로를 타도록 한다.
 
 ## 스토어 의존성
 
