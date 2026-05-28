@@ -21,7 +21,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
        │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (3서비스 공통 — 섹션별 UI 블록)
        │    ├─ skin/         — 카드 스킨 관련 컴포넌트
-       │    ├─ tarot/        — CardInterpretationList, TarotResultPanel, ShuffleCeremony,
+       │    ├─ tarot/        — CardInterpretationList, TarotResultPanel,
        │    │                  CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
        │    └─ chat/home/saju/shinjeom/...
        ├─ 상태 (src/hooks/)

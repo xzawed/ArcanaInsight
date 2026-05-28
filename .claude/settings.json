@@ -70,9 +70,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '' && echo '╔═══════════════════════════════════════════════╗' && echo '║  ✅ 머지 완료 — 포스트 머지 문서 동기화 필요   ║' && echo '╠═══════════════════════════════════════════════╣' && echo '║  post-merge-doc-refresher 에이전트를 실행하여  ║' && echo '║  전체 문서를 Anthropic 기준으로 갱신하세요.    ║' && echo '║                                               ║' && echo '║  명령: \"포스트 머지 문서 정리해줘\"             ║' && echo '╚═══════════════════════════════════════════════╝' && echo ''",
+            "command": "printf '{\"systemMessage\": \"✅ PR 머지 완료 — 포스트 머지 워크플로우를 즉시 실행하세요.\", \"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"PR 머지 완료. 다음 포스트 머지 작업을 지금 바로 수행하세요:\\n1. git checkout main && git pull origin main\\n2. post-merge-doc-refresher 에이전트 실행 (포스트 머지 문서 정리해줘)\\n3. pnpm sync:test-count 실행 (테스트 수 변동 시)\\n4. Railway 대시보드 배포 상태 확인\"}}'",
             "timeout": 10,
-            "statusMessage": "머지 후 문서 동기화 안내 중..."
+            "statusMessage": "포스트 머지 워크플로우 안내 중..."
           }
         ]
       }

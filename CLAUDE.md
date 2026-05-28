@@ -45,7 +45,7 @@ src/
 │   │                # themeAtmosphere.ts — ThemeAtmosphereLayer 전용 파티클 종류·설정
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (3서비스 공통)
 │   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
-│                    # ShuffleCeremony, CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
+│                    # CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta, error-messages
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
