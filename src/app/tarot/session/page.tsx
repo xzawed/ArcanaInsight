@@ -12,10 +12,6 @@ import { useCardAnimationStore } from "@/hooks/useCardAnimation";
 import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { DialogueBox } from "@/components/chat/DialogueBox";
 
-const ShuffleCeremony = dynamic(
-  () => import("@/components/tarot/ShuffleCeremony").then((m) => ({ default: m.ShuffleCeremony })),
-  { ssr: false, loading: () => null },
-);
 const CardDeck = dynamic(
   () => import("@/components/card/CardDeck").then((m) => ({ default: m.CardDeck })),
   { loading: () => <div className="w-full flex-1 min-h-[160px] md:min-h-[280px]" /> },
@@ -171,6 +167,14 @@ export default function TarotSessionPage() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic]); // NOSONAR
+
+  // ShuffleCeremony 제거 — card-shuffle 페이즈 진입 즉시 card-select로 전환
+  useEffect(() => {
+    if (phase === "card-shuffle") {
+      handleCeremonyComplete();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]); // NOSONAR
 
   const handleCeremonyComplete = useCallback(() => {
     const { requiredCards: required } = useSessionStore.getState();
@@ -360,13 +364,6 @@ export default function TarotSessionPage() {
 
         {/* 우측: 모바일 하단 / 데스크탑 우측 50% */}
         <div className="flex-1 md:w-[50%] flex flex-col px-2 md:px-4 overflow-hidden relative">
-          {phase === "card-shuffle" && (
-            <ShuffleCeremony
-              characterId={characterId ?? "arcana"}
-              onComplete={handleCeremonyComplete}
-              primaryColor={character?.effectTheme?.primary}
-            />
-          )}
           {phase === "card-select" && (
             <div className="flex items-center justify-between mb-2">
               <button

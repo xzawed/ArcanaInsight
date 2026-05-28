@@ -55,7 +55,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
   if (styleId && !imageError) {
     return (
       <div
-        className={`relative rounded-lg overflow-hidden ${isReversed ? "rotate-180" : ""} ${className}`}
+        className={`relative rounded-lg overflow-hidden bg-[#0a0a1a] ${isReversed ? "rotate-180" : ""} ${className}`}
         style={{ width: w, height: h }}
       >
         <Image
@@ -65,7 +65,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
           sizes={`${Math.max(w, h)}px`}
           unoptimized
           onError={() => setImageError(true)}
-          className="object-cover"
+          className="object-contain"
         />
         {isReversed && (
           <span className="absolute top-1 right-1 text-[8px] text-red-400 bg-red-900/40 px-1 rounded rotate-180">
@@ -79,7 +79,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
   if (skinId && !imageError) {
     return (
       <div
-        className={`relative rounded-lg overflow-hidden ${isReversed ? "rotate-180" : ""} ${className}`}
+        className={`relative rounded-lg overflow-hidden bg-[#0a0a1a] ${isReversed ? "rotate-180" : ""} ${className}`}
         style={{ width: w, height: h }}
       >
         <Image
@@ -89,7 +89,7 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
           sizes={`${Math.max(w, h)}px`}
           unoptimized
           onError={() => setImageError(true)}
-          className="object-cover"
+          className="object-contain"
         />
         {isReversed && (
           <span className="absolute top-1 right-1 text-[8px] text-red-400 bg-red-900/40 px-1 rounded rotate-180">
