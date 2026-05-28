@@ -15,6 +15,7 @@ interface TarotResultPanelProps {
   selectedCards: SelectedCard[];
   locale: Locale;
   overallLabel: string;
+  directAnswerLabel: string;
   adviceLabel: string;
   newSessionLabel: string;
   shareLabel: string;
@@ -29,6 +30,7 @@ export function TarotResultPanel({
   selectedCards,
   locale,
   overallLabel,
+  directAnswerLabel,
   adviceLabel,
   newSessionLabel,
   shareLabel,
@@ -46,6 +48,9 @@ export function TarotResultPanel({
             spread={spread}
             locale={locale}
           />
+        )}
+        {readingResult.directAnswer && (
+          <ResultTextCard text={readingResult.directAnswer} emoji="🎴" label={directAnswerLabel} delay={0.6} colorScheme="purple" />
         )}
         {readingResult.overallReading && (
           <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={overallLabel} delay={1} colorScheme="purple" />
