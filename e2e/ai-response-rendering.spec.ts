@@ -141,8 +141,7 @@ test.describe("AI 응답 렌더링 — 타로", () => {
 
     await enterTarotSession(page);
 
-    // ShuffleCeremony 스킵 (Enter/Space 지원) → 카드 그리드 진입 대기
-    await page.keyboard.press("Space");
+    // ShuffleCeremony 제거됨 — card-shuffle 페이즈 즉시 card-select로 전환
     await page.waitForLoadState("networkidle");
 
     // 세션 페이지에서 JSON 잔여물 확인
