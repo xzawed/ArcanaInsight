@@ -158,6 +158,7 @@ export const ja: Partial<SharedKeys> = {
     "result.title": "タロット鑑定結果",
     "result.overall": "総合解釈",
     "result.advice": "アドバイス",
+    "result.direct-answer": "カードからの直接メッセージ",
     "result.cta": "私もタロット鑑定を受ける",
     "result.card.reversed": "逆位置",
     "result.card.reversed-badge": "逆",
@@ -208,6 +209,7 @@ export const ja: Partial<SharedKeys> = {
     "session.error.timeout": "応答に時間がかかりすぎています。もう一度お試しください。",
     "section.symbolism": "カードの象徴",
     "section.situation": "現在の状況",
+    "section.action": "カードの導き",
   },
   saju: {
     "result.title": "四柱分析結果",

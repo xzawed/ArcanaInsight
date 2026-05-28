@@ -158,6 +158,7 @@ export interface SharedKeys {
     "result.title": string;
     "result.overall": string;
     "result.advice": string;
+    "result.direct-answer": string;
     "result.cta": string;
     "result.card.reversed": string;
     "result.card.reversed-badge": string;
@@ -211,6 +212,7 @@ export interface SharedKeys {
     "session.error.timeout": string;
     "section.symbolism": string;
     "section.situation": string;
+    "section.action": string;
   };
   saju: {
     "result.title": string;
