@@ -10,10 +10,10 @@ import type { SpreadDefinition } from "@/types/session";
 import type { CardInterpretationItem } from "@/types/service";
 import type { Locale } from "@/i18n/config";
 
-const SECTION_LABELS: Record<string, { symbolism: string; situation: string }> = {
-  ko: { symbolism: "카드 상징", situation: "현재 상황" },
-  en: { symbolism: "Card Symbolism", situation: "Current Situation" },
-  ja: { symbolism: "カードの象徴", situation: "現在の状況" },
+const SECTION_LABELS: Record<string, { symbolism: string; situation: string; action: string }> = {
+  ko: { symbolism: "카드 상징", situation: "현재 상황", action: "카드가 제안하는 것" },
+  en: { symbolism: "Card Symbolism", situation: "Current Situation", action: "Card's Guidance" },
+  ja: { symbolism: "カードの象徴", situation: "現在の状況", action: "カードの導き" },
 };
 
 interface CardInterpretationListProps {
@@ -51,6 +51,9 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
               <div>
                 <ReadingSectionBlock icon="✦" label={labels.symbolism} content={interp.symbolism ?? ""} />
                 <ReadingSectionBlock icon="◈" label={labels.situation} content={interp.situation ?? ""} />
+                {interp.action && (
+                  <ReadingSectionBlock icon="→" label={labels.action} content={interp.action} />
+                )}
               </div>
             ) : (
               <ReadingText text={interp.interpretation ?? ""} />
