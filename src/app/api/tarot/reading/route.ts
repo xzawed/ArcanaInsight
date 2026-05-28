@@ -23,21 +23,16 @@ const deckManager = new DeckManager();
 const spreadResolver = new SpreadResolver();
 
 /**
- * 카드 수에 비례한 max_tokens 정책 — 전 구간 단일 공식 적용.
+ * 카드 수에 비례한 max_tokens 정책.
  *
- * 한국어는 영어 대비 토큰 효율 ~1.3x 낮고, JSON 구조 오버헤드 ~15%, Grok-3 reasoning 모델은
- * 내부 reasoning(thinking) 토큰을 max_tokens 안에서 함께 소비한다.
- *
- * 카드 1장이든 12장이든 3~4문단의 충분한 깊이를 보장해야 하므로 reasoning 흡수 버퍼를 포함한
- * 넉넉한 상한을 설정한다. 출력 토큰만 과금되므로 상한 자체는 비용 영향 없음.
- *   - perCard 7500 = 카드별 3개 섹션(symbolism/situation/action) × 각 3~4문단 (한국어 1.3x + JSON 오버헤드)
- *   - reasoningBuffer 15000 = Grok-3 reasoning 흡수 마진 (3배 확장)
- *   - base 12000 = system + overallReading(5~6문단) + advice(3~4문단) 오버헤드
- * 모델 cap 60000은 Claude Sonnet 4.6/Haiku 4.5 max output 64K 안전마진.
+ * 3-섹션(symbolism/situation/action) + directAnswer(4~5문단) 기준.
+ *   - perCard 9000 = 3섹션 × 3~4문단 (한국어 1.3x + JSON 오버헤드 + action 섹션)
+ *   - base 15000 = system + overallReading + directAnswer + advice 오버헤드
+ *   - reasoningBuffer 15000 = Grok-3 reasoning 흡수 마진
+ *   - cap 65000 = Claude 4.x max output 안전마진 (Grok 최대 100K)
  */
 function computeReadingMaxTokens(cardCount: number): number {
-  // 전 구간 단일 공식 — 3-섹션(symbolism/situation/action) 기준 3배 확장
-  return Math.min(12000 + cardCount * 7500 + 15000, 60000);
+  return Math.min(15000 + cardCount * 9000 + 15000, 65000);
 }
 
 export async function POST(request: NextRequest) {
