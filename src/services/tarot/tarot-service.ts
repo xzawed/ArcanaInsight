@@ -41,13 +41,13 @@ export class TarotService implements DivinationService {
 
     if (parsed) {
       const cardInterpretations = (Array.isArray(parsed.cardInterpretations) ? parsed.cardInterpretations : []).map(
-        (interp: { cardId: string; position: number; interpretation?: string; symbolism?: string; situation?: string; isReversed?: boolean }) => ({
+        (interp: { cardId: string; position: number; interpretation?: string; symbolism?: string; situation?: string; action?: string; isReversed?: boolean }) => ({
           cardId: interp.cardId,
           position: interp.position,
           isReversed: interp.isReversed,
-          // 2-section fields
           ...(interp.symbolism !== undefined ? { symbolism: cleanReadingText(String(interp.symbolism)) } : {}),
           ...(interp.situation !== undefined ? { situation: cleanReadingText(String(interp.situation)) } : {}),
+          ...(interp.action !== undefined ? { action: cleanReadingText(String(interp.action)) } : {}),
           // deprecated backward-compat field
           ...(interp.interpretation !== undefined ? { interpretation: cleanReadingText(String(interp.interpretation)) } : {}),
         })
@@ -60,6 +60,7 @@ export class TarotService implements DivinationService {
         cardInterpretations,
         overallReading: cleanReadingText(String(parsed.overallReading || "")),
         advice: cleanReadingText(String(parsed.advice || "")),
+        ...(parsed.directAnswer !== undefined ? { directAnswer: cleanReadingText(String(parsed.directAnswer)) } : {}),
         ...(isTruncated ? { parseError: "truncated" as const } : {}),
         ...(typeof expectedCardCount === "number" ? { expectedCardCount } : {}),
       };
