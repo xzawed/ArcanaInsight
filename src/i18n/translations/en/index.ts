@@ -156,6 +156,7 @@ export const en: Partial<SharedKeys> = {
     "result.title": "Tarot Reading Result",
     "result.overall": "Overall Reading",
     "result.advice": "Advice",
+    "result.direct-answer": "Direct Message from the Cards",
     "result.cta": "Get my tarot reading",
     "result.card.reversed": "Reversed",
     "result.card.reversed-badge": "R",
@@ -206,6 +207,7 @@ export const en: Partial<SharedKeys> = {
     "session.error.timeout": "The response is taking too long. Please try again.",
     "section.symbolism": "Card Symbolism",
     "section.situation": "Current Situation",
+    "section.action": "Card's Guidance",
   },
   saju: {
     "result.title": "Saju Analysis Result",

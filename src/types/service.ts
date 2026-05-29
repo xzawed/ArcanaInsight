@@ -22,12 +22,14 @@ export interface CardInterpretationItem {
   interpretation?: string;
   symbolism?: string;
   situation?: string;
+  action?: string;
   isReversed?: boolean;
 }
 
 export interface ReadingResult {
   cardInterpretations?: CardInterpretationItem[];
   overallReading: string;
+  directAnswer?: string;
   advice: string;
   topicReading?: string;
   shareToken?: string | null;

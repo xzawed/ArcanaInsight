@@ -151,6 +151,7 @@ export const ko: SharedKeys = {
     "result.title": "타로 리딩 결과",
     "result.overall": "종합 해석",
     "result.advice": "조언",
+    "result.direct-answer": "카드가 전하는 직접 메시지",
     "result.cta": "나도 타로 상담 받기",
     "result.card.reversed": "역방향",
     "result.card.reversed-badge": "역",
@@ -201,6 +202,7 @@ export const ko: SharedKeys = {
     "session.error.timeout": "응답이 너무 오래 걸려요. 다시 시도해주세요.",
     "section.symbolism": "카드 상징",
     "section.situation": "현재 상황",
+    "section.action": "카드가 제안하는 것",
   },
   saju: {
     "result.title": "사주 분석 결과",

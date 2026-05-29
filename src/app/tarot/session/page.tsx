@@ -480,6 +480,7 @@ export default function TarotSessionPage() {
                   selectedCards={selectedCards}
                   locale={locale}
                   overallLabel={t("tarot.result.overall")}
+                  directAnswerLabel={t("tarot.result.direct-answer")}
                   adviceLabel={t("tarot.result.advice")}
                   newSessionLabel={t("tarot.session.btn.new-session")}
                   shareLabel={t("tarot.session.btn.share")}

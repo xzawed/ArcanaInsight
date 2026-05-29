@@ -249,17 +249,19 @@ describe("POST /api/tarot/reading", () => {
   });
 
   it("computeReadingMaxTokens 정책 — 모든 분기가 streamReading에 정확히 전달", async () => {
-    // 전 구간 단일 공식: 12000 + cardCount*7500 + 15000 (모델 cap 60000)
+    // 신규 공식: min(15000 + cardCount * 9000 + 15000, 65000)
+    // base 15000: directAnswer + 오버헤드. perCard 9000: 3섹션(symbolism/situation/action). reasoningBuffer 15000. cap 65000.
     const cases: { count: number; expected: number }[] = [
-      { count: 1, expected: 34500 },   // 12000 + 7500 + 15000
-      { count: 3, expected: 49500 },   // 12000 + 22500 + 15000
-      { count: 5, expected: 60000 },   // 12000 + 37500 + 15000 → cap
-      { count: 7, expected: 60000 },   // 12000 + 52500 + 15000 → cap
-      { count: 9, expected: 60000 },   // 12000 + 67500 + 15000 → cap
-      { count: 10, expected: 60000 },  // 12000 + 75000 + 15000 → cap
-      { count: 12, expected: 60000 },  // 12000 + 90000 + 15000 → cap (zodiac)
-      { count: 15, expected: 60000 },  // 12000 + 112500 + 15000 → cap
-      { count: 20, expected: 60000 },  // 12000 + 150000 + 15000 → cap
+      { count: 1, expected: 39000 },   // 15000 + 9000 + 15000
+      { count: 3, expected: 57000 },   // 15000 + 27000 + 15000
+      { count: 4, expected: 65000 },   // 15000 + 36000 + 15000 = 66000 → cap
+      { count: 5, expected: 65000 },   // cap
+      { count: 7, expected: 65000 },   // cap
+      { count: 9, expected: 65000 },   // cap
+      { count: 10, expected: 65000 },  // cap
+      { count: 12, expected: 65000 },  // cap (zodiac)
+      { count: 15, expected: 65000 },  // cap
+      { count: 20, expected: 65000 },  // cap
     ];
     for (const { count, expected } of cases) {
       vi.resetModules();
@@ -403,5 +405,45 @@ describe("POST /api/tarot/reading", () => {
     const { POST } = await import("@/app/api/tarot/reading/route");
     const res = await POST(makePostRequest(VALID_BODY));
     expect(res.status).toBe(500);
+  });
+
+  it("정상 케이스 → done 페이로드에 action + directAnswer 포함", async () => {
+    const { POST } = await setup();
+    const res = await POST(makePostRequest(VALID_BODY));
+    const text = await readSSEStream(res);
+    const doneLine = text.split("\n").find((l) => l.startsWith("data:") && l.includes('"done":true'));
+    expect(doneLine).toBeDefined();
+    const payload = JSON.parse(doneLine!.slice(5).trim());
+    expect(payload.result.cardInterpretations[0].action).toBe("테스트 행동 제안");
+    expect(payload.result.directAnswer).toBe("테스트 직접 답변입니다.");
+  });
+
+  it("freeQuestion 있는 요청 → streamReading 두 번째 인자(userPrompt)에 directAnswer 지침 포함", async () => {
+    vi.resetModules();
+    const streamSpy = vi.fn().mockImplementation(async function* () {
+      yield JSON.stringify({
+        cardInterpretations: [{ cardId: "major-00", position: 0, symbolism: "s", situation: "sit", action: "act" }],
+        overallReading: "ok",
+        directAnswer: "직접 답변 텍스트",
+        advice: "ok",
+      });
+    });
+    const provider = { streamReading: streamSpy, generateReading: vi.fn() };
+    vi.doMock("@/services/core/fallback-provider", () => ({
+      FallbackProvider: vi.fn().mockImplementation(() => provider),
+    }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, freeQuestion: "이 관계는 앞으로 어떻게 될까요?" }));
+    await readSSEStream(res);
+    expect(streamSpy).toHaveBeenCalledTimes(1);
+    const userPrompt: string = streamSpy.mock.calls[0][1];
+    expect(userPrompt).toContain("directAnswer 필드에서");
+    expect(userPrompt).toContain("이 관계는 앞으로 어떻게 될까요?");
   });
 });

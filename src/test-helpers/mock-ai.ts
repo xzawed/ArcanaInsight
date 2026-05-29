@@ -7,10 +7,12 @@ const MOCK_JSON_RESPONSE = JSON.stringify({
       position: 0,
       symbolism: "테스트 상징 해석",
       situation: "테스트 현재 상황 해석",
+      action: "테스트 행동 제안",
       isReversed: false,
     },
   ],
   overallReading: "테스트 전체 리딩 결과입니다.",
+  directAnswer: "테스트 직접 답변입니다.",
   advice: "테스트 조언입니다.",
   topicReading: "테스트 주제 리딩입니다.",
   sajuSections: {
