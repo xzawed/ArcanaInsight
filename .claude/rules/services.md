@@ -71,4 +71,5 @@ getLanguageFooter(locale)              // 프롬프트 끝 언어 강조
 ## max_tokens 정책
 
 카드 수 기반 동적 산정 → `computeReadingMaxTokens(cardCount)` 함수 참고.  
+공식: `min(15000 + cardCount × 9000 + 15000, 65000)` (PR #420 기준, cap 65,000).  
 Grok-3 reasoning 토큰이 같은 예산을 소비하므로 충분한 버퍼 필수.

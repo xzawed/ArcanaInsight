@@ -132,25 +132,25 @@ for (let i = start; i < text.length; i++) {
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
 
-## 4. max_tokens 정책 (3-섹션 프리미엄 리딩 기준 — PR #414)
+## 4. max_tokens 정책 (3-섹션 + directAnswer 프리미엄 리딩 기준 — PR #414 + #420)
 
 ### 타로 (`computeReadingMaxTokens`) — `src/app/api/tarot/reading/route.ts`
 
-카드 수 비례 동적 산정. 3-섹션(symbolism/situation/action) 기준 3배 확장 공식 적용.
+카드 수 비례 동적 산정. 3-섹션(symbolism/situation/action) + directAnswer(4~5문단) 기준 공식 적용.
 
-전 구간 단일 공식: `min(12000 + cardCount × 7500 + 15000, 60000)`
+전 구간 단일 공식: `min(15000 + cardCount × 9000 + 15000, 65000)`
 
 | 카드 수 | max_tokens |
 |---------|-----------|
-| 1장 | 34,500 |
-| 3장 | 49,500 |
-| 5장 | 60,000 (cap) |
-| 7장 이상 | 60,000 (cap) |
+| 1장 | 39,000 |
+| 3장 | 57,000 |
+| 4장 이상 | 65,000 (cap) |
+| 7장 이상 | 65,000 (cap) |
 
-- 모델 cap 60,000: Claude Sonnet 4.6 / Haiku 4.5 max output 64K 안전마진
-- `perCard 7500`: 카드별 3개 섹션(symbolism/situation/action) × 각 3~4문단 (한국어 1.3x + JSON 오버헤드)
+- 모델 cap 65,000: Claude 4.x max output 안전마진 (Grok 최대 100K)
+- `perCard 9000`: 카드별 3개 섹션(symbolism/situation/action) × 각 3~4문단 (한국어 1.3x + JSON 오버헤드 + action 섹션)
 - `reasoningBuffer 15000`: Grok-3 reasoning 흡수 마진 (3배 확장)
-- `base 12000`: system prompt + overallReading(5~6문단) + advice(3~4문단) 오버헤드
+- `base 15000`: system prompt + overallReading(5~6문단) + directAnswer(4~5문단) + advice(3~4문단) 오버헤드
 
 ### 사주 (`computeSajuReadingMaxTokens`) — `src/app/api/saju/reading/route.ts`
 
