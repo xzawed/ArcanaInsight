@@ -89,7 +89,7 @@ PR 및 main push 시 자동 실행 (`sonar.yml`):
 
 - PR마다 커버리지 변화 코멘트 자동 게시
 - `unit` flag로 단위 테스트 커버리지만 추적
-- 임계값: branches 92% / lines·statements·functions 98%
+- 임계값: branches 90% / functions 97% / lines·statements 98%
 
 ---
 

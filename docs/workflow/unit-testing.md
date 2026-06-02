@@ -9,9 +9,9 @@ Vitest 기반 단위 테스트 작성 패턴과 주의사항입니다.
 
 ## 1. 테스트 현황
 
-- **Vitest 2.0** (node env, v8 coverage)
+- **Vitest 4.1** (node env, v8 coverage / `@vitest/coverage-v8` 4.x, vite 7)
 - 실제 테스트 수는 변경이 잦으므로 `pnpm test:coverage` 출력과 coverage 리포트를 기준으로 확인한다.
-- 임계값: `branches 92 / functions 98 / lines 98 / statements 98`
+- 임계값: `branches 90 / functions 97 / lines 98 / statements 98`
 
 ```bash
 pnpm test:coverage    # 테스트 실행 + 커버리지 리포트
@@ -145,6 +145,26 @@ describe("API 테스트", () => {
 });
 ```
 
+### 생성자 mock은 화살표 함수 금지 ⚠️ (vitest 4)
+
+라우트가 `new FallbackProvider()`처럼 **생성자로 호출**하는 클래스를 mock할 때는,
+vitest 4부터 mock 구현이 생성자로 실행되므로 **화살표 함수를 쓸 수 없다**(화살표는 생성자 불가).
+일반 `function` 표현식으로 인스턴스를 반환해야 한다.
+
+```ts
+// ❌ vitest 4에서 "() => provider is not a constructor"
+FallbackProvider: vi.fn().mockImplementation(() => provider)
+
+// ✅ 일반 함수로 인스턴스 반환
+FallbackProvider: vi.fn().mockImplementation(function () { return provider; })
+```
+
+### `makeMockDb()` 타입 (vitest 4)
+
+`MockDbClient`는 각 메서드를 `DbClient[K] & MockInstance` 교차 타입으로 노출한다.
+vitest 4의 `ReturnType<typeof vi.fn>`은 제네릭 메서드(`findOne<T>`)와 호환되지 않으므로,
+원본 시그니처와 Mock 헬퍼(`mockResolvedValue` 등)를 모두 만족시키기 위함이다.
+
 ---
 
 ## 7. 커버리지 임계값
@@ -153,8 +173,8 @@ describe("API 테스트", () => {
 ```ts
 coverage: {
   thresholds: {
-    branches: 92,
-    functions: 98,
+    branches: 90,
+    functions: 97,
     lines: 98,
     statements: 98,
   }
@@ -162,6 +182,8 @@ coverage: {
 ```
 
 임계값 변경 시 PR 설명에 근거 명시 필수.
+
+> ⚠️ vitest 4 + `coverage-v8` 4.x는 함수·분기를 더 세밀하게 카운트하여(Lines 100%여도 Funcs<100%로 잡힘) vitest 2 대비 함수·분기 비율이 소폭 낮게 측정된다. 2026-06-02 vitest 2→4 업그레이드(PR #423) 시 측정 방식 변화를 반영해 `branches 92→90`, `functions 98→97`로 재보정했다. 테스트 자체는 동일하게 통과하며 실제 커버리지 누락이 아니다.
 
 ---
 
