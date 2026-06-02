@@ -35,7 +35,7 @@ async function setup(options: { aiError?: boolean } = {}) {
     const provider = {
       streamReading: vi.fn().mockReturnValue(failingStreamGenerator()),
     };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
   }
 
   vi.doMock("@/lib/rate-limit", () => ({
@@ -233,7 +233,7 @@ describe("POST /api/tarot/reading", () => {
   it("AI 스트림이 non-Error throw → 스트림 catch String(e) 분기 커버", async () => {
     const mockAiModule = makeMockAiModule();
     const provider = { streamReading: vi.fn().mockReturnValue(failingStreamNonError()) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -274,7 +274,7 @@ describe("POST /api/tarot/reading", () => {
       });
       const provider = { streamReading: streamSpy, generateReading: vi.fn() };
       vi.doMock("@/services/core/fallback-provider", () => ({
-        FallbackProvider: vi.fn().mockImplementation(() => provider),
+        FallbackProvider: vi.fn().mockImplementation(function () { return provider; }),
       }));
       vi.doMock("@/lib/rate-limit", () => ({
         checkRateLimit: vi.fn().mockReturnValue(true),
@@ -330,11 +330,11 @@ describe("POST /api/tarot/reading", () => {
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => ({
-      FallbackProvider: vi.fn().mockImplementation(() => ({
+      FallbackProvider: vi.fn().mockImplementation(function () { return ({
         streamReading: vi.fn().mockImplementation(async function* () {
           yield "카드들이 말하는 핵심은 지금의 불안을 정리하고 다음 선택을 차분히 보라는 것입니다.";
         }),
-      })),
+      }); }),
     }));
 
     const { POST } = await import("@/app/api/tarot/reading/route");
@@ -356,11 +356,11 @@ describe("POST /api/tarot/reading", () => {
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
     vi.doMock("@/lib/auth", () => makeAuthMock());
     vi.doMock("@/services/core/fallback-provider", () => ({
-      FallbackProvider: vi.fn().mockImplementation(() => ({
+      FallbackProvider: vi.fn().mockImplementation(function () { return ({
         streamReading: vi.fn().mockImplementation(async function* () {
           yield "JSON 아닌 텍스트 응답 — parseError 유발";
         }),
-      })),
+      }); }),
     }));
 
     const { POST } = await import("@/app/api/tarot/reading/route");
@@ -430,7 +430,7 @@ describe("POST /api/tarot/reading", () => {
     });
     const provider = { streamReading: streamSpy, generateReading: vi.fn() };
     vi.doMock("@/services/core/fallback-provider", () => ({
-      FallbackProvider: vi.fn().mockImplementation(() => provider),
+      FallbackProvider: vi.fn().mockImplementation(function () { return provider; }),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),

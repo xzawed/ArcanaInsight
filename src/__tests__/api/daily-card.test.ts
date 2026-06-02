@@ -23,7 +23,7 @@ async function setup(options: {
   if (options.aiError) {
     const msg = typeof options.aiError === "string" ? options.aiError : "AI down";
     const provider = { generateReading: vi.fn().mockRejectedValue(new Error(msg)) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
   }
 
   vi.doMock("@/lib/db", () => ({

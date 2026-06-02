@@ -39,7 +39,9 @@ export function makeMockAiProvider() {
 }
 
 export function makeMockAiModule(provider = makeMockAiProvider()) {
-  return { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+  // vitest 4: 생성자(`new FallbackProvider()`)로 호출되므로 화살표가 아닌
+  // 일반 함수여야 한다 (화살표 함수는 생성자로 사용할 수 없음).
+  return { FallbackProvider: vi.fn().mockImplementation(function () { return provider; }) };
 }
 
 /** SSE 스트림 바디를 전부 읽어 문자열로 반환 */
