@@ -31,14 +31,14 @@ async function setup(options: {
   if (options.aiError) {
     const msg = typeof options.aiError === "string" ? options.aiError : "AI down";
     const provider = { generateReading: vi.fn().mockRejectedValue(new Error(msg)) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
   } else {
     const aiJson = JSON.stringify({
       general: "종합운 해석", love: "연애운 해석", career: "직장운 해석",
       health: "건강운 해석", wealth: "재물운 해석",
     });
     const provider = { generateReading: vi.fn().mockResolvedValue(aiJson) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
   }
 
   vi.doMock("@/lib/db", () => ({

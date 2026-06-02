@@ -72,8 +72,8 @@ describe("FallbackProvider", () => {
       streamReading: vi.fn(),
     };
 
-    MockGrokProvider.mockImplementation(() => mockGrokInstance);
-    MockClaudeProvider.mockImplementation(() => mockClaudeInstance);
+    MockGrokProvider.mockImplementation(function () { return mockGrokInstance; });
+    MockClaudeProvider.mockImplementation(function () { return mockClaudeInstance; });
 
     // ANTHROPIC_API_KEY 기본 설정 (vitest.setup.ts에서 이미 설정되어 있음)
     process.env.ANTHROPIC_API_KEY = "test-claude-key";

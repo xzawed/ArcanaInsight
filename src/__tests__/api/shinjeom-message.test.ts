@@ -185,7 +185,7 @@ describe("POST /api/shinjeom/message", () => {
   it("AI 오류 → 스트림 내부 catch에서 errMsg 전송", async () => {
     const mockAiModule = makeMockAiModule();
     const provider = { streamReading: vi.fn().mockReturnValue(failingShinjeomStream()) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -247,7 +247,7 @@ describe("POST /api/shinjeom/message", () => {
   it("AI 스트림이 non-Error throw → 스트림 catch String(e) 분기 커버", async () => {
     const mockAiModule = makeMockAiModule();
     const provider = { streamReading: vi.fn().mockReturnValue(failingShinjeomStreamNonError()) };
-    mockAiModule.FallbackProvider.mockImplementation(() => provider);
+    mockAiModule.FallbackProvider.mockImplementation(function () { return provider; });
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -292,7 +292,7 @@ describe("POST /api/shinjeom/message", () => {
         }),
         generateReading: vi.fn().mockResolvedValue(""),
       };
-      const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+      const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(function () { return provider; }) };
       vi.doMock("@/lib/rate-limit", () => ({
         checkRateLimit: vi.fn().mockReturnValue(true),
         rateLimitResponse: vi.fn(),
@@ -336,7 +336,7 @@ describe("POST /api/shinjeom/message", () => {
       streamReading: vi.fn().mockImplementation(async function* () { yield partialJson; }),
       generateReading: vi.fn().mockResolvedValue(""),
     };
-    const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(() => provider) };
+    const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(function () { return provider; }) };
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomFinalReading: mockSave,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
