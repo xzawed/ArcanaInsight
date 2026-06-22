@@ -38,7 +38,7 @@ export function ReadingProgressIndicator({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.25 }}
-      className="pointer-events-none fixed left-1/2 -translate-x-1/2 bottom-24 md:bottom-20 z-30 px-4"
+      className="pointer-events-none fixed left-1/2 -translate-x-1/2 bottom-36 md:bottom-20 z-40 px-4"
       role="status"
       aria-live="polite"
     >
