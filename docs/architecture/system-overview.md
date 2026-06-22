@@ -9,6 +9,10 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 ```
 사용자 브라우저
   └─ Next.js App Router (src/app/)
+       │  RootLayout(src/app/layout.tsx) = html/body·Provider·Header·전역 오버레이만
+       │  ├─ (immersive)/  — 타로·사주·신점 진입/세션, character/[id]. Footer 미렌더(이중 스크롤 방지)
+       │  └─ (site)/       — 홈, */result/[id], 마이페이지, 설정, 약관/개인정보, auth, dev. Footer 렌더
+       │  (괄호 그룹은 URL 불변. api/·error·not-found·globals.css·layout.tsx는 app 루트 유지)
        ├─ UI 레이어 (src/components/)
        │    ├─ card/         — CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector
        │    ├─ character/    — 캐릭터 등장 컴포넌트
@@ -124,7 +128,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 ## 4. 타로 스프레드 × 주제 노출 규칙
 
-`src/app/tarot/page.tsx`의 `topicSpreads`에서 주제별로 노출할 스프레드를 제한합니다:
+`src/app/(immersive)/tarot/page.tsx`의 `topicSpreads`에서 주제별로 노출할 스프레드를 제한합니다:
 
 | 주제 | 노출 스프레드 |
 |------|-------------|
@@ -150,7 +154,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 ---
 
-## 6. 홈 페이지 구성 (`src/app/page.tsx`)
+## 6. 홈 페이지 구성 (`src/app/(site)/page.tsx`)
 
 7개 섹션을 순서대로 조합:
 

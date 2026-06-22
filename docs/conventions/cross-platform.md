@@ -76,7 +76,23 @@ button, a, input { touch-action: manipulation; }   /* 더블탭 줌 방지 */
 
 ---
 
-## 6. 폼 입력 (iOS 대응)
+## 6. 레이아웃 그룹 — 몰입형 vs 사이트 (이중 스크롤 방지)
+
+App Router Route Group으로 렌더 라우트를 두 레이아웃으로 분리합니다 (괄호 그룹은 URL에 영향 없음).
+
+| 그룹 | 레이아웃 파일 | Footer | 대상 라우트 |
+|------|-------------|--------|-----------|
+| **(immersive)** | `src/app/(immersive)/layout.tsx` | **미렌더** | 타로·사주·신점 진입/세션 페이지, `character/[id]` |
+| **(site)** | `src/app/(site)/layout.tsx` | 렌더 | 홈, `*/result/[id]`, 마이페이지, 설정, 약관·개인정보, auth, dev |
+
+- **RootLayout**(`src/app/layout.tsx`)은 `html`/`body`·Provider·`Header`·전역 오버레이(ToastHost, LocaleConfirmModal, InteractionClickParticles)만 렌더한다. `main`/`Footer`/`MobileNav` 소유권은 그룹 레이아웃에 있다.
+- **이중 스크롤 금지**: `100dvh` 몰입형 스테이지 아래로 Footer가 붙으면 document가 추가로 스크롤되는 '이중 스크롤'이 발생한다. 몰입형 그룹은 **Footer를 렌더하지 않아** 구조적으로 이를 차단한다. 새 몰입형 페이지는 반드시 `(immersive)/` 그룹에 둔다.
+- 몰입형 `main`은 `pt-14 pb-14 md:pb-0`(Header·MobileNav 높이 보정) + `MobileNav`를 유지한다.
+- 모바일 고정 오버레이가 대사창(z-30)을 가리지 않도록 `z-40`/`bottom-36` 이상으로 배치한다 (예: `ReadingProgressIndicator`).
+
+---
+
+## 7. 폼 입력 (iOS 대응)
 
 | 요소 | 규칙 |
 |------|------|
@@ -86,7 +102,7 @@ button, a, input { touch-action: manipulation; }   /* 더블탭 줌 방지 */
 
 ---
 
-## 7. 검증 (E2E)
+## 8. 검증 (E2E)
 
 크로스 플랫폼 규칙 위반은 `e2e/cross-platform.spec.ts`에서 자동 감지됩니다:
 - 콘솔 에러 (pageerror)
