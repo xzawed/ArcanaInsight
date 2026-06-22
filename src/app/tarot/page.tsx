@@ -242,11 +242,18 @@ function TarotPageContent() {
   const preselectedCharId = searchParams.get("character");
   const preselectedChar = preselectedCharId ? getCharacterById(preselectedCharId) ?? null : null;
 
-  const [step, setStep] = useState<PageStep>(() => preselectedChar ? "topic-select" : "character-select");
+  // 세션(카드 스프레드)에서 '뒤로'로 복귀한 경우: ?step=spread + 스토어에 보존된 주제로 스프레드 선택 단계 재개
+  const sessionSnapshot = useSessionStore.getState();
+  const isResumeSpread = searchParams.get("step") === "spread" && !!preselectedChar && !!sessionSnapshot.topic;
+
+  const [step, setStep] = useState<PageStep>(() => {
+    if (isResumeSpread) return "spread-select";
+    return preselectedChar ? "topic-select" : "character-select";
+  });
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterConfig | null>(() => preselectedChar);
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(() => (isResumeSpread ? sessionSnapshot.topic : null));
   const [dialogueMessages, setDialogueMessages] = useState<ChatMessage[]>([]);
-  const [localFreeQuestion, setLocalFreeQuestion] = useState("");
+  const [localFreeQuestion, setLocalFreeQuestion] = useState(() => (isResumeSpread ? sessionSnapshot.freeQuestion ?? "" : ""));
 
   // 프리셀렉트 + 즐겨찾기 fallback: 캐릭터 선택 시 스토어 반영 + 인사 메시지 생성 + 스텝 전환
   usePreselectCharacter({
@@ -255,7 +262,7 @@ function TarotPageContent() {
       setSelectedCharacter(character);
       setCharacterId(character.id);
       setDialogueMessages([{ id: crypto.randomUUID(), role: "character", content: getCharacterGreeting(character, useLocaleStore.getState().locale), mood: "smile", timestamp: new Date() }]);
-      setStep("topic-select");
+      setStep(isResumeSpread ? "spread-select" : "topic-select");
     },
   });
 
