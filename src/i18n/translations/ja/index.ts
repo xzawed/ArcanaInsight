@@ -197,7 +197,7 @@ export const ja: Partial<SharedKeys> = {
     "session.btn.try-again": "再試行",
     "session.btn.new-session": "新しい相談",
     "session.btn.share": "結果を共有",
-    "session.btn.back-to-character": "← 占い師を選び直す",
+    "session.btn.back-to-spread": "← スプレッドを選び直す",
     "session.error.reading": "解釈に問題が発生しました",
     "session.shuffle.fallback-text": "カードを選んでください",
     "session.shuffle.skip-aria": "カードシャッフル儀式をスキップ",

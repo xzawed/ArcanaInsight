@@ -199,7 +199,7 @@ export interface SharedKeys {
     "session.btn.try-again": string;
     "session.btn.new-session": string;
     "session.btn.share": string;
-    "session.btn.back-to-character": string;
+    "session.btn.back-to-spread": string;
     "session.error.reading": string;
     "session.shuffle.fallback-text": string;
     "session.shuffle.skip-aria": string;

@@ -195,7 +195,7 @@ export const en: Partial<SharedKeys> = {
     "session.btn.try-again": "Try again",
     "session.btn.new-session": "New session",
     "session.btn.share": "Share result",
-    "session.btn.back-to-character": "← Choose another reader",
+    "session.btn.back-to-spread": "← Choose a different spread",
     "session.error.reading": "Something went wrong with the reading",
     "session.shuffle.fallback-text": "Choose your cards",
     "session.shuffle.skip-aria": "Skip card shuffle ceremony",

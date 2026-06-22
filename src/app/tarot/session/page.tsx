@@ -297,6 +297,28 @@ export default function TarotSessionPage() {
     setMood("default");
   }, [addChatMessage, setMood, locale]);
 
+  /** 카드 스프레드 단계에서 '뒤로' → 진행 상태만 비우고 스프레드 선택 단계로 복귀 (캐릭터/주제/스프레드 유지) */
+  const handleBackToSpread = useCallback(() => {
+    readingAbortRef.current?.abort();
+    if (autoStartTimerRef.current) {
+      clearTimeout(autoStartTimerRef.current);
+      autoStartTimerRef.current = null;
+    }
+    const cid = useSessionStore.getState().characterId;
+    // 진행 상태만 초기화 — characterId/topic/spreadType/userInfo/freeQuestion은 보존
+    useSessionStore.setState({
+      selectedCards: [],
+      chatMessages: [],
+      readingResult: null,
+      sessionId: null,
+      availableCards: [],
+      isLoading: false,
+    });
+    useCardAnimationStore.getState().reset();
+    router.push(cid ? `/tarot?character=${cid}&step=spread` : "/tarot");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]); // NOSONAR — ref/store 접근은 stable
+
   // 결과 스트리밍 시 컨테이너 내부만 하단 스크롤 (윈도우 스크롤 방지)
   useEffect(() => {
     if (phase === "result") {
@@ -367,11 +389,11 @@ export default function TarotSessionPage() {
           {phase === "card-select" && (
             <div className="flex items-center justify-between mb-2">
               <button
-                onClick={() => { useSessionStore.getState().reset(); useCardAnimationStore.getState().reset(); router.push("/tarot"); }}
+                onClick={handleBackToSpread}
                 className="text-arcana-muted text-xs hover:text-arcana-purple transition-colors"
                 type="button"
               >
-                {t("tarot.session.btn.back-to-character")}
+                {t("tarot.session.btn.back-to-spread")}
               </button>
               <button
                 onClick={toggleConfirmMode}

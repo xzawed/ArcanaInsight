@@ -82,6 +82,35 @@ test.describe("타로 서비스 플로우", () => {
     }
   });
 
+  test("뒤로가기: 카드 스프레드 단계 → 스프레드 선택 단계로 복귀 (캐릭터·주제 유지)", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await mockSessionCreate(page, "**/api/tarot/session");
+
+    // 풀 플로우: 캐릭터 → 주제(종합) → 스프레드(원카드) → 세션 카드 선택 단계
+    await page.goto("/tarot");
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
+    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+    await characterCards.first().click();
+
+    await expect(page.locator("[data-testid='topic-btn-general']")).toBeVisible({ timeout: 5_000 });
+    await page.locator("[data-testid='topic-btn-general']").click();
+
+    const spreadBtn = page.locator("[data-testid='spread-btn-one-card']");
+    await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
+    await spreadBtn.evaluate((el) => (el as HTMLElement).click());
+    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+
+    // 카드 스프레드 단계의 '뒤로' → 이전 단계(스프레드 선택)로 복귀 (상담사 선택 아님)
+    const backBtn = page.getByRole("button", { name: /스프레드 다시 선택/ });
+    await expect(backBtn).toBeVisible({ timeout: 10_000 });
+    await backBtn.click();
+
+    // 스프레드 선택 단계로 복귀 — 주제 유지(general 스프레드 노출), topic-select·character-select 아님
+    await page.waitForURL(/\/tarot\?.*step=spread/, { timeout: 5_000 });
+    await expect(page.locator("[data-testid='spread-btn-one-card']")).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("[data-testid='topic-btn-general']")).toHaveCount(0);
+  });
+
   test("카드 선택 중 중복/초과 클릭을 반복해도 리딩은 한 번만 시작된다", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await mockSessionCreate(page, "**/api/tarot/session");
