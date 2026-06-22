@@ -3,8 +3,6 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { MobileNav } from "@/components/layout/MobileNav";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { FocusReset } from "@/components/layout/FocusReset";
 import { LocaleProvider } from "@/i18n/LocaleProvider";
@@ -78,11 +76,7 @@ export default async function RootLayout({
               <FocusReset />
             </Suspense>
             <Header />
-            <main id="main-content" className="flex-1 pt-14 pb-14 md:pb-0">
-              {children}
-            </main>
-            <Footer />
-            <MobileNav />
+            {children}
             <ToastHost />
             <LocaleConfirmModal />
             <InteractionClickParticles />

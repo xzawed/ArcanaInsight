@@ -12,10 +12,11 @@ import { resolve } from "node:path"
 
 const REPO_ROOT = resolve(__dirname, "../../..")
 
+// 라우트 그룹 분리(PR: 몰입형/site) 이후 result 페이지는 (site) 그룹 아래에 위치.
 const RESULT_PAGES = [
-  "src/app/tarot/result/[id]/page.tsx",
-  "src/app/saju/result/[id]/page.tsx",
-  "src/app/shinjeom/result/[id]/page.tsx",
+  "src/app/(site)/tarot/result/[id]/page.tsx",
+  "src/app/(site)/saju/result/[id]/page.tsx",
+  "src/app/(site)/shinjeom/result/[id]/page.tsx",
 ] as const
 
 describe("결과 페이지 — share_token 조회는 service_role 로만", () => {
