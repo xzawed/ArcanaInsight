@@ -193,7 +193,7 @@ finished = true;
 clearTimeout(timer);
 ```
 
-재시도 UI: `data-testid="reading-retry"` 버튼이 표시되어 사용자가 재시도 가능. 적용 라우트: `src/app/tarot/session/page.tsx`, `src/app/saju/session/page.tsx`.
+재시도 UI: `data-testid="reading-retry"` 버튼이 표시되어 사용자가 재시도 가능. 적용 라우트: `src/app/(immersive)/tarot/session/page.tsx`, `src/app/(immersive)/saju/session/page.tsx`.
 
 ---
 

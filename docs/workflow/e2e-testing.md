@@ -501,7 +501,7 @@ UI 텍스트가 i18n으로 변경되므로 한글 `hasText` regex 셀렉터 금�
 - LanguageSwitcher: `lang-option-${l}`, `mobile-lang-option-${l}`
 - LocaleConfirmModal: `locale-confirm-modal`, `locale-confirm-keep`, `locale-confirm-accept`
 - Toast: `toast`
-- 타로 플로우: `topic-btn-${topic}`, `spread-btn-${spread}`, `topic-back-btn` (`src/app/tarot/page.tsx`)
+- 타로 플로우: `topic-btn-${topic}`, `spread-btn-${spread}`, `topic-back-btn` (`src/app/(immersive)/tarot/page.tsx`)
 - 재시도 버튼: `reading-retry` (타로·사주 세션 페이지 타임아웃/에러 시)
 
 PR-6에서 locale 매트릭스 (165 test × 3 locale = 495 실행) 도입 예정. 상세: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)
