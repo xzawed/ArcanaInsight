@@ -217,7 +217,7 @@ function ShinjeomPageContent() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden">
       <ServiceBackground service="shinjeom" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
