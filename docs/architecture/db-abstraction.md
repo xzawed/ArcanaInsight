@@ -72,6 +72,7 @@ src/lib/db/
 | `017_daily_fortune_areas.sql` | daily_cards.area 컬럼 추가 + UNIQUE(date, character_id, area) 재구성 (DailyFortune 5영역) |
 | `018_birthtime_mbti.sql` | profiles.birth_hour HH:MM 형식 외 NULL 처리 + profiles.mbti 컬럼 추가 |
 | `019_fix_saju_readings.sql` | saju_readings.birth_hour NOT NULL 제약 해제 + saju_readings.mbti 컬럼 추가 (018 누락분) |
+| `020_harden_anon_rls.sql` | 익명 over-grant 하드닝 — readings/saju/shinjeom SELECT 소유자 전용(공개 `using(true)` 제거), sessions·saju_readings UPDATE 익명 분기 제거 (#4/#6). result는 service_role(getAdminDb) 조회라 무영향 |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
@@ -79,8 +80,9 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 
 ## 5. share_token 공개 정책
 
-- 타로/사주 결과 페이지(`/*/result/[id]`)는 `share_token` URL 기반 공개 공유 링크
+- 타로/사주/신점 결과 페이지(`/*/result/[id]`)는 `share_token` URL 기반 공개 공유 링크
 - share_token 보유자 = 공개 열람 허용 (공유 링크 생성 = 공개 의도)
+- **공개 열람은 service_role 서버 레이어로 구현**: result 라우트가 `getAdminDb()`(service_role, RLS 우회)로 `share_token` 조회 → 리딩 테이블의 RLS는 **소유자 전용 SELECT**만 둔다(`using(true)` 공개 정책 없음, 020). anon 키 직접 호출로는 타인 리딩 열람 불가.
 - 소유자 전용 쓰기/삭제: `assertReadingAccess("owner")` 사용
 - share_token NULL 방지: Drizzle `$defaultFn(() => crypto.randomUUID())` + DB DEFAULT `gen_random_uuid()` 이중 보장
 

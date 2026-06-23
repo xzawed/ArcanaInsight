@@ -344,7 +344,7 @@ describe("TarotService", () => {
       expect(result.advice).toBeDefined();
     });
 
-    describe("parseError 시그널 (truncated/invalid_json)", () => {
+    describe("parseError 시그널 (truncated/missing_fields/invalid_json/fallback_text)", () => {
       it("expectedCardCount보다 cardInterpretations가 적으면 parseError='truncated'를 반환한다", () => {
         const json = JSON.stringify({
           cardInterpretations: [
@@ -374,6 +374,30 @@ describe("TarotService", () => {
         expect(result.parseError).toBeUndefined();
         expect(result.expectedCardCount).toBe(3);
         expect(result.cardInterpretations).toHaveLength(3);
+      });
+
+      it("overallReading 또는 advice가 비면 parseError='missing_fields' (사주/신점과 동일 계약)", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [
+            { cardId: "major-00", position: 0, interpretation: "해석1" },
+            { cardId: "major-01", position: 1, interpretation: "해석2" },
+            { cardId: "major-02", position: 2, interpretation: "해석3" },
+          ],
+          overallReading: "종합",
+          advice: "",
+        });
+        const result = service.parseResult(json, 3);
+        expect(result.parseError).toBe("missing_fields");
+      });
+
+      it("truncated가 missing_fields보다 우선한다", () => {
+        const json = JSON.stringify({
+          cardInterpretations: [{ cardId: "major-00", position: 0, interpretation: "해석1" }],
+          overallReading: "",
+          advice: "",
+        });
+        const result = service.parseResult(json, 5);
+        expect(result.parseError).toBe("truncated");
       });
 
       it("JSON 파싱 실패 후 fallback 텍스트가 있으면 parseError='fallback_text'를 반환한다", () => {
