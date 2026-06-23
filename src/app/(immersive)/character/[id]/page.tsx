@@ -46,7 +46,7 @@ export default function CharacterPage() {
   const cutoutImageStyle = getCharacterCutoutImageStyle(character.effectTheme.primary);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden">
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/tarot-topic-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
         <div className="absolute inset-0 bg-arcana-bg/60" />

@@ -22,7 +22,9 @@
 | 항목 | 파일 | 현황 | 해결 조건 | 담당 |
 |------|------|------|----------|------|
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | whitelist 방식, 전체 코드의 일부만 측정 | include 확장 또는 exclude 방식 전환 시 처리 | Claude |
-| `(immersive)` 진입 페이지 outer 래퍼 ~112px 이중 스크롤 | `(immersive)/{tarot,saju,shinjeom}/page.tsx`, `character/[id]/page.tsx` | outer `min-h-screen`(100vh)이 dvh 스테이지 위에 ~112px 잉여 스크롤을 부분 재도입. **PR #428에서 `min-h-[calc(100dvh-7rem)]`(dvh)로 전환 시도 → 외부 `ServiceBackground` lazy 이미지 load 지연으로 `navigation.spec.ts` 회귀(`waitForLoadState("load")` 타임아웃) 확인 → 환원.** | dvh 미사용 대안으로 해소 — outer min-height 제거 후 스테이지(`h-[calc(100dvh-7rem)]`)가 높이를 직접 지배하도록 재구성(외부 이미지 load 영향 회피). [`docs/conventions/cross-platform.md`](../conventions/cross-platform.md) §1·§6 참조 | Claude |
+| **B: parseError 리딩 영속화 / resume** | `app/api/{tarot,saju,shinjeom}/reading\|message/route.ts`, `mypage-queries.ts` | parseError(잘림/파싱실패) 시 리딩 미저장 + 세션 in_progress 잔존 → mypage 누락. **단 `.claude/rules/services.md`가 parseError=의도적 미저장(빈 결과 페이지 방지)을 명문화** — 단순 강제 저장은 회귀 위험. 데이터상 in_progress 대부분은 정상 이탈(세션이 카드선택 화면 진입 시 생성)이라 영향 부차적. | resume/재시도 UX 별도 설계 후 처리 (강제 저장 금지) | Claude |
+| **C: 리딩 저장 fire-and-forget 관측성** | `reading route`, `lib/db/reading-saver.ts` | `void save().catch(console.error)` — `withRetry`(3회 백오프)는 이미 있어 transient 흡수, 단 지속 장애 시 무음 유실 + dead-letter/알림·`saved` 시그널 부재 | 'saved' SSE 시그널 또는 dead-letter/알림으로 관측성 보강 | Claude |
+| **INSERT `WITH CHECK(true)` RLS 정책 7종** | `sessions·readings·saju/shinjeom_readings·session_cards·daily_cards·shinjeom_messages` | anon INSERT 허용 (Supabase 보안 어드바이저 WARN). 서버는 getAdminDb(service_role)로만 insert. PR #430의 SELECT/UPDATE 하드닝(#4/#6) 범위 밖. | anon insert 경로 부재 확인 후 service_role 전용 제한 검토 | Claude |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 5건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절 등 — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
 | SonarCloud CRITICAL Cognitive Complexity | — | **0건 해소 완료** (2026-05-01). Quality Gate PASSED. 재발 시 아래 섹션 참고. | — |
 
