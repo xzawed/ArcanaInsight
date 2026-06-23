@@ -13,7 +13,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const reqLocale = await getRequestLocale()
     if (isLocale(reqLocale)) locale = reqLocale
     const ip = getClientIp(request.headers)
-    if (!(await checkRateLimit(`result:${ip}`, 60, 60_000))) return rateLimitResponse(locale)
+    if (!(await checkRateLimit(`shinjeom-result:${ip}`, 60, 60_000))) return rateLimitResponse(locale)
 
     const { id } = await params
     const db = getAdminDb()

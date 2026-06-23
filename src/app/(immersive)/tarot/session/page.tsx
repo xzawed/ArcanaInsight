@@ -43,6 +43,7 @@ import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { useReadingRevealStore } from "@/hooks/useReadingReveal";
 import { useTarotReading } from "@/hooks/useTarotReading";
 import { ServiceIllustrations } from "@/components/effects/ServiceIllustrations";
+import { rememberGuestSession } from "@/lib/guest-sessions";
 
 
 const deckManager = new DeckManager();
@@ -155,7 +156,7 @@ export default function TarotSessionPage() {
         });
         if (!res.ok) throw new Error(`세션 생성 실패: ${res.status}`);
         const data = await res.json();
-        if (data.session?.id) setSessionId(data.session.id);
+        if (data.session?.id) { setSessionId(data.session.id); rememberGuestSession(data.session.id); }
       } catch (err) {
         console.warn("세션 생성 실패 (리딩은 계속 진행):", err);
       }

@@ -36,7 +36,7 @@ src/
 │   ├── card/        # CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector (스타일 선택 UI)
 │   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput,
 │   │                # ResultPageShell, ResultShareButton, ReadingText, Toast, Icon,
-│   │                # LocaleConfirmModal, PrivacyConsentModal
+│   │                # LocaleConfirmModal, PrivacyConsentModal, SessionClaimer (로그인 시 익명 세션 claim)
 │   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
 │   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal,
 │   │                # CanvasParticleLayer (particle-engine.ts 기반, density: low/medium/high, prefers-reduced-motion 지원),
@@ -62,7 +62,8 @@ src/
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
 │   ├── storage/card-style.ts  # getCardStyleImageUrl, getCardStyleBackUrl
-│   └── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
+│   ├── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
+│   └── guest-sessions.ts      # 익명 세션 id localStorage 보관 (로그인 시 claim 대상)
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
 ├── styles/          # theme-effects.css — CSS variable 기반 5-레이어 이펙트 정의
 │                    # service-illustrations.css — 장면별 CSS 클래스 + 11개 keyframe (orbit-spin, spark-twinkle, ember-drift, mist-rise, crystal-pulse 등)
@@ -82,6 +83,7 @@ supabase/migrations/ # Supabase SQL migrations
 
 - AI 신뢰성: `src/services/core/`의 `FallbackProvider`가 Grok 우선 호출 후 Claude로 fallback. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - DB/Auth 추상화: `DB_PROVIDER=supabase|postgres`에 따라 DB, Auth, Storage 구현을 런타임 분기. 상세는 [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md), [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md).
+- 익명 세션 claim (PR: 리딩 이력 미노출 수정): 게스트/만료 세션 상태에서 만든 세션은 `user_id=NULL`로 저장되어 로그인 mypage 이력(`findMany("sessions",{user_id})`)에서 누락된다. `rememberGuestSession`(`lib/guest-sessions.ts`)이 생성 시 sessionId를 localStorage에 보관 → `SessionClaimer`가 로그인 감지 시 `POST /api/sessions/claim` → `db.claimSessions`가 `UPDATE sessions SET user_id WHERE id IN(...) AND user_id IS NULL`로 귀속. 설계 정본 [`docs/superpowers/specs/2026-06-23-anon-session-claim-design.md`](docs/superpowers/specs/2026-06-23-anon-session-claim-design.md).
 - API 보안: Rate Limit -> Zod `safeParse` -> Auth -> 소유권 검증 순서. 새 API는 [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)를 먼저 확인.
 - SSE 스트리밍: 타로/사주/신점 리딩은 `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴을 사용. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - i18n: `middleware`가 locale을 결정하고 `x-locale` 헤더와 쿠키를 유지. 상세는 [`docs/architecture/i18n.md`](docs/architecture/i18n.md), [`docs/conventions/i18n-style.md`](docs/conventions/i18n-style.md).

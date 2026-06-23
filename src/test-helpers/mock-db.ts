@@ -19,6 +19,7 @@ export function makeMockDb(overrides: Partial<MockDbClient> = {}): MockDbClient 
     insertMany: vi.fn(),
     update: vi.fn(),
     upsert: vi.fn(),
+    claimSessions: vi.fn(),
     ...overrides,
   } as MockDbClient;
 }

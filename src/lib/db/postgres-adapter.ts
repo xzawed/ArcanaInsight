@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import { eq, and, inArray, getTableColumns, asc, desc } from "drizzle-orm"
+import { eq, and, inArray, isNull, getTableColumns, asc, desc } from "drizzle-orm"
 import type { PgTable, PgColumn } from "drizzle-orm/pg-core"
 import type { ColumnBaseConfig, ColumnDataType } from "drizzle-orm"
 import * as schema from "./schema/index"
@@ -155,5 +155,22 @@ export class PostgresAdapter implements DbClient {
       .returning()
     if (!result[0]) throw new Error(`Upsert failed for table: ${table}`)
     return normalizeRow<T>(result[0] as Record<string, unknown>)
+  }
+
+  async claimSessions(sessionIds: string[], userId: string): Promise<number> {
+    if (sessionIds.length === 0) return 0
+    const db = getConnection()
+    const t = resolveTable("sessions")
+    const cols = getTableColumns(t)
+    const idCol = cols["id"]
+    const userCol = cols["userId"] ?? cols["user_id"]
+    if (!idCol || !userCol) throw new Error("Unknown column: sessions.id/user_id")
+    const result = await db
+      .update(t)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .set({ userId } as any)
+      .where(and(inArray(idCol, sessionIds), isNull(userCol)))
+      .returning({ id: idCol })
+    return (result as unknown[]).length
   }
 }

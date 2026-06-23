@@ -37,7 +37,7 @@ API Route
 ```
 src/lib/db/
 ├── index.ts                    # getDb() 팩토리
-├── types.ts                    # DbClient 공통 인터페이스 (findMany: limit/offset 옵션 포함)
+├── types.ts                    # DbClient 공통 인터페이스 (findMany limit/offset, claimSessions: 익명 세션 user_id 귀속)
 ├── supabase-adapter.ts         # Supabase 구현체
 ├── supabase-admin-adapter.ts   # service_role 기반 RLS 우회 어댑터 (Supabase 전용)
 ├── postgres-adapter.ts         # Drizzle ORM 구현체

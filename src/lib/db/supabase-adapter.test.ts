@@ -306,4 +306,52 @@ describe("SupabaseAdapter", () => {
       await expect(adapter.upsert("daily_cards", {}, "date")).rejects.toThrow("upsert failed");
     });
   });
+
+  // ─── claimSessions ──────────────────────────────────────────────────────────
+  describe("claimSessions", () => {
+    function makeClaimChain(result: { data?: unknown; error?: { code?: string; message: string } | null }) {
+      const outcome = { data: result.data ?? null, error: result.error ?? null };
+      return {
+        update: vi.fn().mockReturnThis(),
+        in: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        select: vi.fn().mockResolvedValue(outcome),
+      };
+    }
+
+    it("빈 배열이면 0 반환 + 쿼리 미실행", async () => {
+      const from = vi.fn();
+      mockCreateClient.mockResolvedValue({ from });
+      expect(await adapter.claimSessions([], "user-1")).toBe(0);
+      expect(from).not.toHaveBeenCalled();
+    });
+
+    it("claim된 행 수를 반환하고 올바른 조건으로 쿼리한다", async () => {
+      const chain = makeClaimChain({ data: [{ id: "a" }, { id: "b" }] });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+      const result = await adapter.claimSessions(["a", "b", "c"], "user-1");
+      expect(result).toBe(2);
+      expect(chain.update).toHaveBeenCalledWith({ user_id: "user-1" });
+      expect(chain.in).toHaveBeenCalledWith("id", ["a", "b", "c"]);
+      expect(chain.is).toHaveBeenCalledWith("user_id", null);
+    });
+
+    it("data가 null이면 0 반환", async () => {
+      const chain = makeClaimChain({ data: null });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+      expect(await adapter.claimSessions(["a"], "user-1")).toBe(0);
+    });
+
+    it("코드 없는 에러(네트워크) → 0 반환", async () => {
+      const chain = makeClaimChain({ error: { message: "fetch failed" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+      expect(await adapter.claimSessions(["a"], "user-1")).toBe(0);
+    });
+
+    it("코드 있는 에러 → throw", async () => {
+      const chain = makeClaimChain({ error: { code: "42501", message: "permission denied" } });
+      mockCreateClient.mockResolvedValue({ from: vi.fn().mockReturnValue(chain) });
+      await expect(adapter.claimSessions(["a"], "user-1")).rejects.toThrow("permission denied");
+    });
+  });
 });
