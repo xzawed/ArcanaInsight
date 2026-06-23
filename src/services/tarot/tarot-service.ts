@@ -52,16 +52,22 @@ export class TarotService implements DivinationService {
           ...(interp.interpretation !== undefined ? { interpretation: cleanReadingText(String(interp.interpretation)) } : {}),
         })
       );
+      const overallReading = cleanReadingText(String(parsed.overallReading || ""));
+      const advice = cleanReadingText(String(parsed.advice || ""));
       // 카드 수 부족 = AI 응답이 도중에 잘렸을 가능성 높음
       const isTruncated = typeof expectedCardCount === "number"
         && expectedCardCount > 0
         && cardInterpretations.length < expectedCardCount;
+      // 핵심 필드 빈 문자 = 부분 파싱 (사주/신점과 동일 계약 — 빈 리딩 DB 저장 방지)
+      const parseError = isTruncated
+        ? ("truncated" as const)
+        : (!overallReading || !advice ? ("missing_fields" as const) : undefined);
       return {
         cardInterpretations,
-        overallReading: cleanReadingText(String(parsed.overallReading || "")),
-        advice: cleanReadingText(String(parsed.advice || "")),
+        overallReading,
+        advice,
         ...(parsed.directAnswer !== undefined ? { directAnswer: cleanReadingText(String(parsed.directAnswer)) } : {}),
-        ...(isTruncated ? { parseError: "truncated" as const } : {}),
+        ...(parseError ? { parseError } : {}),
         ...(typeof expectedCardCount === "number" ? { expectedCardCount } : {}),
       };
     }
