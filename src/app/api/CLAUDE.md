@@ -23,6 +23,8 @@ api/
 ├── daily-card/route.ts
 ├── daily-fortune/route.ts
 ├── locale/route.ts
+├── sessions/
+│   └── claim/route.ts    # 익명 세션 user_id 귀속 (POST, 로그인 필수)
 └── profile/
     └── favorite-character/route.ts
 ```
