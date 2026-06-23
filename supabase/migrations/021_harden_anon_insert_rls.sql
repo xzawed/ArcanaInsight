@@ -17,6 +17,10 @@
 --   PostgreSQL 모드(DB_PROVIDER=postgres)는 RLS 자체가 없어 무관.
 --
 -- 멱등/드리프트 안전: 운영 RLS 가 마이그레이션 파일과 드리프트될 수 있어 DROP POLICY IF EXISTS 사용.
+--   ⚠️ 실측 드리프트(prod hkjrupbauexapmmzbcgw, 2026-06-24): 013_shinjeom_rls.sql 이 migration history 에
+--   미기록 상태라 운영 shinjeom INSERT 정책이 파일 기준명(shinjeom_*_insert)이 아닌
+--   "Anyone can insert shinjeom messages/readings" 로 out-of-band 생성돼 있었다. IF EXISTS + 이름 불일치는
+--   조용히 drop 을 건너뛰므로, 두 이름 변형을 모두 DROP 하여 fresh replay 와 운영 드리프트 양쪽을 멱등 보정한다.
 
 -- ── 001_initial_schema.sql 정의분 ──
 DROP POLICY IF EXISTS "Anyone can create sessions" ON public.sessions;
@@ -29,9 +33,13 @@ DROP POLICY IF EXISTS "Anyone can insert saju readings" ON public.saju_readings;
 -- ── 003_daily_cards.sql 정의분 (주석상 의도는 service_role 전용이었음) ──
 DROP POLICY IF EXISTS "daily_cards_insert" ON public.daily_cards;
 
--- ── 013_shinjeom_rls.sql 정의분 ──
+-- ── 013_shinjeom_rls.sql 정의분 (파일 기준명 — fresh replay 경로) ──
 DROP POLICY IF EXISTS "shinjeom_messages_insert" ON public.shinjeom_messages;
 DROP POLICY IF EXISTS "shinjeom_readings_insert" ON public.shinjeom_readings;
+
+-- ── 운영 실측 드리프트명 (out-of-band 생성분, 위 주석 참조) ──
+DROP POLICY IF EXISTS "Anyone can insert shinjeom messages" ON public.shinjeom_messages;
+DROP POLICY IF EXISTS "Anyone can insert shinjeom readings" ON public.shinjeom_readings;
 
 -- 적용 후 검증(운영 psql/Supabase SQL editor에서 실행):
 --   1) 잔존 INSERT 정책이 없어야 함(0행 기대):
