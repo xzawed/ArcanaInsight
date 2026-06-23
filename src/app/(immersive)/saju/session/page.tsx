@@ -32,6 +32,7 @@ import type { Locale } from "@/i18n/config";
 import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ServiceIllustrations } from "@/components/effects/ServiceIllustrations";
+import { rememberGuestSession } from "@/lib/guest-sessions";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -94,7 +95,7 @@ export default function SajuSessionPage() {
     }).then(async (res) => {
       if (!res.ok) return;
       const data = await res.json();
-      if (data.session?.id) setSessionId(data.session.id);
+      if (data.session?.id) { setSessionId(data.session.id); rememberGuestSession(data.session.id); }
     }).catch((e) => console.warn("사주 세션 생성 실패 (리딩은 계속 진행):", e));
 
     setMood("default");

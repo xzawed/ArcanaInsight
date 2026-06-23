@@ -249,4 +249,19 @@ describe("PostgresAdapter", () => {
       ).rejects.toThrow("Upsert failed for table: daily_cards");
     });
   });
+
+  // ── claimSessions ──────────────────────────────────────────────────────────
+  describe("claimSessions", () => {
+    it("빈 배열이면 0 반환 + update 미호출", async () => {
+      const adapter = new PostgresAdapter();
+      expect(await adapter.claimSessions([], "u-1")).toBe(0);
+      expect(mockDb.update).not.toHaveBeenCalled();
+    });
+
+    it("claim된 행 수를 반환한다", async () => {
+      mockUpdateWith([{ id: "a" }, { id: "b" }]);
+      const adapter = new PostgresAdapter();
+      expect(await adapter.claimSessions(["a", "b", "c"], "u-1")).toBe(2);
+    });
+  });
 });

@@ -26,6 +26,7 @@ import { useThemeStore } from "@/hooks/useTheme";
 import { getServiceBackgroundUrl } from "@/lib/storage/card-style";
 import { ShinjeomEnergyEffect } from "@/components/shinjeom/ShinjeomEnergyEffect";
 import { ServiceIllustrations } from "@/components/effects/ServiceIllustrations";
+import { rememberGuestSession } from "@/lib/guest-sessions";
 
 const SITE_NAME = "ArcanaInsight";
 
@@ -99,7 +100,7 @@ export default function ShinjeomSessionPage() {
           body: JSON.stringify({ topic, characterId }),
         });
         const data = await res.json();
-        if (data.session?.id) setSessionId(data.session.id);
+        if (data.session?.id) { setSessionId(data.session.id); rememberGuestSession(data.session.id); }
       } catch (e) { console.warn("신점 세션 생성 실패 (상담은 계속 진행):", e); }
     };
     initSession();

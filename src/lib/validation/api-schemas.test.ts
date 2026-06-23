@@ -7,6 +7,7 @@ import {
   SajuSessionSchema,
   ShinjeomSessionSchema,
   DailyCardSchema,
+  ClaimSessionsSchema,
 } from "./api-schemas";
 
 // ──────────────────────────────────────────────
@@ -288,5 +289,32 @@ describe("DailyCardSchema", () => {
 
   it("characterId 누락 시 실패", () => {
     expect(DailyCardSchema.safeParse({ date: "2026-04-24" }).success).toBe(false);
+  });
+});
+
+// ──────────────────────────────────────────────
+// ClaimSessionsSchema
+// ──────────────────────────────────────────────
+describe("ClaimSessionsSchema", () => {
+  const UUID = "11111111-1111-4111-8111-111111111111";
+
+  it("유효한 UUID 배열 통과", () => {
+    expect(ClaimSessionsSchema.safeParse({ sessionIds: [UUID] }).success).toBe(true);
+  });
+
+  it("빈 배열 실패", () => {
+    expect(ClaimSessionsSchema.safeParse({ sessionIds: [] }).success).toBe(false);
+  });
+
+  it("UUID 형식이 아니면 실패", () => {
+    expect(ClaimSessionsSchema.safeParse({ sessionIds: ["not-a-uuid"] }).success).toBe(false);
+  });
+
+  it("100개 초과 실패", () => {
+    expect(ClaimSessionsSchema.safeParse({ sessionIds: Array.from({ length: 101 }, () => UUID) }).success).toBe(false);
+  });
+
+  it("sessionIds 누락 실패", () => {
+    expect(ClaimSessionsSchema.safeParse({}).success).toBe(false);
   });
 });

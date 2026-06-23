@@ -105,4 +105,23 @@ export class SupabaseAdapter implements DbClient {
     if (error) throw new Error(error.message)
     return result as T
   }
+
+  async claimSessions(sessionIds: string[], userId: string): Promise<number> {
+    if (sessionIds.length === 0) return 0
+    const supabase = await this.client()
+    const { data, error } = await supabase
+      .from("sessions")
+      .update({ user_id: userId })
+      .in("id", sessionIds)
+      .is("user_id", null)
+      .select("id")
+    if (error) {
+      if (!error.code) {
+        console.warn(`DB claimSessions unavailable: ${error.message}`)
+        return 0
+      }
+      throw new Error(`DB write error [${error.code}]: ${error.message}`)
+    }
+    return (data ?? []).length
+  }
 }

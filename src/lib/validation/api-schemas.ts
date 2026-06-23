@@ -30,6 +30,11 @@ export const LocaleSchema = z.object({
   locale: localeEnum,
 });
 
+// 익명 세션 claim 스키마 — 로그인 시 클라이언트 보관 익명 sessionId 일괄 귀속
+export const ClaimSessionsSchema = z.object({
+  sessionIds: z.array(z.string().uuid()).min(1).max(100),
+});
+
 // 세션 생성 스키마
 export const TarotSessionSchema = z.object({
   topic: topicStr,

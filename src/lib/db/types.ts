@@ -18,4 +18,7 @@ export interface DbClient {
   update<T>(table: string, where: Record<string, unknown>, data: Record<string, unknown>): Promise<T | null>
   /** Upsert — conflictOn은 콤마 구분 컬럼명 (예: "date,character_id") */
   upsert<T>(table: string, data: Record<string, unknown>, conflictOn: string): Promise<T>
+  /** 익명 세션(user_id IS NULL)을 사용자에게 귀속 — claim된 행 수 반환.
+   *  `WHERE id IN (sessionIds) AND user_id IS NULL` 가드로 타인 소유 세션 보호. */
+  claimSessions(sessionIds: string[], userId: string): Promise<number>
 }
