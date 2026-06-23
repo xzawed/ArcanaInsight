@@ -66,7 +66,7 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-arcana-bg text-arcana-text font-sans min-h-screen antialiased flex flex-col">
+      <body className="bg-arcana-bg text-arcana-text font-sans min-h-dvh antialiased flex flex-col">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-arcana-purple focus:text-white focus:rounded-lg">
           {translate("common.skip-link", locale)}
         </a>

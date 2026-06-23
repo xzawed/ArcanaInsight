@@ -37,7 +37,7 @@ export default async function MyPage() {
   } = await fetchMypageData(user.id, locale);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/mypage-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />

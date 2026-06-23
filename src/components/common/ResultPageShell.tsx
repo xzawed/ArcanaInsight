@@ -11,7 +11,7 @@ interface Props {
 
 export function ResultPageShell({ service, children }: Props) {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden">
       <MysticBackground service={service} />
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/result-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />

@@ -6,7 +6,7 @@ import { useT } from "@/i18n/useT";
 export function Footer() {
   const { t } = useT();
   return (
-    <footer className="bg-arcana-surface border-t border-arcana-border mt-auto">
+    <footer className="bg-arcana-surface border-t border-arcana-border mt-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       {/* 상단 섹션 */}
       <div className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* 컬럼 1: 로고 & 설명 */}
