@@ -27,7 +27,8 @@ md:min-h-[calc(100dvh-3.5rem)]
 ```
 
 - **콘텐츠 페이지 래퍼에는 viewport 높이 min을 두지 않는다.** `body`(`min-h-dvh flex flex-col`) + `main`(`flex-1`) + `Footer`(`mt-auto`)의 sticky-footer 구조가 짧은 콘텐츠에서도 화면을 채우므로, 페이지 래퍼의 `min-h-screen`은 중복이며 위의 유령 스크롤을 유발한다.
-- **풀스크린이어야 하는 래퍼**(몰입형 진입 페이지, 중앙정렬 로그인/스피너)만 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`로 chrome을 차감해 채운다.
+- **중앙정렬이 필요한 래퍼**(로그인 등)만 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`로 chrome을 차감해 채운다.
+- ⚠️ **`dvh` 기반 `min-height` + 외부 lazy 이미지 동거 금지 (E2E load 지연 회귀)**: `ServiceBackground`처럼 외부(Supabase) URL `loading="lazy"` 이미지를 렌더하는 페이지의 래퍼에 `min-h-[calc(100dvh-…)]`(dvh) 를 쓰면, lazy 이미지의 load 가 ~수십초 지연되어 Playwright `waitForLoadState("load")` 가 타임아웃한다(PR #428에서 `(immersive)` 진입 페이지·`PageSpinner` 적용 시 `navigation.spec.ts` 회귀로 확인 → 해당 래퍼는 `min-h-screen` 유지로 환원). 외부 이미지 페이지는 **dvh 래퍼를 두지 말고** 스테이지 자체(`h-[calc(100dvh-7rem)]`)로 높이를 지배하거나 `min-h-screen`을 유지한다.
 
 ---
 
@@ -98,7 +99,7 @@ App Router Route Group으로 렌더 라우트를 두 레이아웃으로 분리�
 - **RootLayout**(`src/app/layout.tsx`)은 `html`/`body`·Provider·`Header`·전역 오버레이(ToastHost, LocaleConfirmModal, InteractionClickParticles)만 렌더한다. `main`/`Footer`/`MobileNav` 소유권은 그룹 레이아웃에 있다.
 - **이중 스크롤 금지**: `100dvh` 몰입형 스테이지 아래로 Footer가 붙으면 document가 추가로 스크롤되는 '이중 스크롤'이 발생한다. 몰입형 그룹은 **Footer를 렌더하지 않아** 구조적으로 이를 차단한다. 새 몰입형 페이지는 반드시 `(immersive)/` 그룹에 둔다.
 - 몰입형 `main`은 `pt-14 pb-14 md:pb-0`(Header·MobileNav 높이 보정) + `MobileNav`를 유지한다.
-- **몰입형 진입 페이지의 outer 래퍼**(`(immersive)/*/page.tsx`)는 `min-h-screen`(=100vh) 대신 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`를 쓴다. 100vh floor는 dvh 스테이지 위에 ~112px 이중 스크롤을 재도입한다 (PR #428).
+- ⚠️ **몰입형 진입 페이지 outer 래퍼는 `min-h-screen` 유지(알려진 이슈)**: outer `min-h-screen`(100vh)이 dvh 스테이지 위에 ~112px 이중 스크롤을 부분 재도입하지만, `min-h-[calc(100dvh-…)]`(dvh)로 바꾸면 외부 `ServiceBackground` lazy 이미지의 load 가 지연돼 E2E `waitForLoadState("load")`가 타임아웃한다(§1 caveat, PR #428에서 회귀 확인 후 환원). 이 ~112px 이중 스크롤 해소는 dvh 미사용 대안(스테이지가 높이를 직접 지배)으로 별도 처리 예정 — [`docs/operations/known-issues.md`](../operations/known-issues.md) 참조.
 - **(site) 그룹은 sticky-footer 구조로 정렬**: `body`(`min-h-dvh flex flex-col`) + `main`(`flex-1`) + `Footer`(`mt-auto`). (site) 페이지 래퍼에는 `min-h-screen`을 두지 않는다(§1 유령 스크롤). `Footer`는 §2의 모바일 네비 회피 클리어런스를 가진다.
 - 모바일 고정 오버레이가 대사창(z-30)을 가리지 않도록 `z-40`/`bottom-36` 이상으로 배치한다 (예: `ReadingProgressIndicator`).
 

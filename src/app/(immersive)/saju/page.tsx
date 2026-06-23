@@ -297,7 +297,7 @@ function SajuPageContent() {
   };
 
   return (
-    <div className="relative min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)] overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden">
       <ServiceBackground service="saju" />
       <ParticleOverlay density="low" className="z-10" />
       <AnimatePresence mode="wait">
