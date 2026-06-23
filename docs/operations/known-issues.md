@@ -22,6 +22,7 @@
 | 항목 | 파일 | 현황 | 해결 조건 | 담당 |
 |------|------|------|----------|------|
 | 커버리지 측정 범위 협소 | `vitest.config.ts` coverage.include | whitelist 방식, 전체 코드의 일부만 측정 | include 확장 또는 exclude 방식 전환 시 처리 | Claude |
+| `(immersive)` 진입 페이지 outer 래퍼 ~112px 이중 스크롤 | `(immersive)/{tarot,saju,shinjeom}/page.tsx`, `character/[id]/page.tsx` | outer `min-h-screen`(100vh)이 dvh 스테이지 위에 ~112px 잉여 스크롤을 부분 재도입. **PR #428에서 `min-h-[calc(100dvh-7rem)]`(dvh)로 전환 시도 → 외부 `ServiceBackground` lazy 이미지 load 지연으로 `navigation.spec.ts` 회귀(`waitForLoadState("load")` 타임아웃) 확인 → 환원.** | dvh 미사용 대안으로 해소 — outer min-height 제거 후 스테이지(`h-[calc(100dvh-7rem)]`)가 높이를 직접 지배하도록 재구성(외부 이미지 load 영향 회피). [`docs/conventions/cross-platform.md`](../conventions/cross-platform.md) §1·§6 참조 | Claude |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 5건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절 등 — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
 | SonarCloud CRITICAL Cognitive Complexity | — | **0건 해소 완료** (2026-05-01). Quality Gate PASSED. 재발 시 아래 섹션 참고. | — |
 

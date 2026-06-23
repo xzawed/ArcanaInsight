@@ -11,15 +11,24 @@
 
 | 규칙 | 이유 |
 |------|------|
-| **`100vh` 사용 금지** | iOS Safari에서 주소창/하단바 포함 높이 계산 → 콘텐츠 가려짐 |
-| **`100dvh` 사용** | Dynamic Viewport Height — 실제 보이는 영역에 정확히 맞춤 |
-| `min-h-screen` 허용 | 페이지 전체 최소 높이 용도만 허용 |
+| **`100vh` / `min-h-screen` 사용 금지** | Tailwind `min-h-screen`은 `min-height:100vh`로 컴파일된다. `100vh`는 모바일에서 large viewport(주소창 숨김 높이)로 해석되어 가시 영역(`100dvh`)을 초과한다. 더 나아가 **페이지 래퍼의 `min-h-screen`은 `main`의 `pt-14 pb-14`(112px)와 합산되어** 콘텐츠 길이와 무관하게 document가 항상 가시 뷰포트를 초과하는 '유령 스크롤'(빈 영역)을 만든다 → 사용자가 가짜 바닥(false bottom)을 페이지 끝으로 오인 (PR #428) |
+| **`min-h-dvh` / `100dvh` 사용** | Dynamic Viewport Height — 실제 보이는 영역에 정확히 맞춤. `body`는 `min-h-dvh flex flex-col`(sticky-footer 컨테이너) |
+| 풀스크린 영역은 chrome 오프셋을 차감 | 헤더(3.5rem) + 모바일 네비(3.5rem)를 뺀 가용 높이를 사용 |
 
 패턴:
 ```css
-h-[calc(100dvh-7rem)]        /* 모바일 */
-md:h-[calc(100dvh-3.5rem)]   /* 데스크탑 */
+/* 스테이지가 화면을 정확히 채워야 할 때(몰입형 등) */
+h-[calc(100dvh-7rem)]            /* 모바일: 헤더+네비 차감 */
+md:h-[calc(100dvh-3.5rem)]       /* 데스크탑: 헤더만 차감 */
+
+/* 중앙정렬·풀스크린 래퍼의 최소 높이(오버플로 없이 채움) */
+min-h-[calc(100dvh-7rem)]
+md:min-h-[calc(100dvh-3.5rem)]
 ```
+
+- **콘텐츠 페이지 래퍼에는 viewport 높이 min을 두지 않는다.** `body`(`min-h-dvh flex flex-col`) + `main`(`flex-1`) + `Footer`(`mt-auto`)의 sticky-footer 구조가 짧은 콘텐츠에서도 화면을 채우므로, 페이지 래퍼의 `min-h-screen`은 중복이며 위의 유령 스크롤을 유발한다.
+- **중앙정렬이 필요한 래퍼**(로그인 등)만 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`로 chrome을 차감해 채운다.
+- ⚠️ **`dvh` 기반 `min-height` + 외부 lazy 이미지 동거 금지 (E2E load 지연 회귀)**: `ServiceBackground`처럼 외부(Supabase) URL `loading="lazy"` 이미지를 렌더하는 페이지의 래퍼에 `min-h-[calc(100dvh-…)]`(dvh) 를 쓰면, lazy 이미지의 load 가 ~수십초 지연되어 Playwright `waitForLoadState("load")` 가 타임아웃한다(PR #428에서 `(immersive)` 진입 페이지·`PageSpinner` 적용 시 `navigation.spec.ts` 회귀로 확인 → 해당 래퍼는 `min-h-screen` 유지로 환원). 외부 이미지 페이지는 **dvh 래퍼를 두지 말고** 스테이지 자체(`h-[calc(100dvh-7rem)]`)로 높이를 지배하거나 `min-h-screen`을 유지한다.
 
 ---
 
@@ -37,6 +46,8 @@ body { padding-top: env(safe-area-inset-top); }
 
 - **하단 고정 요소**(MobileNav 등): 반드시 `pb-[env(safe-area-inset-bottom)]` 적용
 - 새로운 `position: fixed` bottom 요소 추가 시 safe area 패딩 필수
+- **문서 끝 흐름(flow) 요소 ↔ 고정 하단 네비 겹침 주의**: `MobileNav`(fixed bottom-0, 불투명)는 뷰포트 하단 ~3.5rem + safe-area를 덮는다. `main`의 `pb-14`는 `main` **자기 콘텐츠**만 회피시키므로, `main` **바깥 형제**인 `Footer`처럼 문서 끝에 오는 요소는 직접 클리어런스를 가져야 한다.
+  - `Footer`: `pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0` (모바일 네비 본체 + safe-area 회피, 데스크탑은 네비가 `md:hidden`이라 패딩 제거). 미적용 시 저작권 행이 네비 뒤로 영구히 가려진다 (PR #428).
 
 ---
 
@@ -88,6 +99,8 @@ App Router Route Group으로 렌더 라우트를 두 레이아웃으로 분리�
 - **RootLayout**(`src/app/layout.tsx`)은 `html`/`body`·Provider·`Header`·전역 오버레이(ToastHost, LocaleConfirmModal, InteractionClickParticles)만 렌더한다. `main`/`Footer`/`MobileNav` 소유권은 그룹 레이아웃에 있다.
 - **이중 스크롤 금지**: `100dvh` 몰입형 스테이지 아래로 Footer가 붙으면 document가 추가로 스크롤되는 '이중 스크롤'이 발생한다. 몰입형 그룹은 **Footer를 렌더하지 않아** 구조적으로 이를 차단한다. 새 몰입형 페이지는 반드시 `(immersive)/` 그룹에 둔다.
 - 몰입형 `main`은 `pt-14 pb-14 md:pb-0`(Header·MobileNav 높이 보정) + `MobileNav`를 유지한다.
+- ⚠️ **몰입형 진입 페이지 outer 래퍼는 `min-h-screen` 유지(알려진 이슈)**: outer `min-h-screen`(100vh)이 dvh 스테이지 위에 ~112px 이중 스크롤을 부분 재도입하지만, `min-h-[calc(100dvh-…)]`(dvh)로 바꾸면 외부 `ServiceBackground` lazy 이미지의 load 가 지연돼 E2E `waitForLoadState("load")`가 타임아웃한다(§1 caveat, PR #428에서 회귀 확인 후 환원). 이 ~112px 이중 스크롤 해소는 dvh 미사용 대안(스테이지가 높이를 직접 지배)으로 별도 처리 예정 — [`docs/operations/known-issues.md`](../operations/known-issues.md) 참조.
+- **(site) 그룹은 sticky-footer 구조로 정렬**: `body`(`min-h-dvh flex flex-col`) + `main`(`flex-1`) + `Footer`(`mt-auto`). (site) 페이지 래퍼에는 `min-h-screen`을 두지 않는다(§1 유령 스크롤). `Footer`는 §2의 모바일 네비 회피 클리어런스를 가진다.
 - 모바일 고정 오버레이가 대사창(z-30)을 가리지 않도록 `z-40`/`bottom-36` 이상으로 배치한다 (예: `ReadingProgressIndicator`).
 
 ---

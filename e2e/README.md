@@ -17,13 +17,13 @@ Windows(Claude Code)에서는 Docker 필수 → [§1.2 Windows Docker 실행](..
 
 ## 구성
 
-- **19개 spec 파일** / **141개 테스트** (Desktop Chrome 기준)
+- **27개 spec 파일** / **197개 테스트** (Desktop Chrome 기준)
 - **3개 디바이스**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
 - **Playwright**: `v1.59.1` — CI Docker 이미지와 버전 고정
 
 ```
 e2e/
-├── *.spec.ts           # 19개 테스트 파일
+├── *.spec.ts           # 27개 테스트 파일
 ├── helpers/
 │   └── sse-mock.ts     # SSE 스트리밍 mock 유틸리티
 └── README.md           # 이 파일 (요약 + 리다이렉트)

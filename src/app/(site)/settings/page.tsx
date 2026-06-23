@@ -148,7 +148,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative">
       {/* 배경 */}
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/session-bg.jpg" alt="" fill className="object-cover" sizes="100vw" />

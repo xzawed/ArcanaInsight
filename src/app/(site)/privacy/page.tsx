@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-arcana-bg">
+    <div className="bg-arcana-bg">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <Link href="/" className="text-arcana-muted text-sm hover:text-arcana-purple transition-colors">
           ← 홈으로

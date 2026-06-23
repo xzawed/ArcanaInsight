@@ -6,7 +6,7 @@
 > **담당**: Codex (spec 작성·수정·실행) | Claude (테스트 시나리오 기획·셀렉터 전략 결정)
 > 협업 프로토콜 정본: [`claude-codex-collaboration.md`](claude-codex-collaboration.md)
 
-- **25개 spec 파일** (Desktop Chrome 기준; 실제 테스트 수는 `npx playwright test --list --project="Desktop Chrome"` 기준)
+- **27개 spec 파일** (Desktop Chrome 기준 197개 테스트; 실제 수는 `npx playwright test --list --project="Desktop Chrome"` 기준)
 - **3개 디바이스 프로필**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
 - **Playwright 버전**: `v1.59.1` — CI Docker 이미지와 버전 고정, 임의 변경 금지
 
@@ -143,6 +143,8 @@ docker run --rm \
 | `theme-atmosphere.spec.ts` | 7종 테마 분위기 이펙트 · 파티클·배경 렌더링 | — | 없음 |
 | `tarot-text-reveal.spec.ts` | 타로 showLabel 제어 동작 — result phase 진입 전 카드명 텍스트 미노출 검증 | — | 없음 |
 | `theme-effects.spec.ts` | ThemeAtmosphereLayer 렌더링 검증 — 테마별 레이어 DOM 존재 확인 | — | 없음 |
+| `immersive-layout.spec.ts` | 몰입형 라우트 Footer 미렌더 · (site) Footer 렌더 · 타로 세션 이중 스크롤 0 · 대기 인디케이터 z-40 (모바일) | `service-navigation.ts`·`sse-mock.ts` | 없음 |
+| `site-layout.spec.ts` | (site) Footer 하단 행 모바일 네비 클리어런스 · 짧은 페이지 유령 스크롤 0 · 데스크탑 회귀 가드 (PR #428) | — | 없음 |
 | `smart-ci.spec.ts` | 실 Supabase 세션 기반 플로우 검증 (CI `testIgnore` 대상) — 파일 상단 `// ⚠️ 실 Supabase 인증 세션 필요 — CI testIgnore 대상` 주석 필수 | — | ⚠️ 실 세션 필요 |
 
 ---
@@ -481,7 +483,7 @@ await enterShinjeomSession(page);
 
 ```bash
 # 재검증 커맨드
-ls e2e/*.spec.ts | wc -l                                         # spec 파일 수 (현재 25개)
+ls e2e/*.spec.ts | wc -l                                         # spec 파일 수 (현재 27개)
 npx playwright test --list --project="Desktop Chrome" | tail -1  # 테스트 수
 ```
 

@@ -180,7 +180,7 @@ pnpm dev
 | 📦 상태관리 | Zustand v5 |
 | 📦 패키지 매니저 | pnpm 10.33.0 |
 | 🚀 호스팅 | Railway (GitHub Actions 자동 배포) |
-| 🧪 E2E 테스트 | Playwright — 19개 파일, 141개 테스트 (Desktop · Android · iOS) · [가이드](./e2e/README.md) |
+| 🧪 E2E 테스트 | Playwright — 27개 파일 · 디바이스당 197개 테스트 (Desktop · Android · iOS) · [가이드](./e2e/README.md) |
 
 ### 🤖 AI Native 개발 방식
 

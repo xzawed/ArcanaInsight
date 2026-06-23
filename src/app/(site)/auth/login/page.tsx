@@ -6,7 +6,7 @@ export default function LoginPage() {
   const useNextAuth = getDbProvider() === "postgres"
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)] flex items-center justify-center">
         <p className="text-arcana-muted">로딩 중...</p>
       </div>
     }>
