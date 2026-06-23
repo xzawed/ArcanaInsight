@@ -73,6 +73,7 @@ src/lib/db/
 | `018_birthtime_mbti.sql` | profiles.birth_hour HH:MM 형식 외 NULL 처리 + profiles.mbti 컬럼 추가 |
 | `019_fix_saju_readings.sql` | saju_readings.birth_hour NOT NULL 제약 해제 + saju_readings.mbti 컬럼 추가 (018 누락분) |
 | `020_harden_anon_rls.sql` | 익명 over-grant 하드닝 — readings/saju/shinjeom SELECT 소유자 전용(공개 `using(true)` 제거), sessions·saju_readings UPDATE 익명 분기 제거 (#4/#6). result는 service_role(getAdminDb) 조회라 무영향 |
+| `021_harden_anon_insert_rls.sql` | 익명 INSERT over-grant 하드닝 — `FOR INSERT WITH CHECK (true)` 정책 7종 제거 (sessions·session_cards·readings·saju_readings·daily_cards·shinjeom_messages·shinjeom_readings). 모든 쓰기는 getAdminDb(service_role)라 무영향, anon 직접 삽입만 차단 (020 INSERT 후속) |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
@@ -84,6 +85,7 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 - share_token 보유자 = 공개 열람 허용 (공유 링크 생성 = 공개 의도)
 - **공개 열람은 service_role 서버 레이어로 구현**: result 라우트가 `getAdminDb()`(service_role, RLS 우회)로 `share_token` 조회 → 리딩 테이블의 RLS는 **소유자 전용 SELECT**만 둔다(`using(true)` 공개 정책 없음, 020). anon 키 직접 호출로는 타인 리딩 열람 불가.
 - 소유자 전용 쓰기/삭제: `assertReadingAccess("owner")` 사용
+- **모든 INSERT 는 service_role 전용**(021): 세션·카드·리딩·일일카드·신점메시지 등 7개 테이블의 `FOR INSERT WITH CHECK (true)` 정책을 제거 — 서버는 전부 `getAdminDb()`(service_role, RLS 우회)로 삽입하므로 무영향, anon 키 직접 삽입만 차단된다.
 - share_token NULL 방지: Drizzle `$defaultFn(() => crypto.randomUUID())` + DB DEFAULT `gen_random_uuid()` 이중 보장
 
 ---
