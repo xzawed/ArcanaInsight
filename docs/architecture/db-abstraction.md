@@ -139,7 +139,7 @@ GOOGLE_CLIENT_SECRET=
 - `sessions` — 세션 작성 시점 locale (`idx_sessions_user_locale` 인덱스, PR-4 character-context 필터)
 - `readings` / `saju_readings` / `shinjeom_readings` — 결과 텍스트 작성 언어
 
-`daily_cards`는 `(date, character_id)` UNIQUE 단일 사전 정책으로 locale 미포함 (의도). 표시 시점 locale 분리는 PR-3·PR-5에서 처리.
+`daily_cards`는 `(date, character_id)` UNIQUE 단일 사전 정책으로 locale 미포함 (옵션 B 확정 — 용량 4배 폭증 방지). 표시 텍스트는 작성 시점 locale 사전을 따른다.
 
 INSERT 시 `getRequestLocale()` (`src/i18n/server-locale.ts`)로 결정한 locale 명시 동봉. 미동봉 시 DEFAULT 'ko' 자동 입력 — PR-A 정합성 핫픽스에서 6개 INSERT 경로에 추가됨.
 

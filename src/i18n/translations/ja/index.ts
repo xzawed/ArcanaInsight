@@ -1,8 +1,8 @@
 import type { SharedKeys } from "../shared/keys";
 
 /**
- * 일본어 사전 — PR-5에서 외부 번역가 작업으로 채울 예정.
- * 현재는 PR-5 출시 전까지 ko로 fallback (translations/index.ts).
+ * 일본어 사전 — 팀 내부 직역 사전 (외부 번역가 미사용, 사용자 확정 2026-05-14).
+ * 부분 번역만 제공하고 미번역 키는 자동으로 ko fallback (translations/index.ts).
  *
  * core 키만 우선 번역해 LanguageSwitcher·LocaleConfirmModal에서
  * 일본어 화자가 인식 가능하게 한다 (UX: ja 선택 가능 표시 보존).
