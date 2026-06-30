@@ -280,6 +280,87 @@ describe("fetchSSEStream", () => {
     expect(result.expectedCardCount).toBe(5);
   });
 
+  it("onSaveStatus 제공 시 done 이후 saved:true 이벤트를 수신한다", async () => {
+    const lines = [
+      'data: {"chunk":"본문"}',
+      'data: {"done":true,"result":{"overallReading":"ok"}}',
+      'data: {"saved":true}',
+    ];
+    mockFetch.mockResolvedValue(makeSseResponse(lines));
+
+    let doneData: Record<string, unknown> | null = null;
+    const saveStatuses: boolean[] = [];
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone: (d) => { doneData = d; },
+      onError: vi.fn(),
+      onSaveStatus: (s) => saveStatuses.push(s),
+    });
+
+    expect(doneData).toMatchObject({ done: true });
+    expect(saveStatuses).toEqual([true]);
+  });
+
+  it("onSaveStatus 제공 시 saved:false 이벤트도 수신한다", async () => {
+    const lines = [
+      'data: {"done":true,"result":{}}',
+      'data: {"saved":false}',
+    ];
+    mockFetch.mockResolvedValue(makeSseResponse(lines));
+
+    const saveStatuses: boolean[] = [];
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone: vi.fn(),
+      onError: vi.fn(),
+      onSaveStatus: (s) => saveStatuses.push(s),
+    });
+
+    expect(saveStatuses).toEqual([false]);
+  });
+
+  it("onSaveStatus 제공 시 saved 이벤트 없이 종료되면 호출되지 않는다 (익명 리딩)", async () => {
+    const lines = ['data: {"done":true,"result":{}}'];
+    mockFetch.mockResolvedValue(makeSseResponse(lines));
+
+    let doneCalled = false;
+    const onSaveStatus = vi.fn();
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone: () => { doneCalled = true; },
+      onError: vi.fn(),
+      onSaveStatus,
+    });
+
+    expect(doneCalled).toBe(true);
+    expect(onSaveStatus).not.toHaveBeenCalled();
+  });
+
+  it("onSaveStatus 미제공 시 done 이후 saved 이벤트는 무시한다 (하위호환 — onDone 1회)", async () => {
+    const lines = [
+      'data: {"done":true}',
+      'data: {"saved":true}',
+    ];
+    mockFetch.mockResolvedValue(makeSseResponse(lines));
+
+    const onDone = vi.fn();
+    await fetchSSEStream({
+      url: "/api/test",
+      body: {},
+      onChunk: vi.fn(),
+      onDone,
+      onError: vi.fn(),
+    });
+
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
   it("POST 요청 body를 JSON으로 직렬화해서 전송한다", async () => {
     mockFetch.mockResolvedValue(makeSseResponse(['data: {"done":true}']));
 

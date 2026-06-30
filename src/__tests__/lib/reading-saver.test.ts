@@ -4,6 +4,7 @@ import {
   saveSajuReading,
   saveShinjeomFinalReading,
   saveShinjeomMessages,
+  logReadingSaveFailure,
 } from "@/lib/db/reading-saver";
 import { makeMockDb } from "@/test-helpers/mock-db";
 
@@ -88,6 +89,47 @@ describe("saveShinjeomMessages", () => {
       expect.objectContaining({ role: "user", content: "사용자 메시지", message_index: 2 }),
       expect.objectContaining({ role: "character", content: "캐릭터 응답", message_index: 3 }),
     ]);
+  });
+});
+
+describe("logReadingSaveFailure", () => {
+  it("마커 + service + sessionId + code + message 를 포함한 구조적 로그 출력", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const err = Object.assign(new Error("connection lost"), { code: "08006" });
+
+    logReadingSaveFailure("tarot", "sess-9", err);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const logged = spy.mock.calls[0].map((a) => String(a)).join(" ");
+    expect(logged).toContain("[reading-save-failed]");
+    expect(logged).toContain("tarot");
+    expect(logged).toContain("sess-9");
+    expect(logged).toContain("08006");
+    expect(logged).toContain("connection lost");
+    spy.mockRestore();
+  });
+
+  it("code 없는 에러 / null sessionId 안전 로깅", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    logReadingSaveFailure("saju", null, new Error("boom"));
+
+    const logged = spy.mock.calls[0].map((a) => String(a)).join(" ");
+    expect(logged).toContain("[reading-save-failed]");
+    expect(logged).toContain("saju");
+    expect(logged).toContain("boom");
+    spy.mockRestore();
+  });
+
+  it("non-Error throw → String 안전 처리", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    logReadingSaveFailure("shinjeom", "s", "weird string");
+
+    const logged = spy.mock.calls[0].map((a) => String(a)).join(" ");
+    expect(logged).toContain("[reading-save-failed]");
+    expect(logged).toContain("weird string");
+    spy.mockRestore();
   });
 });
 

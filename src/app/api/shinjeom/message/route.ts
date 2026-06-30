@@ -8,7 +8,8 @@ import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveShinjeomFinalReading, saveShinjeomMessages } from "@/lib/db/reading-saver";
+import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure } from "@/lib/db/reading-saver";
+import type { DbClient } from "@/lib/db/types";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 import { isShinjeomTopic } from "@/data/topics";
@@ -20,6 +21,49 @@ const aiProvider = new FallbackProvider();
 // 한국어 토큰 비효율 + JSON 오버헤드 + Grok 내부 reasoning(thinking) 토큰 흡수까지 고려한 안전 마진.
 const SHINJEOM_TOKENS_FINAL = 48000;
 const SHINJEOM_TOKENS_CHAT = 6000;
+
+/** 신점 최종 리딩: 파싱 + 저장 + done/saved SSE 이벤트 전송.
+ *  결과(done)는 항상 전송(가용성 유지). 저장 시도한 경우에만 후속 saved 시그널 전송. */
+async function emitShinjeomFinalResult(
+  controller: ReadableStreamDefaultController,
+  encoder: TextEncoder,
+  fullResponse: string,
+  db: DbClient | null,
+  sessionId: string | null | undefined,
+  locale: string,
+): Promise<void> {
+  const result = shinjeomService.parseResult(fullResponse);
+
+  if (result.parseError) {
+    console.warn("[shinjeom-message] 부분 파싱:", {
+      parseError: result.parseError,
+      olen: result.overallReading?.length ?? 0,
+      alen: result.advice?.length ?? 0,
+      sessionId: sessionId ?? null,
+    });
+  }
+
+  // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 빈 화면 방지).
+  let shareToken: string | null = null;
+  let saveStatus: boolean | null = null; // null = 저장 시도 안 함 (익명/parseError)
+  if (db && sessionId && !result.parseError) {
+    try {
+      const saved = await saveShinjeomFinalReading(db, sessionId, result, locale);
+      shareToken = saved.shareToken;
+      saveStatus = true;
+    } catch (e) {
+      logReadingSaveFailure("shinjeom", sessionId, e);
+      saveStatus = false;
+    }
+  }
+
+  // 결과를 먼저 전송 (share_token 포함). parseError 시 클라이언트는 result.parseError로 재시도 안내.
+  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result: { ...result, shareToken } })}\n\n`));
+  // 저장 시그널 (done 이후 후속 이벤트). onSaveStatus 소비자만 수신.
+  if (saveStatus !== null) {
+    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: saveStatus })}\n\n`));
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,38 +114,13 @@ export async function POST(request: NextRequest) {
           }
 
           if (isFinalTurn) {
-            const result = shinjeomService.parseResult(fullResponse);
-
-            if (result.parseError) {
-              console.warn("[shinjeom-message] 부분 파싱:", {
-                parseError: result.parseError,
-                olen: result.overallReading?.length ?? 0,
-                alen: result.advice?.length ?? 0,
-                sessionId: sessionId ?? null,
-              });
-            }
-
-            // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 빈 화면 방지).
-            // DB 저장 후 share_token을 result에 포함하여 클라이언트에 전송 (공유 URL 생성용).
-            let shareToken: string | null = null;
-            if (db && sessionId && !result.parseError) {
-              try {
-                const saved = await saveShinjeomFinalReading(db, sessionId, result, locale);
-                shareToken = saved.shareToken;
-              } catch (e) {
-                console.error("신점 최종 DB 저장 최종 실패:", e);
-              }
-            }
-
-            // 결과를 클라이언트에 전송 (share_token 포함).
-            // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result: { ...result, shareToken } })}\n\n`));
+            await emitShinjeomFinalResult(controller, encoder, fullResponse, db, sessionId, locale);
           } else {
-            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 (3회 retry)
+            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 fire-and-forget (3회 retry). 실패는 구조적 로깅만.
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
             if (db && sessionId && currentMessage && messageIndex !== undefined) {
               void saveShinjeomMessages(db, sessionId, currentMessage, fullResponse, messageIndex).catch(
-                (e) => console.error("신점 메시지 DB 저장 최종 실패:", e)
+                (e) => logReadingSaveFailure("shinjeom-message", sessionId, e)
               );
             }
           }

@@ -16,6 +16,9 @@ interface SSEStreamOptions {
   onError: (message: string) => void;
   /** 외부에서 fetch abort 신호 전달 (타임아웃 등) */
   signal?: AbortSignal;
+  /** 저장 결과 시그널 콜백 (done 이후 후속 saved 이벤트).
+   *  제공 시 done에서 멈추지 않고 trailing saved 이벤트까지 읽는다. 미제공 시 done 즉시 종료(하위호환). */
+  onSaveStatus?: (saved: boolean) => void;
 }
 
 type LineResult = { signal: "done" | "error" } | { signal: "continue" };
@@ -38,7 +41,7 @@ async function resolveErrorDetail(response: Response): Promise<string> {
 function processLine(
   line: string,
   state: { fullText: string },
-  handlers: Pick<SSEStreamOptions, "onChunk" | "onDone" | "onError">
+  handlers: Pick<SSEStreamOptions, "onChunk" | "onDone" | "onError" | "onSaveStatus">
 ): LineResult {
   if (!line.startsWith("data: ")) return { signal: "continue" };
   try {
@@ -51,9 +54,15 @@ function processLine(
       state.fullText += data.chunk as string;
       handlers.onChunk(data.chunk as string, state.fullText);
     }
+    // 저장 결과 시그널 (done 이후 후속 이벤트) — 수신 시 스트림 종료
+    if (data.saved !== undefined) {
+      handlers.onSaveStatus?.(Boolean(data.saved));
+      return { signal: "done" };
+    }
     if (data.done) {
       handlers.onDone(data);
-      return { signal: "done" };
+      // onSaveStatus 소비자는 trailing saved 이벤트까지 계속 읽는다. 미제공 시 즉시 종료(하위호환).
+      return handlers.onSaveStatus ? { signal: "continue" } : { signal: "done" };
     }
   } catch (e) {
     logParseError(e);
@@ -63,13 +72,15 @@ function processLine(
 
 function flushRemainingBuffer(
   sseBuffer: string,
-  handlers: Pick<SSEStreamOptions, "onDone" | "onError">
+  handlers: Pick<SSEStreamOptions, "onDone" | "onError" | "onSaveStatus">
 ): void {
   if (!sseBuffer.trim() || !sseBuffer.startsWith("data: ")) return;
   try {
     const data = JSON.parse(sseBuffer.slice(6)) as Record<string, unknown>;
     if (data.error) {
       handlers.onError?.(data.error as string);
+    } else if (data.saved !== undefined) {
+      handlers.onSaveStatus?.(Boolean(data.saved));
     } else if (data.done) {
       handlers.onDone(data);
     }
@@ -80,7 +91,7 @@ function flushRemainingBuffer(
 
 async function readStream(
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  handlers: Pick<SSEStreamOptions, "onChunk" | "onDone" | "onError">
+  handlers: Pick<SSEStreamOptions, "onChunk" | "onDone" | "onError" | "onSaveStatus">
 ): Promise<void> {
   const decoder = new TextDecoder();
   let sseBuffer = "";
@@ -91,7 +102,7 @@ async function readStream(
     const { done, value } = await reader.read();
 
     if (done) {
-      flushRemainingBuffer(sseBuffer, { onDone: handlers.onDone, onError: handlers.onError });
+      flushRemainingBuffer(sseBuffer, { onDone: handlers.onDone, onError: handlers.onError, onSaveStatus: handlers.onSaveStatus });
       break;
     }
 
@@ -116,6 +127,7 @@ export async function fetchSSEStream({
   onDone,
   onError,
   signal,
+  onSaveStatus,
 }: SSEStreamOptions): Promise<void> {
   try {
     const response = await fetch(url, {
@@ -131,7 +143,7 @@ export async function fetchSSEStream({
       return;
     }
 
-    await readStream(response.body.getReader(), { onChunk, onDone, onError });
+    await readStream(response.body.getReader(), { onChunk, onDone, onError, onSaveStatus });
   } catch (e) {
     onError(e instanceof Error ? e.message : String(e));
   }

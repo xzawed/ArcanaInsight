@@ -13,7 +13,7 @@ import { isTarotTopic } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
-import { saveTarotReading } from "@/lib/db/reading-saver";
+import { saveTarotReading, logReadingSaveFailure } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -111,14 +111,18 @@ export async function POST(request: NextRequest) {
           // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, result })}\n\n`));
 
-          // DB 저장 — fire-and-forget. parseError 있는 부분 결과는 영구 저장하지 않는다
-          // (result/[id] 진입 시 빈 화면 방지). 클라이언트는 in_progress 세션을 재시도 가능.
+          // DB 저장 — 결과(done)는 이미 전송됐으므로 가용성에 영향 없음. 저장 결과를 saved 시그널로 전송.
+          // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 진입 시 빈 화면 방지).
           if (db && sessionId && !result.parseError) {
-            void saveTarotReading(db, sessionId, result, selectedCards.map((c) => ({
-              cardId: c.card.id, position: c.position, isReversed: c.isReversed, selectedAt: c.selectedAt,
-            })), locale).catch(
-              (e) => console.error("타로 DB 저장 최종 실패:", e)
-            )
+            try {
+              await saveTarotReading(db, sessionId, result, selectedCards.map((c) => ({
+                cardId: c.card.id, position: c.position, isReversed: c.isReversed, selectedAt: c.selectedAt,
+              })), locale);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
+            } catch (e) {
+              logReadingSaveFailure("tarot", sessionId, e);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: false })}\n\n`));
+            }
           }
         } catch (e) {
           console.error("리딩 생성 실패:", e instanceof Error ? e.message : String(e));
