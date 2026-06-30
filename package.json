@@ -6,6 +6,12 @@
   "engines": {
     "node": ">=20"
   },
+  "pnpm": {
+    "overrides": {
+      "ws@<8.21.0": "^8.21.0",
+      "@babel/core@<7.29.6": "^7.29.6"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "remove:bg:pilot": "node --env-file=.env.local scripts/remove-character-bg.mjs --pilot",
