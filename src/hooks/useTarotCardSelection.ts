@@ -99,7 +99,7 @@ export function useTarotCardSelection() {
     const allCards = deckManager.getAllCards();
     const shuffled = [...allCards];
     for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(Math.random() * (i + 1)); // NOSONAR S2245 — 타로 카드 셔플(비보안 엔터테인먼트 용도)
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     setShuffledDeck(shuffled);
@@ -162,7 +162,7 @@ export function useTarotCardSelection() {
 
     const card = shuffledDeck[index];
     if (!card) return;
-    const isReversed = Math.random() > 0.5;
+    const isReversed = Math.random() > 0.5; // NOSONAR S2245 — 카드 정/역방향 무작위(비보안 용도)
     const position = currentCards.length;
     const selected: SelectedCard = { card, position, isReversed, selectedAt: new Date() };
     if (!selectCard(selected)) return;
