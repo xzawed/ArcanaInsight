@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateSaju } from "./saju-calculator";
+import { calculateSaju, determineYongsin } from "./saju-calculator";
 import type { SajuInput } from "./saju-types";
 import { STEM_KO, BRANCH_KO, STEM_ELEMENT } from "@/data/saju/constants";
 
@@ -385,5 +385,58 @@ describe("calculateSaju", () => {
         expect(pillar.branch).toBe(BRANCH_KO[pillar.branchHanja]);
       }
     });
+  });
+});
+
+describe("determineYongsin (억부용신 부족-가중 휴리스틱)", () => {
+  // 신강: 일간을 덜어내는 후보 = 식상(생출=관성 아님)·관성(극입) 중 분포상 가장 부족한 오행.
+  // dayElement=wood → 식상=fire, 관성=metal
+  it("신강 + 관성(metal)이 식상(fire)보다 부족 → 관성을 용신", () => {
+    const elements = { wood: 4, fire: 3, earth: 2, metal: 1, water: 2 };
+    const r = determineYongsin("wood", true, elements);
+    expect(r.element).toBe("metal");
+    expect(r.reason).toContain("신강");
+  });
+
+  it("신강 + 식상(fire)이 관성(metal)보다 부족 → 식상을 용신", () => {
+    const elements = { wood: 4, fire: 0, earth: 2, metal: 2, water: 1 };
+    const r = determineYongsin("wood", true, elements);
+    expect(r.element).toBe("fire");
+    expect(r.reason).toContain("신강");
+  });
+
+  it("신강 + 식상·관성 동률 → 첫 후보(관성)을 용신 (결정론적 동률 처리)", () => {
+    const elements = { wood: 4, fire: 2, earth: 1, metal: 2, water: 1 };
+    const r = determineYongsin("wood", true, elements);
+    expect(r.element).toBe("metal");
+  });
+
+  // 신약: 일간을 돕는 후보 = 인성(생입)·비겁(동일) 중 분포상 가장 부족한 오행.
+  // dayElement=wood → 인성=water, 비겁=wood
+  it("신약 + 인성(water)이 비겁(wood)보다 부족 → 인성을 용신", () => {
+    const elements = { wood: 2, fire: 3, earth: 2, metal: 2, water: 0 };
+    const r = determineYongsin("wood", false, elements);
+    expect(r.element).toBe("water");
+    expect(r.reason).toContain("신약");
+  });
+
+  it("신약 + 비겁(일간 wood)이 인성(water)보다 부족 → 일간 오행을 용신", () => {
+    const elements = { wood: 0, fire: 3, earth: 2, metal: 2, water: 2 };
+    const r = determineYongsin("wood", false, elements);
+    expect(r.element).toBe("wood");
+    expect(r.reason).toContain("신약");
+  });
+
+  it("신약 + 인성·비겁 동률 → 첫 후보(인성)을 용신", () => {
+    // dayElement=fire → 인성=wood, 비겁=fire
+    const elements = { wood: 1, fire: 1, earth: 3, metal: 2, water: 2 };
+    const r = determineYongsin("fire", false, elements);
+    expect(r.element).toBe("wood");
+  });
+
+  it("reason에 부족 근거가 명시된다 (투명성)", () => {
+    const elements = { wood: 4, fire: 3, earth: 2, metal: 1, water: 2 };
+    const r = determineYongsin("wood", true, elements);
+    expect(r.reason).toContain("부족");
   });
 });

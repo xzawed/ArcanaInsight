@@ -214,24 +214,48 @@ function judgeStrength(dayElement: OhaengType, elements: Record<OhaengType, numb
   return strength >= 4;
 }
 
-/** 용신 결정 (향후 elements 기반 정밀 판별로 확장 예정) */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function determineYongsin(dayElement: OhaengType, isStrong: boolean, _elements: Record<OhaengType, number>): { element: OhaengType; reason: string } {
-  // 신강이면 설기(일간을 약화시키는 오행), 신약이면 생조(일간을 강화하는 오행)
-  const weakenMap: Record<OhaengType, OhaengType> = {
+/** 용신 결정 — 억부용신(抑扶用神) 부족-가중 휴리스틱.
+ *  신강이면 일간을 덜어내는 후보(관성=극입·식상=생출), 신약이면 일간을 돕는 후보(인성=생입·비겁=동일) 중
+ *  오행 분포상 가장 부족한(=균형 회복에 가장 필요한) 오행을 용신으로 택한다.
+ *  동률은 첫 후보(관성/인성 — 전통 기본)로 결정론적 처리.
+ *  ⚠️ 용신론은 학파 간 이견이 있는 영역이라 본 구현은 결정론적 휴리스틱이며, reason에 근거를 투명하게 명시한다. */
+export function determineYongsin(
+  dayElement: OhaengType,
+  isStrong: boolean,
+  elements: Record<OhaengType, number>,
+): { element: OhaengType; reason: string } {
+  const genMap: Record<OhaengType, OhaengType> = {     // 식상: 일간이 생하는 오행
+    wood: "fire", fire: "earth", earth: "metal", metal: "water", water: "wood",
+  };
+  const weakenMap: Record<OhaengType, OhaengType> = {  // 관성: 일간을 극하는 오행
     wood: "metal", fire: "water", earth: "wood", metal: "fire", water: "earth",
   };
-  const supportMap: Record<OhaengType, OhaengType> = {
+  const supportMap: Record<OhaengType, OhaengType> = { // 인성: 일간을 생하는 오행
     wood: "water", fire: "wood", earth: "fire", metal: "earth", water: "metal",
   };
 
-  if (isStrong) {
-    const el = weakenMap[dayElement];
-    return { element: el, reason: `신강하므로 ${el}(일간을 제어하는 오행)이 용신` };
-  } else {
-    const el = supportMap[dayElement];
-    return { element: el, reason: `신약하므로 ${el}(일간을 생하는 오행)이 용신` };
+  // 후보 십성 (배열 첫 항목이 동률 시 기본). 신강=설기·제어, 신약=생조.
+  const candidates: { element: OhaengType; label: string }[] = isStrong
+    ? [
+        { element: weakenMap[dayElement], label: "일간을 극하는 관성" },
+        { element: genMap[dayElement], label: "일간이 생하는 식상" },
+      ]
+    : [
+        { element: supportMap[dayElement], label: "일간을 생하는 인성" },
+        { element: dayElement, label: "일간과 같은 비겁" },
+      ];
+
+  // 분포상 가장 부족한 후보 오행 선택 (부족 = 균형 회복에 필요). 동률은 첫 후보 유지.
+  let best = candidates[0];
+  for (let i = 1; i < candidates.length; i++) {
+    if (elements[candidates[i].element] < elements[best.element]) best = candidates[i];
   }
+
+  const head = isStrong ? "신강하여 설기·제어가 필요" : "신약하여 생조가 필요";
+  return {
+    element: best.element,
+    reason: `${head}하고, ${best.element}(${best.label})이 분포상 가장 부족(${elements[best.element]})하여 용신`,
+  };
 }
 
 /** 대운 계산 (8개) */
