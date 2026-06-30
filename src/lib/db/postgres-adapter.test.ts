@@ -32,12 +32,14 @@ function mockSelectWith(rows: Record<string, unknown>[]) {
     then: (resolve: (v: unknown) => unknown) => Promise.resolve(rows).then(resolve),
     catch: (onRejected: (e: unknown) => unknown) => Promise.resolve(rows).catch(onRejected),
     where: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnValue(withOffset),
     offset: vi.fn().mockResolvedValue(rows),
   };
   const fromChain = {
     $dynamic: vi.fn().mockReturnValue(thenable),
     where: thenable.where,
+    orderBy: thenable.orderBy,
     limit: thenable.limit,
     offset: thenable.offset,
     then: thenable.then,
@@ -141,6 +143,49 @@ describe("PostgresAdapter", () => {
       const adapter = new PostgresAdapter();
       const result = await adapter.findMany("sessions", undefined, { limit: 10, offset: 5 });
       expect(result).toHaveLength(1);
+    });
+
+    it("orderBy desc 옵션 → orderBy() 호출 (desc 분기)", async () => {
+      mockSelectWith([{ id: "1", createdAt: new Date() }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findMany("sessions", { user_id: "u-1" }, { orderBy: "created_at", orderDir: "desc" });
+      expect(result).toHaveLength(1);
+    });
+
+    it("orderBy asc 기본 옵션 (orderDir 미지정)", async () => {
+      mockSelectWith([{ id: "1" }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findMany("sessions", undefined, { orderBy: "created_at" });
+      expect(result).toHaveLength(1);
+    });
+
+    it("orderBy 컬럼이 테이블에 없으면 정렬 건너뜀 (orderCol falsy 분기)", async () => {
+      mockSelectWith([{ id: "1" }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findMany("sessions", undefined, { orderBy: "no_such_col_xyz" });
+      expect(result).toHaveLength(1);
+    });
+  });
+
+  // ── findManyIn ───────────────────────────────────────────────────────────
+
+  describe("findManyIn", () => {
+    it("빈 values → 쿼리 미실행, 빈 배열 반환", async () => {
+      const adapter = new PostgresAdapter();
+      expect(await adapter.findManyIn("sessions", "id", [])).toEqual([]);
+    });
+
+    it("IN 조회 → normalizeRow 후 반환", async () => {
+      mockSelectWith([{ id: "a", userId: "u-1" }, { id: "b", userId: "u-2" }]);
+      const adapter = new PostgresAdapter();
+      const result = await adapter.findManyIn<{ id: string; user_id: string }>("sessions", "id", ["a", "b"]);
+      expect(result).toHaveLength(2);
+      expect(result[0].user_id).toBe("u-1");
+    });
+
+    it("존재하지 않는 컬럼 → Unknown column 예외", async () => {
+      const adapter = new PostgresAdapter();
+      await expect(adapter.findManyIn("sessions", "no_such_col_xyz", ["x"])).rejects.toThrow("Unknown column");
     });
   });
 
