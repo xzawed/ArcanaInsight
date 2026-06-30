@@ -178,7 +178,8 @@ describe("POST /api/saju/reading", () => {
   it("저장 실패 시 saved:false 이벤트 전송 + logReadingSaveFailure 호출", async () => {
     const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
     const mockLog = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave, logReadingSaveFailure: mockLog }));
+    const mockRecord = vi.fn();
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -189,6 +190,7 @@ describe("POST /api/saju/reading", () => {
     const text = await readSSEStream(res);
     expect(text).toContain('"saved":false');
     expect(mockLog).toHaveBeenCalledWith("saju", "sess-saju", expect.any(Error));
+    expect(mockRecord).toHaveBeenCalledWith(mockDb, "saju", "sess-saju", expect.objectContaining({ sajuReadingData: expect.any(Object) }), expect.any(Error));
   });
 
   it("birthTime=null → birth_hour: null 로 저장 (NOT NULL 위반 방지)", async () => {

@@ -140,3 +140,62 @@ export async function saveShinjeomMessages(
     ])
   );
 }
+
+/** dead-letter 대상 서비스 (최종 리딩 저장만 — 신점 중간 메시지는 대화 이력이라 제외) */
+export type DlqService = "tarot" | "saju" | "shinjeom";
+
+/** 영구 저장 실패한 리딩을 dead-letter 큐(`failed_readings`)에 영속화한다 (재처리 대상).
+ *  best-effort — 이 insert 자체가 실패해도 throw하지 않고 로깅만 한다 (스트림 가용성 보호).
+ *  payload는 재저장에 필요한 서비스별 인자(JSON 직렬화 형태). */
+export async function recordFailedReading(
+  db: DbClient,
+  service: DlqService,
+  sessionId: string,
+  payload: Record<string, unknown>,
+  error: unknown,
+): Promise<void> {
+  try {
+    const code = (error as { code?: string } | null)?.code ?? null;
+    const message = error instanceof Error ? error.message : String(error);
+    await db.insert("failed_readings", {
+      service,
+      session_id: sessionId,
+      payload,
+      error_code: code,
+      error_message: message.slice(0, 500),
+      status: "pending",
+      attempts: 0,
+    });
+  } catch (e) {
+    // dead-letter 기록 자체 실패는 무음 흡수 — 원 저장 실패는 이미 logReadingSaveFailure로 기록됨
+    logReadingSaveFailure(service, sessionId, e);
+  }
+}
+
+/** dead-letter payload로 원본 save 함수를 재호출한다 (재처리 엔드포인트가 사용).
+ *  성공 시 정상 반환, 실패 시 throw → 호출자가 attempts 증가/abandoned 처리. */
+export async function dispatchFailedReadingSave(
+  db: DbClient,
+  service: string,
+  sessionId: string,
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const locale = typeof payload.locale === "string" ? payload.locale : DEFAULT_LOCALE;
+  if (service === "tarot") {
+    const rawCards = Array.isArray(payload.cards)
+      ? (payload.cards as { cardId: string; position: number; isReversed: boolean; selectedAt?: string }[])
+      : [];
+    // jsonb 직렬화로 Date → ISO 문자열이 되므로 selectedAt을 Date로 복원
+    const cards = rawCards.map((c) => ({
+      cardId: c.cardId, position: c.position, isReversed: c.isReversed,
+      selectedAt: c.selectedAt ? new Date(c.selectedAt) : undefined,
+    }));
+    await saveTarotReading(db, sessionId, payload.reading as { cardInterpretations?: unknown; overallReading: string; advice: string }, cards, locale);
+  } else if (service === "saju") {
+    await saveSajuReading(db, sessionId, payload.sajuReadingData as Record<string, unknown>, locale);
+  } else if (service === "shinjeom") {
+    await saveShinjeomFinalReading(db, sessionId, payload.result as { overallReading: string; topicReading?: string; advice: string }, locale);
+  } else {
+    throw new Error(`unknown DLQ service: ${service}`);
+  }
+}

@@ -32,3 +32,6 @@ export function getPostgresPoolSize(): number { return parseInt(process.env.POST
 export function getUpstashRedisRestUrl(): string { return process.env.UPSTASH_REDIS_REST_URL ?? "" }
 export function getUpstashRedisRestToken(): string { return process.env.UPSTASH_REDIS_REST_TOKEN ?? "" }
 
+// 리딩 dead-letter 재처리 엔드포인트 시크릿 (미설정 시 엔드포인트 비활성=404)
+export function getDlqRetrySecret(): string { return process.env.DLQ_RETRY_SECRET ?? "" }
+

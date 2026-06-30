@@ -14,6 +14,7 @@ import {
   getPostgresPoolSize,
   getPostgresUrl,
   getUpstashRedisRestToken,
+  getDlqRetrySecret,
 } from "./env";
 
 /** 각 테스트 전 관련 env 키를 모두 제거하고, 종료 후 복원 */
@@ -34,6 +35,7 @@ const ENV_KEYS = [
   "POSTGRES_POOL_SIZE",
   "POSTGRES_URL",
   "UPSTASH_REDIS_REST_TOKEN",
+  "DLQ_RETRY_SECRET",
 ] as const;
 
 let snapshot: EnvSnapshot = {};
@@ -250,3 +252,14 @@ describe("getUpstashRedisRestToken", () => {
   });
 });
 
+
+describe("getDlqRetrySecret", () => {
+  it("미설정 시 빈 문자열", () => {
+    expect(getDlqRetrySecret()).toBe("");
+  });
+
+  it("설정 시 값 반환", () => {
+    process.env.DLQ_RETRY_SECRET = "dlq-secret-xyz";
+    expect(getDlqRetrySecret()).toBe("dlq-secret-xyz");
+  });
+});

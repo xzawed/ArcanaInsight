@@ -179,10 +179,12 @@ describe("POST /api/shinjeom/message", () => {
 
   it("isFinalTurn=true + 최종 저장 실패 → saved:false 이벤트 + logReadingSaveFailure 호출", async () => {
     const mockLog = vi.fn();
+    const mockRecord = vi.fn();
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomFinalReading: vi.fn().mockRejectedValue(new Error("DB save failed")),
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingSaveFailure: mockLog,
+      recordFailedReading: mockRecord,
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),

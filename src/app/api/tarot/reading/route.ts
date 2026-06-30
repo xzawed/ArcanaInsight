@@ -13,7 +13,7 @@ import { isTarotTopic } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
-import { saveTarotReading, logReadingSaveFailure } from "@/lib/db/reading-saver";
+import { saveTarotReading, logReadingSaveFailure, recordFailedReading } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -114,13 +114,15 @@ export async function POST(request: NextRequest) {
           // DB 저장 — 결과(done)는 이미 전송됐으므로 가용성에 영향 없음. 저장 결과를 saved 시그널로 전송.
           // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 진입 시 빈 화면 방지).
           if (db && sessionId && !result.parseError) {
+            const cardsForSave = selectedCards.map((c) => ({
+              cardId: c.card.id, position: c.position, isReversed: c.isReversed, selectedAt: c.selectedAt,
+            }));
             try {
-              await saveTarotReading(db, sessionId, result, selectedCards.map((c) => ({
-                cardId: c.card.id, position: c.position, isReversed: c.isReversed, selectedAt: c.selectedAt,
-              })), locale);
+              await saveTarotReading(db, sessionId, result, cardsForSave, locale);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
             } catch (e) {
               logReadingSaveFailure("tarot", sessionId, e);
+              await recordFailedReading(db, "tarot", sessionId, { reading: result, cards: cardsForSave, locale }, e);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: false })}\n\n`));
             }
           }

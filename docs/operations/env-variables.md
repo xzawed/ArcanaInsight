@@ -72,6 +72,16 @@
 
 ---
 
+## 리딩 dead-letter 재처리 (선택)
+
+리딩 저장이 영구 실패하면 `failed_readings`(마이그레이션 022)에 영속화된다. 재처리 엔드포인트 `POST /api/internal/reading-dlq/retry`를 시크릿으로 가드한다.
+
+| 변수 | 설명 | 비고 |
+|------|------|------|
+| `DLQ_RETRY_SECRET` | dead-letter 재처리 엔드포인트 시크릿 (`x-dlq-secret` 헤더로 검증) | 미설정 시 엔드포인트 404(비활성). Railway cron/수동 curl로 호출 |
+
+---
+
 ## AI 공급자 튜닝 (선택)
 
 미설정 시 기본값을 사용합니다.
