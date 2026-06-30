@@ -58,6 +58,8 @@ src/
 │   ├── usePreselectCharacter.ts  # URL ?character= 파라미터 + 선호 상담사 자동 선택
 │   ├── useResetScrollOnStep.ts   # step 변경 시 스크롤 최상단 초기화 (3페이지 공통)
 │   ├── useTarotReading.ts        # 타로 SSE 스트리밍·대기 연출·elapsed 카운터
+│   ├── useTarotCardSelection.ts  # 타로 세션 카드선택·리딩진행 컨트롤러 훅 (레이스 가드 포함, page=view 분리)
+│   ├── useSettings.ts            # 설정 페이지 상태·핸들러·storage 컨트롤러 훅 (page=view 분리)
 │   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸

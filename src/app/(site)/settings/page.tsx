@@ -1,18 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useThemeStore, themes, getThemeName, ThemeId } from "@/hooks/useTheme";
-import { useSkinStore } from "@/hooks/useSkinStore";
-import { useGenderStore } from "@/hooks/useGenderStore";
-import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
+import { themes, getThemeName } from "@/hooks/useTheme";
 import { cardSkins, getSkinName, getSkinDescription } from "@/data/skins";
 import { cardStyles, getStyleName, getStyleDescription, THEME_TO_STYLE_MAP, DEFAULT_STYLE_ID } from "@/data/cardStyles";
-import { useCardStyleStore } from "@/hooks/useCardStyleStore";
-import { GenderFilter } from "@/types/character";
-import { useT } from "@/i18n/useT";
-import { useLocaleStore } from "@/hooks/useLocaleStore";
+import { useSettings } from "@/hooks/useSettings";
 
 const STYLE_COLORS: Record<string, string> = {
   "dark-fantasy": "linear-gradient(135deg, #1a0a2e, #6b21a8)",
@@ -20,45 +13,6 @@ const STYLE_COLORS: Record<string, string> = {
   "anime-mystical": "linear-gradient(135deg, #1e3a8a, #60a5fa)",
   "modern-digital": "linear-gradient(135deg, #0f2944, #00b4d8)",
 };
-
-const USER_INFO_KEY = "arcana_user_info";
-const USER_INFO_CONSENT_KEY = "arcana_privacy_agreed";
-
-function hasSavedUserInfo(): boolean {
-  try {
-    return !!sessionStorage.getItem(USER_INFO_KEY);
-  } catch {
-    return false;
-  }
-}
-
-function clearSavedUserInfo(): void {
-  try {
-    sessionStorage.removeItem(USER_INFO_KEY);
-    sessionStorage.removeItem(USER_INFO_CONSENT_KEY);
-    // 이전 localStorage 저장 방식에서 남은 데이터를 함께 정리한다.
-    localStorage.removeItem(USER_INFO_KEY);
-    localStorage.removeItem(USER_INFO_CONSENT_KEY);
-  } catch {
-    // storage 차단 환경에서는 표시 상태만 갱신한다.
-  }
-}
-
-function isConfirmEachCardEnabled(): boolean {
-  try {
-    return localStorage.getItem("arcana-confirm-each-card") === "true";
-  } catch {
-    return false;
-  }
-}
-
-function saveConfirmEachCard(enabled: boolean): void {
-  try {
-    localStorage.setItem("arcana-confirm-each-card", String(enabled));
-  } catch {
-    // storage 차단 환경에서는 현재 화면 상태만 유지한다.
-  }
-}
 
 function SaveToast({ visible, text }: { visible: boolean; text: string }) {
   return (
@@ -75,77 +29,14 @@ function SaveToast({ visible, text }: { visible: boolean; text: string }) {
 }
 
 export default function SettingsPage() {
-  const { t } = useT();
-  const locale = useLocaleStore((s) => s.locale);
-  const { mode, activeTheme, setMode } = useThemeStore();
-  const { selectedSkinId, setSkin } = useSkinStore();
-  const { styleOverride, useSkinMode, setStyleOverride, clearOverride, enableSkinMode } = useCardStyleStore();
-  const { genderFilter, setGenderFilter } = useGenderStore();
-  const { reducedMotion, setReducedMotion } = useReducedMotionStore();
-
-  const isStyleMode = !useSkinMode;
-  const [confirmEachCard, setConfirmEachCard] = useState(false);
-  const [hasSavedInfo, setHasSavedInfo] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      setConfirmEachCard(isConfirmEachCardEnabled());
-      setHasSavedInfo(hasSavedUserInfo());
-    }, 0);
-    return () => clearTimeout(t);
-  }, []);
-
-  const showToast = useCallback(() => {
-    setToastVisible(true);
-    const t = setTimeout(() => setToastVisible(false), 1800);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleThemeChange = (id: "auto" | ThemeId) => {
-    setMode(id);
-    showToast();
-  };
-
-  const handleSkinChange = (skinId: string) => {
-    setSkin(skinId);
-    enableSkinMode();
-    showToast();
-  };
-
-  const handleGenderChange = (id: GenderFilter) => {
-    setGenderFilter(id);
-    showToast();
-  };
-
-  const toggleConfirmMode = () => {
-    const next = !confirmEachCard;
-    setConfirmEachCard(next);
-    saveConfirmEachCard(next);
-    showToast();
-  };
-
-  const toggleReducedMotion = () => {
-    setReducedMotion(!reducedMotion);
-    showToast();
-  };
-
-  const clearSavedInfo = () => {
-    clearSavedUserInfo();
-    setHasSavedInfo(false);
-    showToast();
-  };
-
-  const themeOptions: { id: "auto" | ThemeId; label: string; icon: string }[] = [
-    { id: "auto", label: t("settings.theme.auto-label"), icon: "🔄" },
-    ...Object.values(themes).map((th) => ({ id: th.id, label: th.nameKo, icon: th.icon })),
-  ];
-
-  const genderOptions: { id: GenderFilter; label: string }[] = [
-    { id: "all", label: t("settings.gender.all") },
-    { id: "female", label: t("settings.gender.female") },
-    { id: "male", label: t("settings.gender.male") },
-  ];
+  const {
+    t, locale,
+    mode, activeTheme, isStyleMode, styleOverride, useSkinMode, selectedSkinId,
+    genderFilter, reducedMotion, confirmEachCard, hasSavedInfo, toastVisible,
+    setStyleOverride, clearOverride, showToast,
+    handleThemeChange, handleSkinChange, handleGenderChange, toggleConfirmMode, toggleReducedMotion, clearSavedInfo,
+    themeOptions, genderOptions,
+  } = useSettings();
 
   return (
     <div className="relative">
