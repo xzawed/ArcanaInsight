@@ -25,7 +25,8 @@
 | **B: parseError 리딩 영속화 / resume** | `app/api/{tarot,saju,shinjeom}/reading\|message/route.ts`, `mypage-queries.ts` | parseError(잘림/파싱실패) 시 리딩 미저장 + 세션 in_progress 잔존 → mypage 누락. **단 `.claude/rules/services.md`가 parseError=의도적 미저장(빈 결과 페이지 방지)을 명문화** — 단순 강제 저장은 회귀 위험. 데이터상 in_progress 대부분은 정상 이탈(세션이 카드선택 화면 진입 시 생성)이라 영향 부차적. | resume/재시도 UX 별도 설계 후 처리 (강제 저장 금지) | Claude |
 | **C: 리딩 저장 fire-and-forget 관측성** | `reading route`, `lib/db/reading-saver.ts` | `void save().catch(console.error)` — `withRetry`(3회 백오프)는 이미 있어 transient 흡수, 단 지속 장애 시 무음 유실 + dead-letter/알림·`saved` 시그널 부재 | 'saved' SSE 시그널 또는 dead-letter/알림으로 관측성 보강 | Claude |
 | ~~**INSERT `WITH CHECK(true)` RLS 정책 7종**~~ | `sessions·readings·saju/shinjeom_readings·session_cards·daily_cards·shinjeom_messages` | **해소 완료 (migration 021, prod 적용 2026-06-24)** — 7테이블 병렬 심층 검증으로 anon/쿠키 클라이언트 INSERT 경로 부재 확인(모든 쓰기 getAdminDb=service_role) 후 `FOR INSERT WITH CHECK (true)` 정책 7종 제거. 적용 결과: 잔존 INSERT 정책 0행, service_role INSERT 성공·anon INSERT 차단(42501) 검증. ⚠️ 운영 shinjeom 정책이 파일 기준명(`shinjeom_*_insert`)이 아닌 `Anyone can insert shinjeom *`로 out-of-band 드리프트되어 있어 021 파일에 실측명 DROP 2종 추가(멱등 보정). | — | — |
-| `postgres-adapter.ts` Drizzle `as any` 잔존 5건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절 등 — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
+| `postgres-adapter.ts` Drizzle `as any` 잔존 6건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절·claim userId 등 6건(110·119·128·149·153·171행) — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
+| 타로 `interpretation` 레거시 필드 (하위호환 fallback) | `src/services/tarot/tarot-service.ts`, `src/components/tarot/CardInterpretationList.tsx` | 프리미엄 3-섹션(symbolism/situation/action) 도입 후 구포맷 저장 리딩 표시 전용 fallback. 신규 리딩은 미사용. 즉시 제거 시 과거 저장 리딩 표시 깨짐. | 구포맷 저장 데이터 소멸(충분 기간 경과) 확인 후 필드·렌더 제거 검토 | Claude |
 | SonarCloud CRITICAL Cognitive Complexity | — | **0건 해소 완료** (2026-05-01). Quality Gate PASSED. 재발 시 아래 섹션 참고. | — |
 
 ### SonarCloud CRITICAL 이슈 현황 (2026-05-01 기준)
@@ -41,7 +42,7 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
 
 | 항목 | 파기 근거 | 담당 |
 |------|----------|------|
-| **rate-limit Redis 전환** | Railway 단일 인스턴스에서 in-memory Map이 Redis와 동등. 서비스 규모(일 수천 건, 공격 대상성 낮음)에서 배포 시 카운터 초기화는 허용 수준. Upstash는 트래픽 급증 시 선택적 추가. `getClientIp`(x-forwarded-for 첫 번째 값)도 Railway 환경에서 정상. | 파기 확정 (Claude 결정) |
+| **rate-limit Redis 전환** | **이미 구현 완료** — `src/lib/rate-limit.ts`의 `checkUpstash`가 Upstash Redis(REST pipeline `INCR`+`EXPIRE NX`) 경로를 제공하며 `UPSTASH_REDIS_REST_URL` 설정 시 활성·미설정 시 in-memory Map fallback. Railway 단일 인스턴스에선 Map도 동등하므로 env는 선택 사항. `getClientIp`(x-forwarded-for 첫 번째 값)도 Railway 환경에서 정상. **재구현 금지.** | 구현 완료 (재제안 금지) |
 | **SupabaseAdapter 통합 테스트** | insert/upsert 하드-throw는 올바른 설계(쓰기 실패 무음 처리 금지). CI Supabase Test DB 설정 투자 대비 효용 불충분. E2E 19개 spec이 DB 계층 간접 커버. 현행 100% 단위 테스트로 충분. | 파기 확정 (Claude 결정) |
 
 ---

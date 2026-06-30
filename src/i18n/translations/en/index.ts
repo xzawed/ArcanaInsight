@@ -1,8 +1,7 @@
 import type { SharedKeys } from "../shared/keys";
 
 /**
- * 영어 사전 — 1차 임시 번역 (외부 전문 번역가 의뢰 예정)
- * 마스터 플랜 PR-2 결정에 따라 외부 번역 도착 후 교체.
+ * 영어 사전 — 팀 내부 직역 사전 (외부 번역가 미사용, 사용자 확정 2026-05-14).
  * 미번역 키는 자동으로 ko fallback (translations/index.ts).
  */
 export const en: Partial<SharedKeys> = {

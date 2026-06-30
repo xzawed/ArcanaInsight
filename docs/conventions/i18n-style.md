@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
 1. **타입 먼저**: `src/i18n/translations/shared/keys.ts`의 `SharedKeys` 인터페이스에 키 추가
 2. **ko 사전 채움**: `src/i18n/translations/ko/index.ts` (SSOT, 모든 키 필수)
-3. **en 사전 임시 영문**: `src/i18n/translations/en/index.ts` (외부 번역가 의뢰 대기 중에는 1차 직역)
+3. **en 사전 직역 영문**: `src/i18n/translations/en/index.ts` (팀 내부 직역 사전, 외부 번역가 미사용)
 4. **ja 사전 관리**: 미번역 키는 ko fallback을 허용하되, 사용자에게 직접 보이는 주요 UI는 우선 번역한다.
 
 ## SSR 규칙 (필수 준수)
