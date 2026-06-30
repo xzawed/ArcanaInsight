@@ -229,7 +229,8 @@ describe("POST /api/tarot/reading", () => {
   it("저장 실패 시 saved:false 이벤트 전송 + logReadingSaveFailure 호출", async () => {
     const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
     const mockLog = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ saveTarotReading: mockSave, logReadingSaveFailure: mockLog }));
+    const mockRecord = vi.fn();
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveTarotReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -240,6 +241,7 @@ describe("POST /api/tarot/reading", () => {
     const text = await readSSEStream(res);
     expect(text).toContain('"saved":false');
     expect(mockLog).toHaveBeenCalledWith("tarot", "sess-existing", expect.any(Error));
+    expect(mockRecord).toHaveBeenCalledWith(mockDb, "tarot", "sess-existing", expect.objectContaining({ reading: expect.any(Object) }), expect.any(Error));
   });
 
   it("존재하지 않는 cardId → Card not found 에러 → 500", async () => {

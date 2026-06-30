@@ -46,6 +46,7 @@ export default defineConfig({
         "src/app/api/shinjeom/message/route.ts",      // PR C
         "src/app/api/shinjeom/result/[id]/route.ts",  // PR-L
         "src/app/api/sessions/claim/route.ts",        // 익명 세션 claim
+        "src/app/api/internal/reading-dlq/retry/route.ts", // A-1 dead-letter 재처리
         "src/lib/supabase/admin.ts",  // Admin client — 테스트 있음
         "src/lib/db/index.ts",        // DB provider 팩토리 — 테스트 있음
         "src/i18n/config.ts",         // PR-1 i18n config — 테스트 있음

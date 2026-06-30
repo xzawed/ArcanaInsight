@@ -5,6 +5,8 @@ import {
   saveShinjeomFinalReading,
   saveShinjeomMessages,
   logReadingSaveFailure,
+  recordFailedReading,
+  dispatchFailedReadingSave,
 } from "@/lib/db/reading-saver";
 import { makeMockDb } from "@/test-helpers/mock-db";
 
@@ -210,5 +212,95 @@ describe("withRetry — 재시도 동작", () => {
 
     await expect(saveTarotReading(db, "s", { overallReading: "o", advice: "a" }, [])).rejects.toThrow("violates");
     expect(db.insert).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("recordFailedReading (dead-letter 영속화)", () => {
+  it("failed_readings에 service/session/payload/error 기록", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "f-1" });
+    const err = Object.assign(new Error("db down"), { code: "53300" });
+
+    await recordFailedReading(db, "tarot", "sess-1", { reading: { x: 1 }, locale: "ko" }, err);
+
+    expect(db.insert).toHaveBeenCalledWith("failed_readings", expect.objectContaining({
+      service: "tarot", session_id: "sess-1", status: "pending", attempts: 0,
+      error_code: "53300", error_message: "db down",
+    }));
+  });
+
+  it("insert 자체 실패 시 throw 없이 흡수 (best-effort)", async () => {
+    const db = makeMockDb();
+    db.insert.mockRejectedValue(new Error("dlq insert fail"));
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await expect(
+      recordFailedReading(db, "saju", "s", { sajuReadingData: {}, locale: "ko" }, new Error("x"))
+    ).resolves.toBeUndefined();
+
+    spy.mockRestore();
+  });
+
+  it("code 없는 에러 → error_code null", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "f-2" });
+
+    await recordFailedReading(db, "shinjeom", "s2", { result: {}, locale: "ko" }, new Error("boom"));
+
+    expect(db.insert).toHaveBeenCalledWith("failed_readings", expect.objectContaining({ error_code: null }));
+  });
+});
+
+describe("dispatchFailedReadingSave (dead-letter 재처리 dispatch)", () => {
+  it("tarot → saveTarotReading 재호출 (selectedAt ISO→Date 복원)", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "r" }); db.update.mockResolvedValue(null); db.insertMany.mockResolvedValue([]);
+
+    await dispatchFailedReadingSave(db, "tarot", "sess-1", {
+      reading: { overallReading: "o", advice: "a" },
+      cards: [{ cardId: "major-00", position: 0, isReversed: false, selectedAt: "2026-06-30T00:00:00.000Z" }],
+      locale: "ko",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith("readings", expect.objectContaining({ session_id: "sess-1" }));
+    expect(db.insertMany).toHaveBeenCalledWith("session_cards", expect.arrayContaining([
+      expect.objectContaining({ card_id: "major-00", selected_at: "2026-06-30T00:00:00.000Z" }),
+    ]));
+  });
+
+  it("saju → saveSajuReading 재호출", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "r" }); db.update.mockResolvedValue(null);
+
+    await dispatchFailedReadingSave(db, "saju", "sess-2", {
+      sajuReadingData: { session_id: "sess-2", overall_reading: "x" }, locale: "ko",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith("saju_readings", expect.objectContaining({ session_id: "sess-2" }));
+  });
+
+  it("shinjeom → saveShinjeomFinalReading 재호출", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "r", share_token: "t" }); db.update.mockResolvedValue(null);
+
+    await dispatchFailedReadingSave(db, "shinjeom", "sess-3", {
+      result: { overallReading: "o", advice: "a" }, locale: "ko",
+    });
+
+    expect(db.insert).toHaveBeenCalledWith("shinjeom_readings", expect.objectContaining({ session_id: "sess-3" }));
+  });
+
+  it("locale 누락 시 기본 ko로 저장", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({ id: "r" }); db.update.mockResolvedValue(null);
+
+    await dispatchFailedReadingSave(db, "saju", "s", { sajuReadingData: { session_id: "s" } });
+
+    expect(db.insert).toHaveBeenCalledWith("saju_readings", expect.objectContaining({ locale: "ko" }));
+  });
+
+  it("알 수 없는 service → throw", async () => {
+    const db = makeMockDb();
+    await expect(dispatchFailedReadingSave(db, "unknown", "s", {})).rejects.toThrow("unknown DLQ service");
   });
 });

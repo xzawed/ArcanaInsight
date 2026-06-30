@@ -8,7 +8,7 @@ import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure } from "@/lib/db/reading-saver";
+import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading } from "@/lib/db/reading-saver";
 import type { DbClient } from "@/lib/db/types";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
@@ -53,6 +53,7 @@ async function emitShinjeomFinalResult(
       saveStatus = true;
     } catch (e) {
       logReadingSaveFailure("shinjeom", sessionId, e);
+      await recordFailedReading(db, "shinjeom", sessionId, { result, locale }, e);
       saveStatus = false;
     }
   }
