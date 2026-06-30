@@ -63,7 +63,7 @@ controller.close()
 - **제공 시**: `done`에서 `onDone` 호출하되 루프를 멈추지 않고 계속 읽음 → `{saved}` 수신 시 `onSaveStatus(saved)` 후 종료, 또는 스트림 close/타임아웃 시 상태 미상으로 종료(이미 결과 보유).
 - 익명 리딩(저장 없음)·구경로: saved 이벤트 없이 close → 미상 종료로 안전 처리.
 
-**클라이언트 훅 (타로·사주·신점):** `onSaveStatus`를 opt-in해 `saveStatus: "saved" | "failed" | "unknown"` 상태를 노출. 1차 구현은 상태 보유까지(필요 시 후속 PR에서 UI 힌트 — 예: "이력 저장 실패" 토스트).
+**클라이언트 훅 (타로·사주·신점) — 후속 PR로 분리:** `fetchSSEStream`에 `onSaveStatus` capability를 추가하는 것까지가 본 PR 범위다. 3개 훅이 `onSaveStatus`를 opt-in해 `saveStatus` 상태를 노출하고 UI 힌트(예: "이력 저장 실패" 토스트)를 보여주는 작업은 **소비할 UI와 함께 후속 PR로 진행**한다. 소비 UI 없이 상태만 보유하면 dead state(YAGNI)이므로, 훅 배선은 UI 설계와 한 묶음으로 처리한다. 서버는 이미 saved 이벤트를 전송하나 `onSaveStatus` 미제공 훅은 기존처럼 done에서 종료하며, 미수신 trailing 이벤트는 무해하다.
 
 ## 에러 처리
 
@@ -82,6 +82,6 @@ controller.close()
 
 ## 범위·비범위
 
-- **범위**: 3 라우트, `reading-saver.ts`(헬퍼), `useSSEStream.ts`(하위호환), 3 훅(상태 opt-in), 단위 테스트.
-- **비범위(후속 가능)**: dead-letter 테이블·자동 재처리, saveError UI 토스트 디자인, 신점 중간 메시지 saved 시그널.
+- **범위(본 PR)**: 3 라우트(await + saved 시그널 + 구조적 로깅), `reading-saver.ts`(`logReadingSaveFailure` 헬퍼), `useSSEStream.ts`(`onSaveStatus` 하위호환 capability), 단위 테스트.
+- **비범위(후속 PR)**: 3 클라이언트 훅의 `onSaveStatus` opt-in + `saveStatus` UI 힌트(토스트), dead-letter 테이블·자동 재처리, 신점 중간 메시지 saved 시그널.
 - **마이그레이션 0.**

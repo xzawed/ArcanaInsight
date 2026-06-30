@@ -143,7 +143,7 @@ describe("POST /api/saju/reading", () => {
     expect(res.status).toBe(403);
   });
 
-  it("스트림 완료 후 saveSajuReading fire-and-forget 호출", async () => {
+  it("스트림 완료 후 saveSajuReading 호출 (done 이후 await)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
     vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave }));
     vi.doMock("@/lib/rate-limit", () => ({
@@ -159,6 +159,36 @@ describe("POST /api/saju/reading", () => {
     await readSSEStream(res);
     await Promise.resolve();
     expect(mockSave).toHaveBeenCalledWith(mockDb, "sess-saju", expect.any(Object), expect.any(String));
+  });
+
+  it("저장 성공 시 done 이후 saved:true 이벤트를 전송한다", async () => {
+    const mockSave = vi.fn().mockResolvedValue(undefined);
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave, logReadingSaveFailure: vi.fn() }));
+    vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-saju" }));
+    const text = await readSSEStream(res);
+    expect(text).toContain('"saved":true');
+  });
+
+  it("저장 실패 시 saved:false 이벤트 전송 + logReadingSaveFailure 호출", async () => {
+    const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
+    const mockLog = vi.fn();
+    vi.doMock("@/lib/db/reading-saver", () => ({ saveSajuReading: mockSave, logReadingSaveFailure: mockLog }));
+    vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-saju" }));
+    const text = await readSSEStream(res);
+    expect(text).toContain('"saved":false');
+    expect(mockLog).toHaveBeenCalledWith("saju", "sess-saju", expect.any(Error));
   });
 
   it("birthTime=null → birth_hour: null 로 저장 (NOT NULL 위반 방지)", async () => {

@@ -29,6 +29,20 @@ async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
   throw lastErr;
 }
 
+/** 리딩 저장 실패를 단일 grep 가능 마커로 구조적 로깅한다.
+ *  운영 로그에서 `[reading-save-failed]` 마커로 지속 장애를 추적·알림하기 위한 관측성 헬퍼. */
+export function logReadingSaveFailure(
+  service: "tarot" | "saju" | "shinjeom" | "shinjeom-message",
+  sessionId: string | null,
+  error: unknown,
+): void {
+  const code = (error as { code?: string } | null)?.code ?? "none";
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(
+    `[reading-save-failed] service=${service} session=${sessionId ?? "null"} code=${code} msg=${message}`,
+  );
+}
+
 /** 타로 리딩 결과 + 세션 완료 + 카드 목록 저장 (3회 retry).
  *  locale 인자는 readings 테이블에 작성 시점 locale을 기록 (sessions.locale과 별도 — 결과 텍스트 언어 추적용). */
 export async function saveTarotReading(

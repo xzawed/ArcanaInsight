@@ -11,7 +11,7 @@ import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveSajuReading } from "@/lib/db/reading-saver";
+import { saveSajuReading, logReadingSaveFailure } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -131,31 +131,37 @@ export async function POST(request: NextRequest) {
             sajuData: sajuResult,
           })}\n\n`));
 
-          // DB 저장 — fire-and-forget. parseError 있는 부분 결과는 영구 저장하지 않는다
-          // (result/[id] 진입 시 빈 화면 방지). 클라이언트는 in_progress 세션을 재시도 가능.
+          // DB 저장 — 결과(done)는 이미 전송됐으므로 가용성에 영향 없음. 저장 결과를 saved 시그널로 전송.
+          // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 진입 시 빈 화면 방지).
           if (db && sessionId && !result.parseError) {
-            void saveSajuReading(db, sessionId, {
-              session_id: sessionId,
-              birth_date: userInfo.birthDate,
-              birth_hour: userInfo.birthTime ?? null,
-              gender: userInfo.gender,
-              birth_name: userInfo.name || null,
-              mbti: userInfo.mbti ?? null,
-              pillars: sajuResult.pillars,
-              day_master: sajuResult.dayMaster,
-              day_master_element: sajuResult.dayMasterElement,
-              is_strong: sajuResult.isStrong,
-              elements: sajuResult.elements,
-              ten_stars: sajuResult.tenStars,
-              twelve_stages: sajuResult.twelveStages,
-              interactions: sajuResult.interactions,
-              yongsin: sajuResult.yongsin,
-              major_fortunes: sajuResult.majorFortunes,
-              yearly_fortune: sajuResult.yearlyFortune,
-              overall_reading: result.overallReading,
-              topic_reading: result.topicReading || "",
-              advice: result.advice,
-            }, locale).catch((e) => console.error("사주 DB 저장 최종 실패:", e))
+            try {
+              await saveSajuReading(db, sessionId, {
+                session_id: sessionId,
+                birth_date: userInfo.birthDate,
+                birth_hour: userInfo.birthTime ?? null,
+                gender: userInfo.gender,
+                birth_name: userInfo.name || null,
+                mbti: userInfo.mbti ?? null,
+                pillars: sajuResult.pillars,
+                day_master: sajuResult.dayMaster,
+                day_master_element: sajuResult.dayMasterElement,
+                is_strong: sajuResult.isStrong,
+                elements: sajuResult.elements,
+                ten_stars: sajuResult.tenStars,
+                twelve_stages: sajuResult.twelveStages,
+                interactions: sajuResult.interactions,
+                yongsin: sajuResult.yongsin,
+                major_fortunes: sajuResult.majorFortunes,
+                yearly_fortune: sajuResult.yearlyFortune,
+                overall_reading: result.overallReading,
+                topic_reading: result.topicReading || "",
+                advice: result.advice,
+              }, locale);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
+            } catch (e) {
+              logReadingSaveFailure("saju", sessionId, e);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: false })}\n\n`));
+            }
           }
         } catch (e) {
           console.error("사주 리딩 생성 실패:", e instanceof Error ? e.message : String(e));

@@ -160,11 +160,29 @@ describe("POST /api/shinjeom/message", () => {
     expect(text).toContain("test-token-123");
   });
 
-  it("isFinalTurn=true + saveShinjeomFinalReading 실패 → catch 처리 후 SSE 정상 완료", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  it("isFinalTurn=true + 최종 저장 성공 → saved:true 이벤트를 전송한다", async () => {
+    vi.doMock("@/lib/db/reading-saver", () => ({
+      saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: "tok" }),
+      saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
+      logReadingSaveFailure: vi.fn(),
+    }));
+    vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
+    const mockDb = makeMockDb();
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => makeMockAiModule());
+    const { POST } = await import("@/app/api/shinjeom/message/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-final-ok", isFinalTurn: true }));
+    const text = await readSSEStream(res);
+    expect(text).toContain('"saved":true');
+  });
+
+  it("isFinalTurn=true + 최종 저장 실패 → saved:false 이벤트 + logReadingSaveFailure 호출", async () => {
+    const mockLog = vi.fn();
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomFinalReading: vi.fn().mockRejectedValue(new Error("DB save failed")),
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
+      logReadingSaveFailure: mockLog,
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -176,10 +194,9 @@ describe("POST /api/shinjeom/message", () => {
     const { POST } = await import("@/app/api/shinjeom/message/route");
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-save-fail", isFinalTurn: true }));
     const text = await readSSEStream(res);
-    await Promise.resolve();
     expect(text).toContain("isFinal");
-    expect(consoleSpy).toHaveBeenCalledWith("신점 최종 DB 저장 최종 실패:", expect.any(Error));
-    consoleSpy.mockRestore();
+    expect(text).toContain('"saved":false');
+    expect(mockLog).toHaveBeenCalledWith("shinjeom", "sess-save-fail", expect.any(Error));
   });
 
   it("AI 오류 → 스트림 내부 catch에서 errMsg 전송", async () => {
@@ -200,12 +217,13 @@ describe("POST /api/shinjeom/message", () => {
     expect(text).toContain("error");
   });
 
-  it("DB 저장 실패해도 SSE 응답 정상 완료 (fire-and-forget 비블로킹)", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  it("중간 메시지 저장 실패 → SSE 정상 완료 + logReadingSaveFailure 호출 (비블로킹)", async () => {
     const mockSaveFail = vi.fn().mockRejectedValue(new Error("DB connection lost"));
+    const mockLog = vi.fn();
     vi.doMock("@/lib/db/reading-saver", () => ({
       saveShinjeomMessages: mockSaveFail,
       saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: null }),
+      logReadingSaveFailure: mockLog,
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -218,9 +236,9 @@ describe("POST /api/shinjeom/message", () => {
     const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-sh", isFinalTurn: false }));
     const text = await readSSEStream(res);
     expect(text).toContain("done");
-    await Promise.resolve();
+    await new Promise((r) => setTimeout(r, 10)); // fire-and-forget 대기
     expect(mockSaveFail).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(mockLog).toHaveBeenCalledWith("shinjeom-message", "sess-sh", expect.any(Error));
   });
 
   it("중간 메시지 → saveShinjeomMessages fire-and-forget 호출", async () => {
