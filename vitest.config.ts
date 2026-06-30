@@ -27,6 +27,7 @@ export default defineConfig({
         "src/lib/time-utils.ts",          // 시간 포맷 유틸 — 테스트 있음 (B-4 점진 확장)
         "src/lib/guest-sessions.ts",      // 익명 세션 localStorage 보관 — 테스트 있음 (B-4 점진 확장)
         "src/lib/db/reading-saver.ts",    // 리딩 저장 + logReadingSaveFailure — 테스트 있음 (B-4 점진 확장)
+        "src/lib/db/character-context.ts", // fetchMemoryPrompt — 테스트 14건 (B-4 점진 확장 2차, stmts 100%)
         "src/lib/db/supabase-adapter.ts", // DB 어댑터 — 테스트 있음
         "src/lib/rate-limit.ts",          // Rate Limiter — 테스트 있음
         "src/lib/validation/api-schemas.ts", // Zod 스키마 — null/undefined 경계 테스트 있음
