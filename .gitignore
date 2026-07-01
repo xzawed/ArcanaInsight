@@ -64,3 +64,6 @@ scripts/e2e-full/results/
 scripts/e2e-full/cases/
 
 .superpowers/
+
+# Playwright MCP 세션 아티팩트 (로컬 전용)
+.playwright-mcp/
