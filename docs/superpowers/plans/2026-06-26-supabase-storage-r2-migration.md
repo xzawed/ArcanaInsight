@@ -124,7 +124,7 @@ function storageBase(): string {
 ### Phase 7 — (선택) 후속 최적화
 - 7.1 무손실 WebP(픽셀 동일) 재인코딩으로 전송량 추가 절감 — 화질 0 손실.
 - 7.2 `card-skins`(224MB)도 동일 패턴으로 R2 이전(일원화).
-- 7.3 별개 청소: `public/images/characters/*/_backup/` 404MB 삭제(코드 참조 0, Supabase 무관, Railway/repo 다이어트).
+- ~~7.3 별개 청소: `public/images/characters/*/_backup/` 405MB 삭제(코드 참조 0, Supabase 무관, Railway/repo 다이어트).~~ ✅ **완료(2026-07-02)** — 12개 캐릭터 `_backup/`(legacy-base·nukki·nukki-enhanced·sprites 백업 사본, 추적 226파일) 제거. 라이브 `nukki-enhanced/` 이미지 무영향.
 
 ---
 
