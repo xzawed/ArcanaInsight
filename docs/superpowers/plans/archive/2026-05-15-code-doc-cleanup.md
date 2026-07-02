@@ -1,5 +1,7 @@
 # 전체 코드·문서 정리 Implementation Plan
 
+> ✅ **완료 (2026-07-02 archive)** — 산출물은 후속 PR로 전량 달성: 문서 감사·drift 제거(#426 route group 이동 등), 대형 컴포넌트 분리(#437·#440 컨트롤러 훅 추출: tarot/session·saju·shinjeom·settings 전부 <300줄), `as any`/dead code 정리. 미완 체크박스는 당시 추적용 잔재이며 실질 잔여 없음. 아래 원본은 의사결정 맥락 보존용.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 코드↔문서 drift 제거, CLAUDE.md Anthropic 가이드라인 준수, dead code 정리, 대형 컴포넌트 분리를 3개 순차 PR로 완료한다.
