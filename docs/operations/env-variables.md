@@ -5,7 +5,7 @@
 
 `src/lib/env.ts`의 getter 함수와 대응하는 전체 환경변수 목록입니다.
 환경변수는 코드에 하드코딩 금지 — 원칙적으로 `src/lib/env.ts`의 getter 함수를 통해 접근합니다.
-단, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`은 Supabase 클라이언트 초기화 코드에서 `process.env.*`로 직접 접근합니다 (Next.js NEXT_PUBLIC_ 패턴 준수).
+단, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_ASSET_BASE_URL`은 클라이언트/스토리지 초기화 코드에서 `process.env.*`로 직접 접근합니다 (Next.js NEXT_PUBLIC_ 패턴 준수).
 
 ---
 
@@ -31,6 +31,21 @@
 | `GROK_MODEL` | Grok 텍스트 생성 모델 | `grok-3` (CI 하드코딩값. `grok-4-fast-non-reasoning`은 reasoning 토큰 차단이 필요할 때의 선택적 대안) |
 | `GROK_REASONING_EFFORT` | Grok-3 계열 reasoning 노력 수준. `low`/`high`. 비-reasoning 모델은 무시됨 | `low` |
 | `ANTHROPIC_API_KEY` | Anthropic Claude API 키 (Grok 장애 시 자동 fallback) | 미설정 시 Grok 단독 사용 |
+
+---
+
+## 자산 CDN (선택 — Cloudflare R2)
+
+카드·배경 이미지(`card-styles` 버킷)의 서빙 베이스를 전환하는 선택 변수입니다. DB 모드와 무관하게 적용됩니다.
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`로 서빙(예: Cloudflare R2 커스텀 도메인). 미설정 시 Supabase Storage로 폴백 | 미설정(Supabase 사용) |
+
+- 예시: `NEXT_PUBLIC_ASSET_BASE_URL=https://cdn.xzawed.xyz`
+- `NEXT_PUBLIC_` 접두사라 **빌드 타임에 인라인**됩니다 → Railway에 설정 후 재배포해야 반영. 변수 제거 + 재배포로 즉시 Supabase 롤백.
+- 코드: [`src/lib/storage/card-style.ts`](../../src/lib/storage/card-style.ts) `storageBase()`, [`next.config.ts`](../../next.config.ts) `images.remotePatterns`(호스트 자동 파생).
+- 설계·이전 절차 정본: [`../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md)
 
 ---
 

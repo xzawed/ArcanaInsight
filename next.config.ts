@@ -2,6 +2,19 @@ import type { NextConfig } from "next";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
+// NEXT_PUBLIC_ASSET_BASE_URL(R2 이전 시) 설정 시 그 호스트를 이미지 remotePatterns에 추가한다.
+// 미설정 시 Supabase 호스트만 허용(기존 동작). 카드 이미지는 unoptimized라 필수는 아니나
+// 최적화 경로(StyleSelector 등)를 안전하게 허용한다.
+const assetHost = (() => {
+  const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  if (!base) return null;
+  try {
+    return new URL(base).hostname;
+  } catch {
+    return null;
+  }
+})();
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
@@ -36,6 +49,9 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      ...(assetHost
+        ? [{ protocol: "https" as const, hostname: assetHost }]
+        : []),
     ],
     // Large transparent character PNGs can stall first-time AVIF optimization
     // in Chromium mobile runs. WebP keeps alpha support with steadier latency.

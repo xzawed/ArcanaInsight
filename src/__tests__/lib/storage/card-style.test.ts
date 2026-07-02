@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import {
   getCardStyleImageUrl,
   getCardStyleBackUrl,
@@ -10,6 +10,8 @@ const BASE = `${SUPABASE_URL}/storage/v1/object/public/card-styles`;
 
 beforeAll(() => {
   process.env.NEXT_PUBLIC_SUPABASE_URL = SUPABASE_URL;
+  // 폴백(Supabase) 모드 테스트 격리 — R2 베이스가 설정돼 있으면 제거
+  delete process.env.NEXT_PUBLIC_ASSET_BASE_URL;
 });
 
 describe('getCardStyleImageUrl', () => {
@@ -78,5 +80,43 @@ describe('getServiceBackgroundUrl', () => {
     expect(getServiceBackgroundUrl('shinjeom', 'winter')).toBe(
       `${BASE}/backgrounds/shinjeom/winter.png`
     );
+  });
+});
+
+describe('NEXT_PUBLIC_ASSET_BASE_URL 설정 시 (R2/CDN 우선)', () => {
+  const ASSET_BASE = 'https://cdn.example.xyz';
+  const R2_BASE = `${ASSET_BASE}/card-styles`;
+
+  beforeAll(() => {
+    process.env.NEXT_PUBLIC_ASSET_BASE_URL = ASSET_BASE;
+  });
+  afterAll(() => {
+    delete process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  });
+
+  it('카드 이미지 URL이 자산 베이스를 사용한다', () => {
+    expect(getCardStyleImageUrl('dark-fantasy', 'major-00')).toBe(
+      `${R2_BASE}/cards/dark-fantasy/major/00.png`
+    );
+  });
+
+  it('카드 뒷면 URL이 자산 베이스를 사용한다', () => {
+    expect(getCardStyleBackUrl('anime-mystical')).toBe(
+      `${R2_BASE}/cards/anime-mystical/card-back.webp`
+    );
+  });
+
+  it('서비스 배경 URL이 자산 베이스를 사용한다', () => {
+    expect(getServiceBackgroundUrl('tarot', 'spring')).toBe(
+      `${R2_BASE}/backgrounds/tarot/spring.png`
+    );
+  });
+
+  it('베이스 끝 슬래시를 정규화한다 (이중 슬래시 방지)', () => {
+    process.env.NEXT_PUBLIC_ASSET_BASE_URL = `${ASSET_BASE}/`;
+    expect(getCardStyleBackUrl('dark-fantasy')).toBe(
+      `${R2_BASE}/cards/dark-fantasy/card-back.webp`
+    );
+    process.env.NEXT_PUBLIC_ASSET_BASE_URL = ASSET_BASE;
   });
 });
