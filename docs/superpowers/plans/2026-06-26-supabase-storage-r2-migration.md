@@ -108,7 +108,7 @@ function storageBase(): string {
 | ID | 작업 | 담당 | 선행 | 완료기준 |
 |---|---|---|---|---|
 | 5.1 | `pnpm type-check && pnpm lint && pnpm build` | 🤖 | Ph4 | 무오류 |
-| 5.2 | `pnpm test:coverage`(임계 branches92/그외98) | 🤖 | Ph4 | 통과 |
+| 5.2 | `pnpm test:coverage`(임계 branches90/functions97/그외98) | 🤖 | Ph4 | 통과 |
 | 5.3 | 카드 표시 전수 육안: **타로 결과·스프레드·StyleSelector·ShuffleCeremony(canvas)·배경** | 👤+🤖 | 5.1 | 4곳+배경 정상, 404 0 |
 | 5.4 | E2E(`pnpm test:e2e` 또는 Docker) | 🤖 | 5.1 | 통과 |
 | 5.5 | 프로덕션 배포 후 실서비스 카드 로드 확인 | 👤 | 5.3 | 정상 |

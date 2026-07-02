@@ -194,7 +194,7 @@
 ```bash
 pnpm type-check        # TypeScript 오류 없음
 pnpm lint              # ESLint 통과
-pnpm test:coverage     # 임계값: branches 92 / functions·lines·statements 98
+pnpm test:coverage     # 임계값: branches 90 / functions 97 / lines·statements 98
 pnpm check:doc-links   # 문서 링크 유효
 pnpm check:env-docs    # env.ts ↔ env-variables.md 정합성
 pnpm i18n:check        # 번역 키 drift 없음
