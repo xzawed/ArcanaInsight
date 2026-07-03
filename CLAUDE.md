@@ -65,7 +65,7 @@ src/
 │   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
-│   ├── storage/card-style.ts  # getCardStyleImageUrl, getCardStyleBackUrl
+│   ├── storage/card-style.ts  # getCardStyleImageUrl·getCardStyleBackUrl·getServiceBackgroundUrl. card-styles 자산은 Cloudflare R2(cdn.xzawed.xyz), storageBase()가 NEXT_PUBLIC_ASSET_BASE_URL↔Supabase 폴백 분기
 │   ├── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
 │   └── guest-sessions.ts      # 익명 세션 id localStorage 보관 (로그인 시 claim 대상)
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스

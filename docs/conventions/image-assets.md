@@ -67,19 +67,22 @@
 
 ---
 
-## 5. 카드 아트 스타일 이미지 (Supabase Storage)
+## 5. 카드 아트 스타일 이미지 (Cloudflare R2)
 
-AI 생성 타로 카드 이미지는 Supabase Storage `card-styles` 버킷에 저장된다.  
-SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
+AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana-assets` 버킷, `card-styles/` prefix)에 저장되어 커스텀 도메인 `cdn.xzawed.xyz`로 서빙된다. SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
 
-| 구분 | 경로 패턴 | 비고 |
+> **이전 이력**: 2026-07-03 이전에는 Supabase Storage `card-styles` 버킷 사용. 무료티어(1GB) 초과(~2GB, 100% 카드아트) 해소를 위해 R2로 **무손실 이전**(351객체, 바이트·md5 일치 검증, Supabase 원본 삭제 → 224MB로 복귀). 정본: [`../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md).
+
+| 구분 | 서빙 URL 패턴 (`cdn.xzawed.xyz` 기준) | 비고 |
 |------|---------|------|
-| 카드 앞면 | `{styleId}/{suit}/{number}.png` | 4종 스타일 × 카드 수 (`.png`) |
-| 카드 뒷면 | `{styleId}/card-back.webp` | 스타일별 전용 뒷면 (`.webp`) |
+| 카드 앞면 | `card-styles/cards/{styleId}/{suit}/{number}.png` | 4종 스타일 × 카드 수 (`.png`) |
+| 카드 뒷면 | `card-styles/cards/{styleId}/card-back.webp` | 스타일별 전용 뒷면 (`.webp`) |
+| 서비스 배경 | `card-styles/backgrounds/{service}/{theme}.png` | 타로/사주/신점 × 테마 |
 
-- 이미지 URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()`로 조회
-- 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요)
-- 업로드: `pnpm upload:assets` / `pnpm upload:assets:skip`
+- URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).
+- 카드 `<Image>`는 `unoptimized`로 R2에서 직접 로드(옵티마이저 우회). `next.config.ts` `remotePatterns`가 자산 호스트를 env에서 자동 파생.
+- 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요).
+- ⚠️ 업로드: 기존 `pnpm upload:assets`는 **Supabase 대상**이다. 현재 정본은 R2이므로 **신규 카드 자산은 R2에도 업로드해야 앱에 반영**된다(전용 R2 업로드 스크립트는 후속 과제 — 이전 시 사용한 S3 API PUT 방식 재사용 가능).
 
 ---
 
