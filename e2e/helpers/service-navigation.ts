@@ -14,7 +14,7 @@ export async function selectFirstCharacter(
 // ── 사주 ──
 
 export async function navigateToSajuForm(page: Page) {
-  await page.goto("/saju");
+  await page.goto("/saju", { waitUntil: "domcontentloaded" });
   await selectFirstCharacter(page);
   await expect(page.locator("text=생년월일").first()).toBeVisible({ timeout: 5_000 });
 }
@@ -42,8 +42,7 @@ export async function submitSajuForm(page: Page) {
 }
 
 export async function enterSajuSession(page: Page) {
-  await page.goto("/saju");
-  await page.waitForLoadState("networkidle");
+  await page.goto("/saju", { waitUntil: "domcontentloaded" });
   await selectFirstCharacter(page);
 
   const birthInput = page.locator("input[type='date']");
@@ -75,7 +74,7 @@ export async function enterSajuSession(page: Page) {
 // ── 신점 ──
 
 export async function navigateToShinjeomSession(page: Page) {
-  await page.goto("/shinjeom");
+  await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
   await selectFirstCharacter(page);
   await page.locator("text=신수").first().click();
   // user-info 스텝: 건너뛰기로 즉시 세션 진입
@@ -84,8 +83,7 @@ export async function navigateToShinjeomSession(page: Page) {
 }
 
 export async function enterShinjeomSession(page: Page) {
-  await page.goto("/shinjeom");
-  await page.waitForLoadState("networkidle");
+  await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
   await selectFirstCharacter(page);
   await page.locator("text=신수").first().click();
   // user-info 스텝: 건너뛰기로 즉시 세션 진입
@@ -97,8 +95,7 @@ export async function enterShinjeomSession(page: Page) {
 // ── 타로 ──
 
 export async function enterTarotSession(page: Page) {
-  await page.goto("/tarot");
-  await page.waitForLoadState("networkidle");
+  await page.goto("/tarot", { waitUntil: "domcontentloaded" });
   await selectFirstCharacter(page);
   await expect(page.locator("[data-testid='topic-btn-general']")).toBeVisible({ timeout: 5_000 });
   await page.locator("[data-testid='topic-btn-general']").click();
