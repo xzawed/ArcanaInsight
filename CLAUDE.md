@@ -121,9 +121,13 @@ pnpm check:doc-links      # 문서 링크 검증
 pnpm i18n:check           # 번역 키 drift 검출
 pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생성 (REPLICATE_API_KEY 필요)
 pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성
-pnpm upload:assets        # 생성된 이미지를 Supabase Storage에 업로드
-pnpm upload:assets:skip   # 이미 존재하는 이미지 건너뛰고 업로드
+pnpm upload:assets:r2     # 카드/배경을 Cloudflare R2에 업로드 (정본, etag=md5 검증, .env.r2.local 필요)
+pnpm upload:assets:r2:skip # R2에 이미 있는 키 건너뛰고 업로드
+pnpm upload:assets        # (구) Supabase Storage 업로드 — card-styles는 R2로 이전됨, 정본 아님
+pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Supabase 업로드
 ```
+
+> 카드 아트·서비스 배경은 Cloudflare R2(`cdn.xzawed.xyz`) 서빙. 추가/수정 절차는 `add-card-asset` 스킬·`card-style-manager` 에이전트. 정본 [`docs/conventions/image-assets.md`](docs/conventions/image-assets.md).
 
 명령어 정책은 [`docs/workflow/scripts.md`](docs/workflow/scripts.md), 테스트 정책은 [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md), [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)를 따른다.
 

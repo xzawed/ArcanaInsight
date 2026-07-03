@@ -239,7 +239,8 @@ PR 머지 완료 후 반드시 수행:
 | 에이전트 | 사용 시점 |
 |---------|---------|
 | `character-add` | 새 캐릭터 추가 (backup-v2/ 백업 포함) |
-| `skin-manager` | 카드 스킨 추가·이미지 생성 (backup-v2/ 백업 포함) |
+| `skin-manager` | 카드 스킨 추가·이미지 생성 (backup-v2/ 백업 포함, Supabase card-skins) |
+| `card-style-manager` | 카드 아트 스타일(4종)·카드뒷면·서비스 배경 추가/수정 (Cloudflare R2, `upload:assets:r2`) |
 | `theme-creator` | 새 테마 추가 또는 기존 테마 색상 수정 |
 | `divination-scaffold` | 새 운세 서비스 추가 (sonar exclusions 동기화 포함) |
 | `page-builder` | 새 페이지 생성 |

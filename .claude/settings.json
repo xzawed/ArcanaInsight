@@ -14,6 +14,7 @@
       "Bash(pnpm add*)",
       "Bash(pnpm check:*)",
       "Bash(pnpm i18n:check)",
+      "Bash(pnpm upload:assets:r2*)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)",
@@ -41,6 +42,17 @@
   },
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Bash(pnpm upload:assets*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/hooks/upload-assets-r2-guard.sh",
+            "timeout": 10,
+            "statusMessage": "카드 자산 업로드 대상 확인(Supabase vs R2)..."
+          }
+        ]
+      },
       {
         "matcher": "Bash(git push*)",
         "hooks": [
