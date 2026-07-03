@@ -2,8 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("신점 서비스 플로우", () => {
   test("캐릭터 선택 → 주제 선택 화면", async ({ page }) => {
-    await page.goto("/shinjeom");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 그리드 존재
     const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
@@ -22,8 +21,7 @@ test.describe("신점 서비스 플로우", () => {
   });
 
   test("주제 선택 → 세션 페이지 이동", async ({ page }) => {
-    await page.goto("/shinjeom");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 선택
     const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
@@ -36,13 +34,13 @@ test.describe("신점 서비스 플로우", () => {
     // user-info 스텝: 건너뛰기로 즉시 세션 진입
     await page.locator("button:has-text('건너뛰기')").click();
 
-    // 세션 페이지 이동
-    await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
+    // 세션 페이지 이동 (web-first — commit만 대기, 세션 페이지 외부 R2 배경 load 게이트 회피)
+    await page.waitForURL("**/shinjeom/session**", { waitUntil: "commit", timeout: 10_000 });
     expect(page.url()).toContain("/shinjeom/session");
   });
 
   test("세션 — 인사말 표시 + 입력 필드 존재", async ({ page }) => {
-    await page.goto("/shinjeom");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
@@ -50,7 +48,7 @@ test.describe("신점 서비스 플로우", () => {
     await page.locator("text=신수").first().click();
     // user-info 스텝: 건너뛰기
     await page.locator("button:has-text('건너뛰기')").click();
-    await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
+    await page.waitForURL("**/shinjeom/session**", { waitUntil: "commit", timeout: 10_000 });
 
     // 인사말 메시지 존재
     await expect(page.locator("text=고민").first()).toBeVisible({ timeout: 10_000 });
@@ -67,7 +65,7 @@ test.describe("신점 서비스 플로우", () => {
   });
 
   test("뒤로가기 — 캐릭터 선택으로 복귀", async ({ page }) => {
-    await page.goto("/shinjeom");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     const characterCards = page.locator("button").filter({ hasText: /아르카나|루나|미코/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
@@ -83,8 +81,7 @@ test.describe("신점 서비스 플로우", () => {
   });
 
   test("성별 필터 동작", async ({ page }) => {
-    await page.goto("/shinjeom");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     // 여자 필터
     const femaleBtn = page.getByRole("button", { name: "여자" });
@@ -100,8 +97,7 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
   test.beforeEach(async ({ page }) => {
     // 신점 세션 진입: 첫 번째 캐릭터 선택 → 첫 번째 주제 선택 → user-info 건너뛰기
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/shinjeom");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
     // 캐릭터 선택 (기존 spec 패턴 — shinjeom 페이지는 character-card testid 없음)
     const firstChar = page.locator("button").filter({ hasText: /아르카나|루나|미코/ }).first();
     await expect(firstChar).toBeVisible({ timeout: 10_000 });
@@ -112,7 +108,7 @@ test.describe("신점 세션 — 메시지 전송 플로우", () => {
     await firstTopic.click();
     // user-info 스텝: 건너뛰기
     await page.locator("button:has-text('건너뛰기')").click();
-    await page.waitForURL("**/shinjeom/session", { timeout: 10000 });
+    await page.waitForURL("**/shinjeom/session", { waitUntil: "commit", timeout: 10000 });
   });
 
   test("입력창 표시 + 메시지 전송 가능", async ({ page }) => {

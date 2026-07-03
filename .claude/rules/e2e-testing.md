@@ -95,9 +95,15 @@ await page.waitForURL(/\/$/, { waitUntil: "commit" }); // 또는 expect(page).to
 ```
 
 `networkidle`은 Playwright 공식 **DISCOURAGED**이므로 신규 코드에 쓰지 않는다 — 현재 프로젝트에 lint 강제는 없는 **수동 컨벤션**
-(필요 시 `eslint-plugin-playwright`의 `no-networkidle` 도입 검토). 공유 헬퍼 `service-navigation.ts`와 `ui-quality.spec.ts`의
-몰입형 대기는 web-first로 전환됨. 저위험 `(site)` 페이지(settings/login/terms/privacy/home) networkidle은 로컬 자산이라 유지.
-(PR #455 navigation 스크롤-리셋 + #457 헬퍼·ui-quality sweep — #121~#428 재발 계열. 잔여 추적: `docs/operations/known-issues.md`)
+(필요 시 `eslint-plugin-playwright`의 `no-networkidle` 도입 검토). **몰입형(6개 ServiceBackground 라우트)+홈 전면 sweep 완료 (2026-07-03)**:
+모든 spec과 공유 헬퍼 `service-navigation.ts`에서 몰입형 `goto` 기본-load → `{ waitUntil: "domcontentloaded" }`, 세션 `waitForURL`
+기본-load → `{ waitUntil: "commit" }`, 몰입형/홈 `networkidle`·`load` → web-first 어서션으로 전환. 남은 `networkidle`은 **(site) 로컬
+라우트**(settings/login/mypage/result/terms/privacy/character)뿐 — ServiceBackground 없어 로컬 자산이 빠르게 settle하므로 유지.
+(PR #455 navigation·#457 헬퍼 부분 sweep → #459 전면 sweep. #121~#428 재발 계열. 상세: `docs/operations/known-issues.md`)
+
+> ⚠️ 홈 `goto("/")` 후 **인터랙션 전에 한 번만 읽는 값**(one-shot `textContent`/`.count()`/`getAttribute`)은 금지 — DCL 시점에 SSR
+> 값을 읽어 hydration 후 재조정을 놓친다. web-first 재시도(`expect(...).toBeVisible()`, `expect.poll()`, `toHaveCount()`, `waitForFunction`)로 게이트한다.
+> (예: 성별 필터 `.count()`가 12→6 재조정 전 12를 읽는 플레이키 — `expect.poll(...).toBeLessThanOrEqual(6)`로 교정)
 
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 

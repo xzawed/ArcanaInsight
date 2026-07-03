@@ -3,7 +3,7 @@ import { createSSEBody, mockSessionCreate, TAROT_READING_CHUNKS, TAROT_READING_R
 
 test.describe("타로 서비스 플로우", () => {
   test("Step 1→2: 캐릭터 선택 → 주제 선택 전환", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 그리드 로딩
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
@@ -17,7 +17,7 @@ test.describe("타로 서비스 플로우", () => {
   });
 
   test("Step 2→3: 캐릭터 선택 → 주제 선택", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 선택 → 바로 topic-select로 전환 (상담 시작 버튼 단계 없음)
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
@@ -29,7 +29,7 @@ test.describe("타로 서비스 플로우", () => {
   });
 
   test("Step 3→4: 주제 선택 → 스프레드 선택", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 선택 → 바로 topic-select
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
@@ -45,7 +45,7 @@ test.describe("타로 서비스 플로우", () => {
   });
 
   test("Step 4: 스프레드 선택 → 세션 페이지 이동", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 풀 플로우: 캐릭터 → 주제 → 스프레드
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
@@ -61,12 +61,12 @@ test.describe("타로 서비스 플로우", () => {
     await spreadBtn.evaluate((el) => (el as HTMLElement).click());
 
     // /tarot/session으로 이동
-    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
     expect(page.url()).toContain("/tarot/session");
   });
 
   test("뒤로가기: 주제 선택에서 캐릭터 선택으로 복귀", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 선택 → 바로 주제 선택 (캐릭터 상세 단계 제거됨)
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
@@ -87,7 +87,7 @@ test.describe("타로 서비스 플로우", () => {
     await mockSessionCreate(page, "**/api/tarot/session");
 
     // 풀 플로우: 캐릭터 → 주제(종합) → 스프레드(원카드) → 세션 카드 선택 단계
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
@@ -98,7 +98,7 @@ test.describe("타로 서비스 플로우", () => {
     const spreadBtn = page.locator("[data-testid='spread-btn-one-card']");
     await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
     await spreadBtn.evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
 
     // 카드 스프레드 단계의 '뒤로' → 이전 단계(스프레드 선택)로 복귀 (상담사 선택 아님)
     const backBtn = page.getByRole("button", { name: /스프레드 다시 선택/ });
@@ -106,7 +106,7 @@ test.describe("타로 서비스 플로우", () => {
     await backBtn.click();
 
     // 스프레드 선택 단계로 복귀 — 주제 유지(general 스프레드 노출), topic-select·character-select 아님
-    await page.waitForURL(/\/tarot\?.*step=spread/, { timeout: 5_000 });
+    await page.waitForURL(/\/tarot\?.*step=spread/, { waitUntil: "commit", timeout: 5_000 });
     await expect(page.locator("[data-testid='spread-btn-one-card']")).toBeVisible({ timeout: 5_000 });
     await expect(page.locator("[data-testid='topic-btn-general']")).toHaveCount(0);
   });
@@ -126,14 +126,14 @@ test.describe("타로 서비스 플로우", () => {
       });
     });
 
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
     await page.locator("[data-testid='topic-btn-general']").click();
     await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
 
     const firstCard = page.locator("[data-testid='card-back-0']");
     await expect(firstCard).toBeVisible({ timeout: 10_000 });
@@ -174,14 +174,14 @@ test.describe("타로 서비스 플로우", () => {
       });
     });
 
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
     await characterCards.first().click();
 
     await page.locator("[data-testid='topic-btn-general']").click();
     await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
 
     const firstCard = page.locator("[data-testid='card-back-0']");
     await expect(firstCard).toBeVisible({ timeout: 10_000 });

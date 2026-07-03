@@ -21,19 +21,15 @@ async function setLocaleCookie(page: Page, locale: "ko" | "en" | "ja") {
 
 test.describe("i18n — 홈 페이지 locale 렌더링", () => {
   test("ko (기본) — html[lang]=ko + 한국어 히어로 CTA", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    expect(await page.locator("html").getAttribute("lang")).toBe("ko");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("lang", "ko");
     await expect(page.locator("text=타로 상담 시작하기").first()).toBeVisible();
   });
 
   test("en — html[lang]=en + 영어 히어로 CTA", async ({ page }) => {
     await setLocaleCookie(page, "en");
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    expect(await page.locator("html").getAttribute("lang")).toBe("en");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(
       page.locator("text=Start tarot reading").first()
     ).toBeVisible({ timeout: 5000 });
@@ -41,10 +37,8 @@ test.describe("i18n — 홈 페이지 locale 렌더링", () => {
 
   test("ja — html[lang]=ja + 일본어 히어로 CTA", async ({ page }) => {
     await setLocaleCookie(page, "ja");
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    expect(await page.locator("html").getAttribute("lang")).toBe("ja");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("lang", "ja");
     await expect(
       page.locator("text=タロット占いを始める").first()
     ).toBeVisible({ timeout: 5000 });
@@ -138,10 +132,8 @@ test.describe("i18n — LanguageSwitcher 데스크탑", () => {
     await page.waitForResponse((resp) => resp.url().includes("api/locale"), { timeout: 3000 }).catch(() => {});
 
     // 재방문
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    expect(await page.locator("html").getAttribute("lang")).toBe("en");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(
       page.locator("text=Start tarot reading").first()
     ).toBeVisible({ timeout: 5000 });

@@ -9,7 +9,7 @@ test.describe("홈 페이지", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("link", { name: "타로 상담 시작하기" })).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 

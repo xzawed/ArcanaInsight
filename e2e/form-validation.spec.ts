@@ -93,16 +93,18 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
     await page.waitForTimeout(300);
 
     // 타로 페이지로 이동
-    await page.goto("/tarot");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     // 캐릭터 카드 수 확인 — 캐릭터 이름 텍스트가 포함된 버튼만 카운트 (필터 버튼 제외)
     const characterCards = page.locator("button").filter({
       hasText: /아르카나|미코|선화|호시|루나|레이|카이른|제로|하루|렌|릭스|에단/,
     });
     await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-    const count = await characterCards.count();
-    expect(count).toBeLessThanOrEqual(6); // 여자 필터: 6명 이하
+    // hydration이 persist된 성별 필터(여자)를 적용해 12→6으로 재조정될 때까지 재시도 대기.
+    // one-shot count는 재조정 전 SSR의 12를 읽어 플레이키 — 제거한 networkidle을 web-first 재시도로 대체.
+    await expect
+      .poll(async () => characterCards.count(), { timeout: 10_000 })
+      .toBeLessThanOrEqual(6); // 여자 필터: 6명 이하
   });
 
   test("카드 확인 모드 토글 후 유지", async ({ page }) => {

@@ -11,8 +11,8 @@ import { test, expect } from "@playwright/test";
 
 test.describe("타로 카드 텍스트 reveal 흐름", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/tarot/session");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/tarot/session", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("result phase가 아니면 reading-content 영역 미노출", async ({ page }) => {

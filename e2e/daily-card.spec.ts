@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 
 test.describe("DailyFortune — 오늘의 운세", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#daily-fortune")).toBeVisible();
     const section = page.locator("#daily-fortune");
     await section.scrollIntoViewIfNeeded();
   });
@@ -37,8 +37,8 @@ test.describe("DailyFortune — 오늘의 운세", () => {
   test("콘솔 에러 없음", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#daily-fortune")).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 });

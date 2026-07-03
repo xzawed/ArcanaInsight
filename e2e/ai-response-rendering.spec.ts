@@ -142,7 +142,9 @@ test.describe("AI 응답 렌더링 — 타로", () => {
     await enterTarotSession(page);
 
     // ShuffleCeremony 제거됨 — card-shuffle 페이즈 즉시 card-select로 전환
-    await page.waitForLoadState("networkidle");
+    // web-first 대기 — 외부 R2 배경(ServiceBackground)이 load/networkidle 게이트
+    await expect(page).toHaveURL(/\/tarot\/session/);
+    await expect(page.locator("main").first()).toBeVisible();
 
     // 세션 페이지에서 JSON 잔여물 확인
     const bodyText = await page.textContent("body");
@@ -167,8 +169,9 @@ test.describe("AI 응답 렌더링 — 사주", () => {
 
     await enterSajuSession(page);
 
-    // 사주 리딩 완료 대기 (mocked SSE 즉시 완료 → networkidle)
-    await page.waitForLoadState("networkidle");
+    // 사주 세션 페이지 렌더 대기 (web-first — 외부 R2 배경이 load/networkidle 게이트)
+    // enterSajuSession은 early-bail 시 /saju에 머무를 수 있어 라우트 비의존 main 확인
+    await expect(page.locator("main").first()).toBeVisible();
 
     const bodyText = await page.textContent("body");
     for (const pattern of JSON_ARTIFACTS) {
@@ -183,8 +186,8 @@ test.describe("AI 응답 렌더링 — 공통 JSON 잔여물 감지", () => {
     const sessionPages = ["/tarot/session", "/saju/session", "/shinjeom/session"];
 
     for (const sessionPage of sessionPages) {
-      await page.goto(sessionPage);
-      await page.waitForLoadState("networkidle");
+      await page.goto(sessionPage, { waitUntil: "domcontentloaded" });
+      await expect(page.locator("main").first()).toBeVisible();
 
       const bodyText = await page.textContent("body");
       // 리디렉트 되더라도 JSON 잔여물이 없어야 함
