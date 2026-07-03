@@ -161,7 +161,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 타로 탭 클릭 → 스크롤 최상단 확인 (evaluate로 nextjs-portal 우회)
     const tarotTab = page.locator("nav a[href='/tarot']").last();
     await tarotTab.evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot");
+    await page.waitForURL("**/tarot", { waitUntil: "commit" });
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterTarot = await page.evaluate(() => window.scrollY);
     expect(scrollAfterTarot).toBe(0);
@@ -169,7 +169,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 사주 탭 클릭 → 스크롤 최상단 확인
     const sajuTab = page.locator("nav a[href='/saju']").last();
     await sajuTab.evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/saju");
+    await page.waitForURL("**/saju", { waitUntil: "commit" });
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterSaju = await page.evaluate(() => window.scrollY);
     expect(scrollAfterSaju).toBe(0);
@@ -177,7 +177,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 신점 탭 클릭 → 스크롤 최상단 확인
     const shinjeomTab = page.locator("nav a[href='/shinjeom']").last();
     await shinjeomTab.evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/shinjeom");
+    await page.waitForURL("**/shinjeom", { waitUntil: "commit" });
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfterShinjeom = await page.evaluate(() => window.scrollY);
     expect(scrollAfterShinjeom).toBe(0);
@@ -195,21 +195,24 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 타로 링크 클릭
     const tarotLink = page.locator("nav a[href='/tarot']").first();
     await tarotLink.click();
-    await page.waitForURL("**/tarot");
+    await page.waitForURL("**/tarot", { waitUntil: "commit" });
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });
 
   test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
-    // /tarot load + 홈 load 두 번의 waitForLoadState("load")로 합산 30s 초과 (Mobile Android CI)
+    // 외부 R2 배경 이미지(ServiceBackground)가 window.load를 지연시켜 waitForLoadState("load")가
+    // Mobile Android CI에서 60s 타임아웃을 유발했다(문서화된 플레이키). load 이벤트 대신 web-first
+    // 준비 신호(캐릭터 그리드 렌더)와 waitUntil:"commit"으로 대체 — 배경 이미지 로딩과 무관하게 동작.
     test.setTimeout(60_000);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/tarot");
-    // Mobile Android Pixel 7 에뮬에서 layout 안정화 시간 확보 (2026-05-08 PR #265 회귀 핫픽스)
-    // domcontentloaded 직후 scrollTo는 캐릭터 그리드 레이아웃 미완성 시 무시될 수 있음.
-    await page.waitForLoadState("load");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
+    // 캐릭터 그리드(로컬 이미지 + CSS aspect-[2/3]로 높이 확정)가 렌더되면 페이지가 스크롤 가능해진다.
+    // ServiceBackground(fixed inset-0, 외부 R2)는 scrollHeight에 기여하지 않아 load 대기가 불필요하다.
+    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ });
+    await expect(characterCards.first()).toBeVisible({ timeout: 15_000 });
 
     // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
     await page.evaluate(() => window.scrollTo(0, 300));
@@ -219,12 +222,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 홈으로 이동 — evaluate와 waitForURL 병렬 실행.
     // evaluate 내 click()이 네비게이션을 트리거하면 페이지 컨텍스트가 즉시 닫혀
     // evaluate가 "Target page closed"를 throw하므로 catch로 무시하고 URL 전환만 기다린다.
+    // waitUntil:"commit"으로 load 이벤트(외부 이미지) 비의존 — URL 커밋 즉시 진행한다.
     const homeTab = page.locator("nav a[href='/']").last();
     await Promise.all([
-      page.waitForURL(/\/$/),
+      page.waitForURL(/\/$/, { waitUntil: "commit" }),
       homeTab.evaluate((el) => (el as HTMLElement).click()).catch(() => {}),
     ]);
-    await page.waitForLoadState("load");
+    // 라우트 전환 시 스크롤 최상단 초기화 확인 (load 대기 불필요)
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
