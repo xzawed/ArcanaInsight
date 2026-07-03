@@ -77,14 +77,16 @@ LCP 요소(히어로 이미지 등)가 아닌 배경·데코 이미지에는 절
 
 ## 테스트 측: `waitForLoadState("load")` 대신 web-first 대기
 
-외부 CDN(R2) 배경 이미지가 있는 페이지(`ServiceBackground`가 있는 `/tarot`·`/saju`·`/shinjeom`·홈)는
-`priority`를 안 붙여도 **풀스크린(in-viewport) 배경이라 `window.load`를 게이트**한다. 따라서 테스트에서
-`waitForLoadState("load")`(및 `waitForURL`의 기본 `waitUntil:'load'`)를 쓰면 Mobile Android CI에서 타임아웃이 재발한다.
+`ServiceBackground`를 렌더하는 **몰입형 페이지**(`/tarot`·`/saju`·`/shinjeom` 진입·세션)는
+`priority`를 안 붙여도 **`fixed inset-0` 풀스크린(in-viewport) 외부 R2 배경이라 `window.load`를 게이트**한다.
+따라서 테스트에서 `waitForLoadState("load")`·`waitForLoadState("networkidle")`(및 `waitForURL`의 기본 `waitUntil:'load'`)를
+쓰면 Mobile Android CI에서 타임아웃이 재발한다. (홈 `(site)/page.tsx`는 ServiceBackground가 **없다** — 로컬 hero 이미지 +
+`StyleSelector`의 lazy R2 카드 이미지 구성이라 게이팅 요인이 다르나, 그래도 web-first 대기가 안전하다.)
 
 ```ts
-// ❌ 금지 — 외부 배경 이미지가 window.load 를 지연시켜 타임아웃
+// ❌ 금지 — 외부 배경/CDN 이미지가 window.load·networkidle 을 지연시켜 타임아웃
 await page.goto("/tarot");
-await page.waitForLoadState("load");
+await page.waitForLoadState("load"); // 또는 networkidle
 
 // ✅ 권장 — web-first 준비 신호 + load 비의존 네비게이션
 await page.goto("/tarot", { waitUntil: "domcontentloaded" });
@@ -92,8 +94,10 @@ await expect(page.locator("button").filter({ hasText: /아르카나|미코/ }).f
 await page.waitForURL(/\/$/, { waitUntil: "commit" }); // 또는 expect(page).toHaveURL(...)
 ```
 
-`networkidle`은 Playwright 공식 **DISCOURAGED**(eslint `no-networkidle`)이므로 신규 코드에 쓰지 않는다.
-(PR #455 — navigation 스크롤-리셋 플레이키(#121~#428 재발 계열) 영구 해소)
+`networkidle`은 Playwright 공식 **DISCOURAGED**이므로 신규 코드에 쓰지 않는다 — 현재 프로젝트에 lint 강제는 없는 **수동 컨벤션**
+(필요 시 `eslint-plugin-playwright`의 `no-networkidle` 도입 검토). 공유 헬퍼 `service-navigation.ts`와 `ui-quality.spec.ts`의
+몰입형 대기는 web-first로 전환됨. 저위험 `(site)` 페이지(settings/login/terms/privacy/home) networkidle은 로컬 자산이라 유지.
+(PR #455 navigation 스크롤-리셋 + #457 헬퍼·ui-quality sweep — #121~#428 재발 계열. 잔여 추적: `docs/operations/known-issues.md`)
 
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 
