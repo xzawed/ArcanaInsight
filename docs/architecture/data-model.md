@@ -171,9 +171,10 @@ export interface EffectTheme {
 - `resolvedStyle(activeTheme)` — 최종 적용 스타일 ID 반환. 스킨 모드면 `null` 반환(consumer는 `?? undefined`로 변환해 `CardFace`/`CardBack`에 전달)
 - `persist` key: `'arcana-card-style'` (localStorage)
 
-**이미지 URL 헬퍼** (`src/lib/storage/card-style.ts`):
-- `getCardStyleImageUrl(styleId, cardId)` — Supabase Storage `card-styles` 버킷의 카드 앞면 URL
+**이미지 URL 헬퍼** (`src/lib/storage/card-style.ts`) — `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 Cloudflare R2 `cdn.xzawed.xyz`) ↔ Supabase Storage(폴백)를 분기(DB_PROVIDER와 독립). `next.config.ts` remotePatterns가 자산 호스트를 env에서 동적 파생. **card-styles는 2026-07-03 R2로 무손실 이전, Supabase card-styles 버킷 삭제(0객체)** — 정본 [`../conventions/image-assets.md`](../conventions/image-assets.md) §5:
+- `getCardStyleImageUrl(styleId, cardId)` — 카드 앞면 URL (`{base}/card-styles/cards/{styleId}/{suit}/{n}.png`)
 - `getCardStyleBackUrl(styleId)` — 스타일별 카드 뒷면 URL (`card-back.webp`)
+- `getServiceBackgroundUrl(service, theme)` — 서비스 배경 URL (`backgrounds/{service}/{theme}.png`)
 
 ---
 

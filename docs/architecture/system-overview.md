@@ -44,7 +44,8 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
             └─ core/prompt-builder, text-cleaner, circuit-breaker
 
 데이터 레이어
-  ├─ Supabase (기본)     — Auth + PostgreSQL + Storage(card-styles 버킷)
+  ├─ Supabase (기본)     — Auth + PostgreSQL + Storage(card-skins 버킷, 팔레트 스킨)
+  ├─ Cloudflare R2       — card-styles 카드아트·서비스배경 (cdn.xzawed.xyz, NEXT_PUBLIC_ASSET_BASE_URL, 2026-07-03 이전)
   └─ PostgreSQL 모드     — NextAuth.js v5 + Drizzle (DB_PROVIDER=postgres 시)
 ```
 

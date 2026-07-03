@@ -28,7 +28,7 @@ md:min-h-[calc(100dvh-3.5rem)]
 
 - **콘텐츠 페이지 래퍼에는 viewport 높이 min을 두지 않는다.** `body`(`min-h-dvh flex flex-col`) + `main`(`flex-1`) + `Footer`(`mt-auto`)의 sticky-footer 구조가 짧은 콘텐츠에서도 화면을 채우므로, 페이지 래퍼의 `min-h-screen`은 중복이며 위의 유령 스크롤을 유발한다.
 - **중앙정렬이 필요한 래퍼**(로그인 등)만 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`로 chrome을 차감해 채운다.
-- ⚠️ **`dvh` 기반 `min-height` + 외부 lazy 이미지 동거 금지 (E2E load 지연 회귀)**: `ServiceBackground`처럼 외부(Supabase) URL `loading="lazy"` 이미지를 렌더하는 페이지의 래퍼에 `min-h-[calc(100dvh-…)]`(dvh) 를 쓰면, lazy 이미지의 load 가 ~수십초 지연되어 Playwright `waitForLoadState("load")` 가 타임아웃한다(PR #428에서 `(immersive)` 진입 페이지·`PageSpinner` 적용 시 `navigation.spec.ts` 회귀로 확인). 외부 이미지 페이지는 **dvh 래퍼를 두지 말고** 스테이지 자체(`h-[calc(100dvh-7rem)]`)로 높이를 지배한다(몰입형 진입 페이지는 outer min-height **제거**로 해소 — PR #431, §6). 외부 lazy 이미지가 없는 페이지(중앙정렬 로그인=로컬 bg, `PageSpinner`)만 `min-h-[calc(100dvh-…)]` 허용.
+- ⚠️ **`dvh` 기반 `min-height` + 외부 lazy 이미지 동거 금지 (E2E load 지연 회귀)**: `ServiceBackground`처럼 외부(Cloudflare R2/CDN `cdn.xzawed.xyz`) URL `loading="lazy"` 이미지를 렌더하는 페이지의 래퍼에 `min-h-[calc(100dvh-…)]`(dvh) 를 쓰면, lazy 이미지의 load 가 ~수십초 지연되어 Playwright `waitForLoadState("load")` 가 타임아웃한다(PR #428에서 `(immersive)` 진입 페이지·`PageSpinner` 적용 시 `navigation.spec.ts` 회귀로 확인). 외부 이미지 페이지는 **dvh 래퍼를 두지 말고** 스테이지 자체(`h-[calc(100dvh-7rem)]`)로 높이를 지배한다(몰입형 진입 페이지는 outer min-height **제거**로 해소 — PR #431, §6). 외부 lazy 이미지가 없는 페이지(중앙정렬 로그인=로컬 bg, `PageSpinner`)만 `min-h-[calc(100dvh-…)]` 허용.
 
 ---
 

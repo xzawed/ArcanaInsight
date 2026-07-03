@@ -33,8 +33,8 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
       page.on("pageerror", (err) => errors.push(err.message));
       await page.goto(p.path);
       if (p.path === "/") {
-        // 홈 페이지는 StyleSelector가 Supabase Storage 카드 이미지를 next/image로 로드함.
-        // CI에서 외부 Storage 응답이 느리면 networkidle 30s를 초과하므로 load + 콘텐츠 대기로 대체.
+        // 홈 페이지는 StyleSelector가 외부 CDN(Cloudflare R2, cdn.xzawed.xyz) 카드 이미지를 next/image로 로드함.
+        // CI에서 외부 CDN 응답이 느리면 networkidle 30s를 초과하므로 load + 콘텐츠 대기로 대체.
         await page.waitForLoadState("load");
         await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, { timeout: 15_000 });
       } else {
