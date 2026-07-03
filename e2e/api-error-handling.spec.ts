@@ -11,8 +11,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
       });
     });
 
-    await page.goto("/tarot/session");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/tarot/session", { waitUntil: "domcontentloaded" });
     // 세션 페이지가 로드되면 에러 메시지가 표시되거나 리디렉트
     // (세션 데이터 없이 접근하면 /tarot로 리디렉트됨)
   });
@@ -26,8 +25,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
       });
     });
 
-    await page.goto("/saju/session");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/saju/session", { waitUntil: "domcontentloaded" });
   });
 
   test("신점 메시지 API 400 → 에러 처리", async ({ page }) => {
@@ -39,8 +37,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
       });
     });
 
-    await page.goto("/shinjeom/session");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/shinjeom/session", { waitUntil: "domcontentloaded" });
   });
 
   test("일일 운세 API 타임아웃 → 에러 처리", async ({ page }) => {
@@ -55,9 +52,9 @@ test.describe("API 에러 처리 — mock 응답", () => {
       }, 3000);
     });
 
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-    // 홈 페이지의 DailyFortune이 에러 상태에서도 페이지가 깨지지 않아야 함
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // 홈 페이지의 DailyFortune이 에러 상태에서도 페이지가 깨지지 않아야 함 (히어로 CTA 가시성으로 렌더 준비 확인)
+    await expect(page.getByRole("link", { name: "타로 상담 시작하기" })).toBeVisible();
     const body = await page.textContent("body");
     expect(body?.length ?? 0).toBeGreaterThan(100);
   });
@@ -72,8 +69,8 @@ test.describe("API 에러 처리 — mock 응답", () => {
       });
     });
 
-    await page.goto("/tarot");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("text=상담사").first()).toBeVisible();
     // 타로 메인 페이지는 API 실패와 무관하게 정상 로드
     const body = await page.textContent("body");
     expect(body).toContain("상담사");

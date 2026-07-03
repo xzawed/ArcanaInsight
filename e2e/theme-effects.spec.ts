@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Theme Effect Layers", () => {
   test("타로 페이지에 ThemeAtmosphereLayer가 렌더된다", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     // midnight은 aurora layer가 있음
     const layer = page.getByTestId("theme-atmosphere-layer-midnight");
     await expect(layer).toBeAttached();
@@ -14,7 +14,7 @@ test.describe("Theme Effect Layers", () => {
   });
 
   test("ThemeAtmosphere 서비스 레이어가 렌더된다", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     await expect(
       page.getByTestId("service-theme-atmosphere-tarot")
     ).toBeAttached();
@@ -26,7 +26,7 @@ test.describe("Theme Effect Layers", () => {
       locale: "ko",
     });
     const page = await ctx.newPage();
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     // ThemeAtmosphereLayer(midnight)는 reduced-motion 시에도 DOM에는 존재
     const layer = page.getByTestId("theme-atmosphere-layer-midnight");
     await expect(layer).toBeAttached();
@@ -34,7 +34,7 @@ test.describe("Theme Effect Layers", () => {
   });
 
   test("타로 서비스 배경이 렌더된다", async ({ page }) => {
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     await expect(page.getByTestId("service-background-tarot")).toBeAttached();
   });
 });

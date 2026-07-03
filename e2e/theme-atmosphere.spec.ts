@@ -22,7 +22,7 @@ async function expectAtmosphere(page: Page, testId: string, theme = "winter") {
 test.describe("테마 atmosphere 적용 범위", () => {
   test("타로 상담사/카테고리/리딩 방식 선택 단계에 테마 atmosphere가 유지된다", async ({ page }) => {
     await forceTheme(page);
-    await page.goto("/tarot");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
 
     await expectAtmosphere(page, "service-theme-atmosphere-tarot");
     await selectFirstCharacter(page);
@@ -37,7 +37,7 @@ test.describe("테마 atmosphere 적용 범위", () => {
 
   test("사주 상담사/리딩 카테고리 선택 단계에 테마 atmosphere가 유지된다", async ({ page }) => {
     await forceTheme(page);
-    await page.goto("/saju");
+    await page.goto("/saju", { waitUntil: "domcontentloaded" });
 
     await expectAtmosphere(page, "service-theme-atmosphere-saju");
     await selectFirstCharacter(page);
@@ -52,7 +52,7 @@ test.describe("테마 atmosphere 적용 범위", () => {
 
   test("신점 상담사/리딩 카테고리 선택 단계에 테마 atmosphere가 유지된다", async ({ page }) => {
     await forceTheme(page);
-    await page.goto("/shinjeom");
+    await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
 
     await expectAtmosphere(page, "service-theme-atmosphere-shinjeom");
     await selectFirstCharacter(page);

@@ -47,9 +47,8 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
 
 test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
   test("홈 — 필수 섹션 타이틀", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("load");
-    // CharacterGallery는 dynamic import이므로 "상담사" 텍스트가 hydration 후 렌더링될 때까지 대기
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // CharacterGallery는 dynamic import이므로 "상담사" 텍스트가 hydration 후 렌더링될 때까지 대기 (아래 waitForFunction이 준비 신호)
     await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
 
     const body = await page.textContent("body");
@@ -116,8 +115,8 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
 test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
   test("홈 — 가로 스크롤 없음 (오버플로우)", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
@@ -146,8 +145,20 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
   });
 
   test("모든 이미지 로드 성공 (깨진 이미지 없음)", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // 이미지 로드 검사 테스트 — 뷰포트 내 이미지가 실제 로드 완료(complete && naturalWidth>0)될 때까지 대기.
+    // (networkidle은 외부 R2 lazy 카드까지 기다려 Mobile Android 지연 → 뷰포트 로컬 이미지만 web-first로 대기)
+    await page.waitForFunction(
+      () => {
+        const imgs = Array.from(document.querySelectorAll("img"));
+        const visible = imgs.filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && r.top < window.innerHeight && r.bottom > 0;
+        });
+        return visible.length > 0 && visible.every((el) => el.complete && el.naturalWidth > 0);
+      },
+      { timeout: 15_000 }
+    );
     const images = page.locator("img");
     const count = await images.count();
 

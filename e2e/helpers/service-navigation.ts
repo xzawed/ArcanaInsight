@@ -67,7 +67,7 @@ export async function enterSajuSession(page: Page) {
   const startBtn = page.locator("button").filter({ hasText: /사주 분석|시작|흐름/ }).last();
   if (await startBtn.isEnabled().catch(() => false)) {
     await startBtn.click();
-    await page.waitForURL("**/saju/session**", { timeout: 10_000 }).catch(() => {});
+    await page.waitForURL("**/saju/session**", { waitUntil: "commit", timeout: 10_000 }).catch(() => {});
   }
 }
 
@@ -79,7 +79,7 @@ export async function navigateToShinjeomSession(page: Page) {
   await page.locator("text=신수").first().click();
   // user-info 스텝: 건너뛰기로 즉시 세션 진입
   await page.locator("button:has-text('건너뛰기')").click();
-  await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
+  await page.waitForURL("**/shinjeom/session**", { waitUntil: "commit", timeout: 10_000 });
 }
 
 export async function enterShinjeomSession(page: Page) {
@@ -88,7 +88,7 @@ export async function enterShinjeomSession(page: Page) {
   await page.locator("text=신수").first().click();
   // user-info 스텝: 건너뛰기로 즉시 세션 진입
   await page.locator("button:has-text('건너뛰기')").click();
-  await page.waitForURL("**/shinjeom/session**", { timeout: 10_000 });
+  await page.waitForURL("**/shinjeom/session**", { waitUntil: "commit", timeout: 10_000 });
   await expect(page.locator("text=고민").first()).toBeVisible({ timeout: 10_000 });
 }
 
@@ -102,5 +102,5 @@ export async function enterTarotSession(page: Page) {
   const spreadBtn = page.locator("[data-testid='spread-btn-one-card']");
   await expect(spreadBtn).toBeVisible({ timeout: 5_000 });
   await spreadBtn.evaluate((el) => (el as HTMLElement).click());
-  await page.waitForURL("**/tarot/session**", { timeout: 10_000 });
+  await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
 }

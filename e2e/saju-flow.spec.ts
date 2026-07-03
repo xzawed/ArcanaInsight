@@ -8,7 +8,7 @@ import {
 
 test.describe("사주 서비스 플로우", () => {
   test("Step 1: 캐릭터 선택", async ({ page }) => {
-    await page.goto("/saju");
+    await page.goto("/saju", { waitUntil: "domcontentloaded" });
     await selectFirstCharacter(page);
     await expect(page.locator("text=생년월일").first()).toBeVisible({ timeout: 5_000 });
   });
@@ -41,7 +41,7 @@ test.describe("사주 서비스 플로우", () => {
     await expect(startBtn).toBeEnabled({ timeout: 3_000 });
     await startBtn.click();
 
-    await page.waitForURL("**/saju/session**", { timeout: 10_000 });
+    await page.waitForURL("**/saju/session**", { waitUntil: "commit", timeout: 10_000 });
     expect(page.url()).toContain("/saju/session");
   });
 });

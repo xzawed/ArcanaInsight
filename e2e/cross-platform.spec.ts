@@ -32,8 +32,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto("/tarot");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     expect(errors).toHaveLength(0);
   });
 
@@ -41,8 +40,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto("/saju");
-    await page.waitForLoadState("domcontentloaded");
+    await page.goto("/saju", { waitUntil: "domcontentloaded" });
     expect(errors).toHaveLength(0);
   });
 
@@ -60,9 +58,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
   });
 
   test("이미지 — 모든 이미지 로드 성공", async ({ page }) => {
-    await page.goto("/");
-    // load 이벤트 대기 — img.naturalWidth 확인 전 이미지 리소스 로드 완료 보장
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // 이미지 로드는 아래 이미지별 waitForFunction(el.complete && naturalWidth>0) 폴링이 보장
+    // (외부 R2 lazy 이미지가 load 이벤트를 지연 → Mobile Android 타임아웃, web-first 전환)
 
     const images = await page.locator("img").elementHandles();
 
@@ -114,12 +112,10 @@ test.describe("크로스 플랫폼 품질 검증", () => {
   });
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page, browserName }) => {
-    await page.goto("/");
-    // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe·next/dynamic) load 후
-    // scrollHeight 계산이 안정. domcontentloaded · load 직후엔 viewportHeight보다 작아 보이는
-    // flaky 사례 발생 (PR #265 회귀 핫픽스 v2 — 2026-05-08).
-    await page.waitForLoadState("load");
-    await page.waitForLoadState("networkidle").catch(() => { /* networkidle 미도달도 허용 */ });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // Mobile Android Pixel 7 에뮬에서 lazy 콘텐츠(이미지·iframe·next/dynamic) hydration 후
+    // scrollHeight 계산이 안정. 아래 scrollHeight > vh+200 waitForFunction 폴링이 결정적으로 대기.
+    // (외부 R2 배경/이미지가 load·networkidle을 지연 → Mobile Android 타임아웃, PR #265 계열 → web-first 전환)
 
     // scrollHeight 안정화 폴링 — lazy 이미지 hydration 후 페이지가 viewport보다 충분히 길어질 때까지 대기.
     const viewportHeight = await page.evaluate(() => window.innerHeight);

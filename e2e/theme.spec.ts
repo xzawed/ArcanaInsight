@@ -24,8 +24,8 @@ function mobileThemeOptionBtn(page: import("@playwright/test").Page, id: string)
 test.describe("테마 드롭다운 — 데스크탑 기본 동작", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").first()).toBeVisible();
   });
 
   test("테마 버튼 visible + 드롭다운 열기", async ({ page }) => {
@@ -51,8 +51,8 @@ test.describe("테마 드롭다운 — 데스크탑 기본 동작", () => {
 test.describe("테마 드롭다운 — 7개 테마 선택 + localStorage + CSS 변수", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").first()).toBeVisible();
   });
 
   for (const { id, nameKo } of THEMES) {
@@ -82,8 +82,8 @@ test.describe("테마 드롭다운 — 7개 테마 선택 + localStorage + CSS �
 test.describe("테마 드롭다운 — auto 모드 선택", () => {
   test("자동(시간/계절) 선택 → localStorage 'auto' 저장", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").first()).toBeVisible();
 
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
@@ -104,8 +104,8 @@ test.describe("테마 드롭다운 — auto 모드 선택", () => {
 test.describe("테마 드롭다운 — 모바일 390px", () => {
   test("모바일 드롭다운 열기 + 한밤의 신비 선택 + 닫힘 확인", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").last()).toBeVisible();
 
     // 모바일 테마 버튼 (.last() — 모바일 헤더 버튼)
     const btn = page.locator("button[aria-label='테마 변경']").last();
@@ -128,8 +128,8 @@ test.describe("테마 드롭다운 — 모바일 390px", () => {
 test.describe("테마 — 새로고침 후 유지", () => {
   test("황혼의 노을 선택 후 reload → 테마 유지", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").first()).toBeVisible();
 
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
@@ -137,8 +137,7 @@ test.describe("테마 — 새로고침 후 유지", () => {
     await themeOptionBtn(page, "sunset").evaluate((el) => (el as HTMLElement).click());
     await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "sunset", { timeout: 3000 });
 
-    await page.reload();
-    await page.waitForLoadState("load");
+    await page.reload({ waitUntil: "domcontentloaded" });
     await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") !== null, { timeout: 3000 });
 
     const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
@@ -154,8 +153,8 @@ test.describe("테마 — 새로고침 후 유지", () => {
 test.describe("테마 — 설정 페이지 상태 일치", () => {
   test("Header에서 한여름 밤 선택 → 설정 페이지 활성 버튼 일치", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("button[aria-label='테마 변경']").first()).toBeVisible();
 
     const btn = page.locator("button[aria-label='테마 변경']").first();
     await btn.click();
