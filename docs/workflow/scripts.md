@@ -11,7 +11,7 @@
 |---|---|---|
 | `pre-push-checks.sh` | `.claude/settings.json` PreToolUse hook | `tsc --noEmit` + `eslint` + `next build` 통과 확인 후 push 허용 |
 | `hooks/upload-assets-r2-guard.sh` | `.claude/settings.json` PreToolUse `Bash(pnpm upload:assets*)` | `upload:assets`(`:r2` 없음=Supabase) 실행 시 "card-styles는 R2로 이전됨 → `upload:assets:r2` 사용" 확인 요청 |
-| `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크·앵커 검증, 깨진 링크 보고 |
+| `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크(파일 존재) 검증. 동결 스냅샷(`superpowers/plans/archive`·`superpowers/specs`)은 제외, 깨진 링크 발견 시 exit 1(push·CI 차단) |
 | `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
 

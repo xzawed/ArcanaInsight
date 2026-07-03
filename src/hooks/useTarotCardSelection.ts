@@ -74,15 +74,18 @@ export function useTarotCardSelection() {
   }, []);
 
   // unmount cleanup: 진행 중인 SSE abort + 자동 시작 타이머 clear (saju/shinjeom과 동일 패턴)
+  // readingAbortRef는 useTarotReading가 소유한 stable ref이므로 deps에 명시(재구독 없음).
   useEffect(() => {
     return () => {
+      // 의도된 패턴: cleanup 시점의 최신 AbortController를 abort (in-flight SSE 중단)
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       readingAbortRef.current?.abort();
       if (autoStartTimerRef.current) {
         clearTimeout(autoStartTimerRef.current);
         autoStartTimerRef.current = null;
       }
     };
-  }, []);
+  }, [readingAbortRef]);
 
   // phase가 초기화되면 reveal 상태도 리셋
   useEffect(() => {
