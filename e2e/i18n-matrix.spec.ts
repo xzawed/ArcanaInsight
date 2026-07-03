@@ -52,7 +52,6 @@ test.describe("i18n — 홈 페이지 locale 렌더링", () => {
 test.describe("i18n — 설정 페이지 locale 렌더링", () => {
   test("ko — 설정 헤딩 한국어", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
 
     await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
   });
@@ -60,7 +59,6 @@ test.describe("i18n — 설정 페이지 locale 렌더링", () => {
   test("en — 설정 헤딩 영어 (Settings)", async ({ page }) => {
     await setLocaleCookie(page, "en");
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
 
     await expect(
       page.locator("h1").filter({ hasText: "Settings" })
@@ -70,7 +68,6 @@ test.describe("i18n — 설정 페이지 locale 렌더링", () => {
   test("ja — 설정 헤딩 일본어 (設定)", async ({ page }) => {
     await setLocaleCookie(page, "ja");
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
 
     await expect(
       page.locator("h1").filter({ hasText: "設定" })

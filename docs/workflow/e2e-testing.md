@@ -231,7 +231,7 @@ Mobile iOS 프로젝트(WebKit)는 `page.mouse.wheel()`을 지원하지 않는�
 | 특정 요소 표시 대기 | `expect(locator).toBeVisible({ timeout: 10_000 })` |
 | SSE 응답 완료 대기 | `page.waitForTimeout(2000)` (mock 완료 후 렌더링 보장) |
 | 레이아웃/정적 UI 준비 | `page.goto(path, { waitUntil: "domcontentloaded" })` 후 핵심 요소 `toBeVisible()` |
-| API·이미지까지 포함한 로딩 완료 | ⚠️ `page.waitForLoadState("networkidle")` **지양** (외부 CDN 이미지에 지연·Playwright 공식 DISCOURAGED). 몰입형 R2 페이지 금지, 신규는 web-first 어서션(`toBeVisible`/`waitForFunction`) 사용 |
+| API·이미지까지 포함한 로딩 완료 | ⚠️ `page.waitForLoadState("networkidle")` **금지 — eslint `playwright/no-networkidle` 강제** (외부 CDN 이미지 지연·Playwright DISCOURAGED). web-first 어서션(`toBeVisible`/`waitForFunction`/`toHaveCount`) 사용 |
 | 사용 금지 | `waitForTimeout` 단독 의존 — 명시적 상태 체크 우선. `waitForLoadState("load")` — 외부 CDN(R2) 배경 이미지가 `window.load`를 지연시켜 Mobile Android CI 타임아웃 유발(#455), web-first(`domcontentloaded`+`toBeVisible`)로 대체 |
 
 ---

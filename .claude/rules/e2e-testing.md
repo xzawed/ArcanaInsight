@@ -94,12 +94,13 @@ await expect(page.locator("button").filter({ hasText: /아르카나|미코/ }).f
 await page.waitForURL(/\/$/, { waitUntil: "commit" }); // 또는 expect(page).toHaveURL(...)
 ```
 
-`networkidle`은 Playwright 공식 **DISCOURAGED**이므로 신규 코드에 쓰지 않는다 — 현재 프로젝트에 lint 강제는 없는 **수동 컨벤션**
-(필요 시 `eslint-plugin-playwright`의 `no-networkidle` 도입 검토). **몰입형(6개 ServiceBackground 라우트)+홈 전면 sweep 완료 (2026-07-03)**:
-모든 spec과 공유 헬퍼 `service-navigation.ts`에서 몰입형 `goto` 기본-load → `{ waitUntil: "domcontentloaded" }`, 세션 `waitForURL`
-기본-load → `{ waitUntil: "commit" }`, 몰입형/홈 `networkidle`·`load` → web-first 어서션으로 전환. 남은 `networkidle`은 **(site) 로컬
-라우트**(settings/login/mypage/result/terms/privacy/character)뿐 — ServiceBackground 없어 로컬 자산이 빠르게 settle하므로 유지.
-(PR #455 navigation·#457 헬퍼 부분 sweep → #459 전면 sweep. #121~#428 재발 계열. 상세: `docs/operations/known-issues.md`)
+`networkidle`은 Playwright 공식 **DISCOURAGED**이며, 이제 **`eslint-plugin-playwright`의 `playwright/no-networkidle`로 lint 강제**된다
+(`eslint.config.mjs`, `e2e/**` 스코프, error). **몰입형+홈(#459)에 이어 (site) 로컬 라우트 잔여까지 전면 제거 완료 (#460)** — 이제
+`e2e/`에 `networkidle` **0건**. 전환: 몰입형 `goto` 기본-load → `{ waitUntil: "domcontentloaded" }`, 세션 `waitForURL` 기본-load →
+`{ waitUntil: "commit" }`, `networkidle`·`load` → web-first 어서션. 대체 패턴 — 뒤따르는 `toBeVisible`가 게이트면 제거,
+one-shot 읽기(`textContent`/`.count()`/`getAttribute`) 앞이면 `toBeVisible`/`toContainText`/`toHaveCount`/`waitForFunction`으로 게이트,
+404 페이지는 `getByRole("heading", { name: "페이지를 찾을 수 없습니다" })` 대기.
+(PR #455·#457 부분 → #459 몰입형+홈 → #460 (site)+eslint 가드. #121~#428 재발 계열. 상세: `docs/operations/known-issues.md`)
 
 > ⚠️ 홈 `goto("/")` 후 **인터랙션 전에 한 번만 읽는 값**(one-shot `textContent`/`.count()`/`getAttribute`)은 금지 — DCL 시점에 SSR
 > 값을 읽어 hydration 후 재조정을 놓친다. web-first 재시도(`expect(...).toBeVisible()`, `expect.poll()`, `toHaveCount()`, `waitForFunction`)로 게이트한다.

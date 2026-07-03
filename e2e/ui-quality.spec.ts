@@ -80,7 +80,7 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
   test("설정 — 6개 섹션 존재", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
     const body = await page.textContent("body");
 
     expect(body).toContain("테마");
@@ -92,21 +92,18 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
   test("로그인 — Google 버튼 + 안내문", async ({ page }) => {
     await page.goto("/auth/login");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=Google")).toBeVisible();
     await expect(page.locator("text=로그인 없이도")).toBeVisible();
   });
 
   test("이용약관 — 필수 섹션", async ({ page }) => {
     await page.goto("/terms");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=이용약관").first()).toBeVisible();
     await expect(page.locator("text=목적").first()).toBeVisible();
   });
 
   test("개인정보 — 테이블 + 필수 섹션", async ({ page }) => {
     await page.goto("/privacy");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=개인정보처리방침").first()).toBeVisible();
     const tables = page.locator("table");
     expect(await tables.count()).toBeGreaterThanOrEqual(1);
@@ -132,7 +129,7 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
 
   test("설정 — 모든 섹션 카드 가시", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("section").first()).toBeVisible();
     const sections = page.locator("section");
     const count = await sections.count();
     expect(count).toBeGreaterThanOrEqual(4);
