@@ -61,7 +61,7 @@ testId가 발견되면 새 컴포넌트에 동일한 testId를 유지하거나 E
 
 ## 외부 URL Image에 priority 금지
 
-Supabase Storage 등 외부 URL을 `src`로 쓰는 `<Image>`에는 **`priority` 속성을 붙이지 않는다.**
+Cloudflare R2/CDN(`cdn.xzawed.xyz`)·Supabase Storage 등 외부 URL을 `src`로 쓰는 `<Image>`에는 **`priority` 속성을 붙이지 않는다.**
 
 ```tsx
 // ❌ 금지 — <link rel="preload"> 가 window.load 를 블로킹

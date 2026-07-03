@@ -64,13 +64,15 @@
 
 ## 카드 아트 스타일 이미지 생성·업로드 `[Codex]`
 
+> **card-styles 자산은 Cloudflare R2(`cdn.xzawed.xyz`) 서빙**(2026-07-03 이전). `card-style-manager` 에이전트·`add-card-asset` 스킬을 우선 활용한다.
+
 1. `src/data/cardStyles.ts` — `CardStyleId` 4종 및 `THEME_TO_STYLE_MAP` 확인
 2. `src/hooks/useCardStyleStore.ts` — `styleOverride`, `useSkinMode`, `resolvedStyle()` 스토어 확인
-3. `src/lib/storage/card-style.ts` — `getCardStyleImageUrl()` / `getCardStyleBackUrl()` 헬퍼
+3. `src/lib/storage/card-style.ts` — `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()` 헬퍼 (`storageBase()` env 분기)
 4. `src/components/card/CardStyleSelector.tsx` — 스타일 선택 UI (설정 페이지)
 5. `scripts/generate-assets/` — Replicate API 생성 오케스트레이터
 6. 생성: `pnpm generate:assets` 또는 `pnpm generate:assets:skip`
-7. 업로드: `pnpm upload:assets` 또는 `pnpm upload:assets:skip`
+7. 업로드(정본): `pnpm upload:assets:r2` 또는 `pnpm upload:assets:r2:skip` (R2 `card-styles/`, ETag=md5 검증). ⚠️ 기존 키 덮어쓰기(수정) 시 Cloudflare immutable 캐시 퍼지 필요. (구 `pnpm upload:assets`는 Supabase 대상=정본 아님, 가드 훅이 경고)
 
 이미지 경로 규칙: [`docs/conventions/image-assets.md`](../conventions/image-assets.md) §5
 

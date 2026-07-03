@@ -71,6 +71,14 @@ git push origin main
 
 ---
 
+## 자산 서빙 (Cloudflare R2)
+
+- 카드 아트·카드 뒷면·서비스 배경(`card-styles`)은 **Cloudflare R2**에서 `NEXT_PUBLIC_ASSET_BASE_URL=https://cdn.xzawed.xyz` 기준으로 `unoptimized` 직접 서빙된다(2026-07-03 이전, Supabase 폴백). 프로덕션 `arcanainsight-production` 서비스에 설정됨.
+- `NEXT_PUBLIC_`은 빌드 타임 인라인 → 변경 시 **재빌드 필요**.
+- ⚠️ **자산 수정 배포**: 기존 R2 키를 덮어쓴 경우 `Cache-Control: immutable`이라 Cloudflare가 구버전을 계속 서빙 → 해당 URL **Cloudflare 캐시 퍼지 필요**. 업로드는 `pnpm upload:assets:r2`. 상세: [`../conventions/image-assets.md`](../conventions/image-assets.md) §5.
+
+---
+
 ## Rate-Limit Redis 활성화 (Upstash)
 
 현재 rate-limit은 서버 메모리 기반 fallback으로 동작합니다 (단일 인스턴스에서는 정상).

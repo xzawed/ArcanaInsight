@@ -86,7 +86,8 @@
    - 새 페이지: page-builder 에이전트
    - 새 캐릭터: character-add 에이전트
    - 새 DivinationService: divination-scaffold 에이전트
-   - 새 카드 스킨: skin-manager 에이전트
+   - 새 카드 스킨: skin-manager 에이전트 (Supabase card-skins)
+   - 새 카드 아트 스타일/서비스 배경: card-style-manager 에이전트 (Cloudflare R2, `upload:assets:r2`)
    - 새 테마 추가/색상 수정: theme-creator 에이전트
 
 4. 구현 (Codex 위임 가능)

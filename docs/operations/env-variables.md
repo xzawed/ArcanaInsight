@@ -36,15 +36,17 @@
 
 ## 자산 CDN (선택 — Cloudflare R2)
 
-카드·배경 이미지(`card-styles` 버킷)의 서빙 베이스를 전환하는 선택 변수입니다. DB 모드와 무관하게 적용됩니다.
+카드·배경 이미지의 서빙 베이스를 전환하는 선택 변수입니다. DB 모드와 무관하게 적용됩니다. **card-styles 카드아트·서비스배경은 2026-07-03 R2로 무손실 이전됐고, 프로덕션(`arcanainsight-production`)에는 설정돼 R2 서빙이 활성 상태입니다.**
 
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
-| `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`로 서빙(예: Cloudflare R2 커스텀 도메인). 미설정 시 Supabase Storage로 폴백 | 미설정(Supabase 사용) |
+| `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`로 서빙 (R2 버킷 `arcana-assets`의 `card-styles/` prefix — `card-styles`는 Supabase 폴백 시에만 버킷명). 미설정 시 Supabase Storage로 폴백 | 코드 기본값 미설정 / **프로덕션은 `https://cdn.xzawed.xyz` 설정됨(R2 활성)** |
 
 - 예시: `NEXT_PUBLIC_ASSET_BASE_URL=https://cdn.xzawed.xyz`
-- `NEXT_PUBLIC_` 접두사라 **빌드 타임에 인라인**됩니다 → Railway에 설정 후 재배포해야 반영. 변수 제거 + 재배포로 즉시 Supabase 롤백.
-- 코드: [`src/lib/storage/card-style.ts`](../../src/lib/storage/card-style.ts) `storageBase()`, [`next.config.ts`](../../next.config.ts) `images.remotePatterns`(호스트 자동 파생).
+- `NEXT_PUBLIC_` 접두사라 **빌드 타임에 인라인**됩니다 → Railway에 설정 후 재배포해야 반영.
+- ⚠️ **롤백 주의**: 코드 폴백 경로는 존재하나 Supabase `card-styles` 버킷이 **삭제(2026-07-03, 0객체)**돼 변수만 제거하면 **전량 404**가 됩니다. Supabase로 롤백하려면 먼저 버킷에 자산을 재업로드해야 합니다(현 정본은 R2).
+- ⚠️ 자산 **수정(기존 키 덮어쓰기)** 시 R2 `immutable` 캐시로 인해 Cloudflare 캐시 퍼지 필요.
+- 코드: [`src/lib/storage/card-style.ts`](../../src/lib/storage/card-style.ts) `storageBase()`, [`next.config.ts`](../../next.config.ts) `images.remotePatterns`(호스트 자동 파생). 업로드: `pnpm upload:assets:r2`(`.env.r2.local` 자격증명).
 - 설계·이전 절차 정본: [`../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md)
 
 ---
@@ -169,3 +171,4 @@ i18n 자체에는 신규 환경변수 없음 — 쿠키(`ai_locale`)와 헤더(`
 | 변수 | 설명 | 비고 |
 |------|------|------|
 | `REPLICATE_API_KEY` | Replicate API 인증 키 | 이미지 생성 스크립트(`generate:assets`) 실행 시 필수. 런타임에는 불필요. |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 S3 자격증명 | 루트 `.env.r2.local`(gitignore)에서 로드. `pnpm upload:assets:r2` 실행 시 필수. 런타임에는 불필요(`NEXT_PUBLIC_` 아님). |

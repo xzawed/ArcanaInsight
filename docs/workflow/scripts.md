@@ -10,6 +10,7 @@
 | 스크립트 | 호출 위치 | 용도 |
 |---|---|---|
 | `pre-push-checks.sh` | `.claude/settings.json` PreToolUse hook | `tsc --noEmit` + `eslint` + `next build` 통과 확인 후 push 허용 |
+| `hooks/upload-assets-r2-guard.sh` | `.claude/settings.json` PreToolUse `Bash(pnpm upload:assets*)` | `upload:assets`(`:r2` 없음=Supabase) 실행 시 "card-styles는 R2로 이전됨 → `upload:assets:r2` 사용" 확인 요청 |
 | `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크·앵커 검증, 깨진 링크 보고 |
 | `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
@@ -24,9 +25,13 @@
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·unit-testing.md 자동 갱신 |
 | `pnpm generate:assets` | `generate-assets/index.ts` | Replicate API로 카드·배경·데코 이미지 생성 (`REPLICATE_API_KEY` 필요) |
 | `pnpm generate:assets:skip` | `generate-assets/index.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 생성 |
+| `pnpm generate:service-bg` | `generate-service-backgrounds.ts` | 서비스(타로/사주/신점) 배경 이미지 생성 |
+| `pnpm generate:service-bg:skip` | `generate-service-backgrounds.ts --skip` | 기존 서비스 배경 건너뛰고 생성 |
 | `pnpm download:skins` | `download-skin-images.ts` | Supabase Storage 스킨 이미지 로컬 다운로드 (관리자) |
-| `pnpm upload:assets` | `generate-assets/upload-to-supabase.ts` | 로컬 카드·배경·데코 이미지를 Supabase Storage 업로드 |
-| `pnpm upload:assets:skip` | `generate-assets/upload-to-supabase.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 업로드 |
+| `pnpm upload:assets:r2` | `generate-assets/upload-to-r2.ts` | **(정본)** 로컬 카드·배경 → Cloudflare R2(`cdn.xzawed.xyz/card-styles`), ETag=md5 무결성 검증. `.env.r2.local` 필요 |
+| `pnpm upload:assets:r2:skip` | `generate-assets/upload-to-r2.ts --skip-existing` | R2에 이미 있는 키 건너뛰고 업로드 |
+| `pnpm upload:assets` | `generate-assets/upload-to-supabase.ts` | (레거시) Supabase Storage 업로드 — card-styles는 R2로 이전됨, **정본 아님**(가드 훅이 확인 요청) |
+| `pnpm upload:assets:skip` | `generate-assets/upload-to-supabase.ts --skip-existing` | (레거시) Supabase 업로드, 기존 건너뜀 |
 | `pnpm test:e2e:full` | `e2e-full/orchestrator.ts --mode=full --workers=6` | 전수 E2E (실서버 + 실 API 키 필요) |
 | `pnpm test:e2e:full:ci` | `e2e-full/orchestrator.ts --mode=ci` | CI 대표 12 조합 |
 | `pnpm enhance:images` | `enhance-character-images.mjs` | 캐릭터 이미지 보정 (Node.js) |
