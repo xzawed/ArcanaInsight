@@ -75,6 +75,26 @@ Cloudflare R2/CDN(`cdn.xzawed.xyz`)·Supabase Storage 등 외부 URL을 `src`로
 느리면 `waitForLoadState("load")` 가 20-30s 블로킹 → E2E 타임아웃 유발.  
 LCP 요소(히어로 이미지 등)가 아닌 배경·데코 이미지에는 절대 사용하지 않는다. (PR #412 2차 실패 원인)
 
+## 테스트 측: `waitForLoadState("load")` 대신 web-first 대기
+
+외부 CDN(R2) 배경 이미지가 있는 페이지(`ServiceBackground`가 있는 `/tarot`·`/saju`·`/shinjeom`·홈)는
+`priority`를 안 붙여도 **풀스크린(in-viewport) 배경이라 `window.load`를 게이트**한다. 따라서 테스트에서
+`waitForLoadState("load")`(및 `waitForURL`의 기본 `waitUntil:'load'`)를 쓰면 Mobile Android CI에서 타임아웃이 재발한다.
+
+```ts
+// ❌ 금지 — 외부 배경 이미지가 window.load 를 지연시켜 타임아웃
+await page.goto("/tarot");
+await page.waitForLoadState("load");
+
+// ✅ 권장 — web-first 준비 신호 + load 비의존 네비게이션
+await page.goto("/tarot", { waitUntil: "domcontentloaded" });
+await expect(page.locator("button").filter({ hasText: /아르카나|미코/ }).first()).toBeVisible();
+await page.waitForURL(/\/$/, { waitUntil: "commit" }); // 또는 expect(page).toHaveURL(...)
+```
+
+`networkidle`은 Playwright 공식 **DISCOURAGED**(eslint `no-networkidle`)이므로 신규 코드에 쓰지 않는다.
+(PR #455 — navigation 스크롤-리셋 플레이키(#121~#428 재발 계열) 영구 해소)
+
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 
 버튼·레이블 텍스트를 변경할 때는 **같은 커밋**에 E2E 셀렉터도 수정한다.
