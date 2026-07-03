@@ -227,12 +227,12 @@ Mobile iOS 프로젝트(WebKit)는 `page.mouse.wheel()`을 지원하지 않는�
 
 | 상황 | 사용 |
 |------|------|
-| 페이지 이동 완료 대기 | `page.waitForURL("**/tarot/session**")` |
+| 페이지 이동 완료 대기 | `page.waitForURL("**/tarot/session**")` (외부 CDN 배경 이미지 페이지는 `{ waitUntil: "commit" }`로 `load` 의존 제거) |
 | 특정 요소 표시 대기 | `expect(locator).toBeVisible({ timeout: 10_000 })` |
 | SSE 응답 완료 대기 | `page.waitForTimeout(2000)` (mock 완료 후 렌더링 보장) |
 | 레이아웃/정적 UI 준비 | `page.goto(path, { waitUntil: "domcontentloaded" })` 후 핵심 요소 `toBeVisible()` |
 | API·이미지까지 포함한 로딩 완료 | `page.waitForLoadState("networkidle")` (외부 API를 mock한 경우에만 권장) |
-| 사용 금지 | `waitForTimeout` 단독 의존 — 대신 명시적 상태 체크 우선 |
+| 사용 금지 | `waitForTimeout` 단독 의존 — 명시적 상태 체크 우선. `waitForLoadState("load")` — 외부 CDN(R2) 배경 이미지가 `window.load`를 지연시켜 Mobile Android CI 타임아웃 유발(#455), web-first(`domcontentloaded`+`toBeVisible`)로 대체 |
 
 ---
 
