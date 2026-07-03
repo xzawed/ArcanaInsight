@@ -82,7 +82,9 @@ AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana
 - URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).
 - 카드 `<Image>`는 `unoptimized`로 R2에서 직접 로드(옵티마이저 우회). `next.config.ts` `remotePatterns`가 자산 호스트를 env에서 자동 파생.
 - 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요).
-- ⚠️ 업로드: 기존 `pnpm upload:assets`는 **Supabase 대상**이다. 현재 정본은 R2이므로 **신규 카드 자산은 R2에도 업로드해야 앱에 반영**된다(전용 R2 업로드 스크립트는 후속 과제 — 이전 시 사용한 S3 API PUT 방식 재사용 가능).
+- **업로드(정본)**: `pnpm upload:assets:r2` — `public/images/cards`·`backgrounds` → R2(`card-styles/` 키, `Cache-Control: immutable`), 업로드 후 **ETag=md5 무결성 검증**. `.env.r2.local`에 R2 자격증명 필요. `:r2:skip`은 기존 키 스킵. (⚠️ 기존 `pnpm upload:assets`는 **Supabase 대상=정본 아님** — PreToolUse 훅이 오사용 시 확인 요청)
+- ⚠️ **수정(덮어쓰기) 시**: R2 객체가 `immutable` 캐시라 같은 키를 덮어써도 CDN이 구버전을 최대 1년 서빙 → **Cloudflare 캐시 퍼지 필수**.
+- 절차/에이전트: [`.claude/skills/add-card-asset/SKILL.md`](../../.claude/skills/add-card-asset/SKILL.md), `card-style-manager` 에이전트.
 
 ---
 

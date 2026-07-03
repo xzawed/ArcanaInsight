@@ -39,6 +39,8 @@
     "generate:service-bg:skip": "npx tsx scripts/generate-service-backgrounds.ts --skip",
     "upload:assets": "npx tsx scripts/generate-assets/upload-to-supabase.ts",
     "upload:assets:skip": "npx tsx scripts/generate-assets/upload-to-supabase.ts --skip-existing",
+    "upload:assets:r2": "npx tsx scripts/generate-assets/upload-to-r2.ts",
+    "upload:assets:r2:skip": "npx tsx scripts/generate-assets/upload-to-r2.ts --skip-existing",
     "enhance:images": "node scripts/enhance-character-images.mjs",
     "polish:images": "python scripts/polish-character-images.py"
   },
@@ -58,6 +60,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
+    "@aws-sdk/client-s3": "^3.1079.0",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
