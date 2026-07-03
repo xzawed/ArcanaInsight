@@ -1,7 +1,9 @@
 # Supabase Storage → Cloudflare R2 이전 (card-styles) — WBS 실행 계획
 
-> 작성일: 2026-06-26 · 상태: **계획 확정, 실행 보류**(주간 토큰 회복 후 착수)
-> 목적: Supabase Storage 무료티어(1GB) 초과(현재 ~2.2GB)를 **화질 손실 0**으로 해소.
+> 작성일: 2026-06-26 · 상태: ✅ **전체 완료 (2026-07-03)**
+> 목적: Supabase Storage 무료티어(1GB) 초과(~2.2GB)를 **화질 손실 0**으로 해소.
+
+> **완료 요약 (2026-07-03)**: 전 Phase 완료. `cdn.xzawed.xyz`(R2 `arcana-assets`/`card-styles/`) 커스텀 도메인 연결 → 351객체 무손실 이전(etag=md5 351/351, 바이트 완전일치) → `card-style.ts` env 분기(PR #450) + Railway `NEXT_PUBLIC_ASSET_BASE_URL` 설정·재배포 → Playwright 실브라우저 검증(card-styles 27요청 전부 cdn/200) → Supabase card-styles 351개 삭제 → **총 용량 2.2GB→224MB 무료티어 복귀**. 앱 정본은 R2. ⚠️ `xzawed.xyz` 도메인 자체는 사용자의 별개 앱(CustomWebService)이고, ArcanaInsight 운영지는 `arcanainsight-production.up.railway.app` — `cdn.` 서브도메인만 R2 CDN으로 사용.
 
 ---
 
