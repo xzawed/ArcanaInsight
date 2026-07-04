@@ -48,7 +48,7 @@ const body = await request.json() as { field1: string };
 
 ## 3. 기존 스키마 목록
 
-`src/lib/validation/api-schemas.ts` — 10종:
+`src/lib/validation/api-schemas.ts` — 11종:
 
 | 스키마 | 용도 |
 |--------|------|
@@ -62,6 +62,7 @@ const body = await request.json() as { field1: string };
 | `DailyCardSchema` | 일일 카드 요청 |
 | `DailyFortuneSchema` | 일일 운세 요청 (5개 영역) |
 | `FavoriteCharacterSchema` | 선호 상담사 설정 |
+| `ClaimSessionsSchema` | 익명 세션 claim (로그인 시 sessionId 일괄 귀속, `/api/sessions/claim`) |
 
 ---
 

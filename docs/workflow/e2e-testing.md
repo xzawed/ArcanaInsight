@@ -363,11 +363,14 @@ QA 실패 시 GitHub Issue(`🚨 주간 QA 실패`)가 자동 생성됩니다. m
 | Mobile Android (Pixel 7) | 412×915 | Chromium | PR CI + 주간 QA |
 | Mobile iOS (iPhone 14) | 390×844 | WebKit | **주간 QA만** (PR CI 제외) |
 
+> **CI 동시성 (`playwright.config.ts`)**: `workers: 1` — 3개 디바이스 프로젝트는 매트릭스 레벨에서 병렬 유지하되 한 프로젝트 내부는 워커 1개. 2코어/7GB 러너에서 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target page/context/browser has been closed" 크래시(chromium·webkit 공통)를 유발했다 (#462). CI `retries: 2`, 로컬은 workers 무제한.
+
 **iOS-only 이슈**:
 - `100dvh`(dynamic viewport height) — iOS Safari 주소창 높이 변화 대응
 - `safe-area-inset-*` — 노치·홈바 영역
 - WebKit touch event 차이 — `touch-action: manipulation` 전역 적용 필수
 - iOS에서만 실패하는 테스트 발생 시 주간 QA artifact의 `Mobile iOS` 리포트 확인
+- 무거운 홈 이미지 로드·해상도 검사(`cross-platform.spec.ts`의 "이미지 로드 성공"·"캐릭터 이미지 에셋" 테스트)는 `test.skip(project!=="Desktop Chrome")`로 **Desktop Chrome 전용** — 대형 홈 이미지 디코드가 메모리-취약한 WebKit(iOS)을 크래시("Target closed")시키고, 깨진 이미지(404)는 엔진 무관이라 반복이 불필요 (#464). `daily-card.spec.ts`는 webkit의 benign `_rsc` access-control pageerror를 필터한다.
 
 ---
 

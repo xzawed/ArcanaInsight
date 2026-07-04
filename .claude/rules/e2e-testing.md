@@ -36,11 +36,12 @@ grep -rn "service-navigation" e2e/ --include="*.ts"
 ## CI 재현성 필수 조건
 
 1. **`playwright.config.ts`의 `use.locale: "ko"` 유지 필수**  
-   CI 브라우저 기본값 en-US → 제거 시 SSR 영어 렌더링 → 한국어 단언 전부 실패 (PR #243, 23개 실패)
+   CI 브라우저 기본값 en-US → 제거 시 SSR 영어 렌더링 → 한국어 단언 전부 실패 (PR #243, 25개 실패)
 
 2. **CI vs 로컬 차이**
-   - CI: `pnpm start` (프로덕션 빌드), retries: 2
-   - 로컬: `pnpm dev`, retries: 0, reuseExistingServer: true
+   - CI: `pnpm start` (프로덕션 빌드), retries: 2, **workers: 1**
+   - 로컬: `pnpm dev`, retries: 0, workers 무제한, reuseExistingServer: true
+   - CI `workers: 1` 이유(#462): 2코어/7GB 러너에서 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target closed" 크래시(chromium·webkit 공통). 3개 디바이스 프로젝트의 매트릭스 레벨 병렬은 유지.
    - Pre-PR 훅에 E2E 전체 포함 권장 안 함 — CI에서 재검증
 
 3. **hidden 요소 확인**  

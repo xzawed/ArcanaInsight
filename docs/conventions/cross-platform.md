@@ -118,8 +118,8 @@ App Router Route Group으로 렌더 라우트를 두 레이아웃으로 분리�
 ## 8. 검증 (E2E)
 
 크로스 플랫폼 규칙 위반은 `e2e/cross-platform.spec.ts`에서 자동 감지됩니다:
-- 콘솔 에러 (pageerror)
-- 이미지 로드 실패
+- 콘솔 에러 (pageerror) — daily-card는 webkit `_rsc` 무해 pageerror 필터
+- 이미지 로드 성공 — Desktop Chrome 전용(#464, 대용량 홈 이미지가 메모리 취약 webkit 크래시 유발해 non-DC는 test.skip)
 - 주요 링크 200 응답
 
 → E2E 실행 가이드: [`docs/workflow/e2e-testing.md`](../workflow/e2e-testing.md)
