@@ -87,16 +87,12 @@ export interface EffectTheme {
 
 | 구분 | 형식 | 경로 패턴 | 해당 캐릭터 |
 |------|------|---------|------------|
-| 원본 nukki PNG | PNG (투명 배경) | `[id]/nukki/[mood].png` | 12명 전체 |
-| 고해상도 색상 기준 이미지 | RGB 이미지 | `[id]/nukki/backup-v2/[mood].png` | 12명 전체 |
-| 운영용 enhanced nukki PNG | PNG (투명 배경) | `[id]/nukki-enhanced/[mood].png` | 12명 전체 |
+| 운영용 enhanced nukki PNG | PNG RGB (2816×1536, 고DPI 의도적 2배 · 다운스케일 금지) | `[id]/nukki-enhanced/[mood].png` | 12명 전체 (표시 경로 유일) |
 
-- 루트 `nukki/` 이미지 규격은 캐릭터·표정별로 다를 수 있으며, 운영용 enhanced 이미지는 `nukki/backup-v2/`의 1408×768 색상 소스와 기존 누끼 알파를 결합해 생성한 2816×1536 PNG이다.
+- 운영용 enhanced 이미지는 1408×768 색상 소스를 2배로 업스케일한 2816×1536 RGB PNG이다. 고DPI 대형 표시(캐릭터 상세 모바일 100vw)를 위한 의도적 2배이므로 다운스케일하지 않는다.
 - 예: `/images/characters/arcana/nukki-enhanced/default.png`
 - 예: `/images/characters/miko/nukki-enhanced/default.png`
-- 원본 `nukki`는 비교와 롤백을 위해 보존한다.
-
-> miko·seonhwa 루트 `.jpg` 파일이 `public/images/characters/` 에 잔존하지만 코드에서는 참조하지 않음. 삭제 가능 (선택 사항). → [`docs/operations/known-issues.md`](../operations/known-issues.md)
+- 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`, `_backup/`)는 #447에서 리포지토리에서 제거되어 현재는 `nukki-enhanced/`만 존재한다(롤백용 사본은 git 히스토리·외부 백업).
 
 ---
 

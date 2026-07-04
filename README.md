@@ -3,7 +3,7 @@
 <p align="right"><a href="README.en.md">🇺🇸 English</a></p>
 
 > **애니메이션 캐릭터와 대화하며 타로 리딩 · 사주 분석 · 신점 상담을 받는 운세 종합 플랫폼**
-> **3개 locale 지원** (한국어 · English · 日本語) — `ai_locale` 쿠키 기반 자동 전환 (PR-3·4·5에서 점진 채움)
+> **3개 locale 지원** (한국어 · English · 日本語) — `ai_locale` 쿠키 기반 자동 전환
 
 <p align="center">
   <img src="public/images/backgrounds/hero-bg.jpg" alt="ArcanaInsight Hero" width="100%" style="border-radius:12px" />
@@ -132,7 +132,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 - 📅 **오늘의 카드** — 캐릭터별 일일 운세 (탭 전환 + 카드 뒤집기 애니메이션)
 - 🌈 **동적 테마 7종** — 시간·계절 자동 감지 + 수동 고정 선택
 - 🔐 **소셜 로그인** — Google 계정 로그인 (Supabase Auth / NextAuth.js)
-- 📚 **마이페이지** — 타로·사주 리딩 히스토리 통합 조회 + 선호 상담사 설정
+- 📚 **마이페이지** — 타로·사주·신점 리딩 히스토리 통합 조회 + 선호 상담사 설정
 - 🔗 **결과 공유** — URL 링크 공유 또는 텍스트 복사
 
 ---
@@ -162,7 +162,7 @@ pnpm dev
 ```
 
 > 🔑 [xAI Console](https://console.x.ai)에서 Grok API 키를 발급받을 수 있습니다.
-> 📖 상세 환경변수 목록은 [CLAUDE.md](CLAUDE.md#환경-변수)를 참조하세요.
+> 📖 상세 환경변수 목록은 [CLAUDE.md](CLAUDE.md#환경변수)를 참조하세요.
 
 ---
 
@@ -171,7 +171,7 @@ pnpm dev
 | 분류 | 기술 |
 |------|------|
 | 🗣️ 언어 | TypeScript (strict) |
-| ⚛️ 프레임워크 | Next.js 16.2.3 (App Router) · React 19.2.4 |
+| ⚛️ 프레임워크 | Next.js 16.2.6 (App Router) · React 19.2.4 |
 | 🎨 스타일링 | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 🎬 애니메이션 | Framer Motion v12.38 |
 | 🤖 AI | Grok API (xAI) — SSE 스트리밍 · Claude API (Anthropic) 자동 fallback |
@@ -193,7 +193,7 @@ pnpm dev
 | 🔄 운영 자동화 | **n8n Cloud** | Spec 추적·품질 모니터링·주간 리포트 |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → 주간 QA → 자동 재검증 루프 |
 
-> 📘 상세 AI 협업 구조는 [CLAUDE.md — 운영 체계](CLAUDE.md#운영-체계--supergrok--claude-cli-역할-분담)에서 확인할 수 있습니다.
+> 📘 상세 AI 협업 구조는 [CLAUDE.md — Claude & Codex 역할 분담](CLAUDE.md#claude--codex-역할-분담)에서 확인할 수 있습니다.
 
 ---
 
@@ -208,7 +208,7 @@ pnpm dev
 ### 📡 SSE 스트리밍
 `/api/tarot/reading` · `/api/saju/reading` · `/api/daily-card` 엔드포인트가 AI 응답을 **Server-Sent Events로 실시간 전송**. 클라이언트는 `useSSEStream` 훅으로 한 글자씩 타이핑 애니메이션 구현.
 
-> 📖 전체 아키텍처 상세는 [CLAUDE.md](CLAUDE.md#핵심-아키텍처-패턴)를 참조하세요.
+> 📖 전체 아키텍처 상세는 [CLAUDE.md](CLAUDE.md#핵심-아키텍처)를 참조하세요.
 
 ---
 
@@ -216,13 +216,12 @@ pnpm dev
 
 ### 캐릭터 이미지
 
-12캐릭터 모두 운영 UI에서는 고해상도 보정 누끼 이미지를 사용합니다. 원본 `nukki/`는 비교·롤백용으로 보존하며, `nukki/backup-v2/` 색상 원본과 기존 누끼 알파를 결합해 `nukki-enhanced/` 운영본을 생성합니다.
+12캐릭터 모두 운영 UI에서는 `nukki-enhanced/` 고해상도 보정 이미지를 사용합니다. **2816×1536은 1408×768 색상 원본의 2배로, 고DPI 대형 표시(캐릭터 상세 모바일 100vw)를 위한 의도적 규격이므로 다운스케일하지 않습니다.** 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`)는 용량 절감을 위해 리포지토리에서 제거되어(#447) 현재는 `nukki-enhanced/`만 존재합니다.
 
 | 항목 | 규격 |
 |------|------|
-| 운영본 사이즈 | **2816×1536** — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
-| 색상 기준 원본 | **1408×768** RGB 이미지 — `/images/characters/{id}/nukki/backup-v2/{mood}.png` |
-| 원본 누끼 | PNG (투명 배경, 규격 혼재) — `/images/characters/{id}/nukki/{mood}.png` |
+| 운영본 (표시 경로 유일) | **2816×1536** RGB — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
+| 색상 소스 원본 (리포지토리 외부 보관) | **1408×768** RGB |
 | 표정 종류 | default · idle · smile · serious · surprised · wink · mystical |
 
 ### 테두리 투명도 (CSS mask)

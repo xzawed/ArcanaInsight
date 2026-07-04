@@ -131,7 +131,7 @@ ArcanaInsight is a web application where users have natural conversations with *
 - 📅 **Daily Card** — Per-character daily fortune with tab switching + card-flip animation
 - 🌈 **7 dynamic themes** — Auto-detects time of day and season, or set manually
 - 🔐 **Social login** — Google account (Supabase Auth / NextAuth.js)
-- 📚 **My Page** — Unified history for tarot & saju readings + preferred consultant setting
+- 📚 **My Page** — Unified history for tarot, saju & shinjeom readings + preferred consultant setting
 - 🔗 **Result sharing** — Share via URL link or copy to clipboard
 
 ---
@@ -161,7 +161,7 @@ pnpm dev
 ```
 
 > 🔑 Get your Grok API key at [xAI Console](https://console.x.ai).
-> 📖 Full environment variable reference: [CLAUDE.md](CLAUDE.md#환경-변수)
+> 📖 Full environment variable reference: [CLAUDE.md](CLAUDE.md#환경변수)
 
 ---
 
@@ -170,7 +170,7 @@ pnpm dev
 | Category | Technology |
 |----------|-----------|
 | 🗣️ Language | TypeScript (strict) |
-| ⚛️ Framework | Next.js 16.2.3 (App Router) · React 19.2.4 |
+| ⚛️ Framework | Next.js 16.2.6 (App Router) · React 19.2.4 |
 | 🎨 Styling | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 🎬 Animation | Framer Motion v12.38 |
 | 🤖 AI | Grok API (xAI) — SSE streaming · Claude API (Anthropic) auto-fallback |
@@ -179,7 +179,7 @@ pnpm dev
 | 📦 State | Zustand v5 |
 | 📦 Package manager | pnpm 10.33.0 |
 | 🚀 Hosting | Railway (auto-deploy via GitHub Actions) |
-| 🧪 E2E Tests | Playwright — 19 files, 141 tests (Desktop · Android · iOS) · [Guide](./e2e/README.md) |
+| 🧪 E2E Tests | Playwright — 27 files, ~197 tests per device (Desktop · Android · iOS) · [Guide](./e2e/README.md) |
 
 ### 🤖 AI-Native Development
 
@@ -192,7 +192,7 @@ This project is built with an **AI-native approach** where AI acts as a genuine 
 | 🔄 Ops automation | **n8n Cloud** | Spec tracking · quality monitoring · weekly reports |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → weekly QA → auto-recheck loop |
 
-> 📘 Full AI collaboration structure: [CLAUDE.md — Operations](CLAUDE.md#운영-체계--supergrok--claude-cli-역할-분담)
+> 📘 Full AI collaboration structure: [CLAUDE.md — Claude & Codex roles](CLAUDE.md#claude--codex-역할-분담)
 
 ---
 
@@ -205,9 +205,9 @@ A single `DB_PROVIDER` environment variable switches **instantly between Supabas
 `FallbackProvider` calls **Grok first, then automatically falls back to Claude API** on failure. Rate limit (429), server error (500), and auth failure (401) each trigger different cooldown durations for optimal recovery. The error surface is only shown to the user if both providers fail.
 
 ### 📡 SSE Streaming
-`/api/tarot/reading`, `/api/saju/reading`, and `/api/daily-card` endpoints stream AI responses via **Server-Sent Events**. The client-side `useSSEStream` hook renders each token as a typing animation.
+`/api/tarot/reading`, `/api/saju/reading`, `/api/shinjeom/message`, and `/api/daily-card` endpoints stream AI responses via **Server-Sent Events**. The client-side `useSSEStream` hook renders each token as a typing animation.
 
-> 📖 Full architecture details: [CLAUDE.md](CLAUDE.md#핵심-아키텍처-패턴)
+> 📖 Full architecture details: [CLAUDE.md](CLAUDE.md#핵심-아키텍처)
 
 ---
 
@@ -215,14 +215,13 @@ A single `DB_PROVIDER` environment variable switches **instantly between Supabas
 
 ### Character Images
 
-10 characters use PNG cutout (nukki) images; 2 characters (miko · seonhwa) use legacy JPG paths.
+All 12 characters use `nukki-enhanced/` high-resolution cutout images in the production UI. **The 2816×1536 size is 2x the 1408×768 color source — an intentional spec for high-DPI large displays (the character detail page renders at 100vw on mobile); do not downscale.** The source/backup folders (`nukki/`, `nukki/backup-v2/`) were removed from the repository (#447) to save space, so only `nukki-enhanced/` remains.
 
 | Item | Spec |
 |------|------|
-| Size | **1408×768** (grok-imagine-image-pro API default output) |
-| Format (10 chars) | PNG (transparent background) — `/images/characters/{id}/nukki/{mood}.png` |
-| Format (miko · seonhwa) | JPG (legacy) — `/images/characters/{id}/{mood}.jpg` |
-| Expressions | default · smile · serious · surprised · wink · mystical |
+| Production (only display path) | **2816×1536** RGB — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
+| Color source original (kept off-repo) | **1408×768** RGB |
+| Expressions | default · idle · smile · serious · surprised · wink · mystical |
 
 ### Edge Transparency (CSS mask)
 

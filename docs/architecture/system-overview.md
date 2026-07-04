@@ -150,6 +150,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 - 마이페이지에서 선호 상담사를 설정하면 이후 서비스 진입 시 캐릭터 선택 단계 자동 스킵
 - `useFavoriteCharacter(skip)` 훅이 `/api/profile/favorite-character`를 통해 `profiles.favorite_character_id` 조회
 - API 라우트가 `getDb()`를 사용하므로 `DB_PROVIDER` 추상화 완전 적용
+- GET은 비로그인 시 401 대신 200 `{ characterId: null }` 반환(#465 — 몰입형 진입 시 콘솔 401 제거). 선호를 '설정'하는 POST는 401 유지
 - 캐릭터 상세 페이지 진입: `?character=xxx` URL 파라미터로 스킵 (타로·사주·신점 모두 지원)
 - 홈 직접 접속: `useEffect` fallback으로 자동 선택. `skip=true`이면 fetch 생략
 
