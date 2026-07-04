@@ -211,6 +211,7 @@ export const en: Partial<SharedKeys> = {
   saju: {
     "result.title": "Saju Analysis Result",
     "result.overall": "Overall Reading",
+    "result.direct-answer": "A Direct Answer from Your Saju",
     "result.topic": "Topic Reading",
     "result.advice": "Advice",
     "result.cta": "Get my Saju analysis",
@@ -367,6 +368,7 @@ export const en: Partial<SharedKeys> = {
   shinjeom: {
     "result.title": "Shinjeom Result",
     "result.overall": "Overall Reading",
+    "result.direct-answer": "A Direct Answer from the Spirits",
     "result.topic": "Topic Reading",
     "result.advice": "Advice",
     "result.cta": "Get my Shinjeom reading",

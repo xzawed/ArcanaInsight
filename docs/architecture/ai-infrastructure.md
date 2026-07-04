@@ -132,6 +132,17 @@ for (let i = start; i < text.length; i++) {
 `shinjeom-service.ts`가 이 정규식을 사용하다가 `parseJsonSafe()`로 교체됨.
 
 
+## 질문 직답(directAnswer) — answer-first 계약
+
+사용자의 구체 질문("이번 달에 이직할 수 있을까요?")에 리딩이 동문서답하지 않도록, `directAnswer` 필드를 **answer-first**로 강제한다.
+
+- **단일 진실원 헬퍼**: `buildDirectAnswerContract(domain)`(`prompt-builder.ts`)가 `schemaLine`(JSON 스켈레톤 라인)·`systemSpec`(작성 지침)·`footerReminder`(누락 방지)를 **한 함수에서** 방출한다. 지시·스키마·파서가 서로 어긋나는 드리프트를 코드 레벨에서 차단(과거 결함: 사주 route가 `buildFreeQuestionPrompt`로 "directAnswer에 답하라"를 붙였으나 사주 스키마·`parseResult`·UI에 필드가 없어 답이 소실).
+- **작성 순서**(systemSpec): ① 질문 재진술 → ② 가장 유력한 한 방향 단언 → ③ 확신 수위 문체 표기("분명히" / "~쪽으로 기울어 있습니다" / "단서는 있으나 확정하기엔 이릅니다") → ④ 근거(도메인 렌즈: 타로=카드 상징·위치, 사주=세운·월운·용신, 신점=대화에서 읽어낸 상)+전제조건.
+- **안티패턴 금지**: "가능한 모든 상황(재직/구직/이직/창업)을 균등하게 나열"하는 헤지는 금지. 2축 분리 — 상담자의 사적 사실은 완충하되 점괘의 방향은 커밋. 민감 도메인(건강·재정·법률)은 확답 대신 경향+전문가 상담 권유로 강등.
+- **앵커**: 타로·사주는 자유질문 입력창(200자, `buildFreeQuestionPrompt`), 신점은 chat 첫 사용자 메시지를 핵심질문으로 최종 턴 프롬프트 상단에 재노출.
+- **배선**: 3서비스 모두 `getSystemPrompt`/`buildConversationPrompt` JSON 스켈레톤 상단(truncation 생존율↑)에 `directAnswer` + `parseResult` 추출 + 결과화면 최상단 `ResultTextCard` 렌더. en/ja는 `LANGUAGE_INSTRUCTIONS` JSON 키 화이트리스트에 `directAnswer` 포함(키 번역 방지).
+- ⚠️ `directAnswer`는 라이브 세션 SSE 결과에서만 노출되고 DB 미영속(타로 포함 3서비스 공통) — 재방문(`result/[id]`)·공유엔 미포함. DB 영속은 후속 과제(마이그레이션 필요).
+
 ## 4. max_tokens 정책 (3-섹션 + directAnswer 프리미엄 리딩 기준 — PR #414 + #420)
 
 ### 타로 (`computeReadingMaxTokens`) — `src/app/api/tarot/reading/route.ts`

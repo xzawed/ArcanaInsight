@@ -368,6 +368,21 @@ describe("SajuService", () => {
       expect(result.overallReading).toContain("종합 운세");
     });
 
+    it("directAnswer 필드가 있으면 추출한다 (자유질문 직답 배선)", () => {
+      const json = JSON.stringify({
+        directAnswer: "이번 달 이직 가능성에 대해 말하자면— 다음 분기 쪽으로 기울어 있습니다.",
+        overallReading: "종합", topicReading: "주제", advice: "조언",
+      });
+      const result = service.parseResult(json);
+      expect(result.directAnswer).toContain("다음 분기 쪽으로 기울어");
+    });
+
+    it("directAnswer 필드가 없으면 result.directAnswer는 undefined이다 (하위호환)", () => {
+      const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "조언" });
+      const result = service.parseResult(json);
+      expect(result.directAnswer).toBeUndefined();
+    });
+
     describe("parseError 시그널", () => {
       it("overallReading이 빈 문자열이면 parseError='missing_fields'", () => {
         const json = JSON.stringify({ overallReading: "", topicReading: "주제", advice: "조언" });

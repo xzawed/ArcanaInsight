@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt, getLanguageFooter } from "./prompt-builder";
+import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt, getLanguageFooter, buildDirectAnswerContract, buildFreeQuestionPrompt } from "./prompt-builder";
 import type { CharacterConfig } from "@/types/character";
 import type { SelectedCard, TarotCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
@@ -511,5 +511,58 @@ describe("getLanguageFooter", () => {
 
   it("ja는 最終確認을 포함한다", () => {
     expect(getLanguageFooter("ja")).toContain("最終確認");
+  });
+});
+
+describe("buildDirectAnswerContract", () => {
+  it("3서비스 모두 schemaLine·systemSpec·footerReminder를 반환한다", () => {
+    for (const domain of ["tarot", "saju", "shinjeom"] as const) {
+      const c = buildDirectAnswerContract(domain);
+      expect(c.schemaLine).toContain('"directAnswer"');
+      expect(c.systemSpec).toContain("직접 답변(directAnswer)");
+      expect(c.footerReminder).toContain("directAnswer");
+    }
+  });
+
+  it("systemSpec은 answer-first 순서(재진술→방향 단언→확신 수위)를 강제한다", () => {
+    const spec = buildDirectAnswerContract("tarot").systemSpec;
+    expect(spec).toContain("재진술");
+    expect(spec).toContain("방향 단언");
+    expect(spec).toContain("확신");
+    // 균등 나열 안티패턴 금지
+    expect(spec).toContain("균등하게 나열하지");
+  });
+
+  it("도메인별 근거 렌즈가 다르다 (tarot=카드, saju=세운, shinjeom=상)", () => {
+    expect(buildDirectAnswerContract("tarot").systemSpec).toContain("카드");
+    expect(buildDirectAnswerContract("saju").systemSpec).toContain("세운");
+    expect(buildDirectAnswerContract("shinjeom").systemSpec).toContain("상(象)");
+  });
+
+  it("민감 도메인(건강·재정·법률)은 확답 대신 강등 지시를 포함한다", () => {
+    expect(buildDirectAnswerContract("saju").systemSpec).toContain("전문가 상담 권유");
+  });
+});
+
+describe("buildFreeQuestionPrompt", () => {
+  it("질문이 없거나 공백이면 빈 문자열을 반환한다", () => {
+    expect(buildFreeQuestionPrompt(null)).toBe("");
+    expect(buildFreeQuestionPrompt("")).toBe("");
+    expect(buildFreeQuestionPrompt("   ")).toBe("");
+  });
+
+  it("질문이 있으면 directAnswer 필드에 answer-first로 직답하도록 지시한다", () => {
+    const p = buildFreeQuestionPrompt("이번 달에 이직할 수 있을까요?");
+    expect(p).toContain("이번 달에 이직할 수 있을까요?");
+    expect(p).toContain("directAnswer 필드에서");
+    expect(p).toContain("먼저");
+    // 균등 나열 헤지 금지
+    expect(p).toContain("균등하게 나열하지");
+  });
+
+  it("200자를 초과하는 질문은 잘라낸다 (인젝션 방지)", () => {
+    const long = "가".repeat(300);
+    const p = buildFreeQuestionPrompt(long);
+    expect(p).not.toContain("가".repeat(201));
   });
 });

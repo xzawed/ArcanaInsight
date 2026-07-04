@@ -214,6 +214,7 @@ export const ja: Partial<SharedKeys> = {
   saju: {
     "result.title": "四柱分析結果",
     "result.overall": "総合解釈",
+    "result.direct-answer": "四柱推命が示す直接の答え",
     "result.topic": "テーマ別解釈",
     "result.advice": "アドバイス",
     "result.cta": "私も四柱分析を受ける",
@@ -370,6 +371,7 @@ export const ja: Partial<SharedKeys> = {
   shinjeom: {
     "result.title": "神占結果",
     "result.overall": "総合解釈",
+    "result.direct-answer": "神霊が示す直接の答え",
     "result.topic": "テーマ別解釈",
     "result.advice": "アドバイス",
     "result.cta": "私も神占相談を受ける",

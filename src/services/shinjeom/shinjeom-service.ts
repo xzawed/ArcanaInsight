@@ -3,7 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
-import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter, buildDirectAnswerContract } from "@/services/core/prompt-builder";
 import { UserInfo } from "@/types/user-info";
 
 const topicLabels: Record<string, string> = {
@@ -94,15 +94,24 @@ ${historyText}
     }
 
     // 사용자 종료 요청 → 전체 대화 종합하여 최종 결과
-    return `상담 주제: ${topicLabel}${userInfoText}
+    const contract = buildDirectAnswerContract("shinjeom");
+    // 상담자가 가장 알고 싶어한 핵심 질문 = 첫 사용자 메시지(주된 고민). 최종 종합 전에 직답 앵커로 재노출.
+    const coreQuestion = chatHistory.find((m) => m.role === "user")?.content?.trim();
+    const coreQuestionBlock = coreQuestion
+      ? `\n상담자가 가장 알고 싶어한 핵심 질문: "${coreQuestion.replace(/[\r\n]/g, " ").slice(0, 200)}"\n→ 아래 종합에 앞서 directAnswer에서 이 질문에 먼저 직접 답하세요.`
+      : "";
+
+    return `상담 주제: ${topicLabel}${userInfoText}${coreQuestionBlock}
 
 전체 대화:
 ${historyText}
 
 지금까지의 모든 대화를 종합하여 최종 신점 결과를 충분한 깊이로 제공해주세요.
+${contract.systemSpec}
 
 응답 형식 — 반드시 아래 JSON:
 {
+${contract.schemaLine}
   "shinjeomSections": {
     "spiritual": "신명이 감지하는 핵심 기운과 영적 메시지. 현재 상황의 영적 의미와 흐름을 5~6문단으로 서술.",
     "current": "지금 이 시기의 운세 에너지, 상황 맥락, 주변 인물·환경이 미치는 영향을 5~6문단으로 구체적으로 분석.",
@@ -116,7 +125,8 @@ ${historyText}
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.
 JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
-내부 reasoning·생각·계획 단계를 출력하지 마세요 — 첫 토큰부터 곧바로 JSON을 시작하고 <think> 같은 태그도 출력 금지.`;
+내부 reasoning·생각·계획 단계를 출력하지 마세요 — 첫 토큰부터 곧바로 JSON을 시작하고 <think> 같은 태그도 출력 금지.
+${contract.footerReminder}`;
   }
 
   getReadingPrompt(context: SessionContext): string {
@@ -138,6 +148,10 @@ JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
         topicReading: cleanReadingText(typeof parsed.topicReading === "string" ? parsed.topicReading : ""),
         advice,
       };
+      // directAnswer 추출 — 상담자 핵심 질문에 대한 직답 (존재 시에만)
+      if (parsed.directAnswer !== undefined) {
+        result.directAnswer = cleanReadingText(typeof parsed.directAnswer === "string" ? parsed.directAnswer : "");
+      }
       // shinjeomSections 추출 (새 형식)
       if (parsed.shinjeomSections && typeof parsed.shinjeomSections === "object") {
         const s = parsed.shinjeomSections as Record<string, unknown>;

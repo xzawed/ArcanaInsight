@@ -77,6 +77,10 @@ export default function ShinjeomSessionPage() {
           {phase === "result" && readingResult ? (
             /* 최종 결과 */
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
+              {readingResult.directAnswer && (
+                <ResultTextCard text={readingResult.directAnswer} emoji="🎯" label={t("shinjeom.result.direct-answer")} delay={0.05} colorScheme="gold" />
+              )}
+
               {readingResult.shinjeomSections && (
                 <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
                   <ReadingSectionBlock icon="🌙" label={t("shinjeom.section.spiritual")} content={readingResult.shinjeomSections.spiritual} />

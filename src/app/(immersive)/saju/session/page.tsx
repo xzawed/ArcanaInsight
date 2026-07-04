@@ -93,6 +93,10 @@ export default function SajuSessionPage() {
                   <OhaengGraph elements={sajuData.elements} yongsinElement={sajuData.yongsin.element} />
                 </SajuChartReveal>
 
+                {readingResult.directAnswer && (
+                  <ResultTextCard text={readingResult.directAnswer} emoji="🎯" label={t("saju.result.direct-answer")} delay={0.3} colorScheme="gold" />
+                )}
+
                 {readingResult.sajuSections && (
                   <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
                     <ReadingSectionBlock icon="🏛" label={t("saju.section.structure")} content={readingResult.sajuSections.structure} />

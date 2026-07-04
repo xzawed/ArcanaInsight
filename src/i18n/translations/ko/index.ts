@@ -207,6 +207,7 @@ export const ko: SharedKeys = {
   saju: {
     "result.title": "사주 분석 결과",
     "result.overall": "종합 해석",
+    "result.direct-answer": "사주가 짚어주는 직접 답변",
     "result.topic": "주제별 해석",
     "result.advice": "조언",
     "result.cta": "나도 사주 분석 받기",
@@ -363,6 +364,7 @@ export const ko: SharedKeys = {
   shinjeom: {
     "result.title": "신점 결과",
     "result.overall": "종합 해석",
+    "result.direct-answer": "신령이 짚어주는 직접 답변",
     "result.topic": "주제별 해석",
     "result.advice": "조언",
     "result.cta": "나도 신점 상담 받기",

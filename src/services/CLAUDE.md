@@ -11,7 +11,7 @@ services/
 │   ├── circuit-breaker.ts     # 쿨다운 상태 globalThis 공유 (서버리스 warm 인스턴스 대응)
 │   ├── grok-provider.ts       # Grok API 호출, RateLimitError / AuthError 정의
 │   ├── claude-provider.ts     # Claude API 호출 (fallback 전용)
-│   ├── prompt-builder.ts      # buildCharacterHeader / buildSystemPrompt / buildReadingPrompt / buildUserInfoPrompt / buildFreeQuestionPrompt / buildCharacterMemoryPrompt / getLanguageFooter
+│   ├── prompt-builder.ts      # buildCharacterHeader / buildSystemPrompt / buildReadingPrompt / buildUserInfoPrompt / buildFreeQuestionPrompt / buildDirectAnswerContract(질문 직답 answer-first 계약, 3서비스 공통) / buildCharacterMemoryPrompt / getLanguageFooter
 │   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe / extractFallbackText
 ├── tarot/
 │   ├── tarot-service.ts       # DivinationService 구현체
