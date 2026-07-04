@@ -36,7 +36,11 @@ test.describe("DailyFortune — 오늘의 운세", () => {
 
   test("콘솔 에러 없음", async ({ page }) => {
     const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
+    page.on("pageerror", (err) => {
+      // webkit는 Next RSC 프리페치(_rsc) 요청을 access control로 차단해 benign pageerror를 낸다 — 앱 버그 아님(내비게이션 정상)
+      if (/_rsc=.*access control/i.test(err.message)) return;
+      errors.push(err.message);
+    });
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.locator("#daily-fortune")).toBeVisible();
     expect(errors).toHaveLength(0);
