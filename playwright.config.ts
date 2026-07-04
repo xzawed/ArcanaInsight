@@ -7,7 +7,11 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // CI는 workers:1 — workers:2 + fullyParallel이 브라우저 2개 + pnpm start Next 서버 + cold-cache
+  // sharp 이미지 최적화(2816×1536 원본 디코드)를 한 2코어/7GB 러너에 공존시켜 호스트 OOM →
+  // OOM-killer가 브라우저 프로세스 kill → Playwright "Target page/context/browser has been closed"
+  // (chromium·webkit 양쪽 재현 = 엔진 무관 메모리 문제). 매트릭스 레벨 3-프로젝트 병렬은 유지.
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
     ? [
         ["html", { open: "never" }],
