@@ -24,8 +24,10 @@ export async function GET(request: NextRequest) {
     )
     return NextResponse.json({ characterId: profile?.favorite_character_id ?? null })
   } catch (e) {
+    // 비로그인 사용자는 "선호 상담사 없음"으로 취급(200/null) — preselect 조회 훅이 401 콘솔 에러 없이 정상 동작.
+    // 비민감 데이터라 유출 없음. 선호를 '설정'하는 POST는 401 유지.
     if (e instanceof Error && e.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ characterId: null })
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }

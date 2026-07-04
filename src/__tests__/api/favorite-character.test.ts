@@ -57,10 +57,11 @@ describe("GET /api/profile/favorite-character", () => {
     expect((await res.json()).characterId).toBeNull();
   });
 
-  it("미인증 사용자 → 401", async () => {
+  it("미인증 사용자 → 200 / characterId: null (preselect 훅 콘솔 401 회피)", async () => {
     const { GET } = await setup({ user: null });
     const res = await GET(makeGetRequest());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
+    expect((await res.json()).characterId).toBeNull();
   });
 
   it("DB 조회 실패 → 500", async () => {
