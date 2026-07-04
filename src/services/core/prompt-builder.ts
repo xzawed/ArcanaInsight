@@ -17,8 +17,8 @@ const topicLabels: Partial<Record<Topic, string>> = {
  */
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   ko: "",
-  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, overallReading, topicReading, advice) — translate only the values, never the keys.",
-  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
+  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice, sajuSections, structure, elements, fortune, guidance, shinjeomSections, spiritual, current, obstacles, future) — translate only the values, never the keys.",
+  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice, sajuSections, structure, elements, fortune, guidance, shinjeomSections, spiritual, current, obstacles, future) は必ず英語のまま使用し、値のみを日本語で記述してください。",
 };
 
 /** 응답 직전 마지막 강조 — 모델은 가까운 위치의 지시를 더 강하게 따른다. */
@@ -62,15 +62,14 @@ export function buildSystemPrompt(character: CharacterConfig, locale: string = "
 - symbolism: 카드의 시각적 이미지(인물·색감·상징물·숫자)에서 출발해 원형적·신화적·심리적 의미까지 3~4문단으로 탐구합니다. 카드가 가진 에너지와 분위기를 감각적으로 전달합니다.
 - situation: 이 카드가 해당 위치에서 가리키는 에너지와 흐름을 3~4문단으로 서술합니다. 에너지의 방향을 묘사하되 상담자가 자신의 상황과 직접 연결할 수 있는 구체적 통찰을 포함합니다. 상담자가 읽으며 "이것이 내 이야기구나"라고 공명할 수 있는 깊이로 씁니다.
 - action: 이 카드가 이 위치에서 상담자에게 제안하는 구체적 행동·방향을 1~2문단으로 서술합니다. 상담자가 어떤 국면에 있든 적용 가능하도록 적극적 국면 / 정체된 국면 / 마무리 국면 세 가지를 고려합니다. 역방향일 경우 내려놓아야 할 것의 관점에서 제시합니다.
-- 직접 답변(directAnswer): 상담자의 현재 상황을 단 하나로 가정하지 말고 가능한 모든 상황을 포괄합니다. 4~5문단으로: ① 어떤 상황에서도 공통인 카드의 핵심 메시지 ② "이미 진행 중이라면" 시나리오 ③ "아직 시작 전이거나 막혀 있다면" 시나리오 ④ "이 방향이 지금 맞지 않다면" 시나리오 ⑤ 어느 시나리오에서든 지금 당장 취할 수 있는 공통 행동과 변화의 조건.
+- 직접 답변(directAnswer): 상담자의 질문에 "먼저" 직접 답합니다. 4~5문단으로 ① 질문을 한 문장으로 되짚고 ② 가장 유력한 한 방향을 단언하며 ③ 확신 수위를 문체로 표기하고("분명히" / "~쪽으로 기울어 있습니다" / "단서는 있으나 확정하기엔 이릅니다") ④ 그 방향을 뒷받침하는 카드 근거와 상담자가 바꿀 수 있는 전제조건을 덧붙입니다. 가능한 모든 경우를 균등하게 나열하지 말고 회피 없이 방향을 커밋합니다. 질문이 없으면 주제가 함축하는 핵심 질문을 상정해 같은 방식으로 답합니다.
 - 종합 해석(overallReading): 카드들이 함께 엮어내는 이야기와 큰 흐름을 5~6문단으로 풀어냅니다. 스프레드 전체를 하나의 서사로 연결하여 핵심 메시지를 전달합니다.
 - 조언(advice): 리딩에서 자연스럽게 흘러나오는 통찰과 지혜를 3~4문단으로 담습니다. 상담자가 스스로 방향을 발견하도록 이끄는 방식으로 씁니다.
 
 중요 규칙 — 문체와 표현:
 - 풍부하고 여운 있는 문장을 씁니다. 읽는 사람이 몰입하고 공명할 수 있는 표현을 사용합니다.
 - 카드의 상징어와 이미지를 살려 감각적으로 묘사합니다. (예: "전차의 흰 말과 검은 말이 팽팽한 긴장 속에 나란히 달립니다")
-- 상담자의 상황을 단정짓는 표현 대신, 가능성을 열어두는 표현을 사용합니다.
-  ("지금 당신은 ~입니다" → "이 카드는 ~의 에너지를 전하고 있습니다")
+- 두 축을 구분합니다. 상담자의 사적 사실(과거·현재 상태)은 단정하지 않고 완충하되("지금 당신은 ~입니다" → "이 카드는 ~의 에너지를 전하고 있습니다"), 점괘가 가리키는 방향성은 회피 없이 분명히 커밋합니다("이 카드는 이 질문에 ~로 답합니다").
 - 타로 특유의 신비롭고 깊이 있는 분위기를 유지하되, 전문 용어는 자연스럽게 풀어 씁니다.
 - 각 문단은 2~4문장으로 구성하고, 문단 사이에 빈 줄(\\n\\n)로 구분합니다.
 
@@ -152,18 +151,7 @@ action (행동 제안) — 1~2문단:
 각 위치의 흐름이 어떻게 연결되고 어디를 향하는지 큰 그림을 그려줍니다.
 이 시점에서 상담자에게 가장 중요한 메시지와 통찰을 전달합니다.
 
-직접 답변(directAnswer) — 4~5문단:
-상담자의 현재 상황을 단 하나로 가정하지 마세요. 모든 가능성을 포괄합니다:
-- 연애라면: 솔로 / 새 관계 시작 / 장기 연애 / 이별 후 / 상처 치유 중 모두 포괄
-- 직장이라면: 재직 중 / 구직 중 / 이직 고민 / 창업 준비 모두 포괄
-- 재정이라면: 안정기 / 지출 과다 / 투자 고민 / 부채 상황 모두 포괄
-- 건강이라면: 예방 관리 / 증상 인식 / 치료 중 / 회복기 모두 포괄
-문단 구성:
-① 어떤 상황에서도 공통인 카드의 핵심 메시지
-② "이미 이 일이 진행 중이라면 카드는 이렇게 말합니다..." (적극적 흐름)
-③ "아직 시작 전이거나 막혀 있다면 카드는 이렇게 말합니다..." (정체·대기)
-④ "이 방향이 지금 맞지 않거나 내려놓아야 할 때라면..." (전환·마무리)
-⑤ 어느 시나리오에서든 지금 당장 취할 수 있는 공통 행동과 변화의 조건
+${buildDirectAnswerContract("tarot").systemSpec}
 
 조언(advice) — 3~4문단:
 리딩에서 자연스럽게 흘러나오는 지혜를 담습니다.
@@ -192,7 +180,7 @@ ${cardDescriptions}
 - symbolism은 카드 이미지와 상징을 감각적이고 깊이 있게 탐구하세요.
 - situation은 에너지와 흐름을 묘사하되 구체적 통찰을 포함하세요.
 - action은 적극적·정체·마무리 국면을 모두 고려한 행동 제안을 1~2문단으로 쓰세요.
-- directAnswer는 상담자의 모든 가능한 상황(진행 중 / 시작 전 / 전환 필요)을 포괄하는 4~5문단으로 작성하세요.
+- directAnswer는 질문에 먼저 직접 답하되(재진술 → 방향 단언 → 확신 수위 → 근거·전제), 모든 경우를 균등 나열하지 말고 방향을 커밋하는 4~5문단으로 작성하세요.
 - 카드별 해석은 반드시 해당 위치의 관점에서 독립적으로 작성하세요.
 - 종합 해석은 모든 카드를 하나의 이야기로 엮어 깊이 있게 서술하세요.`;
 }
@@ -225,15 +213,49 @@ export function buildUserInfoPrompt(
   return `\n\n상담자 정보:\n- 이름: ${name}\n- 생년월일: ${birthDate}\n- 성별: ${gender}\n- 태어난 시: ${birthTimeStr}${mbtiLine}\n\n이 정보를 참고하여 더 개인화된 리딩을 제공해주세요.`;
 }
 
-/** 사용자 자유 질문을 프롬프트에 추가 (최대 200자, 인젝션 방지) */
+export type DirectAnswerDomain = "tarot" | "saju" | "shinjeom";
+
+/** 서비스별 directAnswer 근거 렌즈 — 방향을 무엇에 묶어 정당화하는가. */
+const DIRECT_ANSWER_EVIDENCE: Record<DirectAnswerDomain, string> = {
+  tarot: "뽑힌 카드의 상징과 위치",
+  saju: "세운·월운·용신 등 사주 데이터",
+  shinjeom: "대화에서 읽어낸 상(象)과 기운",
+};
+
+/**
+ * 3서비스 공통 "질문 직답(directAnswer)" 계약을 한 곳에서 방출한다.
+ * schemaLine(JSON 스켈레톤 라인)·systemSpec(작성 지침)·footerReminder(누락 방지)를 같은 함수에서
+ * 내보내 지시·스키마·파서가 서로 어긋나는 드리프트(사주에서 지시만 있고 필드가 없던 결함)를 구조적으로 차단한다.
+ * answer-first 계약: 질문 재진술 → 방향 단언 → 확신 수위 → 근거·전제. "모든 경우 균등 나열" 안티패턴 금지.
+ */
+export function buildDirectAnswerContract(domain: DirectAnswerDomain): {
+  schemaLine: string;
+  systemSpec: string;
+  footerReminder: string;
+} {
+  const evidence = DIRECT_ANSWER_EVIDENCE[domain];
+  const systemSpec = `직접 답변(directAnswer) — 상담자의 질문에 "먼저" 직접 답하는 필드입니다. 아래 순서로 4~5문단:
+① 재진술: 질문의 핵심(시간창·대상·판정)을 한 문장으로 되짚습니다. (예: "이번 달 이직 가능성에 대해 말하자면—")
+② 방향 단언: 가능한 모든 경우를 균등하게 나열하지 말고, 가장 유력한 하나의 방향을 먼저 단언합니다.
+③ 확신 수위: 확신 정도를 문체로 드러냅니다 — 분명하면 "분명히/유력하게", 기울면 "~쪽으로 기울어 있습니다", 약하면 "단서는 있으나 확정하기엔 이릅니다".
+④ 근거·전제: 그 방향을 뒷받침하는 근거(${evidence})와 상담자가 바꿀 수 있는 전제조건 한 문장을 덧붙입니다.
+- 상담자의 사적 사실(과거·현재 상태)은 단정하지 않고 완충하되, 점괘가 가리키는 방향은 회피 없이 분명히 커밋합니다.
+- 확정된 미래가 아니라 상징 해석에 근거한 방향 제시임을 caveat로 "한 번만" 밝힙니다(문장마다 반복 금지).
+- 건강·재정·법률처럼 민감한 실질 결정은 확답 대신 "경향 제시 + 본인 판단·전문가 상담 권유"로 답합니다.
+- 상담자가 명시한 질문이 없으면, 주제가 함축하는 핵심 질문을 하나 상정해 같은 방식으로 답합니다.`;
+  const schemaLine = `  "directAnswer": "질문 직답 — 재진술·방향 단언·확신 수위·근거 순서로 4~5문단(\\n\\n으로 문단 구분)",`;
+  const footerReminder = "directAnswer(질문 직답)를 반드시 포함하고, 그 안에서 방향을 회피 없이 커밋하세요.";
+  return { schemaLine, systemSpec, footerReminder };
+}
+
+/** 사용자 자유 질문을 프롬프트에 추가 (최대 200자, 인젝션 방지). directAnswer에 answer-first로 직답하도록 지시. */
 export function buildFreeQuestionPrompt(question?: string | null): string {
   if (!question?.trim()) return "";
   const sanitized = sanitizeField(question, 200);
-  return `\n\n사용자 질문: "${sanitized}"\n` +
-    `directAnswer 필드에서 이 질문에 직접 답하세요. ` +
-    `단순 "예/아니오"가 아닌 다면적으로: ` +
-    `"이 질문의 상황이 이미 진행 중이라면 / 아직 시작 전이라면 / 방향을 바꿔야 한다면" ` +
-    `세 관점에서 구체적으로 답하되, 마지막 문단에서 공통 핵심 행동을 제시하세요.`;
+  return `\n\n상담자의 질문: "${sanitized}"\n` +
+    `directAnswer 필드에서 이 질문에 "먼저" 직접 답하세요 — ` +
+    `① 질문을 한 문장으로 되짚고 ② 가장 유력한 한 방향을 단언하며 ③ 확신 수위를 문체로 표기하고("분명히" / "~쪽으로 기울어 있습니다" / "단서는 있으나 확정하기엔 이릅니다") ④ 근거와 전제조건을 덧붙입니다. ` +
+    `가능한 모든 경우를 균등하게 나열하지 말고, 회피 없이 방향을 커밋하세요.`;
 }
 
 /** 최근 세션 요약을 시스템 프롬프트에 주입 */

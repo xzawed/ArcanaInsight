@@ -202,6 +202,27 @@ describe("ShinjeomService", () => {
       // 이전 대화 내용이 포함되어 있어야 함
       expect(prompt).toContain("직장이 힘들어요");
     });
+
+    it("최종 프롬프트에 directAnswer 필드와 핵심질문 재노출이 포함된다", () => {
+      const history: ChatMessage[] = [
+        makeChatMessage("user", "이번 달에 이직할 수 있을까요?"),
+        makeChatMessage("character", "어떤 점이 가장 불안하세요?"),
+        makeChatMessage("user", "면접 결과요"),
+      ];
+
+      const prompt = service.buildConversationPrompt(
+        "shinjeom-career",
+        undefined,
+        history,
+        true
+      );
+
+      // directAnswer 필드가 JSON 스켈레톤에 존재 (answer-first 배선)
+      expect(prompt).toContain("directAnswer");
+      // 첫 사용자 메시지를 핵심 질문으로 재노출
+      expect(prompt).toContain("핵심 질문");
+      expect(prompt).toContain("이번 달에 이직할 수 있을까요?");
+    });
   });
 
   // ─── chatHistory 포함 ─────────────────────────────────────────────────────
@@ -335,6 +356,21 @@ describe("ShinjeomService", () => {
 
       const result = service.parseResult(partialJson);
       expect(result.overallReading).toContain("종합 운세");
+    });
+
+    it("directAnswer 필드가 있으면 추출한다 (핵심질문 직답 배선)", () => {
+      const json = JSON.stringify({
+        directAnswer: "이직 질문에 답하자면— 흐름은 다음 달 초로 기울어 있습니다.",
+        overallReading: "종합", topicReading: "주제", advice: "조언",
+      });
+      const result = service.parseResult(json);
+      expect(result.directAnswer).toContain("다음 달 초로 기울어");
+    });
+
+    it("directAnswer 필드가 없으면 result.directAnswer는 undefined이다 (하위호환)", () => {
+      const json = JSON.stringify({ overallReading: "종합", topicReading: "주제", advice: "조언" });
+      const result = service.parseResult(json);
+      expect(result.directAnswer).toBeUndefined();
     });
 
     it("overallReading 필드가 없는 빈 JSON이면 빈 문자열로 처리한다", () => {

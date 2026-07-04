@@ -217,6 +217,7 @@ export interface SharedKeys {
   saju: {
     "result.title": string;
     "result.overall": string;
+    "result.direct-answer": string;
     "result.topic": string;
     "result.advice": string;
     "result.cta": string;
@@ -377,6 +378,7 @@ export interface SharedKeys {
   shinjeom: {
     "result.title": string;
     "result.overall": string;
+    "result.direct-answer": string;
     "result.topic": string;
     "result.advice": string;
     "result.cta": string;
