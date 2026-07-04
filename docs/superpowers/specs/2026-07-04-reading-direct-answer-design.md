@@ -49,7 +49,7 @@
 
 ## P2 구현 (3차 PR — DB 영속)
 
-- ✅ **directAnswer DB 영속**: 마이그 023(`readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''`) + drizzle 스키마 + `persistDirectAnswer`(본 리딩 insert와 **분리된 best-effort UPDATE** — 컬럼 미적용 환경에서도 본 저장 무영향, 배포 순서 무관) + result API `SAFE_KEYS` + result 페이지 렌더(3서비스). ⚠️ 마이그 023은 운영 DB 적용 필요(머지 후 별도 적용).
+- ✅ **directAnswer DB 영속**: 마이그 023(`readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''`) + drizzle 스키마 + `persistDirectAnswer`(본 리딩 insert와 **분리된 best-effort UPDATE** — 컬럼 미적용 환경에서도 본 저장 무영향, 배포 순서 무관) + result API `SAFE_KEYS` + result 페이지 렌더(3서비스). ✅ 마이그 023 운영 Supabase 적용 완료(2026-07-04, 프로젝트 arcana-insight).
 
 ## 남은 과제 (미구현)
 
