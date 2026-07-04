@@ -65,7 +65,7 @@ test.describe("폼 유효성 — 신점 메시지 입력", () => {
 test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
   test("테마 변경 후 새로고침 → 유지", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
 
     // 한밤의 신비 테마 선택
     const midnightBtn = page.locator("button").filter({ hasText: "한밤의 신비" });
@@ -75,7 +75,7 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
 
       // 새로고침
       await page.reload();
-      await page.waitForLoadState("networkidle");
+      await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
 
       // localStorage에서 테마 확인
       const savedTheme = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
@@ -85,7 +85,7 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
 
   test("성별 필터 변경 → 타로 페이지 반영", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
 
     // 여자 필터 선택
     const femaleBtn = page.locator("section").filter({ hasText: "상담사 필터" }).getByRole("button", { name: "여자" });
@@ -109,7 +109,7 @@ test.describe("설정 — 상태 저장 + 교차 페이지 반영", () => {
 
   test("카드 확인 모드 토글 후 유지", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
 
     // 토글 클릭 (ON으로)
     const toggle = page.locator("section").filter({ hasText: "카드 선택 방식" }).locator("button");

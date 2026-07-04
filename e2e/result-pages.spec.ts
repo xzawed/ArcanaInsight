@@ -8,14 +8,14 @@ import { test, expect } from "@playwright/test";
 test.describe("결과 페이지 — 공유 URL", () => {
   test("타로 결과 — 존재하지 않는 token → 404", async ({ page }) => {
     await page.goto("/tarot/result/nonexistent-token-12345");
-    await page.waitForLoadState("networkidle");
-    // notFound() → Next.js 404 페이지
+    // notFound() → Next.js 404 페이지 (web-first — 404 헤딩 노출 대기)
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     expect(page.url()).toContain("nonexistent");
   });
 
   test("사주 결과 — 존재하지 않는 token → 404", async ({ page }) => {
     await page.goto("/saju/result/nonexistent-token-12345");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     expect(page.url()).toContain("nonexistent");
   });
 
@@ -23,7 +23,8 @@ test.describe("결과 페이지 — 공유 URL", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/tarot/result/test-token");
-    await page.waitForLoadState("networkidle");
+    // 404 렌더 완료 대기 (web-first) — 렌더 중 JS 에러가 있으면 pageerror로 포착
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     // 404는 정상 동작이므로 JS 에러만 검증
     expect(errors).toHaveLength(0);
   });
@@ -32,7 +33,7 @@ test.describe("결과 페이지 — 공유 URL", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/saju/result/test-token");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
@@ -41,7 +42,7 @@ test.describe("결과 페이지 — 공유 URL", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/tarot/result/not-a-uuid-!!!");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
@@ -49,7 +50,7 @@ test.describe("결과 페이지 — 공유 URL", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/saju/result/not-a-uuid-!!!");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 });
@@ -72,7 +73,7 @@ test.describe("결과 페이지 — 비인증 컨텍스트 (D1 회귀 방지)", 
         if (res.status() >= 500) failedRequests.push(`${res.status()} ${res.url()}`);
       });
       const response = await page.goto(`/${service}/result/probe-token-${Date.now()}`);
-      await page.waitForLoadState("networkidle");
+      await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
       expect(response, "초기 응답이 존재해야 함").not.toBeNull();
       expect(response!.status(), "5xx 금지 (RLS 빈결과는 404 로 변환되어야 함)").toBeLessThan(500);
       expect(errors, "JS 페이지 에러 없음").toHaveLength(0);

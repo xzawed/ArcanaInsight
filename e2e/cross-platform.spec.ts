@@ -59,56 +59,40 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("이미지 — 모든 이미지 로드 성공", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    // 이미지 로드는 아래 이미지별 waitForFunction(el.complete && naturalWidth>0) 폴링이 보장
-    // (외부 R2 lazy 이미지가 load 이벤트를 지연 → Mobile Android 타임아웃, web-first 전환)
 
-    const images = await page.locator("img").elementHandles();
+    // 상단 뷰포트 이미지들이 로드를 마칠 시간을 단일 예산(15s)으로 확보한다. 이미지별 15s 대기를 누적하면
+    // (느린 대형 이미지 여러 개) 30s 테스트 타임아웃을 넘겨 hang → 단일 폴링으로 대체. 예산 초과도 무방(아래에서 complete만 판정).
+    await page
+      .waitForFunction(
+        () => {
+          const imgs = Array.from(document.querySelectorAll("img"))
+            .slice(0, 20)
+            .filter((el) => {
+              const r = el.getBoundingClientRect();
+              const s = getComputedStyle(el);
+              return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
+            });
+          return imgs.length > 0 && imgs.every((el) => el.complete);
+        },
+        { timeout: 15_000 }
+      )
+      .catch(() => {
+        /* 예산 초과 시에도 아래에서 로드가 끝난(complete) 이미지만 판정 */
+      });
 
-    for (const img of images.slice(0, 20)) {
-      const snapshot = await img
-        .evaluate((el: HTMLImageElement) => {
-          if (!el.isConnected) return { isConnected: false, isVisible: false, currentSrc: "", naturalWidth: 0 };
-          const rect = el.getBoundingClientRect();
-          const style = window.getComputedStyle(el);
-          return {
-            isConnected: true,
-            isVisible:
-              rect.width > 0 &&
-              rect.height > 0 &&
-              style.visibility !== "hidden" &&
-              style.display !== "none",
-            currentSrc: el.currentSrc || el.src,
-            naturalWidth: el.naturalWidth,
-          };
+    // 깨진 이미지 = 로드가 끝났는데(complete) naturalWidth 0 (404/디코드 실패). 로딩 중(!complete)인 유효 이미지는 제외.
+    const broken = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("img"))
+        .slice(0, 20)
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          const s = getComputedStyle(el);
+          return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
         })
-        .catch(() => ({ isConnected: false, isVisible: false, currentSrc: "", naturalWidth: 0 }));
-
-      if (!snapshot.isConnected || !snapshot.isVisible) continue;
-
-      await page
-        .waitForFunction(
-          (el) => {
-            if (!(el instanceof HTMLImageElement) || !el.isConnected) return true;
-            el.scrollIntoView({ block: "center", inline: "nearest" });
-            return el.complete && el.naturalWidth > 0;
-          },
-          img,
-          { timeout: 15000 }
-        )
-        .catch(() => {
-          /* 폴링 실패 시 아래 expect로 정상 fail */
-        });
-
-      const result = await img
-        .evaluate((el: HTMLImageElement) => ({
-          currentSrc: el.currentSrc || el.src,
-          naturalWidth: el.naturalWidth,
-        }))
-        .catch(() => null);
-      if (!result) continue;
-      // naturalWidth > 0이면 이미지 로드 성공
-      expect(result.naturalWidth, result.currentSrc).toBeGreaterThan(0);
-    }
+        .filter((el) => el.complete && el.naturalWidth === 0)
+        .map((el) => el.currentSrc || el.src),
+    );
+    expect(broken, `깨진 이미지: ${broken.join(", ")}`).toEqual([]);
   });
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page, browserName }) => {

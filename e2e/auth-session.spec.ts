@@ -51,7 +51,7 @@ test.describe("인증 — 로그인 상태 테스트", () => {
     }, { url: SUPABASE_URL, access: tokens.access_token, refresh: tokens.refresh_token });
 
     await page.goto("/mypage");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("main").first()).toBeVisible();
 
     // 리디렉트되지 않고 마이페이지 콘텐츠 표시
     const body = await page.textContent("body");

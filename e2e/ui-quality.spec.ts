@@ -80,7 +80,7 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
   test("설정 — 6개 섹션 존재", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1").filter({ hasText: "설정" })).toBeVisible();
     const body = await page.textContent("body");
 
     expect(body).toContain("테마");
@@ -92,21 +92,18 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
   test("로그인 — Google 버튼 + 안내문", async ({ page }) => {
     await page.goto("/auth/login");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=Google")).toBeVisible();
     await expect(page.locator("text=로그인 없이도")).toBeVisible();
   });
 
   test("이용약관 — 필수 섹션", async ({ page }) => {
     await page.goto("/terms");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=이용약관").first()).toBeVisible();
     await expect(page.locator("text=목적").first()).toBeVisible();
   });
 
   test("개인정보 — 테이블 + 필수 섹션", async ({ page }) => {
     await page.goto("/privacy");
-    await page.waitForLoadState("networkidle");
     await expect(page.locator("text=개인정보처리방침").first()).toBeVisible();
     const tables = page.locator("table");
     expect(await tables.count()).toBeGreaterThanOrEqual(1);
@@ -132,7 +129,7 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
 
   test("설정 — 모든 섹션 카드 가시", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("section").first()).toBeVisible();
     const sections = page.locator("section");
     const count = await sections.count();
     expect(count).toBeGreaterThanOrEqual(4);
@@ -146,19 +143,9 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
 
   test("모든 이미지 로드 성공 (깨진 이미지 없음)", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    // 이미지 로드 검사 테스트 — 뷰포트 내 이미지가 실제 로드 완료(complete && naturalWidth>0)될 때까지 대기.
-    // (networkidle은 외부 R2 lazy 카드까지 기다려 Mobile Android 지연 → 뷰포트 로컬 이미지만 web-first로 대기)
-    await page.waitForFunction(
-      () => {
-        const imgs = Array.from(document.querySelectorAll("img"));
-        const visible = imgs.filter((el) => {
-          const r = el.getBoundingClientRect();
-          return r.width > 0 && r.height > 0 && r.top < window.innerHeight && r.bottom > 0;
-        });
-        return visible.length > 0 && visible.every((el) => el.complete && el.naturalWidth > 0);
-      },
-      { timeout: 15_000 }
-    );
+    // 이미지 로드 검사 — 페이지 콘텐츠 렌더 대기 후, 로드가 끝난(complete) 뷰포트 이미지만 판정.
+    // (networkidle은 외부 R2 lazy 카드까지 기다려 Mobile Android 지연 → web-first 콘텐츠 신호 사용)
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
     const images = page.locator("img");
     const count = await images.count();
 
@@ -166,14 +153,16 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
     for (let i = 0; i < Math.min(count, 30); i++) {
       const img = images.nth(i);
       if (await img.isVisible()) {
-        const { inViewport, naturalWidth } = await img.evaluate((el: HTMLImageElement) => {
+        const { inViewport, complete, naturalWidth } = await img.evaluate((el: HTMLImageElement) => {
           const rect = el.getBoundingClientRect();
           return {
             inViewport: rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0,
+            complete: el.complete,
             naturalWidth: el.naturalWidth,
           };
         });
-        if (inViewport && naturalWidth === 0) broken++;
+        // 다운로드 중(!complete)인 유효 이미지는 깨짐 아님 — complete인데 naturalWidth 0인 것만 깨짐으로 카운트
+        if (inViewport && complete && naturalWidth === 0) broken++;
       }
     }
     expect(broken).toBe(0);

@@ -219,15 +219,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // Mobile Android 에뮬에서 scrollTo 반영이 늦거나 무시될 수 있으므로 soft 대기
     await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 }).catch(() => {});
 
-    // 홈으로 이동 — evaluate와 waitForURL 병렬 실행.
-    // evaluate 내 click()이 네비게이션을 트리거하면 페이지 컨텍스트가 즉시 닫혀
-    // evaluate가 "Target page closed"를 throw하므로 catch로 무시하고 URL 전환만 기다린다.
-    // waitUntil:"commit"으로 load 이벤트(외부 이미지) 비의존 — URL 커밋 즉시 진행한다.
-    const homeTab = page.locator("nav a[href='/']").last();
-    await Promise.all([
-      page.waitForURL(/\/$/, { waitUntil: "commit" }),
-      homeTab.evaluate((el) => (el as HTMLElement).click()).catch(() => {}),
-    ]);
+    // 홈으로 이동 — 안정 testid(mobile-nav-home) + Playwright 신뢰 클릭(액셔너빌리티 자동 대기).
+    // `nav a[href='/']`.last()+synthetic evaluate-click+waitUntil:"commit"은 홈(소프트) 네비게이션에서
+    // 클릭이 네비게이션을 트리거하지 못해 waitForURL이 60s 타임아웃(#460 CI, error-context: 페이지가 /tarot 유지).
+    // web-first toHaveURL은 소프트/하드 네비게이션 무관하게 URL을 폴링하므로 commit 라이프사이클에 비의존.
+    const homeTab = page.locator("[data-testid='mobile-nav-home']");
+    await homeTab.click();
+    await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
     // 라우트 전환 시 스크롤 최상단 초기화 확인 (load 대기 불필요)
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);

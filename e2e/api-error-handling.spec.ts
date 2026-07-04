@@ -83,7 +83,6 @@ test.describe("API 에러 처리 — mock 응답", () => {
     });
 
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
     // 설정 페이지는 API 호출 없이 렌더링 가능
     await expect(page.locator("text=테마").first()).toBeVisible();
   });
