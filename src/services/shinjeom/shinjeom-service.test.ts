@@ -120,6 +120,21 @@ describe("ShinjeomService", () => {
       const prompt = service.getSystemPrompt("unknown-char");
       expect(prompt).toContain("루나");
     });
+
+    it("쉬운 말 계약과 상담체(제가 보기엔) 지시가 포함된다", () => {
+      const prompt = service.getSystemPrompt("luna");
+      expect(prompt).toContain("쉬운 말 계약");
+      expect(prompt).toContain("제가 보기엔");
+    });
+  });
+
+  describe("최종 리딩 소제목 평이화", () => {
+    it("overallReading 소제목이 평이 헤더로 교체된다 (【마음에 닿는 말】, not 【신명의 메시지】)", () => {
+      const history: ChatMessage[] = [makeChatMessage("user", "직장이 고민이에요")];
+      const prompt = service.buildConversationPrompt("shinjeom-career", undefined, history, true);
+      expect(prompt).toContain("【마음에 닿는 말】");
+      expect(prompt).not.toContain("【신명의 메시지】");
+    });
   });
 
   // ─── buildConversationPrompt (isFinalTurn=false) ───────────────────────────

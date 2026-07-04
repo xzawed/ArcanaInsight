@@ -5,7 +5,7 @@ import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
 import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
-import { buildCharacterHeader, getLanguageFooter, buildDirectAnswerContract } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
 const TOPIC_LABELS: Record<string, string> = {
@@ -225,6 +225,7 @@ export class SajuService implements DivinationService {
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
     const contract = buildDirectAnswerContract("saju");
+    const readability = buildReadabilityContract("saju");
 
     return `${buildCharacterHeader(character, undefined, locale ?? "ko")}
 - 사주명리학 전문가로서, 제공된 사주 데이터만 기반으로 해석합니다.
@@ -233,9 +234,11 @@ export class SajuService implements DivinationService {
 
 중요 규칙:
 - 문단 사이에 빈 줄(\\n\\n)을 넣어 가독성을 높입니다.
-- 사주 용어는 쉬운 말로 풀어 설명합니다 (예: "나무(木) 기운이 넘쳐 추진력은 강하지만 유연성이 부족합니다").
 - 핵심을 문단 첫 문장에 제시하고, 이유와 구체적 상황으로 이어갑니다.
-- 추상적 표현 대신 구체적 시기·상황·행동으로 서술합니다.
+- 아래 사주 데이터의 용어 라벨(십성·12운성 이름 등)을 결과에 그대로 옮기지 말고, 그 뜻을 쉬운 말로 풀어 씁니다.
+
+${readability.systemSpec}
+${readability.fewShot}
 
 ${contract.systemSpec}
 
@@ -254,11 +257,12 @@ ${contract.systemSpec}
     "guidance": "용신·희신 기반 실용 가이드. 지금 당장 강화할 것, 피해야 할 것, 일상 실천 방법을 5~6문단으로 서술."
   },
 ${contract.schemaLine}
-  "overallReading": "【사주 전체 구조】일간 특성·신강신약·격국 → 【오행 분포】과잉·부족 기운의 삶에 대한 영향 → 【용신·희신】핵심 에너지와 활용법 → 【대운 흐름】현재 대운이 일간에 미치는 영향 → 【세운】올해 세운과 대운의 교차 작용 → 【전반 전망】현재 위치와 앞으로의 큰 흐름. 최소 8문단 이상, 각 문단을 충분히 서술.",
+  "overallReading": "【타고난 성격】일간 특성·신강신약·격국을 쉬운 말로 → 【기운의 균형(오행)】넘치고 모자란 기운이 삶에 주는 영향 → 【나를 살리는 기운(용신)】나에게 힘이 되는 기운과 쓰는 법 → 【지금의 큰 흐름(대운)】지금 대운이 나에게 주는 영향 → 【올해 운세(세운)】올해 흐름과 대운의 만남 → 【앞으로의 전망】지금 위치와 앞으로의 큰 흐름. 소제목은 위처럼 쉬운 말로, 전문 용어는 본문에서 풀어 씁니다. 최소 8문단 이상, 각 문단을 충분히 서술.",
   "topicReading": "선택한 주제와 시간 범위에 특화된 심층 분석. 시기별 구체적 흐름(월별·분기별 포함), 기회가 열리는 시기, 주의해야 할 구간, 십성·12운성이 이 주제에 어떻게 작용하는지. 최소 6문단 이상.",
   "advice": "용신·희신 기반의 실용적 행동 지침. 지금 당장 강화해야 할 것, 피해야 할 것, 일상에서 실천 가능한 구체적 방법, 마음가짐 조언. 최소 4문단 이상."
 }
-${contract.footerReminder}${getLanguageFooter(locale ?? "ko")}`;
+${contract.footerReminder}
+${readability.footerReminder}${getLanguageFooter(locale ?? "ko")}`;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -302,6 +306,7 @@ ${timeContext}
 ${instruction}${horizonNote}
 
 [분량 기준 — 3배 프리미엄 리딩]
+- 각 문단에는 상담자가 자기 삶으로 옮길 수 있는 구체적인 사례를 최소 하나 넣습니다. 분량이 남아도 추상적인 표현으로 늘리지 말고 구체적인 사례로 채웁니다. 사주 용어는 [용어 → 한 줄 비유 → 당신 삶에서는] 순서로 풀어 씁니다.
 - sajuSections.structure: 일간·신강신약·격국을 최소 5~6문단으로 깊이 있게 서술
 - sajuSections.elements: 오행·용신·희신·기신을 최소 5~6문단으로 서술
 - sajuSections.fortune: 대운·세운 흐름을 최소 5~6문단으로 서술

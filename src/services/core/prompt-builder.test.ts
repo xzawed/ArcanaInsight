@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt, getLanguageFooter, buildDirectAnswerContract, buildFreeQuestionPrompt } from "./prompt-builder";
+import { buildSystemPrompt, buildReadingPrompt, buildUserInfoPrompt, buildCharacterHeader, buildCharacterMemoryPrompt, getLanguageFooter, buildDirectAnswerContract, buildFreeQuestionPrompt, buildReadabilityContract } from "./prompt-builder";
 import type { CharacterConfig } from "@/types/character";
 import type { SelectedCard, TarotCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
@@ -533,10 +533,10 @@ describe("buildDirectAnswerContract", () => {
     expect(spec).toContain("균등하게 나열하지");
   });
 
-  it("도메인별 근거 렌즈가 다르다 (tarot=카드, saju=세운, shinjeom=상)", () => {
+  it("도메인별 근거 렌즈가 다르다 (tarot=카드, saju=사주 근거, shinjeom=마음) — 쉬운 말로", () => {
     expect(buildDirectAnswerContract("tarot").systemSpec).toContain("카드");
-    expect(buildDirectAnswerContract("saju").systemSpec).toContain("세운");
-    expect(buildDirectAnswerContract("shinjeom").systemSpec).toContain("상(象)");
+    expect(buildDirectAnswerContract("saju").systemSpec).toContain("사주 근거");
+    expect(buildDirectAnswerContract("shinjeom").systemSpec).toContain("마음");
   });
 
   it("민감 도메인(건강·재정·법률)은 확답 대신 강등 지시를 포함한다", () => {
@@ -564,5 +564,44 @@ describe("buildFreeQuestionPrompt", () => {
     const long = "가".repeat(300);
     const p = buildFreeQuestionPrompt(long);
     expect(p).not.toContain("가".repeat(201));
+  });
+});
+
+describe("buildReadabilityContract (쉬운 말 계약)", () => {
+  it("3서비스 모두 systemSpec·fewShot·footerReminder를 반환한다", () => {
+    for (const domain of ["tarot", "saju", "shinjeom"] as const) {
+      const c = buildReadabilityContract(domain);
+      expect(c.systemSpec).toContain("쉬운 말 계약");
+      expect(c.fewShot).toContain("→");
+      expect(c.footerReminder).toContain("쉽게");
+    }
+  });
+
+  it("코어 원칙: '분량은 그대로, 쉬운 말로' + '깊이는 구체적 상황·사례에서'", () => {
+    const spec = buildReadabilityContract("tarot").systemSpec;
+    expect(spec).toContain("문단 수와 분량은 그대로");
+    expect(spec).toContain("구체적인 상황·이유·사례");
+    // 추상 명사 착지 규칙
+    expect(spec).toContain("예를 들어");
+  });
+
+  it("도메인별 렌즈가 다르다 (tarot=장면, saju=보약 비유 3단착지, shinjeom=제가 보기엔)", () => {
+    expect(buildReadabilityContract("tarot").systemSpec).toContain("장면");
+    expect(buildReadabilityContract("saju").systemSpec).toContain("보약");
+    expect(buildReadabilityContract("shinjeom").systemSpec).toContain("제가 보기엔");
+  });
+});
+
+describe("가독성 배선 — 화려체·전문어 제거 (회귀 방지)", () => {
+  const character = {
+    id: "arcana", name: "아르카나", nameJp: "アルカナ",
+    personality: "p", description: "d", speciality: "s", speechStyle: "~요체",
+  } as Parameters<typeof buildSystemPrompt>[0];
+
+  it("타로 시스템 프롬프트에 쉬운 말 계약이 들어가고, 화려체 예시는 사라진다", () => {
+    const p = buildSystemPrompt(character, "ko");
+    expect(p).toContain("쉬운 말 계약");
+    expect(p).not.toContain("전차의 흰 말과 검은 말");
+    expect(p).not.toContain("원형적·신화적·심리적 의미");
   });
 });

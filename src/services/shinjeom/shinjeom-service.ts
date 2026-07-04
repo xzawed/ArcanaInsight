@@ -3,7 +3,7 @@ import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
-import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter, buildDirectAnswerContract } from "@/services/core/prompt-builder";
+import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { UserInfo } from "@/types/user-info";
 
 const topicLabels: Record<string, string> = {
@@ -42,6 +42,7 @@ export class ShinjeomService implements DivinationService {
       ? getCharacterById(characterId) ?? this.getCharacter()
       : this.getCharacter();
 
+    const readability = buildReadabilityContract("shinjeom");
     return `${buildCharacterHeader(character, "신점(영적 상담)을 제공하는 무속 상담사입니다.", locale ?? "ko")}
 - 영적 직관과 무속적 지혜를 바탕으로 상담합니다.
 - 사용자의 고민에 깊이 공감하며 따뜻하게 대합니다.
@@ -52,16 +53,17 @@ export class ShinjeomService implements DivinationService {
 - 사용자의 고민에 공감하며 핵심을 파악하기 위한 질문을 1개씩 이어갑니다.
 - 사용자가 충분히 털어놓았다고 느낄 때 자연스럽게 대화를 마무리합니다.
 - 최종 신점 결과는 사용자가 상담 종료를 요청할 때 제공합니다.
-- 중간 대화에서도 공감과 영적 통찰을 풍부하게 담아 응답합니다.
+- 중간 대화에서도 공감과 위로를 충분히 담아 응답합니다.
 
-중요 규칙 — 가독성:
+${readability.systemSpec}
+${readability.fewShot}
 - 문단 사이에 빈 줄(\\n\\n)을 넣어 구분합니다.
-- 추상적 표현 대신 구체적 상황·시기·사례를 들어 설명합니다.
 - 각 응답은 충분한 깊이와 분량으로 — 공감·영적 해석·실질 조언이 모두 담기도록 합니다.
 
 중요 규칙 — 최종 결과:
 - 최종 결과는 반드시 JSON 형식으로 응답합니다.
-- 최종이 아닌 중간 대화에서는 일반 텍스트로 응답합니다.${getLanguageFooter(locale ?? "ko")}`;
+- 최종이 아닌 중간 대화에서는 일반 텍스트로 응답합니다.
+${readability.footerReminder}${getLanguageFooter(locale ?? "ko")}`;
   }
 
   buildConversationPrompt(
@@ -86,9 +88,9 @@ ${historyText}
 
 사용자의 새 메시지: ${currentMessage}
 
-아래 구조로 풍부하게 응답해주세요.
+아래 구조로 따뜻하고 쉽게 응답해주세요.
 1. 공감 (2~3문장): 사용자의 감정을 읽어주고, 상황을 구체적으로 반영해서 진심으로 공감
-2. 영적 통찰 (1~2문장): 신명이 이 상황에서 감지하는 기운이나 흐름에 대한 간략한 언급
+2. 느낌 한마디 (1~2문장): 지금 상황에서 마음에 걸리는 점을 어려운 말 없이 부드럽게 짚어주기
 3. 탐구 질문 (1개): 상황의 핵심을 더 깊이 파악하기 위한 구체적 질문
 일반 텍스트로 응답하세요 (JSON 아님)`;
     }
@@ -107,20 +109,21 @@ ${historyText}
 ${historyText}
 
 지금까지의 모든 대화를 종합하여 최종 신점 결과를 충분한 깊이로 제공해주세요.
+각 문단에는 상담자가 자기 삶으로 옮길 수 있는 구체적인 사례를 최소 하나 넣고, 분량이 남아도 추상적인 표현으로 늘리지 말고 구체적인 사례로 채웁니다.
 ${contract.systemSpec}
 
 응답 형식 — 반드시 아래 JSON:
 {
 ${contract.schemaLine}
   "shinjeomSections": {
-    "spiritual": "신명이 감지하는 핵심 기운과 영적 메시지. 현재 상황의 영적 의미와 흐름을 5~6문단으로 서술.",
-    "current": "지금 이 시기의 운세 에너지, 상황 맥락, 주변 인물·환경이 미치는 영향을 5~6문단으로 구체적으로 분석.",
-    "obstacles": "현재 겪고 있는 어려움의 영적 원인, 장애물의 본질, 주의해야 할 에너지를 5~6문단으로 서술.",
-    "future": "앞으로 3~6개월의 흐름 예측, 전환점, 기회가 되는 시기, 삶의 방향과 성장 포인트를 5~6문단으로 서술."
+    "spiritual": "지금 상황에서 가장 크게 느껴지는 기운과 상담자에게 전하고 싶은 말. 무속 표현은 살리되 바로 쉬운 말로 뜻을 함께 풀어 5~6문단으로 서술.",
+    "current": "지금 이 시기의 운세와 상황, 주변 사람·환경이 주는 영향을 눈에 보이는 구체적인 장면으로 5~6문단 분석.",
+    "obstacles": "지금 힘든 일의 뿌리와 조심할 점을, 겁주지 말고 따뜻하게 5~6문단으로 서술.",
+    "future": "앞으로 3~6개월의 흐름, 바뀌는 시점, 기회가 되는 때, 나아갈 방향을 쉬운 말로 5~6문단 서술."
   },
-  "overallReading": "【신명의 메시지】전체 기운과 신명이 전하는 핵심 메시지\\n\\n【현재 흐름】지금 이 시기의 운세 에너지와 상황 맥락\\n\\n【환경과 주변 기운】주변 인물·환경이 미치는 영향\\n\\n【어려움의 영적 원인】현재 겪고 있는 문제의 근원적 의미\\n\\n【가까운 미래 전망】앞으로 3~6개월의 흐름 예측\\n\\n【중요한 시기】특히 주의하거나 기회가 되는 구체적 시점\\n\\n【삶의 방향】이 상황이 삶 전체에서 갖는 의미와 성장 포인트. 각 섹션 3~5문장 이상으로 충분히 서술.",
-  "topicReading": "선택 주제에 대한 심층 신점 해석.\\n\\n긍정적 기운과 도전 요소를 균형 있게 분석.\\n\\n시기별 구체적 흐름(이번 달·3개월·6개월).\\n\\n이 주제와 관련된 중요 인물·환경·기운 분석.\\n\\n상황이 바뀌는 전환점 예측. 최소 6문단 이상.",
-  "advice": "【지금 당장 할 것】오늘부터 실천 가능한 구체적 행동 2~3가지\\n\\n【기도·의식】정화와 좋은 기운을 부르는 방법 (구체적 방법과 시기)\\n\\n【액막이·보호】현재 상황에 맞는 영적 보호 방법\\n\\n【관계·환경 조언】주변 사람·공간·물건에 관한 실질 조언\\n\\n【마음가짐】내면의 변화를 위한 조언과 앞으로 나아갈 방향. 최소 5문단 이상."
+  "overallReading": "【마음에 닿는 말】상담자에게 가장 먼저 전하고 싶은 핵심 메시지\\n\\n【지금의 흐름】지금 이 시기의 운세와 상황\\n\\n【주변 사람들】주변 사람·환경이 주는 영향\\n\\n【힘든 일의 뿌리】지금 겪는 문제의 근본 원인\\n\\n【앞날 전망】앞으로 3~6개월의 흐름\\n\\n【중요한 때】특히 조심하거나 기회가 되는 시점\\n\\n【삶의 방향】이 일이 삶에서 갖는 의미와 나아갈 길. 소제목은 위처럼 쉬운 말로, 각 섹션 3~5문장 이상으로 충분히 서술.",
+  "topicReading": "선택 주제에 대한 깊이 있는 신점 해석.\\n\\n좋은 기운과 조심할 점을 균형 있게.\\n\\n시기별 흐름(이번 달·3개월·6개월).\\n\\n관련된 중요한 사람·환경.\\n\\n상황이 바뀌는 시점 예측. 최소 6문단 이상.",
+  "advice": "【지금 당장 할 것】오늘부터 실천 가능한 구체적 행동 2~3가지\\n\\n【마음을 지키는 법】마음을 다잡고 좋은 기운을 부르는 방법(어려운 말 없이 쉽게)\\n\\n【관계·환경 조언】주변 사람·공간·물건에 관한 실질 조언\\n\\n【마음가짐】내면의 변화를 위한 조언과 나아갈 방향. 최소 5문단 이상."
 }
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.

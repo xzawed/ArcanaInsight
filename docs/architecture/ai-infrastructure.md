@@ -145,6 +145,17 @@ for (let i = start; i < text.length; i++) {
 - **배선**: 3서비스 모두 `getSystemPrompt`/`buildConversationPrompt` JSON 스켈레톤 상단(truncation 생존율↑)에 `directAnswer` + `parseResult` 추출 + 결과화면 최상단 `ResultTextCard` 렌더. en/ja는 `LANGUAGE_INSTRUCTIONS` JSON 키 화이트리스트에 `directAnswer` 포함(키 번역 방지).
 - **DB 영속**(마이그 023): `persistDirectAnswer`(reading-saver)가 본 리딩 insert와 **분리된 best-effort UPDATE**로 `direct_answer` 컬럼에 기록 → 재방문(`result/[id]`)·공유 결과에도 노출. 컬럼 미적용 환경(마이그 023 미배포)에서도 이 UPDATE만 조용히 실패(로깅)하고 본 리딩 insert는 무영향 → 배포 순서 무관. result API `SAFE_KEYS`·result 페이지 렌더 반영. ✅ 마이그 023 운영 DB 적용 완료(2026-07-04).
 
+## 쉬운 말 계약(가독성) — buildReadabilityContract
+
+리딩이 생소한 전문용어·추상 은유·화려한 문어체로 어렵게 읽히는 문제를 막기 위한 3서비스 공통 톤 계약.
+
+- **단일 진실원 헬퍼**: `buildReadabilityContract(domain)`(`prompt-builder.ts`)가 `systemSpec`(쉬운말·대화체 규칙)·`fewShot`(도메인별 before→after 1쌍)·`footerReminder`를 한 함수에서 방출(directAnswer 계약과 동일 패턴). 3서비스가 각 `getSystemPrompt`/문체 규칙 자리에 주입.
+- **핵심 원칙**: "분량 축소가 아니라 **같은 분량을 쉬운 말로**". 문단 수·`max_tokens`는 그대로 두고, 깊이의 실현 수단만 미문(美文)→구체성으로 재조준한다. 깊이는 어려운 단어가 아니라 구체적인 상황·이유·사례에서 나온다.
+- **코어 규칙**: 일반 성인 누구나 한 번에 이해하는 따뜻한 해요체, 한 문장 한 생각, 전문용어는 그 자리에서 쉬운 말로 풀어쓰기, "에너지·흐름·기운" 같은 추상 명사는 "예를 들어 ~할 때처럼" 구체 장면으로 착지, 번역투 자기검증.
+- **도메인 렌즈**: 타로=카드 그림 1~2문장 압축·삶으로 번역·비유 카드당 1개, 사주=용어 [용어→한 줄 비유→당신 삶에서는] 3단 착지 병기, 신점=무속 어휘는 살리되 "신명이 감지합니다"식 신탁체 대신 "제가 보기엔 ~네요" 상담체.
+- **소제목 평이화**: 사주 `overallReading`(`【사주 전체 구조】`→`【타고난 성격】` 등)·신점 `overallReading`(`【신명의 메시지】`→`【마음에 닿는 말】`)·`advice`의 `【】` 리터럴 헤더를 평이 헤더로 rename(렌더 구조 불변, 헤더 텍스트만).
+- **캐릭터 speechStyle**: `buildCharacterHeader`가 매 프롬프트 최상단에 주입하므로, 12명 speechStyle의 어려운 레지스터(ren 문어체·zero 시적·luna 비유 상시·hoshi 이모지)를 개성(어미·톤)은 보존하며 쉬운 말 지향으로 손질.
+
 ## 4. max_tokens 정책 (3-섹션 + directAnswer 프리미엄 리딩 기준 — PR #414 + #420)
 
 ### 타로 (`computeReadingMaxTokens`) — `src/app/api/tarot/reading/route.ts`
