@@ -21,6 +21,7 @@ interface ReadingRow {
   share_token: string | null;
   card_interpretation: unknown;
   overall_reading: string | null;
+  direct_answer: string | null;
   advice: string | null;
   created_at: string;
 }
@@ -47,6 +48,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
     interpretation: cleanReadingText(interp.interpretation),
   }));
   const overallReading = cleanReadingText(reading.overall_reading || "");
+  const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
 
   return (
@@ -60,6 +62,17 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("tarot.result.title", locale)}</h1>
           <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
         </div>
+
+        {/* 질문 직답 — answer-first, 최상단 노출 */}
+        {directAnswer && (
+          <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-purple/40 rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">🎴</span>
+              <h2 className="font-serif font-bold text-xl text-arcana-purple">{t("tarot.result.direct-answer", locale)}</h2>
+            </div>
+            <ReadingText text={directAnswer} />
+          </div>
+        )}
 
         {/* 데스크탑 5:5 레이아웃 / 모바일 세로 배치 */}
         <div className="flex flex-col md:flex-row gap-6">

@@ -40,6 +40,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     yearly_fortune: unknown;
     overall_reading: string;
     topic_reading: string;
+    direct_answer: string | null;
     advice: string;
     created_at: string;
   }
@@ -52,6 +53,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
 
   const overallReading = cleanReadingText(reading.overall_reading || "");
   const topicReading = cleanReadingText(reading.topic_reading || "");
+  const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
   const birthYear = new Date(reading.birth_date).getFullYear();
 
@@ -78,6 +80,16 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
 
         <div className="space-y-4 md:space-y-5">
           <SajuResultClient sajuData={sajuData} birthYear={birthYear} />
+
+          {directAnswer && (
+            <div className="bg-arcana-gold/10 backdrop-blur-sm border border-arcana-gold/40 rounded-2xl p-4 md:p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">🎯</span>
+                <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.direct-answer", locale)}</h2>
+              </div>
+              <ReadingText text={directAnswer} />
+            </div>
+          )}
 
           {overallReading && (
             <div className="bg-arcana-purple/10 backdrop-blur-sm border border-arcana-purple/30 rounded-2xl p-4 md:p-6">

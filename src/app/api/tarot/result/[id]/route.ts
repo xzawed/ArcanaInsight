@@ -5,7 +5,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getRequestLocale } from "@/i18n/server-locale"
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/i18n/config"
 
-const SAFE_KEYS = ["id", "card_interpretation", "overall_reading", "advice", "share_token", "created_at"] as const
+const SAFE_KEYS = ["id", "card_interpretation", "overall_reading", "direct_answer", "advice", "share_token", "created_at"] as const
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let locale: Locale = DEFAULT_LOCALE

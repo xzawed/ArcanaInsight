@@ -47,9 +47,12 @@
 - ✅ **#6 시간한정 질문 → 사주 월운/세운 결정론적 연계** (RC7): `detectSajuTimeHorizon(question)`(ko/en/ja 키워드)가 자유질문의 시간 지평(이번 주/달/올해/내년)을 감지 → route의 `applyHorizonToCalcOptions`가 드롭다운 timeRange와 무관하게 해당 월운/세운/일운 데이터를 **계산·주입**(시기 판정은 데이터에서 결정론적, 모델은 narration만 → SSE 재생성 플레이키 방지). `buildSajuPrompt`에 시기 창 지시 추가(정확한 날짜 금지, 범위+조건).
 - ✅ **#5 렌더 통일·관측성**: 타로 `directAnswer`를 결과 최상단으로 승격(`TarotResultPanel`), 타로·사주 route에서 freeQuestion 있는데 `directAnswer` 비면 관측 경고 로그(RC3 재발 감시).
 
-## 후속 과제 (미구현 — P2)
+## P2 구현 (3차 PR — DB 영속)
 
-- **directAnswer DB 영속**: 현재 3서비스 모두 라이브 SSE에서만 노출, DB 미저장 → 재방문(`result/[id]`)·공유엔 미포함. 컬럼 추가 마이그레이션 필요. (타로도 동일한 기존 한계)
+- ✅ **directAnswer DB 영속**: 마이그 023(`readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''`) + drizzle 스키마 + `persistDirectAnswer`(본 리딩 insert와 **분리된 best-effort UPDATE** — 컬럼 미적용 환경에서도 본 저장 무영향, 배포 순서 무관) + result API `SAFE_KEYS` + result 페이지 렌더(3서비스). ⚠️ 마이그 023은 운영 DB 적용 필요(머지 후 별도 적용).
+
+## 남은 과제 (미구현)
+
 - **신점 중간 턴 되질문 루프**: 사용자 결정으로 이번엔 미변경.
 - Grok `response_format json_schema`(strict)로 directAnswer 필수화 검토(양 provider 실측 선행).
 

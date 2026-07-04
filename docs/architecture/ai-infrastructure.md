@@ -143,7 +143,7 @@ for (let i = start; i < text.length; i++) {
 - **사주 시간 지평 연계**(#6): `detectSajuTimeHorizon(question)`(ko/en/ja 키워드)가 자유질문의 시간창(이번 주/달/올해/내년)을 감지 → route의 `applyHorizonToCalcOptions`가 드롭다운 `timeRange`와 무관하게 해당 월운/세운/일운을 **계산·주입**하고, `buildSajuPrompt`가 "정확한 날짜 금지, 범위+조건으로 유리한 시기 창 명명" 지시를 추가한다. 시기 판정은 데이터에서 결정론적 → SSE 재생성 플레이키 방지.
 - **관측**: 타로·사주 route는 freeQuestion이 있는데 `directAnswer`가 비면 경고 로그(조용한 소실 회귀 감시). 타로 결과화면은 `directAnswer`를 카드 해석보다 위, 최상단에 렌더(answer-first).
 - **배선**: 3서비스 모두 `getSystemPrompt`/`buildConversationPrompt` JSON 스켈레톤 상단(truncation 생존율↑)에 `directAnswer` + `parseResult` 추출 + 결과화면 최상단 `ResultTextCard` 렌더. en/ja는 `LANGUAGE_INSTRUCTIONS` JSON 키 화이트리스트에 `directAnswer` 포함(키 번역 방지).
-- ⚠️ `directAnswer`는 라이브 세션 SSE 결과에서만 노출되고 DB 미영속(타로 포함 3서비스 공통) — 재방문(`result/[id]`)·공유엔 미포함. DB 영속은 후속 과제(마이그레이션 필요).
+- **DB 영속**(마이그 023): `persistDirectAnswer`(reading-saver)가 본 리딩 insert와 **분리된 best-effort UPDATE**로 `direct_answer` 컬럼에 기록 → 재방문(`result/[id]`)·공유 결과에도 노출. 컬럼 미적용 환경(마이그 023 미배포)에서도 이 UPDATE만 조용히 실패(로깅)하고 본 리딩 insert는 무영향 → 배포 순서 무관. result API `SAFE_KEYS`·result 페이지 렌더 반영. ⚠️ 마이그 023 운영 DB 적용 필요.
 
 ## 4. max_tokens 정책 (3-섹션 + directAnswer 프리미엄 리딩 기준 — PR #414 + #420)
 

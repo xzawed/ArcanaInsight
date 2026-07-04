@@ -8,7 +8,7 @@ import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading } from "@/lib/db/reading-saver";
+import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading, persistDirectAnswer } from "@/lib/db/reading-saver";
 import type { DbClient } from "@/lib/db/types";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
@@ -49,6 +49,8 @@ async function emitShinjeomFinalResult(
   if (db && sessionId && !result.parseError) {
     try {
       const saved = await saveShinjeomFinalReading(db, sessionId, result, locale);
+      // directAnswer는 별도 best-effort UPDATE (마이그 023 미적용 환경에서도 본 저장 무영향)
+      await persistDirectAnswer(db, "shinjeom", sessionId, result.directAnswer);
       shareToken = saved.shareToken;
       saveStatus = true;
     } catch (e) {

@@ -125,6 +125,33 @@ export async function saveShinjeomFinalReading(
   return { shareToken: reading?.share_token ?? null };
 }
 
+/** 서비스 → 리딩 테이블 매핑 */
+const READING_TABLE: Record<DlqService, string> = {
+  tarot: "readings",
+  saju: "saju_readings",
+  shinjeom: "shinjeom_readings",
+};
+
+/**
+ * directAnswer(질문 직답)를 best-effort로 별도 UPDATE 한다. 본 리딩 insert 경로와 **분리**해,
+ * 마이그레이션 023(direct_answer 컬럼) 미적용 환경에서도 리딩 저장(insert)이 깨지지 않게 한다
+ * — 컬럼이 없으면 이 update만 조용히 실패하고 로깅만 한다(recordFailedReading와 동일한 관용 패턴).
+ * 반드시 본 리딩 insert가 완료된 뒤(같은 세션 행 존재) 호출한다.
+ */
+export async function persistDirectAnswer(
+  db: DbClient,
+  service: DlqService,
+  sessionId: string,
+  directAnswer?: string | null,
+): Promise<void> {
+  if (!directAnswer?.trim()) return;
+  try {
+    await db.update(READING_TABLE[service], { session_id: sessionId }, { direct_answer: directAnswer });
+  } catch (e) {
+    logReadingSaveFailure(service, sessionId, e);
+  }
+}
+
 /** 신점 중간 대화 메시지 쌍 저장 (3회 retry) */
 export async function saveShinjeomMessages(
   db: DbClient,
