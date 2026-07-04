@@ -53,7 +53,7 @@ export function ThemeDropdown({ variant, onClose }: ThemeDropdownProps) {
             mode === th.id ? "bg-arcana-purple/15 text-arcana-purple" : "text-arcana-text hover:bg-arcana-purple/10"
           }`}
         >
-          <Image src={th.iconPath} alt="" width={16} height={16} unoptimized />
+          <Image src={th.iconPath} alt="" width={16} height={16} />
           <span className="font-serif text-xs">{getThemeName(th, locale)}</span>
           <span
             className="ml-auto w-3 h-3 rounded-full border border-arcana-border"
