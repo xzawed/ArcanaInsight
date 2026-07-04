@@ -140,6 +140,8 @@ for (let i = start; i < text.length; i++) {
 - **작성 순서**(systemSpec): ① 질문 재진술 → ② 가장 유력한 한 방향 단언 → ③ 확신 수위 문체 표기("분명히" / "~쪽으로 기울어 있습니다" / "단서는 있으나 확정하기엔 이릅니다") → ④ 근거(도메인 렌즈: 타로=카드 상징·위치, 사주=세운·월운·용신, 신점=대화에서 읽어낸 상)+전제조건.
 - **안티패턴 금지**: "가능한 모든 상황(재직/구직/이직/창업)을 균등하게 나열"하는 헤지는 금지. 2축 분리 — 상담자의 사적 사실은 완충하되 점괘의 방향은 커밋. 민감 도메인(건강·재정·법률)은 확답 대신 경향+전문가 상담 권유로 강등.
 - **앵커**: 타로·사주는 자유질문 입력창(200자, `buildFreeQuestionPrompt`), 신점은 chat 첫 사용자 메시지를 핵심질문으로 최종 턴 프롬프트 상단에 재노출.
+- **사주 시간 지평 연계**(#6): `detectSajuTimeHorizon(question)`(ko/en/ja 키워드)가 자유질문의 시간창(이번 주/달/올해/내년)을 감지 → route의 `applyHorizonToCalcOptions`가 드롭다운 `timeRange`와 무관하게 해당 월운/세운/일운을 **계산·주입**하고, `buildSajuPrompt`가 "정확한 날짜 금지, 범위+조건으로 유리한 시기 창 명명" 지시를 추가한다. 시기 판정은 데이터에서 결정론적 → SSE 재생성 플레이키 방지.
+- **관측**: 타로·사주 route는 freeQuestion이 있는데 `directAnswer`가 비면 경고 로그(조용한 소실 회귀 감시). 타로 결과화면은 `directAnswer`를 카드 해석보다 위, 최상단에 렌더(answer-first).
 - **배선**: 3서비스 모두 `getSystemPrompt`/`buildConversationPrompt` JSON 스켈레톤 상단(truncation 생존율↑)에 `directAnswer` + `parseResult` 추출 + 결과화면 최상단 `ResultTextCard` 렌더. en/ja는 `LANGUAGE_INSTRUCTIONS` JSON 키 화이트리스트에 `directAnswer` 포함(키 번역 방지).
 - ⚠️ `directAnswer`는 라이브 세션 SSE 결과에서만 노출되고 DB 미영속(타로 포함 3서비스 공통) — 재방문(`result/[id]`)·공유엔 미포함. DB 영속은 후속 과제(마이그레이션 필요).
 

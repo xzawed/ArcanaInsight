@@ -394,4 +394,64 @@ describe("POST /api/saju/reading", () => {
     expect(text).toContain("missing_fields");
     expect(mockSave).not.toHaveBeenCalled();
   });
+
+  describe("freeQuestion 시간 지평 연계 (#6)", () => {
+    /** streamReading userPrompt를 캡처하는 헬퍼. directAnswerText=null 이면 directAnswer 없는 응답. */
+    async function captureSajuUserPrompt(
+      bodyOverride: Record<string, unknown>,
+      directAnswerText: string | null = "직답",
+    ): Promise<{ userPrompt: string; warnSpy: ReturnType<typeof vi.spyOn> }> {
+      vi.resetModules();
+      const aiJson = directAnswerText === null
+        ? JSON.stringify({ overallReading: "ok", topicReading: "t", advice: "ok" })
+        : JSON.stringify({ directAnswer: directAnswerText, overallReading: "ok", topicReading: "t", advice: "ok" });
+      const streamSpy = vi.fn().mockImplementation(async function* () { yield aiJson; });
+      const provider = { streamReading: streamSpy, generateReading: vi.fn() };
+      vi.doMock("@/services/core/fallback-provider", () => ({
+        FallbackProvider: vi.fn().mockImplementation(function () { return provider; }),
+      }));
+      vi.doMock("@/lib/rate-limit", () => ({
+        checkRateLimit: vi.fn().mockReturnValue(true),
+        rateLimitResponse: vi.fn(),
+      }));
+      vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
+      vi.doMock("@/lib/auth", () => makeAuthMock());
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { POST } = await import("@/app/api/saju/reading/route");
+      const res = await POST(makePostRequest({ ...VALID_BODY, ...bodyOverride }));
+      await readSSEStream(res);
+      const userPrompt: string = streamSpy.mock.calls[0]?.[1] ?? "";
+      return { userPrompt, warnSpy };
+    }
+
+    it("'이번 달' → 드롭다운(this-year)과 달라도 월운 데이터+시기 창 지시 주입", async () => {
+      const { userPrompt } = await captureSajuUserPrompt({ timeRange: "this-year", freeQuestion: "이번 달에 이직할 수 있을까요?" });
+      expect(userPrompt).toContain("월운");
+      expect(userPrompt).toContain("질문의 시간 지평");
+      expect(userPrompt).toContain("이번 달에 이직할 수 있을까요?");
+    });
+
+    it("'이번 주' → 일운(daily) 데이터 주입", async () => {
+      const { userPrompt } = await captureSajuUserPrompt({ timeRange: "this-year", freeQuestion: "이번 주는 어떤가요?" });
+      expect(userPrompt).toContain("일운");
+    });
+
+    it("'내년' → 세운(yearly) 데이터 주입", async () => {
+      const { userPrompt } = await captureSajuUserPrompt({ timeRange: "this-year", freeQuestion: "내년에 이사해도 될까요?" });
+      expect(userPrompt).toContain("세운 전망");
+    });
+
+    it("'올해' → 추가 계산 없이 시기 창 지시만 주입 (올해 세운은 기본 포함)", async () => {
+      const { userPrompt } = await captureSajuUserPrompt({ timeRange: "full-fortune", freeQuestion: "올해 재물운이 궁금해요" });
+      expect(userPrompt).toContain("질문의 시간 지평");
+    });
+
+    it("freeQuestion 있으나 directAnswer 비면 관측 경고 로그(RC3 재발 감시)", async () => {
+      const { warnSpy } = await captureSajuUserPrompt({ freeQuestion: "이번 달 이직?" }, null);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("directAnswer 비어있음"),
+        expect.anything(),
+      );
+    });
+  });
 });

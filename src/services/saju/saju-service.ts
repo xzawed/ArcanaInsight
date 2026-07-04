@@ -81,6 +81,28 @@ const TOPIC_INSTRUCTIONS: Record<string, string> = {
 ⑦ 실용적인 택일 방법과 날짜를 고를 때 체크해야 할 사항 목록`,
 };
 
+/** 자유질문의 시간 지평 → 계산·주입에 필요한 SajuTimeRange (범위 밖이면 null). */
+export type SajuQuestionHorizon = "this-week" | "this-month" | "this-year" | "next-year";
+
+const SAJU_HORIZON_LABEL: Record<SajuQuestionHorizon, string> = {
+  "this-week": "이번 주", "this-month": "이번 달", "this-year": "올해", "next-year": "내년",
+};
+
+/**
+ * 자유질문에서 시간 지평 키워드를 감지한다(ko/en/ja). 드롭다운 timeRange와 무관하게
+ * 질문이 가리키는 시기의 세운·월운·일운 데이터를 계산·주입해 directAnswer가 시기 창을 명명하게 한다.
+ * 더 구체적인 범위(주 > 달)를 우선 매칭. 3·5년 등 다년은 드롭다운이 담당하므로 범위 밖(null).
+ */
+export function detectSajuTimeHorizon(question?: string | null): SajuQuestionHorizon | null {
+  if (!question?.trim()) return null;
+  const q = question.toLowerCase();
+  if (/이번\s*주|this\s*week|今週/.test(q)) return "this-week";
+  if (/이번\s*달|금월|this\s*month|今月/.test(q)) return "this-month";
+  if (/내년|next\s*year|来年/.test(q)) return "next-year";
+  if (/올해|금년|올\s*한\s*해|this\s*year|今年/.test(q)) return "this-year";
+  return null;
+}
+
 function resolveTimeContext(timeRange: SajuTimeRange): string {
   if (timeRange === "this-week") return "이번 주(7일간 일운) 기준으로 해석해주세요.";
   if (timeRange === "this-month") return "이번 달(월운) 기준으로 해석해주세요.";
@@ -249,7 +271,8 @@ ${contract.footerReminder}${getLanguageFooter(locale ?? "ko")}`;
     topic: Topic,
     timeRange: SajuTimeRange,
     sajuResult: SajuResult,
-    userInfo?: { name?: string; birthTime?: string | null; mbti?: string }
+    userInfo?: { name?: string; birthTime?: string | null; mbti?: string },
+    questionHorizon?: SajuQuestionHorizon | null
   ): string {
     const timeOption = sajuTimeOptions.find((t) => t.id === timeRange);
     const timeLabel = timeOption?.label ?? timeRange;
@@ -266,6 +289,9 @@ ${contract.footerReminder}${getLanguageFooter(locale ?? "ko")}`;
     const mbtiNote = userInfo?.mbti
       ? `\n[MBTI: ${userInfo.mbti} — 심리 유형을 사주 해석에 교차 참조할 것]`
       : "";
+    const horizonNote = questionHorizon
+      ? `\n\n[질문의 시간 지평: ${SAJU_HORIZON_LABEL[questionHorizon]}] directAnswer에서 이 시간 지평에 맞춰 위 세운·월운·일운 데이터로 유리한 시기 창(window)을 명명하세요. 정확한 캘린더 날짜를 못박지 말고 "언제쯤, 어떤 조건이 갖춰지면" 식 범위+조건으로 답하되, 시기 판정의 근거는 반드시 위에 제시된 사주 데이터에 두세요.`
+      : "";
 
     return `상담 주제: ${TOPIC_LABELS[topic] ?? topic} / 시간 범위: ${timeLabel}(${timeDesc})
 ${userInfo?.name ? `상담자: ${userInfo.name}` : ""}${birthTimeNote}${mbtiNote}
@@ -273,7 +299,7 @@ ${userInfo?.name ? `상담자: ${userInfo.name}` : ""}${birthTimeNote}${mbtiNote
 ${pillarSection}${additionalSections.join("")}
 
 ${timeContext}
-${instruction}
+${instruction}${horizonNote}
 
 [분량 기준 — 3배 프리미엄 리딩]
 - sajuSections.structure: 일간·신강신약·격국을 최소 5~6문단으로 깊이 있게 서술

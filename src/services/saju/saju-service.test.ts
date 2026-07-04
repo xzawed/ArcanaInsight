@@ -38,7 +38,7 @@ vi.mock("@/data/characters", () => ({
   }),
 }));
 
-import { SajuService } from "./saju-service";
+import { SajuService, detectSajuTimeHorizon } from "./saju-service";
 import { SajuResult } from "./saju-types";
 
 /** 테스트용 최소 SajuResult 픽스처 */
@@ -235,6 +235,24 @@ describe("SajuService", () => {
         { name: "홍길동" }
       );
       expect(prompt).toContain("홍길동");
+    });
+  });
+
+  describe("buildSajuPrompt — questionHorizon (시간한정 자유질문 연계, #6)", () => {
+    it("questionHorizon이 있으면 directAnswer 시기 창 지시가 포함된다", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general", "this-year", makeSajuResult(), { name: "홍길동" }, "this-month"
+      );
+      expect(prompt).toContain("질문의 시간 지평");
+      expect(prompt).toContain("이번 달");
+      expect(prompt).toContain("시기 창");
+    });
+
+    it("questionHorizon이 없으면 시기 창 지시가 없다 (드롭다운만)", () => {
+      const prompt = service.buildSajuPrompt(
+        "saju-general", "this-year", makeSajuResult(), { name: "홍길동" }, null
+      );
+      expect(prompt).not.toContain("질문의 시간 지평");
     });
   });
 
@@ -437,5 +455,36 @@ describe("SajuService", () => {
       );
       expect(prompt).toContain(label);
     });
+  });
+});
+
+describe("detectSajuTimeHorizon (#6 — 자유질문 시간 지평 감지)", () => {
+  it.each([
+    ["이번 달에 이직할 수 있을까요?", "this-month"],
+    ["이번주 운세 어때요", "this-week"],
+    ["올해 재물운이 궁금해요", "this-year"],
+    ["내년에 결혼할 수 있을까요", "next-year"],
+    ["Can I change jobs this month?", "this-month"],
+    ["How is this year for me?", "this-year"],
+    ["今月の運勢は？", "this-month"],
+    ["来年はどうですか", "next-year"],
+  ])("'%s' → %s", (q, expected) => {
+    expect(detectSajuTimeHorizon(q)).toBe(expected);
+  });
+
+  it("시간 키워드가 없으면 null", () => {
+    expect(detectSajuTimeHorizon("직장운이 궁금해요")).toBeNull();
+  });
+
+  it("빈 값/공백은 null", () => {
+    expect(detectSajuTimeHorizon(null)).toBeNull();
+    expect(detectSajuTimeHorizon("")).toBeNull();
+    expect(detectSajuTimeHorizon("   ")).toBeNull();
+  });
+
+  it("주(week)가 달(month)보다 우선 매칭된다", () => {
+    // '이번 주'와 '이번 달'이 동시에 없을 때 '이번 주'만 있으면 week
+    expect(detectSajuTimeHorizon("이번 주")).toBe("this-week");
+    expect(detectSajuTimeHorizon("이번 달")).toBe("this-month");
   });
 });

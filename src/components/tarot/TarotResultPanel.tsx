@@ -41,6 +41,9 @@ export function TarotResultPanel({
   return (
     <>
       <div ref={containerRef} data-testid="reading-content" className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">
+        {readingResult.directAnswer && (
+          <ResultTextCard text={readingResult.directAnswer} emoji="🎴" label={directAnswerLabel} delay={0.2} colorScheme="purple" />
+        )}
         {readingResult.cardInterpretations && readingResult.cardInterpretations.length > 0 && (
           <CardInterpretationList
             interpretations={readingResult.cardInterpretations}
@@ -48,9 +51,6 @@ export function TarotResultPanel({
             spread={spread}
             locale={locale}
           />
-        )}
-        {readingResult.directAnswer && (
-          <ResultTextCard text={readingResult.directAnswer} emoji="🎴" label={directAnswerLabel} delay={0.6} colorScheme="purple" />
         )}
         {readingResult.overallReading && (
           <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={overallLabel} delay={1} colorScheme="purple" />
