@@ -136,7 +136,7 @@ export function Header() {
               aria-label={t("header.theme.change-aria")}
               title={`${t("settings.theme.current")} ${activeThemeName}`}
             >
-              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
+              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} />
             </button>
             {isThemeOpen && (
               <ThemeDropdown variant="desktop" onClose={() => setIsThemeOpen(false)} />
@@ -198,7 +198,7 @@ export function Header() {
               className="text-lg hover:scale-110 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label={t("header.theme.change-aria")}
             >
-              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} unoptimized />
+              <Image src={themes[activeTheme].iconPath} alt="" width={20} height={20} />
             </button>
             {isThemeOpen && (
               <ThemeDropdown variant="mobile" onClose={() => setIsThemeOpen(false)} />
