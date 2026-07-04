@@ -43,7 +43,7 @@ export function CardSpreadEffects({ isActive, color = "rgba(167,139,250,0.7)", s
               const r = cx * (0.4 + i * 0.24);
               return (
                 <motion.circle
-                  key={i}
+                  key={delay}
                   cx={cx}
                   cy={cx}
                   r={r}
@@ -79,7 +79,7 @@ export function CardSpreadEffects({ isActive, color = "rgba(167,139,250,0.7)", s
               const my = cx + r2 * Math.sin(angle);
               return (
                 <motion.text
-                  key={i}
+                  key={angle}
                   x={mx}
                   y={my}
                   textAnchor="middle"

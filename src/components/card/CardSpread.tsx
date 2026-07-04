@@ -43,8 +43,8 @@ function computeLayout(
   const uniqueX = [...new Set(xs)].sort((a, b) => a - b);
   const uniqueY = [...new Set(ys)].sort((a, b) => a - b);
 
-  const origRangeX = (uniqueX[uniqueX.length - 1] ?? 0) - (uniqueX[0] ?? 0);
-  const origRangeY = (uniqueY[uniqueY.length - 1] ?? 0) - (uniqueY[0] ?? 0);
+  const origRangeX = (uniqueX.at(-1) ?? 0) - (uniqueX[0] ?? 0);
+  const origRangeY = (uniqueY.at(-1) ?? 0) - (uniqueY[0] ?? 0);
 
   const minXGap = uniqueX.length > 1
     ? Math.min(...uniqueX.slice(1).map((x, i) => x - uniqueX[i]))
@@ -56,11 +56,11 @@ function computeLayout(
   // 각 축의 최대 카드 크기 계산
   const maxW = minXGap > 0 && origRangeX > 0
     ? (minXGap * containerW) / (origRangeX * (1 + GAP_RATIO) + minXGap)
-    : containerW * 0.30; // 단일 열이면 넉넉하게
+    : containerW * 0.3; // 단일 열이면 넉넉하게
 
   const maxH = minYGap > 0 && origRangeY > 0
     ? (minYGap * containerH) / (origRangeY * (1 + GAP_RATIO) + minYGap)
-    : containerH * 0.40; // 단일 행이면 넉넉하게
+    : containerH * 0.4; // 단일 행이면 넉넉하게
 
   // 2:3 비율 유지하며 양쪽 제한 충족
   let cardW = maxW;

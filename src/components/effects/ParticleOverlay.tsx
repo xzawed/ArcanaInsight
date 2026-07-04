@@ -92,10 +92,6 @@ function getParticleInlineStyle(style: ParticleStyle | undefined, p: Particle): 
         borderRadius: "0", backgroundColor: p.color,
         transform: `rotate(45deg)`,
         boxShadow: `0 0 ${p.size * 3}px ${p.color}` };
-    case "snowflake":
-      return { ...base, width: p.size, height: p.size,
-        borderRadius: "50%", backgroundColor: p.color,
-        boxShadow: `0 0 ${p.size * 2}px ${p.color}` };
     case "lightning":
       return { ...base, width: Math.max(p.size * 0.5, 1), height: p.size * 5,
         borderRadius: "2px", backgroundColor: p.color,
@@ -109,6 +105,7 @@ function getParticleInlineStyle(style: ParticleStyle | undefined, p: Particle): 
       return { ...base, width: p.size * 1.5, height: p.size * 1.5,
         borderRadius: "50%", backgroundColor: p.color,
         boxShadow: `0 0 ${p.size * 3}px ${p.color}, 0 0 ${p.size * 6}px ${p.color}` };
+    case "snowflake":
     default: // sparkle
       return { ...base, width: p.size, height: p.size,
         borderRadius: "50%", backgroundColor: p.color,

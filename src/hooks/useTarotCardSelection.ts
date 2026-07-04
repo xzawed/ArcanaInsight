@@ -201,8 +201,8 @@ export function useTarotCardSelection() {
           content: isLast
             ? t("tarot.session.msg.confirm-final").replace("{n}", String(required))
             : t("tarot.session.msg.confirm-card")
-                .replace(/\{current\}/g, String(currentCount))
-                .replace(/\{total\}/g, String(required)),
+                .replaceAll(/\{current\}/g, String(currentCount))
+                .replaceAll(/\{total\}/g, String(required)),
           mood: "mystical", timestamp: new Date(),
         });
       }, 500);
@@ -246,7 +246,7 @@ export function useTarotCardSelection() {
     setPendingConfirm(false);
     const currentCards = useSessionStore.getState().selectedCards;
     if (currentCards.length === 0) return;
-    const lastCard = currentCards[currentCards.length - 1];
+    const lastCard = currentCards.at(-1)!;
     const remaining = currentCards.slice(0, -1);
     useSessionStore.setState({ selectedCards: remaining });
     setSelectedIndices((prev) => prev.slice(0, -1));

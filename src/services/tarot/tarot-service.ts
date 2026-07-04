@@ -14,7 +14,7 @@ function asText(value: unknown): string {
 export class TarotService implements DivinationService {
   id = "tarot";
   name = "타로";
-  private spreadResolver = new SpreadResolver();
+  private readonly spreadResolver = new SpreadResolver();
 
   getCharacter(): CharacterConfig {
     const character = getCharacterById("arcana");

@@ -35,9 +35,8 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
   const preset = sizeDimensions[size];
   const w = width ?? preset.w;
   const h = height ?? preset.h;
-  const symbol = card.type === "major"
-    ? majorSymbols[card.id]
-    : card.suit ? suitSymbols[card.suit] : null;
+  const suitSymbol = card.suit ? suitSymbols[card.suit] : null;
+  const symbol = card.type === "major" ? majorSymbols[card.id] : suitSymbol;
 
   const fontSizeMap = { sm: 6, md: 8, lg: 10 };
   const numberSizeMap = { sm: 7, md: 10, lg: 12 };
@@ -144,8 +143,8 @@ export function CardFace({ card, isReversed, size = "md", width, height, classNa
 
         {symbol && (
           <g transform={`translate(${cx - 24}, ${cy - 24}) scale(${symbolRadius / 24})`}>
-            {symbol.paths.map((d, i) => (
-              <path key={i} d={d} fill="none" stroke="#d4af37" strokeWidth={symbol.strokeWidth ?? 1.5}
+            {symbol.paths.map((d) => (
+              <path key={d} d={d} fill="none" stroke="#d4af37" strokeWidth={symbol.strokeWidth ?? 1.5}
                 strokeLinecap="round" strokeLinejoin="round" />
             ))}
           </g>

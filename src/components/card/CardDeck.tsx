@@ -131,6 +131,11 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
           ritualDone,
         });
 
+        let cardZIndex: number;
+        if (isSelected) cardZIndex = 0;
+        else if (hoveredIndex === index) cardZIndex = 200;
+        else cardZIndex = index;
+
         return (
           <motion.div
             key={card.id}
@@ -147,7 +152,7 @@ export const CardDeck = React.memo(function CardDeck({ cards, isSpread, selected
             }}
             className={`absolute ${ritualDone && !isSelected ? "cursor-pointer" : "cursor-default"}`}
             style={{
-              zIndex: isSelected ? 0 : hoveredIndex === index ? 200 : index,
+              zIndex: cardZIndex,
               touchAction: "manipulation",
               WebkitTapHighlightColor: "transparent",
             }}

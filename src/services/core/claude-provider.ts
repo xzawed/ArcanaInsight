@@ -103,12 +103,12 @@ export class ClaudeProvider implements AIProvider {
         },
         "Claude"
       )) {
-        if (ref.firstChunkAt === null) ref.firstChunkAt = Date.now();
+        ref.firstChunkAt ??= Date.now();
         ref.yielded++;
         yield chunk;
       }
       const totalMs = Date.now() - startedAt;
-      const ttfbMs = ref.firstChunkAt !== null ? ref.firstChunkAt - startedAt : null;
+      const ttfbMs = ref.firstChunkAt === null ? null : ref.firstChunkAt - startedAt;
       if (process.env.NODE_ENV !== "production") console.log(`[Claude] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms stop=${ref.stopReason ?? "?"} max_tokens=${effectiveMaxTokens} output_tokens=${ref.outputTokens ?? "?"}`);
       if (ref.stopReason === "max_tokens") {
         console.warn(`[Claude] ⚠️ TRUNCATED: max_tokens(${effectiveMaxTokens}) 초과로 본문 잘림 — output_tokens=${ref.outputTokens ?? "?"}`);

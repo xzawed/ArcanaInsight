@@ -113,14 +113,14 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
     img.onerror = () => {
       if (!cancelled) {
         const fallbackUrl = getCardBackUrl(selectedSkinId);
-        if (fallbackUrl !== url) {
+        if (fallbackUrl === url) {
+          cardImgRef.current = null;
+        } else {
           const fallbackImg = new Image();
           fallbackImg.crossOrigin = "anonymous";
           fallbackImg.onload = () => { if (!cancelled) cardImgRef.current = fallbackImg; };
           fallbackImg.onerror = () => { if (!cancelled) cardImgRef.current = null; };
           fallbackImg.src = fallbackUrl;
-        } else {
-          cardImgRef.current = null;
         }
       }
     };
@@ -136,7 +136,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
       }
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       safeComplete();
       return;
     }
@@ -148,7 +148,7 @@ export function ShuffleCeremony({ characterId, onComplete, primaryColor = "#8b5c
 
     let cssW = 0, cssH = 0;
     const setSize = () => {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = globalThis.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       cssW = rect.width;
       cssH = rect.height;

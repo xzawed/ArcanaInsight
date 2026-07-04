@@ -15,6 +15,11 @@ const topicLabels: Record<string, string> = {
   "shinjeom-auspicious": "택일 (날짜 선택)",
 };
 
+/** shinjeomSections 필드를 안전하게 정제 — 비문자열은 빈 문자열 (기본 stringification 회피) */
+function toShinjeomSectionText(value: unknown): string {
+  return cleanReadingText(typeof value === "string" ? value : "");
+}
+
 export class ShinjeomService implements DivinationService {
   id = "shinjeom";
   name = "신점";
@@ -135,7 +140,7 @@ ${contract.footerReminder}`;
   getReadingPrompt(context: SessionContext): string {
     return this.buildConversationPrompt(
       context.topic,
-      context.chatHistory[context.chatHistory.length - 1]?.content || "",
+      context.chatHistory.at(-1)?.content || "",
       context.chatHistory,
       false,
     );
@@ -159,10 +164,10 @@ ${contract.footerReminder}`;
       if (parsed.shinjeomSections && typeof parsed.shinjeomSections === "object") {
         const s = parsed.shinjeomSections as Record<string, unknown>;
         result.shinjeomSections = {
-          spiritual: cleanReadingText(String(s.spiritual || "")),
-          current: cleanReadingText(String(s.current || "")),
-          obstacles: cleanReadingText(String(s.obstacles || "")),
-          future: cleanReadingText(String(s.future || "")),
+          spiritual: toShinjeomSectionText(s.spiritual),
+          current: toShinjeomSectionText(s.current),
+          obstacles: toShinjeomSectionText(s.obstacles),
+          future: toShinjeomSectionText(s.future),
         };
       }
       if (!overallReading || !advice) result.parseError = "missing_fields";

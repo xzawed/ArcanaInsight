@@ -8,6 +8,8 @@ import { UserInfo } from "@/types/user-info";
 const STORAGE_KEY = "arcana_user_info";
 const CONSENT_KEY = "arcana_privacy_agreed";
 
+type GenderInput = "male" | "female" | "other" | "";
+
 type ProfileSetters = {
   setName: (v: string) => void;
   setBirthDate: (v: string) => void;
@@ -57,8 +59,8 @@ function applyBirthTime(
 ): void {
   if (!timeStr) { setUnknown(true); return; }
   const [h, m] = timeStr.split(":");
-  setHour(h !== undefined ? String(parseInt(h, 10)) : "");
-  setMinute(m !== undefined ? String(parseInt(m, 10)) : "");
+  setHour(h === undefined ? "" : String(Number.parseInt(h, 10)));
+  setMinute(m === undefined ? "" : String(Number.parseInt(m, 10)));
 }
 
 async function applySupabaseProfile(userId: string, setters: ProfileSetters): Promise<void> {
@@ -127,8 +129,8 @@ export interface UseUserInfoFormReturn {
   setBirthHourNum: (v: string) => void;
   birthMinuteNum: string;
   setBirthMinuteNum: (v: string) => void;
-  gender: "male" | "female" | "other" | "";
-  setGender: (v: "male" | "female" | "other" | "") => void;
+  gender: GenderInput;
+  setGender: (v: GenderInput) => void;
   timeUnknown: boolean;
   setTimeUnknown: (v: boolean) => void;
   mbti: string;
@@ -157,7 +159,7 @@ export function useUserInfoForm(
 ): UseUserInfoFormReturn {
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState(""); // "YYYY-MM-DD"
-  const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
+  const [gender, setGender] = useState<GenderInput>("");
   const [birthHourNum, setBirthHourNum] = useState("");
   const [birthMinuteNum, setBirthMinuteNum] = useState("");
   const [timeUnknown, setTimeUnknown] = useState(false);
@@ -192,21 +194,27 @@ export function useUserInfoForm(
     loadUserInfo();
   }, []);
 
-  const birthTime: string | null = timeUnknown
-    ? null
-    : (birthHourNum !== "" && birthMinuteNum !== ""
-      ? `${birthHourNum.padStart(2, "0")}:${birthMinuteNum.padStart(2, "0")}`
-      : null);
+  let birthTime: string | null;
+  if (timeUnknown) {
+    birthTime = null;
+  } else if (birthHourNum !== "" && birthMinuteNum !== "") {
+    birthTime = `${birthHourNum.padStart(2, "0")}:${birthMinuteNum.padStart(2, "0")}`;
+  } else {
+    birthTime = null;
+  }
 
   const sijin = birthTime ? timeToSijin(birthTime) : null;
 
   // mode별 유효성 검증
   const timeProvided = timeUnknown || birthTime !== null;
-  const isValid = mode === "saju"
-    ? !!(birthDate && gender && timeProvided)
-    : mode === "shinjeom"
-    ? true
-    : !!(name.trim() && birthDate && gender);
+  let isValid: boolean;
+  if (mode === "saju") {
+    isValid = !!(birthDate && gender && timeProvided);
+  } else if (mode === "shinjeom") {
+    isValid = true;
+  } else {
+    isValid = !!(name.trim() && birthDate && gender);
+  }
 
   const handleSubmit = async () => {
     if (!isValid) return;
@@ -233,11 +241,11 @@ export function useUserInfoForm(
 
   /** 동의 철회 시 저장된 데이터도 삭제 */
   const handleSaveToggle = () => {
-    if (!saveInfo) {
-      setShowPrivacyModal(true);
-    } else {
+    if (saveInfo) {
       setSaveInfo(false);
       if (!isLoggedIn) clearLocalInfo();
+    } else {
+      setShowPrivacyModal(true);
     }
   };
 

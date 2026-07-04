@@ -10,7 +10,7 @@ const COPY: Record<Locale, { title: string; description: string; cta: string }> 
   ja: { title: "問題が発生しました", description: "しばらくしてからもう一度お試しください。", cta: "再試行" },
 };
 
-export default function ErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+export default function ErrorBoundary({ error, reset }: Readonly<{ error: Error; reset: () => void }>) {
   const locale = useLocaleStore((s) => s.locale);
 
   useEffect(() => {

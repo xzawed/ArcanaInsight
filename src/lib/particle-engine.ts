@@ -128,6 +128,77 @@ export function createParticle(spec: ParticleEmitterSpec, w: number, h: number):
   return base;
 }
 
+function stepFall(p: Particle, w: number, h: number): void {
+  p.x += p.vx + Math.sin(p.t * 1.2) * 0.4;
+  p.y += p.vy;
+  if (p.y > h + p.size * 2) { p.y = -p.size * 2; p.x = rand(0, w); p.t = 0; }
+}
+
+function stepRise(p: Particle, w: number, h: number): void {
+  p.x += p.vx + Math.sin(p.t * 0.9) * 0.3;
+  p.y += p.vy;
+  if (p.y < -p.size * 2) { p.y = h + p.size; p.x = rand(0, w); p.t = 0; }
+}
+
+function stepDrift(p: Particle, w: number, h: number): void {
+  p.x += Math.sin(p.t * 0.7) * 0.6 + p.vx * 0.3;
+  p.y += p.vy * 0.4 + Math.cos(p.t * 0.5) * 0.3;
+  p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 0.8));
+  if (p.y > h + p.size) { p.y = -p.size; p.x = rand(0, w); p.t = 0; }
+  if (p.y < -p.size) { p.y = h + p.size; p.t = 0; }
+}
+
+function stepTwinkle(p: Particle): void {
+  p.x += Math.sin(p.t * 1.5) * 0.2;
+  p.y += Math.cos(p.t * 1.1) * 0.15;
+  p.alpha = 0.2 + 0.7 * Math.abs(Math.sin(p.t * 1.8));
+}
+
+function stepFirefly(p: Particle, w: number, h: number): void {
+  p.x += Math.sin(p.t * 2) * 1.2 + p.vx * 0.5;
+  p.y += Math.cos(p.t * 1.5) * 0.9 + p.vy * 0.5;
+  p.alpha = 0.1 + 0.8 * Math.abs(Math.sin(p.t * 2.5));
+  if (p.x < -20) { p.x = w + 20; }
+  if (p.x > w + 20) { p.x = -20; }
+  if (p.y < -20) { p.y = h + 20; }
+  if (p.y > h + 20) { p.y = -20; }
+}
+
+function stepWind(p: Particle, w: number, h: number): void {
+  p.x += p.vy * 1.5 + Math.sin(p.t * 1.2) * 0.8;
+  p.y += p.vx * 0.3 + Math.cos(p.t * 0.8) * 0.5;
+  p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 1.2));
+  if (p.x > w + p.size) { p.x = -p.size; p.y = rand(0, h); p.t = 0; }
+}
+
+function stepStreak(p: Particle, w: number, h: number): void {
+  p.x += p.vy * 2;
+  p.y += p.vy * 1.5;
+  p.alpha *= 0.985;
+  if (p.alpha < 0.02 || p.y > h + 20) {
+    p.x = rand(0, w); p.y = -10; p.alpha = rand(0.5, 0.9); p.t = 0;
+  }
+}
+
+function stepOrbit(p: Particle): void {
+  if (
+    p.angle !== undefined && p.aSpeed !== undefined &&
+    p.cx !== undefined && p.cy !== undefined && p.r !== undefined
+  ) {
+    p.angle += p.aSpeed;
+    p.x = p.cx + Math.cos(p.angle) * p.r;
+    p.y = p.cy + Math.sin(p.angle) * p.r;
+    p.alpha = 0.4 + 0.5 * Math.abs(Math.sin(p.t * 2));
+  }
+}
+
+function stepSwirl(p: Particle, w: number, h: number): void {
+  p.x += Math.cos(p.t * 1.3 + p.rot) * 1.2;
+  p.y += Math.sin(p.t * 1.1 + p.rot) * 0.9 + p.vy * 0.2;
+  p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 1.5));
+  if (p.y > h + p.size) { p.y = -p.size; p.t = 0; }
+}
+
 export function stepParticle(p: Particle, w: number, h: number): void {
   p.t += 0.008;
   p.rot += p.vrot;
@@ -135,74 +206,31 @@ export function stepParticle(p: Particle, w: number, h: number): void {
   switch (p.motion) {
     case "fall":
     case "fall-rotate":
-      p.x += p.vx + Math.sin(p.t * 1.2) * 0.4;
-      p.y += p.vy;
-      if (p.y > h + p.size * 2) { p.y = -p.size * 2; p.x = rand(0, w); p.t = 0; }
+      stepFall(p, w, h);
       break;
-
     case "rise":
-      p.x += p.vx + Math.sin(p.t * 0.9) * 0.3;
-      p.y += p.vy;
-      if (p.y < -p.size * 2) { p.y = h + p.size; p.x = rand(0, w); p.t = 0; }
+      stepRise(p, w, h);
       break;
-
     case "drift":
-      p.x += Math.sin(p.t * 0.7) * 0.6 + p.vx * 0.3;
-      p.y += p.vy * 0.4 + Math.cos(p.t * 0.5) * 0.3;
-      p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 0.8));
-      if (p.y > h + p.size) { p.y = -p.size; p.x = rand(0, w); p.t = 0; }
-      if (p.y < -p.size) { p.y = h + p.size; p.t = 0; }
+      stepDrift(p, w, h);
       break;
-
     case "twinkle":
-      p.x += Math.sin(p.t * 1.5) * 0.2;
-      p.y += Math.cos(p.t * 1.1) * 0.15;
-      p.alpha = 0.2 + 0.7 * Math.abs(Math.sin(p.t * 1.8));
+      stepTwinkle(p);
       break;
-
     case "firefly":
-      p.x += Math.sin(p.t * 2) * 1.2 + p.vx * 0.5;
-      p.y += Math.cos(p.t * 1.5) * 0.9 + p.vy * 0.5;
-      p.alpha = 0.1 + 0.8 * Math.abs(Math.sin(p.t * 2.5));
-      if (p.x < -20) { p.x = w + 20; }
-      if (p.x > w + 20) { p.x = -20; }
-      if (p.y < -20) { p.y = h + 20; }
-      if (p.y > h + 20) { p.y = -20; }
+      stepFirefly(p, w, h);
       break;
-
     case "wind":
-      p.x += p.vy * 1.5 + Math.sin(p.t * 1.2) * 0.8;
-      p.y += p.vx * 0.3 + Math.cos(p.t * 0.8) * 0.5;
-      p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 1.2));
-      if (p.x > w + p.size) { p.x = -p.size; p.y = rand(0, h); p.t = 0; }
+      stepWind(p, w, h);
       break;
-
     case "streak":
-      p.x += p.vy * 2;
-      p.y += p.vy * 1.5;
-      p.alpha *= 0.985;
-      if (p.alpha < 0.02 || p.y > h + 20) {
-        p.x = rand(0, w); p.y = -10; p.alpha = rand(0.5, 0.9); p.t = 0;
-      }
+      stepStreak(p, w, h);
       break;
-
     case "orbit":
-      if (
-        p.angle !== undefined && p.aSpeed !== undefined &&
-        p.cx !== undefined && p.cy !== undefined && p.r !== undefined
-      ) {
-        p.angle += p.aSpeed;
-        p.x = p.cx + Math.cos(p.angle) * p.r;
-        p.y = p.cy + Math.sin(p.angle) * p.r;
-        p.alpha = 0.4 + 0.5 * Math.abs(Math.sin(p.t * 2));
-      }
+      stepOrbit(p);
       break;
-
     case "swirl":
-      p.x += Math.cos(p.t * 1.3 + p.rot) * 1.2;
-      p.y += Math.sin(p.t * 1.1 + p.rot) * 0.9 + p.vy * 0.2;
-      p.alpha = 0.3 + 0.5 * Math.abs(Math.sin(p.t * 1.5));
-      if (p.y > h + p.size) { p.y = -p.size; p.t = 0; }
+      stepSwirl(p, w, h);
       break;
   }
 }

@@ -37,7 +37,7 @@ export function TarotResultPanel({
   containerRef,
   onNewSession,
   onShare,
-}: TarotResultPanelProps) {
+}: Readonly<TarotResultPanelProps>) {
   return (
     <>
       <div ref={containerRef} data-testid="reading-content" className="space-y-4 md:space-y-5 flex-1 overflow-y-auto pr-2">

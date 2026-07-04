@@ -18,7 +18,7 @@ interface ResultTextCardProps {
   className?: string;
 }
 
-export function ResultTextCard({ text, emoji, label, delay = 0, colorScheme = "purple", className }: ResultTextCardProps) {
+export function ResultTextCard({ text, emoji, label, delay = 0, colorScheme = "purple", className }: Readonly<ResultTextCardProps>) {
   const c = COLOR[colorScheme];
   return (
     <motion.div

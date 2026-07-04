@@ -8,8 +8,8 @@ export function extractFallbackText(raw: string): string {
     .replace(/"[, \t]*\n/g, "\n")
     .replace(/^[ \t]*"/gm, "")
     .replace(/",?\s*$/gm, "")
-    .replace(/\\n/g, "\n")
-    .replace(/\\"/g, '"')
+    .replaceAll(String.raw`\n`, "\n")
+    .replaceAll(String.raw`\"`, '"')
     .replace(/,\s*\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -24,11 +24,11 @@ export function cleanReadingText(text: string): string {
     .replace(/\}\s*\]\s*$/gm, "")
     .replace(/^\s*\{|\}\s*$/g, "")
     // 이스케이프 문자 처리
-    .replace(/\\n\\n/g, "\n\n")
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "")
-    .replace(/\\t/g, " ")
-    .replace(/\\"/g, '"')
+    .replaceAll(String.raw`\n\n`, "\n\n")
+    .replaceAll(String.raw`\n`, "\n")
+    .replaceAll(String.raw`\r`, "")
+    .replaceAll(String.raw`\t`, " ")
+    .replaceAll(String.raw`\"`, '"')
     // 줄 정리
     .replace(/^["']+|["']+$/gm, "")
     .replace(/,\s*$/gm, "")
@@ -95,7 +95,7 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
   // "..." 패턴 내부의 비이스케이프 개행만 교체
   try {
     const sanitized = text.replace(/("(?:[^"\\]|\\.)*")/g, (m) =>
-      m.replace(/\n/g, "\\n").replace(/\r/g, "").replace(/\t/g, "\\t")
+      m.replaceAll("\n", String.raw`\n`).replaceAll("\r", "").replaceAll("\t", String.raw`\t`)
     );
     return JSON.parse(sanitized) as Record<string, unknown>;
   } catch { /* 다음 파싱 방법으로 계속 */ } // NOSONAR

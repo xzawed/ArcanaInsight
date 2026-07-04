@@ -8,18 +8,18 @@ interface ReadingTextProps {
 /** AI 응답 텍스트의 리터럴 이스케이프·JSON 잔여물을 제거하고 단락 구분 힌트를 추가 */
 function normalizeText(text: string): string {
   let result = text
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "")
-    .replace(/\\t/g, " ")
-    .replace(/\\"/g, '"');
+    .replaceAll(/\\n/g, "\n")
+    .replaceAll(/\\r/g, "")
+    .replaceAll(/\\t/g, " ")
+    .replaceAll(/\\"/g, '"');
 
   result = result
-    .replace(/"(cardInterpretations|cardId|position|interpretation|overallReading|advice|isReversed)":\s*/g, "")
-    .replace(/^\s*[{}\[\]]\s*$/gm, "")
-    .replace(/^["']+|["']+$/gm, "")
-    .replace(/,\s*$/gm, "");
+    .replaceAll(/"(cardInterpretations|cardId|position|interpretation|overallReading|advice|isReversed)":\s*/g, "")
+    .replaceAll(/^\s*[{}[\]]\s*$/gm, "")
+    .replaceAll(/^["']+|["']+$/gm, "")
+    .replaceAll(/,\s*$/gm, "");
 
-  return result.replace(/([.!?。])\s{2,}/g, "$1\n\n");
+  return result.replaceAll(/([.!?。])\s{2,}/g, "$1\n\n");
 }
 
 /**

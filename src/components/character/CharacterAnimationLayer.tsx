@@ -68,7 +68,7 @@ interface MoodAnimConfig {
 
 const MOOD_ANIM_MAP: Partial<Record<Mood, MoodAnimConfig>> = {
   smile: {
-    animate: { scale: [1.0, 1.02, 1.0] },
+    animate: { scale: [1, 1.02, 1] },
     transition: { duration: 0.6, ease: "easeInOut", times: [0, 0.5, 1] },
   },
   serious: {
@@ -76,11 +76,11 @@ const MOOD_ANIM_MAP: Partial<Record<Mood, MoodAnimConfig>> = {
     transition: { duration: 0.4, ease: "easeOut" },
   },
   surprised: {
-    animate: { scale: [1.0, 1.05, 0.98, 1.0] },
+    animate: { scale: [1, 1.05, 0.98, 1] },
     transition: { duration: 0.5, ease: "easeInOut", times: [0, 0.35, 0.7, 1] },
   },
   wink: {
-    animate: { scale: [1.0, 1.02, 1.0] },
+    animate: { scale: [1, 1.02, 1] },
     transition: { duration: 0.5, ease: "easeInOut", times: [0, 0.5, 1] },
   },
 };
@@ -138,7 +138,7 @@ function GlowOverlay({ mood, effectTheme }: { readonly mood: Mood; readonly effe
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-export function CharacterAnimationLayer({ mood, effectTheme, children }: CharacterAnimationLayerProps) {
+export function CharacterAnimationLayer({ mood, effectTheme, children }: Readonly<CharacterAnimationLayerProps>) {
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <GlowOverlay mood={mood} effectTheme={effectTheme} />

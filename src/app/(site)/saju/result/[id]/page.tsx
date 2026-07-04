@@ -17,7 +17,7 @@ function toOhaengType(v: string): OhaengType {
   return "wood";
 }
 
-export default async function SajuResultPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SajuResultPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const { id } = await params;
   interface SajuReadingRow {
     id: string;
@@ -57,6 +57,10 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
   const advice = cleanReadingText(reading.advice || "");
   const birthYear = new Date(reading.birth_date).getFullYear();
 
+  let dateLocale = "en-US";
+  if (locale === "ko") dateLocale = "ko-KR";
+  else if (locale === "ja") dateLocale = "ja-JP";
+
   const sajuData: SajuResult = {
     pillars: reading.pillars as SajuResult["pillars"],
     dayMaster: reading.day_master,
@@ -75,7 +79,7 @@ export default async function SajuResultPage({ params }: { params: Promise<{ id:
     <ResultPageShell service="saju">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("saju.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
+          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString(dateLocale)}</p>
         </div>
 
         <div className="space-y-4 md:space-y-5">

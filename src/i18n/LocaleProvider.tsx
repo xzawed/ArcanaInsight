@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
 import type { Locale } from "./config";
 
-export function LocaleProvider({ initial, children }: { initial: Locale; children: React.ReactNode }) {
+export function LocaleProvider({ initial, children }: Readonly<{ initial: Locale; children: React.ReactNode }>) {
   const setLocale = useLocaleStore((s) => s.setLocale);
 
   useEffect(() => {

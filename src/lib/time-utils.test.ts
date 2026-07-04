@@ -4,8 +4,8 @@ import { timeToSijin } from "./time-utils";
 describe("timeToSijin", () => {
   it("null 입력 → null", () => expect(timeToSijin(null)).toBeNull());
   it("빈 문자열 → null", () => expect(timeToSijin("")).toBeNull());
-  it("형식 불일치 → null", () => expect(timeToSijin("14:3")).toBeNull());
-  it("형식 불일치 → null", () => expect(timeToSijin("abc")).toBeNull());
+  it("형식 불일치(자릿수) → null", () => expect(timeToSijin("14:3")).toBeNull());
+  it("형식 불일치(문자) → null", () => expect(timeToSijin("abc")).toBeNull());
 
   it("00:00 → 자시(子時)", () => expect(timeToSijin("00:00")).toEqual({ key: "ja", label: "자시", hanja: "子時" }));
   it("00:59 → 자시(子時)", () => expect(timeToSijin("00:59")).toEqual({ key: "ja", label: "자시", hanja: "子時" }));

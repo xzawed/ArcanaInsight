@@ -18,7 +18,7 @@ interface ShinjeomReadingRow {
   created_at: string;
 }
 
-export default async function ShinjeomResultPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ShinjeomResultPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const { id } = await params;
   const locale = await getRequestLocale();
   const db = getAdminDb();
@@ -31,11 +31,15 @@ export default async function ShinjeomResultPage({ params }: { params: Promise<{
   const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
 
+  let dateLocale = "en-US";
+  if (locale === "ko") dateLocale = "ko-KR";
+  else if (locale === "ja") dateLocale = "ja-JP";
+
   return (
     <ResultPageShell service="shinjeom">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("shinjeom.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
+          <p className="text-arcana-muted text-sm">{new Date(reading.created_at).toLocaleDateString(dateLocale)}</p>
         </div>
 
         <div className="space-y-4 md:space-y-5">

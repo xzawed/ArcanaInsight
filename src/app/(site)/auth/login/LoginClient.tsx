@@ -11,7 +11,7 @@ interface Props {
   useNextAuth: boolean
 }
 
-export default function LoginClient({ useNextAuth }: Props) {
+export default function LoginClient({ useNextAuth }: Readonly<Props>) {
   const { t } = useT()
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
@@ -29,7 +29,7 @@ export default function LoginClient({ useNextAuth }: Props) {
       return
     }
     const supabase = createClient()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || globalThis.location.origin
     const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${siteUrl}/auth/callback` },

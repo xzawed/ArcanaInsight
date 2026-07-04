@@ -23,7 +23,7 @@ interface CardInterpretationListProps {
   locale: Locale;
 }
 
-export function CardInterpretationList({ interpretations, selectedCards, spread, locale }: CardInterpretationListProps) {
+export function CardInterpretationList({ interpretations, selectedCards, spread, locale }: Readonly<CardInterpretationListProps>) {
   const labels = SECTION_LABELS[locale] ?? SECTION_LABELS.ko;
   return (
     <>
@@ -31,13 +31,15 @@ export function CardInterpretationList({ interpretations, selectedCards, spread,
         const card = selectedCards.find(c => c.card.id === interp.cardId);
         const fallbackCard = !card && interp.position < selectedCards.length
           ? selectedCards[interp.position] : null;
-        const displayName = card?.card ? getCardName(card.card, locale) : fallbackCard?.card ? getCardName(fallbackCard.card, locale) : "";
+        let displayName = "";
+        if (card?.card) displayName = getCardName(card.card, locale);
+        else if (fallbackCard?.card) displayName = getCardName(fallbackCard.card, locale);
         const pos = spread?.positions[interp.position];
         const posLabel = pos ? getPositionLabel(pos, locale) : fallbackPosLabel(interp.position, locale);
         const hasNewFormat = !!(interp.symbolism || interp.situation);
         return (
           <motion.div
-            key={`card-${i}`}
+            key={`card-${interp.cardId}-${interp.position}`}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 + Math.min(i * 0.2, 0.8), ease: "easeOut" }}

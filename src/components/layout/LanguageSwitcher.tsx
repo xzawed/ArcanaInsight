@@ -25,7 +25,7 @@ interface Props {
   onSelect?: (locale: Locale) => void;
 }
 
-export function LanguageSwitcher({ variant, onSelect }: Props) {
+export function LanguageSwitcher({ variant, onSelect }: Readonly<Props>) {
   const router = useRouter();
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);

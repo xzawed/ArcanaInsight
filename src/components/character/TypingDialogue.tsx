@@ -8,7 +8,7 @@ interface TypingDialogueProps {
   readonly className?: string; isStreaming?: boolean;
 }
 
-export function TypingDialogue({ text, speed = 30, onComplete, className = "", isStreaming = false }: TypingDialogueProps) {
+export function TypingDialogue({ text, speed = 30, onComplete, className = "", isStreaming = false }: Readonly<TypingDialogueProps>) {
   const [displayedText, setDisplayedText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const prevTextRef = useRef("");

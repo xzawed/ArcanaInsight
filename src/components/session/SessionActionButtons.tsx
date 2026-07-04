@@ -8,7 +8,7 @@ interface SessionActionButtonsProps {
   className?: string;
 }
 
-export function SessionActionButtons({ onNewSession, onShare, newSessionLabel, shareLabel, className }: SessionActionButtonsProps) {
+export function SessionActionButtons({ onNewSession, onShare, newSessionLabel, shareLabel, className }: Readonly<SessionActionButtonsProps>) {
   return (
     <div className={`flex gap-3 pt-5 flex-shrink-0 ${className ?? ""}`}>
       <button

@@ -6,7 +6,7 @@ import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { faqItems } from "@/data/home/faq";
 import { useT } from "@/i18n/useT";
 
-function FAQItem({ question, answer, index }: { question: string; answer: string; index: number }) {
+function FAQItem({ question, answer, index }: Readonly<{ question: string; answer: string; index: number }>) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

@@ -19,7 +19,7 @@ export function calculateSaju(input: SajuInput, options?: SajuCalculateOptions):
   const [y, m, d] = input.birthDate.split("-").map(Number);
   // birthTime null = 시간 모름 → 자시(0시) 기준으로 계산 (시주는 AI 프롬프트에서 '알 수 없음' 처리)
   const hourVal = input.birthTime
-    ? parseInt(input.birthTime.split(":")[0], 10)
+    ? Number.parseInt(input.birthTime.split(":")[0], 10)
     : 0;
   const gender = input.gender === "female" ? Gender.WOMAN : Gender.MAN;
 
@@ -182,19 +182,19 @@ function calculateInteractions(year: SixtyCycle, month: SixtyCycle, day: SixtyCy
 
       // 합 (육합)
       const combine = a.eb.getCombine();
-      if (combine && combine.toString() === b.eb.toString()) {
+      if (combine?.toString() === b.eb.toString()) {
         combinations.push(`${a.label}(${aStr})-${b.label}(${bStr}) 합`);
       }
 
       // 충
       const opposite = a.eb.getOpposite();
-      if (opposite && opposite.toString() === b.eb.toString()) {
+      if (opposite?.toString() === b.eb.toString()) {
         clashes.push(`${a.label}(${aStr})-${b.label}(${bStr}) 충`);
       }
 
       // 형 (해)
       const harm = a.eb.getHarm();
-      if (harm && harm.toString() === b.eb.toString()) {
+      if (harm?.toString() === b.eb.toString()) {
         punishments.push(`${a.label}(${aStr})-${b.label}(${bStr}) 형`);
       }
     }

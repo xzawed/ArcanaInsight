@@ -17,16 +17,16 @@ export function getGrokBaseUrl(): string { return process.env.GROK_BASE_URL ?? "
 // AI_TIMEOUT_MS — 120s는 10장+ 타로/full-fortune 사주(max_tokens 18000~20000)에서 부족 →
 // reasoning 토큰 흡수 + 한국어 1.3x 비효율 + JSON 구조 오버헤드 고려해 240s로 상향.
 // 클라이언트 hard timeout과 동일.
-export function getAiTimeoutMs(): number { return parseInt(process.env.AI_TIMEOUT_MS ?? "240000", 10) }
-export function getDefaultMaxTokens(): number { return parseInt(process.env.AI_DEFAULT_MAX_TOKENS ?? "4000", 10) }
-export function getAiTemperature(): number { return parseFloat(process.env.AI_TEMPERATURE ?? "0.7") }
+export function getAiTimeoutMs(): number { return Number.parseInt(process.env.AI_TIMEOUT_MS ?? "240000", 10) }
+export function getDefaultMaxTokens(): number { return Number.parseInt(process.env.AI_DEFAULT_MAX_TOKENS ?? "4000", 10) }
+export function getAiTemperature(): number { return Number.parseFloat(process.env.AI_TEMPERATURE ?? "0.7") }
 
 // Fallback 쿨다운
-export function getAiFallbackCooldownMs(): number { return parseInt(process.env.AI_FALLBACK_COOLDOWN_MS ?? "300000", 10) }
-export function getAiAuthCooldownMs(): number { return parseInt(process.env.AI_AUTH_COOLDOWN_MS ?? "1800000", 10) }
+export function getAiFallbackCooldownMs(): number { return Number.parseInt(process.env.AI_FALLBACK_COOLDOWN_MS ?? "300000", 10) }
+export function getAiAuthCooldownMs(): number { return Number.parseInt(process.env.AI_AUTH_COOLDOWN_MS ?? "1800000", 10) }
 
 // DB
-export function getPostgresPoolSize(): number { return parseInt(process.env.POSTGRES_POOL_SIZE ?? "10", 10) }
+export function getPostgresPoolSize(): number { return Number.parseInt(process.env.POSTGRES_POOL_SIZE ?? "10", 10) }
 
 // Rate-limit (Upstash Redis)
 export function getUpstashRedisRestUrl(): string { return process.env.UPSTASH_REDIS_REST_URL ?? "" }

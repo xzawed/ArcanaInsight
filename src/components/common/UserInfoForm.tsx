@@ -49,7 +49,12 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     "w-full bg-arcana-card/70 border border-arcana-border rounded-xl px-3 py-2.5 text-arcana-text text-sm focus:border-arcana-purple focus:outline-none";
 
   const backLabel = mode === "saju" ? t("common.back-arrow") : t("tarot.page.spread-select.back");
-  const title = mode === "saju" ? t("user-info.title.saju") : mode === "shinjeom" ? t("user-info.title.shinjeom") : t("user-info.title.tarot");
+  const computeTitle = (): string => {
+    if (mode === "saju") return t("user-info.title.saju");
+    if (mode === "shinjeom") return t("user-info.title.shinjeom");
+    return t("user-info.title.tarot");
+  };
+  const title = computeTitle();
   const computeSubtitle = (): string => {
     if (mode === "saju") return t("user-info.subtitle.saju");
     if (mode === "shinjeom") return t("user-info.subtitle.shinjeom");
@@ -57,7 +62,12 @@ export function UserInfoForm({ mode, onSubmit, onBack, characterName }: UserInfo
     return t("user-info.subtitle.tarot.default");
   };
   const subtitle = computeSubtitle();
-  const submitLabel = mode === "saju" ? t("user-info.submit.saju") : mode === "shinjeom" ? t("user-info.submit.shinjeom") : t("user-info.submit.tarot");
+  const computeSubmitLabel = (): string => {
+    if (mode === "saju") return t("user-info.submit.saju");
+    if (mode === "shinjeom") return t("user-info.submit.shinjeom");
+    return t("user-info.submit.tarot");
+  };
+  const submitLabel = computeSubmitLabel();
 
   return (
     <div className="space-y-5">

@@ -10,7 +10,7 @@ interface ReadingErrorStateProps {
   isRetrying?: boolean;
 }
 
-export function ReadingErrorState({ titleText, errorText, tryAgainText, newSessionText, onRetry, onNewSession, isRetrying }: ReadingErrorStateProps) {
+export function ReadingErrorState({ titleText, errorText, tryAgainText, newSessionText, onRetry, onNewSession, isRetrying }: Readonly<ReadingErrorStateProps>) {
   return (
     <div className="flex flex-col items-center gap-3 px-5 py-5 rounded-2xl bg-arcana-card/90 border border-red-500/40 shadow-xl backdrop-blur-md max-w-sm" data-testid="reading-error">
       <p className="text-arcana-text text-sm md:text-base font-serif font-bold text-center">{titleText}</p>

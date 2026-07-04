@@ -11,7 +11,7 @@ const TOAST_EVENT = "arcana:toast";
 
 export function showToast(message: string, duration = 2400): void {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent<ToastEvent>(TOAST_EVENT, { detail: { message, duration } }));
+  globalThis.dispatchEvent(new CustomEvent<ToastEvent>(TOAST_EVENT, { detail: { message, duration } }));
 }
 
 export function ToastHost() {
@@ -25,9 +25,9 @@ export function ToastHost() {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => setMessage(null), detail.duration ?? 2400);
     };
-    window.addEventListener(TOAST_EVENT, handler);
+    globalThis.addEventListener(TOAST_EVENT, handler);
     return () => {
-      window.removeEventListener(TOAST_EVENT, handler);
+      globalThis.removeEventListener(TOAST_EVENT, handler);
       if (timer) clearTimeout(timer);
     };
   }, []);

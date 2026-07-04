@@ -26,10 +26,10 @@ export function LocaleConfirmModal() {
   const [suggested, setSuggested] = useState<Locale | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof globalThis.window === "undefined") return;
     let alreadyShown = false;
     try {
-      alreadyShown = window.localStorage.getItem(STORAGE_KEY) === "1";
+      alreadyShown = globalThis.localStorage.getItem(STORAGE_KEY) === "1";
     } catch {
       // localStorage 비활성 환경에서는 매번 1회 표시 (무해)
     }
@@ -48,7 +48,7 @@ export function LocaleConfirmModal() {
 
   const dismiss = () => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, "1");
+      globalThis.localStorage.setItem(STORAGE_KEY, "1");
     } catch {
       // 무시
     }

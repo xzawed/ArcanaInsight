@@ -47,7 +47,7 @@ interface FortuneData {
 
 function AreaCardSlot({
   areaResult, isFlipped, isLoading, selectedSkinId, styleId, onFlip, areaLabel, tr,
-}: {
+}: Readonly<{
   areaResult: AreaResult | undefined;
   isFlipped: boolean;
   isLoading: boolean;
@@ -56,7 +56,7 @@ function AreaCardSlot({
   onFlip: () => void;
   areaLabel: string;
   tr: (key: string) => string;
-}) {
+}>) {
   const card = areaResult ? deckManager.getCardById(areaResult.cardId) : undefined;
   const [burstPlaying, setBurstPlaying] = useState(false);
 

@@ -28,7 +28,7 @@ const SAJU_BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "
 
 // Pre-computed 오행 positions (r=32, angles: -90°, -18°, 54°, 126°, 198°)
 const OHAENG = [
-  { sym: "火", x:  0.00, y: -32.00, color: "#ef4444" },
+  { sym: "火", x:  0, y: -32, color: "#ef4444" },
   { sym: "水", x: 30.43, y:  -9.89, color: "#0ea5e9" },
   { sym: "木", x: 18.81, y:  25.88, color: "#4ade80" },
   { sym: "金", x:-18.81, y:  25.88, color: "#fbbf24" },
@@ -65,7 +65,7 @@ function parallaxCoverStyle(offset: LayerOffset): React.CSSProperties {
 
 // ─── TAROT SCENE ────────────────────────────────────────────────────────────
 
-function TarotScene({ far, mid, near }: LayerOffsets) {
+function TarotScene({ far, mid, near }: Readonly<LayerOffsets>) {
   return (
     <div className="service-scene tarot-scene" aria-hidden="true">
       {/* FAR: god rays */}
@@ -137,7 +137,7 @@ function TarotScene({ far, mid, near }: LayerOffsets) {
 
 // ─── SAJU SCENE ─────────────────────────────────────────────────────────────
 
-function SajuScene({ far, mid, near }: LayerOffsets) {
+function SajuScene({ far, mid, near }: Readonly<LayerOffsets>) {
   return (
     <div className="service-scene saju-scene" aria-hidden="true">
       {/* FAR: warm rays */}
@@ -222,7 +222,7 @@ function SajuScene({ far, mid, near }: LayerOffsets) {
 
 // ─── SHINJEOM SCENE ──────────────────────────────────────────────────────────
 
-function ShinjeomScene({ far, mid, near }: LayerOffsets) {
+function ShinjeomScene({ far, mid, near }: Readonly<LayerOffsets>) {
   return (
     <div className="service-scene shinjeom-scene" aria-hidden="true">
       {/* FAR: rising mist (covers full area, no flex centering) */}

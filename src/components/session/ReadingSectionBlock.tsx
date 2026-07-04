@@ -8,7 +8,7 @@ interface ReadingSectionBlockProps {
   content: string;
 }
 
-export function ReadingSectionBlock({ icon, label, content }: ReadingSectionBlockProps) {
+export function ReadingSectionBlock({ icon, label, content }: Readonly<ReadingSectionBlockProps>) {
   if (!content) return null;
   return (
     <div className="mt-4 first:mt-0">

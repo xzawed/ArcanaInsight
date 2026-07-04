@@ -106,9 +106,9 @@ export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: Char
 
       {/* burst 파티클 3개 — isTransitioning 시 렌더 */}
       <AnimatePresence>
-        {isTransitioning && BURST_PARTICLES.map((p, i) => (
+        {isTransitioning && BURST_PARTICLES.map((p) => (
           <motion.div
-            key={`burst-${i}`}
+            key={`burst-${p.dx}-${p.dy}`}
             className="absolute rounded-full"
             style={{
               width: p.size,

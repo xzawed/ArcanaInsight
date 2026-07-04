@@ -63,7 +63,7 @@ export function ShinjeomEnergyEffect({ onComplete }: ShinjeomEnergyEffectProps) 
 
             return (
               <motion.div
-                key={i}
+                key={elem.label}
                 className="absolute rounded-full"
                 style={{
                   width: 32,
@@ -133,7 +133,7 @@ export function ShinjeomEnergyEffect({ onComplete }: ShinjeomEnergyEffectProps) 
             const ly = 50 + Math.sin(rad) * 32;
             return (
               <motion.span
-                key={`label-${i}`}
+                key={elem.label}
                 className="absolute font-serif font-bold select-none"
                 style={{
                   left: `${lx}%`,

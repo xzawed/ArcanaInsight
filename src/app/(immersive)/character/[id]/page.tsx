@@ -125,7 +125,7 @@ export default function CharacterPage() {
                   }`}
                 >
                   <span className="text-2xl block mb-2">{service.icon}</span>
-                  <h3 className={`font-serif font-bold text-sm transition-colors ${!service.disabled ? "group-hover:text-arcana-purple" : ""}`}>
+                  <h3 className={`font-serif font-bold text-sm transition-colors ${service.disabled ? "" : "group-hover:text-arcana-purple"}`}>
                     {service.label}
                   </h3>
                   <p className="text-arcana-muted text-xs mt-0.5">{service.desc}</p>

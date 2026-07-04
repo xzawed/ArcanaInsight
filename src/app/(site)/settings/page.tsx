@@ -14,7 +14,7 @@ const STYLE_COLORS: Record<string, string> = {
   "modern-digital": "linear-gradient(135deg, #0f2944, #00b4d8)",
 };
 
-function SaveToast({ visible, text }: { visible: boolean; text: string }) {
+function SaveToast({ visible, text }: Readonly<{ visible: boolean; text: string }>) {
   return (
     <div
       className={`fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-arcana-purple text-white text-sm font-sans shadow-lg shadow-arcana-purple/30 pointer-events-none transition-all duration-300 ${
@@ -37,6 +37,11 @@ export default function SettingsPage() {
     handleThemeChange, handleSkinChange, handleGenderChange, toggleConfirmMode, toggleReducedMotion, clearSavedInfo,
     themeOptions, genderOptions,
   } = useSettings();
+
+  const currentThemeName = getThemeName(themes[activeTheme], locale);
+  const themeStatus = mode === "auto"
+    ? `${t("settings.theme.auto-label")} (${currentThemeName})`
+    : currentThemeName;
 
   return (
     <div className="relative">
@@ -62,7 +67,7 @@ export default function SettingsPage() {
           {/* 테마 */}
           <section className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-5">
             <h2 className="font-sans font-bold text-base md:text-lg text-arcana-text mb-1">{t("settings.section.theme")}</h2>
-            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${mode === "auto" ? `${t("settings.theme.auto-label")} (${getThemeName(themes[activeTheme], locale)})` : getThemeName(themes[activeTheme], locale)}`}</p>
+            <p className="text-arcana-muted text-xs mb-4">{`${t("settings.theme.current")} ${themeStatus}`}</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {themeOptions.map((t) => (
                 <button

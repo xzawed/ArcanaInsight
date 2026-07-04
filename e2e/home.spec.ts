@@ -59,6 +59,7 @@ test.describe("홈 페이지", () => {
   test("FAQ — 아코디언 열기/닫기", async ({ page }) => {
     const faqSection = page.locator("text=자주 묻는 질문").first();
     await faqSection.scrollIntoViewIfNeeded();
+    await expect(faqSection).toBeVisible();
 
     // 첫 번째 FAQ 항목 클릭
     const firstQuestion = page.locator("text=AI가 정말로 타로를 해석").first();

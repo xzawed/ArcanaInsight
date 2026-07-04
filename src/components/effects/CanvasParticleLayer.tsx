@@ -97,9 +97,9 @@ export function CanvasParticleLayer({ density = "medium", className = "" }: Canv
       const h = canvas.clientHeight;
       ctx.clearRect(0, 0, w, h);
       const ps = particlesRef.current;
-      for (let i = 0; i < ps.length; i++) {
-        stepParticle(ps[i], w, h);
-        drawParticle(ctx, ps[i]);
+      for (const p of ps) {
+        stepParticle(p, w, h);
+        drawParticle(ctx, p);
       }
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -116,7 +116,7 @@ export function CanvasParticleLayer({ density = "medium", className = "" }: Canv
   return (
     <canvas
       ref={canvasRef}
-      aria-hidden="true"
+      role="presentation"
       className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
     />
   );
