@@ -128,6 +128,18 @@ describe("SajuService", () => {
       const prompt = service.getSystemPrompt("unknown-char");
       expect(prompt).toContain("선화");
     });
+
+    it("쉬운 말 계약과 3단 착지(보약 예시)가 포함된다", () => {
+      const prompt = service.getSystemPrompt("seonhwa");
+      expect(prompt).toContain("쉬운 말 계약");
+      expect(prompt).toContain("보약");
+    });
+
+    it("overallReading 소제목이 평이 헤더로 교체된다 (【타고난 성격】, not 【사주 전체 구조】)", () => {
+      const prompt = service.getSystemPrompt("seonhwa");
+      expect(prompt).toContain("【타고난 성격】");
+      expect(prompt).not.toContain("【사주 전체 구조】");
+    });
   });
 
   // ─── buildSajuPrompt ──────────────────────────────────────────────────────
