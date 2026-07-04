@@ -13,7 +13,7 @@ import { isTarotTopic } from "@/data/topics";
 import { TarotReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils";
-import { saveTarotReading, logReadingSaveFailure, recordFailedReading } from "@/lib/db/reading-saver";
+import { saveTarotReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -123,6 +123,8 @@ export async function POST(request: NextRequest) {
             }));
             try {
               await saveTarotReading(db, sessionId, result, cardsForSave, locale);
+              // directAnswer는 별도 best-effort UPDATE (마이그 023 미적용 환경에서도 본 저장 무영향)
+              await persistDirectAnswer(db, "tarot", sessionId, result.directAnswer);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
             } catch (e) {
               logReadingSaveFailure("tarot", sessionId, e);

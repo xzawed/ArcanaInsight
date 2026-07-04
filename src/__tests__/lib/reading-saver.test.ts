@@ -7,6 +7,7 @@ import {
   logReadingSaveFailure,
   recordFailedReading,
   dispatchFailedReadingSave,
+  persistDirectAnswer,
 } from "@/lib/db/reading-saver";
 import { makeMockDb } from "@/test-helpers/mock-db";
 
@@ -91,6 +92,45 @@ describe("saveShinjeomMessages", () => {
       expect.objectContaining({ role: "user", content: "사용자 메시지", message_index: 2 }),
       expect.objectContaining({ role: "character", content: "캐릭터 응답", message_index: 3 }),
     ]);
+  });
+});
+
+describe("persistDirectAnswer (best-effort directAnswer UPDATE)", () => {
+  it("directAnswer가 있으면 서비스별 테이블에 session_id 기준 UPDATE 한다", async () => {
+    const db = makeMockDb();
+    db.update.mockResolvedValue(null);
+    await persistDirectAnswer(db, "tarot", "sess-da", "이 질문에는 ~쪽으로 기울어 있습니다");
+    expect(db.update).toHaveBeenCalledWith(
+      "readings", { session_id: "sess-da" }, { direct_answer: "이 질문에는 ~쪽으로 기울어 있습니다" },
+    );
+  });
+
+  it("서비스별 테이블 매핑 (saju→saju_readings, shinjeom→shinjeom_readings)", async () => {
+    const db = makeMockDb();
+    db.update.mockResolvedValue(null);
+    await persistDirectAnswer(db, "saju", "s1", "직답");
+    await persistDirectAnswer(db, "shinjeom", "s2", "직답");
+    expect(db.update).toHaveBeenCalledWith("saju_readings", { session_id: "s1" }, { direct_answer: "직답" });
+    expect(db.update).toHaveBeenCalledWith("shinjeom_readings", { session_id: "s2" }, { direct_answer: "직답" });
+  });
+
+  it("directAnswer가 비었으면(빈 문자열/공백/undefined) UPDATE 하지 않는다", async () => {
+    const db = makeMockDb();
+    db.update.mockResolvedValue(null);
+    await persistDirectAnswer(db, "tarot", "s", "");
+    await persistDirectAnswer(db, "tarot", "s", "   ");
+    await persistDirectAnswer(db, "tarot", "s", undefined);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("UPDATE 실패(컬럼 미존재 등)해도 throw하지 않고 로깅만 한다 — 본 저장 무영향", async () => {
+    const db = makeMockDb();
+    const err = new Error('column "direct_answer" does not exist');
+    db.update.mockRejectedValue(err);
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    await expect(persistDirectAnswer(db, "tarot", "sess-x", "직답")).resolves.toBeUndefined();
+    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-save-failed] service=tarot"));
+    errSpy.mockRestore();
   });
 });
 

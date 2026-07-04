@@ -141,6 +141,7 @@ describe("POST /api/shinjeom/message", () => {
   it("isFinalTurn=true + sessionId → saveShinjeomFinalReading 호출 및 shareToken 수신", async () => {
     const mockSaveFinal = vi.fn().mockResolvedValue({ shareToken: "test-token-123" });
     vi.doMock("@/lib/db/reading-saver", () => ({
+      persistDirectAnswer: vi.fn(),
       saveShinjeomFinalReading: mockSaveFinal,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
     }));
@@ -162,6 +163,7 @@ describe("POST /api/shinjeom/message", () => {
 
   it("isFinalTurn=true + 최종 저장 성공 → saved:true 이벤트를 전송한다", async () => {
     vi.doMock("@/lib/db/reading-saver", () => ({
+      persistDirectAnswer: vi.fn(),
       saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: "tok" }),
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingSaveFailure: vi.fn(),
@@ -181,6 +183,7 @@ describe("POST /api/shinjeom/message", () => {
     const mockLog = vi.fn();
     const mockRecord = vi.fn();
     vi.doMock("@/lib/db/reading-saver", () => ({
+      persistDirectAnswer: vi.fn(),
       saveShinjeomFinalReading: vi.fn().mockRejectedValue(new Error("DB save failed")),
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingSaveFailure: mockLog,
@@ -358,6 +361,7 @@ describe("POST /api/shinjeom/message", () => {
     };
     const mockAiModule = { FallbackProvider: vi.fn().mockImplementation(function () { return provider; }) };
     vi.doMock("@/lib/db/reading-saver", () => ({
+      persistDirectAnswer: vi.fn(),
       saveShinjeomFinalReading: mockSave,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
     }));
