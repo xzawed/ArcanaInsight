@@ -57,7 +57,11 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     }
   });
 
-  test("이미지 — 모든 이미지 로드 성공", async ({ page }) => {
+  test("이미지 — 모든 이미지 로드 성공", async ({ page }, testInfo) => {
+    // 홈 전체 이미지 로드 검사는 데스크톱 1회만 — 깨진 이미지(404)는 엔진 무관이라 브라우저별 반복이 불필요하고,
+    // 무거운 홈 이미지 디코드가 메모리-취약한 webkit(Mobile iOS)을 크래시("Target closed")시킨다. (형제 line 203과 동일 스코프)
+    test.skip(testInfo.project.name !== "Desktop Chrome", "홈 이미지 로드 검사는 데스크톱 1회만 (webkit 크래시 회피)");
+
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // 상단 뷰포트 이미지들이 로드를 마칠 시간을 단일 예산(15s)으로 확보한다. 이미지별 15s 대기를 누적하면
