@@ -106,6 +106,10 @@ export async function POST(request: NextRequest) {
               sessionId: sessionId ?? null,
             });
           }
+          // 자유질문이 있었는데 directAnswer가 비면 조용한 소실 회귀 — 관측
+          if (freeQuestion?.trim() && !result.directAnswer?.trim()) {
+            console.warn("[tarot-reading] freeQuestion 있으나 directAnswer 비어있음:", { sessionId: sessionId ?? null });
+          }
 
           // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 병렬).
           // parseError가 있으면 클라이언트는 result.parseError 시그널로 재시도 안내.

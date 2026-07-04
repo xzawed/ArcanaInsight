@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { SajuService } from "@/services/saju/saju-service";
+import { SajuService, detectSajuTimeHorizon, type SajuQuestionHorizon } from "@/services/saju/saju-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
@@ -52,6 +52,21 @@ function resolveCalcOptions(timeRange: SajuTimeRange, includeMonthly: boolean) {
   return opts;
 }
 
+/** 자유질문의 시간 지평이 드롭다운 timeRange와 달라도 해당 시기 데이터를 계산하도록 calc 옵션을 병합.
+ *  시기 판정 근거를 데이터에서 결정론적으로 확보(모델은 narration만 → SSE 재생성 플레이키 방지). */
+function applyHorizonToCalcOptions(
+  opts: ReturnType<typeof resolveCalcOptions>,
+  horizon: SajuQuestionHorizon | null,
+) {
+  if (!horizon) return opts;
+  const next = { ...opts };
+  if (horizon === "this-week") next.daily = true;
+  else if (horizon === "this-month") next.monthly = true;
+  else if (horizon === "next-year") next.yearlyMulti = Math.max(next.yearlyMulti ?? 0, 1);
+  // this-year: 올해 세운은 pillar 섹션에 항상 포함되므로 추가 계산 불필요
+  return next;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const locale = await getRequestLocale();
@@ -76,8 +91,14 @@ export async function POST(request: NextRequest) {
       if (ownerErr) return ownerErr;
     }
 
+    // 자유질문의 시간 지평 감지 → 드롭다운과 무관하게 해당 시기 데이터를 계산·주입 (#6)
+    const questionHorizon: SajuQuestionHorizon | null = detectSajuTimeHorizon(freeQuestion);
+
     // 사주팔자 계산 (서버 사이드)
-    const calcOptions = resolveCalcOptions(timeRange, includeMonthly ?? false);
+    const calcOptions = applyHorizonToCalcOptions(
+      resolveCalcOptions(timeRange, includeMonthly ?? false),
+      questionHorizon,
+    );
     const sajuResult = calculateSaju({
       birthDate: userInfo.birthDate,
       birthTime: userInfo.birthTime,
@@ -91,7 +112,7 @@ export async function POST(request: NextRequest) {
       name: userInfo.name,
       birthTime: userInfo.birthTime,
       mbti: userInfo.mbti,
-    }) + buildFreeQuestionPrompt(freeQuestion);
+    }, questionHorizon) + buildFreeQuestionPrompt(freeQuestion);
 
     const db = sessionId ? getAdminDb() : null
 
@@ -121,6 +142,10 @@ export async function POST(request: NextRequest) {
               alen: result.advice?.length ?? 0,
               sessionId: sessionId ?? null,
             });
+          }
+          // 자유질문이 있었는데 directAnswer가 비면 조용한 소실 회귀 — 관측(RC3 재발 감시)
+          if (freeQuestion?.trim() && !result.directAnswer?.trim()) {
+            console.warn("[saju-reading] freeQuestion 있으나 directAnswer 비어있음:", { sessionId: sessionId ?? null });
           }
 
           // 결과를 먼저 클라이언트에 전송 (DB 저장은 비동기 fire-and-forget).

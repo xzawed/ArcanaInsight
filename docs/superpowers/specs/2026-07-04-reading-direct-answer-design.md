@@ -42,11 +42,14 @@
 
 테스트: `prompt-builder.test.ts`(헬퍼·buildFreeQuestionPrompt), `saju-service.test.ts`/`shinjeom-service.test.ts`(parseResult directAnswer 추출·하위호환, 최종턴 핵심질문 재노출). 기존 `tarot-reading.test.ts`("directAnswer 필드에서" assertion)는 문구 보존으로 무변경 통과.
 
-## 후속 과제 (미구현 — P1/P2)
+## P1 구현 (2차 PR — #6 + #5)
+
+- ✅ **#6 시간한정 질문 → 사주 월운/세운 결정론적 연계** (RC7): `detectSajuTimeHorizon(question)`(ko/en/ja 키워드)가 자유질문의 시간 지평(이번 주/달/올해/내년)을 감지 → route의 `applyHorizonToCalcOptions`가 드롭다운 timeRange와 무관하게 해당 월운/세운/일운 데이터를 **계산·주입**(시기 판정은 데이터에서 결정론적, 모델은 narration만 → SSE 재생성 플레이키 방지). `buildSajuPrompt`에 시기 창 지시 추가(정확한 날짜 금지, 범위+조건).
+- ✅ **#5 렌더 통일·관측성**: 타로 `directAnswer`를 결과 최상단으로 승격(`TarotResultPanel`), 타로·사주 route에서 freeQuestion 있는데 `directAnswer` 비면 관측 경고 로그(RC3 재발 감시).
+
+## 후속 과제 (미구현 — P2)
 
 - **directAnswer DB 영속**: 현재 3서비스 모두 라이브 SSE에서만 노출, DB 미저장 → 재방문(`result/[id]`)·공유엔 미포함. 컬럼 추가 마이그레이션 필요. (타로도 동일한 기존 한계)
-- **#6 시간한정 질문 → 사주 월운/세운 결정론적 연계** (RC7): 자유질문의 시간 키워드를 파싱해 해당 월운/세운 데이터 주입, 시기 판정은 데이터에서 결정론적으로(SSE 재생성 플레이키 방지).
-- **#5 렌더 통일·관측성**: 타로 directAnswer도 결과 최상단 승격, freeQuestion 있는데 directAnswer 비면 로그 경고.
 - **신점 중간 턴 되질문 루프**: 사용자 결정으로 이번엔 미변경.
 - Grok `response_format json_schema`(strict)로 directAnswer 필수화 검토(양 provider 실측 선행).
 
