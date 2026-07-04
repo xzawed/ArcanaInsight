@@ -41,9 +41,10 @@ describe("ResultTextCard 컬러 스킴 계약", () => {
     }
   });
 
-  it("기본 delay는 0이다 (prop 계약 문서화)", () => {
-    // ResultTextCard의 delay 기본값은 0
-    const defaultDelay = 0;
-    expect(defaultDelay).toBe(0);
+  it("delay prop 미지정 시 기본값 0으로 처리한다 (prop 계약 문서화)", () => {
+    // ResultTextCard의 delay 기본값 처리 로직(`delay = 0`)을 미러링
+    const resolveDelay = (delay?: number) => delay ?? 0;
+    expect(resolveDelay()).toBe(0);
+    expect(resolveDelay(0.3)).toBe(0.3);
   });
 });

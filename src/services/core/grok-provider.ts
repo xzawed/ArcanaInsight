@@ -136,12 +136,12 @@ export class GrokProvider implements AIProvider {
         "Grok",
         controller.signal
       )) {
-        if (ref.firstChunkAt === null) ref.firstChunkAt = Date.now();
+        ref.firstChunkAt ??= Date.now();
         ref.yielded++;
         yield chunk;
       }
       const totalMs = Date.now() - startedAt;
-      const ttfbMs = ref.firstChunkAt !== null ? ref.firstChunkAt - startedAt : null;
+      const ttfbMs = ref.firstChunkAt === null ? null : ref.firstChunkAt - startedAt;
       const reasoningTokens = ref.usage?.completion_tokens_details?.reasoning_tokens;
       if (process.env.NODE_ENV !== "production") console.log(`[Grok] stream done — chunks=${ref.yielded} ttfb=${ttfbMs}ms total=${totalMs}ms finish=${ref.finishReason ?? "?"} max_tokens=${effectiveMaxTokens} usage=${JSON.stringify(ref.usage)}`);
       if (ref.finishReason === "length") {

@@ -83,7 +83,7 @@ export interface UseTarotReadingReturn {
   readingErrorReason: "timeout" | "generic";
   isConnecting: boolean;
   elapsedSec: number;
-  readingAbortRef: React.MutableRefObject<AbortController | null>;
+  readingAbortRef: React.RefObject<AbortController | null>;
   startReading: (cards: SelectedCard[]) => Promise<void>;
   setReadingError: Dispatch<SetStateAction<boolean>>;
 }
@@ -144,7 +144,7 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
     const { revealAll: revealAllCards } = useReadingRevealStore.getState();
     const { locale } = useLocaleStore.getState();
 
-    if (!cards || cards.length !== required) {
+    if (cards?.length !== required) {
       console.warn("[tarot-session] startReading aborted: card count mismatch", cards?.length ?? 0, "/", required);
       setPendingConfirm(false);
       setLoading(false);

@@ -9,7 +9,7 @@ interface Props {
   children: ReactNode;
 }
 
-export function ResultPageShell({ service, children }: Props) {
+export function ResultPageShell({ service, children }: Readonly<Props>) {
   return (
     <div className="relative overflow-hidden">
       <MysticBackground service={service} />

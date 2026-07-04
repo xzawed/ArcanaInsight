@@ -36,7 +36,7 @@ export function DaeunTimeline({ majorFortunes, yearlyFortune, birthYear }: Daeun
 
       {/* 대운 타임라인 */}
       <div className="flex overflow-x-auto gap-2 md:gap-3 pb-2">
-        {majorFortunes.map((f, i) => {
+        {majorFortunes.map((f) => {
           const isCurrent = currentAge >= f.startAge && currentAge <= f.endAge;
           const info = OHAENG[f.element];
           const stemHanja = getStemHanjaFromKo(f.stem);
@@ -46,7 +46,7 @@ export function DaeunTimeline({ majorFortunes, yearlyFortune, birthYear }: Daeun
 
           return (
             <div
-              key={i}
+              key={f.startAge}
               className={`flex-shrink-0 w-[4.5rem] md:w-20 rounded-lg p-2 md:p-2.5 text-center border transition-all ${
                 isCurrent
                   ? "border-arcana-gold bg-arcana-gold/15 shadow-lg shadow-arcana-gold/20"

@@ -9,8 +9,9 @@ import { describe, it, expect } from "vitest";
 describe("SessionActionButtons props 계약", () => {
   it("className prop이 없을 때 기본 pt-5가 적용된다 (계약 문서화)", () => {
     // SessionActionButtons는 className이 없으면 pt-5를 사용한다
-    const defaultPt = "pt-5";
-    expect(defaultPt).toBe("pt-5");
+    const resolveWrapperClass = (className?: string) => `flex gap-3 flex-shrink-0 ${className ?? "pt-5"}`;
+    expect(resolveWrapperClass()).toContain("pt-5");
+    expect(resolveWrapperClass("pt-2")).not.toContain("pt-5");
   });
 
   it("className prop이 있을 때 override된다 (shinjeom에서 pt-2 사용)", () => {

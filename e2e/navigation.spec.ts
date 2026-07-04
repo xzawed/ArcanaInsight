@@ -11,6 +11,7 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
     const homeLink = page.locator("header a[href='/']").first();
     await homeLink.click();
     await page.waitForURL("**/");
+    await expect(page).toHaveURL(/\/$/);
   });
 
   test("타로 상담 링크", async ({ page }) => {
@@ -130,6 +131,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     const settingsIcon = page.locator("[data-testid='mobile-settings-link']");
     await settingsIcon.click();
     await page.waitForURL("**/settings");
+    await expect(page).toHaveURL(/\/settings$/);
   });
 
   test("MobileNav 5탭 표시 + 클릭", async ({ page }) => {
@@ -139,9 +141,11 @@ test.describe("네비게이션 — 모바일 Header", () => {
 
     // 타로 탭 클릭 — evaluate로 직접 DOM click (nextjs-portal 가로채기 우회)
     const tarotTab = page.locator("nav a[href='/tarot']").last();
+    await expect(tarotTab).toBeVisible();
     if (await tarotTab.isVisible()) {
       await tarotTab.evaluate((el) => (el as HTMLElement).click());
       await page.waitForURL("**/tarot");
+      await expect(page).toHaveURL(/\/tarot$/);
     }
   });
 });

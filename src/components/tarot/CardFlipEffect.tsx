@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 const BURST_RAYS = [0, 45, 90, 135, 180, 225, 270, 315] as const;
 

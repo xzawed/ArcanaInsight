@@ -228,7 +228,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
       >
         {STAR_POINTS.map((s, i) => (
           <motion.circle
-            key={i}
+            key={`star-${s.cx}-${s.cy}`}
             cx={s.cx} cy={s.cy} r={s.r}
             fill="rgba(212,175,55,0.5)"
             animate={shouldReduceMotion ? { opacity: 0.4 } : { opacity: [0.3, 0.8, 0.3] }}
@@ -237,7 +237,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
         ))}
         {CONSTELLATION_LINES.map((l, i) => (
           <motion.path
-            key={i}
+            key={`cline-${l.x1}-${l.y1}-${l.x2}-${l.y2}`}
             d={`M ${l.x1} ${l.y1} L ${l.x2} ${l.y2}`}
             stroke="rgba(167,139,250,0.2)"
             strokeWidth="0.3"
@@ -255,7 +255,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
         if (!pos) return null;
         return shouldReduceMotion ? (
           <div
-            key={i}
+            key={`rune-${pos.top}-${pos.left}`}
             className="absolute select-none"
             style={{ top: pos.top, left: pos.left, fontSize: pos.fontSize, color: `rgba(167,139,250,${pos.opacity})` }}
           >
@@ -263,7 +263,7 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
           </div>
         ) : (
           <motion.div
-            key={i}
+            key={`rune-${pos.top}-${pos.left}`}
             className="absolute select-none"
             style={{ top: pos.top, left: pos.left, fontSize: pos.fontSize, color: `rgba(167,139,250,${pos.opacity})` }}
             animate={{ opacity: [pos.opacity * 0.6, pos.opacity, pos.opacity * 0.6], rotate: [0, 3, 0, -3, 0] }}

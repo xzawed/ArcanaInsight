@@ -11,7 +11,7 @@ interface SajuResultClientProps {
   birthYear: number;
 }
 
-export function SajuResultClient({ sajuData, birthYear }: SajuResultClientProps) {
+export function SajuResultClient({ sajuData, birthYear }: Readonly<SajuResultClientProps>) {
   return (
     <>
       <SajuChart

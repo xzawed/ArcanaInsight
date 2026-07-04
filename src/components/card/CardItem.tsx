@@ -58,11 +58,11 @@ export function CardItem({ card, isFlipped, isSelected, isReversed = false, onCl
       onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      whileHover={!isFlipped ? {
+      whileHover={isFlipped ? undefined : {
         y: -8,
         scale: 1.02,
         transition: { duration: 0.2 },
-      } : undefined}
+      }}
       className={`relative cursor-pointer ${useCustomSize ? "" : sizeClasses[size]} ${className}`}
       style={{
         perspective: "1000px",

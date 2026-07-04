@@ -13,7 +13,7 @@ interface ThemeDropdownProps {
   onClose: () => void;
 }
 
-export function ThemeDropdown({ variant, onClose }: ThemeDropdownProps) {
+export function ThemeDropdown({ variant, onClose }: Readonly<ThemeDropdownProps>) {
   const { mode, activeTheme, setMode } = useThemeStore();
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);

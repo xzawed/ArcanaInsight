@@ -57,7 +57,7 @@ function buildLoopMotion(primary: string): Record<string, Record<string, number[
       x: [0, -2, 3, 0, -1, 0],
       rotate: [0, -0.15, 0.12, 0, -0.08, 0],
       scale: [1, 1.003, 1.006, 1.003, 1.005, 1],
-      filter: [sh(12, 0.15), sh(18, 0.25), sh(22, 0.30), sh(18, 0.25), sh(15, 0.20), sh(12, 0.15)],
+      filter: [sh(12, 0.15), sh(18, 0.25), sh(22, 0.3), sh(18, 0.25), sh(15, 0.2), sh(12, 0.15)],
     },
     mystical: {
       y: [0, -10, 0],

@@ -35,9 +35,9 @@ export async function fetchMypageData(userId: string, locale: Locale): Promise<M
     db.findMany<SessionRow>("sessions", { user_id: userId }).catch(() => [] as SessionRow[]),
   ]);
 
-  const profileError: { message: string } | null = !profile
-    ? { message: t("mypage.profile.error-detail-fallback", locale) }
-    : null;
+  const profileError: { message: string } | null = profile
+    ? null
+    : { message: t("mypage.profile.error-detail-fallback", locale) };
 
   // status 필터 + 최신순 정렬 (DB Provider별 ORDER BY 미지원이므로 JS에서 처리)
   const filtered = (allRawSessions as SessionRow[])

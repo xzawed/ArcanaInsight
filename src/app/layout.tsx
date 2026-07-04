@@ -51,9 +51,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
   const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;

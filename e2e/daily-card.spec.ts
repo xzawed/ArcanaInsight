@@ -22,8 +22,11 @@ test.describe("DailyFortune — 오늘의 운세", () => {
   test("캐릭터 탭 전환 가능", async ({ page }) => {
     const section = page.locator("#daily-fortune");
     const tabs = section.getByRole("button");
-    if (await tabs.count() >= 2) {
+    const count = await tabs.count();
+    expect(count).toBeGreaterThanOrEqual(1);
+    if (count >= 2) {
       await tabs.nth(1).click();
+      await expect(tabs.nth(1)).toBeVisible();
       await page.waitForTimeout(500);
     }
   });

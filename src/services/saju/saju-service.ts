@@ -320,25 +320,25 @@ ${instruction}${horizonNote}
     const parsed = parseJsonSafe(aiResponse);
 
     if (parsed) {
-      const overallReading = cleanReadingText(String(parsed.overallReading || ""));
-      const advice = cleanReadingText(String(parsed.advice || ""));
+      const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
+      const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
       const result: ReadingResult = {
         overallReading,
-        topicReading: cleanReadingText(String(parsed.topicReading || "")),
+        topicReading: cleanReadingText(typeof parsed.topicReading === "string" ? parsed.topicReading : ""),
         advice,
       };
       // directAnswer 추출 — 자유질문/핵심질문에 대한 직답 (존재 시에만)
       if (parsed.directAnswer !== undefined) {
-        result.directAnswer = cleanReadingText(String(parsed.directAnswer || ""));
+        result.directAnswer = cleanReadingText(typeof parsed.directAnswer === "string" ? parsed.directAnswer : "");
       }
       // sajuSections 추출 (새 형식)
       if (parsed.sajuSections && typeof parsed.sajuSections === "object") {
         const s = parsed.sajuSections as Record<string, unknown>;
         result.sajuSections = {
-          structure: cleanReadingText(String(s.structure || "")),
-          elements: cleanReadingText(String(s.elements || "")),
-          fortune: cleanReadingText(String(s.fortune || "")),
-          guidance: cleanReadingText(String(s.guidance || "")),
+          structure: cleanReadingText(typeof s.structure === "string" ? s.structure : ""),
+          elements: cleanReadingText(typeof s.elements === "string" ? s.elements : ""),
+          fortune: cleanReadingText(typeof s.fortune === "string" ? s.fortune : ""),
+          guidance: cleanReadingText(typeof s.guidance === "string" ? s.guidance : ""),
         };
       }
       // 핵심 필드(overallReading 또는 advice) 빈 문자 = 부분 파싱

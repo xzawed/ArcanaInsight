@@ -11,7 +11,7 @@ interface ResultCardFaceProps {
   isReversed: boolean;
 }
 
-export function ResultCardFace({ card, isReversed }: ResultCardFaceProps) {
+export function ResultCardFace({ card, isReversed }: Readonly<ResultCardFaceProps>) {
   const { selectedSkinId } = useSkinStore();
   const { activeTheme } = useThemeStore();
   const { resolvedStyle } = useCardStyleStore();

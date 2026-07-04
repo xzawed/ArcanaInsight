@@ -12,7 +12,7 @@ interface FavoriteCharacterSelectorProps {
   currentCharacterName?: string | null;
 }
 
-export function FavoriteCharacterSelector({ currentCharacterId, currentCharacterName }: FavoriteCharacterSelectorProps) {
+export function FavoriteCharacterSelector({ currentCharacterId, currentCharacterName }: Readonly<FavoriteCharacterSelectorProps>) {
   const router = useRouter();
   const { t } = useT();
   const [open, setOpen] = useState(false);

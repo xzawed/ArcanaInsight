@@ -1,8 +1,7 @@
 import { create } from "zustand";
-import { SpreadType, ChatMessage } from "@/types/session";
+import { SpreadType, ChatMessage, Topic } from "@/types/session";
 import { SelectedCard, TarotCard } from "@/types/card";
 import { ReadingResult } from "@/types/service";
-import { Topic } from "@/types/session";
 import { UserInfo } from "@/types/user-info";
 import type { CharacterId } from "@/types/character";
 
@@ -79,8 +78,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   addChatMessage: (message) => set((state) => ({ chatMessages: [...state.chatMessages, message] })),
   appendToLastMessage: (content) => set((state) => {
     const messages = [...state.chatMessages];
-    const last = messages[messages.length - 1];
-    if (last && last.role === "character") {
+    const last = messages.at(-1);
+    if (last?.role === "character") {
       messages[messages.length - 1] = { ...last, content: last.content + content };
     }
     return { chatMessages: messages };

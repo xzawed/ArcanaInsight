@@ -28,8 +28,8 @@ const JASI: Sijin = { key: "ja", label: "자시", hanja: "子時" };
 
 export function timeToSijin(time: string | null | undefined): Sijin | null {
   if (!time || !/^\d{2}:\d{2}$/.test(time)) return null;
-  const hour = parseInt(time.split(":")[0], 10);
-  if (isNaN(hour) || hour < 0 || hour > 23) return null;
+  const hour = Number.parseInt(time.split(":")[0], 10);
+  if (Number.isNaN(hour) || hour < 0 || hour > 23) return null;
   if (hour === 23 || hour === 0) return JASI;
   const found = SIJIN_TABLE.find(s => hour >= s.startHour && hour < s.endHour);
   return found ? { key: found.key, label: found.label, hanja: found.hanja } : null;

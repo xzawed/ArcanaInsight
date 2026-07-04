@@ -13,6 +13,8 @@ export interface ReadingData {
   overall_reading?: string | null;
 }
 
+export type ReadingRelation = ReadingData | ReadingData[] | null;
+
 export interface SessionRow {
   id: string;
   service_type: string;
@@ -20,9 +22,9 @@ export interface SessionRow {
   status: string;
   created_at: string;
   character_id?: string | null;
-  readings: ReadingData | ReadingData[] | null;
-  saju_readings: ReadingData | ReadingData[] | null;
-  shinjeom_readings: ReadingData | ReadingData[] | null;
+  readings: ReadingRelation;
+  saju_readings: ReadingRelation;
+  shinjeom_readings: ReadingRelation;
 }
 
 export interface SessionCard {
@@ -81,7 +83,7 @@ export function getCharacterName(characterId?: string | null): string | null {
 }
 
 /** PostgREST 1:1 관계: 객체 또는 배열 모두 처리 */
-export function normalizeReading(readings: ReadingData | ReadingData[] | null | undefined): ReadingData | undefined {
+export function normalizeReading(readings: ReadingRelation | undefined): ReadingData | undefined {
   if (!readings) return undefined;
   if (Array.isArray(readings)) return readings[0];
   return readings;

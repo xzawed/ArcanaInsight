@@ -22,7 +22,7 @@ export function ReadingProgressIndicator({
   elapsedSec,
   isConnecting,
   primaryColor,
-}: ReadingProgressIndicatorProps): React.ReactElement {
+}: Readonly<ReadingProgressIndicatorProps>): React.ReactElement {
   const { t } = useT();
   const stageText = isConnecting
     ? t("tarot.session.progress.connecting")

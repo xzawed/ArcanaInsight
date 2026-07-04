@@ -65,12 +65,12 @@ export function useMouseParallax(enabled = true): ParallaxOffsets {
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    window.addEventListener("mousemove", onMove, { passive: true });
+    globalThis.addEventListener("mousemove", onMove, { passive: true });
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
       mountedRef.current = false;
-      window.removeEventListener("mousemove", onMove);
+      globalThis.removeEventListener("mousemove", onMove);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
   }, [enabled]);

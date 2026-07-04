@@ -32,15 +32,15 @@ function computeSajuReadingMaxTokens(timeRange: SajuTimeRange, includeMonthly: b
   return 48000;                              // this-week / this-month / this-year 기본
 }
 
-const VALID_TOPICS: Topic[] = [
+const VALID_TOPICS: ReadonlySet<Topic> = new Set([
   "saju-general", "saju-love-single", "saju-love-couple",
   "saju-career", "saju-health", "saju-personality",
   "saju-compatibility", "saju-auspicious-date",
-];
+]);
 
-const VALID_TIME_RANGES: SajuTimeRange[] = [
+const VALID_TIME_RANGES: ReadonlySet<SajuTimeRange> = new Set([
   "this-week", "this-month", "this-year", "next-year", "three-year", "five-year", "full-fortune",
-];
+]);
 
 /** timeRange + includeMonthly 기반 calculator options 결정 */
 function resolveCalcOptions(timeRange: SajuTimeRange, includeMonthly: boolean) {
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) return jsonError("Invalid request");
     const { sessionId, topic: rawTopic, timeRange: rawTimeRange, includeMonthly, characterId, freeQuestion, userInfo } = parsed.data;
 
-    if (!VALID_TOPICS.includes(rawTopic as Topic)) return jsonError("Invalid topic");
-    if (!VALID_TIME_RANGES.includes(rawTimeRange as SajuTimeRange)) return jsonError("Invalid timeRange");
+    if (!VALID_TOPICS.has(rawTopic as Topic)) return jsonError("Invalid topic");
+    if (!VALID_TIME_RANGES.has(rawTimeRange as SajuTimeRange)) return jsonError("Invalid timeRange");
     const topic = rawTopic as Topic;
     const timeRange = rawTimeRange as SajuTimeRange;
 

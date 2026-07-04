@@ -33,7 +33,7 @@ function getShareTitle(service: Service, locale: Locale): string {
 }
 
 function getShareUrl(service: Service, shareToken: string): string {
-  return `${window.location.origin}${SERVICE_PATH[service]}${shareToken}`;
+  return `${globalThis.location.origin}${SERVICE_PATH[service]}${shareToken}`;
 }
 
 interface ResultShareButtonProps {
@@ -42,7 +42,7 @@ interface ResultShareButtonProps {
   spreadName?: string;
 }
 
-export function ResultShareButton({ service, shareToken, spreadName }: ResultShareButtonProps) {
+export function ResultShareButton({ service, shareToken, spreadName }: Readonly<ResultShareButtonProps>) {
   const { t } = useT();
   const locale = useLocaleStore((s) => s.locale);
   const [copied, setCopied] = useState(false);

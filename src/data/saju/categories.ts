@@ -50,26 +50,36 @@ export const sajuAreaOptions: SajuAreaOption[] = [
 
 // ─── locale 헬퍼 ─────────────────────────────────────────────────────────────
 
-export function getSajuTimeLabel(opt: SajuTimeOption, locale: string): string {
+function pickLocalizedLabel(
+  opt: { label: string; labelEn?: string; labelJa?: string },
+  locale: string,
+): string {
   if (locale === "en" && opt.labelEn) return opt.labelEn;
   if (locale === "ja" && opt.labelJa) return opt.labelJa;
   return opt.label;
+}
+
+function pickLocalizedDesc(
+  opt: { desc: string; descEn?: string; descJa?: string },
+  locale: string,
+): string {
+  if (locale === "en" && opt.descEn) return opt.descEn;
+  if (locale === "ja" && opt.descJa) return opt.descJa;
+  return opt.desc;
+}
+
+export function getSajuTimeLabel(opt: SajuTimeOption, locale: string): string {
+  return pickLocalizedLabel(opt, locale);
 }
 
 export function getSajuTimeDesc(opt: SajuTimeOption, locale: string): string {
-  if (locale === "en" && opt.descEn) return opt.descEn;
-  if (locale === "ja" && opt.descJa) return opt.descJa;
-  return opt.desc;
+  return pickLocalizedDesc(opt, locale);
 }
 
 export function getSajuAreaLabel(opt: SajuAreaOption, locale: string): string {
-  if (locale === "en" && opt.labelEn) return opt.labelEn;
-  if (locale === "ja" && opt.labelJa) return opt.labelJa;
-  return opt.label;
+  return pickLocalizedLabel(opt, locale);
 }
 
 export function getSajuAreaDesc(opt: SajuAreaOption, locale: string): string {
-  if (locale === "en" && opt.descEn) return opt.descEn;
-  if (locale === "ja" && opt.descJa) return opt.descJa;
-  return opt.desc;
+  return pickLocalizedDesc(opt, locale);
 }

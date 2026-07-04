@@ -68,7 +68,7 @@ export function Header() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setIsDropdownOpen(false);
-    window.location.href = "/";
+    globalThis.location.href = "/";
   };
 
   // 유저 이니셜 (이메일 첫 글자 또는 이름 첫 글자)

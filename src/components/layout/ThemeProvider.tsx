@@ -5,7 +5,7 @@ import { useThemeStore, themes } from "@/hooks/useTheme";
 import { ThemeEffectEngine } from "@/components/effects/ThemeEffectEngine";
 
 /** CSS 변수를 :root에 동적 적용하고, 시간 경과 시 자동 갱신 */
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const { mode, activeTheme, setMode, refresh } = useThemeStore();
 
   // localStorage에서 저장된 모드 복원, 없으면 클라이언트 시간 기반 테마 보정 (SSR 초기값 "midnight" 덮어쓰기)

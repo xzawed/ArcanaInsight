@@ -3,8 +3,8 @@ import { majorArcana } from "@/data/cards/major-arcana";
 import { minorArcana } from "@/data/cards/minor-arcana";
 
 export class DeckManager {
-  private deck: TarotCard[];
-  private cardMap: Map<string, TarotCard>;
+  private readonly deck: TarotCard[];
+  private readonly cardMap: Map<string, TarotCard>;
 
   constructor() {
     this.deck = [...majorArcana, ...minorArcana];

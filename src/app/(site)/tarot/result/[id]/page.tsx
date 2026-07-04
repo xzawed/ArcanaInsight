@@ -15,6 +15,14 @@ import { getCardName } from "@/data/cards/locale-helpers";
 
 const deckManager = new DeckManager();
 
+const DATE_LOCALES: Record<string, string> = { ko: "ko-KR", ja: "ja-JP", en: "en-US" };
+
+function cardGridClassFor(count: number): string {
+  if (count <= 5) return "flex flex-wrap justify-center gap-4";
+  if (count <= 10) return "grid grid-cols-5 gap-2 justify-items-center";
+  return "grid grid-cols-6 gap-2 justify-items-center";
+}
+
 interface ReadingRow {
   id: string;
   session_id: string;
@@ -31,7 +39,7 @@ interface SessionRow {
   spread_type: string | null;
 }
 
-export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ResultPage({ params }: Readonly<{ params: Promise<{ id: string }> }>) {
   const { id } = await params;
   const locale = await getRequestLocale();
   const db = getAdminDb();
@@ -51,6 +59,9 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
 
+  const dateLocale = DATE_LOCALES[locale] ?? "en-US";
+  const cardGridClass = cardGridClassFor(interpretations.length);
+
   return (
     <ResultPageShell service="tarot">
         {/* 장식 - 떠다니는 카드 */}
@@ -60,7 +71,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-arcana-purple mb-2 drop-shadow-md">{t("tarot.result.title", locale)}</h1>
-          <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString(locale === "ko" ? "ko-KR" : locale === "ja" ? "ja-JP" : "en-US")}</p>
+          <p className="text-arcana-muted text-sm">{locale === "ko" ? spread?.nameKo : spread?.name} ・ {new Date(reading.created_at).toLocaleDateString(dateLocale)}</p>
         </div>
 
         {/* 질문 직답 — answer-first, 최상단 노출 */}
@@ -80,13 +91,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <div className="w-full md:w-[50%] space-y-4">
             <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-6">
               <h2 className="font-serif font-bold text-lg text-arcana-gold mb-4">{locale === "ko" ? spread?.nameKo : spread?.name}</h2>
-              <div className={
-                interpretations.length <= 5
-                  ? "flex flex-wrap justify-center gap-4"
-                  : interpretations.length <= 10
-                    ? "grid grid-cols-5 gap-2 justify-items-center"
-                    : "grid grid-cols-6 gap-2 justify-items-center"
-              }>
+              <div className={cardGridClass}>
                 {interpretations.map((interp) => {
                   const card = deckManager.getCardById(interp.cardId);
                   const pos = spread?.positions[interp.position];

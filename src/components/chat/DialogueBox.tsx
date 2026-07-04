@@ -15,7 +15,7 @@ interface DialogueBoxProps {
 export const DialogueBox = React.memo(function DialogueBox({ messages, characterName, isTyping = false, className = "" }: DialogueBoxProps) {
   const { t } = useT();
   const displayName = characterName ?? t("chat.default-character-name");
-  const lastMessage = messages.filter((m) => m.role === "character").at(-1);
+  const lastMessage = messages.findLast((m) => m.role === "character");
   const [displayedText, setDisplayedText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const prevContentRef = useRef("");
@@ -41,6 +41,51 @@ export const DialogueBox = React.memo(function DialogueBox({ messages, character
     return () => clearInterval(interval);
   }, [lastMessage]);
 
+  let dialogueContent: React.ReactNode;
+  if (isTyping) {
+    dialogueContent = (
+      <motion.div
+        key="typing"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center gap-1.5 py-2"
+      >
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            className="w-2 h-2 rounded-full bg-arcana-purple"
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+          />
+        ))}
+      </motion.div>
+    );
+  } else if (lastMessage) {
+    dialogueContent = (
+      <motion.p
+        key={lastMessage.id}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap font-sans"
+      >
+        {displayedText}
+        {!isComplete && (
+          <motion.span
+            animate={{ opacity: [1, 0] }}
+            transition={{ duration: 0.5, repeat: Infinity }}
+            className="text-arcana-purple font-bold"
+          >
+            |
+          </motion.span>
+        )}
+      </motion.p>
+    );
+  } else {
+    dialogueContent = (
+      <p className="text-arcana-muted text-sm italic">{t("chat.empty-prompt")}</p>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
       {/* 메인 배경 — 투명도 강화 */}
@@ -58,43 +103,7 @@ export const DialogueBox = React.memo(function DialogueBox({ messages, character
         </div>
         <div className="min-h-[2.5rem] md:min-h-[4rem]">
           <AnimatePresence mode="wait">
-            {isTyping ? (
-              <motion.div
-                key="typing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-1.5 py-2"
-              >
-                {[0, 1, 2].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="w-2 h-2 rounded-full bg-arcana-purple"
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                  />
-                ))}
-              </motion.div>
-            ) : lastMessage ? (
-              <motion.p
-                key={lastMessage.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-arcana-text text-sm md:text-base leading-relaxed whitespace-pre-wrap font-sans"
-              >
-                {displayedText}
-                {!isComplete && (
-                  <motion.span
-                    animate={{ opacity: [1, 0] }}
-                    transition={{ duration: 0.5, repeat: Infinity }}
-                    className="text-arcana-purple font-bold"
-                  >
-                    |
-                  </motion.span>
-                )}
-              </motion.p>
-            ) : (
-              <p className="text-arcana-muted text-sm italic">{t("chat.empty-prompt")}</p>
-            )}
+            {dialogueContent}
           </AnimatePresence>
         </div>
         {isComplete && lastMessage && (

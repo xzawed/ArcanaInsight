@@ -13,7 +13,8 @@ test.describe("API 에러 처리 — mock 응답", () => {
 
     await page.goto("/tarot/session", { waitUntil: "domcontentloaded" });
     // 세션 페이지가 로드되면 에러 메시지가 표시되거나 리디렉트
-    // (세션 데이터 없이 접근하면 /tarot로 리디렉트됨)
+    // (세션 데이터 없이 접근하면 /tarot로 리디렉트됨) — 타로 라우트에 안착했는지 확인
+    await expect(page).toHaveURL(/\/tarot/);
   });
 
   test("사주 리딩 API 500 → 에러 메시지 표시", async ({ page }) => {
@@ -26,6 +27,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
     });
 
     await page.goto("/saju/session", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/saju/);
   });
 
   test("신점 메시지 API 400 → 에러 처리", async ({ page }) => {
@@ -38,6 +40,7 @@ test.describe("API 에러 처리 — mock 응답", () => {
     });
 
     await page.goto("/shinjeom/session", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/shinjeom/);
   });
 
   test("일일 운세 API 타임아웃 → 에러 처리", async ({ page }) => {

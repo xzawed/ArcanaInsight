@@ -32,7 +32,7 @@ export const LocaleSchema = z.object({
 
 // 익명 세션 claim 스키마 — 로그인 시 클라이언트 보관 익명 sessionId 일괄 귀속
 export const ClaimSessionsSchema = z.object({
-  sessionIds: z.array(z.string().uuid()).min(1).max(100),
+  sessionIds: z.array(z.uuid()).min(1).max(100),
 });
 
 // 세션 생성 스키마
@@ -90,7 +90,7 @@ export const TarotReadingSchema = z.object({
   data.cards.forEach((card, index) => {
     if (cardIds.has(card.cardId)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: `duplicate cardId '${card.cardId}'`,
         path: ["cards", index, "cardId"],
       });
@@ -99,7 +99,7 @@ export const TarotReadingSchema = z.object({
 
     if (positions.has(card.position)) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: `duplicate position '${card.position}'`,
         path: ["cards", index, "position"],
       });
@@ -112,7 +112,7 @@ export const TarotReadingSchema = z.object({
   const expected = SPREAD_REQUIRED_CARDS[data.spreadType];
   if (expected !== undefined && data.cards.length !== expected) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: `cards.length must be ${expected} for spread '${data.spreadType}', got ${data.cards.length}`,
       path: ["cards"],
     });

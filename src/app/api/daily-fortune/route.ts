@@ -25,7 +25,7 @@ const AREA_LABELS: Record<Area, string> = {
 function hashDateSeed(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    const c = str.charCodeAt(i);
+    const c = str.codePointAt(i) ?? 0;
     hash = ((hash << 5) - hash) + c;
     hash |= 0;
   }
@@ -33,6 +33,12 @@ function hashDateSeed(str: string): number {
 }
 
 type CachedRow = { area: Area; card_id: string; is_reversed: boolean; interpretation: string; keywords: string[] };
+
+function resolveErrorMessage(errMsg: string, locale: Locale): string {
+  if (errMsg.includes("API_KEY") || errMsg.includes("auth")) return translate("api.ai-config-error", locale);
+  if (errMsg.includes("rate limit") || errMsg.includes("429")) return translate("api.rate-limit-error", locale);
+  return translate("api.daily-fortune-error", locale);
+}
 
 export async function POST(request: NextRequest) {
   let locale: Locale = DEFAULT_LOCALE;
@@ -105,10 +111,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
     console.error("Daily fortune error:", errMsg);
-    const userMessage =
-      errMsg.includes("API_KEY") || errMsg.includes("auth") ? translate("api.ai-config-error", locale)
-      : errMsg.includes("rate limit") || errMsg.includes("429") ? translate("api.rate-limit-error", locale)
-      : translate("api.daily-fortune-error", locale);
+    const userMessage = resolveErrorMessage(errMsg, locale);
     return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }

@@ -7,8 +7,6 @@
  * 데이터 인라인 패턴 — `src/data/characters/locale-helpers.ts` 동일 구조 (캐릭터 i18n 패턴 재사용).
  * 사전 namespace 폭발 회피 + 토픽 데이터·라벨 응집도 향상.
  */
-import type { Topic } from "@/types/session";
-
 interface TopicMeta {
   /** UI 카드 표시명 (기본 ko) */
   labelKo: string;
@@ -99,20 +97,20 @@ function pickLocaleText(meta: TopicMeta, locale: string, field: "label" | "desc"
 }
 
 /** 토픽 라벨 — locale에 맞춰 반환. 미정의 토픽은 입력값 그대로 반환. */
-export function getTopicLabel(topic: Topic | string, locale: string): string {
+export function getTopicLabel(topic: string, locale: string): string {
   const meta = TOPIC_META[topic];
   if (!meta) return String(topic);
   return pickLocaleText(meta, locale, "label") ?? meta.labelKo;
 }
 
 /** 토픽 설명 — 타로 토픽 카드용. 미정의 시 빈 문자열. */
-export function getTopicDesc(topic: Topic | string, locale: string): string {
+export function getTopicDesc(topic: string, locale: string): string {
   const meta = TOPIC_META[topic];
   if (!meta) return "";
   return pickLocaleText(meta, locale, "desc") ?? "";
 }
 
 /** 토픽 아이콘 ID — tarot/page.tsx 토픽 카드용. */
-export function getTopicIconId(topic: Topic | string): string | undefined {
+export function getTopicIconId(topic: string): string | undefined {
   return TOPIC_META[topic]?.iconId;
 }

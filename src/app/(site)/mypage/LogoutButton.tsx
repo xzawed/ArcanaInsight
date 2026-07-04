@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function LogoutButton({ useNextAuth }: { useNextAuth?: boolean }) {
+export function LogoutButton({ useNextAuth }: Readonly<{ useNextAuth?: boolean }>) {
   const router = useRouter();
 
   const handleLogout = async () => {

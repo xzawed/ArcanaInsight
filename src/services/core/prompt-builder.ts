@@ -117,11 +117,12 @@ export function buildReadingPrompt(topic: Topic, selectedCards: SelectedCard[], 
   기본 의미: ${meanings.meaning}`;
   }).join("\n\n");
 
-  const topicContext = topic === "love-single"
-    ? "\n\n상담 맥락: 현재 솔로(싱글) 상태입니다. 새로운 만남의 가능성, 자기 자신에 대한 이해, 이상적인 파트너상, 연애 준비도 등을 중심으로 해석해주세요."
-    : topic === "love-couple"
-    ? "\n\n상담 맥락: 현재 연인/파트너가 있는 커플 상태입니다. 관계의 현재 상태, 소통 방식, 갈등 해결, 관계 발전 방향, 신뢰와 친밀감 등을 중심으로 해석해주세요."
-    : "";
+  let topicContext = "";
+  if (topic === "love-single") {
+    topicContext = "\n\n상담 맥락: 현재 솔로(싱글) 상태입니다. 새로운 만남의 가능성, 자기 자신에 대한 이해, 이상적인 파트너상, 연애 준비도 등을 중심으로 해석해주세요.";
+  } else if (topic === "love-couple") {
+    topicContext = "\n\n상담 맥락: 현재 연인/파트너가 있는 커플 상태입니다. 관계의 현재 상태, 소통 방식, 갈등 해결, 관계 발전 방향, 신뢰와 친밀감 등을 중심으로 해석해주세요.";
+  }
 
   // 카드 수에 관계없이 동일한 깊이의 해석 — 카드 1장이든 12장이든 충분한 분량으로 작성한다
   const depthGuide = `해석 품질 지침 (${cardCount}장 스프레드, 프리미엄 기준):
@@ -201,13 +202,13 @@ export function buildUserInfoPrompt(
   const gender = sanitizeField(genderMap[userInfo.gender] || userInfo.gender, 10);
 
   let birthTimeStr: string;
-  if (!userInfo.birthTime) {
-    birthTimeStr = "알 수 없음";
-  } else {
+  if (userInfo.birthTime) {
     const sijin = timeToSijin(userInfo.birthTime);
     birthTimeStr = sijin
       ? `${userInfo.birthTime} (${sijin.label}, ${sijin.hanja})`
       : sanitizeField(userInfo.birthTime, 20);
+  } else {
+    birthTimeStr = "알 수 없음";
   }
 
   const mbtiLine = userInfo.mbti ? `\n- MBTI: ${sanitizeField(userInfo.mbti, 10)}` : "";

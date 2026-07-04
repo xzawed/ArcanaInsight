@@ -132,11 +132,14 @@ export default async function MyPage() {
                 : overallText || null;
               const shareToken = reading?.share_token;
               const serviceLabel = getServiceLabel(session.service_type, locale);
-              const resultPath = session.service_type === "saju"
-                ? `/saju/result/${shareToken}`
-                : session.service_type === "shinjeom"
-                ? `/shinjeom/result/${shareToken}`
-                : `/tarot/result/${shareToken}`;
+              let resultPath: string;
+              if (session.service_type === "saju") {
+                resultPath = `/saju/result/${shareToken}`;
+              } else if (session.service_type === "shinjeom") {
+                resultPath = `/shinjeom/result/${shareToken}`;
+              } else {
+                resultPath = `/tarot/result/${shareToken}`;
+              }
 
               const content = (
                 <>

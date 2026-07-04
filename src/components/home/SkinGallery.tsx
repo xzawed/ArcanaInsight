@@ -5,15 +5,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { SkinSelector } from "@/components/skin/SkinSelector";
 import { StyleSelector } from "@/components/skin/StyleSelector";
-import { cardSkins } from "@/data/skins";
-import { cardStyles } from "@/data/cardStyles";
-import type { CardStyleId } from "@/data/cardStyles";
+import { cardSkins, getSkinName } from "@/data/skins";
+import { cardStyles, getStyleName, type CardStyleId } from "@/data/cardStyles";
 import { useSkinStore } from "@/hooks/useSkinStore";
 import { useCardStyleStore } from "@/hooks/useCardStyleStore";
 import { useThemeStore } from "@/hooks/useTheme";
 import { useT } from "@/i18n/useT";
-import { getSkinName } from "@/data/skins";
-import { getStyleName } from "@/data/cardStyles";
 
 const TOAST_VISIBILITY_MS = 2000
 

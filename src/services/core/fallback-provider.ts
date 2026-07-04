@@ -23,7 +23,7 @@ export function __resetFallbackCircuitForTests(): void {
 }
 
 export class FallbackProvider implements AIProvider {
-  private grok: GrokProvider;
+  private readonly grok: GrokProvider;
   private claude: ClaudeProvider | null = null;
   private static readonly COOLDOWN_MS = getAiFallbackCooldownMs();
   private static readonly AUTH_COOLDOWN_MS = getAiAuthCooldownMs();
@@ -33,7 +33,7 @@ export class FallbackProvider implements AIProvider {
   }
 
   private getClaude(): ClaudeProvider {
-    if (!this.claude) this.claude = new ClaudeProvider();
+    this.claude ??= new ClaudeProvider();
     return this.claude;
   }
 
@@ -42,12 +42,18 @@ export class FallbackProvider implements AIProvider {
   }
 
   private handleGrokError(e: unknown): void {
-    const cooldown = e instanceof AuthError ? FallbackProvider.AUTH_COOLDOWN_MS
-      : e instanceof RateLimitError ? e.retryAfterMs
-      : FallbackProvider.COOLDOWN_MS;
-    const reason = e instanceof AuthError ? "인증 실패 (401/403)"
-      : e instanceof RateLimitError ? "Rate Limit (429)"
-      : "서버 에러/네트워크";
+    let cooldown: number;
+    let reason: string;
+    if (e instanceof AuthError) {
+      cooldown = FallbackProvider.AUTH_COOLDOWN_MS;
+      reason = "인증 실패 (401/403)";
+    } else if (e instanceof RateLimitError) {
+      cooldown = e.retryAfterMs;
+      reason = "Rate Limit (429)";
+    } else {
+      cooldown = FallbackProvider.COOLDOWN_MS;
+      reason = "서버 에러/네트워크";
+    }
     grokCircuit.markDown(cooldown, reason);
   }
 

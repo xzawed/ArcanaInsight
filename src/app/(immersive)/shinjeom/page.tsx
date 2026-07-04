@@ -31,6 +31,7 @@ const TOPIC_CONFIGS: { id: Topic; iconId: string }[] = [
 ];
 
 type PageStep = "character-select" | "topic-select" | "user-info";
+type GenderFilter = "all" | "female" | "male";
 
 const topicKey = (id: Topic): string => id.replace("shinjeom-", "");
 
@@ -38,13 +39,13 @@ const topicKey = (id: Topic): string => id.replace("shinjeom-", "");
 
 function CharacterSelectStep({ characters, genderFilter, setGenderFilter, selectedCharacter, onSelect }: Readonly<{
   characters: CharacterConfig[];
-  genderFilter: "all" | "female" | "male";
-  setGenderFilter: (f: "all" | "female" | "male") => void;
+  genderFilter: GenderFilter;
+  setGenderFilter: (f: GenderFilter) => void;
   selectedCharacter: CharacterConfig | null;
   onSelect: (c: CharacterConfig) => void;
 }>) {
   const { t } = useT();
-  const genderLabels: Record<"all" | "female" | "male", string> = {
+  const genderLabels: Record<GenderFilter, string> = {
     all: t("settings.gender.all"),
     female: t("settings.gender.female"),
     male: t("settings.gender.male"),

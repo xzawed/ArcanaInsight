@@ -99,12 +99,12 @@ function ImagePanel({
   subtitle,
   src,
   highlighted = false,
-}: {
+}: Readonly<{
   title: string;
   subtitle: string;
   src: string;
   highlighted?: boolean;
-}) {
+}>) {
   return (
     <div
       className={`flex min-h-[520px] flex-col overflow-hidden rounded-lg border ${
