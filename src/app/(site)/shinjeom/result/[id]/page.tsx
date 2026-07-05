@@ -4,6 +4,7 @@ import { cleanReadingText } from "@/services/core/text-cleaner";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { ReadingText } from "@/components/common/ReadingText";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultPageShell } from "@/components/common/ResultPageShell";
 
@@ -14,6 +15,7 @@ interface ShinjeomReadingRow {
   overall_reading: string;
   topic_reading: string;
   direct_answer: string | null;
+  shinjeom_sections: { spiritual?: string; current?: string; obstacles?: string; future?: string } | null;
   advice: string;
   created_at: string;
 }
@@ -30,6 +32,8 @@ export default async function ShinjeomResultPage({ params }: Readonly<{ params: 
   const topicReading = cleanReadingText(reading.topic_reading || "");
   const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
+  const s = reading.shinjeom_sections;
+  const hasShinjeomSections = Boolean(s && (s.spiritual || s.current || s.obstacles || s.future));
 
   let dateLocale = "en-US";
   if (locale === "ko") dateLocale = "ko-KR";
@@ -50,6 +54,15 @@ export default async function ShinjeomResultPage({ params }: Readonly<{ params: 
                 <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("shinjeom.result.direct-answer", locale)}</h2>
               </div>
               <ReadingText text={directAnswer} />
+            </div>
+          )}
+
+          {hasShinjeomSections && s && (
+            <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-6 space-y-1">
+              <ReadingSectionBlock icon="🌙" label={t("shinjeom.section.spiritual", locale)} content={s.spiritual ?? ""} />
+              <ReadingSectionBlock icon="🔍" label={t("shinjeom.section.current", locale)} content={s.current ?? ""} />
+              <ReadingSectionBlock icon="⚠" label={t("shinjeom.section.obstacles", locale)} content={s.obstacles ?? ""} />
+              <ReadingSectionBlock icon="🌟" label={t("shinjeom.section.future", locale)} content={s.future ?? ""} />
             </div>
           )}
 

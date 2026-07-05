@@ -11,7 +11,7 @@ import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer } from "@/lib/db/reading-saver";
+import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -183,8 +183,9 @@ export async function POST(request: NextRequest) {
             };
             try {
               await saveSajuReading(db, sessionId, sajuReadingData, locale);
-              // directAnswer는 별도 best-effort UPDATE (마이그 023 미적용 환경에서도 본 저장 무영향)
+              // directAnswer·섹션은 별도 best-effort UPDATE (마이그 023/024 미적용 환경에서도 본 저장 무영향)
               await persistDirectAnswer(db, "saju", sessionId, result.directAnswer);
+              await persistReadingSections(db, "saju", sessionId, result.sajuSections);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
             } catch (e) {
               logReadingSaveFailure("saju", sessionId, e);

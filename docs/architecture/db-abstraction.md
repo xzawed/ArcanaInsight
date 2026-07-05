@@ -76,6 +76,7 @@ src/lib/db/
 | `021_harden_anon_insert_rls.sql` | 익명 INSERT over-grant 하드닝 — `FOR INSERT WITH CHECK (true)` 정책 7종 제거 (sessions·session_cards·readings·saju_readings·daily_cards·shinjeom_messages·shinjeom_readings). 모든 쓰기는 getAdminDb(service_role)라 무영향, anon 직접 삽입만 차단 (020 INSERT 후속) |
 | `022_failed_readings_dlq.sql` | 리딩 저장 dead-letter 큐 — `failed_readings` 테이블 신설(영구 저장 실패분 payload 영속화·재처리). service_role 전용, anon 정책 없음(021과 일관). ⚠️ 운영 DB 미적용 |
 | `023_direct_answer.sql` | 질문 직답 영속 — `readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''` 추가(재방문·공유 결과 노출). 앱은 `persistDirectAnswer` **best-effort UPDATE**로 기록하므로 컬럼 미적용 환경에서도 본 리딩 insert 무영향(컬럼 없으면 UPDATE만 조용히 실패·로깅). ✅ 운영 DB 적용 완료(2026-07-04) |
+| `024_reading_sections.sql` | 사주·신점 섹션 영속 — `saju_readings.saju_sections`·`shinjeom_readings.shinjeom_sections` `JSONB DEFAULT '{}'` 추가(재방문·공유에 4-섹션 프리미엄 리딩 노출). `saju_readings.elements`(오행 jsonb)와 이름 충돌 없음. `persistReadingSections` **best-effort UPDATE**(023과 동일 관용 패턴)로 기록. ⚠️ 운영 DB 적용 필요 |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
