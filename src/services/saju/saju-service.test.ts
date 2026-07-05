@@ -266,6 +266,12 @@ describe("SajuService", () => {
       );
       expect(prompt).not.toContain("질문의 시간 지평");
     });
+
+    it("분량 기준에 directAnswer 항상 채움 지시가 포함된다 (개방형 질문 누락 방지)", () => {
+      const prompt = service.buildSajuPrompt("saju-general", "this-year", makeSajuResult());
+      expect(prompt).toContain("directAnswer");
+      expect(prompt).toContain("비워 두지 않습니다");
+    });
   });
 
   describe("buildSajuPrompt — birthTimeNote & mbtiNote", () => {
