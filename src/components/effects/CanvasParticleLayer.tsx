@@ -114,9 +114,9 @@ export function CanvasParticleLayer({ density = "medium", className = "" }: Canv
   if (shouldReduceMotion) return null;
 
   return (
+    // 장식용 파티클 캔버스 — 내용/이벤트 없는 빈 캔버스라 스크린리더가 무시(role·aria-hidden 불필요)
     <canvas
       ref={canvasRef}
-      role="presentation"
       className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
     />
   );

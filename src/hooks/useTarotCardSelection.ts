@@ -201,8 +201,8 @@ export function useTarotCardSelection() {
           content: isLast
             ? t("tarot.session.msg.confirm-final").replace("{n}", String(required))
             : t("tarot.session.msg.confirm-card")
-                .replaceAll(/\{current\}/g, String(currentCount))
-                .replaceAll(/\{total\}/g, String(required)),
+                .replaceAll("{current}", String(currentCount))
+                .replaceAll("{total}", String(required)),
           mood: "mystical", timestamp: new Date(),
         });
       }, 500);
