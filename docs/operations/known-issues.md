@@ -32,12 +32,12 @@
 | ~~E2E "Target closed" 크래시 (DC·MA·iOS)~~ | `playwright.config.ts`, `public/images/characters/*` | **근본원인 규명·수정 (2026-07-04, #462)** — 만성 "Target page/context/browser has been closed"(Weekly QA #461)는 테스트 버그가 아니라 **호스트 OOM**: `workers:2`+`fullyParallel`이 브라우저 2개 + `pnpm start` Next 서버 + cold-cache sharp 이미지 최적화(원본 2816×1536 84장 → 16.5MiB 비트맵 디코드)를 한 2코어/7GB ubuntu 러너에 공존 → OOM-killer가 브라우저 프로세스 kill. **chromium·webkit 양쪽 재현 = 엔진 무관** ∴ `--disable-dev-shm-usage`는 no-op·반증(Playwright 기본 적용·bare VM shm는 GB급·webkit 무시). 4-각도 진단 워크플로우로 확정. **수정: CI `workers: 2→1`**(chromium DC·MA 해소, #462). **webkit(iOS)은 workers:1으로도 무거운 홈 이미지 테스트에서 크래시**(webkit 메모리-취약) → `cross-platform:60`(홈 이미지 로드 검사)을 **Desktop Chrome 전용 스코프**(깨진 이미지는 엔진 무관) + `daily-card` webkit `_rsc` 프리페치 benign 에러 필터(PR #464, 이슈 #463). #465는 비로그인 `GET /api/profile/favorite-character`를 401→200(`{characterId:null}`)로 바꿔 몰입형 진입 콘솔 401 제거(POST는 401 유지). 부수 perf: 테마 아이콘 `unoptimized` 제거(653KB→webp). ⚠️ 캐릭터 이미지 다운스케일은 **재검토 후 보류** — `nukki-enhanced` 2816×1536은 오독이 아니라 **고DPI 큰 표시(캐릭터 상세 모바일 100vw·세션)를 위한 의도된 2x 보정본**(docs/conventions/image-assets.md). 1408로 낮추면 고DPI 표시 품질 저하 → 균일 품질 요구와 충돌. CI 메모리는 workers:1로 해소되므로 에셋 변경 불필요. | ✅ 완료 (에셋 변경 없이 config로 해소) | Claude |
 | SonarCloud CRITICAL Cognitive Complexity | — | **0건 해소 완료** (2026-05-01). Quality Gate PASSED. 재발 시 아래 섹션 참고. | — |
 
-### SonarCloud CRITICAL 이슈 현황 (2026-05-01 기준)
+### SonarCloud 이슈 현황 (2026-07-05 기준)
 
-Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | CRITICAL: **0건**
+Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | **Open code smell: 0건**
 
-**2026-05-01 멀티 에이전트 정리 세션에서 12건 전부 해소 완료.**  
-해소 방식: 각 함수에서 로직을 명명된 헬퍼 함수로 추출 (파일 내부, export 없음).
+- **2026-05-01**: CRITICAL Cognitive Complexity 12건 해소(각 함수 로직을 명명 헬퍼로 추출).
+- **2026-07-05 (PR #472·#473)**: SonarLint 연결모드 누적 백로그 **240건 → 0**. 파일별 병렬 워크플로로 **203건 수정**(행동 보존 — Readonly props·`replaceAll`·`Number.parseInt`·`.at`·`globalThis`·인지복잡도 헬퍼 추출 등), 나머지 **38건은 SonarCloud에서 Accept(Won't Fix) 처리**(프롬프트 `\n` 이스케이프·`hash |= 0` 래핑·정규식 백트래킹·`force-click`·사유 명시 조건부 `test.skip` 등 — 고치면 동작이 바뀌는 정당 skip). CI SonarCloud Quality Gate는 신규 코드만 검사하므로 백로그와 무관하게 항상 PASSED였음.
 
 ### 파기 확정 항목 (재제안 금지)
 

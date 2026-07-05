@@ -84,6 +84,17 @@ return new Response(
 
 클라이언트는 `fetchSSEStream()` 훅으로 소비한다. 세션 페이지 하드 타임아웃: **240,000ms (240초)**.
 
+## 리딩 저장 패턴 (best-effort 분리 UPDATE)
+
+`done` 이벤트로 결과를 먼저 전송(가용성)한 뒤 DB에 저장한다. 본 리딩과 부가 필드를 **분리**해 배포 순서 하자를 없앤다:
+
+1. 본 리딩 insert: `saveTarotReading` / `saveSajuReading` / `saveShinjeomFinalReading` (`reading-saver.ts`, 3회 retry)
+2. `directAnswer`: `persistDirectAnswer(db, service, sessionId, result.directAnswer)` — 마이그 023 `direct_answer` 컬럼에 **별도 best-effort UPDATE**
+3. 섹션(사주·신점): `persistReadingSections(db, service, sessionId, result.sajuSections|shinjeomSections)` — 마이그 024 `saju_sections`/`shinjeom_sections` JSONB에 별도 UPDATE
+4. 저장 실패 시 `recordFailedReading`(dead-letter, 마이그 022)로 payload 영속화 → `POST /api/internal/reading-dlq/retry`가 재처리
+
+> best-effort UPDATE(2·3)는 컬럼 미적용 환경에서도 조용히 실패·로깅만 하고 본 리딩 insert(1)를 깨지 않는다. `freeQuestion`이 있는데 `directAnswer`가 비면 route가 관측 경고를 남긴다.
+
 ## 테스트 위치
 
 API 라우트 테스트는 반드시 `src/__tests__/api/`에 배치한다. (`vitest.config.ts`의 `exclude: ["src/app/**"]` 때문에 `src/app/api/` 하위 `*.test.ts`는 수집되지 않는다.)

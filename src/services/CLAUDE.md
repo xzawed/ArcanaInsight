@@ -57,7 +57,7 @@ interface DivinationService {
 
 ### max_tokens 정책 (3-섹션 프리미엄 리딩 기준)
 
-- **타로**: `computeReadingMaxTokens(cardCount)` — `min(12000 + cardCount × 7500 + 15000, 60000)`. 3-섹션(symbolism/situation/action) 기준 3배 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
+- **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 3-섹션(symbolism/situation/action) + directAnswer 기준 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
 - **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap. sajuSections(structure/elements/fortune/guidance) 4-섹션 대응.
 - **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`. shinjeomSections(spiritual/current/obstacles/future) 4-섹션 대응.
 - **신점 중간 대화**: `SHINJEOM_TOKENS_CHAT = 6,000`.
