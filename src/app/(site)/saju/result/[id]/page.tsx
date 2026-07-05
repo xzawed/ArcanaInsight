@@ -5,6 +5,7 @@ import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
 import { SajuResultClient } from "./SajuResultClient";
 import { ReadingText } from "@/components/common/ReadingText";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultPageShell } from "@/components/common/ResultPageShell";
 import type { SajuResult } from "@/services/saju/saju-types";
@@ -41,6 +42,7 @@ export default async function SajuResultPage({ params }: Readonly<{ params: Prom
     overall_reading: string;
     topic_reading: string;
     direct_answer: string | null;
+    saju_sections: { structure?: string; elements?: string; fortune?: string; guidance?: string } | null;
     advice: string;
     created_at: string;
   }
@@ -56,6 +58,8 @@ export default async function SajuResultPage({ params }: Readonly<{ params: Prom
   const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
   const birthYear = new Date(reading.birth_date).getFullYear();
+  const s = reading.saju_sections;
+  const hasSajuSections = Boolean(s && (s.structure || s.elements || s.fortune || s.guidance));
 
   let dateLocale = "en-US";
   if (locale === "ko") dateLocale = "ko-KR";
@@ -92,6 +96,15 @@ export default async function SajuResultPage({ params }: Readonly<{ params: Prom
                 <h2 className="text-arcana-gold font-serif font-bold text-base md:text-lg">{t("saju.result.direct-answer", locale)}</h2>
               </div>
               <ReadingText text={directAnswer} />
+            </div>
+          )}
+
+          {hasSajuSections && s && (
+            <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-6 space-y-1">
+              <ReadingSectionBlock icon="🏛" label={t("saju.section.structure", locale)} content={s.structure ?? ""} />
+              <ReadingSectionBlock icon="⚡" label={t("saju.section.elements", locale)} content={s.elements ?? ""} />
+              <ReadingSectionBlock icon="🌊" label={t("saju.section.fortune", locale)} content={s.fortune ?? ""} />
+              <ReadingSectionBlock icon="🧭" label={t("saju.section.guidance", locale)} content={s.guidance ?? ""} />
             </div>
           )}
 

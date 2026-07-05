@@ -1,4 +1,5 @@
 import type { DbClient } from "./types";
+import type { SajuSections, ShinjeomSections } from "@/types/service";
 import { isLocale, DEFAULT_LOCALE } from "@/i18n/config";
 
 /** 016 마이그레이션 CHECK 제약(locale IN ('ko','en','ja'))과 동기화 — 빈 문자열·잘못된 값 차단 */
@@ -147,6 +148,32 @@ export async function persistDirectAnswer(
   if (!directAnswer?.trim()) return;
   try {
     await db.update(READING_TABLE[service], { session_id: sessionId }, { direct_answer: directAnswer });
+  } catch (e) {
+    logReadingSaveFailure(service, sessionId, e);
+  }
+}
+
+/** 서비스 → 섹션 JSONB 컬럼 매핑 (타로는 섹션 없음 — card_interpretation으로 별도 저장) */
+const SECTIONS_COLUMN: Record<"saju" | "shinjeom", string> = {
+  saju: "saju_sections",
+  shinjeom: "shinjeom_sections",
+};
+
+/**
+ * 사주·신점 섹션(sajuSections/shinjeomSections)을 best-effort로 별도 UPDATE 한다.
+ * persistDirectAnswer와 동일한 관용 패턴 — 마이그레이션 024(saju_sections/shinjeom_sections 컬럼) 미적용
+ * 환경에서도 본 리딩 insert가 깨지지 않게 한다(컬럼 없으면 이 update만 조용히 실패·로깅).
+ * 본 리딩 insert가 완료된 뒤 호출한다.
+ */
+export async function persistReadingSections(
+  db: DbClient,
+  service: "saju" | "shinjeom",
+  sessionId: string,
+  sections: SajuSections | ShinjeomSections | undefined,
+): Promise<void> {
+  if (!sections || Object.keys(sections).length === 0) return;
+  try {
+    await db.update(READING_TABLE[service], { session_id: sessionId }, { [SECTIONS_COLUMN[service]]: sections });
   } catch (e) {
     logReadingSaveFailure(service, sessionId, e);
   }
