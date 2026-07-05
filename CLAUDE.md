@@ -85,7 +85,7 @@ supabase/migrations/ # Supabase SQL migrations
 
 ## 핵심 아키텍처
 
-- AI 신뢰성: `src/services/core/`의 `FallbackProvider`가 Grok 우선 호출 후 Claude로 fallback. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
+- AI 신뢰성: `src/services/core/`의 `FallbackProvider`가 Grok 우선 호출 후 Claude로 fallback. 리딩 결과 JSON은 `parseJsonSafe`(트레일링 콤마 내성)·`promoteNestedFields`(섹션 내부 flat 필드 승격)·`streamReadingWithParseRetry`(parseError 시 1회 재생성)로 형식 위반 내성을 갖는다(PR #480 — 사주·신점 간헐적 무결과 근본 수정, 실측 재현 기반). 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - DB/Auth 추상화: `DB_PROVIDER=supabase|postgres`에 따라 DB, Auth, Storage 구현을 런타임 분기. 상세는 [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md), [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md).
 - 익명 세션 claim (PR: 리딩 이력 미노출 수정): 게스트/만료 세션 상태에서 만든 세션은 `user_id=NULL`로 저장되어 로그인 mypage 이력(`findMany("sessions",{user_id})`)에서 누락된다. `rememberGuestSession`(`lib/guest-sessions.ts`)이 생성 시 sessionId를 localStorage에 보관 → `SessionClaimer`가 로그인 감지 시 `POST /api/sessions/claim` → `db.claimSessions`가 `UPDATE sessions SET user_id WHERE id IN(...) AND user_id IS NULL`로 귀속. 설계 정본 [`docs/superpowers/specs/2026-06-23-anon-session-claim-design.md`](docs/superpowers/specs/2026-06-23-anon-session-claim-design.md).
 - API 보안: Rate Limit -> Zod `safeParse` -> Auth -> 소유권 검증 순서. 새 API는 [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)를 먼저 확인.
