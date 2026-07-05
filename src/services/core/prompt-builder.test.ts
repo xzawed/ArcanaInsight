@@ -590,6 +590,14 @@ describe("buildReadabilityContract (쉬운 말 계약)", () => {
     expect(buildReadabilityContract("saju").systemSpec).toContain("보약");
     expect(buildReadabilityContract("shinjeom").systemSpec).toContain("제가 보기엔");
   });
+
+  it("문체는 특정 어미(해요체)를 하드코딩하지 않고 캐릭터 말투 일관성을 요구한다 (zero/ren 등 비-해요체 호환)", () => {
+    const spec = buildReadabilityContract("tarot").systemSpec;
+    expect(spec).toContain("캐릭터의 말투");
+    expect(spec).toContain("일관되게");
+    // '정중한 해요체' 하드코딩 제거 확인
+    expect(spec).not.toContain("정중한 해요체");
+  });
 });
 
 describe("가독성 배선 — 화려체·전문어 제거 (회귀 방지)", () => {
