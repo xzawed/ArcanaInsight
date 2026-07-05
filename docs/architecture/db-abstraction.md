@@ -41,7 +41,7 @@ src/lib/db/
 ├── supabase-adapter.ts         # Supabase 구현체
 ├── supabase-admin-adapter.ts   # service_role 기반 RLS 우회 어댑터 (Supabase 전용)
 ├── postgres-adapter.ts         # Drizzle ORM 구현체
-├── reading-saver.ts            # DB 저장 추상화 — 3회 retry + 지수 백오프
+├── reading-saver.ts            # DB 저장 추상화 — 3회 retry + 점증 백오프(200ms×시도)
 ├── character-context.ts        # getRecentCharacterMemory() / fetchMemoryPrompt() — 캐릭터 메모리 공통 추출 (tarot/saju/shinjeom 3개 라우트에서 import)
 └── schema/index.ts             # Drizzle 스키마 (supabase/migrations/ 동기화 대상)
 ```
@@ -97,9 +97,11 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 
 `src/lib/db/reading-saver.ts` — tarot/saju/shinjeom reading 라우트의 DB 저장 공통 모듈 (PR D에서 구현 완료)
 
-- **3회 retry + 지수 백오프** (200ms, 400ms, 600ms)
-- 모든 저장 실패는 `console.error`로 로깅 (SSE 스트림에 영향 없음)
-- 제공 함수: `saveTarotReading`, `saveSajuReading`, `saveShinjeomFinalReading`, `saveShinjeomMessages`
+- **3회 retry + 점증 백오프** (200ms×시도 = 200/400/600ms). 영구 에러(PostgreSQL 22/23/42 코드)는 즉시 throw
+- 모든 저장 실패는 `logReadingSaveFailure`가 `[reading-save-failed]` 단일 grep 마커로 로깅 (SSE 스트림에 영향 없음)
+- 제공 함수(3회 retry insert): `saveTarotReading`, `saveSajuReading`, `saveShinjeomFinalReading`, `saveShinjeomMessages`
+- best-effort 별도 UPDATE(본 insert와 분리 — 컬럼 미적용 환경에서도 insert 무영향): `persistDirectAnswer`(마이그 023 `direct_answer`), `persistReadingSections`(마이그 024 `saju_sections`/`shinjeom_sections`)
+- dead-letter 큐(마이그 022 `failed_readings`): `recordFailedReading`(무음 흡수 insert), `dispatchFailedReadingSave`(payload로 원본 save 재호출)
 
 ```typescript
 // 호출 패턴 (fire-and-forget, 스트림 차단 없음)

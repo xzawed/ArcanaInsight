@@ -45,6 +45,9 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 데이터 레이어
   ├─ Supabase (기본)     — Auth + PostgreSQL + Storage(card-skins 버킷, 팔레트 스킨)
+  │     리딩 영속: readings/saju_readings/shinjeom_readings에 direct_answer(마이그 023)·
+  │     saju_sections/shinjeom_sections JSONB(마이그 024) 추가. persistDirectAnswer·persistReadingSections가
+  │     본 insert와 분리된 best-effort UPDATE로 기록 → result/[id] 재방문·공유에 직답·4-섹션 round-trip.
   ├─ Cloudflare R2       — card-styles 카드아트·서비스배경 (cdn.xzawed.xyz, NEXT_PUBLIC_ASSET_BASE_URL, 2026-07-03 이전)
   └─ PostgreSQL 모드     — NextAuth.js v5 + Drizzle (DB_PROVIDER=postgres 시)
 ```

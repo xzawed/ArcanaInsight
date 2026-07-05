@@ -33,13 +33,15 @@
 
 ## ✨ Introduction
 
-ArcanaInsight is a web application where users have natural conversations with **12 uniquely-voiced anime-style characters** to receive fortune-telling services. Grok AI (xAI) delivers tarot interpretations and Four Pillars astrology analysis via **real-time SSE streaming**, with each character presenting results in their own distinct voice.
+ArcanaInsight is a web application where users have natural conversations with **12 uniquely-voiced anime-style characters** to receive fortune-telling services. Grok AI (xAI) delivers tarot interpretations, Four Pillars analysis, and spiritual consultations via **real-time SSE streaming**, with each character presenting results in their own distinct voice.
 
 ### Why ArcanaInsight?
 
 | | Feature |
 |---|---|
 | 🎭 **12 distinct characters** | From mysterious witches to solemn shrine maidens to mischievous tricksters — the same reading feels entirely different depending on who delivers it |
+| 🎯 **Direct answer** | Instead of listing every possibility, the reading commits to the most likely direction for your question first (answer-first) |
+| 💬 **Plain-language contract** | Fortune-telling jargon is explained in plain words on the spot, so anyone understands it at a glance |
 | ⚡ **Real-time SSE streaming** | AI responses appear character by character in a typing animation, creating the feel of a live consultation |
 | 🔄 **Dual AI fallback** | If the Grok API goes down, Claude API takes over automatically — users experience zero interruption |
 
