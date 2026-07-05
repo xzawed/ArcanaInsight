@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanReadingText, parseJsonSafe, extractFallbackText } from "./text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "./text-cleaner";
 
 describe("cleanReadingText", () => {
   it("빈 문자열 입력 시 빈 문자열을 반환한다", () => {
@@ -323,5 +323,87 @@ describe("extractFallbackText", () => {
 
   it("일반 텍스트는 trim 후 그대로 반환한다", () => {
     expect(extractFallbackText("  해석 결과  ")).toBe("해석 결과");
+  });
+});
+
+// 2026-07-06 조사: 사주·신점 리딩 간헐 무결과 근본원인(트레일링 콤마·필드 중첩) 회귀 방지
+describe("parseJsonSafe — LLM 형식 위반 내성", () => {
+  it("객체 마지막 필드 뒤 트레일링 콤마를 허용해 파싱한다", () => {
+    const input = `{"overallReading": "종합 해석", "advice": "조언",}`;
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toBe("종합 해석");
+    expect(result?.advice).toBe("조언");
+  });
+
+  it("중첩 객체 마지막 필드 뒤 트레일링 콤마(실측 신점 fallback_text 패턴)를 복구한다", () => {
+    const input = `{
+      "shinjeomSections": {
+        "spiritual": "기운",
+        "future": "앞날",
+      },
+      "overallReading": "종합",
+      "advice": "조언"
+    }`;
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.overallReading).toBe("종합");
+    expect((result?.shinjeomSections as Record<string, unknown>)?.future).toBe("앞날");
+  });
+
+  it("배열 마지막 요소 뒤 트레일링 콤마도 허용한다", () => {
+    const input = `{"items": ["a", "b",]}`;
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.items).toEqual(["a", "b"]);
+  });
+
+  it("트레일링 콤마 + 문자열 내 실제 개행이 동시에 있어도 파싱한다", () => {
+    const input = "{\n\"overallReading\": \"문단1\n문단2\",\n\"advice\": \"조언\",\n}";
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.advice).toBe("조언");
+  });
+
+  it("문자열 값 안의 콤마+중괄호는 트레일링 콤마로 오인하지 않는다", () => {
+    const input = `{"advice": "먼저 A, 그다음 B}", "overallReading": "정상"}`;
+    const result = parseJsonSafe(input);
+    expect(result).not.toBeNull();
+    expect(result?.advice).toBe("먼저 A, 그다음 B}");
+    expect(result?.overallReading).toBe("정상");
+  });
+});
+
+describe("promoteNestedFields", () => {
+  it("섹션 내부에 잘못 중첩된 flat 필드를 top-level로 승격한다(실측 missing_fields 패턴)", () => {
+    const parsed: Record<string, unknown> = {
+      sajuSections: { structure: "구조", overallReading: "종합", advice: "조언" },
+    };
+    promoteNestedFields(parsed, "sajuSections", ["overallReading", "advice", "directAnswer"]);
+    expect(parsed.overallReading).toBe("종합");
+    expect(parsed.advice).toBe("조언");
+  });
+
+  it("top-level에 이미 값이 있으면 섹션 값으로 덮어쓰지 않는다", () => {
+    const parsed: Record<string, unknown> = {
+      overallReading: "원본",
+      sajuSections: { overallReading: "섹션내부" },
+    };
+    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
+    expect(parsed.overallReading).toBe("원본");
+  });
+
+  it("섹션 내부 값이 빈 문자열이면 승격하지 않는다", () => {
+    const parsed: Record<string, unknown> = { overallReading: "", sajuSections: { overallReading: "   " } };
+    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
+    expect(parsed.overallReading).toBe("");
+  });
+
+  it("섹션 키가 없거나 객체가 아니면 아무것도 하지 않는다", () => {
+    const parsed: Record<string, unknown> = { overallReading: "" };
+    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
+    expect(parsed.overallReading).toBe("");
+    const parsed2: Record<string, unknown> = { sajuSections: "문자열" };
+    expect(() => promoteNestedFields(parsed2, "sajuSections", ["overallReading"])).not.toThrow();
   });
 });

@@ -130,7 +130,7 @@ export function useShinjeomChat() {
       updateMessageContent(msgId, getErrorMsg(characterId, "api", locale));
       setMood("default");
       setLoading(false);
-    }, 240_000);
+    }, 280_000);
 
     void fetchSSEStream({
       url: "/api/shinjeom/message",
@@ -162,7 +162,13 @@ export function useShinjeomChat() {
         setLoading(false);
       },
     }).then(() => {
-      if (!finished) clearTimeout(timeoutId);
+      // 스트림이 종단 이벤트(done/error) 없이 종료된 경우 → 무한 스피너 방지, 명시적 에러로 전환
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
+      updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
+      setMood("default");
+      setLoading(false);
     });
   };
 
@@ -192,7 +198,7 @@ export function useShinjeomChat() {
       updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
       setMood("default");
       setLoading(false);
-    }, 240_000);
+    }, 280_000);
 
     void fetchSSEStream({
       url: "/api/shinjeom/message",
@@ -244,7 +250,13 @@ export function useShinjeomChat() {
         setLoading(false);
       },
     }).then(() => {
-      if (!finished) clearTimeout(timeoutId);
+      // 스트림이 종단 이벤트(done/error) 없이 종료된 경우 → 무한 스피너 방지, 명시적 에러로 전환
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
+      updateMessageContent(msgId, getErrorMsg(characterId, "reading", locale));
+      setMood("default");
+      setLoading(false);
     });
   };
 

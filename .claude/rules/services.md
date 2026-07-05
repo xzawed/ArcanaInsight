@@ -43,6 +43,16 @@ parseResult(aiResponse: string): ReadingResult {
 **parseError 시그널 4종**: `truncated` | `invalid_json` | `fallback_text` | `missing_fields`  
 누락 시 클라이언트가 빈 결과를 정상으로 판정 → DB에 빈 리딩 저장됨.
 
+### 리딩 안정성 내성 (2026-07-06)
+
+사주·신점 리딩의 간헐적 JSON 형식 위반(트레일링 콤마·flat 필드를 섹션 객체 내부에 중첩)이 무결과를 유발했다. 파서·라우트에 3중 내성:
+
+1. **`parseJsonSafe`** — 3차 파싱 시도에 **트레일링 콤마 제거** 포함 (`,}`·`,]` → `JSON.parse` 실패 방지).
+2. **`promoteNestedFields(parsed, "sajuSections"|"shinjeomSections", [...])`** — 사주·신점 `parseResult`에서 파싱 직후 호출. 모델이 `overallReading`·`advice` 등을 섹션 객체 **내부**에 잘못 넣은 경우 top-level로 승격 (`missing_fields` 복구).
+3. **`streamReadingWithParseRetry`** (`reading-generator.ts`) — 3개 리딩 라우트가 `for await streamReading` 대신 이 헬퍼 사용. 1차 파싱이 `parseError`면 **1회 non-stream 재생성** 후 재파싱(성공 시 채택, 실패 시 원본 유지).
+
+클라이언트: 사주도 타로·신점과 동일 계약 — `invalid_json`/`missing_fields`만 무결과, `truncated`/`fallback_text`는 부분 표시. SSE 종단 이벤트(done/error) 없이 스트림이 끝나면 3훅 모두 명시적 에러로 전환(무한 스피너 방지). 클라 hard timeout 280s(서버 `AI_TIMEOUT_MS` 240s 대비 양의 마진).
+
 ## FallbackProvider 사용법
 
 ```typescript

@@ -2,7 +2,7 @@ import { DivinationService, ReadingResult, SessionContext } from "@/types/servic
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
-import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { UserInfo } from "@/types/user-info";
 
@@ -133,6 +133,8 @@ ${contract.schemaLine}
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.
 JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
+overallReading·topicReading·advice·directAnswer는 shinjeomSections 바깥의 최상위(top-level) 필드입니다. 절대 shinjeomSections 객체 안에 넣지 마세요.
+각 객체·배열의 마지막 항목 뒤에는 쉼표(,)를 넣지 않습니다 (트레일링 콤마 금지).
 내부 reasoning·생각·계획 단계를 출력하지 마세요 — 첫 토큰부터 곧바로 JSON을 시작하고 <think> 같은 태그도 출력 금지.
 ${contract.footerReminder}`;
   }
@@ -149,6 +151,8 @@ ${contract.footerReminder}`;
   parseResult(aiResponse: string): ReadingResult {
     const parsed = parseJsonSafe(aiResponse);
     if (parsed) {
+      // 모델이 flat 필드를 shinjeomSections 내부에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구)
+      promoteNestedFields(parsed, "shinjeomSections", ["overallReading", "topicReading", "advice", "directAnswer"]);
       const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
       const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
       const result: ReadingResult = {

@@ -4,7 +4,7 @@ import { Session, Topic, SajuTimeRange } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
-import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
@@ -249,6 +249,8 @@ ${contract.systemSpec}
 - 내부 reasoning·생각·계획 단계를 출력하지 마세요. 첫 토큰부터 곧바로 JSON을 시작합니다.
 - <think> 같은 태그·메타 텍스트도 출력 금지 (응답 토큰 한도 내에 JSON 본문이 모두 들어가야 함).
 - JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
+- overallReading·topicReading·advice·directAnswer는 sajuSections **바깥**의 최상위(top-level) 필드입니다. 절대 sajuSections 객체 안에 넣지 마세요.
+- 각 객체·배열의 마지막 항목 뒤에는 쉼표(,)를 넣지 않습니다 (트레일링 콤마 금지).
 {
   "sajuSections": {
     "structure": "일간 특성·신강신약·격국 분석. 타고난 기질, 삶의 방향성, 에너지 구조를 5~6문단으로 깊이 있게 서술.",
@@ -321,6 +323,8 @@ ${instruction}${horizonNote}
     const parsed = parseJsonSafe(aiResponse);
 
     if (parsed) {
+      // 모델이 flat 필드를 sajuSections 내부에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구)
+      promoteNestedFields(parsed, "sajuSections", ["overallReading", "topicReading", "advice", "directAnswer"]);
       const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
       const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
       const result: ReadingResult = {

@@ -12,7 +12,8 @@ services/
 │   ├── grok-provider.ts       # Grok API 호출, RateLimitError / AuthError 정의
 │   ├── claude-provider.ts     # Claude API 호출 (fallback 전용)
 │   ├── prompt-builder.ts      # buildCharacterHeader / buildSystemPrompt / buildReadingPrompt / buildUserInfoPrompt / buildFreeQuestionPrompt / buildDirectAnswerContract(질문 직답 answer-first 계약) / buildReadabilityContract(쉬운 말 계약, 3서비스 공통) / buildCharacterMemoryPrompt / getLanguageFooter
-│   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe / extractFallbackText
+│   ├── reading-generator.ts   # streamReadingWithParseRetry — 1차 스트리밍 → parseError 시 1회 non-stream 재생성 (3 리딩 라우트 공통)
+│   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe(트레일링 콤마 내성) / promoteNestedFields(섹션 내부 필드 승격) / extractFallbackText
 ├── tarot/
 │   ├── tarot-service.ts       # DivinationService 구현체
 │   ├── deck-manager.ts        # 카드 덱 셔플·뽑기
