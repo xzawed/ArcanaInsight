@@ -10,7 +10,7 @@ interface ToastEvent {
 const TOAST_EVENT = "arcana:toast";
 
 export function showToast(message: string, duration = 2400): void {
-  if (typeof window === "undefined") return;
+  if (globalThis.window === undefined) return;
   globalThis.dispatchEvent(new CustomEvent<ToastEvent>(TOAST_EVENT, { detail: { message, duration } }));
 }
 

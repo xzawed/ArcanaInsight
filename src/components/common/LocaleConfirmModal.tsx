@@ -26,7 +26,7 @@ export function LocaleConfirmModal() {
   const [suggested, setSuggested] = useState<Locale | null>(null);
 
   useEffect(() => {
-    if (typeof globalThis.window === "undefined") return;
+    if (globalThis.window === undefined) return;
     let alreadyShown = false;
     try {
       alreadyShown = globalThis.localStorage.getItem(STORAGE_KEY) === "1";
