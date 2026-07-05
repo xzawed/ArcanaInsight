@@ -71,9 +71,11 @@ new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "__arcanaFallba
 
 | 유틸 | 위치 | 역할 |
 |------|------|------|
-| `parseJsonSafe(raw)` | `src/services/core/text-cleaner.ts` | thinking 토큰 제거 → 코드블록 추출 → 문자열-aware 괄호 카운터로 JSON 추출 → 2차 파싱 시도 |
+| `parseJsonSafe(raw)` | `src/services/core/text-cleaner.ts` | thinking 토큰 제거 → 코드블록 추출 → 문자열-aware 괄호 카운터로 JSON 추출 → 3단 파싱 시도(원본 → 문자열 내 개행 이스케이프 → **트레일링 콤마 제거**) |
+| `promoteNestedFields(parsed, sectionKey, fields)` | `src/services/core/text-cleaner.ts` | 모델이 flat 필드(overallReading·advice 등)를 `sajuSections`/`shinjeomSections` **내부**에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구) |
 | `extractFallbackText(raw)` | `src/services/core/text-cleaner.ts` | JSON 파싱 완전 실패 시 본문 회수 (tarot/saju 공용, ReDoS-safe) |
 | `cleanReadingText(text)` | `src/services/core/text-cleaner.ts` | 파싱 후 JSON 잔여물·이스케이프 정리 |
+| `streamReadingWithParseRetry(...)` | `src/services/core/reading-generator.ts` | 1차 streamReading → 파싱 실패(parseError) 시 **1회 non-stream 재생성** 후 재파싱. 3개 리딩 라우트 공통 |
 | `buildCharacterHeader(character, subtitle?)` | `src/services/core/prompt-builder.ts` | 3 서비스 공통 캐릭터 system-prompt 헤더 |
 
 ---
@@ -91,12 +93,17 @@ AI 스트리밍 응답 (fullResponse 누적)
     │      3. findOutermostObjectEnd() — 문자열-aware 괄호 카운팅
     │      4. JSON.parse 1차 시도
     │      5. 문자열 내 리터럴 개행 이스케이프 후 2차 시도
+    │      6. 트레일링 콤마 제거 후 3차 시도 (LLM 흔한 형식 위반)
     │      → 성공: Record<string, unknown>
     │      → 실패: null
     │
-    ├─ 성공 → cleanReadingText(field) 후 ReadingResult 반환
+    ├─ 성공 → promoteNestedFields()(섹션 내부 잘못 중첩 필드 승격) → cleanReadingText(field) → ReadingResult
     └─ 실패 → extractFallbackText(raw) 또는 원문 텍스트 반환
+
+파싱 결과에 parseError가 있으면 라우트는 streamReadingWithParseRetry로 1회 재생성한다.
 ```
+
+> **리딩 안정성 (2026-07-06)**: 사주·신점 리딩이 간헐적으로 JSON 형식 위반을 냈다. 실측 재현(프로덕션 반복 호출) 결과 원인은 타임아웃·절단이 아니라 **`sajuSections`/`shinjeomSections` 중첩 스키마**로, 모델이 (1) flat 필드를 섹션 객체 내부에 중첩(`missing_fields`)하거나 (2) 섹션 끝에 트레일링 콤마를 남겨(`JSON.parse` 실패 → `fallback_text`) 결과가 폐기됐다(사주 ~21%, 신점 ~67% 실패, 타로 0%). 대응: ① `parseJsonSafe` 트레일링 콤마 내성, ② `promoteNestedFields` 승격, ③ 파싱 실패 시 1회 재생성, ④ 프롬프트에 "flat 필드는 섹션 밖 top-level·트레일링 콤마 금지" 명시, ⑤ 사주 클라이언트 `parseError` 처리를 타로·신점과 동일 계약으로(fallback_text 부분 표시), ⑥ 클라 hard timeout 240→280s(서버 대비 양의 마진)·SSE 종단 이벤트 부재 시 영구 스피너 방지 가드.
 
 ### 핵심 주의사항 — 문자열 내 중괄호
 

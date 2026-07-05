@@ -366,6 +366,8 @@ describe("POST /api/tarot/reading", () => {
         streamReading: vi.fn().mockImplementation(async function* () {
           yield "카드들이 말하는 핵심은 지금의 불안을 정리하고 다음 선택을 차분히 보라는 것입니다.";
         }),
+        // 재생성도 동일하게 비-JSON → parseError 유지(재시도 경로 명시적 모델링)
+        generateReading: vi.fn().mockResolvedValue("카드들이 말하는 핵심은 지금의 불안을 정리하고 다음 선택을 차분히 보라는 것입니다."),
       }); }),
     }));
 
@@ -392,6 +394,8 @@ describe("POST /api/tarot/reading", () => {
         streamReading: vi.fn().mockImplementation(async function* () {
           yield "JSON 아닌 텍스트 응답 — parseError 유발";
         }),
+        // 재생성도 동일하게 비-JSON → parseError 유지(재시도 경로 명시적 모델링)
+        generateReading: vi.fn().mockResolvedValue("JSON 아닌 텍스트 응답 — parseError 유발"),
       }); }),
     }));
 

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { SajuService, detectSajuTimeHorizon, type SajuQuestionHorizon } from "@/services/saju/saju-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
+import { streamReadingWithParseRetry } from "@/services/core/reading-generator";
 import { calculateSaju } from "@/services/saju/saju-calculator";
 import { Topic, SajuTimeRange } from "@/types/session";
 import { sajuTimeOptions } from "@/data/saju/categories";
@@ -124,15 +125,19 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        let fullResponse = "";
         try {
           // timeRange·includeMonthly 기반 동적 max_tokens (truncated 방지)
           const sajuMaxTokens = computeSajuReadingMaxTokens(timeRange, includeMonthly ?? false);
-          for await (const chunk of grokProvider.streamReading(systemPrompt + memoryPrompt, readingPrompt, sajuMaxTokens)) {
-            fullResponse += chunk;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
-          }
-          const result = sajuService.parseResult(fullResponse);
+          // 파싱 실패 시 1회 재생성 (간헐적 JSON 형식 위반 흡수)
+          const { result } = await streamReadingWithParseRetry({
+            provider: grokProvider,
+            systemPrompt: systemPrompt + memoryPrompt,
+            userPrompt: readingPrompt,
+            maxTokens: sajuMaxTokens,
+            parse: (raw) => sajuService.parseResult(raw),
+            onChunk: (chunk) => controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)),
+            logTag: "saju-reading",
+          });
 
           // 부분 파싱(누락/잘림)은 운영 로그로 명시 추적
           if (result.parseError) {

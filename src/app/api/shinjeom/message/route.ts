@@ -1,7 +1,9 @@
 import { NextRequest } from "next/server";
 import { ShinjeomService } from "@/services/shinjeom/shinjeom-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
+import { streamReadingWithParseRetry } from "@/services/core/reading-generator";
 import { Topic, ChatMessage } from "@/types/session";
+import type { ReadingResult } from "@/types/service";
 import { getAdminDb } from "@/lib/db";
 import { assertSessionOwnership } from "@/lib/auth";
 import { fetchMemoryPrompt } from "@/lib/db/character-context";
@@ -27,13 +29,11 @@ const SHINJEOM_TOKENS_CHAT = 6000;
 async function emitShinjeomFinalResult(
   controller: ReadableStreamDefaultController,
   encoder: TextEncoder,
-  fullResponse: string,
+  result: ReadingResult,
   db: DbClient | null,
   sessionId: string | null | undefined,
   locale: string,
 ): Promise<void> {
-  const result = shinjeomService.parseResult(fullResponse);
-
   if (result.parseError) {
     console.warn("[shinjeom-message] 부분 파싱:", {
       parseError: result.parseError,
@@ -109,18 +109,28 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        let fullResponse = "";
         try {
-          const shinjeomMaxTokens = isFinalTurn ? SHINJEOM_TOKENS_FINAL : SHINJEOM_TOKENS_CHAT;
-          for await (const chunk of aiProvider.streamReading(systemPrompt + memoryPrompt, userPrompt, shinjeomMaxTokens)) {
-            fullResponse += chunk;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
-          }
-
+          const enqueueChunk = (chunk: string) => controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
           if (isFinalTurn) {
-            await emitShinjeomFinalResult(controller, encoder, fullResponse, db, sessionId, locale);
+            // 최종 결과만 JSON 파싱 대상 — 파싱 실패 시 1회 재생성 (간헐적 형식 위반 흡수)
+            const { result } = await streamReadingWithParseRetry({
+              provider: aiProvider,
+              systemPrompt: systemPrompt + memoryPrompt,
+              userPrompt,
+              maxTokens: SHINJEOM_TOKENS_FINAL,
+              parse: (raw) => shinjeomService.parseResult(raw),
+              onChunk: enqueueChunk,
+              logTag: "shinjeom-message",
+            });
+            await emitShinjeomFinalResult(controller, encoder, result, db, sessionId, locale);
           } else {
-            // 중간 대화 — 응답 먼저 전송, DB 저장은 비동기 fire-and-forget (3회 retry). 실패는 구조적 로깅만.
+            // 중간 대화 — 일반 텍스트 스트리밍 (JSON 파싱 없음, 재생성 불필요)
+            let fullResponse = "";
+            for await (const chunk of aiProvider.streamReading(systemPrompt + memoryPrompt, userPrompt, SHINJEOM_TOKENS_CHAT)) {
+              fullResponse += chunk;
+              enqueueChunk(chunk);
+            }
+            // 응답 먼저 전송, DB 저장은 비동기 fire-and-forget (3회 retry). 실패는 구조적 로깅만.
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: false, message: fullResponse })}\n\n`));
             if (db && sessionId && currentMessage && messageIndex !== undefined) {
               void saveShinjeomMessages(db, sessionId, currentMessage, fullResponse, messageIndex).catch(

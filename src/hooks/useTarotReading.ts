@@ -190,8 +190,8 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
 
     setIsConnecting(false);
 
-    // 클라이언트 hard timeout (240초). 서버 AI_TIMEOUT_MS와 동조 — 10장+ 카드 리딩(max_tokens 24500+)은
-    // reasoning 흡수 + 한국어 비효율 + JSON stream으로 200~400s 소요 가능. 120s/180s에서는 본문 잘림 빈발.
+    // 클라이언트 hard timeout (280초). 서버 AI_TIMEOUT_MS(240s)보다 크게 잡아 양의 마진 확보 —
+    // 서버가 240s 근처에서 done을 보내도 클라가 먼저 abort하지 않도록 한다(마진 0 회귀 방지).
     const abortController = new AbortController();
     readingAbortRef.current = abortController;
     let finished = false;
@@ -200,14 +200,14 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
       finished = true;
       abortController.abort();
       stopSequence();
-      console.warn("[tarot-session] 클라이언트 타임아웃 (240s)");
+      console.warn("[tarot-session] 클라이언트 타임아웃 (280s)");
       setMood("default");
       setReadingErrorReason("timeout");
       setReadingError(true);
       setLoading(false);
       setReadingStartedAt(null);
       readingInFlightRef.current = false;
-    }, 240_000);
+    }, 280_000);
 
     await fetchSSEStream({
       url: "/api/tarot/reading",
@@ -271,7 +271,20 @@ export function useTarotReading({ setRevealedPositions, setPendingConfirm }: Use
         readingInFlightRef.current = false;
       },
     });
-    if (!finished) clearTimeout(timeoutId);
+    // 스트림이 종단 이벤트(done/error) 없이 종료된 경우(프록시 idle-drop·배포 재시작 등)
+    // phase=reading에 스피너만 꺼진 채 영구 정지 → 명시적 에러로 전환해 복구 가능하게 한다.
+    if (!finished) {
+      finished = true;
+      clearTimeout(timeoutId);
+      stopSequence();
+      console.warn("[tarot-session] 스트림이 종단 이벤트 없이 종료됨");
+      addChatMessage({
+        id: crypto.randomUUID(), role: "character",
+        content: getReadingErrorText(translate("tarot.session.msg.connection-failed", locale), characterId),
+        mood: "default", timestamp: new Date(),
+      });
+      setMood("default"); setReadingError(true);
+    }
     useSessionStore.getState().setLoading(false);
     setReadingStartedAt(null);
     readingInFlightRef.current = false;

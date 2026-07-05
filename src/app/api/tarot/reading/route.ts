@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { TarotService } from "@/services/tarot/tarot-service";
 import { FallbackProvider } from "@/services/core/fallback-provider";
+import { streamReadingWithParseRetry } from "@/services/core/reading-generator";
 import { DeckManager } from "@/services/tarot/deck-manager";
 import { SpreadResolver } from "@/services/tarot/spread-resolver";
 import { Topic, SpreadType } from "@/types/session";
@@ -87,15 +88,19 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        let fullResponse = "";
         try {
           const cardCount = cards.length;
           const maxTokens = computeReadingMaxTokens(cardCount);
-          for await (const chunk of grokProvider.streamReading(systemPrompt + memoryPrompt, readingPrompt + userInfoPrompt + freeQuestionPrompt, maxTokens)) {
-            fullResponse += chunk;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`));
-          }
-          const result = tarotService.parseResult(fullResponse, cardCount);
+          // 파싱 실패 시 1회 재생성 (간헐적 JSON 형식 위반 흡수)
+          const { result } = await streamReadingWithParseRetry({
+            provider: grokProvider,
+            systemPrompt: systemPrompt + memoryPrompt,
+            userPrompt: readingPrompt + userInfoPrompt + freeQuestionPrompt,
+            maxTokens,
+            parse: (raw) => tarotService.parseResult(raw, cardCount),
+            onChunk: (chunk) => controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)),
+            logTag: "tarot-reading",
+          });
 
           // 부분 파싱(누락/잘림)은 운영 로그로 명시 추적
           if (result.parseError) {

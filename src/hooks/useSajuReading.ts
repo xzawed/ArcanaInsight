@@ -97,8 +97,8 @@ export function useSajuReading() {
     });
     const stopTimers = () => timers.forEach(clearTimeout);
 
-    // 클라이언트 hard timeout (240초). 서버 AI_TIMEOUT_MS와 동조 — full-fortune/includeMonthly(max_tokens
-    // 17000~20000)는 reasoning 흡수까지 200~400s 소요 가능. 120s/180s에서는 본문 잘림 빈발.
+    // 클라이언트 hard timeout (280초). 서버 AI_TIMEOUT_MS(240s)보다 크게 잡아 양의 마진 확보 —
+    // 서버가 240s 근처에서 done을 보내도 클라가 먼저 abort하지 않도록 한다(마진 0 회귀 방지).
     const abortController = new AbortController();
     readingAbortRef.current = abortController;
     let finished = false;
@@ -107,12 +107,12 @@ export function useSajuReading() {
       finished = true;
       abortController.abort();
       stopTimers();
-      console.warn("[saju-session] 클라이언트 타임아웃 240s");
+      console.warn("[saju-session] 클라이언트 타임아웃 280s");
       setMood("default");
       setReadingErrorReason("timeout");
       setReadingError(true);
       setLoading(false);
-    }, 240_000);
+    }, 280_000);
 
     void fetchSSEStream({
       url: "/api/saju/reading",
@@ -135,8 +135,9 @@ export function useSajuReading() {
           return;
         }
 
-        // 결과 표시 불가 — DB 저장도 차단된 상태이므로 사용자에게 재시도 안내
-        if (result.parseError) {
+        // 표시 불가 — 본문 salvage조차 없는 경우만 무결과 처리 (타로·신점과 동일 계약).
+        // truncated/fallback_text는 overallReading에 정제 본문이 있으므로 아래에서 부분 표시한다.
+        if (result.parseError === "invalid_json" || result.parseError === "missing_fields") {
           console.warn("[saju-session] 결과 표시 불가:", { parseError: result.parseError });
           const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
           addChatMessage({ id: crypto.randomUUID(), role: "character",
@@ -168,7 +169,17 @@ export function useSajuReading() {
         setMood("default"); setReadingError(true); setLoading(false);
       },
     }).then(() => {
-      if (!finished) clearTimeout(timeoutId);
+      // 스트림이 종단 이벤트(done/error) 없이 종료된 경우(프록시 idle-drop·배포 재시작 등)
+      // 워치독만 해제하면 무한 스피너로 영구 정지 → 명시적 에러로 전환해 복구 가능하게 한다.
+      if (finished) return;
+      finished = true;
+      clearTimeout(timeoutId);
+      stopTimers();
+      console.warn("[saju-session] 스트림이 종단 이벤트 없이 종료됨");
+      const errLines = (charId && wl.characterErrorLines[charId]) ? wl.characterErrorLines[charId] : wl.defaultErrorLines;
+      addChatMessage({ id: crypto.randomUUID(), role: "character",
+        content: errLines.reading, mood: "default", timestamp: new Date() });
+      setMood("default"); setReadingError(true); setLoading(false);
     });
 
     return () => { clearTimeout(timeoutId); abortController.abort(); };
