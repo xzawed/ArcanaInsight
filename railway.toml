@@ -6,7 +6,8 @@ buildCommand = "pnpm install --frozen-lockfile && pnpm build"
 
 [deploy]
 startCommand = "pnpm start"
-# 홈(/) 대신 경량 /api/health로 기동 판정 → 무거운 홈 SSR 대기·불필요한 재기동 방지.
-healthcheckPath = "/api/health"
+# 마지막 성공 배포(cabcf8e)와 동일하게 "/"로 유지(안정화 우선). 경량 /api/health 전환은
+# 다음 세션에서 정밀 검증 후 적용.
+healthcheckPath = "/"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

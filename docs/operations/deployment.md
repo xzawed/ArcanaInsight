@@ -10,31 +10,28 @@ ArcanaInsight는 Railway를 사용하여 자동 배포됩니다.
 ## 자동 배포 흐름
 
 ```
-PR 머지 → main push → Railway 자동 빌드(nixpacks) → /api/health 통과 → 트래픽 스왑
+PR 머지 → main push → Railway 자동 빌드(nixpacks) → 헬스체크(/) 통과 → 트래픽 스왑
 ```
 
 Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수동 배포 트리거는 필요하지 않습니다.
-**헬스체크(`/api/health`)가 통과해야만 새 배포로 트래픽이 넘어가므로**, 빌드/기동 실패 시 기존 배포가 계속 서빙됩니다(무중단·안전 스왑).
+헬스체크가 통과해야만 새 배포로 트래픽이 넘어가므로, 빌드/기동 실패 시 기존 배포가 계속 서빙됩니다(무중단·안전 스왑).
 
-### 빌드 최적화 (배포 이미지 축소)
+### 자산(이미지) 서빙
 
-- **캐릭터 이미지(283MB) R2 이전**: `getCharacterImageUrl`(`src/lib/storage/character-image.ts`)이 `NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2(`cdn.xzawed.xyz/characters`)로 서빙, 미설정 시 로컬 public 폴백. `.railwayignore`로 `public/images/characters`를 빌드 컨텍스트에서 제외해 배포 이미지에서 283MB 제거(프로덕션은 R2 서빙). 업로드: `pnpm upload:characters:r2`.
-- `.railwayignore`로 e2e·docs·scripts·supabase·테스트·.env도 컨텍스트에서 제외.
-- 경량 `/api/health` 헬스체크로 무거운 홈 SSR 대기·불필요한 재기동 방지.
+- **카드·서비스 배경·캐릭터 이미지는 Cloudflare R2**(`cdn.xzawed.xyz`)에서 서빙된다. 캐릭터는 `getCharacterImageUrl`(`src/lib/storage/character-image.ts`)이 `NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2(`characters/…`), 미설정 시 로컬 public 폴백. 업로드: `pnpm upload:characters:r2`.
 
-> ⚠️ **프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수**: 카드·캐릭터 이미지가 R2에서 서빙되고 이미지 폴더가 배포 이미지에서 제외되므로, 이 변수가 없으면 이미지가 404된다(카드 자산이 이미 의존).
+> ⚠️ **프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수**: 카드·캐릭터 이미지가 R2에서 서빙되므로 이 변수가 없으면 이미지가 로컬 폴백을 시도한다(카드 자산이 이미 의존).
 
-> **왜 standalone Dockerfile을 쓰지 않는가 (2026-07-06 시도·롤백)**: `output:"standalone"` + 멀티스테이지 Dockerfile로 런타임 이미지를 ~300MB로 줄이려 했으나(node_modules 580→38MB), Railway 서비스 특유의 문제가 연속 발생해 롤백했다 — ① 서비스에 남은 `pnpm start` 시작 명령이 슬림 런타임(pnpm 없음)에서 실패, ② Railway가 시작 명령을 shell 없이 argv로 파싱해 `HOSTNAME=0.0.0.0` 프리픽스를 실행파일로 오인, ③ `sh -c` 래핑 후에도 DEPLOYING(헬스체크) 단계에서 실패(런타임 로그 API·CLI 접근 불가로 미규명). 재시도하려면 대시보드에서 실패 배포의 Deploy 단계 로그를 확보해 헬스체크 실패 원인부터 규명할 것. 관련 브랜치 히스토리: #482·#485·#486.
+> **배포 이미지 최소화(standalone Dockerfile) — 2026-07-06 시도·롤백, 다음 세션 재분석 예정**: `output:"standalone"` + 멀티스테이지 Dockerfile로 런타임 이미지를 ~300MB로 줄이려 했으나(node_modules 580→38MB, `public/images/characters` 283MB 제외), Railway 서비스 특유의 문제가 연속 발생해 nixpacks로 롤백했다 — ① 서비스에 남은 `pnpm start` 시작 명령이 슬림 런타임(pnpm 없음)에서 실패, ② Railway가 시작 명령을 shell 없이 argv로 파싱해 `HOSTNAME=0.0.0.0` 프리픽스를 실행파일로 오인, ③ `sh -c` 래핑 후에도 DEPLOYING(헬스체크) 단계에서 실패(런타임 로그가 CLI·GraphQL 모두 접근 불가로 미규명). **재시도 전 규명 필요**: 대시보드에서 실패 배포의 Deploy 단계 로그(헬스체크 실패 사유·앱 바인딩 host:port)를 확보할 것. 관련 브랜치 히스토리: #482·#483·#485·#486·#487.
 
 ---
 
 ## 설정 파일
 
-- `railway.toml` — 빌드/배포 설정 (`builder = "nixpacks"`, `startCommand = "pnpm start"`, `healthcheckPath = "/api/health"`)
-- `.railwayignore` — 빌드 컨텍스트 제외 목록 (캐릭터 이미지·테스트·docs 등)
+- `railway.toml` — 빌드/배포 설정 (`builder = "nixpacks"`, `startCommand = "pnpm start"`, `healthcheckPath = "/"`)
 - `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트)
 
-> ⚠️ Railway **서비스 시작 명령**은 대시보드/서비스 설정 값이 railway.toml보다 우선한다(2026-07-06 확인). 시작 명령을 바꾸려면 서비스 설정(또는 GraphQL `serviceInstanceUpdate`)을 함께 갱신해야 한다.
+> ⚠️ Railway **서비스 시작 명령**은 서비스 설정 값이 railway.toml보다 우선한다(2026-07-06 확인 — GraphQL `serviceInstance.startCommand`가 우선). 시작 명령을 바꾸려면 서비스 설정(또는 GraphQL `serviceInstanceUpdate`)을 함께 갱신해야 한다.
 
 ### GitHub Secrets (CI 전용)
 
