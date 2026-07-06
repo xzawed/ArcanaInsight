@@ -14,6 +14,7 @@
 | `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크(파일 존재) 검증. 동결 스냅샷(`superpowers/plans/archive`·`superpowers/specs`)은 제외, 깨진 링크 발견 시 exit 1(push·CI 차단) |
 | `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
+| `eval-reading.ts` | `pnpm eval:reading` | 리딩 품질 계약 회귀 검증 — 타로·사주·신점 리딩 API에 익명 요청→SSE 파싱→directAnswer·4섹션·parseError·본문 검증. CI 미연동(실 AI 호출·온디맨드), `EVAL_BASE_URL`로 대상 지정 |
 
 ## 2. 명령어 등록 (`pnpm <name>`)
 
@@ -23,6 +24,7 @@
 | `pnpm check:env-docs` | `check-env-docs.ts` | `src/lib/env.ts` ↔ `docs/operations/env-variables.md` 정합성 |
 | `pnpm i18n:check` | `check-translation-keys.ts` | 번역 키 drift 검출 (로컬·CI) |
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·unit-testing.md 자동 갱신 |
+| `pnpm eval:reading` | `eval-reading.ts` | 리딩 품질 계약 검증(directAnswer·4섹션·parseError·SSE). `EVAL_BASE_URL` 지정(기본 프로덕션), `--service=` 필터. 실 AI 호출·온디맨드 |
 | `pnpm generate:assets` | `generate-assets/index.ts` | Replicate API로 카드·배경·데코 이미지 생성 (`REPLICATE_API_KEY` 필요) |
 | `pnpm generate:assets:skip` | `generate-assets/index.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 생성 |
 | `pnpm generate:service-bg` | `generate-service-backgrounds.ts` | 서비스(타로/사주/신점) 배경 이미지 생성 |

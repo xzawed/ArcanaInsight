@@ -33,6 +33,7 @@
     "check:env-docs": "tsx scripts/check-env-docs.ts",
     "i18n:check": "tsx scripts/check-translation-keys.ts",
     "sync:test-count": "tsx scripts/sync-test-count.ts",
+    "eval:reading": "tsx scripts/eval-reading.ts",
     "download:skins": "tsx --env-file=.env.local scripts/download-skin-images.ts",
     "generate:assets": "npx tsx scripts/generate-assets/index.ts",
     "generate:assets:skip": "npx tsx scripts/generate-assets/index.ts --skip-existing",
