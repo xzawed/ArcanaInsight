@@ -5,7 +5,8 @@ builder = "dockerfile"
 
 [deploy]
 # standalone 서버를 순수 단일 실행파일로 기동. Railway는 startCommand를 shell 없이 argv로 분해하므로
-# env 프리픽스(HOSTNAME=…)·따옴표·sh -c 금지. HOSTNAME 조작 불필요(컨테이너ID가 실제 IP로 해석됨).
+# env 프리픽스(HOSTNAME=…)·따옴표·sh -c 금지(순수 `node server.js`만).
+# ⚠️ standalone은 컨테이너 HOSTNAME(IPv6-우선 해석)에 바인딩 → 서비스 변수 `HOSTNAME=0.0.0.0` 필수(없으면 IPv4 헬스체크 미도달로 배포 FAILED). 상세: docs/operations/deploy-safety-guide.md
 # ⚠️ 서비스(대시보드/GraphQL) startCommand가 이 값보다 우선하므로, 배포 시 serviceInstanceUpdate로 동일하게 맞춰야 함.
 startCommand = "node server.js"
 # 경량 /api/health로 기동 판정(무거운 홈 SSR 대기 회피). standalone에서 200 반환 검증됨.
