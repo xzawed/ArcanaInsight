@@ -39,9 +39,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // 런타임에 필요한 의존성만 추적해 최소 서버 번들 생성 → Railway 배포 이미지 대폭 축소·배포 가속.
-  // 배포: railway.toml이 빌드 후 public·.next/static을 .next/standalone에 복사하고 server.js로 기동.
-  output: "standalone",
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
