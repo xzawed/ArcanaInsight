@@ -121,6 +121,7 @@ function verifyContract(service: string, result: Json): CheckResult["checks"] {
     }
   } else if (service === "saju" || service === "shinjeom") {
     add("topicReading 존재", nonEmpty(result.topicReading), `len=${String(result.topicReading ?? "").length}`);
+    add("overallReading 【】 소제목", String(result.overallReading).includes("【"));
   }
 
   return checks;

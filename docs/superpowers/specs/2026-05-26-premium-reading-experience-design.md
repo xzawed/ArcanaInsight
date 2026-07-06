@@ -1,5 +1,7 @@
 # 프리미엄 리딩 경험 설계 (Premium Reading Experience)
 
+> ⚠️ **부분 슈퍼시드(2026-07-07)**: 이 설계의 사주 `sajuSections`/신점 `shinjeomSections` 4-섹션 스키마는 [리딩 신뢰성 기술부채 정리](2026-07-07-reading-reliability-debt-design.md)에서 폐지되었습니다(overallReading 정본). 나머지(타로 3-섹션·directAnswer 등)는 유효.
+
 **날짜:** 2026-05-26
 **상태:** 승인됨
 **우선순위:** A (AI 품질) → B (가독성) → C (몰입감)
