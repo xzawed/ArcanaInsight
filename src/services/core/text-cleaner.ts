@@ -137,28 +137,3 @@ export function parseJsonSafe(raw: string): Record<string, unknown> | null {
 
   return null;
 }
-
-/**
- * 모델이 flat 필드(overallReading·advice 등)를 섹션 객체(sajuSections/shinjeomSections) *내부*에
- * 잘못 중첩한 경우 top-level로 승격한다. (실측: 사주·신점 리딩의 흔한 형식 위반으로, 내용은
- * 생성됐으나 위치가 틀려 missing_fields로 폐기되던 결함을 복구.)
- *
- * parsed[sectionKey][field]가 비지 않은 문자열이고 parsed[field]가 없거나 빈 문자열일 때만 끌어올린다.
- * parsed 객체를 in-place로 수정한다.
- */
-export function promoteNestedFields(
-  parsed: Record<string, unknown>,
-  sectionKey: string,
-  fields: readonly string[],
-): void {
-  const section = parsed[sectionKey];
-  if (!section || typeof section !== "object") return;
-  const s = section as Record<string, unknown>;
-  for (const f of fields) {
-    const cur = parsed[f];
-    const nested = s[f];
-    if ((cur === undefined || cur === null || cur === "") && typeof nested === "string" && nested.trim()) {
-      parsed[f] = nested;
-    }
-  }
-}

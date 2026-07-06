@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "./text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "./text-cleaner";
 
 describe("cleanReadingText", () => {
   it("빈 문자열 입력 시 빈 문자열을 반환한다", () => {
@@ -371,39 +371,5 @@ describe("parseJsonSafe — LLM 형식 위반 내성", () => {
     expect(result).not.toBeNull();
     expect(result?.advice).toBe("먼저 A, 그다음 B}");
     expect(result?.overallReading).toBe("정상");
-  });
-});
-
-describe("promoteNestedFields", () => {
-  it("섹션 내부에 잘못 중첩된 flat 필드를 top-level로 승격한다(실측 missing_fields 패턴)", () => {
-    const parsed: Record<string, unknown> = {
-      sajuSections: { structure: "구조", overallReading: "종합", advice: "조언" },
-    };
-    promoteNestedFields(parsed, "sajuSections", ["overallReading", "advice", "directAnswer"]);
-    expect(parsed.overallReading).toBe("종합");
-    expect(parsed.advice).toBe("조언");
-  });
-
-  it("top-level에 이미 값이 있으면 섹션 값으로 덮어쓰지 않는다", () => {
-    const parsed: Record<string, unknown> = {
-      overallReading: "원본",
-      sajuSections: { overallReading: "섹션내부" },
-    };
-    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
-    expect(parsed.overallReading).toBe("원본");
-  });
-
-  it("섹션 내부 값이 빈 문자열이면 승격하지 않는다", () => {
-    const parsed: Record<string, unknown> = { overallReading: "", sajuSections: { overallReading: "   " } };
-    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
-    expect(parsed.overallReading).toBe("");
-  });
-
-  it("섹션 키가 없거나 객체가 아니면 아무것도 하지 않는다", () => {
-    const parsed: Record<string, unknown> = { overallReading: "" };
-    promoteNestedFields(parsed, "sajuSections", ["overallReading"]);
-    expect(parsed.overallReading).toBe("");
-    const parsed2: Record<string, unknown> = { sajuSections: "문자열" };
-    expect(() => promoteNestedFields(parsed2, "sajuSections", ["overallReading"])).not.toThrow();
   });
 });
