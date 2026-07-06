@@ -4,7 +4,7 @@ import { Session, Topic, SajuTimeRange } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
 import { SajuResult } from "./saju-types";
 import { OhaengType, OHAENG } from "@/data/saju/constants";
-import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { sajuTimeOptions } from "@/data/saju/categories";
 
@@ -249,15 +249,9 @@ ${contract.systemSpec}
 - 내부 reasoning·생각·계획 단계를 출력하지 마세요. 첫 토큰부터 곧바로 JSON을 시작합니다.
 - <think> 같은 태그·메타 텍스트도 출력 금지 (응답 토큰 한도 내에 JSON 본문이 모두 들어가야 함).
 - JSON 문자열 값 안의 줄바꿈은 반드시 \\n 이스케이프로 표현합니다. 실제 줄바꿈 문자를 사용하지 않습니다.
-- overallReading·topicReading·advice·directAnswer는 sajuSections **바깥**의 최상위(top-level) 필드입니다. 절대 sajuSections 객체 안에 넣지 마세요.
+- overallReading·topicReading·advice·directAnswer는 각각 독립된 최상위(top-level) 문자열 필드입니다.
 - 각 객체·배열의 마지막 항목 뒤에는 쉼표(,)를 넣지 않습니다 (트레일링 콤마 금지).
 {
-  "sajuSections": {
-    "structure": "일간 특성·신강신약·격국 분석. 타고난 기질, 삶의 방향성, 에너지 구조를 5~6문단으로 깊이 있게 서술.",
-    "elements": "오행 분포 분석. 과잉·부족 기운이 성격·건강·환경에 미치는 구체적 영향, 용신·희신·기신의 역할을 5~6문단으로 서술.",
-    "fortune": "대운·세운 흐름 분석. 현재 대운이 일간에 미치는 영향, 올해 세운과 대운의 교차 작용, 앞으로의 흐름을 5~6문단으로 서술.",
-    "guidance": "용신·희신 기반 실용 가이드. 지금 당장 강화할 것, 피해야 할 것, 일상 실천 방법을 5~6문단으로 서술."
-  },
 ${contract.schemaLine}
   "overallReading": "【타고난 성격】일간 특성·신강신약·격국을 쉬운 말로 → 【기운의 균형(오행)】넘치고 모자란 기운이 삶에 주는 영향 → 【나를 살리는 기운(용신)】나에게 힘이 되는 기운과 쓰는 법 → 【지금의 큰 흐름(대운)】지금 대운이 나에게 주는 영향 → 【올해 운세(세운)】올해 흐름과 대운의 만남 → 【앞으로의 전망】지금 위치와 앞으로의 큰 흐름. 소제목은 위처럼 쉬운 말로, 전문 용어는 본문에서 풀어 씁니다. 최소 8문단 이상, 각 문단을 충분히 서술.",
   "topicReading": "선택한 주제와 시간 범위에 특화된 심층 분석. 시기별 구체적 흐름(월별·분기별 포함), 기회가 열리는 시기, 주의해야 할 구간, 십성·12운성이 이 주제에 어떻게 작용하는지. 최소 6문단 이상.",
@@ -310,11 +304,7 @@ ${instruction}${horizonNote}
 [분량 기준 — 3배 프리미엄 리딩]
 - 각 문단에는 상담자가 자기 삶으로 옮길 수 있는 구체적인 사례를 최소 하나 넣습니다. 분량이 남아도 추상적인 표현으로 늘리지 말고 구체적인 사례로 채웁니다. 사주 용어는 [용어 → 한 줄 비유 → 당신 삶에서는] 순서로 풀어 씁니다.
 - directAnswer: 상담자의 질문(또는 주제가 함축하는 핵심 질문)에 먼저 직접 답하는 4~5문단. 질문이 모호하거나 개방형이어도 반드시 채웁니다(절대 비워 두지 않습니다). 재진술 → 방향 단언 → 확신 수위 → 근거(사주 용어는 그 자리에서 쉬운 말로 풀어서) 순서로 씁니다.
-- sajuSections.structure: 일간·신강신약·격국을 최소 5~6문단으로 깊이 있게 서술
-- sajuSections.elements: 오행·용신·희신·기신을 최소 5~6문단으로 서술
-- sajuSections.fortune: 대운·세운 흐름을 최소 5~6문단으로 서술
-- sajuSections.guidance: 실용 행동 가이드를 최소 5~6문단으로 서술
-- overallReading: 사주팔자 전체 구조(일간→오행→용신→대운→세운)를 최소 8문단 이상, 각 문단은 3~5문장으로 풍부하게 서술
+- overallReading: 일간→오행→용신→대운→세운→전망 전 구조를 각 【】 소제목으로 나누어 최소 8문단 이상 서술. 일간·신강신약·격국(타고난 기질), 오행 과잉·부족이 성격·건강·환경에 미치는 영향, 용신·희신·기신의 활용법, 현재 대운이 일간에 미치는 영향, 올해 세운과 대운의 교차 작용, 앞으로의 흐름과 전망까지 — 소제목마다 근거와 구체적 사례를 담아 각 문단을 3~5문장으로 풍부하게 서술 (섹션 분리 없이 하나의 서사로 통합, 깊이는 축소하지 않음)
 - topicReading: 위 주제·시간 범위에 맞게 시기별 흐름, 기회·주의 구간, 구체적 상황 예측을 최소 6문단 이상
 - advice: 용신·희신 기반의 실용적 행동 지침과 일상 실천 방법을 최소 4문단 이상`;
   }
@@ -323,8 +313,6 @@ ${instruction}${horizonNote}
     const parsed = parseJsonSafe(aiResponse);
 
     if (parsed) {
-      // 모델이 flat 필드를 sajuSections 내부에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구)
-      promoteNestedFields(parsed, "sajuSections", ["overallReading", "topicReading", "advice", "directAnswer"]);
       const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
       const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
       const result: ReadingResult = {
@@ -335,16 +323,6 @@ ${instruction}${horizonNote}
       // directAnswer 추출 — 자유질문/핵심질문에 대한 직답 (존재 시에만)
       if (parsed.directAnswer !== undefined) {
         result.directAnswer = cleanReadingText(typeof parsed.directAnswer === "string" ? parsed.directAnswer : "");
-      }
-      // sajuSections 추출 (새 형식)
-      if (parsed.sajuSections && typeof parsed.sajuSections === "object") {
-        const s = parsed.sajuSections as Record<string, unknown>;
-        result.sajuSections = {
-          structure: cleanReadingText(typeof s.structure === "string" ? s.structure : ""),
-          elements: cleanReadingText(typeof s.elements === "string" ? s.elements : ""),
-          fortune: cleanReadingText(typeof s.fortune === "string" ? s.fortune : ""),
-          guidance: cleanReadingText(typeof s.guidance === "string" ? s.guidance : ""),
-        };
       }
       // 핵심 필드(overallReading 또는 advice) 빈 문자 = 부분 파싱
       if (!overallReading || !advice) result.parseError = "missing_fields";
