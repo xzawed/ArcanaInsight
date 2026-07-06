@@ -12,7 +12,7 @@ import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections, logReadingParseError } from "@/lib/db/reading-saver";
+import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, logReadingParseError } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -25,7 +25,7 @@ const grokProvider = new FallbackProvider();
  * 출력 토큰만 과금되므로 상한 자체는 비용 영향이 없다.
  */
 function computeSajuReadingMaxTokens(timeRange: SajuTimeRange, includeMonthly: boolean): number {
-  // 3-섹션(sajuSections) 기준 3배 확장, 모델 cap 60000 적용
+  // 프리미엄 리딩(3배 확장 분량) 기준, 모델 cap 60000 적용
   if (includeMonthly) return 60000;          // 월운 12개월 상세 포함 (84000 → cap 60000)
   if (timeRange === "five-year") return 60000;
   if (timeRange === "full-fortune") return 60000;
@@ -184,9 +184,8 @@ export async function POST(request: NextRequest) {
             };
             try {
               await saveSajuReading(db, sessionId, sajuReadingData, locale);
-              // directAnswer·섹션은 별도 best-effort UPDATE (마이그 023/024 미적용 환경에서도 본 저장 무영향)
+              // directAnswer는 별도 best-effort UPDATE (마이그 023 미적용 환경에서도 본 저장 무영향)
               await persistDirectAnswer(db, "saju", sessionId, result.directAnswer);
-              await persistReadingSections(db, "saju", sessionId, result.sajuSections);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: true })}\n\n`));
             } catch (e) {
               logReadingSaveFailure("saju", sessionId, e);
