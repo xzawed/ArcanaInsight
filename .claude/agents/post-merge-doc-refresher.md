@@ -69,7 +69,7 @@ Anthropic 권장 CLAUDE.md 구조:
 ### 에이전트 C — 워크플로우·컨벤션 문서 동기화
 
 검증 대상:
-1. `.claude/WORKFLOW.md` — 공통 완료 체크리스트, 검증 명령어 최신화
+1. `.claude/rules/workflow.md` — 업무 프로세스·공통 완료 체크리스트·검증 명령어 최신화 (매 세션 전역 로드)
 2. `docs/workflow/task-playbooks.md` — 플레이북 스텝이 현재 에이전트/스크립트와 일치하는가?
 3. `docs/workflow/code-change-process.md` — PR 생성 전 검증 절차가 pre-pr-checks.sh와 일치하는가?
 4. `docs/conventions/coding-style.md` — 커밋 prefix, 브랜치 명명 규칙 반영
@@ -99,7 +99,7 @@ Anthropic 권장 CLAUDE.md 구조:
 - [ ] 새로 추가된 스크립트가 `permissions.allow`에 등록되었는가?
 
 **규칙 파일 (`.claude/rules/*.md`)**
-- [ ] `paths` 프론트매터로 경로 스코핑 적용
+- [ ] `paths` 프론트매터로 경로 스코핑 적용 (api-routes·e2e-testing·i18n·services). ⚠️ `workflow.md`는 예외 — paths 없이 매 세션 전역 로드
 - [ ] 서브 CLAUDE.md와 내용 중복 없는가?
 - [ ] 최근 코드 변경으로 무효화된 규칙 없는가?
 

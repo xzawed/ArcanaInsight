@@ -20,7 +20,7 @@ description: 새 DivinationService 구현체 추가 시 필요한 파일들을 �
 - `src/hooks/useSajuSession.ts` — 사주 Zustand 스토어 패턴
 - `src/app/api/tarot/reading/route.ts` — SSE 스트리밍 API 패턴
 - `src/app/api/saju/reading/route.ts` — 사주 API 패턴
-- `src/app/saju/page.tsx` — 서비스 메인 페이지 패턴 (멀티스텝 + 카테고리 선택)
+- `src/app/(immersive)/saju/page.tsx` — 서비스 메인 페이지 패턴 (멀티스텝 + 카테고리 선택)
 - `src/data/saju/categories.ts` — 시간단위×분석영역 매트릭스 패턴 (SajuTimeOption 7개 / SajuAreaOption 8개)
 - `src/services/saju/saju-calculator.ts` — SajuCalculateOptions 확장 계산 패턴
 - `supabase/migrations/006_saju_readings.sql` — 마이그레이션 패턴
@@ -47,7 +47,7 @@ DivinationService 인터페이스를 구현한다. 필수 메서드:
 - `startSession(topic: Topic): Omit<Session, "id" | "createdAt">`
 - `getSystemPrompt(characterId?: string): string` — `buildSystemPrompt(character)` 활용
 - `getReadingPrompt(context: SessionContext): string`
-- `parseResult(aiResponse: string): ReadingResult` — `parseJsonSafe()` + `cleanReadingText()` 활용
+- `parseResult(aiResponse: string): ReadingResult` — `parseJsonSafe()`(트레일링 콤마 내성) + `cleanReadingText()`, 섹션형 서비스는 `promoteNestedFields()`로 섹션 내부 flat 필드 승격. parseError 4종(truncated/invalid_json/fallback_text/missing_fields) 시그널 필수
 
 ### 2. Zustand 세션 스토어
 **경로**: `src/hooks/use{ServiceName}Session.ts`
@@ -61,7 +61,7 @@ DivinationService 인터페이스를 구현한다. 필수 메서드:
 - hasCards가 true이면 카드 관련 상태 추가
 
 ### 3. 서비스 메인 페이지
-**경로**: `src/app/{serviceName}/page.tsx`
+**경로**: `src/app/(immersive)/{serviceName}/page.tsx` (서비스 진입/세션은 몰입형 그룹 — Footer 미렌더)
 
 **필수 준수**: 레이아웃 5:5 규칙
 - `'use client'` 지시문 필요
@@ -71,7 +71,7 @@ DivinationService 인터페이스를 구현한다. 필수 메서드:
 - `TypingDialogue`로 캐릭터 대사 표시
 
 ### 4. 세션 페이지
-**경로**: `src/app/{serviceName}/session/page.tsx`
+**경로**: `src/app/(immersive)/{serviceName}/session/page.tsx`
 
 - SSE 스트리밍 수신 처리
 - 레이아웃 5:5 규칙 준수
@@ -84,11 +84,12 @@ SSE 스트리밍 패턴 (기존 패턴과 동일):
 ```typescript
 // 핵심 구조
 const service = new {ServiceName}Service();
-const provider = new GrokProvider();
+const provider = new FallbackProvider();   // Grok 우선 → Claude 자동 fallback (GrokProvider 직접 사용 금지 — 신뢰성 계약)
 const systemPrompt = service.getSystemPrompt(characterId);
 const readingPrompt = service.getReadingPrompt(context);
-// ReadableStream + TextEncoder로 SSE 전송
-// 완료 시 parseResult() + Supabase DB 저장
+// streamReadingWithParseRetry({ provider, systemPrompt, userPrompt: readingPrompt, maxTokens, parse: (r) => service.parseResult(r), onChunk })
+//   — 1차 스트리밍 → parseError 시 1회 non-stream 재생성 (reading-generator.ts, 3 리딩 라우트 공통)
+// SSE_HEADERS + ReadableStream로 전송, 완료 시 parseError 없을 때만 Supabase DB 저장
 ```
 
 ### 6. DB 마이그레이션
@@ -127,7 +128,7 @@ src/services/{serviceName}/{serviceName}-service.ts
 
 **sonar.coverage.exclusions에 추가 (테스트 없는 파일)**:
 ```
-src/app/{serviceName}/**,
+src/app/(immersive)/{serviceName}/**,
 src/hooks/use{ServiceName}Session.ts,
 src/app/api/{serviceName}/**  ← coverage.include에 추가한 경우 제외
 ```

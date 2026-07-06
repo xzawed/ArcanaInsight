@@ -60,12 +60,11 @@ card-skins/
 
 ### 3. 이미지 생성 전 백업 (필수)
 
-**이미지 생성·교체 전 반드시 기존 이미지를 backup-v2/에 백업한다.**
+**이미지 생성·교체 전 반드시 기존 이미지를 백업한다.** 스킨 이미지는 로컬 `public/skins`가 아니라 **Supabase Storage(`card-skins` 버킷)**에 있으므로, 덮어쓰기 전 해당 스킨 객체를 다운로드해 `scripts/backup-v2/{skinId}/`에 보관한다.
 
 ```bash
 mkdir -p scripts/backup-v2/{skinId}
-cp -r public/skins/{skinId}/* scripts/backup-v2/{skinId}/ 2>/dev/null || true
-# Supabase Storage 이미지는 다운로드 후 백업
+# Supabase Storage(card-skins/{skinId}/)에서 기존 이미지를 다운로드해 위 경로에 저장
 ```
 
 백업 없이 덮어쓰면 재생성 비용 발생 (Grok 이미지 API 과금).
@@ -73,7 +72,7 @@ cp -r public/skins/{skinId}/* scripts/backup-v2/{skinId}/ 2>/dev/null || true
 ### 4. 이미지 생성
 
 ```bash
-# Grok 이미지 API(grok-2-image)로 79장 생성 (앞면 78장 + 뒷면 1장)
+# Grok 이미지 API(grok-imagine-image-pro)로 79장 생성 (앞면 78장 + 뒷면 1장)
 GROK_API_KEY=키 pnpm tsx scripts/generate-skin-images.ts --skin={skinId}
 
 # Supabase Storage에 업로드
