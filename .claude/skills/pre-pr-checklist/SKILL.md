@@ -18,7 +18,7 @@ git diff --stat HEAD origin/main 2>/dev/null || git diff --stat HEAD~1
 
 - [ ] `pnpm type-check` — 0 error
 - [ ] `pnpm lint` — 0 error
-- [ ] `pnpm test:coverage` — branches 92 / functions·lines·statements 98%
+- [ ] `pnpm test:coverage` — branches 90 / functions 97 / lines·statements 98 (정본: `vitest.config.ts`)
 - [ ] `pnpm check:doc-links` — 링크 유효
 - [ ] `pnpm check:env-docs` — env.ts ↔ env-variables.md 정합성
 - [ ] `pnpm i18n:check` — 번역 키 drift 없음
@@ -29,7 +29,7 @@ git diff --stat HEAD origin/main 2>/dev/null || git diff --stat HEAD~1
 - [ ] 새 TS 파일 추가 시 `sonar-project.properties` exclusions 동기화했는가?
 - [ ] 상수(max_tokens 등) 변경 시 해당 상수를 기댓값으로 쓰는 테스트도 수정했는가?
   - 확인: `grep -r "toBe(" src/__tests__/` 에서 변경 전 값 검색
-- [ ] 새 캐릭터/스킨 이미지 작업 전 `backup-v2/` 백업 완료했는가?
+- [ ] 이미지 덮어쓰기 전 기존 이미지 백업했는가? (캐릭터=R2 `cdn.xzawed.xyz/characters`, 스킨=Supabase Storage `card-skins`에서 다운로드 — `nukki/`·`backup-v2/` 로컬 폴더는 #447로 제거됨)
 
 ### UI 변경
 - [ ] UI 텍스트 변경 시 E2E `hasText`/`getByText` 셀렉터도 같이 수정했는가?
