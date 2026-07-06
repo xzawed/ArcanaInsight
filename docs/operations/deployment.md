@@ -10,28 +10,35 @@ ArcanaInsight는 Railway를 사용하여 자동 배포됩니다.
 ## 자동 배포 흐름
 
 ```
-PR 머지 → main push → Railway 자동 빌드(nixpacks) → 헬스체크(/) 통과 → 트래픽 스왑
+PR 머지 → main push → Railway 자동 빌드(Dockerfile/standalone) → /api/health 통과 → 트래픽 스왑
 ```
 
 Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수동 배포 트리거는 필요하지 않습니다.
-헬스체크가 통과해야만 새 배포로 트래픽이 넘어가므로, 빌드/기동 실패 시 기존 배포가 계속 서빙됩니다(무중단·안전 스왑).
+**헬스체크(`/api/health`)가 통과해야만 새 배포로 트래픽이 넘어가므로**, 빌드/기동 실패 시 기존 배포가 계속 서빙됩니다(무중단·안전 스왑).
 
-### 자산(이미지) 서빙
+### 빌드 최적화 (배포 이미지 최소화 → 배포 가속)
 
-- **카드·서비스 배경·캐릭터 이미지는 Cloudflare R2**(`cdn.xzawed.xyz`)에서 서빙된다. 캐릭터는 `getCharacterImageUrl`(`src/lib/storage/character-image.ts`)이 `NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2(`characters/…`), 미설정 시 로컬 public 폴백. 업로드: `pnpm upload:characters:r2`.
+`next.config.ts` `output:"standalone"` + 멀티스테이지 `Dockerfile`로 런타임 이미지를 최소화한다:
+- standalone이 런타임 필요한 의존성만 추적 → 런타임 `node_modules` 580MB → **38MB**(실측)
+- 슬림 런타임 스테이지에 `.next/standalone`+`.next/static`+`public`만 복사
+- `.dockerignore`로 `node_modules`·`.next`·테스트·docs·`.env`, 그리고 **`public/images/characters`(283MB)** 제외 → 이미지 내 `public` 317MB→35MB (캐릭터는 R2 서빙)
+- 실측(amd64): 전체 이미지 ~1.1GB(nixpacks 추정) → **~300MB**
 
-> ⚠️ **프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수**: 카드·캐릭터 이미지가 R2에서 서빙되므로 이 변수가 없으면 이미지가 로컬 폴백을 시도한다(카드 자산이 이미 의존).
+**시작 명령 — 반드시 `node server.js`** (env 프리픽스·따옴표·`sh -c` 금지):
+Railway는 startCommand를 **shell 없이 공백으로 argv 분해(따옴표 미존중)** 한다. 그래서 `HOSTNAME=0.0.0.0 node server.js`는 `HOSTNAME=0.0.0.0`을 실행파일로 오인, `sh -c "..."`는 따옴표가 깨져 서버가 안 뜬다(2026-07-06 배포 3회 실패의 실제 원인). HOSTNAME 조작은 불필요 — Railway가 주입하는 `HOSTNAME=<컨테이너ID>`는 `/etc/hosts`에서 컨테이너 실제 IP로 해석되므로 standalone이 그 HOSTNAME:PORT(8080)에 바인딩해도 헬스체크가 도달한다(SSH 실측 + 로컬 재현 확인).
 
-> **배포 이미지 최소화(standalone Dockerfile) — 2026-07-06 시도·롤백, 다음 세션 재분석 예정**: `output:"standalone"` + 멀티스테이지 Dockerfile로 런타임 이미지를 ~300MB로 줄이려 했으나(node_modules 580→38MB, `public/images/characters` 283MB 제외), Railway 서비스 특유의 문제가 연속 발생해 nixpacks로 롤백했다 — ① 서비스에 남은 `pnpm start` 시작 명령이 슬림 런타임(pnpm 없음)에서 실패, ② Railway가 시작 명령을 shell 없이 argv로 파싱해 `HOSTNAME=0.0.0.0` 프리픽스를 실행파일로 오인, ③ `sh -c` 래핑 후에도 DEPLOYING(헬스체크) 단계에서 실패(런타임 로그가 CLI·GraphQL 모두 접근 불가로 미규명). **재시도 전 규명 필요**: 대시보드에서 실패 배포의 Deploy 단계 로그(헬스체크 실패 사유·앱 바인딩 host:port)를 확보할 것. 관련 브랜치 히스토리: #482·#483·#485·#486·#487.
+> ⚠️ **NEXT_PUBLIC_* 빌드 인자 필수**: `NEXT_PUBLIC_SUPABASE_URL`·`_ANON_KEY`·`_SITE_URL`·`_ASSET_BASE_URL`은 `next build` 시 클라이언트 번들에 인라인되므로 Railway 서비스 변수로 설정되어 있어야 Dockerfile `ARG`로 주입된다. 특히 `NEXT_PUBLIC_ASSET_BASE_URL` 누락 시 R2 캐릭터 이미지가 이미지에서도 제외돼 404.
+
+> ⚠️ **서비스 startCommand가 railway.toml보다 우선**(GraphQL `serviceInstance.startCommand`). railway.toml에 `node server.js`를 두더라도 서비스에 남은 값(과거 `pnpm start`)이 우선하므로, 배포 시 `serviceInstanceUpdate`로 `node server.js`로 맞춰야 한다.
 
 ---
 
 ## 설정 파일
 
-- `railway.toml` — 빌드/배포 설정 (`builder = "nixpacks"`, `startCommand = "pnpm start"`, `healthcheckPath = "/"`)
-- `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트)
-
-> ⚠️ Railway **서비스 시작 명령**은 서비스 설정 값이 railway.toml보다 우선한다(2026-07-06 확인 — GraphQL `serviceInstance.startCommand`가 우선). 시작 명령을 바꾸려면 서비스 설정(또는 GraphQL `serviceInstanceUpdate`)을 함께 갱신해야 한다.
+- `Dockerfile` — 멀티스테이지 (deps → build → 슬림 runtime, `node server.js` 기동)
+- `.dockerignore` — 빌드 컨텍스트 제외 (node_modules·.next·테스트·docs·캐릭터 이미지·.env)
+- `railway.toml` — (`builder = "dockerfile"`, `startCommand = "node server.js"`, `healthcheckPath = "/api/health"`)
+- `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트, CI는 `next start` 사용)
 
 ### GitHub Secrets (CI 전용)
 
