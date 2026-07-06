@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
+import { getCharacterImageUrl } from "@/lib/storage/character-image";
 
 interface MoodConfig {
   loop: boolean;
@@ -132,7 +133,7 @@ interface SpriteAnimatorProps {
 export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, mood, idleAnimation = "float", primaryColor, onAnimationEnd, className = "" }: SpriteAnimatorProps) {
   const config = MOOD_CONFIGS[mood];
   const fileName = MOOD_TO_FILE[mood];
-  const imageSrc = `/images/characters/${characterId}/nukki-enhanced/${fileName}.png`;
+  const imageSrc = getCharacterImageUrl(characterId, fileName);
 
   // 첫 등장이면 입장 시그니처, 이후 무드 전환은 표준 페이드
   const entrance = CHAR_ENTRANCE[characterId];

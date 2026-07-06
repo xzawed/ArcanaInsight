@@ -23,8 +23,8 @@
 
 **12캐릭터** (arcana, miko, seonhwa, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan):
 - 운영 표시용 이미지: `nukki-enhanced/` 폴더 (2816×1536). **이 2배(원본 1408×768의 2x) 규격은 고DPI 대형 디스플레이·캐릭터 상세(모바일 100vw) 대응을 위한 의도적 선택이며 다운스케일 금지.**
-- 예: `/images/characters/arcana/nukki-enhanced/default.png`
 - 7가지 mood: `default`, `idle`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- **서빙(2026-07-06~)**: 컴포넌트는 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`으로 URL을 조회한다. `NEXT_PUBLIC_ASSET_BASE_URL`(cdn.xzawed.xyz) 설정 시 R2(`characters/[id]/nukki-enhanced/[mood].png`), 미설정 시 로컬 `/images/characters/...` 폴백. **배포 이미지는 `.dockerignore`로 `public/images/characters`(283MB)를 제외**하고 프로덕션은 R2로 서빙 → 배포 이미지 슬림화. 로컬/CI는 repo public 폴백. (⚠️ 프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수)
 - ⚠️ 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`)는 용량 절감을 위해 리포지토리에서 제거(#447)되어 현재는 `nukki-enhanced/`만 존재한다. 운영본 재생성 시에만 외부 백업(1408×768 색상 소스)을 참조한다.
 - 원본은 보존하고, UI에서는 `nukki-enhanced`를 우선 사용한다.
 - Next.js 이미지 optimizer 출력은 WebP를 사용한다. 대형 투명 PNG를 AVIF로 즉석 변환하면 일부 모바일 Chromium 환경에서 첫 요청이 지연될 수 있다.
@@ -75,7 +75,9 @@ AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana
 | 카드 앞면 | `card-styles/cards/{styleId}/{suit}/{number}.png` | 4종 스타일 × 카드 수 (`.png`) |
 | 카드 뒷면 | `card-styles/cards/{styleId}/card-back.webp` | 스타일별 전용 뒷면 (`.webp`) |
 | 서비스 배경 | `card-styles/backgrounds/{service}/{theme}.png` | 타로/사주/신점 × 테마 |
+| 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 7 mood = 84개 (2026-07-06 배포 슬림화로 R2 이전) |
 
+- 캐릭터 URL은 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`로 조회(`NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2, 미설정 시 로컬 public 폴백). 업로드: `pnpm upload:characters:r2`(`:skip` 지원) — `public/images/characters` → R2(`characters/` 키), ETag=md5 검증.
 - URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).
 - 카드 `<Image>`는 `unoptimized`로 R2에서 직접 로드(옵티마이저 우회). `next.config.ts` `remotePatterns`가 자산 호스트를 env에서 자동 파생.
 - 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요).
