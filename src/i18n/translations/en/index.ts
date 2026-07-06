@@ -248,10 +248,6 @@ export const en: Partial<SharedKeys> = {
     "chart.pillar.year": "Year",
     "chart.age-range": "Age {from}–{to}",
     "chart.age-until": "Until {to}",
-    "section.structure": "Four Pillars Structure",
-    "section.elements": "Five Elements",
-    "section.fortune": "Fortune Flow",
-    "section.guidance": "Practical Guide",
   },
   mypage: {
     "page.title": "My Page",
@@ -396,9 +392,5 @@ export const en: Partial<SharedKeys> = {
     "session.btn.get-result": "Get Shinjeom result",
     "session.btn.share": "Share result",
     "session.share.title": "Shinjeom Reading Result",
-    "section.spiritual": "Spiritual Signals",
-    "section.current": "Current Situation",
-    "section.obstacles": "Obstacles",
-    "section.future": "Future Direction",
   },
 };
