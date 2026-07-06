@@ -24,8 +24,14 @@ Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수�
 - `.dockerignore`로 `node_modules`·`.next`·테스트·docs·`.env`, 그리고 **`public/images/characters`(283MB)** 제외 → 이미지 내 `public` 317MB→35MB (캐릭터는 R2 서빙)
 - 실측(amd64): 전체 이미지 ~1.1GB(nixpacks 추정) → **~300MB**
 
-**시작 명령 — 반드시 `node server.js`** (env 프리픽스·따옴표·`sh -c` 금지):
-Railway는 startCommand를 **shell 없이 공백으로 argv 분해(따옴표 미존중)** 한다. 그래서 `HOSTNAME=0.0.0.0 node server.js`는 `HOSTNAME=0.0.0.0`을 실행파일로 오인, `sh -c "..."`는 따옴표가 깨져 서버가 안 뜬다(2026-07-06 배포 3회 실패의 실제 원인). HOSTNAME 조작은 불필요 — Railway가 주입하는 `HOSTNAME=<컨테이너ID>`는 `/etc/hosts`에서 컨테이너 실제 IP로 해석되므로 standalone이 그 HOSTNAME:PORT(8080)에 바인딩해도 헬스체크가 도달한다(SSH 실측 + 로컬 재현 확인).
+**standalone 배포 필수 조건 2가지 (2026-07-06 실측 확정 — 이게 없으면 헬스체크 실패로 배포 FAILED):**
+
+1. **서비스 startCommand = `node server.js`** (env 프리픽스·따옴표·`sh -c` 금지):
+   Railway는 startCommand를 **shell 없이 공백으로 argv 분해(따옴표 미존중)** 한다. 그래서 `HOSTNAME=0.0.0.0 node server.js`는 `HOSTNAME=0.0.0.0`을 실행파일로 오인, `sh -c "..."`는 따옴표가 깨져 서버가 안 뜬다. 순수 `node server.js`여야 함.
+2. **서비스 변수 `HOSTNAME=0.0.0.0` 필수**:
+   Railway 컨테이너의 `HOSTNAME`은 컨테이너ID(예 `f47c8b41151b`)이고, `/etc/hosts`에서 **IPv6(fd12:…)가 먼저, IPv4(10.168.67.211) 나중**으로 해석된다. Next standalone `server.js`는 `process.env.HOSTNAME`에 바인딩하므로 그대로 두면 **IPv6에만 바인딩** → Railway 헬스체크(IPv4)가 도달 못 해 배포 FAILED. `HOSTNAME=0.0.0.0` 서비스 변수를 주입하면 **IPv4 전 인터페이스(0.0.0.0)** 에 바인딩해 도달한다(앱 로그 `Network: http://0.0.0.0:8080` 확인). PORT는 Railway가 8080으로 주입. (nixpacks의 `next start`는 0.0.0.0/IPv4로 바인딩돼 이 문제가 없었음.)
+
+   설정: `railway variable set HOSTNAME=0.0.0.0 -s ArcanaInsight -e production` (또는 GraphQL/대시보드). ⚠️ 서비스 재생성 시 재설정 필요 — repo가 아니라 Railway 서비스 config에 있음.
 
 > ⚠️ **NEXT_PUBLIC_* 빌드 인자 필수**: `NEXT_PUBLIC_SUPABASE_URL`·`_ANON_KEY`·`_SITE_URL`·`_ASSET_BASE_URL`은 `next build` 시 클라이언트 번들에 인라인되므로 Railway 서비스 변수로 설정되어 있어야 Dockerfile `ARG`로 주입된다. 특히 `NEXT_PUBLIC_ASSET_BASE_URL` 누락 시 R2 캐릭터 이미지가 이미지에서도 제외돼 404.
 
