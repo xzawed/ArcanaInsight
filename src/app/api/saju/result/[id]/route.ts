@@ -10,7 +10,7 @@ const SAFE_KEYS = [
   "pillars", "day_master", "day_master_element", "is_strong",
   "elements", "ten_stars", "twelve_stages", "interactions",
   "yongsin", "major_fortunes", "yearly_fortune",
-  "overall_reading", "topic_reading", "direct_answer", "saju_sections", "advice", "share_token", "created_at",
+  "overall_reading", "topic_reading", "direct_answer", "advice", "share_token", "created_at",
 ] as const
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

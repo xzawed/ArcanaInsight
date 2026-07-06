@@ -244,10 +244,6 @@ export const ko: SharedKeys = {
     "chart.pillar.year": "연주",
     "chart.age-range": "{from}~{to}세",
     "chart.age-until": "~{to}세",
-    "section.structure": "사주 구조",
-    "section.elements": "오행 분포",
-    "section.fortune": "대운·세운 흐름",
-    "section.guidance": "실용 가이드",
   },
   mypage: {
     "page.title": "마이페이지",
@@ -392,9 +388,5 @@ export const ko: SharedKeys = {
     "session.btn.get-result": "신점 결과 받기",
     "session.btn.share": "결과 공유하기",
     "session.share.title": "신점 상담 결과",
-    "section.spiritual": "영적 신호",
-    "section.current": "현재 상황",
-    "section.obstacles": "장애물",
-    "section.future": "미래 방향",
   },
 };

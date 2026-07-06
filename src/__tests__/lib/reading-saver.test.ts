@@ -5,10 +5,10 @@ import {
   saveShinjeomFinalReading,
   saveShinjeomMessages,
   logReadingSaveFailure,
+  logReadingParseError,
   recordFailedReading,
   dispatchFailedReadingSave,
   persistDirectAnswer,
-  persistReadingSections,
 } from "@/lib/db/reading-saver";
 import { makeMockDb } from "@/test-helpers/mock-db";
 
@@ -135,43 +135,6 @@ describe("persistDirectAnswer (best-effort directAnswer UPDATE)", () => {
   });
 });
 
-describe("persistReadingSections (best-effort 섹션 UPDATE)", () => {
-  it("saju 섹션을 saju_readings.saju_sections에 session_id 기준 UPDATE 한다", async () => {
-    const db = makeMockDb();
-    db.update.mockResolvedValue(null);
-    const sections = { structure: "구조", elements: "오행", fortune: "운세", guidance: "가이드" };
-    await persistReadingSections(db, "saju", "sess-s1", sections);
-    expect(db.update).toHaveBeenCalledWith("saju_readings", { session_id: "sess-s1" }, { saju_sections: sections });
-  });
-
-  it("shinjeom 섹션을 shinjeom_readings.shinjeom_sections에 UPDATE 한다", async () => {
-    const db = makeMockDb();
-    db.update.mockResolvedValue(null);
-    const sections = { spiritual: "영적", current: "현재", obstacles: "장애", future: "미래" };
-    await persistReadingSections(db, "shinjeom", "sess-s2", sections);
-    expect(db.update).toHaveBeenCalledWith("shinjeom_readings", { session_id: "sess-s2" }, { shinjeom_sections: sections });
-  });
-
-  it("섹션이 없거나 빈 객체면 UPDATE 하지 않는다", async () => {
-    const db = makeMockDb();
-    db.update.mockResolvedValue(null);
-    await persistReadingSections(db, "saju", "s", undefined);
-    await persistReadingSections(db, "saju", "s", {} as never);
-    expect(db.update).not.toHaveBeenCalled();
-  });
-
-  it("UPDATE 실패(컬럼 미존재 등)해도 throw하지 않고 로깅만 한다 — 본 저장 무영향", async () => {
-    const db = makeMockDb();
-    db.update.mockRejectedValue(new Error('column "saju_sections" does not exist'));
-    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    await expect(
-      persistReadingSections(db, "saju", "sess-x", { structure: "s", elements: "e", fortune: "f", guidance: "g" }),
-    ).resolves.toBeUndefined();
-    expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-save-failed] service=saju"));
-    errSpy.mockRestore();
-  });
-});
-
 describe("logReadingSaveFailure", () => {
   it("마커 + service + sessionId + code + message 를 포함한 구조적 로그 출력", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -209,6 +172,43 @@ describe("logReadingSaveFailure", () => {
     const logged = spy.mock.calls[0].map((a) => String(a)).join(" ");
     expect(logged).toContain("[reading-save-failed]");
     expect(logged).toContain("weird string");
+    spy.mockRestore();
+  });
+});
+
+describe("logReadingParseError", () => {
+  it("마커 + service + type + session을 포함한 구조적 로그를 console.warn으로 출력", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("saju", "missing_fields", "sess-9");
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("[reading-parse-error]");
+    expect(logged).toContain("service=saju");
+    expect(logged).toContain("type=missing_fields");
+    expect(logged).toContain("session=sess-9");
+    spy.mockRestore();
+  });
+
+  it("sessionId가 null이면 session=null로 안전 로깅", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("tarot", "truncated", null);
+
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("session=null");
+    spy.mockRestore();
+  });
+
+  it("shinjeom-message 서비스 태그도 그대로 로깅 (신점 최종 턴 파싱 실패)", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("shinjeom-message", "fallback_text", "s");
+
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("service=shinjeom-message");
+    expect(logged).toContain("type=fallback_text");
     spy.mockRestore();
   });
 });

@@ -13,7 +13,7 @@ services/
 │   ├── claude-provider.ts     # Claude API 호출 (fallback 전용)
 │   ├── prompt-builder.ts      # buildCharacterHeader / buildSystemPrompt / buildReadingPrompt / buildUserInfoPrompt / buildFreeQuestionPrompt / buildDirectAnswerContract(질문 직답 answer-first 계약) / buildReadabilityContract(쉬운 말 계약, 3서비스 공통) / buildCharacterMemoryPrompt / getLanguageFooter
 │   ├── reading-generator.ts   # streamReadingWithParseRetry — 1차 스트리밍 → parseError 시 1회 non-stream 재생성 (3 리딩 라우트 공통)
-│   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe(트레일링 콤마 내성) / promoteNestedFields(섹션 내부 필드 승격) / extractFallbackText
+│   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe(트레일링 콤마 내성) / extractFallbackText
 ├── tarot/
 │   ├── tarot-service.ts       # DivinationService 구현체
 │   ├── deck-manager.ts        # 카드 덱 셔플·뽑기
@@ -50,17 +50,17 @@ interface DivinationService {
   getSystemPrompt(characterId?: string, locale?: string): string;
   getReadingPrompt(context: SessionContext): string;
   parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult;
-  // 타로: expectedCardCount로 truncated 감지
-  // 사주: ReadingResult에 sajuSections(structure/elements/fortune/guidance) 포함
-  // 신점: ReadingResult에 shinjeomSections(spiritual/current/obstacles/future) 포함
+  // 타로: expectedCardCount로 truncated 감지, cardInterpretations[].{symbolism,situation,action} 3-섹션
+  // 사주·신점: overallReading/topicReading/advice/directAnswer flat 필드가 정본
+  //   (구 4-섹션 중첩 스키마는 2026-07-07 폐지 — docs/architecture/ai-infrastructure.md 참고)
 }
 ```
 
-### max_tokens 정책 (3-섹션 프리미엄 리딩 기준)
+### max_tokens 정책
 
-- **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 3-섹션(symbolism/situation/action) + directAnswer 기준 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
-- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap. sajuSections(structure/elements/fortune/guidance) 4-섹션 대응.
-- **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`. shinjeomSections(spiritual/current/obstacles/future) 4-섹션 대응.
+- **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 카드별 3-섹션(symbolism/situation/action) + directAnswer 기준 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
+- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap.
+- **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`.
 - **신점 중간 대화**: `SHINJEOM_TOKENS_CHAT = 6,000`.
 
 ## 테스트 위치

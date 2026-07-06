@@ -2,7 +2,7 @@ import { DivinationService, ReadingResult, SessionContext } from "@/types/servic
 import { CharacterConfig } from "@/types/character";
 import { Session, Topic, ChatMessage } from "@/types/session";
 import { getCharacterById } from "@/data/characters";
-import { cleanReadingText, parseJsonSafe, extractFallbackText, promoteNestedFields } from "@/services/core/text-cleaner";
+import { cleanReadingText, parseJsonSafe, extractFallbackText } from "@/services/core/text-cleaner";
 import { buildCharacterHeader, buildUserInfoPrompt, getLanguageFooter, buildDirectAnswerContract, buildReadabilityContract } from "@/services/core/prompt-builder";
 import { UserInfo } from "@/types/user-info";
 
@@ -14,11 +14,6 @@ const topicLabels: Record<string, string> = {
   "shinjeom-career": "직장/이직",
   "shinjeom-auspicious": "택일 (날짜 선택)",
 };
-
-/** shinjeomSections 필드를 안전하게 정제 — 비문자열은 빈 문자열 (기본 stringification 회피) */
-function toShinjeomSectionText(value: unknown): string {
-  return cleanReadingText(typeof value === "string" ? value : "");
-}
 
 export class ShinjeomService implements DivinationService {
   id = "shinjeom";
@@ -120,20 +115,14 @@ ${contract.systemSpec}
 응답 형식 — 반드시 아래 JSON:
 {
 ${contract.schemaLine}
-  "shinjeomSections": {
-    "spiritual": "지금 상황에서 가장 크게 느껴지는 기운과 상담자에게 전하고 싶은 말. 무속 표현은 살리되 바로 쉬운 말로 뜻을 함께 풀어 5~6문단으로 서술.",
-    "current": "지금 이 시기의 운세와 상황, 주변 사람·환경이 주는 영향을 눈에 보이는 구체적인 장면으로 5~6문단 분석.",
-    "obstacles": "지금 힘든 일의 뿌리와 조심할 점을, 겁주지 말고 따뜻하게 5~6문단으로 서술.",
-    "future": "앞으로 3~6개월의 흐름, 바뀌는 시점, 기회가 되는 때, 나아갈 방향을 쉬운 말로 5~6문단 서술."
-  },
-  "overallReading": "【마음에 닿는 말】상담자에게 가장 먼저 전하고 싶은 핵심 메시지\\n\\n【지금의 흐름】지금 이 시기의 운세와 상황\\n\\n【주변 사람들】주변 사람·환경이 주는 영향\\n\\n【힘든 일의 뿌리】지금 겪는 문제의 근본 원인\\n\\n【앞날 전망】앞으로 3~6개월의 흐름\\n\\n【중요한 때】특히 조심하거나 기회가 되는 시점\\n\\n【삶의 방향】이 일이 삶에서 갖는 의미와 나아갈 길. 소제목은 위처럼 쉬운 말로, 각 섹션 3~5문장 이상으로 충분히 서술.",
+  "overallReading": "【마음에 닿는 말】상담자에게 가장 먼저 전하고 싶은 핵심 메시지, 무속 표현은 살리되 바로 쉬운 말로 뜻을 함께 풀어 서술\\n\\n【지금의 흐름】지금 이 시기의 운세와 상황을 눈에 보이는 구체적인 장면으로\\n\\n【주변 사람들】주변 사람·환경이 주는 영향\\n\\n【힘든 일의 뿌리】지금 겪는 문제의 근본 원인을 겁주지 말고 따뜻하게\\n\\n【앞날 전망】앞으로 3~6개월의 흐름, 바뀌는 시점\\n\\n【중요한 때】특히 조심하거나 기회가 되는 시점\\n\\n【삶의 방향】이 일이 삶에서 갖는 의미와 나아갈 길. 소제목은 위처럼 쉬운 말로, 최소 7개 소제목 각각 3~5문장 이상으로 충분히 서술(섹션 분리 없이 하나의 서사로 통합, 깊이는 축소하지 않음).",
   "topicReading": "선택 주제에 대한 깊이 있는 신점 해석.\\n\\n좋은 기운과 조심할 점을 균형 있게.\\n\\n시기별 흐름(이번 달·3개월·6개월).\\n\\n관련된 중요한 사람·환경.\\n\\n상황이 바뀌는 시점 예측. 최소 6문단 이상.",
   "advice": "【지금 당장 할 것】오늘부터 실천 가능한 구체적 행동 2~3가지\\n\\n【마음을 지키는 법】마음을 다잡고 좋은 기운을 부르는 방법(어려운 말 없이 쉽게)\\n\\n【관계·환경 조언】주변 사람·공간·물건에 관한 실질 조언\\n\\n【마음가짐】내면의 변화를 위한 조언과 나아갈 방향. 최소 5문단 이상."
 }
 
 JSON 문자열 값 안의 줄바꿈은 반드시 \\n으로 표현합니다.
 JSON 앞뒤에 어떤 텍스트도 추가하지 않습니다.
-overallReading·topicReading·advice·directAnswer는 shinjeomSections 바깥의 최상위(top-level) 필드입니다. 절대 shinjeomSections 객체 안에 넣지 마세요.
+overallReading·topicReading·advice·directAnswer는 각각 독립된 최상위(top-level) 문자열 필드입니다.
 각 객체·배열의 마지막 항목 뒤에는 쉼표(,)를 넣지 않습니다 (트레일링 콤마 금지).
 내부 reasoning·생각·계획 단계를 출력하지 마세요 — 첫 토큰부터 곧바로 JSON을 시작하고 <think> 같은 태그도 출력 금지.
 ${contract.footerReminder}`;
@@ -151,8 +140,6 @@ ${contract.footerReminder}`;
   parseResult(aiResponse: string): ReadingResult {
     const parsed = parseJsonSafe(aiResponse);
     if (parsed) {
-      // 모델이 flat 필드를 shinjeomSections 내부에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구)
-      promoteNestedFields(parsed, "shinjeomSections", ["overallReading", "topicReading", "advice", "directAnswer"]);
       const overallReading = cleanReadingText(typeof parsed.overallReading === "string" ? parsed.overallReading : "");
       const advice = cleanReadingText(typeof parsed.advice === "string" ? parsed.advice : "");
       const result: ReadingResult = {
@@ -163,16 +150,6 @@ ${contract.footerReminder}`;
       // directAnswer 추출 — 상담자 핵심 질문에 대한 직답 (존재 시에만)
       if (parsed.directAnswer !== undefined) {
         result.directAnswer = cleanReadingText(typeof parsed.directAnswer === "string" ? parsed.directAnswer : "");
-      }
-      // shinjeomSections 추출 (새 형식)
-      if (parsed.shinjeomSections && typeof parsed.shinjeomSections === "object") {
-        const s = parsed.shinjeomSections as Record<string, unknown>;
-        result.shinjeomSections = {
-          spiritual: toShinjeomSectionText(s.spiritual),
-          current: toShinjeomSectionText(s.current),
-          obstacles: toShinjeomSectionText(s.obstacles),
-          future: toShinjeomSectionText(s.future),
-        };
       }
       if (!overallReading || !advice) result.parseError = "missing_fields";
       return result;

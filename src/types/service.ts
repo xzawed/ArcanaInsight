@@ -2,20 +2,6 @@ import { CharacterConfig } from "./character";
 import { Session, Topic, ChatMessage } from "./session";
 import { SelectedCard } from "./card";
 
-export interface SajuSections {
-  structure: string;
-  elements: string;
-  fortune: string;
-  guidance: string;
-}
-
-export interface ShinjeomSections {
-  spiritual: string;
-  current: string;
-  obstacles: string;
-  future: string;
-}
-
 export interface CardInterpretationItem {
   cardId: string;
   position: number;
@@ -33,8 +19,6 @@ export interface ReadingResult {
   advice: string;
   topicReading?: string;
   shareToken?: string | null;
-  sajuSections?: SajuSections;
-  shinjeomSections?: ShinjeomSections;
   /** AI 응답이 잘렸거나 JSON 파싱 실패 시 클라이언트가 감지하기 위한 시그널.
    *  - truncated: 카드 수 부족 등 응답이 도중에 잘림
    *  - invalid_json: JSON 파싱 완전 실패 + fallback 텍스트도 비어있음

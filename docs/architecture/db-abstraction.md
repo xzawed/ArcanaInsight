@@ -74,9 +74,9 @@ src/lib/db/
 | `019_fix_saju_readings.sql` | saju_readings.birth_hour NOT NULL 제약 해제 + saju_readings.mbti 컬럼 추가 (018 누락분) |
 | `020_harden_anon_rls.sql` | 익명 over-grant 하드닝 — readings/saju/shinjeom SELECT 소유자 전용(공개 `using(true)` 제거), sessions·saju_readings UPDATE 익명 분기 제거 (#4/#6). result는 service_role(getAdminDb) 조회라 무영향 |
 | `021_harden_anon_insert_rls.sql` | 익명 INSERT over-grant 하드닝 — `FOR INSERT WITH CHECK (true)` 정책 7종 제거 (sessions·session_cards·readings·saju_readings·daily_cards·shinjeom_messages·shinjeom_readings). 모든 쓰기는 getAdminDb(service_role)라 무영향, anon 직접 삽입만 차단 (020 INSERT 후속) |
-| `022_failed_readings_dlq.sql` | 리딩 저장 dead-letter 큐 — `failed_readings` 테이블 신설(영구 저장 실패분 payload 영속화·재처리). service_role 전용, anon 정책 없음(021과 일관). ⚠️ 운영 DB 미적용 |
+| `022_failed_readings_dlq.sql` | 리딩 저장 dead-letter 큐 — `failed_readings` 테이블 신설(영구 저장 실패분 payload 영속화·재처리). service_role 전용, anon 정책 없음(021과 일관). ✅ 운영 DB 적용 완료(2026-07-01, Supabase MCP 실측 확인) |
 | `023_direct_answer.sql` | 질문 직답 영속 — `readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''` 추가(재방문·공유 결과 노출). 앱은 `persistDirectAnswer` **best-effort UPDATE**로 기록하므로 컬럼 미적용 환경에서도 본 리딩 insert 무영향(컬럼 없으면 UPDATE만 조용히 실패·로깅). ✅ 운영 DB 적용 완료(2026-07-04) |
-| `024_reading_sections.sql` | 사주·신점 섹션 영속 — `saju_readings.saju_sections`·`shinjeom_readings.shinjeom_sections` `JSONB DEFAULT '{}'` 추가(재방문·공유에 4-섹션 프리미엄 리딩 노출). `saju_readings.elements`(오행 jsonb)와 이름 충돌 없음. `persistReadingSections` **best-effort UPDATE**(023과 동일 관용 패턴)로 기록. ✅ 운영 DB 적용 완료(2026-07-05) |
+| `024_reading_sections.sql` | 사주·신점 섹션 영속 — `saju_readings.saju_sections`·`shinjeom_readings.shinjeom_sections` `JSONB DEFAULT '{}'` 추가. ⚠️ **deprecated·미사용(섹션 스키마 폐지 2026-07-07)** — 간헐 무결과의 근본 원인이던 4-섹션 중첩 스키마를 제거하고 `overallReading`을 정본으로 통합(리딩 신뢰성 기술부채 정리). 컬럼은 하위 호환을 위해 DROP하지 않고 유지하되 앱은 더 이상 쓰거나 읽지 않는다. |
 
 PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
 
@@ -100,7 +100,7 @@ PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 �
 - **3회 retry + 점증 백오프** (200ms×시도 = 200/400/600ms). 영구 에러(PostgreSQL 22/23/42 코드)는 즉시 throw
 - 모든 저장 실패는 `logReadingSaveFailure`가 `[reading-save-failed]` 단일 grep 마커로 로깅 (SSE 스트림에 영향 없음)
 - 제공 함수(3회 retry insert): `saveTarotReading`, `saveSajuReading`, `saveShinjeomFinalReading`, `saveShinjeomMessages`
-- best-effort 별도 UPDATE(본 insert와 분리 — 컬럼 미적용 환경에서도 insert 무영향): `persistDirectAnswer`(마이그 023 `direct_answer`), `persistReadingSections`(마이그 024 `saju_sections`/`shinjeom_sections`)
+- best-effort 별도 UPDATE(본 insert와 분리 — 컬럼 미적용 환경에서도 insert 무영향): `persistDirectAnswer`(마이그 023 `direct_answer`). ⚠️ `persistReadingSections`(마이그 024 섹션 컬럼)는 섹션 스키마 폐지(2026-07-07)로 제거됨 — 컬럼은 유지되나 더 이상 기록되지 않는다.
 - dead-letter 큐(마이그 022 `failed_readings`): `recordFailedReading`(무음 흡수 insert), `dispatchFailedReadingSave`(payload로 원본 save 재호출)
 
 ```typescript

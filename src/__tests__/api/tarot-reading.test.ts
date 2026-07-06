@@ -190,7 +190,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("스트림 완료 후 saveTarotReading 호출 (done 이후 await)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -214,7 +214,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("저장 성공 시 done 이후 saved:true 이벤트를 전송한다", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: vi.fn(), logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -230,7 +230,7 @@ describe("POST /api/tarot/reading", () => {
     const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
     const mockLog = vi.fn();
     const mockRecord = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -382,7 +382,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("parseError 있을 때 saveTarotReading 미호출 — 빈 리딩 DB 저장 방지", async () => {
     const saveSpy = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: saveSpy }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: saveSpy, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -408,6 +408,32 @@ describe("POST /api/tarot/reading", () => {
     // parseError가 있으면 saveTarotReading은 호출되지 않아야 한다
     await new Promise((r) => setTimeout(r, 10)); // fire-and-forget 대기
     expect(saveSpy).not.toHaveBeenCalled();
+  });
+
+  it("parseError 시 [reading-parse-error] 마커를 남긴다", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    // 이전 테스트의 doMock("@/lib/db/reading-saver", ...)가 잔존하지 않도록 실제 모듈 사용 보장
+    vi.doUnmock("@/lib/db/reading-saver");
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => ({
+      FallbackProvider: vi.fn().mockImplementation(function () { return ({
+        streamReading: vi.fn().mockImplementation(async function* () {
+          yield "JSON 아닌 텍스트 응답 — parseError 유발";
+        }),
+        generateReading: vi.fn().mockResolvedValue("JSON 아닌 텍스트 응답 — parseError 유발"),
+      }); }),
+    }));
+
+    const { POST } = await import("@/app/api/tarot/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "s-marker" }));
+    await readSSEStream(res);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-parse-error] service=tarot"));
+    warnSpy.mockRestore();
   });
 
   it("freeQuestion 포함 요청 → SSE 스트림 응답", async () => {

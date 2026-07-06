@@ -90,10 +90,9 @@ return new Response(
 
 1. 본 리딩 insert: `saveTarotReading` / `saveSajuReading` / `saveShinjeomFinalReading` (`reading-saver.ts`, 3회 retry)
 2. `directAnswer`: `persistDirectAnswer(db, service, sessionId, result.directAnswer)` — 마이그 023 `direct_answer` 컬럼에 **별도 best-effort UPDATE**
-3. 섹션(사주·신점): `persistReadingSections(db, service, sessionId, result.sajuSections|shinjeomSections)` — 마이그 024 `saju_sections`/`shinjeom_sections` JSONB에 별도 UPDATE
-4. 저장 실패 시 `recordFailedReading`(dead-letter, 마이그 022)로 payload 영속화 → `POST /api/internal/reading-dlq/retry`가 재처리
+3. 저장 실패 시 `recordFailedReading`(dead-letter, 마이그 022)로 payload 영속화 → `POST /api/internal/reading-dlq/retry`가 재처리
 
-> best-effort UPDATE(2·3)는 컬럼 미적용 환경에서도 조용히 실패·로깅만 하고 본 리딩 insert(1)를 깨지 않는다. `freeQuestion`이 있는데 `directAnswer`가 비면 route가 관측 경고를 남긴다.
+> best-effort UPDATE(2)는 컬럼 미적용 환경에서도 조용히 실패·로깅만 하고 본 리딩 insert(1)를 깨지 않는다. `freeQuestion`이 있는데 `directAnswer`가 비면 route가 관측 경고를 남긴다. ⚠️ 마이그 024 섹션 컬럼(`saju_sections`/`shinjeom_sections`)에 대한 별도 UPDATE는 섹션 스키마 폐지(2026-07-07)로 제거됨 — 상세: `docs/architecture/db-abstraction.md`.
 
 ## 테스트 위치
 

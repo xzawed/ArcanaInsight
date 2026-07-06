@@ -17,8 +17,8 @@ const topicLabels: Partial<Record<Topic, string>> = {
  */
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   ko: "",
-  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice, sajuSections, structure, elements, fortune, guidance, shinjeomSections, spiritual, current, obstacles, future) — translate only the values, never the keys.",
-  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice, sajuSections, structure, elements, fortune, guidance, shinjeomSections, spiritual, current, obstacles, future) は必ず英語のまま使用し、値のみを日本語で記述してください。",
+  en: "**CRITICAL — RESPONSE LANGUAGE**: All response text (including all JSON string values) MUST be in natural English. Korean and Japanese are STRICTLY FORBIDDEN in the response, even if the system prompt below is written in Korean. The Korean text in the system prompt is for your INSTRUCTIONS only — your output must be 100% English. Use the EXACT English JSON keys (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice) — translate only the values, never the keys.",
+  ja: "【最重要 — 応答言語】回答本文(すべてのJSON文字列値を含む)は必ず自然な日本語のみで記述してください。下記のシステムプロンプトが韓国語で書かれていても、応答に韓国語と英語を使用することは厳禁です。システムプロンプトの韓国語はあなたへの指示用であり、出力は100%日本語でなければなりません。JSONのキー (cardInterpretations, cardId, position, symbolism, situation, action, directAnswer, overallReading, topicReading, advice) は必ず英語のまま使用し、値のみを日本語で記述してください。",
 };
 
 /** 응답 직전 마지막 강조 — 모델은 가까운 위치의 지시를 더 강하게 따른다. */

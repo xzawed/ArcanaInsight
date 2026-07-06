@@ -99,8 +99,8 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | **Open code smell: 0�
 
 | 항목 | 영역 | 상태·근거 | 우선순위 |
 |------|------|-----------|----------|
-| **리딩 스키마 중복 근본 제거** | `saju-service.ts`·`shinjeom-service.ts` 프롬프트 | 간헐 무결과의 뿌리는 `sajuSections`/`shinjeomSections`가 flat 필드(overallReading/advice)와 **내용 중복**인 과적재 스키마. #480은 파서 내성(트레일링콤마·`promoteNestedFields`)+1회 재생성이라는 **방어**로 0%까지 낮췄으나, 스키마를 flat/섹션 중 하나로 정리하면 재발 여지·토큰이 줄어든다. UX(섹션 렌더) 영향이 있어 별도 설계 필요. | 中 |
-| **parseError 실패 계량/dead-letter** | reading route·`reading-saver.ts` | parseError 리딩은 DB·DLQ에 흔적을 안 남겨(저장 게이트 `!result.parseError`) 지배적 실패 모드가 **관측 불가**. 별도 카운터/전용 dead-letter로 truncation/missing_fields/fallback_text 분포를 계량해야 회귀를 조기 감지. | 中 |
+| ~~**리딩 스키마 중복 근본 제거**~~ | `saju-service.ts`·`shinjeom-service.ts` 프롬프트 | **✅ 해소(2026-07-07, 리딩 신뢰성 기술부채 정리)** — 간헐 무결과의 뿌리이던 `sajuSections`/`shinjeomSections`(flat 필드와 내용 중복인 과적재 스키마)를 타입·프롬프트·파서·영속·UI·i18n 전 계층에서 제거하고 `overallReading`을 정본으로 통합. `promoteNestedFields`·`persistReadingSections`·`ReadingSectionBlock`의 사주·신점 렌더도 함께 제거(타로 카드별 3-섹션 렌더는 유지). 마이그 024 컬럼은 하위 호환 위해 DROP하지 않고 유지(미사용). | — |
+| **parseError 실패 계량/dead-letter** | reading route·`reading-saver.ts` | parseError 리딩은 DB·DLQ에 흔적을 안 남겨(저장 게이트 `!result.parseError`) 지배적 실패 모드가 **관측 불가**했다. **① 계량 로깅 추가 완료(2026-07-07)** — `logReadingParseError`가 `[reading-parse-error]` 단일 grep 마커로 service/parseError 타입(truncated/missing_fields/fallback_text/invalid_json)/sessionId를 3개 리딩 라우트에서 구조적 로깅(`reading-saver.ts`). 잔여: 전용 dead-letter 영속(마이그 022 `failed_readings`는 저장 실패용이라 parseError 전용 분리 여부는 미결정)·카운터 대시보드 집계는 로그 인프라 후속 과제. | 中 |
 | **배포 이미지 추가 슬림** | `public/images/{icons,backgrounds}` | standalone+캐릭터R2로 ~300MB 달성. 잔여 이미지 내 `icons`(21MB)·`backgrounds`(13MB)도 R2 이전 시 추가 축소 가능(캐릭터와 동일 패턴). 효과 대비 소규모. | 低 |
 | **Railway 서비스 config 취약성** | Railway 서비스(startCommand·`HOSTNAME=0.0.0.0`) | standalone 배포 필수 2조건이 **repo가 아닌 Railway 서비스 config**에 있어 서비스 재생성 시 유실 위험. 문서화(가이드·deployment.md)는 완료했으나 자동화는 미구현. | 中 |
 | **배포 후 자동 스모크 검증 부재** | CI/배포 | 헬스체크(`/api/health`) 통과가 이미지·리딩 정상을 보장하지 않음(예 `NEXT_PUBLIC_ASSET_BASE_URL` 누락 시 이미지 404여도 헬스체크 통과). 현재는 수동 스모크(가이드 §4). 배포 후 자동 스모크(홈 이미지·리딩 1건) 도입 여지. | 中 |

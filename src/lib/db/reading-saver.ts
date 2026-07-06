@@ -1,5 +1,4 @@
 import type { DbClient } from "./types";
-import type { SajuSections, ShinjeomSections } from "@/types/service";
 import { isLocale, DEFAULT_LOCALE } from "@/i18n/config";
 
 /** 016 마이그레이션 CHECK 제약(locale IN ('ko','en','ja'))과 동기화 — 빈 문자열·잘못된 값 차단 */
@@ -41,6 +40,19 @@ export function logReadingSaveFailure(
   const message = error instanceof Error ? error.message : String(error);
   console.error(
     `[reading-save-failed] service=${service} session=${sessionId ?? "null"} code=${code} msg=${message}`,
+  );
+}
+
+/** parseError(부분 파싱/무결과)를 단일 grep 마커로 구조적 로깅한다.
+ *  `[reading-parse-error]` 마커로 지배적 실패 모드(truncated/missing_fields/fallback_text/invalid_json)를
+ *  운영 로그에서 추적·집계하기 위한 관측성 헬퍼. best-effort — 절대 throw하지 않는다. */
+export function logReadingParseError(
+  service: "tarot" | "saju" | "shinjeom" | "shinjeom-message",
+  parseError: string,
+  sessionId: string | null,
+): void {
+  console.warn(
+    `[reading-parse-error] service=${service} type=${parseError} session=${sessionId ?? "null"}`,
   );
 }
 
@@ -148,32 +160,6 @@ export async function persistDirectAnswer(
   if (!directAnswer?.trim()) return;
   try {
     await db.update(READING_TABLE[service], { session_id: sessionId }, { direct_answer: directAnswer });
-  } catch (e) {
-    logReadingSaveFailure(service, sessionId, e);
-  }
-}
-
-/** 서비스 → 섹션 JSONB 컬럼 매핑 (타로는 섹션 없음 — card_interpretation으로 별도 저장) */
-const SECTIONS_COLUMN: Record<"saju" | "shinjeom", string> = {
-  saju: "saju_sections",
-  shinjeom: "shinjeom_sections",
-};
-
-/**
- * 사주·신점 섹션(sajuSections/shinjeomSections)을 best-effort로 별도 UPDATE 한다.
- * persistDirectAnswer와 동일한 관용 패턴 — 마이그레이션 024(saju_sections/shinjeom_sections 컬럼) 미적용
- * 환경에서도 본 리딩 insert가 깨지지 않게 한다(컬럼 없으면 이 update만 조용히 실패·로깅).
- * 본 리딩 insert가 완료된 뒤 호출한다.
- */
-export async function persistReadingSections(
-  db: DbClient,
-  service: "saju" | "shinjeom",
-  sessionId: string,
-  sections: SajuSections | ShinjeomSections | undefined,
-): Promise<void> {
-  if (!sections || Object.keys(sections).length === 0) return;
-  try {
-    await db.update(READING_TABLE[service], { session_id: sessionId }, { [SECTIONS_COLUMN[service]]: sections });
   } catch (e) {
     logReadingSaveFailure(service, sessionId, e);
   }

@@ -29,7 +29,7 @@ SSE 라우트(`tarot/reading`, `saju/reading`, `shinjeom/message`)는 반드시 
 6. try/catch 내 `controller.error(e)` 처리
 7. `getAdminDb()` 사용 (RLS 우회 서비스 롤)
 
-> 스트림 완료 후: 본 리딩 insert(`save*Reading`) → `persistDirectAnswer`·`persistReadingSections`(마이그 023·024 컬럼, **본 insert와 분리된 best-effort UPDATE**) → 실패 시 `recordFailedReading`(dead-letter). 별도 UPDATE는 컬럼 미적용 시 조용히 실패해 본 저장을 깨지 않는다(배포 순서 무관).
+> 스트림 완료 후: 본 리딩 insert(`save*Reading`) → `persistDirectAnswer`(마이그 023 `direct_answer` 컬럼, **본 insert와 분리된 best-effort UPDATE**) → 실패 시 `recordFailedReading`(dead-letter). 별도 UPDATE는 컬럼 미적용 시 조용히 실패해 본 저장을 깨지 않는다(배포 순서 무관). ⚠️ `persistReadingSections`(마이그 024 섹션 컬럼)는 섹션 스키마 폐지(2026-07-07)로 제거됨.
 
 ## DB 접근
 

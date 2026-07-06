@@ -145,7 +145,7 @@ describe("POST /api/saju/reading", () => {
 
   it("스트림 완료 후 saveSajuReading 호출 (done 이후 await)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -163,7 +163,7 @@ describe("POST /api/saju/reading", () => {
 
   it("저장 성공 시 done 이후 saved:true 이벤트를 전송한다", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave, logReadingSaveFailure: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingSaveFailure: vi.fn(), logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -179,7 +179,7 @@ describe("POST /api/saju/reading", () => {
     const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
     const mockLog = vi.fn();
     const mockRecord = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -195,7 +195,7 @@ describe("POST /api/saju/reading", () => {
 
   it("birthTime=null → birth_hour: null 로 저장 (NOT NULL 위반 방지)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -218,7 +218,7 @@ describe("POST /api/saju/reading", () => {
 
   it("mbti 입력 시 saju_readings에 저장", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -241,7 +241,7 @@ describe("POST /api/saju/reading", () => {
 
   it("mbti 미입력 시 mbti: null 로 저장", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -265,7 +265,7 @@ describe("POST /api/saju/reading", () => {
       streamReading: vi.fn().mockImplementation(async function* () { yield noTopicReading; }),
       generateReading: vi.fn().mockResolvedValue(""),
     });
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -357,18 +357,6 @@ describe("POST /api/saju/reading", () => {
     });
   });
 
-  // ─── sajuSections 구조 검증 ───────────────────────────────────────────────
-  it("sajuSections 포함 AI 응답 → done 청크에 sajuSections 전달", async () => {
-    const { POST } = await setup();
-    const res = await POST(makePostRequest(VALID_BODY));
-    const text = await readSSEStream(res);
-    expect(text).toContain("sajuSections");
-    expect(text).toContain("structure");
-    expect(text).toContain("elements");
-    expect(text).toContain("fortune");
-    expect(text).toContain("guidance");
-  });
-
   // ─── parseError 시 DB 저장 차단 ───────────────────────────────────────────
   it("parseError(missing_fields) → saveSajuReading 미호출 (부분 결과 영구 저장 차단)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
@@ -378,7 +366,7 @@ describe("POST /api/saju/reading", () => {
       streamReading: vi.fn().mockImplementation(async function* () { yield partialJson; }),
       generateReading: vi.fn().mockResolvedValue(""),
     });
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), persistReadingSections: vi.fn(), saveSajuReading: mockSave }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveSajuReading: mockSave, logReadingParseError: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -393,6 +381,29 @@ describe("POST /api/saju/reading", () => {
     await Promise.resolve();
     expect(text).toContain("missing_fields");
     expect(mockSave).not.toHaveBeenCalled();
+  });
+
+  it("parseError 시 [reading-parse-error] 마커를 남긴다", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const partialJson = JSON.stringify({ overallReading: "결과 본문", topicReading: "주제", advice: "" });
+    const mockAiModule = makeMockAiModule({
+      streamReading: vi.fn().mockImplementation(async function* () { yield partialJson; }),
+      generateReading: vi.fn().mockResolvedValue(""),
+    });
+    // 이전 테스트의 doMock("@/lib/db/reading-saver", ...)가 잔존하지 않도록 실제 모듈 사용 보장
+    vi.doUnmock("@/lib/db/reading-saver");
+    vi.doMock("@/lib/rate-limit", () => ({
+      checkRateLimit: vi.fn().mockReturnValue(true),
+      rateLimitResponse: vi.fn(),
+    }));
+    vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(makeMockDb()), getAdminDb: vi.fn().mockReturnValue(makeMockDb()) }));
+    vi.doMock("@/lib/auth", () => makeAuthMock());
+    vi.doMock("@/services/core/fallback-provider", () => mockAiModule);
+    const { POST } = await import("@/app/api/saju/reading/route");
+    const res = await POST(makePostRequest({ ...VALID_BODY, sessionId: "sess-marker" }));
+    await readSSEStream(res);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-parse-error] service=saju"));
+    warnSpy.mockRestore();
   });
 
   describe("freeQuestion 시간 지평 연계 (#6)", () => {
