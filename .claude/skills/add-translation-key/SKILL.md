@@ -21,20 +21,24 @@ src/i18n/translations/
     └── index.ts         ← 일본어 번역
 ```
 
-현재 namespace 19개: `common`, `home`, `tarot`, `saju`, `shinjeom`, `character`, `settings`, `result`, `error`, `reading`, `card`, `skin`, `session`, `auth`, `legal`, `share`, `theme`, `birth-time`, `privacy-consent`
+현재 top-level namespace 19개 (`shared/keys.ts` 정본): `common`, `header`, `footer`, `home`, `settings`, `locale`, `tarot`, `saju`, `mypage`, `character`, `user-info`, `birth-time`, `privacy-consent`, `auth`, `share`, `chat`, `api`, `meta`, `shinjeom`
 
 ## 단계별 절차
 
 ### Step 1 — SharedKeys에 타입 추가
 
-`src/i18n/translations/shared/keys.ts`에서 해당 namespace 인터페이스에 키를 추가한다.
+`src/i18n/translations/shared/keys.ts`의 **단일 `SharedKeys` 인터페이스**에서 해당 namespace(중첩 객체)에 키를 추가한다. (namespace별 `XxxKeys` 인터페이스는 존재하지 않는다.)
 
 ```typescript
-// 예시: tarot namespace에 새 키 추가
-export interface TarotKeys {
-  // 기존 키들...
-  newFeatureTitle: string;    // ← 추가
-  newFeatureDesc: string;     // ← 추가
+// 예시: tarot namespace 객체에 새 키 추가 (키는 kebab-case 관례)
+export interface SharedKeys {
+  // ...
+  tarot: {
+    // 기존 키들...
+    "new-feature-title": string;   // ← 추가
+    "new-feature-desc": string;    // ← 추가
+  };
+  // ...
 }
 ```
 
@@ -45,8 +49,8 @@ export interface TarotKeys {
 ```typescript
 tarot: {
   // 기존 항목들...
-  newFeatureTitle: "새 기능 제목",
-  newFeatureDesc: "새 기능 설명",
+  "new-feature-title": "새 기능 제목",
+  "new-feature-desc": "새 기능 설명",
 }
 ```
 
@@ -57,14 +61,14 @@ tarot: {
 ```typescript
 // en/index.ts
 tarot: {
-  newFeatureTitle: "New Feature Title",
-  newFeatureDesc: "New feature description",
+  "new-feature-title": "New Feature Title",
+  "new-feature-desc": "New feature description",
 }
 
 // ja/index.ts
 tarot: {
-  newFeatureTitle: "新機能タイトル",
-  newFeatureDesc: "新機能の説明",
+  "new-feature-title": "新機能タイトル",
+  "new-feature-desc": "新機能の説明",
 }
 ```
 
@@ -79,13 +83,15 @@ drift(키 불일치) 없음 확인. 에러 발생 시 누락된 언어의 키를
 ### Step 5 — UI에서 사용
 
 ```tsx
-// 클라이언트 컴포넌트
-const { t } = useT("tarot");
-return <h1>{t("newFeatureTitle")}</h1>;
+// 클라이언트 컴포넌트 — useT()는 인자 없음, 전체 키(namespace.key)로 조회
+const { t } = useT();
+return <h1>{t("tarot.new-feature-title")}</h1>;
 
-// 서버 컴포넌트 / API
-const t = await getT("tarot", locale);
-return t("newFeatureTitle");
+// 서버 컴포넌트 / API — getRequestLocale + t(key, locale)  (getT는 존재하지 않음)
+import { t as translate } from "@/i18n/translations";
+import { getRequestLocale } from "@/i18n/server-locale";
+const locale = await getRequestLocale();
+return translate("tarot.new-feature-title", locale);
 ```
 
 ## 주의사항

@@ -1,7 +1,6 @@
 ---
 name: quality-gate
 description: 코드 품질 검증을 강도 높게 수행한다. "코드 검증", "품질 검사", "전체 테스트", "코드 품질 향상" 등의 요청에 사용한다.
-model: claude-sonnet-4-6
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -44,19 +43,23 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 - `src/app/tarot/session/page.tsx` — SSE 버퍼링, 카드 확인, 대기 연출
 - `src/app/saju/session/page.tsx` — SSE 처리, 결과 표시
 
-### Phase 3: 27개 테스트 케이스 실행
+### Phase 3: 자동화 테스트 + 커버리지 게이트 (실제 실행)
 
-코드를 직접 읽고 아래 항목을 검증한다 (자동화 테스트 프레임워크 없음, 정적 코드 분석 + 파일 존재 확인):
+프로젝트는 Vitest(단위·통합) + Playwright(E2E) 기반이다. **정적 시뮬레이션이 아니라 실제 스위트를 실행**한다:
 
-1. **사주 계산 엔진** (5개) — 알려진 사주, 윤년, 십성, 12운성, 대운
-2. **상수 데이터 무결성** (4개) — 천간 10개, 지지 12개, 오행 5개, 12시진
-3. **카드 데이터** (2개) — 메이저 22장, 스프레드 10종
-4. **캐릭터 데이터** (2개) — 전체 캐릭터 수 12명, 모든 expressions가 nukki-enhanced PNG 경로(`/nukki-enhanced/*.png`) 형식
-5. **API 입력 검증** (2개) — 유효 토픽(15개 / 사주 8개+타로 7개), 스프레드 타입(10종)
-6. **SSE 패턴** (4개) — 버퍼링, error 처리, done+break, 사주 동일 패턴
-7. **타입 안전성** (4개) — spreadType nullable, cardInterpretations optional, 타임아웃, 플레이스홀더
-8. **레이아웃 규칙** (2개) — 타로/사주 5:5 레이아웃 (md:w-1/2 적용 여부)
-9. **보안** (2개) — 환경변수 하드코딩 없음, 법적 페이지 존재
+```bash
+pnpm test:coverage      # Vitest 전체 + v8 커버리지 임계값 게이트
+```
+
+- **전체 테스트 통과 필수** — 1개라도 실패 시 게이트 실패.
+- **커버리지 임계값**(`vitest.config.ts`): branches 90 / functions 97 / lines 98 / statements 98. 미달 시 실패.
+- 실패·미달 항목은 아래 결과 보고에 파일·수치와 함께 기록한다.
+
+```bash
+pnpm test:e2e:full:ci   # (선택) 대표 케이스 E2E — UI/플로우 변경 시
+```
+
+Vitest가 이미 커버하는 도메인(사주 계산·상수 무결성·카드/캐릭터 데이터·API 입력 검증·SSE 패턴·타입 안전성 등)은 위 실행으로 검증된다. 추가로 구조적 스팟 체크가 필요하면 Phase 2·4의 파일 대조를 병행한다.
 
 ### Phase 4: 이미지 에셋 검증
 
@@ -65,12 +68,12 @@ pnpm lint              # ESLint (0 error 필수, warning 기록)
 - 필수 표정 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 - SpriteAnimator MOOD_TO_FILE 매핑과 파일명 일치
 - expressions 경로가 실제 파일과 일치
-- **[필수] 모든 nukki PNG 사이즈가 1408×768인지 검증**:
+- **[필수] 모든 nukki PNG 사이즈가 2816×1536인지 검증** (고DPI 2x본 · 다운스케일 금지):
   ```bash
   python3 -c "
   from PIL import Image; import glob
   files = glob.glob('public/images/characters/*/nukki-enhanced/*.png')
-  bad = [f for f in files if Image.open(f).size != (1408, 768)]
+  bad = [f for f in files if Image.open(f).size != (2816, 1536)]
   print(f'전체 {len(files)}개 | 비표준: {len(bad)}개')
   for f in bad: print(' !!', f, Image.open(f).size)
   "
@@ -101,11 +104,12 @@ git diff HEAD~1 --name-only --diff-filter=A | grep "^src/.*\.tsx\?$"
 tsc: 0 error
 lint: 0 error, N warning
 
-=== 테스트 케이스 ===
-총 N개 | ✓ N 통과 | ✗ N 실패
+=== 테스트 + 커버리지 (실제 실행) ===
+Vitest: N passed / N files
+커버리지: branches X / functions X / lines X / statements X (임계값 90/97/98/98)
 
 === 이미지 에셋 ===
-N개 캐릭터 × 7 누끼 = N개 확인
+12개 캐릭터 × nukki-enhanced 표정 = N개 확인 (2816×1536)
 
 === 발견된 이슈 ===
 | # | 심각도 | 파일 | 이슈 | 수정 |

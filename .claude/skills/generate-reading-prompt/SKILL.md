@@ -18,35 +18,37 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:co
 
 ### 1. max_tokens 적정성 확인
 
-현재 `computeReadingMaxTokens` 정책:
+> ⚠️ 수치는 코드가 정본이다. 이 표는 참고용이며, 실제 값은 **`src/app/api/tarot/reading/route.ts`(`computeReadingMaxTokens`)**·**`src/services/CLAUDE.md`**를 확인한다(휘발성 수치 drift 방지).
 
-전 구간 단일 공식: `min(4000 + cardCount × 2500 + 5000, 60000)`
+**타로** `computeReadingMaxTokens(cardCount)`: `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000)
 
-| 카드 수 | max_tokens | 비고 |
-|---------|-----------|------|
-| 1장 | 11,500 | |
-| 3장 | 16,500 | |
-| 5장 | 21,500 | |
-| 7장 | 26,500 | |
-| 9장 | 31,500 | |
-| 10장 | 34,000 | |
-| 12장(zodiac) | 39,000 | |
-| 20장 이상 | 60,000 (cap) | |
+| 카드 수 | max_tokens |
+|---------|-----------|
+| 1장 | 39,000 |
+| 2장 | 48,000 |
+| 3장 | 57,000 |
+| 4장 이상 | 65,000 (cap) |
 
-> **주의**: Grok-3은 reasoning 토큰이 output max_tokens 예산을 공유한다.  
-> reasoning ~1500토큰 소모 시 실제 출력 가능 토큰이 그만큼 줄어든다.
+**사주** `computeSajuReadingMaxTokens`: 기본 48,000 / 복잡 범위(includeMonthly·5년·전체운세 등) 60,000 cap
+**신점**: 최종 리딩 `SHINJEOM_TOKENS_FINAL = 48,000` 고정 · 중간 대화 `SHINJEOM_TOKENS_CHAT = 6,000`
+
+> **주의**: Grok-3은 reasoning 토큰이 output max_tokens 예산을 공유한다(reasoning 소모분만큼 실제 출력 감소) → 충분한 버퍼 필수.
 
 - [ ] 실제 AI 응답 길이가 기대에 못 미친다면 max_tokens 상향을 검토한다
-- [ ] 변경 후 `src/__tests__/api/tarot-reading.test.ts`의 기댓값도 동시 수정 필수
+- [ ] 변경 후 `src/__tests__/api/tarot-reading.test.ts` 등 상수를 기댓값으로 쓰는 테스트 동시 수정 필수
 
-### 2. depthGuide 지침 확인
+### 2. 프리미엄 리딩 구조 + 계약 (PR #414·#420·#467·#471)
 
-현재 정책 (`prompt-builder.ts`):
-- 각 카드 해석(interpretation): **카드 수 무관 3~4문단**
-- 종합 해석(overallReading): **4~5문단**
-- 조언(advice): **2~3문단**
+**타로 카드 해석은 단일 필드가 아니라 3-섹션**이다(`prompt-builder.ts`):
+- `symbolism` 3~4문단 · `situation` 3~4문단 · `action` 1~2문단
+- 종합 해석(overallReading): **5~6문단** · 조언(advice): **3~4문단**
+- 사주 `sajuSections`(structure/elements/fortune/guidance), 신점 `shinjeomSections`(spiritual/current/obstacles/future) 4-섹션
 
-- [ ] depthGuide 변경 시 `src/services/core/prompt-builder.test.ts` 테스트 기댓값 동시 수정
+**두 공통 계약을 반드시 함께 검토**한다:
+- **`buildDirectAnswerContract(domain)`** — 질문 직답(answer-first). `directAnswer`를 결과 최상단에 렌더. schemaLine·systemSpec·footerReminder를 한 곳에서 방출(지시-스키마-파서 drift 차단). "균등 나열" 헤지 금지.
+- **`buildReadabilityContract(domain)`** — 쉬운 말 계약. "분량 축소가 아니라 같은 분량을 쉬운 말로"(문단 수·max_tokens 불변). 해요체·전문용어 즉시 풀어쓰기·구체 장면 착지.
+
+- [ ] 문단 수/구조 변경 시 `src/services/core/prompt-builder.test.ts` 테스트 기댓값 동시 수정
 
 ### 3. 시스템 프롬프트 구조
 
@@ -59,13 +61,16 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:co
 - [ ] 새 캐릭터 추가 시 persona 완성도 확인 (personality + speechStyle 필수)
 - [ ] 언어 파라미터가 `x-locale` 헤더에서 올바르게 전달되는지 확인
 
-### 4. JSON 파싱 안전성
+### 4. JSON 파싱 안전성 (PR #480 무결성 파이프라인)
 
-`parseJsonSafe()` + `cleanReadingText()` 파이프라인:
-- AI가 JSON 외 텍스트를 포함해도 `fallback_text` 처리
-- `parseError` 신호: `truncated`, `fallback_text`, `invalid_json`
+간헐적 무결과 근본 수정으로 3중 내성 파이프라인이 있다:
+- **`parseJsonSafe()`** — 3차 파싱에 **트레일링 콤마 제거**(`stripTrailingCommas`) 포함
+- **`promoteNestedFields(parsed, "sajuSections"|"shinjeomSections", [...])`** — 모델이 flat 필드를 섹션 객체 *내부*에 잘못 중첩한 경우 top-level로 승격(`missing_fields` 복구). 사주·신점 `parseResult`에서 호출
+- **`streamReadingWithParseRetry`** (`reading-generator.ts`) — 3개 리딩 라우트가 사용. 1차 파싱이 `parseError`면 1회 non-stream 재생성
+- `parseError` 신호 4종: `truncated`, `fallback_text`, `invalid_json`, `missing_fields`
 
 - [ ] 새 필드 추가 시 Zod schema와 `ReadingResult` 타입 동시 업데이트
+- [ ] 섹션 내부 중첩 가능 필드는 `promoteNestedFields` 대상 목록에 추가
 - [ ] `parseError` 케이스를 UI가 적절히 처리하는지 확인
 
 ## 프롬프트 개선 작업 절차
@@ -79,7 +84,9 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:co
 
 ## 실제 리딩 품질 확인 방법
 
-개발 서버에서 타로 리딩 1장 요청 후 SSE 스트림 길이 확인:
-- overallReading: 4~5문단 (각 200~300자)
-- cardInterpretations[0]: 3~4문단
-- advice: 2~3문단
+개발 서버(또는 프로덕션 익명 요청)에서 타로 리딩 요청 후 SSE 스트림 파싱:
+- `directAnswer`: 질문 재진술 + 한 방향 단언(최상단 렌더)
+- overallReading: 5~6문단
+- cardInterpretations[0]: `symbolism`(3~4) + `situation`(3~4) + `action`(1~2)
+- advice: 3~4문단
+- `parseError` 없음(무결과 아님) 확인
