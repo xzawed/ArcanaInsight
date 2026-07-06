@@ -10,7 +10,7 @@ import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections } from "@/lib/db/reading-saver";
+import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections, logReadingParseError } from "@/lib/db/reading-saver";
 import type { DbClient } from "@/lib/db/types";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
@@ -34,15 +34,6 @@ async function emitShinjeomFinalResult(
   sessionId: string | null | undefined,
   locale: string,
 ): Promise<void> {
-  if (result.parseError) {
-    console.warn("[shinjeom-message] 부분 파싱:", {
-      parseError: result.parseError,
-      olen: result.overallReading?.length ?? 0,
-      alen: result.advice?.length ?? 0,
-      sessionId: sessionId ?? null,
-    });
-  }
-
   // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 빈 화면 방지).
   let shareToken: string | null = null;
   let saveStatus: boolean | null = null; // null = 저장 시도 안 함 (익명/parseError)
@@ -63,6 +54,12 @@ async function emitShinjeomFinalResult(
 
   // 결과를 먼저 전송 (share_token 포함). parseError 시 클라이언트는 result.parseError로 재시도 안내.
   controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isFinal: true, result: { ...result, shareToken } })}\n\n`));
+
+  // parseError(부분 파싱/무결과)는 [reading-parse-error] 마커로 관측성 로깅 (저장 게이트와 무관, best-effort)
+  if (result.parseError) {
+    logReadingParseError("shinjeom-message", result.parseError, sessionId ?? null);
+  }
+
   // 저장 시그널 (done 이후 후속 이벤트). onSaveStatus 소비자만 수신.
   if (saveStatus !== null) {
     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ saved: saveStatus })}\n\n`));

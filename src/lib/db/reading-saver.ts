@@ -44,6 +44,19 @@ export function logReadingSaveFailure(
   );
 }
 
+/** parseError(부분 파싱/무결과)를 단일 grep 마커로 구조적 로깅한다.
+ *  `[reading-parse-error]` 마커로 지배적 실패 모드(truncated/missing_fields/fallback_text/invalid_json)를
+ *  운영 로그에서 추적·집계하기 위한 관측성 헬퍼. best-effort — 절대 throw하지 않는다. */
+export function logReadingParseError(
+  service: "tarot" | "saju" | "shinjeom" | "shinjeom-message",
+  parseError: string,
+  sessionId: string | null,
+): void {
+  console.warn(
+    `[reading-parse-error] service=${service} type=${parseError} session=${sessionId ?? "null"}`,
+  );
+}
+
 /** 타로 리딩 결과 + 세션 완료 + 카드 목록 저장 (3회 retry).
  *  locale 인자는 readings 테이블에 작성 시점 locale을 기록 (sessions.locale과 별도 — 결과 텍스트 언어 추적용). */
 export async function saveTarotReading(

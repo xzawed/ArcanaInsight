@@ -12,7 +12,7 @@ import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections } from "@/lib/db/reading-saver";
+import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, persistReadingSections, logReadingParseError } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -139,15 +139,6 @@ export async function POST(request: NextRequest) {
             logTag: "saju-reading",
           });
 
-          // 부분 파싱(누락/잘림)은 운영 로그로 명시 추적
-          if (result.parseError) {
-            console.warn("[saju-reading] 부분 파싱:", {
-              parseError: result.parseError,
-              olen: result.overallReading?.length ?? 0,
-              alen: result.advice?.length ?? 0,
-              sessionId: sessionId ?? null,
-            });
-          }
           // 자유질문이 있었는데 directAnswer가 비면 조용한 소실 회귀 — 관측(RC3 재발 감시)
           if (freeQuestion?.trim() && !result.directAnswer?.trim()) {
             console.warn("[saju-reading] freeQuestion 있으나 directAnswer 비어있음:", { sessionId: sessionId ?? null });
@@ -160,6 +151,11 @@ export async function POST(request: NextRequest) {
             result,
             sajuData: sajuResult,
           })}\n\n`));
+
+          // parseError(부분 파싱/무결과)는 [reading-parse-error] 마커로 관측성 로깅 (저장 게이트와 무관, best-effort)
+          if (result.parseError) {
+            logReadingParseError("saju", result.parseError, sessionId ?? null);
+          }
 
           // DB 저장 — 결과(done)는 이미 전송됐으므로 가용성에 영향 없음. 저장 결과를 saved 시그널로 전송.
           // parseError 있는 부분 결과는 영구 저장하지 않는다 (result/[id] 진입 시 빈 화면 방지).

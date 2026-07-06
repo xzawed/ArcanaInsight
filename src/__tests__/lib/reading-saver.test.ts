@@ -5,6 +5,7 @@ import {
   saveShinjeomFinalReading,
   saveShinjeomMessages,
   logReadingSaveFailure,
+  logReadingParseError,
   recordFailedReading,
   dispatchFailedReadingSave,
   persistDirectAnswer,
@@ -209,6 +210,43 @@ describe("logReadingSaveFailure", () => {
     const logged = spy.mock.calls[0].map((a) => String(a)).join(" ");
     expect(logged).toContain("[reading-save-failed]");
     expect(logged).toContain("weird string");
+    spy.mockRestore();
+  });
+});
+
+describe("logReadingParseError", () => {
+  it("마커 + service + type + session을 포함한 구조적 로그를 console.warn으로 출력", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("saju", "missing_fields", "sess-9");
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("[reading-parse-error]");
+    expect(logged).toContain("service=saju");
+    expect(logged).toContain("type=missing_fields");
+    expect(logged).toContain("session=sess-9");
+    spy.mockRestore();
+  });
+
+  it("sessionId가 null이면 session=null로 안전 로깅", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("tarot", "truncated", null);
+
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("session=null");
+    spy.mockRestore();
+  });
+
+  it("shinjeom-message 서비스 태그도 그대로 로깅 (신점 최종 턴 파싱 실패)", () => {
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    logReadingParseError("shinjeom-message", "fallback_text", "s");
+
+    const logged = String(spy.mock.calls[0][0]);
+    expect(logged).toContain("service=shinjeom-message");
+    expect(logged).toContain("type=fallback_text");
     spy.mockRestore();
   });
 });
