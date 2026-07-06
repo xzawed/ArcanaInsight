@@ -214,7 +214,6 @@ export interface EffectTheme {
 | 카드 아트 스타일 | `src/data/cardStyles.ts` |
 | 팔레트 스킨 | `src/data/skins/index.ts` |
 | 홈 페이지 정적 데이터 | `src/data/home/` (faq.ts) |
-| 에러 메시지 상수 | `src/data/error-messages.ts` |
 | MBTI 16타입 상수 | `src/data/mbti.ts` |
 | 토픽 메타 정보 | `src/data/topics-meta.ts` |
 | 신점 문화적 해석 데이터 | `src/data/shinjeom/cultural-readings.ts` |

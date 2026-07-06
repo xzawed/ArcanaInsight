@@ -13,10 +13,9 @@
 1. `src/data/characters/index.ts` — 캐릭터 메타데이터 추가
 2. `src/data/characters/waiting-lines.ts` — 대기 대사 추가
 3. `src/types/character.ts` — 타입 확인
-4. `public/images/characters/[id]/nukki/` — 원본 이미지 7종 배치
-5. `public/images/characters/[id]/nukki/backup-v2/` — 운영본 색상 기준 1408×768 고해상도 원본 7종 배치
-6. `public/images/characters/[id]/nukki-enhanced/` — `backup-v2` 색상과 누끼 알파를 결합한 2816×1536 보정본 생성
-7. → `.claude/agents/character-add.md` 에이전트 활용
+4. `public/images/characters/[id]/nukki-enhanced/[mood].png` — 표정별 이미지(2816×1536 고DPI 2x본) 배치. ⚠️ `nukki/`·`nukki/backup-v2/` 폴더는 #447로 제거됨 — 현재는 `nukki-enhanced/` 단일 폴더만 사용(다운스케일 금지)
+5. `pnpm upload:characters:r2` — 캐릭터 이미지를 Cloudflare R2에 업로드(프로덕션은 `cdn.xzawed.xyz/characters` 서빙, `.dockerignore`가 배포 이미지에서 제외)
+6. → `.claude/agents/character-add.md` 에이전트 활용
 
 참고: [`docs/architecture/data-model.md`](../architecture/data-model.md) — 캐릭터 이미지 경로 규칙
 

@@ -86,12 +86,6 @@ export async function POST(req: NextRequest) {
 - server-locale.ts: exclusion (Next.js headers API 의존, 단위 테스트는 vitest setup mock)
 - vitest `coverage.include`와 `sonar.coverage.exclusions` 항상 동기 (PR-A 표류 정리 교훈)
 
-## 외부 번역 의뢰 자료
-
-- `docs/i18n/glossary.md`: 사주 십성·오방색·타로 표준 영문 용어집
-- `docs/i18n/character-voice-guide.md`: 12 캐릭터 영문·일문 화법 시그니처
-- `docs/i18n/character-qa-checklist.md`: 페르소나 톤 일관성 QA
-
 ## 참조
 
 - 인프라 개요: [`docs/architecture/i18n.md`](../architecture/i18n.md)

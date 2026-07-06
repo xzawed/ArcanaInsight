@@ -55,7 +55,7 @@ ArcanaInsight 코드 작성 시 반드시 준수해야 하는 스타일 규칙�
 | **메이저 업그레이드 금지** (사용자 승인 필요) | Next.js, React, Framer Motion, Tailwind CSS, Zustand |
 | **마이너·패치 허용** | 보안 패치, 버그 픽스 |
 | **버전 고정** | `pnpm@10.33.0` — lock 파일 및 Docker 스크립트 동기화 |
-| **버전 고정** | `playwright:v1.59.1-noble` — CI Docker 이미지 동기화 |
+| **버전 고정** | `@playwright/test@^1.59.1` — CI는 ubuntu 러너 + `npx playwright install`. `mcr.microsoft.com/playwright:v1.59.1-noble`는 로컬 Docker E2E 전용 이미지(CI는 컨테이너 미사용) |
 
 ---
 
