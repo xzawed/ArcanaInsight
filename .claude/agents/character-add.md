@@ -117,24 +117,35 @@ node scripts/generate-character-images-v2.mjs {id}
 node scripts/generate-character-images-v2.mjs {id} smile
 ```
 
-> **[필수] 이미지 사이즈 규격: 1408×768**
-> `grok-imagine-image-pro` API 기본 출력 사이즈이므로 별도 지정 불필요.
+> **[필수] 이미지 사이즈 규격: 2816×1536** (고DPI 표시용 의도적 2x본 — **다운스케일 금지**)
+> `nukki-enhanced` 이미지는 캐릭터 상세(모바일 100vw)·세션 등 큰 표시를 위해 2816×1536 2x본으로 유지한다.
 > 생성 후 반드시 아래 명령으로 사이즈를 검증한다:
 > ```bash
 > python3 -c "
 > from PIL import Image; import glob
 > files = sorted(glob.glob('public/images/characters/{id}/nukki-enhanced/*.png'))
-> bad = [(f, Image.open(f).size) for f in files if Image.open(f).size != (1408, 768)]
-> print('비표준 파일:', bad if bad else '없음 (모두 1408x768)')
+> bad = [(f, Image.open(f).size) for f in files if Image.open(f).size != (2816, 1536)]
+> print('비표준 파일:', bad if bad else '없음 (모두 2816x1536)')
 > "
 > ```
 > 비표준 사이즈가 있으면 해당 표정을 재생성한다. 사이즈가 맞지 않으면 이후 작업을 중단하고 수정한다.
+
+### 6. R2 업로드 (필수 — 프로덕션 서빙)
+
+프로덕션은 캐릭터 이미지를 **Cloudflare R2(`cdn.xzawed.xyz/characters`)**에서 서빙하고, `.dockerignore`가 `public/images/characters`를 배포 이미지에서 제외한다(배포 슬림화). 따라서 **로컬 생성만으로는 프로덕션에서 404**가 되므로 반드시 R2에 업로드한다.
+
+```bash
+pnpm upload:characters:r2        # 신규/변경분 R2 업로드 (md5 검증)
+pnpm upload:characters:r2:skip   # 이미 존재하는 키 건너뛰고 업로드
+```
+
+`src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, mood)`가 `NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2를, 미설정 시 로컬 `public`을 사용한다.
 
 ## 이미지 표시 규칙
 
 캐릭터 이미지를 화면에 표시할 때 **항상** 아래 두 가지를 동시에 지킨다:
 
-### 1. 사이즈 규격 — 1408×768 (필수)
+### 1. 사이즈 규격 — 2816×1536 (필수, 고DPI 2x본 · 다운스케일 금지)
 생성 후 반드시 검증 (위 4단계 참조).
 
 ### 2. 테두리 투명도 — CSS mask 표준값 (필수)
@@ -190,8 +201,9 @@ sonar.coverage.exclusions=\
 - [ ] `waitingLines`에 대사 추가됨
 - [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
 - [ ] nukki-enhanced 이미지 7개(default/idle/smile/serious/surprised/wink/mystical) 존재
-- [ ] **모든 nukki-enhanced 이미지가 1408×768 사이즈** (python3 사이즈 검증 명령으로 확인)
+- [ ] **모든 nukki-enhanced 이미지가 2816×1536 사이즈** (python3 사이즈 검증 명령으로 확인 · 고DPI 2x본, 다운스케일 금지)
+- [ ] **`pnpm upload:characters:r2`로 R2 업로드 완료** (프로덕션은 `cdn.xzawed.xyz/characters` 서빙 — 미업로드 시 프로덕션 404)
 - [ ] **캐릭터 이미지 표시 시 표준 mask 스타일 적용** (CharacterDisplay 사용 또는 직접 스타일 명시)
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치 (default→idle.png)
-- [ ] **이미지 생성 전 backup-v2/ 백업 완료**
+- [ ] **이미지 생성 전 백업 완료**
 - [ ] **신규 .ts 파일 추가 시 sonar-project.properties exclusions 동기화 완료**
