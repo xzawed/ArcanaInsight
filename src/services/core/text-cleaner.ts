@@ -57,6 +57,16 @@ function findOutermostObjectEnd(text: string, start: number): number {
 }
 
 /**
+ * `commaIndex` 위치의 콤마가 트레일링 콤마인지 판정한다.
+ * 다음 비공백 문자가 `}` 또는 `]` 이면 트레일링 콤마.
+ */
+function isTrailingComma(text: string, commaIndex: number): boolean {
+  let j = commaIndex + 1;
+  while (j < text.length && /\s/.test(text[j])) j++;
+  return j < text.length && (text[j] === "}" || text[j] === "]");
+}
+
+/**
  * 객체·배열 닫힘 앞의 트레일링 콤마를 제거한다 (`,}` / `,]`).
  * LLM이 마지막 필드 뒤에 콤마를 남기는 매우 흔한 형식 위반을 교정. (문자열 내부는 건드리지 않음)
  */
@@ -69,12 +79,7 @@ function stripTrailingCommas(text: string): string {
     if (escape) { out += ch; escape = false; continue; }
     if (ch === "\\") { out += ch; escape = true; continue; }
     if (ch === '"') { inString = !inString; out += ch; continue; }
-    if (!inString && ch === ",") {
-      // 다음 비공백 문자가 } 또는 ] 이면 트레일링 콤마 → 제거
-      let j = i + 1;
-      while (j < text.length && /\s/.test(text[j])) j++;
-      if (j < text.length && (text[j] === "}" || text[j] === "]")) continue;
-    }
+    if (!inString && ch === "," && isTrailingComma(text, i)) continue;
     out += ch;
   }
   return out;
