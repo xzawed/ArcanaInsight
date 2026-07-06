@@ -9,6 +9,7 @@ import { useLocaleStore } from "@/hooks/useLocaleStore";
 import { useT } from "@/i18n/useT";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { getCharacterCutoutImageStyle } from "@/components/character/SpriteAnimator";
+import { getCharacterImageUrl } from "@/lib/storage/character-image";
 import { ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { useThemeStore } from "@/hooks/useTheme";
 
@@ -76,7 +77,7 @@ export default function CharacterPage() {
           }}
         >
           <Image
-            src={`/images/characters/${character.id}/nukki-enhanced/idle.png`}
+            src={getCharacterImageUrl(character.id, "idle")}
             alt={character.name}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
