@@ -29,6 +29,7 @@
 | 운영자 가이드 | [operations/operation-guide.md](operations/operation-guide.md) |
 | 미구현/기술부채 | [operations/known-issues.md](operations/known-issues.md) |
 | 배포/롤백 | [operations/deployment.md](operations/deployment.md) |
+| 배포 품질/안전 가이드 | [operations/deploy-safety-guide.md](operations/deploy-safety-guide.md) |
 | 모니터링/QA | [operations/monitoring.md](operations/monitoring.md) |
 
 ## 폴더 구조
@@ -60,6 +61,7 @@ docs/
 │   └── unit-testing.md
 ├── operations/
 │   ├── deployment.md
+│   ├── deploy-safety-guide.md
 │   ├── env-variables.md
 │   ├── known-issues.md
 │   ├── monitoring.md

@@ -90,3 +90,20 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | **Open code smell: 0�
 | **외부 번역가 미사용** | — | **사용자 확정(2026-05-14)**: 외부 번역 발주 계획 없음. 현행 직역 사전으로 운영 지속. |
 
 상세 인프라: [`../architecture/i18n.md`](../architecture/i18n.md) / 컨벤션: [`../conventions/i18n-style.md`](../conventions/i18n-style.md)
+
+---
+
+## 리딩·배포 후속 항목 (2026-07-06 회고 도출)
+
+이번 세션(리딩 안정성 #480, 배포 최적화 #482~#490)에서 **해결은 됐으나 근본/부차적으로 남은 개선 항목**. 배포 안전 절차는 [`deploy-safety-guide.md`](deploy-safety-guide.md) 참고.
+
+| 항목 | 영역 | 상태·근거 | 우선순위 |
+|------|------|-----------|----------|
+| **리딩 스키마 중복 근본 제거** | `saju-service.ts`·`shinjeom-service.ts` 프롬프트 | 간헐 무결과의 뿌리는 `sajuSections`/`shinjeomSections`가 flat 필드(overallReading/advice)와 **내용 중복**인 과적재 스키마. #480은 파서 내성(트레일링콤마·`promoteNestedFields`)+1회 재생성이라는 **방어**로 0%까지 낮췄으나, 스키마를 flat/섹션 중 하나로 정리하면 재발 여지·토큰이 줄어든다. UX(섹션 렌더) 영향이 있어 별도 설계 필요. | 中 |
+| **parseError 실패 계량/dead-letter** | reading route·`reading-saver.ts` | parseError 리딩은 DB·DLQ에 흔적을 안 남겨(저장 게이트 `!result.parseError`) 지배적 실패 모드가 **관측 불가**. 별도 카운터/전용 dead-letter로 truncation/missing_fields/fallback_text 분포를 계량해야 회귀를 조기 감지. | 中 |
+| **배포 이미지 추가 슬림** | `public/images/{icons,backgrounds}` | standalone+캐릭터R2로 ~300MB 달성. 잔여 이미지 내 `icons`(21MB)·`backgrounds`(13MB)도 R2 이전 시 추가 축소 가능(캐릭터와 동일 패턴). 효과 대비 소규모. | 低 |
+| **Railway 서비스 config 취약성** | Railway 서비스(startCommand·`HOSTNAME=0.0.0.0`) | standalone 배포 필수 2조건이 **repo가 아닌 Railway 서비스 config**에 있어 서비스 재생성 시 유실 위험. 문서화(가이드·deployment.md)는 완료했으나 자동화는 미구현. | 中 |
+| **배포 후 자동 스모크 검증 부재** | CI/배포 | 헬스체크(`/api/health`) 통과가 이미지·리딩 정상을 보장하지 않음(예 `NEXT_PUBLIC_ASSET_BASE_URL` 누락 시 이미지 404여도 헬스체크 통과). 현재는 수동 스모크(가이드 §4). 배포 후 자동 스모크(홈 이미지·리딩 1건) 도입 여지. | 中 |
+| **로컬 Docker의 IPv6 미재현** | 로컬 검증 | 로컬 Docker는 Railway의 IPv6-우선 `/etc/hosts`를 재현 못 함 → 바인딩 이슈가 로컬에서 안 보임. 인프라 수정은 프로덕션 실측으로 확정하는 원칙 준수. 도구화 여지 낮음. | 低 |
+
+> 조사용으로 Railway에 SSH 키(`claude-railway-debug`) 등록 + 로컬 `~/.ssh/config`에 `StrictHostKeyChecking accept-new` 추가 상태. 향후 배포 디버깅에 유용하나 불필요 시 제거 가능.

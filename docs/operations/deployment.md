@@ -5,6 +5,8 @@
 
 ArcanaInsight는 Railway를 사용하여 자동 배포됩니다.
 
+> 배포 관련 변경 시 품질 손상을 막는 절차·체크리스트·함정은 [`deploy-safety-guide.md`](deploy-safety-guide.md)를 먼저 확인한다.
+
 ---
 
 ## 자동 배포 흐름
