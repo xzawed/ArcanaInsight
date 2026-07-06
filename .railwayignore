@@ -1,0 +1,26 @@
+# Railway(nixpacks) 빌드 컨텍스트 제외 — 배포 이미지·업로드 축소.
+# 유지: src/, public/(캐릭터 제외), package.json, pnpm-lock.yaml, next.config.ts, tsconfig.json, railway.toml 등
+
+# 캐릭터 이미지 283MB — 프로덕션은 R2(cdn.xzawed.xyz/characters)로 서빙하므로 배포 이미지에서 제외.
+# repo/로컬/CI는 유지(getCharacterImageUrl이 env 미설정 시 이 폴더로 폴백).
+# ⚠️ 프로덕션 NEXT_PUBLIC_ASSET_BASE_URL 필수(미설정 시 이미지 폴더가 이미지에 없어 404).
+public/images/characters
+
+# 테스트·E2E·개발 스크립트·문서·DB 마이그레이션 (빌드/런타임 미참조)
+e2e
+coverage
+playwright-report
+test-results
+**/*.test.ts
+**/*.test.tsx
+scripts
+n8n
+.claude
+.vscode
+.github
+docs
+supabase
+
+# 시크릿·로컬 env
+.env
+.env.*

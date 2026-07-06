@@ -1,13 +1,11 @@
 [build]
-# Dockerfile 멀티스테이지 빌드 — Next.js standalone으로 런타임 이미지 최소화 (배포 가속).
-# NEXT_PUBLIC_* 서비스 변수는 Railway가 Dockerfile 빌드 ARG로 제공하므로 대시보드에 설정되어 있어야 한다.
-builder = "dockerfile"
+# nixpacks 빌더 (검증된 방식). Dockerfile+standalone 전환은 Railway 서비스 특유의
+# 시작명령/바인딩/헬스체크 문제로 반복 실패해 롤백함(2026-07-06). 상세: docs/operations/deployment.md
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build"
 
 [deploy]
-# standalone 서버 기동 명령을 명시. Railway에 남아있던 nixpacks 시절 시작 명령("pnpm start")이
-# Dockerfile CMD를 덮어써 슬림 런타임(pnpm 없음)에서 "pnpm not found"로 실패했으므로 여기서 확정한다.
-# HOSTNAME은 실행 시점에 0.0.0.0으로 강제(Railway가 HOSTNAME=<컨테이너ID> 주입 시 바인딩 보호).
-startCommand = "HOSTNAME=0.0.0.0 node server.js"
+startCommand = "pnpm start"
 # 홈(/) 대신 경량 /api/health로 기동 판정 → 무거운 홈 SSR 대기·불필요한 재기동 방지.
 healthcheckPath = "/api/health"
 restartPolicyType = "on_failure"
