@@ -22,9 +22,12 @@ Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수�
 - standalone이 런타임 필요한 의존성만 추적 → 런타임 `node_modules` 580MB → ~38MB
 - 슬림 런타임 스테이지에 `.next/standalone` + `.next/static` + `public`만 복사 (전체 node_modules·빌드 툴 제외)
 - `.dockerignore`로 빌드 컨텍스트 슬림화 (e2e·docs·scripts·supabase·테스트·.env 제외)
-- 실측(amd64): 전체 이미지 ~1.1GB(nixpacks 추정) → **~416MB**. 캐릭터 이미지 R2 이전 시 public 축소로 추가 감소.
+- 캐릭터 이미지(283MB)는 R2로 이전하고 `.dockerignore`로 배포 이미지에서 제외(로컬/CI는 public 폴백 유지) → 이미지 내 `public` 317MB→35MB
+- 실측(amd64): 전체 이미지 ~1.1GB(nixpacks 추정) → standalone(#482) → 캐릭터 R2 제외(#483)로 **~300MB**대
 
 > ⚠️ **NEXT_PUBLIC_* 빌드 인자 필수**: `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY`·`NEXT_PUBLIC_SITE_URL`·`NEXT_PUBLIC_ASSET_BASE_URL`은 `next build` 시 클라이언트 번들에 인라인되므로, Railway 서비스 변수로 설정되어 있어야 Dockerfile `ARG`로 주입된다. 누락 시 빌드는 되지만 클라이언트가 잘못된 값(예: R2 base 미설정 → 이미지 깨짐)으로 동작한다.
+
+> ⚠️ **HOSTNAME 바인딩(배포 실패 방지)**: Railway 컨테이너 런타임이 `HOSTNAME=<컨테이너ID>`를 주입해 Dockerfile `ENV HOSTNAME`을 덮어쓴다. Next standalone 서버는 `process.env.HOSTNAME`에 바인딩하므로, 그대로 두면 라우팅 불가 호스트에 바인딩되어 **헬스체크가 도달하지 못하고 배포가 FAILED**된다(배포 로그엔 "Stopping Container"만, 앱 stdout 없음). 그래서 CMD를 `sh -c "HOSTNAME=0.0.0.0 exec node server.js"`로 두어 실행 시점에 강제한다(주입값 무시, exec으로 node를 PID 1 유지). 2026-07-06 최초 Dockerfile 전환 시 이 문제로 3회 배포 실패 → 수정. 로컬 재현: `docker run -e HOSTNAME=<임의값>` 시 health 도달 불가로 확인.
 
 ---
 

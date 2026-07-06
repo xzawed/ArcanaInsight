@@ -32,7 +32,6 @@ RUN pnpm build
 FROM node:20-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
-    HOSTNAME=0.0.0.0 \
     NEXT_TELEMETRY_DISABLED=1
 # 비루트 실행
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
@@ -42,5 +41,8 @@ COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
 USER nextjs
 EXPOSE 3000
-# PORT는 Railway가 런타임에 주입(standalone server.js가 process.env.PORT 사용)
-CMD ["node", "server.js"]
+# PORT는 Railway가 런타임에 주입(standalone server.js가 process.env.PORT 사용).
+# ⚠️ HOSTNAME은 실행 시점에 0.0.0.0으로 강제한다 — Railway(컨테이너 런타임)가 HOSTNAME=<컨테이너ID>를
+#    주입해 Dockerfile ENV를 덮어쓰면 Next standalone이 라우팅 불가 호스트에 바인딩 → 헬스체크 실패로 배포 실패.
+#    `HOSTNAME=0.0.0.0 exec node`로 주입값을 무시하고, exec으로 node를 PID 1로 유지(SIGTERM 전달).
+CMD ["sh", "-c", "HOSTNAME=0.0.0.0 exec node server.js"]
