@@ -6,13 +6,25 @@
 #   0. 프로덕션 빌드 (경고만 — 네트워크 의존 빌드 오류 허용)
 #   1. TypeScript 타입 체크
 #   2. ESLint
-#   3. 단위·통합 테스트 + 커버리지 임계값 (branches 92 / 나머지 98)
+#   3. 단위·통합 테스트 + 커버리지 임계값 (branches 90 / functions 97 / lines·statements 98)
 #   4. 문서 정합성 3종 (env-docs, doc-links, i18n:check)
 #   5. SonarCloud exclusions 동기화 검사
 #   6. E2E 셀렉터 영향 파일 경고 (차단 아님 — 확인 권고)
 #   7. playwright.config.ts locale:"ko" 유지 확인
 
 set -e
+
+# 훅 stdin 가드: 훅(PreToolUse Bash)으로 호출된 경우 stdin에 JSON이 온다.
+# 대상 명령(gh pr create)이 아니면 즉시 통과 — settings.json의 `if` matcher가 미지원인
+# 버전에서 matcher "Bash"가 모든 Bash 명령에 발화하는 것을 방어(defense-in-depth).
+# 수동 실행(터미널) 시엔 stdin이 tty라 가드를 건너뛰고 정상 실행한다.
+if [ ! -t 0 ]; then
+  HOOK_INPUT="$(cat 2>/dev/null || true)"
+  case "$HOOK_INPUT" in
+    *'"command"'*"gh pr create"*) : ;;  # 대상 명령 — 계속 진행
+    *'"command"'*) exit 0 ;;             # 다른 Bash 명령 — 검증 없이 통과
+  esac
+fi
 
 # pnpm PATH 설정 — 이식 가능 (환경별 자동 탐지, 하드코딩 없음)
 if ! command -v pnpm &> /dev/null; then
@@ -59,7 +71,7 @@ echo ""
 
 # ── 3. 단위·통합 테스트 + 커버리지 임계값 ────────────────
 echo "=== [3/8] 단위·통합 테스트 + 커버리지 임계값 ==="
-echo "    (branches 92 / functions·lines·statements 98)"
+echo "    (branches 90 / functions 97 / lines·statements 98)"
 pnpm test:coverage
 echo "✅ 테스트 + 커버리지 통과"
 echo ""

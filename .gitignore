@@ -59,6 +59,9 @@ playwright/.cache/
 .claude/settings.local.json
 CLAUDE.local.md
 
+# SCAManager 코드리뷰 설정 (평문 토큰 포함 — git 제외 필수)
+.scamanager/config.json
+
 # E2E Full Run 결과 (대용량, 로컬 전용)
 docs/e2e-reports/
 scripts/e2e-full/results/
