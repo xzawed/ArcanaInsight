@@ -90,14 +90,6 @@ const ALL_TASKS: Task[] = [
 
 const nonEmpty = (v: unknown): boolean => typeof v === "string" && v.trim().length > 0;
 
-/** 섹션 객체의 모든 하위 필드가 비어있지 않은지 확인 */
-function sectionsComplete(sections: unknown, keys: string[]): { ok: boolean; missing: string[] } {
-  if (!sections || typeof sections !== "object") return { ok: false, missing: keys };
-  const s = sections as Json;
-  const missing = keys.filter((k) => !nonEmpty(s[k]));
-  return { ok: missing.length === 0, missing };
-}
-
 interface CheckResult {
   service: string;
   term: string;
@@ -127,12 +119,8 @@ function verifyContract(service: string, result: Json): CheckResult["checks"] {
       const hasLegacy = nonEmpty(first.interpretation);
       add("카드 3-섹션(symbolism/situation/action)", has3 || hasLegacy, hasLegacy && !has3 ? "legacy interpretation" : undefined);
     }
-  } else if (service === "saju") {
-    const r = sectionsComplete(result.sajuSections, ["structure", "elements", "fortune", "guidance"]);
-    add("sajuSections 4개 완결", r.ok, r.missing.length ? `누락: ${r.missing.join(",")}` : undefined);
-  } else if (service === "shinjeom") {
-    const r = sectionsComplete(result.shinjeomSections, ["spiritual", "current", "obstacles", "future"]);
-    add("shinjeomSections 4개 완결", r.ok, r.missing.length ? `누락: ${r.missing.join(",")}` : undefined);
+  } else if (service === "saju" || service === "shinjeom") {
+    add("topicReading 존재", nonEmpty(result.topicReading), `len=${String(result.topicReading ?? "").length}`);
   }
 
   return checks;
