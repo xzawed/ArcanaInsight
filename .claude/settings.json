@@ -35,53 +35,49 @@
     ],
     "deny": [
       "Bash(rm -rf /)",
-      "Bash(git push --force origin main*)",
-      "Bash(git push --force origin master*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(git push origin +*)",
       "Bash(git reset --hard*)"
     ]
   },
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash(pnpm upload:assets*)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
+            "if": "Bash(pnpm upload:assets*)",
             "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/hooks/upload-assets-r2-guard.sh",
             "timeout": 10,
             "statusMessage": "카드 자산 업로드 대상 확인(Supabase vs R2)..."
-          }
-        ]
-      },
-      {
-        "matcher": "Bash(git push*)",
-        "hooks": [
+          },
           {
             "type": "command",
+            "if": "Bash(git push*)",
             "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/pre-push-checks.sh",
             "timeout": 300,
             "statusMessage": "push 전 검증 중 (tsc + lint + test:coverage + 문서 정합성)..."
-          }
-        ]
-      },
-      {
-        "matcher": "Bash(gh pr create*)",
-        "hooks": [
+          },
           {
             "type": "command",
+            "if": "Bash(gh pr create*)",
             "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/pre-pr-checks.sh",
             "timeout": 600,
-            "statusMessage": "PR 생성 전 종합 검증 중 (7단계 품질 게이트)..."
+            "statusMessage": "PR 생성 전 종합 검증 중 (8단계 품질 게이트)..."
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash(gh pr merge*)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
+            "if": "Bash(gh pr merge*)",
             "command": "printf '{\"systemMessage\": \"✅ PR 머지 완료 — 포스트 머지 워크플로우를 즉시 실행하세요.\", \"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"PR 머지 완료. 다음 포스트 머지 작업을 지금 바로 수행하세요:\\n1. git checkout main && git pull origin main\\n2. post-merge-doc-refresher 에이전트 실행 (포스트 머지 문서 정리해줘)\\n3. pnpm sync:test-count 실행 (테스트 수 변동 시)\\n4. Railway 대시보드 배포 상태 확인\"}}'",
             "timeout": 10,
             "statusMessage": "포스트 머지 워크플로우 안내 중..."
