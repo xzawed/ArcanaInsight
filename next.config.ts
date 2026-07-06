@@ -39,6 +39,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // 런타임 필요한 의존성만 추적해 최소 서버 번들 생성 → Railway 배포 이미지 축소·배포 가속.
+  // 배포: Dockerfile 멀티스테이지가 .next/standalone + static + public을 슬림 런타임에 복사, node server.js로 기동.
+  output: "standalone",
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
