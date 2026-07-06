@@ -23,7 +23,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │    │                  mysticUtils.ts — particleStyle·particleMotion 순수 함수
        │    │                  (홈 히어로 카드 덱 스타일: src/styles/home-effects.css — hero-tarot-card, hero-card-idle keyframe)
        │    ├─ layout/       — 데스크탑/모바일 레이아웃 분리 컴포넌트
-       │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (3서비스 공통 — 섹션별 UI 블록)
+       │    ├─ session/      — ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (타로 카드별 3-섹션 UI 블록 — 사주·신점 섹션 스키마는 2026-07-07 폐지, overallReading 정본)
        │    ├─ skin/         — 카드 스킨 관련 컴포넌트
        │    ├─ tarot/        — CardInterpretationList, TarotResultPanel,
        │    │                  CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
@@ -45,9 +45,10 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
 
 데이터 레이어
   ├─ Supabase (기본)     — Auth + PostgreSQL + Storage(card-skins 버킷, 팔레트 스킨)
-  │     리딩 영속: readings/saju_readings/shinjeom_readings에 direct_answer(마이그 023)·
-  │     saju_sections/shinjeom_sections JSONB(마이그 024) 추가. persistDirectAnswer·persistReadingSections가
-  │     본 insert와 분리된 best-effort UPDATE로 기록 → result/[id] 재방문·공유에 직답·4-섹션 round-trip.
+  │     리딩 영속: readings/saju_readings/shinjeom_readings에 direct_answer(마이그 023) 추가.
+  │     persistDirectAnswer가 본 insert와 분리된 best-effort UPDATE로 기록 → result/[id] 재방문·공유에 직답 round-trip.
+  │     ⚠️ saju_sections/shinjeom_sections JSONB(마이그 024)·persistReadingSections는 섹션 스키마 폐지(2026-07-07)로
+  │     제거됨 — 컬럼은 하위 호환용으로만 유지, overallReading이 정본.
   ├─ Cloudflare R2       — card-styles 카드아트·서비스배경 (cdn.xzawed.xyz, NEXT_PUBLIC_ASSET_BASE_URL, 2026-07-03 이전)
   └─ PostgreSQL 모드     — NextAuth.js v5 + Drizzle (DB_PROVIDER=postgres 시)
 ```

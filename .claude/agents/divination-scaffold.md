@@ -47,7 +47,7 @@ DivinationService 인터페이스를 구현한다. 필수 메서드:
 - `startSession(topic: Topic): Omit<Session, "id" | "createdAt">`
 - `getSystemPrompt(characterId?: string): string` — `buildSystemPrompt(character)` 활용
 - `getReadingPrompt(context: SessionContext): string`
-- `parseResult(aiResponse: string): ReadingResult` — `parseJsonSafe()`(트레일링 콤마 내성) + `cleanReadingText()`, 섹션형 서비스는 `promoteNestedFields()`로 섹션 내부 flat 필드 승격. parseError 4종(truncated/invalid_json/fallback_text/missing_fields) 시그널 필수
+- `parseResult(aiResponse: string): ReadingResult` — `parseJsonSafe()`(트레일링 콤마 내성) + `cleanReadingText()`. `overallReading`/`topicReading`/`advice`/`directAnswer` flat 필드가 정본(섹션 객체로 중첩하지 말 것 — 2026-07-07 사주·신점 섹션 스키마 폐지 이후 원칙). parseError 4종(truncated/invalid_json/fallback_text/missing_fields) 시그널 필수
 
 ### 2. Zustand 세션 스토어
 **경로**: `src/hooks/use{ServiceName}Session.ts`

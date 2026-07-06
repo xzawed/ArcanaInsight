@@ -37,12 +37,12 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:co
 - [ ] 실제 AI 응답 길이가 기대에 못 미친다면 max_tokens 상향을 검토한다
 - [ ] 변경 후 `src/__tests__/api/tarot-reading.test.ts` 등 상수를 기댓값으로 쓰는 테스트 동시 수정 필수
 
-### 2. 프리미엄 리딩 구조 + 계약 (PR #414·#420·#467·#471)
+### 2. 프리미엄 리딩 구조 + 계약 (PR #414·#420·#467·#471, 섹션 스키마는 2026-07-07 폐지)
 
 **타로 카드 해석은 단일 필드가 아니라 3-섹션**이다(`prompt-builder.ts`):
 - `symbolism` 3~4문단 · `situation` 3~4문단 · `action` 1~2문단
 - 종합 해석(overallReading): **5~6문단** · 조언(advice): **3~4문단**
-- 사주 `sajuSections`(structure/elements/fortune/guidance), 신점 `shinjeomSections`(spiritual/current/obstacles/future) 4-섹션
+- ⚠️ 사주 `sajuSections`(structure/elements/fortune/guidance)·신점 `shinjeomSections`(spiritual/current/obstacles/future) 4-섹션은 **폐지됨** — flat 필드(`overallReading`/`topicReading`/`advice`/`directAnswer`)와 내용이 중복되면서 간헐 무결과(사주 ~21%·신점 ~67%)의 근본 원인이었다. 사주·신점도 이제 `overallReading`이 정본.
 
 **두 공통 계약을 반드시 함께 검토**한다:
 - **`buildDirectAnswerContract(domain)`** — 질문 직답(answer-first). `directAnswer`를 결과 최상단에 렌더. schemaLine·systemSpec·footerReminder를 한 곳에서 방출(지시-스키마-파서 drift 차단). "균등 나열" 헤지 금지.
@@ -61,16 +61,16 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm lint) Bash(pnpm test:co
 - [ ] 새 캐릭터 추가 시 persona 완성도 확인 (personality + speechStyle 필수)
 - [ ] 언어 파라미터가 `x-locale` 헤더에서 올바르게 전달되는지 확인
 
-### 4. JSON 파싱 안전성 (PR #480 무결성 파이프라인)
+### 4. JSON 파싱 안전성 (PR #480 방어 → 2026-07-07 근본 제거)
 
-간헐적 무결과 근본 수정으로 3중 내성 파이프라인이 있다:
+PR #480은 간헐적 무결과에 3중 내성으로 대응했으나, 후속 작업(리딩 신뢰성 기술부채 정리)에서 근본 원인인 섹션 스키마 자체를 제거했다. 현재 유효한 파이프라인:
 - **`parseJsonSafe()`** — 3차 파싱에 **트레일링 콤마 제거**(`stripTrailingCommas`) 포함
-- **`promoteNestedFields(parsed, "sajuSections"|"shinjeomSections", [...])`** — 모델이 flat 필드를 섹션 객체 *내부*에 잘못 중첩한 경우 top-level로 승격(`missing_fields` 복구). 사주·신점 `parseResult`에서 호출
 - **`streamReadingWithParseRetry`** (`reading-generator.ts`) — 3개 리딩 라우트가 사용. 1차 파싱이 `parseError`면 1회 non-stream 재생성
 - `parseError` 신호 4종: `truncated`, `fallback_text`, `invalid_json`, `missing_fields`
 
-- [ ] 새 필드 추가 시 Zod schema와 `ReadingResult` 타입 동시 업데이트
-- [ ] 섹션 내부 중첩 가능 필드는 `promoteNestedFields` 대상 목록에 추가
+> `promoteNestedFields(parsed, "sajuSections"|"shinjeomSections", [...])`(섹션 내부 flat 필드 승격)는 승격 대상 섹션이 사라져 함께 제거됨.
+
+- [ ] 새 필드 추가 시 Zod schema와 `ReadingResult` 타입 동시 업데이트 — **섹션 객체로 중첩하지 말고 top-level flat 필드로 추가**(중복·중첩이 과거 무결과의 근본 원인)
 - [ ] `parseError` 케이스를 UI가 적절히 처리하는지 확인
 
 ## 프롬프트 개선 작업 절차

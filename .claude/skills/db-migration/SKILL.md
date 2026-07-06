@@ -21,7 +21,7 @@ ls supabase/migrations/ | tail -3
 
 - **멱등**: `ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS` / `DROP POLICY IF EXISTS` — 재실행 안전.
 - **RLS**: 새 테이블은 `ENABLE ROW LEVEL SECURITY` + 정책 명시. 쓰기 경로가 전부 `getAdminDb()`(service_role)면 anon INSERT 정책 불필요(021과 일관). ⚠️ 운영 정책명이 파일 기준명과 out-of-band 드리프트될 수 있으니 `pg_policies` 실측으로 확인.
-- **컬럼 추가 + best-effort 영속 패턴**: 앱이 본 insert와 **분리된 UPDATE**로 기록하면(예 `persistDirectAnswer`·`persistReadingSections`) 컬럼 미적용 환경에서도 본 저장 무영향(UPDATE만 조용히 실패). 이 패턴이면 **코드 배포와 마이그 적용 순서 무관**.
+- **컬럼 추가 + best-effort 영속 패턴**: 앱이 본 insert와 **분리된 UPDATE**로 기록하면(예 `persistDirectAnswer`) 컬럼 미적용 환경에서도 본 저장 무영향(UPDATE만 조용히 실패). 이 패턴이면 **코드 배포와 마이그 적용 순서 무관**. (참고: `persistReadingSections`는 섹션 스키마 폐지로 2026-07-07 제거됨 — 컬럼 추가 자체가 앱에서 미사용으로 끝날 수 있음을 보여주는 사례.)
 - 이름 충돌 확인(예 기존 `elements` jsonb vs 신규 컬럼).
 
 ## 3. 운영 DB 적용 (Supabase MCP)

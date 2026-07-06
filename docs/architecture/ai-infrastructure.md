@@ -72,7 +72,6 @@ new CircuitBreaker({ prefix: "FallbackProvider/Grok", globalKey: "__arcanaFallba
 | 유틸 | 위치 | 역할 |
 |------|------|------|
 | `parseJsonSafe(raw)` | `src/services/core/text-cleaner.ts` | thinking 토큰 제거 → 코드블록 추출 → 문자열-aware 괄호 카운터로 JSON 추출 → 3단 파싱 시도(원본 → 문자열 내 개행 이스케이프 → **트레일링 콤마 제거**) |
-| `promoteNestedFields(parsed, sectionKey, fields)` | `src/services/core/text-cleaner.ts` | 모델이 flat 필드(overallReading·advice 등)를 `sajuSections`/`shinjeomSections` **내부**에 잘못 중첩한 경우 top-level로 승격 (missing_fields 복구) |
 | `extractFallbackText(raw)` | `src/services/core/text-cleaner.ts` | JSON 파싱 완전 실패 시 본문 회수 (tarot/saju 공용, ReDoS-safe) |
 | `cleanReadingText(text)` | `src/services/core/text-cleaner.ts` | 파싱 후 JSON 잔여물·이스케이프 정리 |
 | `streamReadingWithParseRetry(...)` | `src/services/core/reading-generator.ts` | 1차 streamReading → 파싱 실패(parseError) 시 **1회 non-stream 재생성** 후 재파싱. 3개 리딩 라우트 공통 |
@@ -97,13 +96,13 @@ AI 스트리밍 응답 (fullResponse 누적)
     │      → 성공: Record<string, unknown>
     │      → 실패: null
     │
-    ├─ 성공 → promoteNestedFields()(섹션 내부 잘못 중첩 필드 승격) → cleanReadingText(field) → ReadingResult
+    ├─ 성공 → cleanReadingText(field) → ReadingResult
     └─ 실패 → extractFallbackText(raw) 또는 원문 텍스트 반환
 
 파싱 결과에 parseError가 있으면 라우트는 streamReadingWithParseRetry로 1회 재생성한다.
 ```
 
-> **리딩 안정성 (2026-07-06)**: 사주·신점 리딩이 간헐적으로 JSON 형식 위반을 냈다. 실측 재현(프로덕션 반복 호출) 결과 원인은 타임아웃·절단이 아니라 **`sajuSections`/`shinjeomSections` 중첩 스키마**로, 모델이 (1) flat 필드를 섹션 객체 내부에 중첩(`missing_fields`)하거나 (2) 섹션 끝에 트레일링 콤마를 남겨(`JSON.parse` 실패 → `fallback_text`) 결과가 폐기됐다(사주 ~21%, 신점 ~67% 실패, 타로 0%). 대응: ① `parseJsonSafe` 트레일링 콤마 내성, ② `promoteNestedFields` 승격, ③ 파싱 실패 시 1회 재생성, ④ 프롬프트에 "flat 필드는 섹션 밖 top-level·트레일링 콤마 금지" 명시, ⑤ 사주 클라이언트 `parseError` 처리를 타로·신점과 동일 계약으로(fallback_text 부분 표시), ⑥ 클라 hard timeout 240→280s(서버 대비 양의 마진)·SSE 종단 이벤트 부재 시 영구 스피너 방지 가드.
+> **리딩 안정성 (2026-07-06 방어 → 2026-07-07 근본 제거)**: 사주·신점 리딩이 간헐적으로 JSON 형식 위반을 냈다. 실측 재현(프로덕션 반복 호출) 결과 원인은 타임아웃·절단이 아니라 **`sajuSections`/`shinjeomSections` 중첩 스키마**로, 모델이 (1) flat 필드를 섹션 객체 내부에 중첩(`missing_fields`)하거나 (2) 섹션 끝에 트레일링 콤마를 남겨(`JSON.parse` 실패 → `fallback_text`) 결과가 폐기됐다(사주 ~21%, 신점 ~67% 실패, 타로 0%). 2026-07-06에는 ① `parseJsonSafe` 트레일링 콤마 내성, ② `promoteNestedFields` 승격, ③ 파싱 실패 시 1회 재생성, ④ 프롬프트 명시, ⑤ 사주 클라이언트 계약 통일, ⑥ 클라 hard timeout 280s로 **방어**했다. 2026-07-07 후속 작업(리딩 신뢰성 기술부채 정리)에서 **근본 원인인 `sajuSections`/`shinjeomSections` 자체를 스키마·프롬프트·파서·영속·UI 전 계층에서 제거**하고 `overallReading`(flat 필드)을 정본으로 통합 — 중복·중첩 여지를 구조적으로 차단했다. `promoteNestedFields`는 승격 대상(섹션)이 사라져 함께 제거됨. ③(1회 재생성)·①(트레일링 콤마 내성)·⑤·⑥은 사주·신점의 flat 필드에도 동일하게 유효해 유지.
 
 ### 핵심 주의사항 — 문자열 내 중괄호
 
@@ -150,7 +149,7 @@ for (let i = start; i < text.length; i++) {
 - **사주 시간 지평 연계**(#6): `detectSajuTimeHorizon(question)`(ko/en/ja 키워드)가 자유질문의 시간창(이번 주/달/올해/내년)을 감지 → route의 `applyHorizonToCalcOptions`가 드롭다운 `timeRange`와 무관하게 해당 월운/세운/일운을 **계산·주입**하고, `buildSajuPrompt`가 "정확한 날짜 금지, 범위+조건으로 유리한 시기 창 명명" 지시를 추가한다. 시기 판정은 데이터에서 결정론적 → SSE 재생성 플레이키 방지.
 - **관측**: 타로·사주 route는 freeQuestion이 있는데 `directAnswer`가 비면 경고 로그(조용한 소실 회귀 감시). 타로 결과화면은 `directAnswer`를 카드 해석보다 위, 최상단에 렌더(answer-first).
 - **배선**: 3서비스 모두 `getSystemPrompt`/`buildConversationPrompt` JSON 스켈레톤 상단(truncation 생존율↑)에 `directAnswer` + `parseResult` 추출 + 결과화면 최상단 `ResultTextCard` 렌더. en/ja는 `LANGUAGE_INSTRUCTIONS` JSON 키 화이트리스트에 `directAnswer` 포함(키 번역 방지).
-- **DB 영속**(마이그 023·024): `persistDirectAnswer`·`persistReadingSections`(reading-saver)가 본 리딩 insert와 **분리된 best-effort UPDATE**로 `direct_answer`(TEXT)·`saju_sections`/`shinjeom_sections`(JSONB)에 기록 → 재방문(`result/[id]`)·공유 결과에도 직답과 4-섹션 프리미엄 리딩이 노출. 컬럼 미적용 환경에서도 이 UPDATE만 조용히 실패(로깅)하고 본 리딩 insert는 무영향 → 배포 순서 무관. result API `SAFE_KEYS`·result 페이지 `ReadingSectionBlock` 렌더 반영. ✅ 마이그 023·024 적용 완료(2026-07-04~05).
+- **DB 영속**(마이그 023): `persistDirectAnswer`(reading-saver)가 본 리딩 insert와 **분리된 best-effort UPDATE**로 `direct_answer`(TEXT)에 기록 → 재방문(`result/[id]`)·공유 결과에도 직답이 노출. 컬럼 미적용 환경에서도 이 UPDATE만 조용히 실패(로깅)하고 본 리딩 insert는 무영향 → 배포 순서 무관. result API `SAFE_KEYS`에 반영. ✅ 마이그 023 적용 완료(2026-07-04). ⚠️ 마이그 024(`saju_sections`/`shinjeom_sections`)·`persistReadingSections`·result `ReadingSectionBlock` 섹션 렌더는 섹션 스키마 폐지(2026-07-07)로 제거 — 컬럼만 하위 호환 유지.
 
 ## 쉬운 말 계약(가독성) — buildReadabilityContract
 
@@ -191,7 +190,7 @@ for (let i = start; i < text.length; i++) {
 | includeMonthly=true (월운 12개월) | 60,000 (cap) |
 | five-year / full-fortune / three-year / next-year | 60,000 (cap) |
 
-sajuSections(structure/elements/fortune/guidance) 4-섹션 기준 3배 확장 적용.
+⚠️ 값은 과거 사주 4-섹션(sajuSections) 기준으로 3배 확장된 것을 그대로 유지 중(섹션 스키마는 2026-07-07 폐지, `overallReading`/`topicReading`/`advice` flat 필드 기준으로도 재조정하지 않고 현행 유지 — 넉넉한 예산이 품질에 유리).
 
 ### 신점 — `src/app/api/shinjeom/message/route.ts`
 
@@ -200,7 +199,7 @@ sajuSections(structure/elements/fortune/guidance) 4-섹션 기준 3배 확장 �
 | 최종 턴 (`isFinalTurn=true`) | `SHINJEOM_TOKENS_FINAL = 48,000` |
 | 중간 대화 | `SHINJEOM_TOKENS_CHAT = 6,000` |
 
-shinjeomSections(spiritual/current/obstacles/future) 4-섹션 기준 3배 확장 적용 (최종 턴).
+⚠️ 값은 과거 신점 4-섹션(shinjeomSections) 기준으로 3배 확장된 것을 그대로 유지 중(섹션 스키마는 2026-07-07 폐지, 최종 턴 flat 필드 기준으로도 재조정하지 않고 현행 유지).
 
 ---
 
