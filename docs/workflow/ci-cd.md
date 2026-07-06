@@ -88,7 +88,7 @@ pnpm test:coverage   # Vitest + lcov 커버리지 생성
 **트리거**: main 브랜치 push → Railway 자동 빌드+배포
 
 ```
-설정 파일: railway.toml (nixpacks 빌더)
+설정 파일: railway.toml (dockerfile 빌더 — Next.js standalone 멀티스테이지, startCommand=node server.js, healthcheckPath=/api/health)
 GitHub Secrets 필요:
   RAILWAY_TOKEN       Railway API 토큰
   RAILWAY_SERVICE_ID  Railway 서비스 ID

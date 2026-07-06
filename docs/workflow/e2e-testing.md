@@ -8,7 +8,7 @@
 
 - **27개 spec 파일** (Desktop Chrome 기준 197개 테스트; 실제 수는 `npx playwright test --list --project="Desktop Chrome"` 기준)
 - **3개 디바이스 프로필**: Desktop Chrome · Mobile Android (Pixel 7) · Mobile iOS (iPhone 14)
-- **Playwright 버전**: `v1.59.1` — CI Docker 이미지와 버전 고정, 임의 변경 금지
+- **Playwright 버전**: `@playwright/test@^1.59.1` — package.json 고정, 임의 변경 금지 (CI는 ubuntu 러너 + `npx playwright install`; `mcr.microsoft.com/playwright:v1.59.1-noble`는 로컬 Docker E2E 전용)
 
 ---
 

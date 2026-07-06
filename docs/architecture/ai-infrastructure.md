@@ -206,18 +206,18 @@ shinjeomSections(spiritual/current/obstacles/future) 4-섹션 기준 3배 확장
 
 ## 클라이언트 타임아웃 패턴 (tarot/saju 세션 공통)
 
-타로·사주 세션 페이지는 240s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:
+타로·사주 세션 페이지는 280s 하드 타임아웃 + `AbortController` + `finished` 가드 패턴을 공통 적용합니다:
 
 ```ts
 const abortController = new AbortController();
 let finished = false;
 
-// 240s 하드 타임아웃 — 10장+ 타로/full-fortune 사주의 reasoning+stream 시간 대응
+// 280s 하드 타임아웃 — 10장+ 타로/full-fortune 사주의 reasoning+stream 시간 대응
 const timer = setTimeout(() => {
   if (finished) return;
   abortController.abort();
   setReadingErrorReason("timeout");
-}, 240_000);
+}, 280_000);
 
 await fetchSSEStream({ signal: abortController.signal, ... });
 finished = true;

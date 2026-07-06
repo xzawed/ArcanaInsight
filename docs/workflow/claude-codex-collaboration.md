@@ -25,7 +25,7 @@
 |---|-----------|--------|
 | C1 | 기능 요구사항 분석 및 스펙 문서 작성 | `docs/superpowers/specs/*.md` |
 | C2 | 아키텍처 설계·기술 결정 문서 | `docs/architecture/*.md` 갱신 |
-| C3 | 에이전트 정의 및 Task Playbook | `.claude/agents/*.md`, `docs/workflow/task-playbooks.md` — 현재 8종: `character-add`, `divination-scaffold`, `page-builder`, `skin-manager`, `theme-creator`, `quality-gate`, `i18n-manager`, `post-merge-doc-refresher` |
+| C3 | 에이전트 정의 및 Task Playbook | `.claude/agents/*.md`, `docs/workflow/task-playbooks.md` — 현재 9종: `character-add`, `card-style-manager`, `divination-scaffold`, `page-builder`, `skin-manager`, `theme-creator`, `quality-gate`, `i18n-manager`, `post-merge-doc-refresher` |
 | C4 | DB 스키마 설계 및 마이그레이션 계획 | SQL 초안, Drizzle 스키마 구조 명세 |
 | C5 | 새 서비스·페이지 뼈대 스캐폴딩 | 파일 구조, 인터페이스, 타입 정의, 빈 함수 시그니처 |
 | C6 | `CLAUDE.md` / `AGENTS.md` 최신화 | 구조 트리, 아키텍처 섹션 갱신 |
@@ -82,7 +82,7 @@ Codex에게 작업을 전달할 때 **아래 항목을 모두 포함**해야 한
 ### 완료 조건 (Definition of Done)
 - [ ] pnpm type-check — 0 error
 - [ ] pnpm lint       — 0 error
-- [ ] pnpm test:coverage — branches≥92 / functions≥98 / lines≥98 / statements≥98
+- [ ] pnpm test:coverage — branches≥90 / functions≥97 / lines≥98 / statements≥98
 - [ ] [기능별 추가 조건]
 
 ### 재진입 조건 (아래 상황이면 구현 중단 후 Claude에게 반환)

@@ -51,6 +51,11 @@ docs/
 │   ├── image-assets.md
 │   ├── layout-rules.md
 │   └── zod-schemas.md
+├── design/
+│   ├── CLAUDE_DESIGN_BRIEF.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── characters/
+│   └── screenshots/
 ├── workflow/
 │   ├── ci-cd.md
 │   ├── claude-codex-collaboration.md
