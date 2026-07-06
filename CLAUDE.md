@@ -66,6 +66,7 @@ src/
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
 │   ├── storage/card-style.ts  # getCardStyleImageUrl·getCardStyleBackUrl·getServiceBackgroundUrl. card-styles 자산은 Cloudflare R2(cdn.xzawed.xyz), storageBase()가 NEXT_PUBLIC_ASSET_BASE_URL↔Supabase 폴백 분기
+│   ├── storage/character-image.ts # getCharacterImageUrl(id,mood) — 캐릭터 이미지 R2(cdn.xzawed.xyz/characters)↔로컬 public 폴백. 배포 이미지는 .dockerignore로 public/images/characters 제외(배포 슬림화)
 │   ├── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
 │   └── guest-sessions.ts      # 익명 세션 id localStorage 보관 (로그인 시 claim 대상)
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
