@@ -10,17 +10,30 @@ ArcanaInsight는 Railway를 사용하여 자동 배포됩니다.
 ## 자동 배포 흐름
 
 ```
-PR 머지 → main push → Railway 자동 빌드 → 배포 완료 (약 2~3분)
+PR 머지 → main push → Railway 자동 빌드(Dockerfile) → /api/health 통과 → 트래픽 스왑
 ```
 
 Railway는 `main` 브랜치의 모든 push에 자동으로 반응합니다. 수동 배포 트리거는 필요하지 않습니다.
+**헬스체크(`/api/health`)가 통과해야만 새 배포로 트래픽이 넘어가므로**, 빌드/기동 실패 시 기존 배포가 계속 서빙됩니다(무중단·안전 스왑).
+
+### 빌드 최적화 (배포 이미지 최소화 → 배포 가속)
+
+`next.config.ts`의 `output: "standalone"` + 멀티스테이지 `Dockerfile`로 런타임 이미지를 최소화한다:
+- standalone이 런타임 필요한 의존성만 추적 → 런타임 `node_modules` 580MB → ~38MB
+- 슬림 런타임 스테이지에 `.next/standalone` + `.next/static` + `public`만 복사 (전체 node_modules·빌드 툴 제외)
+- `.dockerignore`로 빌드 컨텍스트 슬림화 (e2e·docs·scripts·supabase·테스트·.env 제외)
+- 실측(amd64): 전체 이미지 ~1.1GB(nixpacks 추정) → **~416MB**. 캐릭터 이미지 R2 이전 시 public 축소로 추가 감소.
+
+> ⚠️ **NEXT_PUBLIC_* 빌드 인자 필수**: `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY`·`NEXT_PUBLIC_SITE_URL`·`NEXT_PUBLIC_ASSET_BASE_URL`은 `next build` 시 클라이언트 번들에 인라인되므로, Railway 서비스 변수로 설정되어 있어야 Dockerfile `ARG`로 주입된다. 누락 시 빌드는 되지만 클라이언트가 잘못된 값(예: R2 base 미설정 → 이미지 깨짐)으로 동작한다.
 
 ---
 
 ## 설정 파일
 
-- `railway.toml` — 빌드/배포 설정 (nixpacks 빌더)
-- `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트)
+- `Dockerfile` — 멀티스테이지 빌드 (deps → build → 슬림 runtime, standalone 서버 기동)
+- `.dockerignore` — 빌드 컨텍스트 제외 목록
+- `railway.toml` — 빌드/배포 설정 (`builder = "dockerfile"`, `healthcheckPath = "/api/health"`)
+- `.github/workflows/deploy.yml` — PR CI 워크플로우 (Railway 배포 전 게이트, CI는 `next start` 사용)
 
 ### GitHub Secrets (CI 전용)
 
