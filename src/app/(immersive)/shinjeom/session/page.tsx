@@ -7,7 +7,6 @@ import { CharacterDisplay } from "@/components/character/CharacterDisplay";
 import { ParticleOverlay } from "@/components/effects/ParticleOverlay";
 import { MysticBackground, ThemeAtmosphere } from "@/components/effects/MysticBackground";
 import { ResultTextCard } from "@/components/session/ResultTextCard";
-import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { SessionActionButtons } from "@/components/session/SessionActionButtons";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { getWaitingLinesData } from "@/data/characters/waiting-lines-i18n";
@@ -79,15 +78,6 @@ export default function ShinjeomSessionPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="flex-1 overflow-y-auto py-4 space-y-4">
               {readingResult.directAnswer && (
                 <ResultTextCard text={readingResult.directAnswer} emoji="🎯" label={t("shinjeom.result.direct-answer")} delay={0.05} colorScheme="gold" />
-              )}
-
-              {readingResult.shinjeomSections && (
-                <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
-                  <ReadingSectionBlock icon="🌙" label={t("shinjeom.section.spiritual")} content={readingResult.shinjeomSections.spiritual} />
-                  <ReadingSectionBlock icon="🔍" label={t("shinjeom.section.current")} content={readingResult.shinjeomSections.current} />
-                  <ReadingSectionBlock icon="⚠" label={t("shinjeom.section.obstacles")} content={readingResult.shinjeomSections.obstacles} />
-                  <ReadingSectionBlock icon="🌟" label={t("shinjeom.section.future")} content={readingResult.shinjeomSections.future} />
-                </div>
               )}
 
               <ResultTextCard text={readingResult.overallReading} emoji="🔮" label={t("shinjeom.result.overall")} delay={0.1} colorScheme="purple" />

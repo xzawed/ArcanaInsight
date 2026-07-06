@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ResultTextCard } from "@/components/session/ResultTextCard";
 import { SessionActionButtons } from "@/components/session/SessionActionButtons";
 import { ReadingErrorState } from "@/components/session/ReadingErrorState";
-import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
 import { shareWithUrl, shareWithText } from "@/lib/share-utils";
 import { motion } from "framer-motion";
 import { useSajuSessionStore } from "@/hooks/useSajuSession";
@@ -95,15 +94,6 @@ export default function SajuSessionPage() {
 
                 {readingResult.directAnswer && (
                   <ResultTextCard text={readingResult.directAnswer} emoji="🎯" label={t("saju.result.direct-answer")} delay={0.3} colorScheme="gold" />
-                )}
-
-                {readingResult.sajuSections && (
-                  <div className="bg-arcana-card/70 backdrop-blur-sm border border-arcana-border rounded-2xl p-4 md:p-5 space-y-1">
-                    <ReadingSectionBlock icon="🏛" label={t("saju.section.structure")} content={readingResult.sajuSections.structure} />
-                    <ReadingSectionBlock icon="⚡" label={t("saju.section.elements")} content={readingResult.sajuSections.elements} />
-                    <ReadingSectionBlock icon="🌊" label={t("saju.section.fortune")} content={readingResult.sajuSections.fortune} />
-                    <ReadingSectionBlock icon="🧭" label={t("saju.section.guidance")} content={readingResult.sajuSections.guidance} />
-                  </div>
                 )}
 
                 {readingResult.overallReading && (
