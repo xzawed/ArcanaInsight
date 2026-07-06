@@ -57,7 +57,7 @@ async function emitShinjeomFinalResult(
 
   // parseError(부분 파싱/무결과)는 [reading-parse-error] 마커로 관측성 로깅 (저장 게이트와 무관, best-effort)
   if (result.parseError) {
-    logReadingParseError("shinjeom-message", result.parseError, sessionId ?? null);
+    logReadingParseError("shinjeom", result.parseError, sessionId ?? null);
   }
 
   // 저장 시그널 (done 이후 후속 이벤트). onSaveStatus 소비자만 수신.

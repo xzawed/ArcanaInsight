@@ -411,7 +411,7 @@ describe("POST /api/shinjeom/message", () => {
     const { POST } = await import("@/app/api/shinjeom/message/route");
     const res = await POST(makePostRequest({ ...VALID_BODY, isFinalTurn: true, sessionId: "sess-marker" }));
     await readSSEStream(res);
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-parse-error] service=shinjeom-message"));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-parse-error] service=shinjeom"));
     warnSpy.mockRestore();
   });
 });
