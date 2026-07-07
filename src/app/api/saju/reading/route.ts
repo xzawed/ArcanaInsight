@@ -12,7 +12,7 @@ import { buildFreeQuestionPrompt } from "@/services/core/prompt-builder";
 import { SajuReadingSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, logReadingParseError } from "@/lib/db/reading-saver";
+import { saveSajuReading, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, logReadingParseError, recordParseFailure } from "@/lib/db/reading-saver";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
 
@@ -155,6 +155,7 @@ export async function POST(request: NextRequest) {
           // parseError(부분 파싱/무결과)는 [reading-parse-error] 마커로 관측성 로깅 (저장 게이트와 무관, best-effort)
           if (result.parseError) {
             logReadingParseError("saju", result.parseError, sessionId ?? null);
+            if (db) await recordParseFailure(db, "saju", result.parseError, sessionId ?? null, locale);
           }
 
           // DB 저장 — 결과(done)는 이미 전송됐으므로 가용성에 영향 없음. 저장 결과를 saved 시그널로 전송.
