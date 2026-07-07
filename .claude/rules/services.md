@@ -13,13 +13,18 @@ paths:
 interface DivinationService {
   id: string
   name: string
-  getCharacter(): CharacterConfig          // getCharacterById(id) 사용
-  startSession(topic: Topic): ...          // Topic 유니온 타입 준수
-  getSystemPrompt(charId?, locale?): string // buildSystemPrompt(char, locale) 사용
-  getReadingPrompt(context): string        // buildReadingPrompt() 사용
-  parseResult(aiResponse, expectedCount?): ReadingResult  // 아래 체인 필수
+  getCharacter(): CharacterConfig                                    // getCharacterById(id) 사용
+  startSession(topic: Topic): Omit<Session, "id" | "createdAt">       // Topic 유니온 타입 준수
+  getSystemPrompt(characterId?: string, locale?: string): string     // buildSystemPrompt(char, locale) 사용
+  getReadingPrompt(context: SessionContext): string                  // buildReadingPrompt() 사용
+  parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult  // 아래 체인 필수
+  // 타로: expectedCardCount로 truncated 감지, cardInterpretations[].{symbolism,situation,action} 3-섹션
+  // 사주·신점: overallReading/topicReading/advice/directAnswer flat 필드가 정본
+  //   (구 4-섹션 중첩 스키마는 2026-07-07 폐지 — docs/architecture/ai-infrastructure.md 참고)
 }
 ```
+
+새 서비스 추가 시 `divination-scaffold` 에이전트를 사용한다.
 
 ## parseResult 3단계 체인 (필수)
 
@@ -81,6 +86,9 @@ getLanguageFooter(locale)              // 프롬프트 끝 언어 강조
 
 ## max_tokens 정책
 
-카드 수 기반 동적 산정 → `computeReadingMaxTokens(cardCount)` 함수 참고.  
-공식: `min(15000 + cardCount × 9000 + 15000, 65000)` (PR #420 기준, cap 65,000).  
-Grok-3 reasoning 토큰이 같은 예산을 소비하므로 충분한 버퍼 필수.
+- **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (PR #420 기준, cap 65,000). Grok-3 reasoning 토큰이 같은 예산을 소비하므로 충분한 버퍼 필수. 신규 스프레드 추가 시 이 함수를 확인한다.
+- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap.
+- **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`.
+- **신점 중간 대화**: `SHINJEOM_TOKENS_CHAT = 6,000`.
+
+> 위 함수·상수는 `services/`가 아니라 **각 API 라우트**(`computeReadingMaxTokens`는 `app/api/tarot/reading/route.ts`, `computeSajuReadingMaxTokens`는 `app/api/saju/reading/route.ts`, `SHINJEOM_TOKENS_*`는 `app/api/shinjeom/message/route.ts`)에 위치한다. 상세: `docs/architecture/ai-infrastructure.md`.

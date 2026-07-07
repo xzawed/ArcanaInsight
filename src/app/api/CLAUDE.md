@@ -34,7 +34,7 @@ api/
 
 ## 필수 보안 패턴 (순서 엄수)
 
-모든 POST 라우트는 아래 순서를 지킨다:
+모든 POST 라우트는 아래 순서를 지킨다. 5단계 순서·근거는 [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md) 참조.
 
 ```ts
 export async function POST(request: NextRequest) {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
 ## SSE 스트리밍 패턴
 
-`tarot/reading`, `saju/reading`, `shinjeom/message`은 SSE로 응답한다.
+`tarot/reading`, `saju/reading`, `shinjeom/message`은 SSE로 응답한다. 필수 요소 7개는 [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md) 참조.
 
 ```ts
 import { SSE_HEADERS } from "@/lib/request-utils";
@@ -87,19 +87,13 @@ return new Response(
 
 클라이언트는 `fetchSSEStream()` 훅으로 소비한다. 세션 페이지 하드 타임아웃: **240,000ms (240초)**.
 
-## 리딩 저장 패턴 (best-effort 분리 UPDATE)
+## 리딩 저장 패턴
 
-`done` 이벤트로 결과를 먼저 전송(가용성)한 뒤 DB에 저장한다. 본 리딩과 부가 필드를 **분리**해 배포 순서 하자를 없앤다:
-
-1. 본 리딩 insert: `saveTarotReading` / `saveSajuReading` / `saveShinjeomFinalReading` (`reading-saver.ts`, 3회 retry)
-2. `directAnswer`: `persistDirectAnswer(db, service, sessionId, result.directAnswer)` — 마이그 023 `direct_answer` 컬럼에 **별도 best-effort UPDATE**
-3. 저장 실패 시 `recordFailedReading`(dead-letter, 마이그 022)로 payload 영속화 → `POST /api/internal/reading-dlq/retry`가 재처리
-
-> best-effort UPDATE(2)는 컬럼 미적용 환경에서도 조용히 실패·로깅만 하고 본 리딩 insert(1)를 깨지 않는다. `freeQuestion`이 있는데 `directAnswer`가 비면 route가 관측 경고를 남긴다. ⚠️ 마이그 024 섹션 컬럼(`saju_sections`/`shinjeom_sections`)에 대한 별도 UPDATE는 섹션 스키마 폐지(2026-07-07)로 제거됨 — 상세: `docs/architecture/db-abstraction.md`.
+best-effort 분리 UPDATE 절차(본 리딩 insert → `persistDirectAnswer` 별도 UPDATE → 실패 시 dead-letter)는 [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md) 참조.
 
 ## 테스트 위치
 
-API 라우트 테스트는 반드시 `src/__tests__/api/`에 배치한다. (`vitest.config.ts`의 `exclude: ["src/app/**"]` 때문에 `src/app/api/` 하위 `*.test.ts`는 수집되지 않는다.)
+API 라우트 테스트 배치 규칙은 [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md) 참조.
 
 ```ts
 // ✅ 올바른 위치
@@ -116,13 +110,11 @@ import { POST } from "@/app/api/tarot/reading/route";
 
 ## Zod 스키마 위치
 
-`src/lib/validation/api-schemas.ts`에 중앙 관리. 새 API 추가 시 이 파일에 스키마를 추가한다.
+`src/lib/validation/api-schemas.ts`에 중앙 관리(규칙: [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md)). 새 API 추가 시 이 파일에 스키마를 추가한다.
 
 ## DB 접근
 
-- `getAdminDb()` — 서비스 롤 권한 (INSERT/UPDATE 등)
-- `getDb()` — 일반 롤 권한 (SELECT 위주)
-- RLS 우회가 필요한 서버 작업은 항상 `getAdminDb()` 사용
+`getAdminDb()`/`getDb()` 사용 기준은 [`.claude/rules/api-routes.md`](../../../.claude/rules/api-routes.md) 참조. RLS 우회가 필요한 서버 작업은 항상 `getAdminDb()` 사용.
 
 ## 환경변수 분기
 
