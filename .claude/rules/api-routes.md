@@ -29,7 +29,17 @@ SSE 라우트(`tarot/reading`, `saju/reading`, `shinjeom/message`)는 반드시 
 6. try/catch 내 `controller.error(e)` 처리
 7. `getAdminDb()` 사용 (RLS 우회 서비스 롤)
 
-> 스트림 완료 후: 본 리딩 insert(`save*Reading`) → `persistDirectAnswer`(마이그 023 `direct_answer` 컬럼, **본 insert와 분리된 best-effort UPDATE**) → 실패 시 `recordFailedReading`(dead-letter). 별도 UPDATE는 컬럼 미적용 시 조용히 실패해 본 저장을 깨지 않는다(배포 순서 무관). ⚠️ `persistReadingSections`(마이그 024 섹션 컬럼)는 섹션 스키마 폐지(2026-07-07)로 제거됨.
+클라이언트는 `fetchSSEStream()` 훅으로 소비하며, 세션 페이지 하드 타임아웃은 240,000ms(240초)이다.
+
+## 리딩 저장 패턴 (best-effort 분리 UPDATE)
+
+`done` 이벤트로 결과를 먼저 전송(가용성)한 뒤 DB에 저장한다. 본 리딩과 부가 필드를 **분리**해 배포 순서 하자를 없앤다:
+
+1. 본 리딩 insert: `saveTarotReading` / `saveSajuReading` / `saveShinjeomFinalReading`(`reading-saver.ts`, 3회 retry)
+2. `persistDirectAnswer`(마이그 023 `direct_answer` 컬럼) — 본 insert와 **분리된 best-effort UPDATE**. 컬럼 미적용 환경에서도 조용히 실패해 본 저장을 깨지 않는다(배포 순서 무관). `freeQuestion`이 있는데 `directAnswer`가 비면 route가 관측 경고를 남긴다.
+3. 저장 실패 시 `recordFailedReading`(dead-letter, 마이그 022)로 payload 영속화 → `POST /api/internal/reading-dlq/retry`가 재처리.
+
+⚠️ `persistReadingSections`(마이그 024 섹션 컬럼)는 섹션 스키마 폐지(2026-07-07)로 제거됨. 상세: `docs/architecture/db-abstraction.md`.
 
 ## DB 접근
 

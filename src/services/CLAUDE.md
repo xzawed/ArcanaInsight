@@ -32,7 +32,7 @@ services/
 
 ### FallbackProvider 사용법
 
-모든 API 라우트는 `FallbackProvider`를 직접 인스턴스화한다. Grok 장애 시 Claude로 자동 전환되며 호출 측은 분기를 신경 쓰지 않아도 된다.
+모든 API 라우트는 `FallbackProvider`를 직접 인스턴스화한다. Grok 장애 시 Claude로 자동 전환되며 호출 측은 분기를 신경 쓰지 않아도 된다. 모듈 레벨 싱글턴 필수·`hasYielded` 분기 등 사용 규칙은 [`.claude/rules/services.md`](../../.claude/rules/services.md) 참조.
 
 ```ts
 const provider = new FallbackProvider();
@@ -42,31 +42,13 @@ const result = await provider.generateReading(systemPrompt, userPrompt, maxToken
 
 ### DivinationService 인터페이스
 
-새 운세 서비스 추가 시 `divination-scaffold` 에이전트를 사용한다. 구현 필수 메서드:
-
-```ts
-interface DivinationService {
-  id: string;
-  name: string;
-  getCharacter(): CharacterConfig;
-  startSession(topic: Topic): Omit<Session, "id" | "createdAt">;
-  getSystemPrompt(characterId?: string, locale?: string): string;
-  getReadingPrompt(context: SessionContext): string;
-  parseResult(aiResponse: string, expectedCardCount?: number): ReadingResult;
-  // 타로: expectedCardCount로 truncated 감지, cardInterpretations[].{symbolism,situation,action} 3-섹션
-  // 사주·신점: overallReading/topicReading/advice/directAnswer flat 필드가 정본
-  //   (구 4-섹션 중첩 스키마는 2026-07-07 폐지 — docs/architecture/ai-infrastructure.md 참고)
-}
-```
+새 운세 서비스 추가 시 `divination-scaffold` 에이전트를 사용한다. 구현 필수 메서드 체크리스트(인터페이스 시그니처·parseResult 필드 계약)는 [`.claude/rules/services.md`](../../.claude/rules/services.md) 참조.
 
 ### max_tokens 정책
 
-> 아래 함수·상수는 `services/`가 아니라 **각 API 라우트**(`computeReadingMaxTokens`는 `app/api/tarot/reading/route.ts`, `computeSajuReadingMaxTokens`는 `app/api/saju/reading/route.ts`, `SHINJEOM_TOKENS_*`는 `app/api/shinjeom/message/route.ts`)에 위치한다. 상세: `docs/architecture/ai-infrastructure.md` 참고.
+> 아래 함수·상수는 `services/`가 아니라 **각 API 라우트**(`computeReadingMaxTokens`는 `app/api/tarot/reading/route.ts`, `computeSajuReadingMaxTokens`는 `app/api/saju/reading/route.ts`, `SHINJEOM_TOKENS_*`는 `app/api/shinjeom/message/route.ts`)에 위치한다.
 
-- **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 카드별 3-섹션(symbolism/situation/action) + directAnswer 기준 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
-- **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap.
-- **신점 최종 턴**: `SHINJEOM_TOKENS_FINAL = 48,000`.
-- **신점 중간 대화**: `SHINJEOM_TOKENS_CHAT = 6,000`.
+타로/사주/신점별 수치·cap은 [`.claude/rules/services.md`](../../.claude/rules/services.md) 참조. 상세: `docs/architecture/ai-infrastructure.md`.
 
 ## 테스트 위치
 
@@ -76,6 +58,5 @@ CircuitBreaker 테스트 시 `__resetFallbackCircuitForTests()`로 초기화 필
 
 ## 주의사항
 
-- `FallbackProvider` 인스턴스를 모듈 레벨(파일 상단)에 싱글턴으로 생성한다. 요청마다 `new`하면 CircuitBreaker 쿨다운 상태가 유실된다.
 - `core/__tests__/` 디렉토리에 통합 테스트용 파일이 별도 존재한다.
 - Grok 쿨다운 값은 환경변수 `AI_FALLBACK_COOLDOWN_MS` / `AI_AUTH_COOLDOWN_MS`로 제어한다.
