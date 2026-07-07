@@ -33,9 +33,11 @@
 | `pnpm generate:assets:skip` | `generate-assets/index.ts --skip-existing` | 이미 존재하는 이미지를 건너뛰고 생성 |
 | `pnpm generate:service-bg` | `generate-service-backgrounds.ts` | 서비스(타로/사주/신점) 배경 이미지 생성 |
 | `pnpm generate:service-bg:skip` | `generate-service-backgrounds.ts --skip` | 기존 서비스 배경 건너뛰고 생성 |
-| `pnpm download:skins` | `download-skin-images.ts` | Supabase Storage 스킨 이미지 로컬 다운로드 (관리자) |
+| `pnpm download:skins` | `download-skin-images.ts` | (레거시) Supabase Storage 스킨 로컬 다운로드 — card-skins R2 이전(2026-07-07)으로 Supabase 버킷 삭제 후 무효 |
 | `pnpm upload:assets:r2` | `generate-assets/upload-to-r2.ts` | **(정본)** 로컬 카드·배경 → Cloudflare R2(`cdn.xzawed.xyz/card-styles`), ETag=md5 무결성 검증. `.env.r2.local` 필요 |
 | `pnpm upload:assets:r2:skip` | `generate-assets/upload-to-r2.ts --skip-existing` | R2에 이미 있는 키 건너뛰고 업로드 |
+| `pnpm upload:skins:r2` | `generate-assets/upload-skins-r2.ts` | **(정본)** 로컬 카드 스킨 → Cloudflare R2(`cdn.xzawed.xyz/card-skins`), ETag=md5 검증. `.env.r2.local` 필요 |
+| `pnpm upload:skins:r2:skip` | `generate-assets/upload-skins-r2.ts --skip-existing` | R2에 이미 있는 스킨 키 건너뛰고 업로드 |
 | `pnpm upload:assets` | `generate-assets/upload-to-supabase.ts` | (레거시) Supabase Storage 업로드 — card-styles는 R2로 이전됨, **정본 아님**(가드 훅이 확인 요청) |
 | `pnpm upload:assets:skip` | `generate-assets/upload-to-supabase.ts --skip-existing` | (레거시) Supabase 업로드, 기존 건너뜀 |
 | `pnpm test:e2e:full` | `e2e-full/orchestrator.ts --mode=full --workers=6` | 전수 E2E (실서버 + 실 API 키 필요) |
@@ -58,7 +60,8 @@
 | `generate-backgrounds.ts` | 배경 이미지 생성 |
 | `generate-icons.ts` | 아이콘 이미지 생성 |
 | `generate-placeholders.sh` | 플레이스홀더 이미지 생성 (bash) |
-| `upload-skin-images.ts` | 로컬 스킨 이미지를 Supabase Storage 업로드 |
+| `generate-assets/upload-skins-r2.ts` | 로컬 스킨 → Cloudflare R2(`card-skins/`) 업로드 (정본) |
+| `upload-skin-images.ts` | ⚠️ (폐지) 로컬 스킨 → Supabase Storage 업로드 — R2 이전(2026-07-07)으로 대상 버킷 삭제됨 |
 
 ## 4. e2e-full 디렉토리 (멀티 에이전트 E2E)
 

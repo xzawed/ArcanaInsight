@@ -71,3 +71,6 @@ scripts/e2e-full/cases/
 
 # Playwright MCP 세션 아티팩트 (로컬 전용)
 .playwright-mcp/
+
+# card-skins R2 마이그레이션 스테이징(=Supabase→R2 원본). R2가 정본, 로컬은 다운로드 스테이징/postgres 폴백용 — 224MB 리포 비대화 방지
+public/images/skins/

@@ -7,7 +7,7 @@ description: 카드 아트 스타일(4종)·카드 뒷면·서비스 배경 이�
 
 ArcanaInsight의 **카드 아트 스타일·서비스 배경** 이미지를 관리한다. 2026-07-03 이후 이 자산들은 **Cloudflare R2**(`arcana-assets` 버킷, `card-styles/` prefix, `cdn.xzawed.xyz` 서빙)에 저장된다.
 
-> ⚠️ **범위 구분**: 카드 **스킨**(`card-skins` 버킷, Supabase)은 `skin-manager`. **캐릭터** 이미지는 `character-add`. 이 에이전트는 **카드 아트 스타일(4종)·카드 뒷면·서비스 배경**만 담당.
+> ⚠️ **범위 구분**: 카드 **스킨**(`card-skins`, Cloudflare R2, `upload:skins:r2`)은 `skin-manager`. **캐릭터** 이미지는 `character-add`. 이 에이전트는 **카드 아트 스타일(4종)·카드 뒷면·서비스 배경**만 담당.
 
 ## 참조 파일
 

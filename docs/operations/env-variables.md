@@ -40,7 +40,7 @@
 
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
-| `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`로 서빙 (R2 버킷 `arcana-assets`의 `card-styles/` prefix — `card-styles`는 Supabase 폴백 시에만 버킷명). 미설정 시 Supabase Storage로 폴백 | 코드 기본값 미설정 / **프로덕션은 `https://cdn.xzawed.xyz` 설정됨(R2 활성)** |
+| `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`·`{base}/card-skins/...`·`{base}/characters/...`로 서빙 (R2 버킷 `arcana-assets`). 미설정 시 Supabase Storage/로컬 폴백 | 코드 기본값 미설정 / **프로덕션은 `https://cdn.xzawed.xyz` 설정됨(R2 활성)** |
 
 - 예시: `NEXT_PUBLIC_ASSET_BASE_URL=https://cdn.xzawed.xyz`
 - `NEXT_PUBLIC_` 접두사라 **빌드 타임에 인라인**됩니다 → Railway에 설정 후 재배포해야 반영.

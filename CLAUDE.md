@@ -63,6 +63,7 @@ src/
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
 │   ├── storage/card-style.ts  # getCardStyleImageUrl·getCardStyleBackUrl·getServiceBackgroundUrl. card-styles 자산은 Cloudflare R2(cdn.xzawed.xyz), storageBase()가 NEXT_PUBLIC_ASSET_BASE_URL↔Supabase 폴백 분기
+│   ├── storage/index.ts       # getCardImageUrl·getCardBackUrl·getCardThumbnailUrl (카드 스킨 6종). card-skins 자산은 R2(cdn.xzawed.xyz/card-skins, 2026-07-07 이전), skinBase()가 NEXT_PUBLIC_ASSET_BASE_URL↔postgres 로컬↔Supabase 3-way 분기
 │   ├── storage/character-image.ts # getCharacterImageUrl(id,mood) — 캐릭터 이미지 R2(cdn.xzawed.xyz/characters)↔로컬 public 폴백. 배포 이미지는 .dockerignore로 public/images/characters 제외(배포 슬림화)
 │   ├── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
 │   └── guest-sessions.ts      # 익명 세션 id localStorage 보관 (로그인 시 claim 대상)
@@ -125,11 +126,13 @@ pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생�
 pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성
 pnpm upload:assets:r2     # 카드/배경을 Cloudflare R2에 업로드 (정본, etag=md5 검증, .env.r2.local 필요)
 pnpm upload:assets:r2:skip # R2에 이미 있는 키 건너뛰고 업로드
+pnpm upload:skins:r2      # 카드 스킨(6종)을 Cloudflare R2에 업로드 (card-skins/, etag=md5, .env.r2.local 필요)
+pnpm upload:skins:r2:skip # R2에 이미 있는 스킨 키 건너뛰고 업로드
 pnpm upload:assets        # (구) Supabase Storage 업로드 — card-styles는 R2로 이전됨, 정본 아님
 pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Supabase 업로드
 ```
 
-> 카드 아트·서비스 배경은 Cloudflare R2(`cdn.xzawed.xyz`) 서빙. 추가/수정 절차는 `add-card-asset` 스킬·`card-style-manager` 에이전트. 정본 [`docs/conventions/image-assets.md`](docs/conventions/image-assets.md).
+> 카드 아트·서비스 배경·카드 스킨(6종, 2026-07-07 이전)·캐릭터는 모두 Cloudflare R2(`cdn.xzawed.xyz`) 서빙 — **Supabase Storage는 이미지 자산 0**. 카드 아트/배경 추가는 `add-card-asset` 스킬·`card-style-manager` 에이전트, 스킨은 `skin-manager` 에이전트. 정본 [`docs/conventions/image-assets.md`](docs/conventions/image-assets.md).
 
 명령어 정책은 [`docs/workflow/scripts.md`](docs/workflow/scripts.md), 테스트 정책은 [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md), [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)를 따른다.
 

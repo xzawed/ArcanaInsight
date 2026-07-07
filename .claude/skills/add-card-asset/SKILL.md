@@ -1,7 +1,7 @@
 ---
 name: add-card-asset
 description: 카드 아트 스타일·카드 뒷면·서비스 배경 이미지를 추가/수정하는 절차를 안내한다. "카드 이미지 추가", "카드 아트 수정", "카드 배경 교체", "새 카드 스타일", "서비스 배경 이미지" 등의 요청에 사용한다.
-when_to_use: 카드 앞면/뒷면 아트, 타로·사주·신점 서비스 배경 이미지를 추가하거나 수정할 때. (카드 스킨=Supabase는 skin-manager, 캐릭터는 character-add로 별도)
+when_to_use: 카드 앞면/뒷면 아트, 타로·사주·신점 서비스 배경 이미지를 추가하거나 수정할 때. (카드 스킨=R2는 skin-manager, 캐릭터는 character-add로 별도)
 allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm generate:assets*) Bash(pnpm upload:assets:r2*)
 ---
 
