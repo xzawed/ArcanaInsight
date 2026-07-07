@@ -7,7 +7,7 @@ allowed-tools: Read Grep Bash(pnpm type-check) Bash(pnpm generate:assets*) Bash(
 
 # 카드 아트·배경 이미지 추가/수정 절차 (Cloudflare R2)
 
-> **정본**: [`docs/conventions/image-assets.md §5`](../../../docs/conventions/image-assets.md) · [R2 이전 계획](../../../docs/superpowers/plans/2026-06-26-supabase-storage-r2-migration.md)
+> **정본**: [`docs/conventions/image-assets.md §5`](../../../docs/conventions/image-assets.md) · [R2 이전 계획](../../../docs/superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md)
 
 ## 시스템 구조 (2026-07-03 R2 이전 후)
 

@@ -68,7 +68,7 @@
 
 AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana-assets` 버킷, `card-styles/` prefix)에 저장되어 커스텀 도메인 `cdn.xzawed.xyz`로 서빙된다. SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
 
-> **이전 이력**: 2026-07-03 이전에는 Supabase Storage `card-styles` 버킷 사용. 무료티어(1GB) 초과(~2GB, 100% 카드아트) 해소를 위해 R2로 **무손실 이전**(351객체, 바이트·md5 일치 검증, Supabase 원본 삭제 → 224MB로 복귀). 정본: [`../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md).
+> **이전 이력**: 2026-07-03 이전에는 Supabase Storage `card-styles` 버킷 사용. 무료티어(1GB) 초과(~2GB, 100% 카드아트) 해소를 위해 R2로 **무손실 이전**(351객체, 바이트·md5 일치 검증, Supabase 원본 삭제 → 224MB로 복귀). 정본: [`../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md).
 
 | 구분 | 서빙 URL 패턴 (`cdn.xzawed.xyz` 기준) | 비고 |
 |------|---------|------|

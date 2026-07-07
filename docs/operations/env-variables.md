@@ -47,7 +47,7 @@
 - ⚠️ **롤백 주의**: 코드 폴백 경로는 존재하나 Supabase `card-styles` 버킷이 **삭제(2026-07-03, 0객체)**돼 변수만 제거하면 **전량 404**가 됩니다. Supabase로 롤백하려면 먼저 버킷에 자산을 재업로드해야 합니다(현 정본은 R2).
 - ⚠️ 자산 **수정(기존 키 덮어쓰기)** 시 R2 `immutable` 캐시로 인해 Cloudflare 캐시 퍼지 필요.
 - 코드: [`src/lib/storage/card-style.ts`](../../src/lib/storage/card-style.ts) `storageBase()`, [`next.config.ts`](../../next.config.ts) `images.remotePatterns`(호스트 자동 파생). 업로드: `pnpm upload:assets:r2`(`.env.r2.local` 자격증명).
-- 설계·이전 절차 정본: [`../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/2026-06-26-supabase-storage-r2-migration.md)
+- 설계·이전 절차 정본: [`../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md)
 
 ---
 
