@@ -11,6 +11,8 @@ services/
 │   ├── circuit-breaker.ts     # 쿨다운 상태 globalThis 공유 (서버리스 warm 인스턴스 대응)
 │   ├── grok-provider.ts       # Grok API 호출, RateLimitError / AuthError 정의
 │   ├── claude-provider.ts     # Claude API 호출 (fallback 전용)
+│   ├── ai-provider.ts         # AIProvider 공통 인터페이스 타입 정의
+│   ├── http-utils.ts          # withAbortTimeout / readSseLines — Grok·Claude 공용 SSE reader
 │   ├── prompt-builder.ts      # buildCharacterHeader / buildSystemPrompt / buildReadingPrompt / buildUserInfoPrompt / buildFreeQuestionPrompt / buildDirectAnswerContract(질문 직답 answer-first 계약) / buildReadabilityContract(쉬운 말 계약, 3서비스 공통) / buildCharacterMemoryPrompt / getLanguageFooter
 │   ├── reading-generator.ts   # streamReadingWithParseRetry — 1차 스트리밍 → parseError 시 1회 non-stream 재생성 (3 리딩 라우트 공통)
 │   └── text-cleaner.ts        # cleanReadingText / parseJsonSafe(트레일링 콤마 내성) / extractFallbackText
@@ -20,7 +22,8 @@ services/
 │   └── spread-resolver.ts     # Topic → Spread 매핑
 ├── saju/
 │   ├── saju-service.ts        # DivinationService 구현체
-│   └── saju-calculator.ts     # 사주 날짜 계산
+│   ├── saju-calculator.ts     # 사주 날짜 계산
+│   └── saju-types.ts          # 사주 전용 타입 정의
 └── shinjeom/
     └── shinjeom-service.ts    # DivinationService 구현체
 ```
@@ -57,6 +60,8 @@ interface DivinationService {
 ```
 
 ### max_tokens 정책
+
+> 아래 함수·상수는 `services/`가 아니라 **각 API 라우트**(`computeReadingMaxTokens`는 `app/api/tarot/reading/route.ts`, `computeSajuReadingMaxTokens`는 `app/api/saju/reading/route.ts`, `SHINJEOM_TOKENS_*`는 `app/api/shinjeom/message/route.ts`)에 위치한다. 상세: `docs/architecture/ai-infrastructure.md` 참고.
 
 - **타로**: `computeReadingMaxTokens(cardCount)` — `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 카드별 3-섹션(symbolism/situation/action) + directAnswer 기준 확장. 신규 스프레드 추가 시 이 함수를 확인한다.
 - **사주**: `computeSajuReadingMaxTokens(timeRange, includeMonthly)` — 기본 48,000 / 복잡 범위 60,000 cap.

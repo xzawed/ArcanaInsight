@@ -35,6 +35,9 @@
 |-----------|------|
 | `CLAUDE.md`, `AGENTS.md` | Claude가 관리 — Codex 직접 수정 금지 |
 | `.claude/agents/*.md` | Claude가 관리하는 에이전트 정의 |
+| `.claude/rules/*.md` | Claude가 관리하는 세션 자동로드 규칙 |
+| `.claude/skills/` | Claude가 관리하는 스킬 정의 |
+| `.claude/settings.json` | 훅·permissions·deny (파괴적 변경은 사용자 확인) |
 | `src/types/**` (기존 타입 변경) | 타입 계약 변경은 재진입 조건 |
 | `src/i18n/translations/shared/keys.ts` | Claude가 키 네이밍 결정 |
 | `docs/` 구조 변경 | 사실 반영 수정만 허용, 구조 변경은 Claude |
@@ -54,7 +57,7 @@
 ```bash
 pnpm type-check       # TypeScript 0 error 필수
 pnpm lint             # ESLint 0 error 필수
-pnpm test:coverage    # branches≥92 / functions/lines/statements≥98
+pnpm test:coverage    # branches 90 / functions 97 / lines 98 / statements 98
 pnpm build            # 프로덕션 빌드 성공 필수
 ```
 

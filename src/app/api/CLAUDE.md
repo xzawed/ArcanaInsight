@@ -22,9 +22,12 @@ api/
 │   └── [...nextauth]/      # NextAuth.js (DB_PROVIDER=postgres 모드)
 ├── daily-card/route.ts
 ├── daily-fortune/route.ts
+├── health/route.ts         # 헬스체크 (GET, 배포 모니터링용)
 ├── locale/route.ts
 ├── sessions/
 │   └── claim/route.ts    # 익명 세션 user_id 귀속 (POST, 로그인 필수)
+├── internal/
+│   └── reading-dlq/retry/route.ts  # dead-letter 재처리 (POST, secret 가드, 마이그 022)
 └── profile/
     └── favorite-character/route.ts
 ```
