@@ -45,16 +45,20 @@
 - **실패 로그는 CLI에 안 뜰 수 있음.** create-container/헬스체크 실패는 `railway logs`에 비어 나옴 → **대시보드 Details** 또는 SSH·GraphQL `deploymentLogs`(로그인 필요)로 확인.
 - **squash 머지**는 stacked 브랜치의 merge-base를 어긋내 후속 PR에 전체 충돌을 유발 → 배포/문서 PR은 항상 main 최신에서 분기.
 
+> **자동 검증**: `pnpm verify:railway-config` — 위 2필수조건(`startCommand=node server.js`·서비스 변수 `HOSTNAME=0.0.0.0`)을 Railway API로 assert(불일치 시 exit 1). 서비스 재생성/배포 의심 시 실행. `railway login` 또는 `RAILWAY_API_TOKEN` 필요.
+
 ---
 
 ## 4. 배포 후 스모크 검증 (헬스체크만으론 부족)
 
 > `/api/health` 200 = "서버가 떴다"일 뿐, **기능이 정상이란 뜻은 아니다.** (예: NEXT_PUBLIC_ASSET_BASE_URL 누락 시 헬스체크는 통과해도 이미지가 전부 404)
 
-배포 SUCCESS 후 최소 확인:
-1. `/api/health` 200, 홈 `/` 200
-2. **캐릭터 이미지 로드**: 홈에서 `cdn.xzawed.xyz`(R2) 이미지가 `/_next/image` 경유 200 — Playwright로 콘솔 에러 0 확인 권장
-3. **리딩 1건씩**(tarot/saju/shinjeom): 익명 요청으로 실제 결과(SSE) 생성 확인 (DB 무오염, 리딩 회귀 감지)
+**자동**: `.github/workflows/post-deploy-smoke.yml`이 **main push마다** 배포 완료를 기다린 뒤 `pnpm smoke:prod`를 실행한다(health·홈+자산호스트 인라인·R2 이미지 200 검증, 실패 시 워크플로 red). 수동 실행도 가능: `pnpm smoke:prod` (리딩 포함은 `node scripts/smoke-prod.mjs --reading`, AI 비용).
+
+배포 SUCCESS 후 확인 항목(스모크 스크립트가 1~2 자동 커버):
+1. `/api/health` 200, 홈 `/` 200 + 본문에 `cdn.xzawed.xyz` 인라인(=NEXT_PUBLIC_ASSET_BASE_URL 빌드 반영)
+2. **캐릭터 이미지 로드**: `cdn.xzawed.xyz`(R2) 이미지 200
+3. **리딩 1건씩**(tarot/saju/shinjeom): 익명 요청 실제 결과(SSE) 생성 — `pnpm eval:reading`(3서비스 계약 검증) 또는 `smoke:prod --reading`(타로 1건)
 4. **배포 방식 변경 시**: 앱 로그에 `Network: http://0.0.0.0:8080` (0.0.0.0 바인딩) 확인
 
 ---

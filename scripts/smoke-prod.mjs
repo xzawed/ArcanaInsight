@@ -1,0 +1,111 @@
+/**
+ * 배포 후 프로덕션 스모크 검증 — 헬스체크 통과가 보장하지 못하는 "기능적 정상"을 확인한다.
+ *
+ * 배경(2026-07-06 배포 사고): standalone IPv6 바인딩·`NEXT_PUBLIC_ASSET_BASE_URL` 누락 등으로
+ * `/api/health`는 200인데 실제로는 홈이 안 뜨거나 캐릭터 이미지가 404가 나는 경우가 있었다.
+ * 이 스모크는 그 사각(healthcheck green이지만 기능 broken)을 잡는다.
+ *
+ * 검사(무비용, AI 호출 없음):
+ *   1. GET /api/health            → 200
+ *   2. GET /                      → 200 + 본문에 자산 호스트(cdn.xzawed.xyz) 포함
+ *                                    (= NEXT_PUBLIC_ASSET_BASE_URL 빌드 인라인 확인)
+ *   3. GET <asset>/characters/... → 200 (R2 캐릭터 이미지 서빙 확인)
+ *   (--reading 플래그 시 익명 타로 리딩 1건 SSE 확인 — AI 비용 발생, 기본 off)
+ *
+ * 사용:
+ *   node scripts/smoke-prod.mjs                         # 프로덕션
+ *   SMOKE_BASE_URL=https://staging... node scripts/smoke-prod.mjs
+ *   node scripts/smoke-prod.mjs --reading              # 리딩 1건 포함(AI 비용)
+ *
+ * 실패 시 exit 1. CI(post-deploy-smoke.yml) + 수동(`pnpm smoke:prod`) 공용.
+ */
+
+const BASE = (process.env.SMOKE_BASE_URL ?? "https://arcanainsight-production.up.railway.app").replace(/\/$/, "");
+const ASSET_HOST = process.env.SMOKE_ASSET_HOST ?? "cdn.xzawed.xyz";
+const ASSET_IMAGE = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/default.png`;
+const WITH_READING = process.argv.includes("--reading");
+const RETRIES = 3;
+const RETRY_GAP_MS = 8000;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** 단일 검사를 RETRIES회까지 재시도(배포 타이밍/일시 blip 흡수) */
+async function check(name, fn) {
+  let lastErr = "";
+  for (let attempt = 1; attempt <= RETRIES; attempt++) {
+    try {
+      const detail = await fn();
+      console.log(`✅ ${name}${detail ? `  (${detail})` : ""}`);
+      return true;
+    } catch (e) {
+      lastErr = e instanceof Error ? e.message : String(e);
+      if (attempt < RETRIES) await sleep(RETRY_GAP_MS);
+    }
+  }
+  console.log(`❌ ${name}  — ${lastErr}`);
+  return false;
+}
+
+async function status(url, opts = {}) {
+  const res = await fetch(url, { signal: AbortSignal.timeout(20000), ...opts });
+  return res;
+}
+
+async function readingSmoke() {
+  const body = {
+    topic: "general", spreadType: "three-card", characterId: "arcana",
+    userInfo: { name: "smoke", birthDate: "1993-05-14", gender: "male" },
+    freeQuestion: "smoke test",
+    cards: [0, 1, 2].map((i) => ({ cardId: `major-0${i}`, position: i, isReversed: false })),
+  };
+  const res = await fetch(`${BASE}/api/tarot/reading`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body), signal: AbortSignal.timeout(120000),
+  });
+  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+  let buf = "", dec = new TextDecoder(), ok = false, perr = null;
+  for await (const ch of res.body) {
+    buf += dec.decode(ch, { stream: true });
+    const lines = buf.split("\n"); buf = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data: ")) continue;
+      let d; try { d = JSON.parse(line.slice(6)); } catch { continue; }
+      if (d.done) { ok = !!(d.result?.overallReading); perr = d.result?.parseError ?? null; }
+      if (d.error) throw new Error(`SSE error: ${String(d.error).slice(0, 80)}`);
+    }
+  }
+  if (!ok) throw new Error("리딩 결과 없음");
+  if (perr) throw new Error(`parseError=${perr}`);
+  return "리딩 생성 OK";
+}
+
+async function main() {
+  console.log(`배포 후 스모크 — 대상: ${BASE}\n`);
+  const results = [];
+  results.push(await check("GET /api/health = 200", async () => {
+    const r = await status(`${BASE}/api/health`);
+    if (r.status !== 200) throw new Error(`status ${r.status}`);
+    return "200";
+  }));
+  results.push(await check("GET / = 200 + 자산 호스트 인라인", async () => {
+    const r = await status(`${BASE}/`);
+    if (r.status !== 200) throw new Error(`status ${r.status}`);
+    const html = await r.text();
+    if (!html.includes(ASSET_HOST)) throw new Error(`홈 본문에 ${ASSET_HOST} 없음 (NEXT_PUBLIC_ASSET_BASE_URL 미인라인 의심)`);
+    return `200, ${ASSET_HOST} 인라인`;
+  }));
+  results.push(await check("캐릭터 이미지(R2) = 200", async () => {
+    const r = await status(ASSET_IMAGE, { method: "GET" });
+    if (r.status !== 200) throw new Error(`${ASSET_IMAGE} status ${r.status}`);
+    return "R2 서빙 OK";
+  }));
+  if (WITH_READING) {
+    results.push(await check("타로 리딩 1건(SSE)", readingSmoke));
+  }
+
+  const passed = results.filter(Boolean).length;
+  console.log(`\n결과: ${passed}/${results.length} 통과`);
+  if (passed !== results.length) process.exit(1);
+}
+
+main().catch((e) => { console.error("스모크 실행 오류:", e); process.exit(1); });
