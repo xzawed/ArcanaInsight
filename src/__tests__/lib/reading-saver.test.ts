@@ -9,6 +9,7 @@ import {
   recordFailedReading,
   dispatchFailedReadingSave,
   persistDirectAnswer,
+  recordParseFailure,
 } from "@/lib/db/reading-saver";
 import { makeMockDb } from "@/test-helpers/mock-db";
 
@@ -132,6 +133,38 @@ describe("persistDirectAnswer (best-effort directAnswer UPDATE)", () => {
     await expect(persistDirectAnswer(db, "tarot", "sess-x", "직답")).resolves.toBeUndefined();
     expect(errSpy).toHaveBeenCalledWith(expect.stringContaining("[reading-save-failed] service=tarot"));
     errSpy.mockRestore();
+  });
+});
+
+describe("recordParseFailure (best-effort parseError 계량)", () => {
+  it("parse_failures에 service·parse_error·session_id·locale 을 insert 한다", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({});
+    await recordParseFailure(db, "saju", "missing_fields", "sess-pf", "ko");
+    expect(db.insert).toHaveBeenCalledWith("parse_failures", {
+      service: "saju",
+      parse_error: "missing_fields",
+      session_id: "sess-pf",
+      locale: "ko",
+    });
+  });
+
+  it("session_id가 null이어도(익명) 기록한다", async () => {
+    const db = makeMockDb();
+    db.insert.mockResolvedValue({});
+    await recordParseFailure(db, "shinjeom", "truncated", null);
+    expect(db.insert).toHaveBeenCalledWith("parse_failures", expect.objectContaining({
+      service: "shinjeom", parse_error: "truncated", session_id: null,
+    }));
+  });
+
+  it("insert 실패(테이블 미존재 등)해도 throw하지 않고 로깅만 한다 — 스트림 무영향", async () => {
+    const db = makeMockDb();
+    db.insert.mockRejectedValue(new Error('relation "parse_failures" does not exist'));
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(recordParseFailure(db, "tarot", "invalid_json", "s")).resolves.toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("[parse-failure-record-failed] service=tarot"));
+    warnSpy.mockRestore();
   });
 });
 

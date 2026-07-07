@@ -10,7 +10,7 @@ import { fetchMemoryPrompt } from "@/lib/db/character-context";
 import { ShinjeomMessageSchema } from "@/lib/validation/api-schemas";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit"
 import { getClientIp, jsonError, SSE_HEADERS } from "@/lib/request-utils"
-import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, logReadingParseError } from "@/lib/db/reading-saver";
+import { saveShinjeomFinalReading, saveShinjeomMessages, logReadingSaveFailure, recordFailedReading, persistDirectAnswer, logReadingParseError, recordParseFailure } from "@/lib/db/reading-saver";
 import type { DbClient } from "@/lib/db/types";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t as translate } from "@/i18n/translations";
@@ -57,6 +57,7 @@ async function emitShinjeomFinalResult(
   // parseError(부분 파싱/무결과)는 [reading-parse-error] 마커로 관측성 로깅 (저장 게이트와 무관, best-effort)
   if (result.parseError) {
     logReadingParseError("shinjeom", result.parseError, sessionId ?? null);
+    if (db) await recordParseFailure(db, "shinjeom", result.parseError, sessionId ?? null, locale);
   }
 
   // 저장 시그널 (done 이후 후속 이벤트). onSaveStatus 소비자만 수신.

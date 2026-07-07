@@ -145,6 +145,7 @@ describe("POST /api/shinjeom/message", () => {
       saveShinjeomFinalReading: mockSaveFinal,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -169,6 +170,7 @@ describe("POST /api/shinjeom/message", () => {
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingSaveFailure: vi.fn(),
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
@@ -191,6 +193,7 @@ describe("POST /api/shinjeom/message", () => {
       logReadingSaveFailure: mockLog,
       recordFailedReading: mockRecord,
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -233,6 +236,7 @@ describe("POST /api/shinjeom/message", () => {
       saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: null }),
       logReadingSaveFailure: mockLog,
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -256,6 +260,7 @@ describe("POST /api/shinjeom/message", () => {
       saveShinjeomMessages: mockSaveMsg,
       saveShinjeomFinalReading: vi.fn().mockResolvedValue({ shareToken: null }),
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
@@ -358,6 +363,7 @@ describe("POST /api/shinjeom/message", () => {
       saveShinjeomFinalReading: mockSave,
       saveShinjeomMessages: vi.fn().mockResolvedValue(undefined),
       logReadingParseError: vi.fn(),
+      recordParseFailure: vi.fn(),
     }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),

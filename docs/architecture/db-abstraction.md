@@ -77,8 +77,18 @@ src/lib/db/
 | `022_failed_readings_dlq.sql` | 리딩 저장 dead-letter 큐 — `failed_readings` 테이블 신설(영구 저장 실패분 payload 영속화·재처리). service_role 전용, anon 정책 없음(021과 일관). ✅ 운영 DB 적용 완료(2026-07-01, Supabase MCP 실측 확인) |
 | `023_direct_answer.sql` | 질문 직답 영속 — `readings`·`saju_readings`·`shinjeom_readings`에 `direct_answer TEXT DEFAULT ''` 추가(재방문·공유 결과 노출). 앱은 `persistDirectAnswer` **best-effort UPDATE**로 기록하므로 컬럼 미적용 환경에서도 본 리딩 insert 무영향(컬럼 없으면 UPDATE만 조용히 실패·로깅). ✅ 운영 DB 적용 완료(2026-07-04) |
 | `024_reading_sections.sql` | 사주·신점 섹션 영속 — `saju_readings.saju_sections`·`shinjeom_readings.shinjeom_sections` `JSONB DEFAULT '{}'` 추가. ⚠️ **deprecated·미사용(섹션 스키마 폐지 2026-07-07)** — 간헐 무결과의 근본 원인이던 4-섹션 중첩 스키마를 제거하고 `overallReading`을 정본으로 통합(리딩 신뢰성 기술부채 정리). 컬럼은 하위 호환을 위해 DROP하지 않고 유지하되 앱은 더 이상 쓰거나 읽지 않는다. |
+| `025_parse_failures.sql` | parseError(지배적 실패 모드) 계량 테이블 `parse_failures`(service·parse_error·session_id·locale·created_at) 신설. `recordParseFailure`(reading-saver)가 3 리딩 라우트 parseError 브랜치에서 best-effort insert. ⚠️ **재처리 큐(`failed_readings`)와 분리** — retry 엔드포인트가 빈/부분 결과를 재저장해 미저장 게이트를 무효화하는 위험 차단(순수 관측 전용). RLS on·정책 0(service_role 전용, 022와 일관). ✅ 운영 DB 적용 완료(2026-07-07). failed_readings처럼 Drizzle 스키마 미등록(Supabase 어댑터 generic insert). |
 
-PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨
+PostgreSQL 모드: `src/lib/db/schema/index.ts` (Drizzle)에 동일 스키마 정의됨(단 `failed_readings`·`parse_failures`는 Supabase 어댑터 generic insert 전용으로 Drizzle 미등록)
+
+### parse_failures 집계 쿼리 (관측 대시보드 대용)
+```sql
+-- 최근 7일 parseError 분포(타입·서비스별) + 최근 발생 시각
+SELECT parse_error, service, count(*) AS n, max(created_at) AS last_seen
+FROM parse_failures WHERE created_at > now() - interval '7 days'
+GROUP BY parse_error, service ORDER BY n DESC;
+```
+Supabase 대시보드/MCP로 실행. 발생률이 유의미하면 이 데이터를 근거로 프롬프트/스키마를 재조정한다.
 
 ---
 

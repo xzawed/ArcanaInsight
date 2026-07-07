@@ -56,6 +56,30 @@ export function logReadingParseError(
   );
 }
 
+/** parseError(지배적 실패 모드)를 계량 테이블 `parse_failures`에 영속화한다 — 순수 관측용
+ *  (분포·추이 쿼리). `logReadingParseError` 로그 마커(휘발성)를 보완하는 영속 계량.
+ *  best-effort — 이 insert가 실패해도 throw하지 않고 로깅만 한다(스트림 가용성 보호).
+ *  ⚠️ 재처리 큐(`failed_readings`)와 분리 — parse_failures는 retry 대상이 아니다(마이그 025 참고). */
+export async function recordParseFailure(
+  db: DbClient,
+  service: DlqService,
+  parseError: string,
+  sessionId: string | null,
+  locale: string = DEFAULT_LOCALE,
+): Promise<void> {
+  try {
+    await db.insert("parse_failures", {
+      service,
+      parse_error: parseError,
+      session_id: sessionId,
+      locale: safeLocale(locale),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn(`[parse-failure-record-failed] service=${service} type=${parseError} err=${msg.slice(0, 120)}`);
+  }
+}
+
 /** 타로 리딩 결과 + 세션 완료 + 카드 목록 저장 (3회 retry).
  *  locale 인자는 readings 테이블에 작성 시점 locale을 기록 (sessions.locale과 별도 — 결과 텍스트 언어 추적용). */
 export async function saveTarotReading(

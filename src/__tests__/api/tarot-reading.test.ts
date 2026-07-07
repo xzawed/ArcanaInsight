@@ -190,7 +190,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("스트림 완료 후 saveTarotReading 호출 (done 이후 await)", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingParseError: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingParseError: vi.fn(), recordParseFailure: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
@@ -214,7 +214,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("저장 성공 시 done 이후 saved:true 이벤트를 전송한다", async () => {
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: vi.fn(), logReadingParseError: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: vi.fn(), logReadingParseError: vi.fn(), recordParseFailure: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -230,7 +230,7 @@ describe("POST /api/tarot/reading", () => {
     const mockSave = vi.fn().mockRejectedValue(new Error("db down"));
     const mockLog = vi.fn();
     const mockRecord = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord, logReadingParseError: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: mockSave, logReadingSaveFailure: mockLog, recordFailedReading: mockRecord, logReadingParseError: vi.fn(), recordParseFailure: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue(true), rateLimitResponse: vi.fn() }));
     const mockDb = makeMockDb();
     vi.doMock("@/lib/db", () => ({ getDb: vi.fn().mockReturnValue(mockDb), getAdminDb: vi.fn().mockReturnValue(mockDb) }));
@@ -382,7 +382,7 @@ describe("POST /api/tarot/reading", () => {
 
   it("parseError 있을 때 saveTarotReading 미호출 — 빈 리딩 DB 저장 방지", async () => {
     const saveSpy = vi.fn();
-    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: saveSpy, logReadingParseError: vi.fn() }));
+    vi.doMock("@/lib/db/reading-saver", () => ({ persistDirectAnswer: vi.fn(), saveTarotReading: saveSpy, logReadingParseError: vi.fn(), recordParseFailure: vi.fn() }));
     vi.doMock("@/lib/rate-limit", () => ({
       checkRateLimit: vi.fn().mockReturnValue(true),
       rateLimitResponse: vi.fn(),
