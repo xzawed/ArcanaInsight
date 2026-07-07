@@ -66,19 +66,24 @@
 
 ## 5. 카드 아트 스타일 이미지 (Cloudflare R2)
 
-AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana-assets` 버킷, `card-styles/` prefix)에 저장되어 커스텀 도메인 `cdn.xzawed.xyz`로 서빙된다. SVG 스킨 이미지(`images/skins/`)와 **별개**의 독립 시스템이다.
+AI 생성 타로 카드 이미지·서비스 배경·**카드 스킨(6종)**·캐릭터 이미지는 모두 **Cloudflare R2**(`arcana-assets` 버킷)에 저장되어 커스텀 도메인 `cdn.xzawed.xyz`로 서빙된다. Supabase Storage는 더 이상 이미지 자산을 보유하지 않는다.
 
-> **이전 이력**: 2026-07-03 이전에는 Supabase Storage `card-styles` 버킷 사용. 무료티어(1GB) 초과(~2GB, 100% 카드아트) 해소를 위해 R2로 **무손실 이전**(351객체, 바이트·md5 일치 검증, Supabase 원본 삭제 → 224MB로 복귀). 정본: [`../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md).
+> **이전 이력**:
+> - **card-styles**: 2026-07-03 Supabase Storage `card-styles` 버킷 → R2 **무손실 이전**(351객체, 바이트·md5 일치 검증, Supabase 원본 삭제 → 2GB→224MB). 정본: [`../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md`](../superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md).
+> - **card-skins**: 2026-07-07 Supabase Storage `card-skins` 버킷(6종·474객체·224MB, egress 소비) → R2 `card-skins/` prefix로 **무손실 이전**(ETag=md5 검증, Supabase 원본 삭제 → Supabase Storage 0). card-styles와 동일 패턴.
 
 | 구분 | 서빙 URL 패턴 (`cdn.xzawed.xyz` 기준) | 비고 |
 |------|---------|------|
 | 카드 앞면 | `card-styles/cards/{styleId}/{suit}/{number}.png` | 4종 스타일 × 카드 수 (`.png`) |
 | 카드 뒷면 | `card-styles/cards/{styleId}/card-back.webp` | 스타일별 전용 뒷면 (`.webp`) |
 | 서비스 배경 | `card-styles/backgrounds/{service}/{theme}.png` | 타로/사주/신점 × 테마 |
+| 카드 스킨 앞면 | `card-skins/{skinId}/front/{cardId}.png` | 6종 스킨 × 78장 (`.png`) |
+| 카드 스킨 뒷면 | `card-skins/{skinId}/back.png` | 스킨별 전용 뒷면 (`.png`) |
 | 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 7 mood = 84개 (2026-07-06 배포 슬림화로 R2 이전) |
 
 - 캐릭터 URL은 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`로 조회(`NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2, 미설정 시 로컬 public 폴백). 업로드: `pnpm upload:characters:r2`(`:skip` 지원) — `public/images/characters` → R2(`characters/` 키), ETag=md5 검증.
 - URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).
+- **카드 스킨** URL은 `src/lib/storage/index.ts`의 `getCardImageUrl(skinId, cardId)` / `getCardBackUrl(skinId)`로 조회. `skinBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(R2) → postgres 로컬(`/images/skins`) → Supabase(폴백) 3-way 분기. 업로드(정본): `pnpm upload:skins:r2`(`:skip` 지원) — `public/images/skins` → R2(`card-skins/` 키, `Cache-Control: immutable`), ETag=md5 검증. 로컬 스테이징은 `pnpm download:skins`(Supabase 삭제 전) 또는 R2에서 받는다.
 - 카드 `<Image>`는 `unoptimized`로 R2에서 직접 로드(옵티마이저 우회). `next.config.ts` `remotePatterns`가 자산 호스트를 env에서 자동 파생.
 - 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요).
 - **업로드(정본)**: `pnpm upload:assets:r2` — `public/images/cards`·`backgrounds` → R2(`card-styles/` 키, `Cache-Control: immutable`), 업로드 후 **ETag=md5 무결성 검증**. `.env.r2.local`에 R2 자격증명 필요. `:r2:skip`은 기존 키 스킵. (⚠️ 기존 `pnpm upload:assets`는 **Supabase 대상=정본 아님** — PreToolUse 훅이 오사용 시 확인 요청)
@@ -95,9 +100,10 @@ AI 생성 타로 카드 이미지·서비스 배경은 **Cloudflare R2**(`arcana
 | `scripts/generate-nukki-images.mjs` | 누끼(배경제거) 이미지 생성 |
 | `scripts/regenerate-all-nukki.mjs` | 전체 캐릭터 누끼 재생성 |
 | `scripts/generate-assets/` | 카드 아트 스타일 이미지 생성·업로드 오케스트레이터 |
-| `scripts/generate-skin-images.ts` | 카드 스킨 이미지 생성 |
-| `scripts/upload-skin-images.ts` | 생성된 스킨 → Supabase Storage 업로드 |
-| `scripts/download-skin-images.ts` | Supabase Storage → `public/images/skins/` 다운로드 |
+| `scripts/generate-skin-images.ts` | 카드 스킨 이미지 생성 → `public/images/skins/` |
+| `scripts/generate-assets/upload-skins-r2.ts` | 생성된 스킨 → **Cloudflare R2**(`card-skins/`) 업로드 (`pnpm upload:skins:r2`, ETag=md5) — **정본** |
+| `scripts/upload-skin-images.ts` | ⚠️ (폐지) Supabase Storage 업로드 — card-skins R2 이전(2026-07-07)으로 대상 버킷 삭제됨 |
+| `scripts/download-skin-images.ts` | (레거시) Supabase Storage → `public/images/skins/` 다운로드 — Supabase 버킷 삭제 후 무효 |
 | `scripts/generate-card-images.ts` | 카드 이미지 생성 |
 | `scripts/generate-backgrounds.ts` | 배경 이미지 생성 |
 | `scripts/generate-icons.ts` | 아이콘 이미지 생성 (BFS 배경 제거 + 크롭) |

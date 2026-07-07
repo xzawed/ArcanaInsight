@@ -29,7 +29,7 @@ git diff --stat HEAD origin/main 2>/dev/null || git diff --stat HEAD~1
 - [ ] 새 TS 파일 추가 시 `sonar-project.properties` exclusions 동기화했는가?
 - [ ] 상수(max_tokens 등) 변경 시 해당 상수를 기댓값으로 쓰는 테스트도 수정했는가?
   - 확인: `grep -r "toBe(" src/__tests__/` 에서 변경 전 값 검색
-- [ ] 이미지 덮어쓰기 전 기존 이미지 백업했는가? (캐릭터=R2 `cdn.xzawed.xyz/characters`, 스킨=Supabase Storage `card-skins`에서 다운로드 — `nukki/`·`backup-v2/` 로컬 폴더는 #447로 제거됨)
+- [ ] 이미지 덮어쓰기 전 기존 이미지 백업했는가? (캐릭터=R2 `cdn.xzawed.xyz/characters`, 스킨=R2 `cdn.xzawed.xyz/card-skins`에서 다운로드 — `nukki/`·`backup-v2/` 로컬 폴더는 #447로 제거됨)
 
 ### UI 변경
 - [ ] UI 텍스트 변경 시 E2E `hasText`/`getByText` 셀렉터도 같이 수정했는가?

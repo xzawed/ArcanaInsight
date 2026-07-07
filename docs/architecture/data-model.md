@@ -172,6 +172,11 @@ export interface EffectTheme {
 - `getCardStyleBackUrl(styleId)` — 스타일별 카드 뒷면 URL (`card-back.webp`)
 - `getServiceBackgroundUrl(service, theme)` — 서비스 배경 URL (`backgrounds/{service}/{theme}.png`)
 
+**카드 스킨 URL 헬퍼** (`src/lib/storage/index.ts`) — `skinBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(R2) → postgres 로컬(`/images/skins`) → Supabase(폴백) 3-way 분기. **card-skins(6종)는 2026-07-07 R2로 무손실 이전, Supabase card-skins 버킷 삭제(Supabase Storage 0)** — 업로드 정본 `pnpm upload:skins:r2`:
+- `getCardImageUrl(skinId, cardId)` — 스킨 카드 앞면 URL (`{base}/card-skins/{skinId}/front/{cardId}.png`)
+- `getCardBackUrl(skinId)` — 스킨별 카드 뒷면 URL (`back.png`)
+- `getCardThumbnailUrl(skinId, cardId)` — 썸네일(원본 URL 반환, 변환 파라미터 없음)
+
 ---
 
 ### 6-2. 카드 팔레트 스킨 (Skins)

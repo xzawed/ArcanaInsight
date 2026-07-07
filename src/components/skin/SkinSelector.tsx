@@ -68,7 +68,7 @@ export function SkinSelector({ skin, isSelected, onSelect }: SkinSelectorProps) 
       <div className="relative h-28 flex items-end justify-center mb-3">
         {sampleCards.map((cardId, index) => {
           const config = FAN_CONFIGS[index];
-          const thumbUrl = getCardThumbnailUrl(skin.id, cardId, 64, 100);
+          const thumbUrl = getCardThumbnailUrl(skin.id, cardId);
           const hasError = imgErrors[cardId];
 
           return (
