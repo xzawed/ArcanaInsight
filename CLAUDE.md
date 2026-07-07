@@ -118,7 +118,7 @@ pnpm sync:test-count      # 고정 테스트 수가 있는 문서 동기화
 pnpm check:env-docs       # env.ts와 env 문서 정합성
 pnpm check:doc-links      # 문서 링크 검증
 pnpm i18n:check           # 번역 키 drift 검출
-pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·4섹션·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
+pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·overallReading·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
 pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생성 (REPLICATE_API_KEY 필요)
 pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성
 pnpm upload:assets:r2     # 카드/배경을 Cloudflare R2에 업로드 (정본, etag=md5 검증, .env.r2.local 필요)
