@@ -1,6 +1,6 @@
 # ArcanaInsight UI 고도화 — 구현 기반 계획
 > **목적:** Claude Design 결과물 수령 후 즉시 구현 착수 가능하도록 사전 기반 작업 + 영역별 구현 청사진 정리  
-> **연계 문서:** `docs/design/CLAUDE_DESIGN_BRIEF.md` (의뢰서)
+> **연계 문서:** `docs/design/design-brief.md` (의뢰서)
 
 ---
 

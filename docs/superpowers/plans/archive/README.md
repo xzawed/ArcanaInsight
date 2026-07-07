@@ -8,7 +8,7 @@
 - 파일 자체는 삭제하지 않는다 (의사결정 흐름·논의 맥락 보존).
 - 새 계획서를 작성하면 부모 디렉토리에 위치시키고, 머지 후 본 디렉토리로 옮긴다.
 
-## 인벤토리 (37개)
+## 인벤토리 (38개)
 
 | 파일 | 작성 시점 | 주제 | 관련 PR/구현 |
 |---|---|---|---|
@@ -47,11 +47,12 @@
 | `2026-05-15-code-doc-cleanup.md` | 2026-05-15 | 전체 코드·문서 정리 (3-PR) | 문서 감사·컴포넌트 분리(#426·#437·#440) |
 | `2026-05-26-premium-reading-experience.md` | 2026-05-26 | 프리미엄 리딩 경험 | PR #414·#420 |
 | `2026-05-29-tarot-reading-quality.md` | 2026-05-29 | 타로 리딩 품질 | 리딩 프롬프트 |
+| `2026-06-26-supabase-storage-r2-migration.md` | 2026-06-26 | Supabase Storage → Cloudflare R2 이전 (card-styles) | PR #450·#451·#452 |
 | `i18n-consistency-fix.md` | (초기) | i18n 정합성 수정 | i18n 다국어 |
 | `i18n-master-plan.md` | (초기) | i18n 마스터 플랜 | i18n 다국어 |
 
 ## 상위 디렉토리(활성 `plans/`) 현재 파일
 
-- `docs/superpowers/plans/2026-06-26-supabase-storage-r2-migration.md` — Supabase Storage → R2 자산 이전 계획(#450·#451·#452).
+- `docs/superpowers/plans/2026-07-07-reading-reliability-debt.md` — 리딩 안정성 기술부채 계획(전 step 미체크 = 진짜 활성).
 
 > `2026-05-01-code-doc-cleanup-result.md`는 본 `archive/`로 이동되어 위 인벤토리에 포함됨(과거 상위 `plans/` 보존 항목이었음).

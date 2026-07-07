@@ -37,31 +37,28 @@ src/
 │   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput,
 │   │                # ResultPageShell, ResultShareButton, ReadingText, Toast, Icon,
 │   │                # LocaleConfirmModal, PrivacyConsentModal, SessionClaimer (로그인 시 익명 세션 claim)
-│   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects,
-│   │                # ServiceBackground, ParticleOverlay, MysticBackground, ScrollReveal,
-│   │                # CanvasParticleLayer (particle-engine.ts 기반, density: low/medium/high, prefers-reduced-motion 지원),
-│   │                # ServiceIllustrations (TarotScene·SajuScene·ShinjeomScene + useMouseParallax FAR/MID/NEAR 3레이어)
-│   │                # mysticUtils.ts — particleStyle·particleMotion 순수 함수
-│   │                # themeAtmosphere.ts — ThemeAtmosphereLayer 전용 파티클 종류·설정
+│   ├── effects/     # ThemeEffectEngine, ThemeAtmosphereLayer, InteractionEffects, ServiceBackground,
+│   │                # ParticleOverlay, MysticBackground, ScrollReveal, CanvasParticleLayer(파티클 렌더),
+│   │                # ServiceIllustrations(서비스별 장면 일러스트), mysticUtils.ts·themeAtmosphere.ts(순수 함수·설정)
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (타로 카드별 3-섹션 UI 블록)
 │   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
 │                    # CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
-│   ├── useCardStyleStore.ts   # 카드 스타일 persist 스토어 (arcana-card-style)
-│   ├── useReadingReveal.ts    # 타로 카드 텍스트 reveal 타이밍 제어 스토어
-│   ├── useShinjeomSession.ts  # 신점 세션 상태 스토어 (UserInfo 포함)
-│   ├── useSajuSession.ts      # 사주 세션 상태 스토어
-│   ├── useSession.ts          # 타로 세션 상태 스토어
-│   ├── useUserInfoForm.ts     # UserInfoForm 상태·핸들러 추출 훅 (mode: tarot|saju|shinjeom)
-│   ├── usePreselectCharacter.ts  # URL ?character= 파라미터 + 선호 상담사 자동 선택
-│   ├── useResetScrollOnStep.ts   # step 변경 시 스크롤 최상단 초기화 (3페이지 공통)
-│   ├── useTarotReading.ts        # 타로 SSE 스트리밍·대기 연출·elapsed 카운터
-│   ├── useTarotCardSelection.ts  # 타로 세션 카드선택·리딩진행 컨트롤러 훅 (레이스 가드 포함, page=view 분리)
-│   ├── useSajuReading.ts         # 사주 세션 리딩진행 컨트롤러 훅 (SSE·대기연출·타임아웃, page=view 분리)
-│   ├── useShinjeomChat.ts        # 신점 세션 대화·최종리딩 컨트롤러 훅 (page=view 분리)
-│   ├── useSettings.ts            # 설정 페이지 상태·핸들러·storage 컨트롤러 훅 (page=view 분리)
+│   ├── useCardStyleStore.ts      # 카드 스타일 persist 스토어
+│   ├── useReadingReveal.ts       # 타로 카드 텍스트 reveal 타이밍 제어
+│   ├── useShinjeomSession.ts     # 신점 세션 상태 스토어
+│   ├── useSajuSession.ts         # 사주 세션 상태 스토어
+│   ├── useSession.ts             # 타로 세션 상태 스토어
+│   ├── useUserInfoForm.ts        # UserInfoForm 상태·핸들러 훅
+│   ├── usePreselectCharacter.ts  # URL 파라미터·선호 상담사 자동 선택
+│   ├── useResetScrollOnStep.ts   # step 변경 시 스크롤 최상단 초기화
+│   ├── useTarotReading.ts        # 타로 SSE 스트리밍·대기 연출
+│   ├── useTarotCardSelection.ts  # 타로 카드선택·리딩진행 컨트롤러
+│   ├── useSajuReading.ts         # 사주 리딩진행 컨트롤러
+│   ├── useShinjeomChat.ts        # 신점 대화·최종리딩 컨트롤러
+│   ├── useSettings.ts            # 설정 페이지 상태·핸들러 컨트롤러
 │   └── (+ useLocaleStore, useGenderStore, useSkinStore, useFavoriteCharacter, useTheme, useSSEStream, useCardAnimation, useCharacter, useReducedMotionStore 등)
 ├── i18n/            # locale 감지, Provider, useT, translations
 ├── lib/             # env, auth, db, storage, validation, request/rate-limit 유틸
@@ -70,9 +67,8 @@ src/
 │   ├── share-utils.ts         # shareWithUrl·shareWithText (3서비스 공통 공유 유틸)
 │   └── guest-sessions.ts      # 익명 세션 id localStorage 보관 (로그인 시 claim 대상)
 ├── services/        # core AI provider/fallback + tarot/saju/shinjeom 서비스
-├── styles/          # theme-effects.css — CSS variable 기반 5-레이어 이펙트 정의
-│                    # service-illustrations.css — 장면별 CSS 클래스 + 11개 keyframe (orbit-spin, spark-twinkle, ember-drift, mist-rise, crystal-pulse 등)
-│                    # home-effects.css — 홈 히어로 카드 덱 스타일 (hero-tarot-card, hero-card-idle keyframe, CSS vars 기반)
+├── styles/          # theme-effects.css(테마 이펙트 CSS 변수), service-illustrations.css(장면별 keyframe),
+│                    # home-effects.css(홈 히어로 카드 덱 스타일)
 ├── test-helpers/    # Vitest 공통 mock/setup
 └── types/           # 공유 타입
 
@@ -86,19 +82,19 @@ supabase/migrations/ # Supabase SQL migrations
 
 ## 핵심 아키텍처
 
-- AI 신뢰성: `src/services/core/`의 `FallbackProvider`가 Grok 우선 호출 후 Claude로 fallback. 리딩 결과 JSON은 `parseJsonSafe`(트레일링 콤마 내성)·`promoteNestedFields`(섹션 내부 flat 필드 승격)·`streamReadingWithParseRetry`(parseError 시 1회 재생성)로 형식 위반 내성을 갖는다(PR #480 — 사주·신점 간헐적 무결과 근본 수정, 실측 재현 기반). 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
+- AI 신뢰성: `src/services/core/`의 `FallbackProvider`가 Grok 우선 호출 후 Claude로 fallback. 리딩 결과 JSON은 `parseJsonSafe`(트레일링 콤마 내성)·`streamReadingWithParseRetry`(parseError 시 1회 재생성)로 형식 위반 내성을 갖는다. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - DB/Auth 추상화: `DB_PROVIDER=supabase|postgres`에 따라 DB, Auth, Storage 구현을 런타임 분기. 상세는 [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md), [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md).
-- 익명 세션 claim (PR: 리딩 이력 미노출 수정): 게스트/만료 세션 상태에서 만든 세션은 `user_id=NULL`로 저장되어 로그인 mypage 이력(`findMany("sessions",{user_id})`)에서 누락된다. `rememberGuestSession`(`lib/guest-sessions.ts`)이 생성 시 sessionId를 localStorage에 보관 → `SessionClaimer`가 로그인 감지 시 `POST /api/sessions/claim` → `db.claimSessions`가 `UPDATE sessions SET user_id WHERE id IN(...) AND user_id IS NULL`로 귀속. 설계 정본 [`docs/superpowers/specs/2026-06-23-anon-session-claim-design.md`](docs/superpowers/specs/2026-06-23-anon-session-claim-design.md).
+- 익명 세션 claim: 게스트 상태에서 만든 세션은 `user_id=NULL`로 저장돼 로그인 후 mypage 이력에서 누락된다. `rememberGuestSession`(`lib/guest-sessions.ts`)이 localStorage에 보관한 세션 id를, 로그인 감지 시 `SessionClaimer`가 `POST /api/sessions/claim`으로 귀속시킨다. 설계 정본 [`docs/superpowers/specs/2026-06-23-anon-session-claim-design.md`](docs/superpowers/specs/2026-06-23-anon-session-claim-design.md).
 - API 보안: Rate Limit -> Zod `safeParse` -> Auth -> 소유권 검증 순서. 새 API는 [`docs/conventions/zod-schemas.md`](docs/conventions/zod-schemas.md)를 먼저 확인.
 - SSE 스트리밍: 타로/사주/신점 리딩은 `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴을 사용. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 - i18n: `middleware`가 locale을 결정하고 `x-locale` 헤더와 쿠키를 유지. 상세는 [`docs/architecture/i18n.md`](docs/architecture/i18n.md), [`docs/conventions/i18n-style.md`](docs/conventions/i18n-style.md).
-- 레이아웃 그룹: RootLayout(`src/app/layout.tsx`)은 `html`/`body`(`min-h-dvh flex flex-col` sticky-footer 컨테이너)·Provider·`Header`·전역 오버레이만 담당하고 `main`/`Footer`/`MobileNav`는 라우트 그룹 레이아웃이 소유한다. `(immersive)`(타로·사주·신점 세션/진입, `character/[id]`)는 100dvh 풀스크린 경험이라 **Footer를 렌더하지 않아** 스테이지 아래로 document가 추가 스크롤되는 '이중 스크롤'을 구조적으로 제거. `(site)`(홈·결과·마이페이지·약관 등)는 Footer를 유지. **뷰포트 높이 규칙(PR #428)**: `(site)`에서 `min-h-screen`(=100vh) 금지 — 페이지 래퍼의 100vh가 `main` 패딩(112px)과 합산돼 '유령 스크롤'(빈 영역)+Footer 가림을 유발. (site) 콘텐츠 래퍼는 min 높이 없이 sticky-footer에 위임, 중앙정렬 래퍼(로그인)는 `min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)]`, `Footer`는 모바일 네비 회피 `pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0`. **(immersive) 진입 래퍼(PR #431)**: outer는 min-height 없이 `relative overflow-hidden` — 스테이지(`h-[calc(100dvh-7rem)]`)가 높이 지배(이중 스크롤 0). ⚠️ 외부 lazy 이미지(`ServiceBackground`) 페이지에는 dvh 기반 min-height 금지(E2E `load` 지연, PR #428) — min-height 제거 또는 스테이지 height 사용. 정본: [`docs/conventions/cross-platform.md`](docs/conventions/cross-platform.md). 타로 `ReadingProgressIndicator`는 모바일 대사창(z-30) 위에 보이도록 `z-40`.
+- 레이아웃 그룹: `RootLayout`(`src/app/layout.tsx`)은 `html`/`body`·Provider·`Header`·전역 오버레이만 담당하고 `main`/`Footer`/`MobileNav`는 라우트 그룹 레이아웃이 소유한다. `(immersive)`(타로·사주·신점 세션/진입, `character/[id]`)는 100dvh 풀스크린 경험이라 **Footer를 렌더하지 않아** 이중 스크롤을 구조적으로 제거한다. `(site)`(홈·결과·마이페이지·약관 등)는 Footer를 유지하되 **`min-h-screen`(100vh) 금지** — sticky-footer(`body` `min-h-dvh flex flex-col`)에 높이를 위임한다. 세부 규칙(외부 lazy 이미지 페이지의 min-height 예외, safe-area, z-index)은 정본 [`docs/conventions/cross-platform.md`](docs/conventions/cross-platform.md)를 따른다.
 - 카드 아트 스타일: `CardStyleId`(dark-fantasy·art-nouveau·anime-mystical·modern-digital), `THEME_TO_STYLE_MAP`으로 테마 자동 매핑. `useCardStyleStore`가 사용자 override를 persist. `CardFace`/`CardBack`/`CardItem`은 styleId → skinId → SVG 순으로 이미지 우선순위 처리.
 - 테마 이펙트: `ThemeEffectEngine`이 CSS 변수(`--theme-glow-color`, `--theme-particle-color` 등)를 주입. `ThemeAtmosphereLayer`(글로우·파티클 5-레이어), `InteractionEffects`(`InteractionClickParticles` — `document.addEventListener` 방식, pointer-events-none), `ServiceBackground`(AI 배경 이미지 `getServiceBackgroundUrl(service, activeTheme)` + `CanvasParticleLayer` + `ThemeAtmosphere` 내장 — `fixed inset-0 -z-10`, `loading="lazy"` 으로 `window.load` 비블로킹), `src/styles/theme-effects.css` 로 구성.
 - 타로 텍스트 reveal: `useReadingReveal` 스토어가 `showLabel` 플래그를 관리. `CardFace` → `CardItem` → `CardSpread` → 타로 세션 페이지로 prop 체인 전달. result phase 진입 시에만 카드명 텍스트 노출.
-- 프리미엄 리딩 구조 (PR #414 + #420): 타로 `CardInterpretationItem`에 `symbolism`/`situation`/`action` 3-섹션 추가, `ReadingSectionBlock` 컴포넌트로 렌더링. 타로 max_tokens 공식: `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 사주 최대 60,000, 신점 최종 리딩 48,000 고정. 하위 호환: `interpretation` 필드 기존 데이터 fallback 유지. ⚠️ 사주 `SajuSections`(structure/elements/fortune/guidance)·신점 `ShinjeomSections`(spiritual/current/obstacles/future) 4-섹션은 2026-07-07 폐지(리딩 신뢰성 기술부채 정리) — flat 필드와 내용 중복이 간헐 무결과의 근본 원인이었다. 사주·신점도 이제 `overallReading`이 정본.
-- 질문 직답(directAnswer) — answer-first 계약: `ReadingResult.directAnswer`는 사용자의 구체 질문에 "먼저" 답하는 필드다. `buildDirectAnswerContract(domain)`(`prompt-builder.ts`)가 **schemaLine(JSON 스켈레톤)·systemSpec(작성 지침)·footerReminder를 한 곳에서 방출**해 지시-스키마-파서 드리프트를 구조적으로 차단(이전 결함: 사주 route가 directAnswer 지시를 붙였으나 사주 스키마·파서·UI엔 필드가 없어 답이 소실). 지침: ① 질문 재진술 → ② 가장 유력한 한 방향 단언 → ③ 확신 수위 문체 표기("분명히" / "~쪽으로 기울어 있습니다" / "단서는 있으나 확정하기엔 이릅니다") → ④ 근거(도메인별: 카드/세운·월운/상)+전제조건. "모든 상황 균등 나열" 헤지는 안티패턴으로 **금지**. 사적 사실은 완충하되 방향은 커밋(2축 분리), 민감 도메인(건강·재정·법률)은 확답 대신 경향+전문가 상담 권유로 강등. **3서비스 공통 배선**(타로·사주·신점 모두 스키마+parseResult+결과화면 최상단 `ResultTextCard` 렌더). 앵커: 타로·사주는 자유질문 입력창(200자, `buildFreeQuestionPrompt`), 신점은 chat 첫 사용자 메시지를 핵심질문으로 재노출.
-- 쉬운 말 계약(가독성): `buildReadabilityContract(domain)`(`prompt-builder.ts`)가 3서비스 공통 `systemSpec`(쉬운말·대화체 규칙)·`fewShot`(도메인별 before→after)·`footerReminder`를 방출. 원칙은 **"분량 축소가 아니라 같은 분량을 쉬운 말로"** — 문단 수·max_tokens 불변, 깊이의 실현 수단만 미문→구체성으로 재조준. 일반 성인 누구나 한 번에 이해하는 해요체, 전문용어 즉시 풀어쓰기(사주는 [용어→비유→당신 삶] 3단 착지 병기), 추상 명사는 "예를 들어 ~할 때처럼" 구체 장면으로 착지. 타로 화려체("원형·신화·감각적 묘사")·신점 신탁체("신명이 감지합니다"→"제가 보기엔") 완화, 사주·신점 `overallReading`/`advice`의 `【】` 소제목을 평이 헤더로 rename(`【사주 전체 구조】`→`【타고난 성격】`, `【신명의 메시지】`→`【마음에 닿는 말】`). 캐릭터 12명 `speechStyle`도 개성(어미·톤)은 보존하되 어려운 레지스터(문어체·시적·비유 상시)를 쉬운 말 지향으로 손질. 사주 시간 지평 연계: `detectSajuTimeHorizon`+`applyHorizonToCalcOptions`가 질문의 시간창(이번 주/달/올해/내년)을 감지해 드롭다운과 무관하게 해당 월운/세운 데이터를 결정론적으로 주입. 타로는 결과 최상단에 `directAnswer` 렌더(answer-first). DB 영속(마이그 023 `direct_answer` 컬럼): `persistDirectAnswer`가 본 리딩 insert와 **분리된 best-effort UPDATE**로 기록 → 재방문(`result/[id]`)·공유 결과에도 노출. 컬럼 미적용 환경에서도 UPDATE만 조용히 실패해 본 저장 무영향. 마이그 023 운영 DB 적용 완료(2026-07-04). ⚠️ 사주·신점 4-섹션(마이그 024 `saju_sections`/`shinjeom_sections`, `persistReadingSections`)은 2026-07-07 섹션 스키마 폐지로 제거됨 — 컬럼은 하위 호환 위해 유지하되 앱은 더 이상 읽거나 쓰지 않는다.
+- 프리미엄 리딩 구조 (PR #414 + #420): 타로 `CardInterpretationItem`에 `symbolism`/`situation`/`action` 3-섹션 추가, `ReadingSectionBlock` 컴포넌트로 렌더링. 타로 max_tokens 공식: `min(15000 + cardCount × 9000 + 15000, 65000)` (cap 65,000). 사주 최대 60,000, 신점 최종 리딩 48,000 고정. 하위 호환: `interpretation` 필드 기존 데이터 fallback 유지. 사주·신점은 `overallReading`이 정본이며 구 4-섹션 스키마(`SajuSections`/`ShinjeomSections`)는 사용하지 않는다(폐지 경위: [`docs/operations/known-issues.md`](docs/operations/known-issues.md)).
+- 질문 직답(directAnswer) — answer-first 계약: `ReadingResult.directAnswer`는 사용자의 구체 질문에 "먼저" 답하는 필드다. `buildDirectAnswerContract(domain)`(`prompt-builder.ts`)가 schemaLine·systemSpec·footerReminder를 한 곳에서 방출해 지시-스키마-파서 드리프트를 구조적으로 차단한다(질문 재진술 → 방향 단언 → 확신 수위 표기 → 근거, "균등 나열" 헤지 금지). 3서비스 공통 배선(스키마+parseResult+`ResultTextCard` 렌더), DB 영속(마이그 023 `direct_answer`)은 본 리딩 insert와 분리된 best-effort UPDATE. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
+- 쉬운 말 계약(가독성): `buildReadabilityContract(domain)`(`prompt-builder.ts`)가 3서비스 공통 `systemSpec`·`fewShot`·`footerReminder`를 한 곳에서 방출한다(directAnswer와 동일 패턴). 원칙은 **"분량 축소가 아니라 같은 분량을 쉬운 말로"** — 문단 수·max_tokens는 불변, 전문용어 즉시 풀어쓰기·화려체/신탁체 완화·소제목 평이화·캐릭터 `speechStyle` 손질로 구체성만 높인다. 상세는 [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md).
 
 ## 캐릭터/데이터 기준
 
@@ -122,7 +118,7 @@ pnpm sync:test-count      # 고정 테스트 수가 있는 문서 동기화
 pnpm check:env-docs       # env.ts와 env 문서 정합성
 pnpm check:doc-links      # 문서 링크 검증
 pnpm i18n:check           # 번역 키 drift 검출
-pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·4섹션·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
+pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·overallReading·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
 pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생성 (REPLICATE_API_KEY 필요)
 pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성
 pnpm upload:assets:r2     # 카드/배경을 Cloudflare R2에 업로드 (정본, etag=md5 검증, .env.r2.local 필요)

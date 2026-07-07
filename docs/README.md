@@ -25,6 +25,7 @@
 | Zod/API 입력 검증 | [conventions/zod-schemas.md](conventions/zod-schemas.md) |
 | 이미지 에셋 | [conventions/image-assets.md](conventions/image-assets.md) |
 | i18n 작성 규칙 | [conventions/i18n-style.md](conventions/i18n-style.md) |
+| UI 디자인 브리프/구현계획 | [design/design-brief.md](design/design-brief.md), [design/implementation-plan.md](design/implementation-plan.md) |
 | 환경변수 | [operations/env-variables.md](operations/env-variables.md) |
 | 운영자 가이드 | [operations/operation-guide.md](operations/operation-guide.md) |
 | 미구현/기술부채 | [operations/known-issues.md](operations/known-issues.md) |
@@ -52,8 +53,8 @@ docs/
 │   ├── layout-rules.md
 │   └── zod-schemas.md
 ├── design/
-│   ├── CLAUDE_DESIGN_BRIEF.md
-│   ├── IMPLEMENTATION_PLAN.md
+│   ├── design-brief.md
+│   ├── implementation-plan.md
 │   ├── characters/
 │   └── screenshots/
 ├── workflow/
@@ -73,9 +74,11 @@ docs/
 │   └── operation-guide.md
 ├── archive/
 │   └── ai-quality-roadmap.md
-└── superpowers/
-    ├── plans/
-    └── specs/
+└── superpowers/         # 방법론 기반 계획·설계 보관소
+    ├── plans/           # 활성 계획 1
+    │   └── archive/     # 완료 계획 38 (+README 인벤토리)
+    └── specs/           # 활성 설계 20
+        └── archive/     # 완료 설계 12 (+README 인벤토리)
 ```
 
 ## 관리 원칙

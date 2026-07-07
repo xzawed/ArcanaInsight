@@ -131,7 +131,7 @@
 
 3. 수정 원칙
    - 중복 내용은 한 곳을 정본으로, 나머지는 링크로 대체
-   - CLAUDE.md는 200행 이내 유지 (현재 안전 최솟값 234행)
+   - CLAUDE.md는 200행 이내 유지 (현재 191행)
    - 변경 후 보고 형식: "문서 변경: [파일명] - 변경 이유: [이유] - 변경 내용: [1줄 요약]"
 
 4. PR 생성
@@ -251,6 +251,18 @@ PR 머지 완료 후 반드시 수행:
 | `codex:codex-rescue` | Claude가 막힐 때 Codex에 구현 위임 |
 
 > **`Explore`** 는 Claude Code 내장 기능(서브에이전트 타입)이다. `.claude/agents/`에 파일이 없으며, Agent 툴의 `subagent_type: "Explore"` 로 직접 호출한다.
+
+### 스킬 카탈로그 (`.claude/skills/`)
+
+| 스킬 | 사용 시점 |
+|------|---------|
+| `add-card-asset` | 카드 아트 스타일·카드 뒷면·서비스 배경 이미지 추가/수정 |
+| `add-translation-key` | 번역 키 3개 언어(ko/en/ja) 동시 추가 |
+| `db-migration` | Supabase 마이그레이션 작성부터 운영 DB 적용·검증까지 |
+| `deploy-safety` | Dockerfile·railway.toml·next.config 등 배포 영향 변경 전후 체크리스트 |
+| `generate-reading-prompt` | 타로/사주/신점 AI 리딩 프롬프트 검토·개선 |
+| `post-merge` | PR 머지 완료 후 체크리스트 |
+| `pre-pr-checklist` | PR 생성 전 자동화 불가 항목 점검 |
 
 ---
 
