@@ -400,7 +400,7 @@ Claude Design에서 산출물이 나오면:
 1. **파티클 스펙 시트** → `src/data/themes.ts` 의 `ParticleConfig` 값으로 변환
 2. **idle 애니메이션 스펙** → `src/lib/animation-variants.ts` 의 variant 값으로 변환
 3. **SVG 오브젝트 디자인** → `src/components/effects/` 에 각 서비스별 컴포넌트로 변환
-4. **목업 이미지** → 개발팀(Codex) 핸드오프 자료로 활용, `docs/design/mockups/` 에 저장
+4. **목업 이미지** → 구현 참조 자료로 활용, `docs/design/mockups/` 에 저장
 5. **Before/After 비교** → PR description에 첨부
 
 ---

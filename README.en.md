@@ -194,7 +194,7 @@ This project is built with an **AI-native approach** where AI acts as a genuine 
 | 🔄 Ops automation | **n8n Cloud** | Spec tracking · quality monitoring · weekly reports |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → weekly QA → auto-recheck loop |
 
-> 📘 Full AI collaboration structure: [CLAUDE.md — Claude & Codex roles](CLAUDE.md#claude--codex-역할-분담)
+> 📘 Full code change process: [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md)
 
 ---
 

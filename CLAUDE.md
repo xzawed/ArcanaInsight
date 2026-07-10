@@ -174,13 +174,6 @@ pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Sup
 | 배포/운영 | [`docs/operations/deployment.md`](docs/operations/deployment.md), [`docs/operations/operation-guide.md`](docs/operations/operation-guide.md) |
 | 미구현/기술부채 | [`docs/operations/known-issues.md`](docs/operations/known-issues.md) |
 
-## Claude & Codex 역할 분담
-
-**Claude 담당**: 기획·설계·아키텍처·문서·뼈대 스캐폴딩·PR 검토·머지 판단
-**Codex 담당**: 코드 구현·단위 테스트·E2E 수정·로컬 검증 4종 실행
-
-핸드오프 형식·재진입 조건·파일 소유권·품질 게이트 전체는 [`docs/workflow/claude-codex-collaboration.md`](docs/workflow/claude-codex-collaboration.md)가 정본이다.
-
 ## Claude 자율 관리 규칙
 
 - `.claude/agents/`에는 반복 작업용 에이전트 정의가 있다.

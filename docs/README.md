@@ -18,7 +18,6 @@
 | 반복 작업별 파일 가이드 | [workflow/task-playbooks.md](workflow/task-playbooks.md) |
 | 스크립트 정책 | [workflow/scripts.md](workflow/scripts.md) |
 | CI/CD 파이프라인 | [workflow/ci-cd.md](workflow/ci-cd.md) |
-| Claude·Codex 협업 프로토콜 | [workflow/claude-codex-collaboration.md](workflow/claude-codex-collaboration.md) |
 | 코딩 스타일 | [conventions/coding-style.md](conventions/coding-style.md) |
 | 레이아웃 규칙 | [conventions/layout-rules.md](conventions/layout-rules.md) |
 | 크로스 플랫폼 품질 | [conventions/cross-platform.md](conventions/cross-platform.md) |
@@ -59,7 +58,6 @@ docs/
 │   └── screenshots/
 ├── workflow/
 │   ├── ci-cd.md
-│   ├── claude-codex-collaboration.md
 │   ├── code-change-process.md
 │   ├── e2e-testing.md
 │   ├── scripts.md

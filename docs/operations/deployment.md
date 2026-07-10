@@ -1,8 +1,5 @@
 # Railway 배포 가이드
 
-> **담당**: Claude (배포 전략·머지 판단·롤백 결정) | Codex (롤백 명령 실행·핫픽스 브랜치 구현)
-> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
-
 ArcanaInsight는 Railway를 사용하여 자동 배포됩니다.
 
 > 배포 관련 변경 시 품질 손상을 막는 절차·체크리스트·함정은 [`deploy-safety-guide.md`](deploy-safety-guide.md)를 먼저 확인한다.

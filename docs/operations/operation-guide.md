@@ -2,9 +2,6 @@
 
 # ArcanaInsight 운영 가이드
 
-> **담당**: Claude (서비스 구조 이해·장애 판단·환경변수 변경 결정) | Codex (핫픽스 구현·설정 변경 실행)
-> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
-
 운영자가 알아야 할 전체 흐름을 쉽게 정리한 문서입니다.
 
 ---

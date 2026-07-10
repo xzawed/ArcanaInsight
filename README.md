@@ -195,7 +195,7 @@ pnpm dev
 | 🔄 운영 자동화 | **n8n Cloud** | Spec 추적·품질 모니터링·주간 리포트 |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → 주간 QA → 자동 재검증 루프 |
 
-> 📘 상세 AI 협업 구조는 [CLAUDE.md — Claude & Codex 역할 분담](CLAUDE.md#claude--codex-역할-분담)에서 확인할 수 있습니다.
+> 📘 상세 코드 변경 프로세스는 [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md)에서 확인할 수 있습니다.
 
 ---
 

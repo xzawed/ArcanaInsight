@@ -1,8 +1,5 @@
 # i18n 코딩 컨벤션
 
-> **결정자**: Claude (키 네이밍·구조 결정) | **준수 의무**: Codex (번역 값 작성·`useT()` 사용)
-> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
-
 ArcanaInsight 다국어 작업 시 준수할 코딩·번역 컨벤션. 인프라 개요는 [`docs/architecture/i18n.md`](../architecture/i18n.md) 참고.
 
 ## 호출 패턴
