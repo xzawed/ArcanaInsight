@@ -1,8 +1,5 @@
 # 데이터 모델 — 캐릭터·카드·스킨
 
-> **담당**: Claude (데이터 구조·타입 계약 설계) | Codex (데이터 파일 작성·검증)
-> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
-
 ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모델을 정의합니다.
 
 ---
@@ -192,9 +189,10 @@ export interface EffectTheme {
 | `neon-cyberpunk` | 네온 사이버펑크 |
 | `emerald-enchant` | 에메랄드 인챈트 |
 
-이미지 경로 로직: `src/lib/storage/index.ts` — `getCardImageUrl()`
-- `supabase` 모드: Supabase Storage URL
+이미지 경로 로직: `src/lib/storage/index.ts` — `getCardImageUrl()` / `getCardBackUrl()` (`skinBase()` 3-way)
+- `NEXT_PUBLIC_ASSET_BASE_URL` 설정 시(운영): Cloudflare R2 — `{base}/card-skins/{skinId}/...`
 - `postgres` 모드: `/images/skins/...` 정적 파일
+- 그 외: Supabase Storage 폴백 (⚠️ card-skins 버킷은 2026-07-07 R2 이전으로 삭제됨 — 실질 미사용)
 
 ---
 

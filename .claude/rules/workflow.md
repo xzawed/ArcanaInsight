@@ -90,9 +90,8 @@
    - 새 카드 아트 스타일/서비스 배경: card-style-manager 에이전트 (Cloudflare R2, `upload:assets:r2`)
    - 새 테마 추가/색상 수정: theme-creator 에이전트
 
-4. 구현 (Codex 위임 가능)
-   Claude = 설계·뼈대·PR 검토
-   Codex = 코드 구현·단위 테스트·검증 4종
+4. 구현
+   설계·뼈대 스캐폴딩 → 본문 구현 → 단위 테스트
 
 5. 검증
    pnpm type-check && pnpm lint && pnpm build
@@ -248,7 +247,6 @@ PR 머지 완료 후 반드시 수행:
 | `quality-gate` | 전체 코드 품질 검증 (sonar 동기화 포함) |
 | `i18n-manager` | 번역 키 추가·수정·검증 (3개 언어 동시 처리) |
 | `post-merge-doc-refresher` | 머지 후 전체 문서 Anthropic 기준 동기화 |
-| `codex:codex-rescue` | Claude가 막힐 때 Codex에 구현 위임 |
 
 > **`Explore`** 는 Claude Code 내장 기능(서브에이전트 타입)이다. `.claude/agents/`에 파일이 없으며, Agent 툴의 `subagent_type: "Explore"` 로 직접 호출한다.
 
@@ -269,6 +267,6 @@ PR 머지 완료 후 반드시 수행:
 ## 참고 문서
 
 - 플레이북: [`docs/workflow/task-playbooks.md`](../../docs/workflow/task-playbooks.md)
-- Claude·Codex 협업: [`docs/workflow/claude-codex-collaboration.md`](../../docs/workflow/claude-codex-collaboration.md)
+- 코드 변경 프로세스: [`docs/workflow/code-change-process.md`](../../docs/workflow/code-change-process.md)
 - 컨벤션: [`docs/conventions/coding-style.md`](../../docs/conventions/coding-style.md)
 - 운영 가이드: [`docs/operations/operation-guide.md`](../../docs/operations/operation-guide.md)

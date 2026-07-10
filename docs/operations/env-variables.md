@@ -1,8 +1,5 @@
 # 환경변수 목록
 
-> **담당**: Claude (신규 환경변수 추가·변경 결정, `src/lib/env.ts` getter 설계) | Codex (로컬 `.env` 설정·확인, getter 함수 사용)
-> 협업 프로토콜 정본: [`../workflow/claude-codex-collaboration.md`](../workflow/claude-codex-collaboration.md)
-
 `src/lib/env.ts`의 getter 함수와 대응하는 전체 환경변수 목록입니다.
 환경변수는 코드에 하드코딩 금지 — 원칙적으로 `src/lib/env.ts`의 getter 함수를 통해 접근합니다.
 단, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_ASSET_BASE_URL`은 클라이언트/스토리지 초기화 코드에서 `process.env.*`로 직접 접근합니다 (Next.js NEXT_PUBLIC_ 패턴 준수).
