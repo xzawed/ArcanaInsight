@@ -86,6 +86,11 @@ jobs:
 
       - run: pnpm build
         env:
+          # 자산 CDN(R2). NEXT_PUBLIC_ 접두사라 **빌드 타임에 인라인**되므로 E2E 잡이 아니라
+          # 여기서 반드시 설정해야 클라이언트 번들에 반영된다. 미설정 시 storageBase()가
+          # NEXT_PUBLIC_SUPABASE_URL(=placeholder.supabase.co)로 폴백하는데, Supabase
+          # card-styles 버킷은 2026-07-03 삭제(0객체)라 카드 이미지가 전량 404가 된다.
+          NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -108,17 +113,24 @@ jobs:
   # playwright.config.ts webServer.command: process.env.CI ? "pnpm start" : "pnpm dev"
   # unit 테스트는 E2E 정확성과 무관 — E2E는 build 산출물만 있으면 시작 가능
   e2e:
-    name: E2E — ${{ matrix.project }}
+    name: E2E — ${{ matrix.project }} (${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
     needs: [build]
     strategy:
       fail-fast: false
+      # 프로젝트 × 2샤드. 샤딩은 잡당 spec 수를 절반으로 낮춰 피크 메모리를 줄이고
+      # (호스트 OOM 크래시 완화 — workers:1은 빈도만 낮췄을 뿐 근본 해소가 아님),
+      # workers:1로 늘어난 벽시계 시간도 병렬로 회수한다.
       matrix:
+        project: ["Desktop Chrome", "Mobile Android"]
+        shard: [1, 2]
+        # include의 키가 기존 조합과 일치하면 해당 조합들에 slug를 덧붙인다
+        # (아티팩트명에 공백 포함 프로젝트명을 쓰지 않기 위한 슬러그).
         include:
           - project: "Desktop Chrome"
-            report-name: playwright-report-desktop
+            slug: desktop
           - project: "Mobile Android"
-            report-name: playwright-report-android
+            slug: android
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -149,9 +161,12 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
-      - run: pnpm test:e2e --project="${{ matrix.project }}"
+      - run: pnpm test:e2e --project="${{ matrix.project }}" --shard=${{ matrix.shard }}/2
         env:
           CI: "true"
+          # 서버 런타임(pnpm start)의 서버 컴포넌트 경로용 — 클라이언트 인라인은 build 잡이 담당.
+          # 두 잡의 값이 갈리면 SSR/CSR 이미지 URL이 어긋나므로 항상 동일하게 유지한다.
+          NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -159,9 +174,19 @@ jobs:
           GROK_MODEL: grok-3
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
+      # OOM 관측 — 지금까지 "Target closed" 크래시는 시그니처 기반 추정이었고 직접 관측된 적이 없다.
+      # 재발 시 추정이 아니라 증거로 판단하기 위해 커널 OOM-killer 로그와 메모리 상태를 남긴다.
+      - name: OOM·메모리 상태 기록
+        if: always()
+        run: |
+          echo "=== free -m ==="
+          free -m
+          echo "=== OOM-killer 흔적 (dmesg) ==="
+          sudo dmesg 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" || echo "OOM 흔적 없음"
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ${{ matrix.report-name }}
+          name: playwright-report-${{ matrix.slug }}-shard${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
