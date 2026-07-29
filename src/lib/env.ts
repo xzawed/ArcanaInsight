@@ -14,9 +14,10 @@ export function getClaudeBaseUrl(): string { return process.env.CLAUDE_BASE_URL 
 export function getGrokBaseUrl(): string { return process.env.GROK_BASE_URL ?? "https://api.x.ai/v1" }
 
 // AI 동작 튜닝
-// AI_TIMEOUT_MS — 120s는 10장+ 타로/full-fortune 사주(max_tokens 18000~20000)에서 부족 →
+// AI_TIMEOUT_MS — 120s는 대용량 리딩(타로 cap 65k·사주 최대 60k·신점 최종 48k 토큰)에서 부족 →
 // reasoning 토큰 흡수 + 한국어 1.3x 비효율 + JSON 구조 오버헤드 고려해 240s로 상향.
-// 클라이언트 hard timeout과 동일.
+// ⚠️ 클라이언트 hard timeout은 280s로 **더 길다**(useTarotReading·useSajuReading·useShinjeomChat).
+// 서버가 240s에 먼저 끊고 클라이언트가 40s 여유를 두는 구조라 두 값은 의도적으로 다르다.
 export function getAiTimeoutMs(): number { return Number.parseInt(process.env.AI_TIMEOUT_MS ?? "240000", 10) }
 export function getDefaultMaxTokens(): number { return Number.parseInt(process.env.AI_DEFAULT_MAX_TOKENS ?? "4000", 10) }
 export function getAiTemperature(): number { return Number.parseFloat(process.env.AI_TEMPERATURE ?? "0.7") }
