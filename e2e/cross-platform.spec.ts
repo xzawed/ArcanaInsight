@@ -19,29 +19,37 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     });
   });
 
-  test("콘솔 에러 없음 — 홈 페이지", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
+  // 결함 탐지용 가드는 재시도를 끊는다. CI 기본 retries:2는 OOM 유래 비결정 실패를 흡수하는 용도인데,
+  // "콘솔 에러 없음"·"이미지 로드 성공"처럼 **실제 결함을 잡는 단언**까지 함께 삼켜 green으로 만든다.
+  // 실증(2026-07-29 PR #509): 이미지 가드가 placeholder.supabase.co 카드 이미지 404를 정확히 탐지했으나
+  // 재시도가 통과시켜 리포트에 `1 flaky`로만 남고 CI는 통과했다. 이 계열은 1회 실패 = 실패로 취급한다.
+  test.describe("결함 탐지 가드 (재시도 없음)", () => {
+    test.describe.configure({ retries: 0 });
 
-    await page.goto("/");
-    await page.waitForLoadState("domcontentloaded");
-    expect(errors).toHaveLength(0);
-  });
+    test("콘솔 에러 없음 — 홈 페이지", async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", (err) => errors.push(err.message));
 
-  test("콘솔 에러 없음 — 타로 페이지", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
+      await page.goto("/");
+      await page.waitForLoadState("domcontentloaded");
+      expect(errors).toHaveLength(0);
+    });
 
-    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
-    expect(errors).toHaveLength(0);
-  });
+    test("콘솔 에러 없음 — 타로 페이지", async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", (err) => errors.push(err.message));
 
-  test("콘솔 에러 없음 — 사주 페이지", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(err.message));
+      await page.goto("/tarot", { waitUntil: "domcontentloaded" });
+      expect(errors).toHaveLength(0);
+    });
 
-    await page.goto("/saju", { waitUntil: "domcontentloaded" });
-    expect(errors).toHaveLength(0);
+    test("콘솔 에러 없음 — 사주 페이지", async ({ page }) => {
+      const errors: string[] = [];
+      page.on("pageerror", (err) => errors.push(err.message));
+
+      await page.goto("/saju", { waitUntil: "domcontentloaded" });
+      expect(errors).toHaveLength(0);
+    });
   });
 
   test("MobileNav — safe area 하단 패딩 존재", async ({ page }) => {
@@ -57,46 +65,51 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     }
   });
 
-  test("이미지 — 모든 이미지 로드 성공", async ({ page }, testInfo) => {
-    // 홈 전체 이미지 로드 검사는 데스크톱 1회만 — 깨진 이미지(404)는 엔진 무관이라 브라우저별 반복이 불필요하고,
-    // 무거운 홈 이미지 디코드가 메모리-취약한 webkit(Mobile iOS)을 크래시("Target closed")시킨다. (형제 line 203과 동일 스코프)
-    test.skip(testInfo.project.name !== "Desktop Chrome", "홈 이미지 로드 검사는 데스크톱 1회만 (webkit 크래시 회피)");
+  // 재시도 금지 이유는 위 "결함 탐지 가드" describe 주석 참조 — 이 테스트가 바로 실증 사례다.
+  test.describe("이미지 무결성 가드 (재시도 없음)", () => {
+    test.describe.configure({ retries: 0 });
 
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    test("이미지 — 모든 이미지 로드 성공", async ({ page }, testInfo) => {
+      // 홈 전체 이미지 로드 검사는 데스크톱 1회만 — 깨진 이미지(404)는 엔진 무관이라 브라우저별 반복이 불필요하고,
+      // 무거운 홈 이미지 디코드가 메모리-취약한 webkit(Mobile iOS)을 크래시("Target closed")시킨다. (형제 line 203과 동일 스코프)
+      test.skip(testInfo.project.name !== "Desktop Chrome", "홈 이미지 로드 검사는 데스크톱 1회만 (webkit 크래시 회피)");
 
-    // 상단 뷰포트 이미지들이 로드를 마칠 시간을 단일 예산(15s)으로 확보한다. 이미지별 15s 대기를 누적하면
-    // (느린 대형 이미지 여러 개) 30s 테스트 타임아웃을 넘겨 hang → 단일 폴링으로 대체. 예산 초과도 무방(아래에서 complete만 판정).
-    await page
-      .waitForFunction(
-        () => {
-          const imgs = Array.from(document.querySelectorAll("img"))
-            .slice(0, 20)
-            .filter((el) => {
-              const r = el.getBoundingClientRect();
-              const s = getComputedStyle(el);
-              return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
-            });
-          return imgs.length > 0 && imgs.every((el) => el.complete);
-        },
-        { timeout: 15_000 }
-      )
-      .catch(() => {
-        /* 예산 초과 시에도 아래에서 로드가 끝난(complete) 이미지만 판정 */
-      });
+      await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    // 깨진 이미지 = 로드가 끝났는데(complete) naturalWidth 0 (404/디코드 실패). 로딩 중(!complete)인 유효 이미지는 제외.
-    const broken = await page.evaluate(() =>
-      Array.from(document.querySelectorAll("img"))
-        .slice(0, 20)
-        .filter((el) => {
-          const r = el.getBoundingClientRect();
-          const s = getComputedStyle(el);
-          return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
-        })
-        .filter((el) => el.complete && el.naturalWidth === 0)
-        .map((el) => el.currentSrc || el.src),
-    );
-    expect(broken, `깨진 이미지: ${broken.join(", ")}`).toEqual([]);
+      // 상단 뷰포트 이미지들이 로드를 마칠 시간을 단일 예산(15s)으로 확보한다. 이미지별 15s 대기를 누적하면
+      // (느린 대형 이미지 여러 개) 30s 테스트 타임아웃을 넘겨 hang → 단일 폴링으로 대체. 예산 초과도 무방(아래에서 complete만 판정).
+      await page
+        .waitForFunction(
+          () => {
+            const imgs = Array.from(document.querySelectorAll("img"))
+              .slice(0, 20)
+              .filter((el) => {
+                const r = el.getBoundingClientRect();
+                const s = getComputedStyle(el);
+                return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
+              });
+            return imgs.length > 0 && imgs.every((el) => el.complete);
+          },
+          { timeout: 15_000 }
+        )
+        .catch(() => {
+          /* 예산 초과 시에도 아래에서 로드가 끝난(complete) 이미지만 판정 */
+        });
+
+      // 깨진 이미지 = 로드가 끝났는데(complete) naturalWidth 0 (404/디코드 실패). 로딩 중(!complete)인 유효 이미지는 제외.
+      const broken = await page.evaluate(() =>
+        Array.from(document.querySelectorAll("img"))
+          .slice(0, 20)
+          .filter((el) => {
+            const r = el.getBoundingClientRect();
+            const s = getComputedStyle(el);
+            return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
+          })
+          .filter((el) => el.complete && el.naturalWidth === 0)
+          .map((el) => el.currentSrc || el.src),
+      );
+      expect(broken, `깨진 이미지: ${broken.join(", ")}`).toEqual([]);
+    });
   });
 
   test("스크롤 — 홈 페이지 전체 스크롤 가능", async ({ page, browserName }) => {
