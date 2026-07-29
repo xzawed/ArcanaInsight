@@ -31,7 +31,9 @@ export default function CharacterPage() {
 
   if (!character) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      // 정상 경로 스테이지와 같은 chrome 차감. min-h-screen(100vh)은 유령 스크롤을 만든다
+      // (docs/conventions/cross-platform.md §1).
+      <div className="min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)] flex items-center justify-center">
         <p className="text-arcana-muted">{t("character.page.not-found")}</p>
       </div>
     );

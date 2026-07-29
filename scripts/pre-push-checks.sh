@@ -5,14 +5,20 @@
 set -e
 
 # 훅 stdin 가드: 훅(PreToolUse Bash)으로 호출된 경우 stdin에 JSON이 온다.
-# 대상 명령(git push)이 아니면 즉시 통과 — settings.json의 `if` matcher가 미지원인
-# 버전에서 matcher "Bash"가 모든 Bash 명령에 발화하는 것을 방어(defense-in-depth).
-# 수동 실행(터미널) 시엔 stdin이 tty라 가드를 건너뛰고 정상 실행한다.
+# 대상 명령이 아니면 즉시 통과 — `if` matcher 미지원 버전에서 matcher "Bash"가 모든
+# Bash 명령에 발화하는 것을 방어(defense-in-depth). 수동 실행 시엔 stdin이 tty라 건너뛴다.
+#
+# ⚠️ 과거엔 `*"git push"*` 부분 문자열 매칭이었는데, heredoc 본문에 문자열이 있기만 해도
+# 발화해 `git commit -F- <<EOF ... EOF`에서 전체 검증(최대 300초)이 헛돌았다(실측).
+# 이제 "실행되는 세그먼트"만 채택하는 공용 헬퍼로 판정한다.
 if [ ! -t 0 ]; then
   HOOK_INPUT="$(cat 2>/dev/null || true)"
   case "$HOOK_INPUT" in
-    *'"command"'*"git push"*) : ;;  # 대상 명령 — 계속 진행
-    *'"command"'*) exit 0 ;;          # 다른 Bash 명령 — 검증 없이 통과
+    *'"command"'*)
+      # shellcheck source=./hooks/lib/git-push-segment.sh
+      . "$(dirname "$0")/hooks/lib/git-push-segment.sh"
+      [ -n "$(extract_git_push_segment "$HOOK_INPUT")" ] || exit 0
+      ;;
   esac
 fi
 

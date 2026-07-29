@@ -9,12 +9,7 @@ import type { SelectedCard } from "@/types/card";
 import type { SpreadDefinition } from "@/types/session";
 import type { CardInterpretationItem } from "@/types/service";
 import type { Locale } from "@/i18n/config";
-
-const SECTION_LABELS: Record<string, { symbolism: string; situation: string; action: string }> = {
-  ko: { symbolism: "카드 상징", situation: "현재 상황", action: "카드가 제안하는 것" },
-  en: { symbolism: "Card Symbolism", situation: "Current Situation", action: "Card's Guidance" },
-  ja: { symbolism: "カードの象徴", situation: "現在の状況", action: "カードの導き" },
-};
+import { t } from "@/i18n/translations";
 
 interface CardInterpretationListProps {
   interpretations: CardInterpretationItem[];
@@ -24,7 +19,13 @@ interface CardInterpretationListProps {
 }
 
 export function CardInterpretationList({ interpretations, selectedCards, spread, locale }: Readonly<CardInterpretationListProps>) {
-  const labels = SECTION_LABELS[locale] ?? SECTION_LABELS.ko;
+  // 라벨은 i18n SSOT(section.* 키)에서 가져온다 — 컴포넌트가 ko/en/ja를 직접 들고 있으면
+  // 언어 추가 시 i18n:check가 못 잡는 사각지대가 된다.
+  const labels = {
+    symbolism: t("tarot.section.symbolism", locale),
+    situation: t("tarot.section.situation", locale),
+    action: t("tarot.section.action", locale),
+  };
   return (
     <>
       {interpretations.map((interp, i) => {

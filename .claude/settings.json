@@ -35,9 +35,9 @@
     ],
     "deny": [
       "Bash(rm -rf /)",
-      "Bash(git push --force*)",
+      "Bash(git push --force)",
+      "Bash(git push --force *)",
       "Bash(git push -f*)",
-      "Bash(git push --force-with-lease*)",
       "Bash(git push origin +*)",
       "Bash(git reset --hard*)"
     ]
@@ -53,6 +53,13 @@
             "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/hooks/upload-assets-r2-guard.sh",
             "timeout": 10,
             "statusMessage": "카드 자산 업로드 대상 확인(Supabase vs R2)..."
+          },
+          {
+            "type": "command",
+            "if": "Bash(git push*)",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/scripts/hooks/force-push-guard.sh",
+            "timeout": 10,
+            "statusMessage": "push 대상 브랜치·force 형태 확인..."
           },
           {
             "type": "command",
