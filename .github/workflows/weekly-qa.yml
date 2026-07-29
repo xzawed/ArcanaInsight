@@ -51,6 +51,10 @@ jobs:
       - name: 프로덕션 빌드
         run: pnpm build
         env:
+          # deploy.yml과 동일하게 유지 — 누락 시 storageBase()가 placeholder Supabase로 폴백하고
+          # card-styles 버킷은 2026-07-03 삭제(0객체)라 카드 이미지가 전량 404가 된다.
+          # NEXT_PUBLIC_ 접두사는 빌드 타임 인라인이므로 build 잡에 반드시 있어야 한다.
+          NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -123,6 +127,8 @@ jobs:
         run: pnpm test:e2e --project="${{ matrix.project }}"
         env:
           CI: "true"
+          # 서버 런타임(pnpm start)용 — 클라이언트 인라인은 build 잡이 담당. 두 값은 항상 동일해야 한다.
+          NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000

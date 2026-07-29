@@ -63,7 +63,7 @@
 |------|---------|
 | 카드/스킨 표시 | `useCardStyleStore`, `useSkinStore` 상태 흐름 확인. `activeSection` 상호 배타성 체크 |
 | AI 리딩 오류 | `FallbackProvider` → Grok/Claude 분기. CircuitBreaker 상태 확인 |
-| SSE 스트리밍 | `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴. 타임아웃 240s |
+| SSE 스트리밍 | `SSE_HEADERS`, `fetchSSEStream()`, `AbortController` 패턴. 서버 `AI_TIMEOUT_MS` 240s / 클라이언트 hard timeout 280s (의도적 40s 차이) |
 | i18n 텍스트 | `ai_locale` 쿠키 → `x-locale` 헤더 → `getRequestLocale()` 흐름 |
 | API 400/500 | Rate Limit → Zod `safeParse` → Auth → 소유권 검증 순서 |
 | E2E 실패 | `playwright.config.ts` `locale:"ko"` 설정. hidden 요소 셀렉터 오탐 확인 |

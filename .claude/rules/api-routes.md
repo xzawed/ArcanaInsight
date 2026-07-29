@@ -29,7 +29,8 @@ SSE 라우트(`tarot/reading`, `saju/reading`, `shinjeom/message`)는 반드시 
 6. try/catch 내 `controller.error(e)` 처리
 7. `getAdminDb()` 사용 (RLS 우회 서비스 롤)
 
-클라이언트는 `fetchSSEStream()` 훅으로 소비하며, 세션 페이지 하드 타임아웃은 240,000ms(240초)이다.
+클라이언트는 `fetchSSEStream()` 훅으로 소비하며, 세션 페이지 하드 타임아웃은 **280,000ms(280초)** 이다.
+서버 `AI_TIMEOUT_MS` 기본값 240s보다 **40초 길다** — 서버가 먼저 끊고 클라이언트가 그 결과를 받도록 한 의도적 차이다.
 
 ## 리딩 저장 패턴 (best-effort 분리 UPDATE)
 
