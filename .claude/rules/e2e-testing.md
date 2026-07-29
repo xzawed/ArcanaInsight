@@ -128,6 +128,21 @@ test.describe("결함 탐지 가드 (재시도 없음)", () => {
 **새 무결성 가드(404·콘솔 에러·접근성 위반 등)를 추가할 때는 이 describe 안에 넣는다.**
 반대로 네트워크·타이밍에 취약한 플로우 테스트는 `retries: 2`를 유지해 OOM flake로 전면 적색이 되는 것을 피한다.
 
+### 이미지 무결성은 네트워크 시그널로 판정 — DOM `complete`만 보면 새어나간다
+
+```ts
+// ❌ 타이밍 의존 — 아직 로드가 안 끝난(!complete) 깨진 이미지가 검사에서 빠진다
+.filter((el) => el.complete && el.naturalWidth === 0)
+
+// ✅ goto **전에** 네트워크 리스너 부착이 정본, DOM은 2차 시그널
+page.on("response", (r) => { if (r.request().resourceType() === "image" && r.status() >= 400) ... });
+page.on("requestfailed", (r) => { if (r.resourceType() === "image") ... });
+```
+
+⚠️ `requestfailed`는 **중단된 요청에도 발화**한다. hydration의 `src` 교체·언마운트로 lazy 이미지 요청이
+취소되면 `net::ERR_ABORTED`가 잡히는데 이건 결함이 아니다 — `retries:0` 가드에서 정상 페이지를 적색으로
+만든다. **`net::ERR_ABORTED`만 예외 처리**한다(진짜 결함은 status≥400 또는 DOM `naturalWidth===0`로 잡힘).
+
 ### 자산 URL 환경변수는 build 잡에도 설정
 
 `NEXT_PUBLIC_*`는 **빌드 타임에 인라인**된다. E2E 잡은 `build` 잡의 `.next` 아티팩트를 내려받아
