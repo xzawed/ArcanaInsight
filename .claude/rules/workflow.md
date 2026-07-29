@@ -208,8 +208,24 @@ pnpm i18n:check        # 번역 키 drift 없음
 - [ ] UI 컴포넌트 DOM 구조 변경 시 `grep -r "[변경 패턴]" e2e/` 로 영향 파일 사전 파악했는가? (`e2e/helpers/service-navigation.ts` 우선 수정)
 - [ ] 컴포넌트 삭제·교체 시 `grep -rn "getByTestId\|data-testid" e2e/` 로 testId 의존 여부 확인했는가? (미확인 시 E2E 즉시 실패 — PR #412 1차 실패 원인)
 - [ ] 외부 URL(Supabase 등) `<Image>`에 `priority` 붙이지 않았는가? (window.load 블로킹 → E2E 타임아웃 — PR #412 2차 실패 원인)
-- [ ] feature 브랜치 → PR → 머지 순서를 지켰는가? (main 직접 커밋 금지)
+- [ ] feature 브랜치 → PR → 머지 순서를 지켰는가? (main 직접 커밋 금지 — `force-push-guard.sh` 훅이 도구 레벨에서 차단)
 - [ ] **상수(max_tokens 등) 변경 시 해당 상수를 기댓값으로 쓰는 테스트도 동시에 수정했는가?** (`grep -r "toBe([변경 전 값]" src/__tests__/` 로 확인)
+
+### push 정책 (도구 레벨 강제)
+
+`scripts/hooks/force-push-guard.sh`(PreToolUse, `Bash(git push*)`)가 브랜치를 실제로 읽어 판정한다.
+권한 규칙은 명령 문자열 접두사 매칭만 가능해 "지금 브랜치가 main인가"를 판별할 수 없기 때문이다.
+
+| 명령 | 결과 |
+|---|---|
+| `git push` / `git push -u origin feat/x` | ✅ 허용 |
+| `git push --force-with-lease` (feature 브랜치) | ✅ 허용 — 리베이스 반영 경로 |
+| `git push --force-with-lease origin main` | ❌ 차단 |
+| `git push origin main` | ❌ 차단 — 머지는 `gh pr merge` 사용 |
+| `git push --force` / `-f` / `origin +main` | ❌ 차단 — lease 없는 force는 타인 커밋 유실 위험 |
+
+`--force-with-lease`는 원격이 예상 상태일 때만 덮어쓰므로 리베이스 후 반영에 안전하다.
+반면 `--force`는 무조건 덮어쓴다 — 어떤 브랜치에서도 허용하지 않는다.
 
 ## 8. 포스트 머지 워크플로우
 
