@@ -16,8 +16,3 @@ export function hexToRgbBase(hex: string, fallback = "212, 175, 55"): string {
   return `${r}, ${g}, ${b}`;
 }
 
-export function hexToRgbComponents(hex: string, fallback = "139,92,246"): string {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!m) return fallback;
-  return `${Number.parseInt(m[1], 16)},${Number.parseInt(m[2], 16)},${Number.parseInt(m[3], 16)}`;
-}

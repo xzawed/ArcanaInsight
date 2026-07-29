@@ -30,7 +30,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
       const errors: string[] = [];
       page.on("pageerror", (err) => errors.push(err.message));
 
-      await page.goto("/");
+      await page.goto("/", { waitUntil: "domcontentloaded" });
       await page.waitForLoadState("domcontentloaded");
       expect(errors).toHaveLength(0);
     });
@@ -54,7 +54,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
   test("MobileNav — safe area 하단 패딩 존재", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // MobileNav에 safe-area-inset-bottom 스타일 존재 확인
@@ -244,7 +244,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     const characters = ["arcana", "miko", "seonhwa", "hoshi", "luna", "rei", "cairn", "zero", "haru", "ren", "lix", "ethan"];
     const moods = ["default", "idle", "smile", "serious", "surprised", "wink", "mystical"];
 
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     const failures = await page.evaluate(
       async ({ characters, moods }) => {
         const loadImage = (src: string) =>
