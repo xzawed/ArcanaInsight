@@ -82,7 +82,7 @@ test.describe("i18n — 설정 페이지 locale 렌더링", () => {
 test.describe("i18n — LanguageSwitcher 데스크탑", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
   });
 
@@ -144,7 +144,7 @@ test.describe("i18n — LanguageSwitcher 데스크탑", () => {
 test.describe("i18n — LanguageSwitcher 모바일", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
   });
 

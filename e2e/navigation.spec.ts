@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("네비게이션 — Header 데스크탑 링크", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
   });
 
@@ -18,14 +18,14 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
     const link = page.locator("nav a[href='/tarot']").first();
     await expect(link).toBeVisible();
     await link.click();
-    await page.waitForURL("**/tarot");
+    await page.waitForURL("**/tarot", { waitUntil: "commit" });
   });
 
   test("사주 상담 링크", async ({ page }) => {
     const link = page.locator("nav a[href='/saju']").first();
     await expect(link).toBeVisible();
     await link.click();
-    await page.waitForURL("**/saju");
+    await page.waitForURL("**/saju", { waitUntil: "commit" });
   });
 
   test("마이페이지 링크", async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
 test.describe("네비게이션 — Header 테마 드롭다운", () => {
   test("테마 드롭다운 열기/닫기", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // 테마 버튼 클릭 (데스크탑 헤더 버튼만, 모바일 헤더 버튼 제외)
@@ -76,7 +76,7 @@ test.describe("네비게이션 — Header 테마 드롭다운", () => {
 
 test.describe("네비게이션 — Footer 링크", () => {
   test("Footer 존재 + 서비스 링크", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // 앱 Footer만 선택 (Next.js error-overlay footer 제외)
@@ -91,7 +91,7 @@ test.describe("네비게이션 — Footer 링크", () => {
   });
 
   test("Footer 약관 링크 클릭", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     const footer = page.locator("footer").first();
     await footer.scrollIntoViewIfNeeded();
 
@@ -102,7 +102,7 @@ test.describe("네비게이션 — Footer 링크", () => {
   });
 
   test("Footer 개인정보 링크 클릭", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     const footer = page.locator("footer").first();
     await footer.scrollIntoViewIfNeeded();
 
@@ -116,7 +116,7 @@ test.describe("네비게이션 — Footer 링크", () => {
 test.describe("네비게이션 — 모바일 Header", () => {
   test("모바일 설정 아이콘 표시", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     const settingsIcon = page.locator("[data-testid='mobile-settings-link']");
@@ -125,7 +125,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
 
   test("모바일 설정 아이콘 클릭 → /settings 이동", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     const settingsIcon = page.locator("[data-testid='mobile-settings-link']");
@@ -136,7 +136,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
 
   test("MobileNav 5탭 표시 + 클릭", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // 타로 탭 클릭 — evaluate로 직접 DOM click (nextjs-portal 가로채기 우회)
@@ -144,7 +144,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await expect(tarotTab).toBeVisible();
     if (await tarotTab.isVisible()) {
       await tarotTab.evaluate((el) => (el as HTMLElement).click());
-      await page.waitForURL("**/tarot");
+      await page.waitForURL("**/tarot", { waitUntil: "commit" });
       await expect(page).toHaveURL(/\/tarot$/);
     }
   });
@@ -153,7 +153,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
 test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초기화", () => {
   test("MobileNav 탭 클릭 후 scrollY === 0 (모바일)", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // 홈에서 아래로 스크롤
@@ -189,7 +189,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
   test("Header 데스크탑 링크 클릭 후 scrollY === 0", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("domcontentloaded");
 
     // 홈에서 아래로 스크롤

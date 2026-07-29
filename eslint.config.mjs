@@ -11,8 +11,10 @@ const eslintConfig = defineConfig([
   // E2E 재발 방지 가드: networkidle 대기 금지. 외부 R2 배경(ServiceBackground)이 Mobile Android CI에서
   // window.load·networkidle을 게이트 → 타임아웃 플레이키(#121~#428). web-first 어서션
   // (toBeVisible/waitForFunction/toHaveCount)으로 대체한다. 정본: docs/operations/known-issues.md, PR #459 sweep.
+  // scripts/e2e-full/**도 포함 — 가드가 e2e/**만 덮던 탓에 shinjeom-flow.ts의 networkidle이
+  // 살아남아 `pnpm test:e2e:full`만 조용히 flaky했다(2026-07-29 검토에서 발견).
   {
-    files: ["e2e/**/*.ts"],
+    files: ["e2e/**/*.ts", "scripts/e2e-full/**/*.ts"],
     plugins: { playwright },
     rules: { "playwright/no-networkidle": "error" },
   },

@@ -38,7 +38,7 @@ test.describe("인증 — 로그인 상태 테스트", () => {
     if (!tokens) return;
 
     // Supabase 세션 쿠키 설정
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.evaluate(({ url, access, refresh }) => {
       const storageKey = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
       localStorage.setItem(storageKey, JSON.stringify({
