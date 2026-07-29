@@ -9,6 +9,9 @@ out/
 build/
 dist/
 
+# 디자인 툴 출력물 (jsx 프로토타입 + 에셋, 수백 MB 규모 — 앱 소스 아님)
+docs/design/output/
+
 # env
 .env
 .env*.local
