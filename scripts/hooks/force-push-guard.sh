@@ -22,8 +22,28 @@ else
   cmd="$(printf '%s' "$input" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
 fi
 
-# git push가 아니면 통과 (매처가 넓게 잡히는 경우 대비)
-printf '%s' "$cmd" | grep -q 'git push' || exit 0
+# ── 실제 실행될 git push 세그먼트만 추출 ────────────────────────────────────
+# 부분 문자열 grep은 금물: `gh pr create --body-file - <<EOF ... git push --force ...`
+# 처럼 명령을 **본문에서 언급만** 하는 경우까지 차단해버린다(실측 오탐).
+# ① heredoc 본문 제거(<< 이후 전부) ② 구분자로 분리 ③ 세그먼트가 git push로 "시작"할 때만 판정.
+head_part="${cmd%%<<*}"
+push_seg=""
+while IFS= read -r seg; do
+  seg="${seg#"${seg%%[![:space:]]*}"}"        # 앞쪽 공백 제거
+  seg="${seg#cd *&& }"                         # `cd <경로> && ` 접두 제거
+  seg="${seg#"${seg%%[![:space:]]*}"}"
+  case "$seg" in
+    "git push"|"git push "*|"git -C "*" push "*)
+      push_seg="$seg"
+      break
+      ;;
+  esac
+done <<SEGMENTS
+$(printf '%s' "$head_part" | tr ';|&' '\n')
+SEGMENTS
+
+[ -n "$push_seg" ] || exit 0
+cmd="$push_seg"
 
 deny() {
   # permissionDecisionReason은 JSON 문자열이므로 개행은 \n 리터럴로 넣는다.
