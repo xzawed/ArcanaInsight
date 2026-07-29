@@ -27,6 +27,8 @@ const eslintConfig = defineConfig([
     ".worktrees/**",
     // 커버리지 리포트 (생성 파일)
     "coverage/**",
+    // 디자인 툴 출력물 (앱 소스 아닌 jsx 프로토타입)
+    "docs/design/output/**",
   ]),
 ]);
 
