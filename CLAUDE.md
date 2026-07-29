@@ -18,7 +18,7 @@
 
 | 영역 | 현재 기준 |
 |---|---|
-| 언어/프레임워크 | TypeScript strict, Next.js 16.2.6 App Router, React 19.2.4 |
+| 언어/프레임워크 | TypeScript strict, Next.js 16.2.11 App Router, React 19.2.4 |
 | 스타일/애니메이션 | Tailwind CSS v4, Framer Motion v12.38 |
 | AI | Grok API 우선, Claude API 자동 fallback |
 | 인증/DB | Supabase Auth + Supabase PostgreSQL 기본, `DB_PROVIDER=postgres` 전환 시 NextAuth.js v5 + Drizzle |

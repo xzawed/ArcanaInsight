@@ -15,7 +15,10 @@
       "sharp@<0.35.0": ">=0.35.0",
       "esbuild@<0.25.0": "^0.25.0",
       "esbuild@>=0.27.3 <0.28.1": "^0.28.1"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "scripts": {
     "dev": "next dev",
@@ -81,7 +84,7 @@
     "dotenv": "^17.4.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.2.11",
     "eslint-plugin-playwright": "^2.10.4",
     "replicate": "^1.4.0",
     "tailwindcss": "^4",
