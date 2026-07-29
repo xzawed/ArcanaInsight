@@ -18,14 +18,14 @@ test.describe("네비게이션 — Header 데스크탑 링크", () => {
     const link = page.locator("nav a[href='/tarot']").first();
     await expect(link).toBeVisible();
     await link.click();
-    await page.waitForURL("**/tarot");
+    await page.waitForURL("**/tarot", { waitUntil: "commit" });
   });
 
   test("사주 상담 링크", async ({ page }) => {
     const link = page.locator("nav a[href='/saju']").first();
     await expect(link).toBeVisible();
     await link.click();
-    await page.waitForURL("**/saju");
+    await page.waitForURL("**/saju", { waitUntil: "commit" });
   });
 
   test("마이페이지 링크", async ({ page }) => {
@@ -144,7 +144,7 @@ test.describe("네비게이션 — 모바일 Header", () => {
     await expect(tarotTab).toBeVisible();
     if (await tarotTab.isVisible()) {
       await tarotTab.evaluate((el) => (el as HTMLElement).click());
-      await page.waitForURL("**/tarot");
+      await page.waitForURL("**/tarot", { waitUntil: "commit" });
       await expect(page).toHaveURL(/\/tarot$/);
     }
   });
