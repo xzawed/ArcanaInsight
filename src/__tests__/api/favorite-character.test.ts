@@ -121,4 +121,18 @@ describe("POST /api/profile/favorite-character", () => {
     expect(res.status).toBe(400)
     expect((await res.json()).error).toBe("Invalid request body")
   });
+
+  // Rate Limit → Zod → Auth 순서를 잠그는 테스트. 이 라우트는 Auth가 Zod보다 앞서 있어
+  // 미인증 + 잘못된 body가 401을 받았다. Zod가 먼저 도는 지금은 400이어야 한다.
+  it("미인증 + 잘못된 body → 401이 아니라 400 (Zod가 Auth보다 먼저)", async () => {
+    const { POST } = await setup({ user: null });
+    const req = new Request("http://localhost/api/profile/favorite-character", {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: { "Content-Type": "application/json" },
+    })
+    const res = await POST(req as unknown as import("next/server").NextRequest)
+    expect(res.status).toBe(400)
+    expect((await res.json()).error).toBe("Invalid request body")
+  });
 });

@@ -63,7 +63,7 @@ test.describe("테마 atmosphere 적용 범위", () => {
 
   test("캐릭터 상세 서비스 선택 화면에도 테마 atmosphere가 적용된다", async ({ page }) => {
     await forceTheme(page, "spring");
-    await page.goto("/character/arcana");
+    await page.goto("/character/arcana", { waitUntil: "domcontentloaded" });
 
     await expect(page.getByRole("heading", { name: "아르카나" })).toBeVisible({ timeout: 5_000 });
     await expectAtmosphere(page, "character-theme-atmosphere", "spring");
