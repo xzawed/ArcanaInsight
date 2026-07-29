@@ -15,35 +15,12 @@ set -euo pipefail
 
 input="$(cat)"
 
-# jq가 없는 환경도 있으므로 우선 jq, 실패 시 sed 폴백으로 command를 추출한다.
-if command -v jq >/dev/null 2>&1; then
-  cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // ""')"
-else
-  cmd="$(printf '%s' "$input" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
-fi
+# "언급"과 "실행"을 구분하는 판정은 pre-push-checks.sh와 공유한다(동일 오탐을 두 번 겪지 않도록).
+# shellcheck source=./lib/git-push-segment.sh
+. "$(dirname "$0")/lib/git-push-segment.sh"
 
-# ── 실제 실행될 git push 세그먼트만 추출 ────────────────────────────────────
-# 부분 문자열 grep은 금물: `gh pr create --body-file - <<EOF ... git push --force ...`
-# 처럼 명령을 **본문에서 언급만** 하는 경우까지 차단해버린다(실측 오탐).
-# ① heredoc 본문 제거(<< 이후 전부) ② 구분자로 분리 ③ 세그먼트가 git push로 "시작"할 때만 판정.
-head_part="${cmd%%<<*}"
-push_seg=""
-while IFS= read -r seg; do
-  seg="${seg#"${seg%%[![:space:]]*}"}"        # 앞쪽 공백 제거
-  seg="${seg#cd *&& }"                         # `cd <경로> && ` 접두 제거
-  seg="${seg#"${seg%%[![:space:]]*}"}"
-  case "$seg" in
-    "git push"|"git push "*|"git -C "*" push "*)
-      push_seg="$seg"
-      break
-      ;;
-  esac
-done <<SEGMENTS
-$(printf '%s' "$head_part" | tr ';|&' '\n')
-SEGMENTS
-
-[ -n "$push_seg" ] || exit 0
-cmd="$push_seg"
+cmd="$(extract_git_push_segment "$input")"
+[ -n "$cmd" ] || exit 0
 
 deny() {
   # permissionDecisionReason은 JSON 문자열이므로 개행은 \n 리터럴로 넣는다.
