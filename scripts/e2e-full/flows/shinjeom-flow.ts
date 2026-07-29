@@ -17,8 +17,7 @@ export async function executeShinjeomFlow(
   baseUrl: string
 ): Promise<{ responseText: string }> {
   // 1. 캐릭터 선택
-  await page.goto(`${baseUrl}/shinjeom`);
-  await page.waitForLoadState('networkidle');
+  await page.goto(`${baseUrl}/shinjeom`, { waitUntil: 'domcontentloaded' });
   const charName = CHAR_KO[tc.characterId] ?? tc.characterId;
   const charBtn = page.locator('button').filter({ hasText: charName });
   await charBtn.first().waitFor({ timeout: 15000 });

@@ -51,11 +51,11 @@ style={{
 
 ```tsx
 <CharacterDisplay character={character} mood={mood} />
-<TypingDialogue text={dialogue} />
+<DialogueBox messages={messages} characterName={character.name} isTyping={isTyping} />
 ```
 
 - `CharacterDisplay`: 이미지 + 블렌딩 처리 일체화
-- `TypingDialogue`: 한 글자씩 타이핑 효과 + SSE 스트리밍 연동
+- `DialogueBox`(`components/chat/`): 대사 렌더링 + `isTyping` 타이핑 인디케이터. SSE 스트리밍 텍스트를 그대로 받는다
 
 ---
 

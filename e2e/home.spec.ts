@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("홈 페이지", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
   });
 
   test("페이지 로드 성공 및 콘솔 에러 없음", async ({ page }) => {

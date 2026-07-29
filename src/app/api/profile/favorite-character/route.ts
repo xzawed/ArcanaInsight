@@ -41,9 +41,11 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request.headers)
     if (!(await checkRateLimit(`favorite-character:${ip}`, 10, 60_000))) return rateLimitResponse(locale)
 
-    const user = await requireUser()
+    // 순서 엄수: Rate Limit → Zod → Auth (.claude/rules/api-routes.md).
+    // 이 라우트만 Auth가 앞서 있어, 미인증 + 잘못된 body가 400이 아닌 401을 받았다.
     const parsed = FavoriteCharacterSchema.safeParse(await request.json())
     if (!parsed.success) return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+    const user = await requireUser()
     const { characterId } = parsed.data
     if (characterId !== null && !getCharacterById(characterId)) {
       return NextResponse.json({ error: "Invalid character" }, { status: 400 })

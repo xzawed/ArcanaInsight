@@ -162,8 +162,9 @@ test.describe("테마 — 설정 페이지 상태 일치", () => {
     await themeOptionBtn(page, "summer").evaluate((el) => (el as HTMLElement).click());
     await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "summer", { timeout: 3000 });
 
-    await page.goto("/settings");
-    await page.waitForLoadState("load");
+    // `load` 대기 제거 — 바로 아래 toBeVisible이 이미 web-first 게이트다.
+    // 외부 R2 이미지가 window.load를 지연시키면 이 대기가 그대로 타임아웃이 된다(#459 계열).
+    await page.goto("/settings", { waitUntil: "domcontentloaded" });
 
     const activeBtn = page.locator("button:has-text('한여름 밤')").first();
     await expect(activeBtn).toBeVisible();

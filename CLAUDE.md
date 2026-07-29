@@ -42,7 +42,7 @@ src/
 │   │                # ServiceIllustrations(서비스별 장면 일러스트), mysticUtils.ts·themeAtmosphere.ts(순수 함수·설정)
 │   ├── session/     # ResultTextCard, SessionActionButtons, ReadingErrorState, ReadingSectionBlock (타로 카드별 3-섹션 UI 블록)
 │   └── tarot/       # CardInterpretationList (카드별 해석 목록), TarotResultPanel (결과 패널),
-│                    # CardFlipEffect, ReadingProgressIndicator, CardSpreadEffects
+│                    # ReadingProgressIndicator (리딩 진행 인디케이터)
 ├── data/            # cards, characters, home, saju, shinjeom/, skins, spreads, topics, mbti, topics-meta
 │   └── cardStyles.ts  # CardStyleId, 4가지 아트 스타일, THEME_TO_STYLE_MAP
 ├── hooks/           # Zustand store와 UI/streaming hooks
