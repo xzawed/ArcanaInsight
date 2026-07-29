@@ -67,6 +67,7 @@
 | i18n 텍스트 | `ai_locale` 쿠키 → `x-locale` 헤더 → `getRequestLocale()` 흐름 |
 | API 400/500 | Rate Limit → Zod `safeParse` → Auth → 소유권 검증 순서 |
 | E2E 실패 | `playwright.config.ts` `locale:"ko"` 설정. hidden 요소 셀렉터 오탐 확인 |
+| E2E `Target closed`·`ERR_ABORTED`·30s 타임아웃 다발 | **먼저 실패 시그니처를 분류한다.** 위 3종(+평소 7~11분의 3배 이상 소요)이면 호스트 OOM 계열 비결정 실패 후보 → 동일 커밋 재실행(`gh run rerun <runId> --failed`)으로 **재현성을 확인**한다. ⚠️ 재실행 통과는 **진단 결과일 뿐 해결이 아니다** — 확인된 flake는 넘어갈 신호가 아니라 추적해야 할 인프라 결함이며 [`known-issues.md`](../../docs/operations/known-issues.md)에 재발을 기록한다. **단언 실패(깨진 이미지·콘솔 에러 등)는 이 경로로 보내지 말 것** — 재시도로 통과해도 실제 결함일 수 있다(2026-07-29 실증: `placeholder.supabase.co` 404를 가드가 잡았으나 `retries:2`가 `1 flaky`로 흡수) |
 | UI 컴포넌트 변경 후 E2E 실패 | **수정 전** `grep -r "[변경된 셀렉터 패턴]" e2e/` 로 영향 파일 전수 파악 → 일괄 수정. `e2e/helpers/service-navigation.ts` 공통 helper 활용 |
 | DB 오류 | `DB_PROVIDER` 환경변수 확인. `getAdminDb()` vs `getDb()` 구분 |
 
