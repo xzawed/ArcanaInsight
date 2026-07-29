@@ -9,7 +9,7 @@ test.describe("Theme Effect Layers", () => {
   });
 
   test("InteractionClickParticles 오버레이가 존재한다", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(page.getByTestId("interaction-click-particles")).toBeAttached();
   });
 

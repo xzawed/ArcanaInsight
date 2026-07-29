@@ -20,7 +20,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const reading = await db.findOne<Record<string, unknown>>("shinjeom_readings", { share_token: id })
     if (!reading) return NextResponse.json({ error: "Reading not found" }, { status: 404 })
     return NextResponse.json({ reading: pickFields(reading, SAFE_KEYS) })
-  } catch {
+  } catch (e) {
+    // 마커 근거는 tarot/result/[id]/route.ts 참조 — 3서비스 동일 형식으로 남긴다.
+    console.error("[result-fetch-failed]", { service: "shinjeom", err: e instanceof Error ? e.message : String(e) })
     return NextResponse.json({ error: "Failed to fetch reading" }, { status: 500 })
   }
 }

@@ -41,7 +41,8 @@ grep -rn "service-navigation" e2e/ --include="*.ts"
 2. **CI vs 로컬 차이**
    - CI: `pnpm start` (프로덕션 빌드), retries: 2(단 **결함 탐지 가드는 0** — 아래 참조), **workers: 1**, **프로젝트당 2샤드**
    - 로컬: `pnpm dev`, retries: 0, workers 무제한, reuseExistingServer: true
-   - CI `workers: 1` 이유(#462): 2코어/7GB 러너에서 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target closed" 크래시(chromium·webkit 공통). 3개 디바이스 프로젝트의 매트릭스 레벨 병렬은 유지.
+   - CI `workers: 1` 이유(#462): 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target closed" 크래시(chromium·webkit 공통). 3개 디바이스 프로젝트의 매트릭스 레벨 병렬은 유지.
+     > ⚠️ **전제 정정 (2026-07-30 실측)**: #462가 근거로 든 "2코어/7GB 러너"는 사실이 아니다. PR #512가 추가한 계측 스텝이 실제 값을 찍었다 — `Mem: 15989 total / 14476 available`, **swap 미사용**, `OOM 흔적 없음`(dmesg). 즉 **16GB 러너**다. `workers:1`은 틀린 전제 위에 정해졌으므로, 상향 여지가 있는지 재측정 후 판단한다(지금 바꾸지는 말 것 — 실측 없는 변경은 같은 실수의 반복이다).
    - Pre-PR 훅에 E2E 전체 포함 권장 안 함 — CI에서 재검증
 
 3. **hidden 요소 확인**  
@@ -75,6 +76,28 @@ Cloudflare R2/CDN(`cdn.xzawed.xyz`)·Supabase Storage 등 외부 URL을 `src`로
 `priority` 는 `<link rel="preload">` 를 `<head>` 에 추가하므로 CI 환경에서 외부 이미지 응답이
 느리면 `waitForLoadState("load")` 가 20-30s 블로킹 → E2E 타임아웃 유발.  
 LCP 요소(히어로 이미지 등)가 아닌 배경·데코 이미지에는 절대 사용하지 않는다. (PR #412 2차 실패 원인)
+
+## ⚠️ `page.goto()`의 기본값은 `load`다 — 인자 없는 goto 금지
+
+가장 자주 재발하는 함정. `waitForLoadState` 호출이 없어도 **`goto` 자체가 `window.load`를 기다린다.**
+
+```ts
+// ❌ 금지 — goto가 이미 load를 기다린다. 뒤의 waitForLoadState는 no-op이라 안전해 보일 뿐이다.
+await page.goto("/");
+await page.waitForLoadState("domcontentloaded");   // 이미 load 이후라 즉시 통과 = 무의미
+
+// ✅ goto에서 끊는다
+await page.goto("/", { waitUntil: "domcontentloaded" });
+```
+
+**진단 단서**: 실패 에러가 `Test timeout of 30000ms exceeded`인데 정작 터진 액션의 옵션은
+`{ timeout: 2000 }`처럼 훨씬 짧다면, 그 액션이 아니라 **앞의 `goto`가 예산을 다 태운 것**이다.
+액션 자체가 실패했다면 `Timeout 2000ms exceeded`가 찍힌다.
+
+홈(`/`)은 캐릭터 이미지가 `nukki-enhanced/*.png` **장당 약 4.8MB × 12명**을 `next/image`+sharp로
+처리하므로 `load`가 30초를 넘기기 쉽다. 홈·`/character/*` 등 이미지 무거운 라우트는 예외 없이
+`{ waitUntil: "domcontentloaded" }`를 붙인다. (2026-07-30 실증: `navigation.spec.ts:190`·
+`theme-effects.spec.ts:11`이 이 이유로 PR 4건에서 연쇄 실패, `retries:2`가 일부를 `1 flaky`로 가림.)
 
 ## 테스트 측: `waitForLoadState("load")` 대신 web-first 대기
 

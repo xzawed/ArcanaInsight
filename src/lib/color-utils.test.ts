@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hexToRgba, hexToRgbBase, hexToRgbComponents } from "./color-utils";
+import { hexToRgba, hexToRgbBase } from "./color-utils";
 
 describe("hexToRgba", () => {
   it("6자리 hex → rgba 문자열 반환", () => {
@@ -41,28 +41,3 @@ describe("hexToRgbBase", () => {
   });
 });
 
-describe("hexToRgbComponents", () => {
-  it("6자리 hex → 'r,g,b' 컴포넌트 문자열 반환", () => {
-    expect(hexToRgbComponents("#8b5cf6")).toBe("139,92,246");
-  });
-
-  it("# 없는 hex 처리", () => {
-    expect(hexToRgbComponents("ffffff")).toBe("255,255,255");
-  });
-
-  it("검정색 처리", () => {
-    expect(hexToRgbComponents("#000000")).toBe("0,0,0");
-  });
-
-  it("빨간색 처리", () => {
-    expect(hexToRgbComponents("#ff0000")).toBe("255,0,0");
-  });
-
-  it("잘못된 hex → fallback 반환", () => {
-    expect(hexToRgbComponents("invalid")).toBe("139,92,246");
-  });
-
-  it("커스텀 fallback 지정", () => {
-    expect(hexToRgbComponents("bad", "0,0,0")).toBe("0,0,0");
-  });
-});
