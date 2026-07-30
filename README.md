@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
-  <img src="https://img.shields.io/badge/status-v1.0.0%20Live-brightgreen?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/status-Live-brightgreen?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
@@ -50,21 +50,22 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 
 ## 🎯 주요 기능
 
-### 🎴 타로 상담 (4단계)
+### 🎴 타로 상담 (5단계)
 
 1. **캐릭터 선택** — 12명의 상담사 중 선택 (성별 필터 지원)
-2. **개인정보 입력** — 생년월일 · 출생시간 · 성별 · 혈액형
-3. **주제 선택 + 카드 뽑기** — 7개 주제에서 선택 후 스프레드 구성
-4. **AI 리딩 결과** — Grok AI가 실시간으로 해석 제공 + 결과 공유
+2. **주제 선택** — 6개 주제 중 하나 선택
+3. **스프레드 선택** — 주제에 맞는 스프레드 구성 + 궁금한 점 직접 입력 (선택)
+4. **개인정보 입력** — 이름 · 생년월일 · 성별 · 출생시간 · MBTI(선택)
+5. **카드 뽑기 + AI 리딩** — Grok AI가 실시간으로 해석 제공 + 결과 공유
 
-**🃏 주제 7개**: 연애(전체) · 연애(솔로) · 연애(커플) · 재물 · 직업/직장 · 건강 · 종합
+**🃏 주제 6개**: 연애 (솔로) · 연애 (커플) · 직장/진로 · 재정/금전 · 건강 · 일반 상담
 
 **🔢 스프레드 10종**
 
 | 스프레드 | 카드 수 | 스프레드 | 카드 수 |
 |----------|---------|----------|---------|
 | 원카드 | 1장 | 관계 스프레드 | 7장 |
-| 과거·현재·미래 | 3장 | 말굽 스프레드 | 7장 |
+| 과거 / 현재 / 미래 | 3장 | 말굽 스프레드 | 7장 |
 | 간소화된 켈틱 크로스 | 5장 | 의사결정 스프레드 | 5장 |
 | 켈틱 크로스 | 10장 | 한 주 전망 | 7장 |
 | — | — | 조디악 휠 | 12장 |
@@ -75,7 +76,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 ### 🔮 사주 상담 (4단계)
 
 1. **캐릭터 선택** — 12명의 상담사 중 선택 (성별 필터 지원)
-2. **개인정보 입력** — 생년월일 · 출생시간 · 성별 · 혈액형
+2. **개인정보 입력** — 이름 · 생년월일 · 성별 · 출생시간 · MBTI(선택)
 3. **시간단위 × 분석영역 선택** — 동시 선택, 년단위는 월별 상세 토글 포함
 4. **AI 리딩 결과** — Grok AI가 실시간으로 분석 제공 + 결과 공유
 
@@ -88,15 +89,16 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 | 올해 | ✓ | 5년 | ✓ |
 | — | — | 전체 대운 | — |
 
-**🎯 분석영역 8개**: 종합운 · 연애(솔로) · 연애(커플) · 직장·재물 · 건강 · 성격·적성 · 궁합 · 택일
+**🎯 분석영역 8개**: 종합운 · 연애 (솔로) · 연애 (커플) · 직장·재물 · 건강운 · 성격·적성 · 궁합 · 택일
 
 ---
 
-### 🌙 신점 상담 (3단계)
+### 🌙 신점 상담 (4단계)
 
 1. **캐릭터 선택** — 12명의 상담사 중 선택 (성별 필터 지원)
-2. **주제 선택** — 신수 · 연애/궁합 · 재물/사업 · 직장/이직 · 건강/액막이 · 택일
-3. **대화형 상담** — 무제한 문답 후 "신점 결과 받기" 버튼으로 종료 (1턴 이상 후 활성화)
+2. **주제 선택** — 신수 (종합운) · 연애/궁합 · 재물/사업운 · 직장/이직 · 건강/액막이 · 택일
+3. **개인정보 입력** — 이름 · 생년월일 · 성별 · 출생시간 · MBTI(선택)
+4. **대화형 상담** — 무제한 문답 후 "신점 결과 받기" 버튼으로 종료 (1턴 이상 후 활성화)
 
 ---
 
@@ -111,7 +113,7 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 | 🌙 아르카나 | 신비로운 마녀 | 부드럽고 신비로운 톤 (~네요/~해요) |
 | ⛩️ 미코 | 엄숙한 무녀 | 차분하고 엄숙한 톤 (~입니다/~합니다) |
 | 🌸 선화 | 우아한 선녀 | 우아하고 따뜻한 톤 (~세요/~랍니다) |
-| ⭐ 호시 | 발랄한 별의 정령 | 반말 + 이모지 (~야/~지) |
+| ⭐ 호시 | 발랄한 별의 정령 | 밝고 친근한 반말체 (~야/~지) |
 | 🌕 루나 | 포근한 달의 수호자 | 다정하고 부드러운 위로 (~요/~네요) |
 | ❄️ 레이 | 냉철한 분석가 | 짧고 건조한 핵심 (~야/~지) |
 
@@ -130,7 +132,8 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 
 ### 🎁 기타 기능
 
-- 🎨 **카드 스킨 6종** — 골드 럭셔리 · 다크 고딕 · 천상 미스틱 · 파스텔 드림 · 네온 사이버 · 에메랄드 인챈트
+- 🎨 **카드 스킨 6종** — 골드 럭셔리 · 다크 고딕 · 셀레스티얼 미스틱 · 파스텔 드림 · 네온 사이버펑크 · 에메랄드 인챈트
+- 🖌️ **카드 아트 스타일 4종** — 다크 판타지 · 아르누보 · 애니메 미스티컬 · 모던 디지털 (테마에 따라 자동 선택, 수동 변경 가능)
 - 📅 **오늘의 카드** — 캐릭터별 일일 운세 (탭 전환 + 카드 뒤집기 애니메이션)
 - 🌈 **동적 테마 7종** — 시간·계절 자동 감지 + 수동 고정 선택
 - 🔐 **소셜 로그인** — Google 계정 로그인 (Supabase Auth / NextAuth.js)
@@ -141,18 +144,22 @@ ArcanaInsight는 일본 애니메이션 스타일의 **12명 개성 캐릭터**�
 
 ## 🚀 빠른 시작
 
+**전제조건** — Node.js 20 이상, pnpm 10.33.0 (`corepack enable`로 준비할 수 있습니다)
+
 ```bash
 # 1. 클론
 git clone https://github.com/xzawed/ArcanaInsight.git
 cd ArcanaInsight
 
-# 2. 의존성 설치 (pnpm 필수)
+# 2. pnpm 준비 후 의존성 설치
+corepack enable
 pnpm install
 
 # 3. 환경변수 설정
 cp .env.example .env.local
 # .env.local 편집:
-#   GROK_API_KEY=          # xAI API 키 (필수)
+#   GROK_API_KEY=                    # xAI API 키 (필수)
+#   ANTHROPIC_API_KEY=               # Claude fallback 키 (선택, 없으면 fallback 비활성)
 #   NEXT_PUBLIC_SUPABASE_URL=
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY=
 #   SUPABASE_SERVICE_ROLE_KEY=
@@ -164,7 +171,7 @@ pnpm dev
 ```
 
 > 🔑 [xAI Console](https://console.x.ai)에서 Grok API 키를 발급받을 수 있습니다.
-> 📖 상세 환경변수 목록은 [CLAUDE.md](CLAUDE.md#환경변수)를 참조하세요.
+> 📖 전체 환경변수 목록과 전환 절차는 [docs/operations/env-variables.md](docs/operations/env-variables.md)가 정본입니다. 프로덕션 배포에는 이미지 CDN 주소(`NEXT_PUBLIC_ASSET_BASE_URL`)가 추가로 필요합니다.
 
 ---
 
@@ -173,11 +180,11 @@ pnpm dev
 | 분류 | 기술 |
 |------|------|
 | 🗣️ 언어 | TypeScript (strict) |
-| ⚛️ 프레임워크 | Next.js 16.2.6 (App Router) · React 19.2.4 |
+| ⚛️ 프레임워크 | Next.js 16.2.11 (App Router) · React 19.2.4 |
 | 🎨 스타일링 | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 🎬 애니메이션 | Framer Motion v12.38 |
 | 🤖 AI | Grok API (xAI) — SSE 스트리밍 · Claude API (Anthropic) 자동 fallback |
-| 🔐 인증 | Supabase Auth Helpers (구글) |
+| 🔐 인증 | Supabase Auth (`@supabase/ssr`) — 구글 로그인 · `DB_PROVIDER=postgres` 전환 시 NextAuth.js v5 |
 | 🗄️ 데이터베이스 | Supabase (PostgreSQL) · Drizzle ORM (온프레미스 전환 지원) |
 | 📦 상태관리 | Zustand v5 |
 | 📦 패키지 매니저 | pnpm 10.33.0 |
@@ -191,7 +198,8 @@ pnpm dev
 | 역할 | AI | 담당 |
 |------|-----|------|
 | 🧠 코드 구현 · QA · 배포 | **Claude CLI** (Anthropic) | 기획·구현·검토·CI·CLAUDE.md 관리 전 자동화 |
-| ⚡ 프로덕션 AI | **Grok API** (xAI) | 타로·사주 리딩 + 캐릭터 이미지 생성 |
+| ⚡ 프로덕션 AI | **Grok API** (xAI) | 타로·사주·신점 리딩 (장애 시 Claude API 자동 fallback) |
+| 🖼️ 이미지 생성 | **Replicate** (오프라인 파이프라인) | 카드 아트·서비스 배경·캐릭터 이미지 사전 생성 |
 | 🔄 운영 자동화 | **n8n Cloud** | Spec 추적·품질 모니터링·주간 리포트 |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → 주간 QA → 자동 재검증 루프 |
 
@@ -208,7 +216,7 @@ pnpm dev
 `FallbackProvider`가 **Grok 우선 호출 → 실패 시 Claude API 자동 전환**. 429 Rate Limit · 500 서버 에러 · 401 인증 실패 각각 다른 쿨다운으로 최적화. 양쪽 모두 실패 시에만 사용자에게 에러 표시.
 
 ### 📡 SSE 스트리밍
-`/api/tarot/reading` · `/api/saju/reading` · `/api/shinjeom/message` · `/api/daily-card` 엔드포인트가 AI 응답을 **Server-Sent Events로 실시간 전송**. 클라이언트는 `useSSEStream` 훅으로 한 글자씩 타이핑 애니메이션 구현.
+`/api/tarot/reading` · `/api/saju/reading` · `/api/shinjeom/message` 세 엔드포인트가 AI 응답을 **Server-Sent Events로 실시간 전송**. 클라이언트는 `fetchSSEStream()` 함수로 한 글자씩 타이핑 애니메이션 구현. (오늘의 카드 `/api/daily-card`는 스트리밍 없이 JSON 한 번에 응답합니다.)
 
 > 📖 전체 아키텍처 상세는 [CLAUDE.md](CLAUDE.md#핵심-아키텍처)를 참조하세요.
 
@@ -224,7 +232,7 @@ pnpm dev
 |------|------|
 | 운영본 (표시 경로 유일) | **2816×1536** RGB — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
 | 색상 소스 원본 (리포지토리 외부 보관) | **1408×768** RGB |
-| 표정 종류 | default · idle · smile · serious · surprised · wink · mystical |
+| 표정 종류 | **6종** — default · smile · serious · surprised · wink · mystical<br>※ `default` 표정의 파일명은 `idle.png`입니다 |
 
 ### 테두리 투명도 (CSS mask)
 
@@ -246,6 +254,7 @@ pnpm build         # 📦 프로덕션 빌드
 pnpm start         # ▶️  프로덕션 서버
 pnpm lint          # 🔍 ESLint 검사
 pnpm type-check    # ✅ TypeScript 타입 체크
+pnpm test          # 🧪 단위 테스트 (Vitest + 커버리지)
 pnpm test:e2e      # 🎭 E2E 테스트 (Desktop/Android/iOS)
 pnpm test:e2e:ui   # 🖥️  Playwright UI 모드 (시각적 디버깅)
 ```
@@ -259,12 +268,12 @@ pnpm test:e2e:ui   # 🖥️  Playwright UI 모드 (시각적 디버깅)
 | 역할 | 담당 | 설명 |
 |------|------|------|
 | 🎨 서비스 기획/설계 | SuperGrok (xAI) | 기능 기획, UX/UI 설계 논의, 스펙 확정 |
-| ⚡ 프로덕션 AI | SuperGrok (xAI) | Grok API 타로·사주 리딩 + 이미지 생성 |
-| ⚙️ 코드 구현/QA | Claude CLI (Anthropic) | 7단계 프로세스, Playwright E2E, 주간 QA |
+| ⚡ 프로덕션 AI | SuperGrok (xAI) | Grok API 타로·사주·신점 리딩 |
+| ⚙️ 코드 구현/QA | Claude CLI (Anthropic) | 코드 변경 프로세스 운영, Playwright E2E, 주간 QA |
 | 🚀 CI/CD + 배포 | Claude CLI (Anthropic) | GitHub Actions → Railway 자동 배포 |
 | 📊 운영 분석 | SuperGrok (xAI) | 사용자 행동 분석, 리딩 품질 모니터링 |
 
-상세 운영 체계 및 7단계 개발 프로세스는 [CLAUDE.md](./CLAUDE.md) 참조.
+개발 프로세스 7단계의 정본은 [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md), 전체 운영 체계는 [CLAUDE.md](./CLAUDE.md)에 있습니다.
 
 ---
 
@@ -273,6 +282,9 @@ pnpm test:e2e:ui   # 🖥️  Playwright UI 모드 (시각적 디버깅)
 | 문서 | 내용 |
 |------|------|
 | [CLAUDE.md](CLAUDE.md) | 전체 개발 가이드 (아키텍처·규칙·운영 체계) |
+| [docs/README.md](docs/README.md) | 주제별 문서 인덱스 — 아키텍처·컨벤션·운영·워크플로우 |
+| [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md) | 코드 변경 7단계 프로세스 (브랜치·커밋 prefix·PR 절차) |
+| [docs/operations/env-variables.md](docs/operations/env-variables.md) | 환경변수 전체 목록과 전환 절차 |
 | [e2e/README.md](e2e/README.md) | E2E 테스트 실행·컨벤션·실패 대응 |
 
 | 서비스 | URL |

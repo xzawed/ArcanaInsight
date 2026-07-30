@@ -3,6 +3,7 @@
 <p align="right"><a href="README.md">🇰🇷 한국어</a></p>
 
 > **A fortune-telling platform where you converse with anime-style characters for tarot readings, Four Pillars analysis, and spiritual consultations**
+> **Available in 3 locales** (한국어 · English · 日本語) — switched automatically via the `ai_locale` cookie
 
 <p align="center">
   <img src="public/images/backgrounds/hero-bg.jpg" alt="ArcanaInsight Hero" width="100%" style="border-radius:12px" />
@@ -10,7 +11,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
-  <img src="https://img.shields.io/badge/status-v1.0.0%20Live-brightgreen?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/status-Live-brightgreen?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
@@ -49,32 +50,33 @@ ArcanaInsight is a web application where users have natural conversations with *
 
 ## 🎯 Key Features
 
-### 🎴 Tarot Reading (4 steps)
+### 🎴 Tarot Reading (5 steps)
 
 1. **Character selection** — Choose from 12 consultants (gender filter supported)
-2. **Personal info entry** — Date of birth · birth hour · gender · blood type
-3. **Topic selection + card draw** — Choose from 7 topics, then build a spread
-4. **AI reading result** — Grok AI interprets in real time + shareable link
+2. **Topic selection** — Pick one of 6 topics
+3. **Spread selection** — Build a spread suited to the topic, and optionally type your own question
+4. **Personal info entry** — Name · date of birth · gender · birth time · MBTI (optional)
+5. **Card draw + AI reading** — Grok AI interprets in real time + shareable link
 
-**🃏 7 Topics**: Love (all) · Love (single) · Love (couple) · Finance · Career · Health · General
+**🃏 6 Topics**: Love (Single) · Love (Couple) · Career / Path · Finance / Money · Health · General
 
 **🔢 10 Spread types**
 
 | Spread | Cards | Spread | Cards |
 |--------|-------|--------|-------|
 | One Card | 1 | Relationship Spread | 7 |
-| Past · Present · Future | 3 | Horseshoe Spread | 7 |
-| Simplified Celtic Cross | 5 | Decision Spread | 5 |
-| Celtic Cross | 10 | Week Ahead | 7 |
-| — | — | Zodiac Wheel | 12 |
-| — | — | Tree of Life | 10 |
+| Past / Present / Future | 3 | Horseshoe Spread | 7 |
+| Simplified Celtic Cross | 5 | Decision Making Spread | 5 |
+| Celtic Cross | 10 | Week Ahead Spread | 7 |
+| — | — | Zodiac Wheel Spread | 12 |
+| — | — | Tree of Life Spread | 10 |
 
 ---
 
 ### 🔮 Four Pillars (Saju) Reading (4 steps)
 
 1. **Character selection** — Choose from 12 consultants (gender filter supported)
-2. **Personal info entry** — Date of birth · birth hour · gender · blood type
+2. **Personal info entry** — Name · date of birth · gender · birth time · MBTI (optional)
 3. **Time range × analysis domain** — Select both simultaneously; year-range options include a monthly breakdown toggle
 4. **AI reading result** — Grok AI analyzes in real time + shareable link
 
@@ -85,17 +87,18 @@ ArcanaInsight is a web application where users have natural conversations with *
 | This week | — | Next year | ✓ |
 | This month | — | 3 years | ✓ |
 | This year | ✓ | 5 years | ✓ |
-| — | — | Full life fortune | — |
+| — | — | Full Destiny | — |
 
-**🎯 8 Analysis domains**: Overall · Love (single) · Love (couple) · Career & wealth · Health · Personality & aptitude · Compatibility · Auspicious dates
+**🎯 8 Analysis domains**: Overall · Love (Single) · Love (Couple) · Career & Wealth · Health · Personality & Aptitude · Compatibility · Auspicious Date
 
 ---
 
-### 🌙 Spiritual Consultation (Shinjeom) (3 steps)
+### 🌙 Spiritual Consultation (Shinjeom) (4 steps)
 
 1. **Character selection** — Choose from 12 consultants (gender filter supported)
-2. **Topic selection** — Fortune overview · Love/compatibility · Wealth/business · Career/transfer · Health/warding · Auspicious dates
-3. **Conversational session** — Unlimited Q&A, then tap "Get Reading" to close the session (button activates after the first exchange)
+2. **Topic selection** — Overall Fortune · Love & Compatibility · Wealth & Business · Career & Job Change · Health & Protection · Auspicious Date
+3. **Personal info entry** — Name · date of birth · gender · birth time · MBTI (optional)
+4. **Conversational session** — Unlimited Q&A, then tap "Get Shinjeom result" to close the session (button activates after the first exchange)
 
 ---
 
@@ -110,7 +113,7 @@ ArcanaInsight is a web application where users have natural conversations with *
 | 🌙 Arcana | Mysterious witch | Soft and enigmatic |
 | ⛩️ Miko | Solemn shrine maiden | Calm and formal |
 | 🌸 Seonhwa | Graceful celestial being | Elegant and warm |
-| ⭐ Hoshi | Cheerful star spirit | Casual with emoji |
+| ⭐ Hoshi | Cheerful star spirit | Bright and casual |
 | 🌕 Luna | Warm lunar guardian | Gentle and comforting |
 | ❄️ Rei | Cool-headed analyst | Short and razor-sharp |
 
@@ -129,7 +132,8 @@ ArcanaInsight is a web application where users have natural conversations with *
 
 ### 🎁 Additional Features
 
-- 🎨 **6 card skin themes** — Gold Luxury · Dark Gothic · Celestial Mystic · Pastel Dream · Neon Cyber · Emerald Enchant
+- 🎨 **6 card skin themes** — Gold Luxury · Dark Gothic · Celestial Mystic · Pastel Dream · Neon Cyberpunk · Emerald Enchant
+- 🖌️ **4 card art styles** — Dark Fantasy · Art Nouveau · Anime Mystical · Modern Digital (auto-selected per theme, manually overridable)
 - 📅 **Daily Card** — Per-character daily fortune with tab switching + card-flip animation
 - 🌈 **7 dynamic themes** — Auto-detects time of day and season, or set manually
 - 🔐 **Social login** — Google account (Supabase Auth / NextAuth.js)
@@ -140,18 +144,22 @@ ArcanaInsight is a web application where users have natural conversations with *
 
 ## 🚀 Quick Start
 
+**Prerequisites** — Node.js 20+, pnpm 10.33.0 (run `corepack enable` to set it up)
+
 ```bash
 # 1. Clone
 git clone https://github.com/xzawed/ArcanaInsight.git
 cd ArcanaInsight
 
-# 2. Install dependencies (pnpm required)
+# 2. Prepare pnpm, then install dependencies
+corepack enable
 pnpm install
 
 # 3. Configure environment variables
 cp .env.example .env.local
 # Edit .env.local:
-#   GROK_API_KEY=          # xAI API key (required)
+#   GROK_API_KEY=                    # xAI API key (required)
+#   ANTHROPIC_API_KEY=               # Claude fallback key (optional; fallback is off without it)
 #   NEXT_PUBLIC_SUPABASE_URL=
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY=
 #   SUPABASE_SERVICE_ROLE_KEY=
@@ -163,7 +171,7 @@ pnpm dev
 ```
 
 > 🔑 Get your Grok API key at [xAI Console](https://console.x.ai).
-> 📖 Full environment variable reference: [CLAUDE.md](CLAUDE.md#환경변수)
+> 📖 The full environment variable reference is [docs/operations/env-variables.md](docs/operations/env-variables.md). Production deployments also need the image CDN origin (`NEXT_PUBLIC_ASSET_BASE_URL`).
 
 ---
 
@@ -172,11 +180,11 @@ pnpm dev
 | Category | Technology |
 |----------|-----------|
 | 🗣️ Language | TypeScript (strict) |
-| ⚛️ Framework | Next.js 16.2.6 (App Router) · React 19.2.4 |
+| ⚛️ Framework | Next.js 16.2.11 (App Router) · React 19.2.4 |
 | 🎨 Styling | Tailwind CSS v4 (`@theme` CSS-based config) |
 | 🎬 Animation | Framer Motion v12.38 |
 | 🤖 AI | Grok API (xAI) — SSE streaming · Claude API (Anthropic) auto-fallback |
-| 🔐 Auth | Supabase Auth Helpers (Google) |
+| 🔐 Auth | Supabase Auth (`@supabase/ssr`) — Google sign-in · NextAuth.js v5 when `DB_PROVIDER=postgres` |
 | 🗄️ Database | Supabase (PostgreSQL) · Drizzle ORM (on-premises switchover support) |
 | 📦 State | Zustand v5 |
 | 📦 Package manager | pnpm 10.33.0 |
@@ -190,7 +198,8 @@ This project is built with an **AI-native approach** where AI acts as a genuine 
 | Role | AI | Responsibility |
 |------|----|----------------|
 | 🧠 Code · QA · Deployment | **Claude CLI** (Anthropic) | Planning · implementation · review · CI · CLAUDE.md maintenance |
-| ⚡ Production AI | **Grok API** (xAI) | Tarot/saju readings + character image generation |
+| ⚡ Production AI | **Grok API** (xAI) | Tarot · saju · shinjeom readings (auto-fallback to Claude API on failure) |
+| 🖼️ Image generation | **Replicate** (offline pipeline) | Pre-generated card art, service backgrounds, character images |
 | 🔄 Ops automation | **n8n Cloud** | Spec tracking · quality monitoring · weekly reports |
 | 🚀 CI/CD | **GitHub Actions + Railway** | PR CI → weekly QA → auto-recheck loop |
 
@@ -207,9 +216,9 @@ A single `DB_PROVIDER` environment variable switches **instantly between Supabas
 `FallbackProvider` calls **Grok first, then automatically falls back to Claude API** on failure. Rate limit (429), server error (500), and auth failure (401) each trigger different cooldown durations for optimal recovery. The error surface is only shown to the user if both providers fail.
 
 ### 📡 SSE Streaming
-`/api/tarot/reading`, `/api/saju/reading`, `/api/shinjeom/message`, and `/api/daily-card` endpoints stream AI responses via **Server-Sent Events**. The client-side `useSSEStream` hook renders each token as a typing animation.
+The `/api/tarot/reading`, `/api/saju/reading`, and `/api/shinjeom/message` endpoints stream AI responses via **Server-Sent Events**. On the client, `fetchSSEStream()` renders each token as a typing animation. (The Daily Card endpoint, `/api/daily-card`, is not streamed — it returns a single JSON response.)
 
-> 📖 Full architecture details: [CLAUDE.md](CLAUDE.md#핵심-아키텍처)
+> 📖 Full architecture details: [docs/architecture/system-overview.md](docs/architecture/system-overview.md)
 
 ---
 
@@ -223,7 +232,7 @@ All 12 characters use `nukki-enhanced/` high-resolution cutout images in the pro
 |------|------|
 | Production (only display path) | **2816×1536** RGB — `/images/characters/{id}/nukki-enhanced/{mood}.png` |
 | Color source original (kept off-repo) | **1408×768** RGB |
-| Expressions | default · idle · smile · serious · surprised · wink · mystical |
+| Expressions | **6 moods** — default · smile · serious · surprised · wink · mystical<br>※ The `default` mood is stored as `idle.png` |
 
 ### Edge Transparency (CSS mask)
 
@@ -245,6 +254,7 @@ pnpm build         # 📦 Production build
 pnpm start         # ▶️  Production server
 pnpm lint          # 🔍 ESLint
 pnpm type-check    # ✅ TypeScript type check
+pnpm test          # 🧪 Unit tests (Vitest + coverage)
 pnpm test:e2e      # 🎭 E2E tests (Desktop/Android/iOS)
 pnpm test:e2e:ui   # 🖥️  Playwright UI mode (visual debug)
 ```
@@ -258,12 +268,12 @@ pnpm test:e2e:ui   # 🖥️  Playwright UI mode (visual debug)
 | Role | Owner | Description |
 |------|-------|-------------|
 | 🎨 Product planning / design | SuperGrok (xAI) | Feature planning, UX/UI discussion, spec finalization |
-| ⚡ Production AI | SuperGrok (xAI) | Grok API tarot/saju readings + image generation |
-| ⚙️ Code implementation / QA | Claude CLI (Anthropic) | 7-step process, Playwright E2E, weekly QA |
+| ⚡ Production AI | SuperGrok (xAI) | Grok API tarot · saju · shinjeom readings |
+| ⚙️ Code implementation / QA | Claude CLI (Anthropic) | Runs the code change process, Playwright E2E, weekly QA |
 | 🚀 CI/CD + deployment | Claude CLI (Anthropic) | GitHub Actions → Railway auto-deploy |
 | 📊 Operations analytics | SuperGrok (xAI) | User behavior analysis, reading quality monitoring |
 
-Full operations system and 7-step development process: [CLAUDE.md](./CLAUDE.md)
+The 7-step development process lives in [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md); the full operations system is in [CLAUDE.md](./CLAUDE.md).
 
 ---
 
@@ -272,6 +282,9 @@ Full operations system and 7-step development process: [CLAUDE.md](./CLAUDE.md)
 | Document | Contents |
 |----------|---------|
 | [CLAUDE.md](CLAUDE.md) | Full dev guide (architecture · conventions · operations) |
+| [docs/README.md](docs/README.md) | Documentation index — architecture, conventions, operations, workflow |
+| [docs/workflow/code-change-process.md](docs/workflow/code-change-process.md) | The 7-step code change process (branches · commit prefixes · PR flow) |
+| [docs/operations/env-variables.md](docs/operations/env-variables.md) | Full environment variable reference and switchover steps |
 | [e2e/README.md](e2e/README.md) | E2E test execution · conventions · failure handling |
 
 | Service | URL |
