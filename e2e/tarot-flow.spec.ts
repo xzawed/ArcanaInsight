@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { enterTarotSession } from "./helpers/service-navigation";
 import { createSSEBody, mockSessionCreate, TAROT_READING_CHUNKS, TAROT_READING_RESULT } from "./helpers/sse-mock";
 
 test.describe("타로 서비스 플로우", () => {
@@ -126,22 +127,21 @@ test.describe("타로 서비스 플로우", () => {
       });
     });
 
-    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
-    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
-    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-    await characterCards.first().click();
-
-    await page.locator("[data-testid='topic-btn-general']").click();
-    await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
+    await enterTarotSession(page);
 
     const firstCard = page.locator("[data-testid='card-back-0']");
     await expect(firstCard).toBeVisible({ timeout: 10_000 });
     await page.waitForTimeout(700);
 
-    for (let i = 0; i < 8; i += 1) {
-      await firstCard.click({ force: true });
-    }
+    // 한 JS 턴에서 8연타 — 앱이 첫 클릭을 처리하기 전에 몰아쳐 중복 시작 가드를 직접 검증한다.
+    // `locator.click`을 8회 반복하면 이 검증이 되지 않는다: 첫 선택으로 덱이 결과 단계로
+    // 전이하면서 카드 뒷면의 bounding box가 사라지고, `force: true`도 좌표 계산을 위해
+    // 가시성은 요구하므로 2회차부터 "Element is not visible" 재시도에 걸려 30s 테스트
+    // 타임아웃으로 번진다. (#525 — 6런 중 5회 실패/flaky의 실제 원인. CPU 부하는 전이
+    // 타이밍만 바꿨을 뿐 원인이 아니다.)
+    await firstCard.evaluate((el) => {
+      for (let i = 0; i < 8; i += 1) (el as HTMLElement).click();
+    });
 
     const proceedButton = page.getByRole("button", { name: /진행|Proceed|進む|확인|Confirm|確認/ });
     if (await proceedButton.isVisible().catch(() => false)) {
@@ -174,14 +174,7 @@ test.describe("타로 서비스 플로우", () => {
       });
     });
 
-    await page.goto("/tarot", { waitUntil: "domcontentloaded" });
-    const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화/ });
-    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
-    await characterCards.first().click();
-
-    await page.locator("[data-testid='topic-btn-general']").click();
-    await page.locator("[data-testid='spread-btn-one-card']").evaluate((el) => (el as HTMLElement).click());
-    await page.waitForURL("**/tarot/session**", { waitUntil: "commit", timeout: 10_000 });
+    await enterTarotSession(page);
 
     const firstCard = page.locator("[data-testid='card-back-0']");
     await expect(firstCard).toBeVisible({ timeout: 10_000 });

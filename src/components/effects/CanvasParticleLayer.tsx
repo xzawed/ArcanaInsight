@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotionSafe } from "@/hooks/useReducedMotionSafe";
 import { useThemeStore } from "@/hooks/useTheme";
 import {
   THEME_EFFECTS,
@@ -43,7 +43,8 @@ function buildPool(theme: string, density: Density, w: number, h: number): Parti
 
 export function CanvasParticleLayer({ density = "medium", className = "" }: CanvasParticleLayerProps) {
   const { activeTheme } = useThemeStore();
-  const shouldReduceMotion = Boolean(useReducedMotion());
+  // 렌더 유무를 가르는 자리라 hydration 안전 훅을 쓴다 — 자세한 이유는 훅 주석 참조.
+  const shouldReduceMotion = useReducedMotionSafe();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number | null>(null);

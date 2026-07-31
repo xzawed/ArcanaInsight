@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotionSafe } from "@/hooks/useReducedMotionSafe";
 
 // 오행 색상: 木(청) 火(적) 土(황) 金(백) 水(흑/남)
 const OHAENG = [
@@ -23,7 +24,8 @@ interface ShinjeomEnergyEffectProps {
  * 2.2초 후 onComplete 콜백을 호출하고 자동으로 사라진다.
  */
 export function ShinjeomEnergyEffect({ onComplete }: ShinjeomEnergyEffectProps) {
-  const shouldReduceMotion = useReducedMotion();
+  // 렌더 유무를 가르므로 hydration 안전 훅을 쓴다.
+  const shouldReduceMotion = useReducedMotionSafe();
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {

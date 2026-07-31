@@ -50,6 +50,33 @@ test.describe("크로스 플랫폼 품질 검증", () => {
       await page.goto("/saju", { waitUntil: "domcontentloaded" });
       expect(errors).toHaveLength(0);
     });
+
+    // hydration mismatch는 uncaught exception이 아니라 console.error로 나오므로 위 `pageerror`
+    // 가드에 걸리지 않는다. 그리고 "동작 줄이기"를 켜야만 재현되므로 기본 가드는 조건 자체를
+    // 만들지 못한다 — 그래서 CanvasParticleLayer의 SSR 불일치가 오래 방치됐다(#525 진단).
+    // mismatch가 나면 React가 서버 트리를 버리고 다시 그리는데, 그 사이 클릭이 유실돼
+    // E2E가 산발적으로 깨진다. 실제 사용자(OS 동작 줄이기 사용자)도 같은 재렌더를 겪는다.
+    for (const route of ["/tarot", "/saju", "/shinjeom"]) {
+      test(`hydration 불일치 없음 — 동작 줄이기 · ${route}`, async ({ page }) => {
+        const hydrationErrors: string[] = [];
+        // 프로덕션 빌드는 메시지가 축약되므로(react.dev/errors/418·423) 양쪽 형태를 모두 잡는다.
+        const HYDRATION = /hydrat|did not match|react\.dev\/errors\/(418|421|423|425)|Minified React error #(418|421|423|425)/i;
+        page.on("console", (msg) => {
+          if (msg.type() === "error" && HYDRATION.test(msg.text())) hydrationErrors.push(msg.text());
+        });
+        page.on("pageerror", (err) => {
+          if (HYDRATION.test(err.message)) hydrationErrors.push(err.message);
+        });
+
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.goto(route, { waitUntil: "domcontentloaded" });
+        // hydration은 DCL 이후에 일어나므로 상호작용 가능 상태까지 기다린 뒤 판정한다.
+        await expect(page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ }).first())
+          .toBeVisible({ timeout: 10_000 });
+
+        expect(hydrationErrors).toHaveLength(0);
+      });
+    }
   });
 
   test("MobileNav — safe area 하단 패딩 존재", async ({ page }) => {
