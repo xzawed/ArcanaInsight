@@ -248,7 +248,16 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // 클릭은 성공했고 문제는 목적지 준비 속도이므로, URL이 아니라 **목적지가 실제로
     // 그려졌는지**로 게이트하고 예산을 현실에 맞춘다.
     const homeTab = page.locator("[data-testid='mobile-nav-home']");
-    await homeTab.click();
+    await expect(homeTab).toBeVisible({ timeout: 10_000 });
+    // `locator.click()`을 쓰지 않는 이유: trace상 클릭 자체는 성공하지만("click action done"),
+    // 그 뒤 click()이 **"waiting for scheduled navigations to finish"** 단계에서 대기한다.
+    // App Router 전이가 목적지 커밋까지 끝나지 않으면 이 대기가 60s 예산을 통째로 태우고
+    // 실패는 click() 줄로 보고된다. evaluate 디스패치는 그 대기를 만들지 않는다
+    // (형제 테스트들이 이미 쓰는 패턴 — :142, :165).
+    await homeTab.evaluate((el) => (el as HTMLElement).click());
+    // #460이 evaluate에서 물러났던 이유는 `waitForURL(..., "commit")`이 소프트 네비게이션에서
+    // 해소되지 않아서였다. 라이프사이클 이벤트 대신 **목적지가 그려졌는지**로 게이트하면
+    // 소프트/하드 네비게이션 어느 쪽에도 의존하지 않는다.
     await expect(page.locator("text=당신의 상담사를 만나보세요").first()).toBeVisible({ timeout: 30_000 });
     await expect(page).toHaveURL(/\/$/, { timeout: 5_000 });
     // 라우트 전환 시 스크롤 최상단 초기화 확인 (load 대기 불필요)
