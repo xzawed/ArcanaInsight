@@ -2,10 +2,27 @@
 
 이 폴더는 프로젝트의 장기 정본 문서를 주제별로 보관합니다. 루트 `CLAUDE.md`는 빠른 진입점이고, 세부 규칙과 배경 설명은 이 문서들이 기준입니다.
 
+## 읽는 순서 (스펙 우선)
+
+문서는 **무엇을 보장하는가 → 어떻게 만들었는가 → 어떻게 검증하는가 → 어떻게 운영하는가 → 무엇이 남았는가** 순으로 읽습니다.
+
+| 순서 | 폴더 | 답하는 질문 | 진입 문서 |
+|---|---|---|---|
+| 1 | `specs/` | 시스템이 무엇을 **보장**하는가 (SDD) | [specs/README.md](specs/README.md) |
+| 2 | `architecture/` · `conventions/` | 어떻게 **구현**했는가 | [architecture/system-overview.md](architecture/system-overview.md) |
+| 3 | `tests/` | 무엇이 그 보장을 **검증**하는가 (TDD) | [tests/strategy.md](tests/strategy.md) |
+| 4 | `operations/` | 어떻게 **운영·배포**하는가 | [operations/operation-guide.md](operations/operation-guide.md) |
+| 5 | `wbs/` | 무엇이 **남았고 무엇에 막혀** 있는가 | [wbs/README.md](wbs/README.md) |
+
+> 명세와 설계의 차이: **명세를 어기면 코드가 틀린 것**이고, 설계 문서와 코드가 어긋나면 둘 중 무엇을 고칠지는 상황에 따릅니다. 상세는 [specs/README.md](specs/README.md).
+
 ## 업무 유형별 진입점
 
 | 업무 | 진입 문서 |
 |---|---|
+| SSR/hydration 규칙 (계약) | [specs/platform/rendering-contract.md](specs/platform/rendering-contract.md) |
+| 테스트 계층·게이트 전략 | [tests/strategy.md](tests/strategy.md) |
+| 잔여 작업·차단 요인 | [wbs/README.md](wbs/README.md) |
 | 시스템 구조 이해 | [architecture/system-overview.md](architecture/system-overview.md) |
 | AI/LLM fallback, SSE, JSON 파싱 | [architecture/ai-infrastructure.md](architecture/ai-infrastructure.md) |
 | DB 공급자 전환 | [architecture/db-abstraction.md](architecture/db-abstraction.md) |
