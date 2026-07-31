@@ -174,7 +174,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
             <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
               className="relative w-full h-full">
               <Image src={imageSrc} alt="" fill sizes="50vw"
-                className="object-contain object-center" style={cutoutImageStyle} priority />
+                className="object-contain object-center" style={cutoutImageStyle} />
             </motion.div>
           ) : (
             <motion.div
@@ -183,7 +183,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
               className="relative w-full h-full"
             >
               <Image src={imageSrc} alt="" fill sizes="50vw"
-                className="object-contain object-center" style={cutoutImageStyle} priority />
+                className="object-contain object-center" style={cutoutImageStyle} />
             </motion.div>
           )}
         </motion.div>

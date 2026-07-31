@@ -38,5 +38,18 @@ jobs:
       - name: i18n 번역 키 drift 검사
         run: pnpm exec tsx scripts/check-translation-keys.ts
 
+      # 가드가 결함에 실제로 반응하는지 검증한다. "존재하지만 무력한 가드"가 이 저장소에서
+      # 세 번 나왔다(범위 밖 문서 무검사·정본 없으면 조용한 통과·dev 모드가 삼킨 hydration 오류).
+      - name: 가드 셀프테스트 (결함 주입 → 실패해야 통과)
+        run: pnpm exec tsx scripts/check-guards-selftest.ts
+
+      # flaky 실행의 trace가 폐기되지 않도록 아티팩트 업로드 조건을 고정한다.
+      - name: 워크플로우 아티팩트 정책 검사
+        run: pnpm exec tsx scripts/check-workflow-artifacts.ts
+
+      # 캐릭터 마스터의 치수 고정·용량 상한. 런타임 이미지 최적화 비용 폭주 방지(#521 관련).
+      - name: 캐릭터 이미지 예산 검사
+        run: pnpm exec tsx scripts/check-character-image-budget.ts
+
       # sync-test-count --check 은 테스트 실행이 너무 느려 PR CI에서 제외.
       # 로컬에서 수동 실행: pnpm exec tsx scripts/sync-test-count.ts --check
