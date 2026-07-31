@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotionSafe } from "@/hooks/useReducedMotionSafe";
 import { useThemeStore } from "@/hooks/useTheme";
 import type { ThemeId } from "@/hooks/useTheme";
 
@@ -167,7 +168,8 @@ const LAYER_MAP: Record<ThemeId, React.FC<{ shouldReduceMotion: boolean }> | nul
 
 export function ThemeAtmosphereLayer({ intensity = "high", className = "" }: ThemeAtmosphereLayerProps) {
   const { activeTheme } = useThemeStore();
-  const shouldReduceMotion = Boolean(useReducedMotion());
+  // SunsetLayer·SummerLayer의 렌더 유무를 가르므로 hydration 안전 훅을 쓴다.
+  const shouldReduceMotion = useReducedMotionSafe();
 
   if (intensity === "low") return null;
 
