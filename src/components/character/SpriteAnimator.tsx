@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
 import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
-import { getCharacterImageUrl } from "@/lib/storage/character-image";
+import { characterImageLoaderProp, getCharacterImageUrl } from "@/lib/storage/character-image";
 
 interface MoodConfig {
   loop: boolean;
@@ -173,7 +173,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
           {!isLooping && enterAnim ? (
             <motion.div animate={enterAnim} transition={{ duration: 0.5, ease: "easeOut" }}
               className="relative w-full h-full">
-              <Image src={imageSrc} alt="" fill sizes="50vw"
+              <Image src={imageSrc} alt="" fill sizes="50vw" {...characterImageLoaderProp}
                 className="object-contain object-center" style={cutoutImageStyle} />
             </motion.div>
           ) : (
@@ -182,7 +182,7 @@ export const SpriteAnimator = React.memo(function SpriteAnimator({ characterId, 
               transition={loopTransition}
               className="relative w-full h-full"
             >
-              <Image src={imageSrc} alt="" fill sizes="50vw"
+              <Image src={imageSrc} alt="" fill sizes="50vw" {...characterImageLoaderProp}
                 className="object-contain object-center" style={cutoutImageStyle} />
             </motion.div>
           )}

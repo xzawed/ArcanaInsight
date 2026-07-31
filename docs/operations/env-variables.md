@@ -38,6 +38,7 @@
 | 변수 | 설명 | 기본값 |
 |------|------|--------|
 | `NEXT_PUBLIC_ASSET_BASE_URL` | 자산 CDN 루트. 설정 시 `{base}/card-styles/...`·`{base}/card-skins/...`·`{base}/characters/...`로 서빙 (R2 버킷 `arcana-assets`). 미설정 시 Supabase Storage/로컬 폴백 | 코드 기본값 미설정 / **프로덕션은 `https://cdn.xzawed.xyz` 설정됨(R2 활성)** |
+| `NEXT_PUBLIC_CHARACTER_VARIANTS` | `1`이면 캐릭터 이미지를 **사전 생성 WebP 변형**으로 서빙해 `next/image` 런타임 최적화를 건너뛴다(#521). ⚠️ **변형이 해당 환경에 존재할 때만 켠다** — R2에 업로드 전에 켜면 프로덕션 이미지가 전량 404가 된다. 롤백은 이 값을 끄면 끝(마스터 PNG 경로는 그대로 살아 있다) | 미설정(꺼짐) / 로컬·CI는 변형이 저장소에 커밋돼 있어 `1` 가능 / **프로덕션은 R2 업로드 후 설정** |
 
 - 예시: `NEXT_PUBLIC_ASSET_BASE_URL=https://cdn.xzawed.xyz`
 - `NEXT_PUBLIC_` 접두사라 **빌드 타임에 인라인**됩니다 → Railway에 설정 후 재배포해야 반영.

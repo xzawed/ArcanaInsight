@@ -91,6 +91,8 @@ jobs:
           # NEXT_PUBLIC_SUPABASE_URL(=placeholder.supabase.co)로 폴백하는데, Supabase
           # card-styles 버킷은 2026-07-03 삭제(0객체)라 카드 이미지가 전량 404가 된다.
           NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
+          # 사전 생성 변형 사용(#521) — 변형은 저장소에 커밋돼 있어 CI에서 바로 유효하다.
+          NEXT_PUBLIC_CHARACTER_VARIANTS: "1"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -227,6 +229,8 @@ jobs:
           # 서버 런타임(pnpm start)의 서버 컴포넌트 경로용 — 클라이언트 인라인은 build 잡이 담당.
           # 두 잡의 값이 갈리면 SSR/CSR 이미지 URL이 어긋나므로 항상 동일하게 유지한다.
           NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
+          # 사전 생성 변형 사용(#521) — 변형은 저장소에 커밋돼 있어 CI에서 바로 유효하다.
+          NEXT_PUBLIC_CHARACTER_VARIANTS: "1"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
