@@ -41,8 +41,14 @@ grep -rn "service-navigation" e2e/ --include="*.ts"
 2. **CI vs 로컬 차이**
    - CI: `pnpm start` (프로덕션 빌드), retries: 2(단 **결함 탐지 가드는 0** — 아래 참조), **workers: 1**, **프로젝트당 2샤드**
    - 로컬: `pnpm dev`, retries: 0, workers 무제한, reuseExistingServer: true
-   - CI `workers: 1` 이유(#462): 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target closed" 크래시(chromium·webkit 공통). 3개 디바이스 프로젝트의 매트릭스 레벨 병렬은 유지.
-     > ⚠️ **전제 정정 (2026-07-30 실측)**: #462가 근거로 든 "2코어/7GB 러너"는 사실이 아니다. PR #512가 추가한 계측 스텝이 실제 값을 찍었다 — `Mem: 15989 total / 14476 available`, **swap 미사용**, `OOM 흔적 없음`(dmesg). 즉 **16GB 러너**다. `workers:1`은 틀린 전제 위에 정해졌으므로, 상향 여지가 있는지 재측정 후 판단한다(지금 바꾸지는 말 것 — 실측 없는 변경은 같은 실수의 반복이다).
+   - CI `workers: 1` 이유 — **근거는 2026-07-31 실측이다(#522).** 3개 디바이스 프로젝트의 매트릭스 레벨 병렬은 유지.
+     > ⚠️ **폐기된 근거**: #462가 든 "2코어/7GB 러너 → 호스트 OOM → OOM-killer가 브라우저 kill"은 사실이 아니다. 러너는 **`nproc=4` · `15989 MiB`**(AMD EPYC)이고, E2E 구간 1초 샘플링에서 메모리 피크는 **2.4~3.4GiB(총량의 15~21%)·swap 0·dmesg OOM 흔적 0**이다. 결정타로 **`Target page, context or browser has been closed`가 `workers:1` · available 13.1GiB 상태에서 재현**됐다 — 이 시그니처는 OOM의 증거가 아니다.
+     >
+     > ✅ **실제 제약은 CPU다.** 4코어에서 `workers:1`이 이미 **평균 busy 63~75%**(iowait 0.0~0.2% — I/O 대기가 아닌 실제 런큐), 버스트 100%. `workers:2`로 올리면 Desktop Chrome 테스트가 2.9~3.9m → **2.0~2.9m**로 줄지만 평균 busy가 **83~95%**가 돼 30s 테스트 타임아웃 여유가 얇아진다.
+     >
+     > 그래도 1로 두는 이유는 **이득이 없어서다**: E2E 벽시계는 4잡의 최댓값이 정하는데 임계경로는 **Mobile Android(5.0~6.3m)** 라 Desktop Chrome만 빨라져도 CI 시간은 그대로다. 양쪽 확대는 안정성 확인이 선행돼야 하는데 그 판정을 오염시키는 상시 flake가 남아 있다.
+     >
+     > 재측정은 `deploy.yml` 매트릭스의 `workers:` 값만 바꾸면 된다(`E2E_WORKERS`로 주입, 미지정 시 1). 잡 요약에 `nproc`·피크 메모리·CPU busy%·loadavg·OOM 흔적이 매 런 남는다.
    - Pre-PR 훅에 E2E 전체 포함 권장 안 함 — CI에서 재검증
 
 3. **hidden 요소 확인**  

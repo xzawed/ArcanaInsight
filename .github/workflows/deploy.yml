@@ -128,11 +128,11 @@ jobs:
         # (아티팩트명에 공백 포함 프로젝트명을 쓰지 않기 위한 슬러그).
         # workers는 프로젝트 단위로 다르게 줄 수 있다 — #522의 단계적 상향 검증용.
         include:
-          # #522 시험 중: Desktop Chrome만 2, Mobile Android는 1로 남겨 같은 런 안에서
-          # 대조군이 되게 한다. 여러 런의 안정성·소요시간을 본 뒤 확대/원복을 결정한다.
+          # workers는 프로젝트별로 다르게 줄 수 있다. #522 시험(Desktop Chrome만 2, 3런)
+          # 결과 1로 되돌렸다 — 근거는 playwright.config.ts 주석 참조.
           - project: "Desktop Chrome"
             slug: desktop
-            workers: 2
+            workers: 1
           - project: "Mobile Android"
             slug: android
             workers: 1
