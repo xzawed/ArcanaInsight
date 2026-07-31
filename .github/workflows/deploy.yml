@@ -124,13 +124,16 @@ jobs:
       matrix:
         project: ["Desktop Chrome", "Mobile Android"]
         shard: [1, 2]
-        # include의 키가 기존 조합과 일치하면 해당 조합들에 slug를 덧붙인다
+        # include의 키가 기존 조합과 일치하면 해당 조합들에 slug·workers를 덧붙인다
         # (아티팩트명에 공백 포함 프로젝트명을 쓰지 않기 위한 슬러그).
+        # workers는 프로젝트 단위로 다르게 줄 수 있다 — #522의 단계적 상향 검증용.
         include:
           - project: "Desktop Chrome"
             slug: desktop
+            workers: 1
           - project: "Mobile Android"
             slug: android
+            workers: 1
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -161,9 +164,43 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
-      - run: pnpm test:e2e --project="${{ matrix.project }}" --shard=${{ matrix.shard }}/2
+      # 러너 실측 스펙 — workers 결정의 근거는 추정이 아니라 이 출력이어야 한다(#522).
+      # "2코어/7GB"라는 기존 근거가 실제와 다른 것이 확인돼, 코어 수까지 매 런 기록한다.
+      - name: 러너 스펙 기록
+        run: |
+          {
+            echo "### 러너 스펙 — ${{ matrix.project }} (${{ matrix.shard }}/2)"
+            echo '```'
+            echo "nproc: $(nproc)"
+            lscpu | grep -E "^(Model name|CPU\(s\)|Thread\(s\) per core|Core\(s\) per socket)" || true
+            free -m | head -2
+            echo "E2E_WORKERS: ${E2E_WORKERS:-1}"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+        env:
+          E2E_WORKERS: ${{ matrix.workers }}
+
+      - name: E2E 실행 (피크 자원 샘플링 동반)
+        run: |
+          # 1초 간격 샘플링. 스텝 종료 후의 free -m은 브라우저·Next 서버가 이미 내려간 뒤라
+          # 피크를 보여주지 못한다 — 실행 중에 찍어야 workers 상향 여유를 판정할 수 있다.
+          # 메모리만으로는 부족하다: #462의 크래시 원인이 CPU 포화일 수도 있어 loadavg도 남긴다.
+          while :; do
+            mem=$(free -m | awk '/^Mem:/{u=$3; a=$7} /^Swap:/{s=$3} END{print u, a, s}')
+            echo "$mem $(awk '{print $1}' /proc/loadavg)"
+            sleep 1
+          done > /tmp/e2e-mem.log &
+          sampler=$!
+          set +e
+          pnpm test:e2e --project="${{ matrix.project }}" --shard=${{ matrix.shard }}/2
+          status=$?
+          set -e
+          kill "$sampler" 2>/dev/null || true
+          exit $status
         env:
           CI: "true"
+          # 매트릭스가 지정하지 않으면 playwright.config.ts가 1로 폴백한다.
+          E2E_WORKERS: ${{ matrix.workers }}
           # 서버 런타임(pnpm start)의 서버 컴포넌트 경로용 — 클라이언트 인라인은 build 잡이 담당.
           # 두 잡의 값이 갈리면 SSR/CSR 이미지 URL이 어긋나므로 항상 동일하게 유지한다.
           NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz
@@ -175,14 +212,35 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key' }}
 
       # OOM 관측 — 지금까지 "Target closed" 크래시는 시그니처 기반 추정이었고 직접 관측된 적이 없다.
-      # 재발 시 추정이 아니라 증거로 판단하기 위해 커널 OOM-killer 로그와 메모리 상태를 남긴다.
-      - name: OOM·메모리 상태 기록
+      # 재발 시 추정이 아니라 증거로 판단하기 위해 피크 사용량과 커널 OOM-killer 로그를 남긴다.
+      - name: 피크 자원·OOM 요약
         if: always()
         run: |
-          echo "=== free -m ==="
-          free -m
-          echo "=== OOM-killer 흔적 (dmesg) ==="
-          sudo dmesg 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" || echo "OOM 흔적 없음"
+          export NPROC="$(nproc)"
+          {
+            echo "### 자원 사용 — ${{ matrix.project }} (${{ matrix.shard }}/2), workers=${{ matrix.workers }}"
+            echo '```'
+            if [ -s /tmp/e2e-mem.log ]; then
+              awk '{ if ($1 > pu) pu = $1
+                     if (ma == "" || $2 < ma) ma = $2
+                     if ($3 > ps) ps = $3
+                     if ($4 > pl) pl = $4
+                     sl += $4 }
+                   END { printf "샘플 수       : %d (1s 간격)\n", NR
+                         printf "피크 used     : %d MiB\n", pu
+                         printf "최저 available: %d MiB\n", ma
+                         printf "피크 swap     : %d MiB\n", ps
+                         printf "피크 loadavg  : %.2f (nproc=%s)\n", pl, ENVIRON["NPROC"]
+                         printf "평균 loadavg  : %.2f\n", NR ? sl / NR : 0 }' /tmp/e2e-mem.log
+            else
+              echo "샘플 없음 (E2E 스텝이 시작 전에 실패)"
+            fi
+            echo "-- 스텝 종료 시점 --"
+            free -m | head -2
+            echo "-- OOM-killer 흔적 (dmesg) --"
+            sudo dmesg 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" || echo "OOM 흔적 없음"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: failure()
