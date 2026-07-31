@@ -30,8 +30,8 @@
 | 캐릭터, 카드, 스킨 데이터 | [architecture/data-model.md](architecture/data-model.md) |
 | 다국어 인프라 | [architecture/i18n.md](architecture/i18n.md) |
 | 코드 변경 절차 | [workflow/code-change-process.md](workflow/code-change-process.md) |
-| 단위 테스트 | [workflow/unit-testing.md](workflow/unit-testing.md) |
-| E2E 테스트 | [workflow/e2e-testing.md](workflow/e2e-testing.md) |
+| 단위 테스트 | [tests/unit-testing.md](tests/unit-testing.md) |
+| E2E 테스트 | [tests/e2e-testing.md](tests/e2e-testing.md) |
 | 반복 작업별 파일 가이드 | [workflow/task-playbooks.md](workflow/task-playbooks.md) |
 | 스크립트 정책 | [workflow/scripts.md](workflow/scripts.md) |
 | CI/CD 파이프라인 | [workflow/ci-cd.md](workflow/ci-cd.md) |
@@ -54,6 +54,16 @@
 ```text
 docs/
 ├── README.md
+├── specs/                    # 명세(SDD) — 무엇을 보장하는가
+│   ├── README.md
+│   └── platform/
+│       └── rendering-contract.md
+├── tests/                    # 테스트(TDD) — 무엇이 그 보장을 검증하는가
+│   ├── strategy.md           # 계층별 책임·게이트 정책
+│   ├── unit-testing.md
+│   └── e2e-testing.md
+├── wbs/                      # 작업 분해 — 무엇이 남았고 무엇에 막혀 있는가
+│   └── README.md
 ├── architecture/
 │   ├── system-overview.md
 │   ├── ai-infrastructure.md
@@ -73,13 +83,11 @@ docs/
 │   ├── implementation-plan.md
 │   ├── characters/
 │   └── screenshots/
-├── workflow/
+├── workflow/                 # 작업 절차 (테스트 문서는 tests/로 이동)
 │   ├── ci-cd.md
 │   ├── code-change-process.md
-│   ├── e2e-testing.md
 │   ├── scripts.md
-│   ├── task-playbooks.md
-│   └── unit-testing.md
+│   └── task-playbooks.md
 ├── operations/
 │   ├── deployment.md
 │   ├── deploy-safety-guide.md

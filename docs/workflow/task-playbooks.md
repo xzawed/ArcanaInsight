@@ -111,7 +111,7 @@ pnpm type-check && pnpm lint && pnpm build
 
 1. `e2e/` — 관련 spec 파일
 2. `playwright.config.ts` — 디바이스 프로필 확인
-3. [`docs/workflow/e2e-testing.md`](e2e-testing.md) — 실행 방법 + 셀렉터 패턴
+3. [`docs/tests/e2e-testing.md`](../tests/e2e-testing.md) — 실행 방법 + 셀렉터 패턴
 
 **Mobile Android 셀렉터 주의사항** (오탐 패턴):
 

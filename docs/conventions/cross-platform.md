@@ -119,4 +119,4 @@ App Router Route Group으로 렌더 라우트를 두 레이아웃으로 분리�
 - 이미지 로드 성공 — Desktop Chrome 전용(#464, 대용량 홈 이미지가 메모리 취약 webkit 크래시 유발해 non-DC는 test.skip)
 - 주요 링크 200 응답
 
-→ E2E 실행 가이드: [`docs/workflow/e2e-testing.md`](../workflow/e2e-testing.md)
+→ E2E 실행 가이드: [`docs/tests/e2e-testing.md`](../tests/e2e-testing.md)
