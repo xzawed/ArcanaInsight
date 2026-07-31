@@ -2,6 +2,11 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import playwright from "eslint-plugin-playwright";
+import noImagePriorityRemote from "./eslint-rules/no-image-priority-remote.mjs";
+
+const arcana = {
+  rules: { "no-image-priority-remote": noImagePriorityRemote },
+};
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -17,6 +22,15 @@ const eslintConfig = defineConfig([
     files: ["e2e/**/*.ts", "scripts/e2e-full/**/*.ts"],
     plugins: { playwright },
     rules: { "playwright/no-networkidle": "error" },
+  },
+  // 재발 방지 가드: <Image priority>는 로컬 정적 경로에만. 외부 CDN URL에 붙이면 preload가
+  // window.load를 게이트해 E2E 타임아웃·LCP 악화를 만든다(PR #412). 이 규칙은
+  // .claude/rules/e2e-testing.md에 **산문으로만** 있었고 그래서 지켜지지 않았다 —
+  // 2026-08-01 감사에서 세션 3곳과 SpriteAnimator가 위반 중이었다. 린트로 강제한다.
+  {
+    files: ["src/**/*.tsx"],
+    plugins: { arcana },
+    rules: { "arcana/no-image-priority-remote": "error" },
   },
   // Override default ignores of eslint-config-next.
   globalIgnores([

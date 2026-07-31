@@ -137,7 +137,6 @@ function ImagePanel({
           alt={`${title} character sample`}
           fill
           sizes="(min-width: 1024px) 45vw, 100vw"
-          priority
           className="object-contain object-bottom"
         />
       </div>

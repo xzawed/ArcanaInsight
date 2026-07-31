@@ -58,6 +58,42 @@ pnpm build && CI=true pnpm exec playwright test <spec> -g "<가드>"   # 이제 
 
 ---
 
+## 3-1. 가드 목록 — 무엇이 무엇을 막는가
+
+산문 규칙은 지켜지지 않는다. 이 저장소에서 실증됐다 — "외부 URL `<Image>`에 `priority` 금지"는 문서에만 있었고, 감사 시점에 **세션 3곳과 `SpriteAnimator`가 위반 중**이었다. 그래서 규칙은 실행 가능한 가드로 옮긴다.
+
+| 가드 | 막는 것 | 실행 |
+|---|---|---|
+| `arcana/no-image-priority-remote` (ESLint) | 외부 CDN URL `<Image>`의 `priority` — preload가 `window.load`를 게이트 | `pnpm lint` |
+| `playwright/no-networkidle` (ESLint) | `networkidle` 대기 재도입 | `pnpm lint` |
+| hydration 가드 (`cross-platform.spec.ts`, `retries: 0`) | 동작 줄이기 사용자의 SSR 트리 분기 | E2E |
+| 이미지·콘솔 무결성 가드 (`retries: 0`) | 404 이미지·페이지 오류 | E2E |
+| `pnpm check:doc-links` | 깨진 문서 링크 + **검사 범위 축소**(CLAUDE.md 필수 포함) | docs-sync CI |
+| `pnpm check:env-docs` | env 코드↔문서 드리프트 + **정본 파일 실종 시 하드 실패** | docs-sync CI |
+| `pnpm check:workflow-artifacts` | Playwright 리포트가 `if: failure()`로 회귀 — flaky trace 폐기 | docs-sync CI |
+| `pnpm check:image-budget` | 캐릭터 마스터 치수 드리프트·용량 폭주 | docs-sync CI |
+| **`pnpm check:guards`** | **위 검사 스크립트들이 무력해지는 것** (아래 참조) | docs-sync CI |
+
+### 가드를 위한 가드 — `check:guards`
+
+§3의 red→green 의무는 **사람의 기억에 의존해 실패했다.** 이 저장소에서 "존재하지만 무력한 가드"가 세 번 나왔다.
+
+1. `check-doc-links`가 `docs/` 안만 봐서 `CLAUDE.md`(링크 25곳)가 무검사였다.
+2. `check-env-docs`가 정본 문서를 못 찾으면 `exit(0)` — 경로가 어긋나면 **검사가 꺼진 채 CI 초록**.
+3. hydration 가드 첫 버전이 결함이 살아 있는데도 통과했다(dev 모드가 오류를 삼킴).
+
+`check:guards`는 각 검사 스크립트에 **결함을 주입하고 실패하는지 확인**한 뒤 원복한다. 통과 조건은 "가드가 red를 낸다"이다.
+
+> **새 검사 스크립트를 추가하면 `check-guards-selftest.ts`에 케이스도 함께 추가한다.** 그러지 않으면 그 가드가 언제 무력해졌는지 아무도 모른다.
+
+### fail-closed 원칙
+
+무효화될 수 있는 검사는 **닫히는 쪽으로** 실패해야 한다.
+
+- 검사 대상이 0건 → 실패 (범위 설정 오류)
+- 정본 파일 없음 → 실패 (건너뛰기 금지)
+- 필수 대상이 범위 밖 → 실패 (범위 축소 회귀)
+
 ## 4. CI와 로컬의 차이 — 로컬 결과를 CI로 착각하지 않기
 
 | | CI | 로컬 기본 |

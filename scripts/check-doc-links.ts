@@ -106,6 +106,21 @@ if (markdownFiles.length === 0) {
   process.exit(1);
 }
 
+// 범위 축소 방어 — 이 검사는 원래 docs/ 안만 봤고, 그래서 링크가 가장 많은 CLAUDE.md와
+// .claude/**·루트 README가 무검사 상태였다. SCAN_TARGETS가 다시 줄어들면 조용히 통과하는
+// 상태로 되돌아가므로, **반드시 검사돼야 하는 파일**을 명시해 회귀를 실패로 만든다.
+const REQUIRED_SCANNED = ["CLAUDE.md", "README.md"];
+const missingRequired = REQUIRED_SCANNED.filter(
+  (rel) => !markdownFiles.includes(path.join(ROOT, rel)),
+);
+if (missingRequired.length > 0) {
+  console.error(
+    `[check-doc-links] 필수 검사 대상이 범위에서 빠졌습니다: ${missingRequired.join(", ")}\n` +
+    "  SCAN_TARGETS를 줄이면 이 파일들의 링크가 무검사 상태가 됩니다(과거 회귀 사례).",
+  );
+  process.exit(1);
+}
+
 const allBroken: BrokenLink[] = [];
 for (const f of markdownFiles) {
   allBroken.push(...checkLinks(f));
