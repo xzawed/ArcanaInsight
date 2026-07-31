@@ -56,7 +56,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     // 만들지 못한다 — 그래서 CanvasParticleLayer의 SSR 불일치가 오래 방치됐다(#525 진단).
     // mismatch가 나면 React가 서버 트리를 버리고 다시 그리는데, 그 사이 클릭이 유실돼
     // E2E가 산발적으로 깨진다. 실제 사용자(OS 동작 줄이기 사용자)도 같은 재렌더를 겪는다.
-    for (const route of ["/tarot", "/saju", "/shinjeom"]) {
+    // 홈(`/`)도 포함한다 — HeroSection → CharacterDisplay → CharacterAuraLayer가 같은 분기를
+    // 갖고 있었는데, 몰입형 라우트만 보던 초기 가드는 이를 통과시켰다(Grok 교차감사에서 발견).
+    for (const route of ["/", "/tarot", "/saju", "/shinjeom"]) {
       test(`hydration 불일치 없음 — 동작 줄이기 · ${route}`, async ({ page }) => {
         const hydrationErrors: string[] = [];
         // 프로덕션 빌드는 메시지가 축약되므로(react.dev/errors/418·423) 양쪽 형태를 모두 잡는다.
@@ -70,9 +72,13 @@ test.describe("크로스 플랫폼 품질 검증", () => {
 
         await page.emulateMedia({ reducedMotion: "reduce" });
         await page.goto(route, { waitUntil: "domcontentloaded" });
+
         // hydration은 DCL 이후에 일어나므로 상호작용 가능 상태까지 기다린 뒤 판정한다.
-        await expect(page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ }).first())
-          .toBeVisible({ timeout: 10_000 });
+        // 홈은 캐릭터 링크, 몰입형 진입은 캐릭터 선택 버튼이 준비 신호다.
+        const ready = route === "/"
+          ? page.locator("[href^='/character/']").first()
+          : page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ }).first();
+        await expect(ready).toBeVisible({ timeout: 10_000 });
 
         expect(hydrationErrors).toHaveLength(0);
       });

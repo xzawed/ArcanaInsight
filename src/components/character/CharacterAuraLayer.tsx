@@ -1,8 +1,10 @@
 "use client";
 
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Mood } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
+import { useHydrated } from "@/hooks/useHydrated";
+import { useReducedMotionSafe } from "@/hooks/useReducedMotionSafe";
 import { useReducedMotionStore } from "@/hooks/useReducedMotionStore";
 
 interface CharacterAuraLayerProps {
@@ -36,9 +38,13 @@ const BURST_PARTICLES = [
 ] as const;
 
 export function CharacterAuraLayer({ mood, isTransitioning, primaryColor }: CharacterAuraLayerProps) {
-  const systemReducedMotion = useReducedMotion();
+  // 아래에서 렌더 트리 자체를 가르므로 두 값 모두 hydration 이후에만 반영한다.
+  // 미디어 쿼리(useReducedMotionSafe)와 persist 스토어(useHydrated) 둘 다 서버가 알 수 없어,
+  // 그대로 쓰면 "동작 줄이기" 사용자에게서 SSR 결과와 첫 클라이언트 렌더가 어긋난다.
+  const systemReducedMotion = useReducedMotionSafe();
+  const hydrated = useHydrated();
   const { reducedMotion: userReducedMotion } = useReducedMotionStore();
-  const shouldReduceMotion = systemReducedMotion || userReducedMotion;
+  const shouldReduceMotion = systemReducedMotion || (hydrated && userReducedMotion);
   const color = hexToRgba(primaryColor, AURA_OPACITY[mood]);
 
   if (shouldReduceMotion) {

@@ -15,20 +15,18 @@ interface SajuChartRevealProps {
 export function SajuChartReveal({ children, index = 0, className = "" }: SajuChartRevealProps) {
   const shouldReduceMotion = useReducedMotion();
 
-  if (shouldReduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
+  // 호스트 요소를 분기하지 않는다(div ↔ motion.div). 서버는 동작 줄이기 여부를 알 수 없어
+  // 분기하면 SSR 결과와 첫 클라이언트 렌더가 어긋난다 — 등장 애니메이션만 건너뛴다.
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 24, filter: "blur(6px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{
-        duration: 0.55,
-        delay: index * 0.18,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
+      transition={
+        shouldReduceMotion
+          ? { duration: 0 }
+          : { duration: 0.55, delay: index * 0.18, ease: [0.25, 0.46, 0.45, 0.94] }
+      }
     >
       {children}
     </motion.div>
