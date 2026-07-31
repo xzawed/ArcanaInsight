@@ -38,12 +38,11 @@ test.describe("홈 페이지", () => {
     const femaleBtn = page.getByRole("button", { name: "여자" });
     await femaleBtn.click();
 
-    // 필터 후 캐릭터 수 감소 (6명)
+    // 필터 후 캐릭터 수 감소 (6명). 한 번만 읽으면 재조정 전 값을 읽어 플레이키가 된다
+    // (`waitForTimeout`은 사후조건이 아니다) — 재시도하는 단언으로 게이트한다.
     const cards = page.locator("[href^='/character/']");
-    await page.waitForTimeout(300); // 필터 애니메이션 대기
-    const count = await cards.count();
-    expect(count).toBeLessThanOrEqual(6);
-    expect(count).toBeGreaterThanOrEqual(1);
+    await expect.poll(() => cards.count(), { timeout: 5_000 }).toBeLessThanOrEqual(6);
+    expect(await cards.count()).toBeGreaterThanOrEqual(1);
   });
 
   test("DailyFortune — 섹션 존재 및 탭 전환", async ({ page }) => {
