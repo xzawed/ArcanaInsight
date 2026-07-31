@@ -188,10 +188,23 @@ jobs:
           # loadavg는 D-state(I/O 대기)를 포함해 CPU 포화의 직접 증거가 못 되므로,
           # /proc/stat 누적값을 같이 남겨 busy%·iowait%를 구간 델타로 계산한다.
           # 필드: used available swap load1 cpu_total cpu_idle cpu_iowait
+          # 샘플당 프로세스는 awk 하나뿐이다 — CPU가 포화 직전인 호스트에서 계측이
+          # 관측 대상을 흔들면 안 된다(free+cut+awk 조합은 샘플당 4프로세스였다).
+          # used는 free -m과 같은 정의(total-available)라 앞선 측정과 비교 가능하다.
           while :; do
-            mem=$(free -m | awk '/^Mem:/{u=$3; a=$7} /^Swap:/{s=$3} END{print u, a, s}')
-            cpu=$(awk '/^cpu /{t=0; for (i=2; i<=NF; i++) t+=$i; print t, $5, $6}' /proc/stat)
-            echo "$mem $(cut -d' ' -f1 /proc/loadavg) $cpu"
+            awk 'FILENAME == "/proc/meminfo" {
+                   if ($1 == "MemTotal:") mt = $2 / 1024
+                   if ($1 == "MemAvailable:") ma = $2 / 1024
+                   if ($1 == "SwapTotal:") st = $2 / 1024
+                   if ($1 == "SwapFree:") sf = $2 / 1024
+                 }
+                 FILENAME == "/proc/loadavg" { load = $1 }
+                 FILENAME == "/proc/stat" && $1 == "cpu" {
+                   t = 0; for (i = 2; i <= NF; i++) t += $i
+                   idle = $5; io = $6
+                 }
+                 END { printf "%d %d %d %s %d %d %d\n", mt - ma, ma, st - sf, load, t, idle, io }' \
+              /proc/meminfo /proc/loadavg /proc/stat
             sleep 1
           done > /tmp/e2e-mem.log &
           sampler=$!
