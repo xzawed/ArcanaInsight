@@ -231,6 +231,9 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
             key={`star-${s.cx}-${s.cy}`}
             cx={s.cx} cy={s.cy} r={s.r}
             fill="rgba(212,175,55,0.5)"
+            // 초기 opacity가 없으면 framer-motion이 현재값을 못 읽어
+            // "animate opacity from undefined" 경고를 매 노드마다 뱉는다.
+            opacity={0.4}
             animate={shouldReduceMotion ? { opacity: 0.4 } : { opacity: [0.3, 0.8, 0.3] }}
             transition={{ duration: 3 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
           />
@@ -253,21 +256,15 @@ export function MysticBackground({ service }: MysticBackgroundProps) {
       {runes.map((rune, i) => {
         const pos = RUNE_POSITIONS[i];
         if (!pos) return null;
-        return shouldReduceMotion ? (
-          <div
-            key={`rune-${pos.top}-${pos.left}`}
-            className="absolute select-none"
-            style={{ top: pos.top, left: pos.left, fontSize: pos.fontSize, color: `rgba(167,139,250,${pos.opacity})` }}
-          >
-            {rune}
-          </div>
-        ) : (
+        // 호스트 요소를 분기하지 않는다(div ↔ motion.div). 서버는 동작 줄이기 여부를 알 수 없어
+        // 분기하면 SSR 결과와 첫 클라이언트 렌더가 어긋난다 — 애니메이션만 끈다.
+        return (
           <motion.div
             key={`rune-${pos.top}-${pos.left}`}
             className="absolute select-none"
-            style={{ top: pos.top, left: pos.left, fontSize: pos.fontSize, color: `rgba(167,139,250,${pos.opacity})` }}
-            animate={{ opacity: [pos.opacity * 0.6, pos.opacity, pos.opacity * 0.6], rotate: [0, 3, 0, -3, 0] }}
-            transition={{ duration: 6 + i, repeat: Infinity, ease: "easeInOut" }}
+            style={{ top: pos.top, left: pos.left, fontSize: pos.fontSize, color: `rgba(167,139,250,${pos.opacity})`, opacity: pos.opacity }}
+            animate={shouldReduceMotion ? { opacity: pos.opacity, rotate: 0 } : { opacity: [pos.opacity * 0.6, pos.opacity, pos.opacity * 0.6], rotate: [0, 3, 0, -3, 0] }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 6 + i, repeat: Infinity, ease: "easeInOut" }}
           >
             {rune}
           </motion.div>
