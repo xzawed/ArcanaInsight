@@ -50,7 +50,7 @@ export default function SajuSessionPage() {
   return (
     <div className="relative h-[calc(100dvh-7rem)] md:h-[calc(100dvh-3.5rem)] flex flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <Image src={getServiceBackgroundUrl('saju', activeTheme)} alt="" fill className="object-cover" priority sizes="100vw" unoptimized />
+        <Image src={getServiceBackgroundUrl('saju', activeTheme)} alt="" fill className="object-cover" sizes="100vw" unoptimized />
         <div className="absolute inset-0 bg-arcana-bg/50" />
       </div>
       <ParticleOverlay density={phase === "reading" ? "medium" : "low"} className="z-10" />

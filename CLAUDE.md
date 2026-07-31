@@ -166,6 +166,9 @@ pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Sup
 
 | 업무 | 먼저 볼 문서 |
 |---|---|
+| **SSR/hydration 규칙(계약)** | [`docs/specs/platform/rendering-contract.md`](docs/specs/platform/rendering-contract.md) |
+| **테스트 계층·게이트 전략** | [`docs/tests/strategy.md`](docs/tests/strategy.md) |
+| **잔여 작업·차단 요인** | [`docs/wbs/README.md`](docs/wbs/README.md) |
 | 시스템 구조 | [`docs/architecture/system-overview.md`](docs/architecture/system-overview.md) |
 | AI/프롬프트 | [`docs/architecture/ai-infrastructure.md`](docs/architecture/ai-infrastructure.md) |
 | DB/Auth | [`docs/architecture/db-abstraction.md`](docs/architecture/db-abstraction.md), [`docs/architecture/auth-abstraction.md`](docs/architecture/auth-abstraction.md) |

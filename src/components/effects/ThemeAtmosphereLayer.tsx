@@ -45,6 +45,7 @@ function MidnightLayer({ shouldReduceMotion }: { readonly shouldReduceMotion: bo
             backgroundSize: "200% 100%",
             filter: "blur(22px)",
             willChange: "opacity, background-position",
+            opacity: 0.4,
           }}
           animate={
             shouldReduceMotion
@@ -76,6 +77,7 @@ function DawnLayer({ shouldReduceMotion }: { readonly shouldReduceMotion: boolea
               "linear-gradient(180deg, rgba(251,191,36,0.22) 0%, rgba(240,171,252,0.12) 40%, transparent 72%)",
             filter: "blur(14px)",
             willChange: "opacity",
+            opacity: 0.2,
           }}
           animate={
             shouldReduceMotion
@@ -101,6 +103,7 @@ function SunsetLayer({ shouldReduceMotion }: { readonly shouldReduceMotion: bool
       style={{
         backgroundImage:
           "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(251,146,60,0.04) 2px, rgba(251,146,60,0.04) 4px)",
+        opacity: 0.4,
       }}
       animate={{ opacity: [0.4, 0.8, 0.4] }}
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -122,6 +125,7 @@ function WinterLayer({ shouldReduceMotion }: { readonly shouldReduceMotion: bool
             backgroundSize: "200% 100%",
             filter: "blur(24px)",
             willChange: "opacity, background-position",
+            opacity: 0.3,
           }}
           animate={
             shouldReduceMotion
