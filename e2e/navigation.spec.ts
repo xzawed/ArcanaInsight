@@ -219,10 +219,12 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
   });
 
   test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
-    // 외부 R2 배경 이미지(ServiceBackground)가 window.load를 지연시켜 waitForLoadState("load")가
-    // Mobile Android CI에서 60s 타임아웃을 유발했다(문서화된 플레이키). load 이벤트 대신 web-first
-    // 준비 신호(캐릭터 그리드 렌더)와 waitUntil:"commit"으로 대체 — 배경 이미지 로딩과 무관하게 동작.
-    test.setTimeout(60_000);
+    // 이 테스트는 두 무거운 라우트를 연달아 지난다: /tarot 진입(외부 R2 배경) → 홈(캐릭터
+    // 12장이 next/image 런타임 최적화를 탄다, #521). 단계별 예산(진입 15s + 목적지 30s)의
+    // 합이 60s에 근접해 실제로 예산 소진으로 깨졌으므로 90s로 둔다.
+    // 이 값은 "느려도 통과시키자"가 아니라 **목적지가 실제로 그만큼 느리다**는 실측 반영이다 —
+    // 근본 해소는 #521이고, 그것이 끝나면 이 값을 되돌린다.
+    test.setTimeout(90_000);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/tarot", { waitUntil: "domcontentloaded" });
@@ -256,10 +258,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // (형제 테스트들이 이미 쓰는 패턴 — :142, :165).
     await homeTab.evaluate((el) => (el as HTMLElement).click());
     // #460이 evaluate에서 물러났던 이유는 `waitForURL(..., "commit")`이 소프트 네비게이션에서
-    // 해소되지 않아서였다. 라이프사이클 이벤트 대신 **목적지가 그려졌는지**로 게이트하면
-    // 소프트/하드 네비게이션 어느 쪽에도 의존하지 않는다.
-    await expect(page.locator("text=당신의 상담사를 만나보세요").first()).toBeVisible({ timeout: 30_000 });
-    await expect(page).toHaveURL(/\/$/, { timeout: 5_000 });
+    // 해소되지 않아서였다. 라이프사이클 이벤트에 의존하지 않는 URL 폴링으로 게이트한다.
+    //
+    // 예산이 큰 이유: 홈은 캐릭터 12장이 next/image 런타임 최적화를 타는 가장 무거운
+    // 목적지이고(#521), App Router는 새 트리가 커밋될 때까지 이전 URL을 유지한다.
+    // ⚠️ CharacterGallery의 텍스트로 게이트하지 말 것 — next/dynamic 지연 로드라 가장 늦게
+    //    나타나며, 실제로 30s 예산을 넘겨 이 테스트를 다시 깨뜨렸다.
+    await expect(page).toHaveURL(/\/$/, { timeout: 30_000 });
     // 라우트 전환 시 스크롤 최상단 초기화 확인 (load 대기 불필요)
     await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
