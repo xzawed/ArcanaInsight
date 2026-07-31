@@ -134,7 +134,7 @@ pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Sup
 
 > 카드 아트·서비스 배경·카드 스킨(6종, 2026-07-07 이전)·캐릭터는 모두 Cloudflare R2(`cdn.xzawed.xyz`) 서빙 — **Supabase Storage는 이미지 자산 0**. 카드 아트/배경 추가는 `add-card-asset` 스킬·`card-style-manager` 에이전트, 스킨은 `skin-manager` 에이전트. 정본 [`docs/conventions/image-assets.md`](docs/conventions/image-assets.md).
 
-명령어 정책은 [`docs/workflow/scripts.md`](docs/workflow/scripts.md), 테스트 정책은 [`docs/workflow/unit-testing.md`](docs/workflow/unit-testing.md), [`docs/workflow/e2e-testing.md`](docs/workflow/e2e-testing.md)를 따른다.
+명령어 정책은 [`docs/workflow/scripts.md`](docs/workflow/scripts.md), 테스트 정책은 [`docs/tests/unit-testing.md`](docs/tests/unit-testing.md), [`docs/tests/e2e-testing.md`](docs/tests/e2e-testing.md)를 따른다.
 
 ## 환경변수
 

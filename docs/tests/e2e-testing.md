@@ -467,7 +467,7 @@ await enterShinjeomSession(page);
 
 ### spec 파일 추가 시 체크리스트
 
-- [ ] `docs/workflow/e2e-testing.md` §3 매트릭스에 새 행 추가
+- [ ] `docs/tests/e2e-testing.md` §3 매트릭스에 새 행 추가
 - [ ] spec 파일 수 확인: `ls e2e/*.spec.ts | wc -l`
 - [ ] 필요 시 helper 함수 추가 → §5 동시 업데이트
 
@@ -477,7 +477,7 @@ await enterShinjeomSession(page);
 
 | 파일 | 위치 |
 |------|------|
-| `docs/workflow/e2e-testing.md` (이 파일) | 맨 상단 수치 |
+| `docs/tests/e2e-testing.md` (이 파일) | 맨 상단 수치 |
 | `CLAUDE.md` | `e2e/` 설명 섹션 |
 | `README.md` | E2E 테스트 기술 스택 행 |
 

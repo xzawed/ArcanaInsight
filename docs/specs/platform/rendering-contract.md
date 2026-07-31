@@ -62,7 +62,7 @@ return <motion.div style={s} animate={shouldReduceMotion ? staticA : a}>{rune}</
 1. **사용자 입력 유실** — 재렌더 구간에 들어온 클릭은 핸들러가 아직 없어 사라진다. OS "동작 줄이기"를 켠 사용자는 몰입형 페이지와 홈에서 매번 이 구간을 지났다.
 2. **E2E 산발 실패** — 같은 원인으로 클릭이 유실돼 테스트가 비결정적으로 깨졌다. 6런 중 5회 실패/flaky였고, CPU 부하는 재렌더 구간의 길이를 바꿔 승패를 흔들었을 뿐 **원인이 아니었다**.
 
-> 이 결함은 약 한 달간 "E2E flake"로만 보였다. 원인을 OOM으로 추정하던 기록도 함께 틀렸다 — 상세는 [`ops/known-issues.md`](../../operations/known-issues.md)와 이슈 #522·#525.
+> 이 결함은 약 한 달간 "E2E flake"로만 보였다. 원인을 OOM으로 추정하던 기록도 함께 틀렸다 — 상세는 [`operations/known-issues.md`](../../operations/known-issues.md)와 이슈 #522·#525.
 
 ---
 
@@ -113,6 +113,6 @@ CI=true pnpm exec playwright test cross-platform.spec.ts --project="Desktop Chro
 
 ## 관련 문서
 
-- [`design/conventions/cross-platform.md`](../../conventions/cross-platform.md) — 뷰포트·safe-area 등 플랫폼 규칙
+- [`conventions/cross-platform.md`](../../conventions/cross-platform.md) — 뷰포트·safe-area 등 플랫폼 규칙
 - [`tests/strategy.md`](../../tests/strategy.md) — 어떤 계층이 이 계약을 검증하는가
-- [`ops/known-issues.md`](../../operations/known-issues.md) — 폐기된 OOM 가설 기록
+- [`operations/known-issues.md`](../../operations/known-issues.md) — 폐기된 OOM 가설 기록

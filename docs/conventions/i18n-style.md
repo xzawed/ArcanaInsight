@@ -88,4 +88,4 @@ export async function POST(req: NextRequest) {
 - 인프라 개요: [`docs/architecture/i18n.md`](../architecture/i18n.md)
 - LayoutSwitcher 분리 규칙: [`layout-rules.md`](layout-rules.md)
 - 코딩 스타일 통합: [`coding-style.md`](coding-style.md)
-- E2E 정책: [`../workflow/e2e-testing.md`](../workflow/e2e-testing.md)
+- E2E 정책: [`../tests/e2e-testing.md`](../tests/e2e-testing.md)

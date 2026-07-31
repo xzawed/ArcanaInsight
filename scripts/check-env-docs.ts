@@ -27,11 +27,14 @@ function extractEnvVarsFromDocs(content: string): string[] {
 }
 
 if (!fs.existsSync(ENV_DOCS)) {
-  console.warn(
-    "[check-env-docs] docs/operations/env-variables.md 파일이 없습니다.\n" +
-    "  PR-4에서 작성 예정. 현재는 검사를 건너뜁니다."
+  // 예전에는 여기서 exit(0)이었다 — 문서 작성 전이라 건너뛰려던 임시 조치였는데,
+  // 문서가 생긴 뒤에도 남아 **경로가 어긋나면 검사가 조용히 꺼지고 CI는 초록**이 되는
+  // 구멍이 됐다. 파일이 없다는 것은 이제 정상 상태가 아니므로 실패로 취급한다.
+  console.error(
+    `[check-env-docs] 정본 문서를 찾을 수 없습니다: ${path.relative(ROOT, ENV_DOCS)}\n` +
+    "  문서를 옮겼다면 이 스크립트의 ENV_DOCS 경로를 같은 커밋에서 함께 갱신하세요."
   );
-  process.exit(0);
+  process.exit(1);
 }
 
 const envTsContent = fs.readFileSync(ENV_TS, "utf-8");

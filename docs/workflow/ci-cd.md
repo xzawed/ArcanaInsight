@@ -116,14 +116,14 @@ Railway 환경변수: DB_PROVIDER=supabase (즉시 적용)
 
 ### Dependabot PR의 시크릿 제한 ⚠️
 
-Dependabot이 만든 PR의 워크플로는 **저장소 Secrets에 접근하지 못한다**(GitHub 보안 정책). 따라서 Grok/Supabase 키가 플레이스홀더(`pl***ey`)로 주입되어 AI·DB 호출이 실패하고, 이로 인해 `E2E — Mobile Android` 같은 레이아웃·스크롤 타이밍 민감 테스트가 **실제 코드 문제 없이도 실패**할 수 있다(Desktop Chrome은 통과). 이때는 시크릿이 포함된 로컬 Docker E2E([`e2e-testing.md`](e2e-testing.md))로 해당 테스트 통과를 확인한 뒤 수동 머지한다. (2026-06-02 vitest 4 업그레이드 PR #423 사례)
+Dependabot이 만든 PR의 워크플로는 **저장소 Secrets에 접근하지 못한다**(GitHub 보안 정책). 따라서 Grok/Supabase 키가 플레이스홀더(`pl***ey`)로 주입되어 AI·DB 호출이 실패하고, 이로 인해 `E2E — Mobile Android` 같은 레이아웃·스크롤 타이밍 민감 테스트가 **실제 코드 문제 없이도 실패**할 수 있다(Desktop Chrome은 통과). 이때는 시크릿이 포함된 로컬 Docker E2E([`e2e-testing.md`](../tests/e2e-testing.md))로 해당 테스트 통과를 확인한 뒤 수동 머지한다. (2026-06-02 vitest 4 업그레이드 PR #423 사례)
 
 ---
 
 ## E2E 상세 실행 가이드
 
 E2E 실행 방법, Docker 스크립트, 디바이스 프로필:
-→ [`e2e-testing.md`](e2e-testing.md)
+→ [`e2e-testing.md`](../tests/e2e-testing.md)
 
 ---
 
