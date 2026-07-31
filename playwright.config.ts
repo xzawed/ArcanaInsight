@@ -26,11 +26,18 @@ export default defineConfig({
   // 테스트 시간은 2.9~3.9m → 2.0~2.9m로 줄지만 평균 busy가 83~95%까지 올라 30s 테스트
   // 타임아웃 여유가 얇아진다.
   //
-  // 그럼에도 1로 두는 이유는 이득이 없기 때문이다: E2E 벽시계는 4잡의 최댓값이 정하는데
-  // 임계경로는 Mobile Android(5.0~6.3m)라 Desktop Chrome만 빨라져도 CI 시간은 그대로다.
-  // 양쪽 확대는 안정성 확인이 선행돼야 하는데, 그 판정을 오염시키는 상시 flake가 남아 있다.
+  // **2026-08-01 갱신 (S-2)**: 위 판단의 전제 두 가지가 바뀌어 재평가했고, 이번에는
+  // **임계경로인 Mobile Android**를 2로 올렸다(Desktop Chrome은 1 유지 = 대조군).
+  //   ① hydration 결함(#525) 해소로 평균 CPU busy 63~75% → 42~55%
+  //   ② 상시 flake(#530) 해소로 안정성 판정이 가능해졌다
   //
-  // 프로젝트별 재측정은 매트릭스에서 E2E_WORKERS를 주면 된다. 미지정·비정상 값이면 1이다.
+  // 실측 2런 결과 (Mobile Android, workers:2)
+  //   테스트 시간 5.0m → 2.9m / 4.2m → 2.7m (약 40% 단축), **flaky 0**
+  //   평균 CPU busy 82~86%, 피크 메모리 2.9~3.2GiB(16GB 중) — 메모리는 여전히 무관
+  // #522의 Desktop Chrome 시험과 달리 이번에는 **임계경로를 줄였으므로 CI 벽시계가 실제로 준다.**
+  //
+  // 이제 임계경로는 Desktop Chrome으로 넘어갔다. 추가 상향은 같은 방식으로
+  // 매트릭스의 workers 값만 바꿔 재측정한다(E2E_WORKERS 주입, 미지정·비정상 값이면 1).
   workers: process.env.CI ? parseCiWorkers(process.env.E2E_WORKERS) : undefined,
   reporter: process.env.CI
     ? [
