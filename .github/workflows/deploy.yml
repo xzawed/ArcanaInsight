@@ -275,8 +275,13 @@ jobs:
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # `failure()`가 아니라 `always()`인 이유: retries:2가 흡수한 **flaky 실행의 증거가
+      # 통째로 버려지고 있었다.** 잡은 초록이라 아티팩트가 올라가지 않고, 원인 조사는
+      # 매번 시그니처 추정에서 멈췄다(navigation 스크롤 테스트가 근본 원인 없이 두 번
+      # "수정"된 경위). trace는 `on-first-retry`라 재시도가 있을 때만 생성되므로,
+      # 정상 통과 런의 추가 비용은 HTML 리포트뿐이고 flaky일 때만 trace가 담긴다.
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: playwright-report-${{ matrix.slug }}-shard${{ matrix.shard }}
           path: playwright-report/
