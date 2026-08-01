@@ -85,14 +85,30 @@ pnpm test:coverage   # Vitest + lcov 커버리지 생성
 
 ## Railway 자동 배포
 
-**트리거**: main 브랜치 push → Railway 자동 빌드+배포
+**트리거**: main 브랜치 push → **Railway GitHub App이 웹훅을 받아** 자동 빌드+배포.
 
-```
-설정 파일: railway.toml (dockerfile 빌더 — Next.js standalone 멀티스테이지, startCommand=node server.js, healthcheckPath=/api/health)
-GitHub Secrets 필요:
-  RAILWAY_TOKEN       Railway API 토큰
-  RAILWAY_SERVICE_ID  Railway 서비스 ID
-```
+GitHub Actions는 배포에 관여하지 않는다. **`RAILWAY_TOKEN` 등의 GitHub Secret은 필요 없다**
+(2026-08-02 실측: 리포에 등록된 시크릿은 `CODECOV_TOKEN`·`SONAR_TOKEN` 2개뿐이고
+워크플로우 어디도 Railway 시크릿을 참조하지 않는다).
+
+설정 파일은 `railway.toml`(dockerfile 빌더 — Next.js standalone 멀티스테이지,
+`startCommand=node server.js`, `healthcheckPath=/api/health`).
+
+### ⚠️ CI 체크가 배포를 게이트한다 (`checkSuites`)
+
+서비스 배포 트리거가 `checkSuites=true`라, **main의 GitHub 체크 스위트가 전부 통과해야**
+Railway가 빌드를 시작한다. 하나라도 실패하면 배포는 `SKIPPED`가 되는데 —
+
+- **실패가 아니라 "빌드가 아예 없음"이다.** 배포 이벤트 0건, 빌드 로그 0줄
+- 그래서 대시보드에도 실패 로그가 없어 **원인이 보이지 않는다**
+
+2026-08-01에 이 상태로 프로덕션이 하루 넘게 정체됐다. 경위와 재발 방지는
+[`known-issues.md`](../operations/known-issues.md)가 정본이다. 핵심 규칙:
+
+> **post-deploy 검사는 배포를 막으면 안 된다.** 배포돼야 참이 되는 것을 배포 전 게이트가
+> 검사하면 순환이 닫힌다. 새 검사를 스모크에 넣기 전에 **"배포 전에도 참인가"**를 먼저 물어라.
+
+현재 게이팅 상태는 `pnpm verify:railway-config`가 출력한다.
 
 ### 롤백 방법
 

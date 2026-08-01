@@ -32,7 +32,7 @@
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·`docs/tests/unit-testing.md` 갱신. ⚠️ 현재 두 문서 모두 고정 개수를 두지 않아 갱신 대상이 없다 — 개수를 다시 명시할 때만 의미가 있다 |
 | `pnpm eval:reading` | `eval-reading.ts` | 리딩 품질 계약 검증(directAnswer·overallReading·parseError·SSE). `EVAL_BASE_URL` 지정(기본 프로덕션), `--service=` 필터. 실 AI 호출·온디맨드 |
 | `pnpm smoke:prod` | `smoke-prod.mjs` | 배포 후 프로덕션 스모크(health·홈 자산호스트·R2 이미지). `SMOKE_BASE_URL` 지정, `--reading`=타로 1건. main push마다 CI 자동 실행 |
-| `pnpm verify:railway-config` | `verify-railway-config.mjs` | standalone 배포 필수조건(`startCommand=node server.js`·`HOSTNAME=0.0.0.0`)을 Railway API로 assert. ⚠️ **CI에서 호출되지 않는다**(`railway login` 또는 `RAILWAY_API_TOKEN` 필요) — 서비스 재생성·변경 후 **수동 실행**한다 |
+| `pnpm verify:railway-config` | `verify-railway-config.mjs` | standalone 배포 필수조건(`startCommand=node server.js`·`HOSTNAME=0.0.0.0`)을 Railway API로 assert. 배포 트리거 `checkSuites` 게이팅도 출력. ⚠️ **CI에서 호출되지 않는다**(`RAILWAY_TOKEN`=프로젝트 토큰 / `RAILWAY_API_TOKEN`=계정 토큰 / `railway login` 중 하나 필요) — 서비스 재생성·변경 후 **수동 실행**한다 |
 | `pnpm check:image-budget` | `check-character-image-budget.ts` | 캐릭터 마스터 치수·용량 + **필수 표정·WebP 변형 존재** 검증 |
 | `pnpm upload:characters:r2` | `generate-assets/upload-characters-r2.ts` | 캐릭터 마스터+변형을 R2에 업로드 (**프로덕션 배포 경로** — 미실행 시 404) |
 | `pnpm upload:characters:r2:skip` | `upload-characters-r2.ts --skip-existing` | 이미 있는 키를 건너뛰고 업로드 |
