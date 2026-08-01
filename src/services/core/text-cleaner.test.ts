@@ -6,6 +6,14 @@ describe("cleanReadingText", () => {
     expect(cleanReadingText("")).toBe("");
   });
 
+  // 회귀 방지: 호출부 상당수가 JSONB에서 꺼낸 값을 넘긴다. 스키마가 진화하면(타로 3-섹션 전환,
+  // #414) 예전 코드가 기대하던 키가 없는 행이 생기고, 방어가 없으면 `undefined.replace`로
+  // 서버 컴포넌트가 통째로 터진다. 실제로 공유·마이페이지 결과 페이지가 그렇게 깨져 있었다.
+  it("undefined/null을 받아도 터지지 않고 빈 문자열을 반환한다", () => {
+    expect(cleanReadingText(undefined)).toBe("");
+    expect(cleanReadingText(null)).toBe("");
+  });
+
   it("공백만 있는 문자열은 trim 후 빈 문자열을 반환한다", () => {
     expect(cleanReadingText("   \n   ")).toBe("");
   });

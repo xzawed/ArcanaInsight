@@ -8,6 +8,8 @@ import { SpreadType } from "@/types/session";
 import { ResultShareButton } from "@/components/common/ResultShareButton";
 import { ResultCardFace } from "./ResultCardFace";
 import { ReadingText } from "@/components/common/ReadingText";
+import { ReadingSectionBlock } from "@/components/session/ReadingSectionBlock";
+import { normalizeCardInterpretations } from "@/services/tarot/result-view";
 import { ResultPageShell } from "@/components/common/ResultPageShell";
 import { getRequestLocale } from "@/i18n/server-locale";
 import { t } from "@/i18n/translations";
@@ -48,13 +50,14 @@ export default async function ResultPage({ params }: Readonly<{ params: Promise<
   const session = await db.findOne<SessionRow>("sessions", { id: reading.session_id });
   const spreadType = (session?.spread_type ?? undefined) as SpreadType | undefined;
   const spread = spreadType ? spreads[spreadType] : undefined;
-  const rawInterpretations = Array.isArray(reading.card_interpretation)
-    ? (reading.card_interpretation as { cardId: string; position: number; interpretation: string; isReversed?: boolean }[])
-    : [];
-  const interpretations = rawInterpretations.map((interp) => ({
-    ...interp,
-    interpretation: cleanReadingText(interp.interpretation),
-  }));
+  // 포맷 판정(3-섹션 vs 구포맷)은 `normalizeCardInterpretations`가 정본이다 — 서버 컴포넌트라
+  // 단위 테스트가 어려워 로직만 떼어 뒀다. 세션 화면과 같은 기준을 쓴다.
+  const interpretations = normalizeCardInterpretations(reading.card_interpretation);
+  const sectionLabels = {
+    symbolism: t("tarot.section.symbolism", locale),
+    situation: t("tarot.section.situation", locale),
+    action: t("tarot.section.action", locale),
+  };
   const overallReading = cleanReadingText(reading.overall_reading || "");
   const directAnswer = cleanReadingText(reading.direct_answer || "");
   const advice = cleanReadingText(reading.advice || "");
@@ -153,7 +156,20 @@ export default async function ResultPage({ params }: Readonly<{ params: Promise<
                       </div>
                     </div>
                   </div>
-                  <ReadingText text={interp.interpretation} />
+                  {/* 세션 화면(`CardInterpretationList`)과 같은 판정 기준으로 3-섹션/구포맷을 가른다.
+                      이 페이지는 카드 이미지를 함께 보여주는 별도 레이아웃이라 컴포넌트를 공유하지
+                      않지만, **어느 포맷을 어떻게 그리는지는 반드시 같아야 한다.** */}
+                  {interp.hasSections ? (
+                    <div>
+                      <ReadingSectionBlock icon="✦" label={sectionLabels.symbolism} content={interp.symbolism} />
+                      <ReadingSectionBlock icon="◈" label={sectionLabels.situation} content={interp.situation} />
+                      {interp.action && (
+                        <ReadingSectionBlock icon="→" label={sectionLabels.action} content={interp.action} />
+                      )}
+                    </div>
+                  ) : (
+                    <ReadingText text={interp.interpretation} />
+                  )}
                 </div>
               );
             })}
