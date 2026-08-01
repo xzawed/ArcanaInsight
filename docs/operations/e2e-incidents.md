@@ -288,6 +288,71 @@ TypeScript도(`arg: any`) 기본 lint 규칙도(해당 규칙 없음) 이것을 
 
 ---
 
+### 2026-08-01 (4차) — `ERR_BLOCKED_BY_ORB` 최초 관측 (미해결, 관측 중)
+
+PR #542 CI에서 이미지 무결성 가드(`retries: 0`)가 처음 보는 실패를 냈다.
+
+```
+[Desktop Chrome] › e2e/cross-platform.spec.ts › 이미지 — 모든 이미지 로드 성공
+Error: 네트워크 이미지 실패: net::ERR_BLOCKED_BY_ORB
+       https://cdn.xzawed.xyz/characters/haru/nukki-enhanced/idle-320.webp
+```
+
+#### 사후 실측 — 자산은 온전하다
+
+| 검사 | 결과 |
+|---|---|
+| `haru/idle-320.webp` | **200 · `Content-Type: image/webp` · 4950 bytes** |
+| 12캐릭터 `idle-320.webp` content-type | **전부 `image/webp`** |
+| R2 ↔ 로컬 무결성(크기 + ETag=md5) | **12/12 완전 일치** |
+| 이 시그니처의 CI 이력 | 최근 5런 **0건 — 이번이 최초** |
+| 동일 커밋 재실행 | **통과** (재현 안 됨) |
+
+#### 판정: 일시적 전달 조건 — 다만 **해결이 아니라 관측 중**이다
+
+ORB(Opaque Response Blocking)는 Chrome이 no-cors `<img>` 응답을 "이미지로 안전하게 쓸 수
+있는가"로 걸러 막는 기능이다. **정상 webp 바이트 + `image/webp` + 200이면 발동할 이유가 없다.**
+따라서 사후 실측과 모순되지 않으려면 **CI 그 순간의 응답이 지금과 달랐어야** 한다 —
+Cloudflare 챌린지/인터스티셜, WAF·rate limit 페이지, 5xx, 또는 200으로 위장한 비이미지 본문.
+
+> R-4(default 72키 삭제)와의 인과는 **약하다.** 삭제 대상은 `default*`뿐이고 idle은 전수 200이며,
+> 삭제 직후 돌아간 런 2건(30682887736·30681342481)은 ORB 0건이었다.
+
+#### ⚠️ ORB를 `ERR_ABORTED`처럼 예외로 넣지 마라
+
+| | `net::ERR_ABORTED` | `net::ERR_BLOCKED_BY_ORB` |
+|---|---|---|
+| 의미 | 요청 **취소**(hydration `src` 교체·언마운트) | 응답 수신 후 **"이미지가 아니다"로 차단** |
+| 사용자 체감 | 교체 성공 시 정상 | **그 이미지는 실제로 깨져 보인다** |
+| 예외 처리 | 정당 | **금지** |
+
+예외로 넣으면 200으로 위장한 챌린지 페이지·잘못된 본문을 삼키게 된다. 그것은 카드 이미지 404를
+**3.5주간 green으로 통과**시킨 2026-07-29 사고와 같은 방향의 후퇴다.
+
+#### 조치 — 예외가 아니라 관측과 위생
+
+- 가드에 **진단 메타 기록** 추가: 실패 시 `status`·`content-type`·`cf-cache-status`·`cf-ray`를
+  함께 남긴다. 지금 형태는 "ORB only"라 **200+비이미지**와 **4xx**를 구분할 수 없다 —
+  그것이 이번 조사를 어렵게 만든 구조적 맹점이었다
+- **캐릭터 자산에 `Cache-Control` 누락을 교정**(`upload-characters-r2.ts`). 카드·스킨은
+  `public, max-age=31536000, immutable`인데 캐릭터만 없어 `cf-cache-status: DYNAMIC`이었다 —
+  **가장 무거운 자산이 매 요청 오리진을 탔다.** ORB의 증명된 원인은 아니지만 노출을 줄인다
+  > ⚠️ 기존 R2 객체에는 소급 적용되지 않는다. 헤더를 실제로 반영하려면 재업로드가 필요하다
+
+#### 재발하면 볼 것
+
+1. 실패 메시지의 **메타 필드** — `status<400 + ct=text/html`이면 챌린지/인터스티셜,
+   `status>=400`이면 오리진·키 문제, `ct=image/*`인데 ORB면 본문 위장
+2. 러너에서 **독립 probe**: `curl -sI` + `curl -s --range 0-15 | xxd` (기대: `RIFF….WEBP`).
+   브라우저만 막히고 curl은 정상이면 **엣지 차등**(봇/IP) 후보
+3. Cloudflare **Security Events**를 `cf-ray`·시각으로 조회 — Bot Fight Mode,
+   Browser Integrity Check, rate limiting 규칙이 GitHub Actions IP를 오탐하는지
+4. 다수 URL 동시 ORB면 WAF/CF 장애, 특정 캐릭터·폭만 반복이면 객체·키 문제
+
+**임계값**: 2주 내 2회 이상 같은 시그니처면 CDN 설정 조사를 우선한다. 그때도 가드 예외는 금지다.
+
+---
+
 ## 운영 지침
 
 **이 시그니처(`Target closed` + `net::ERR_ABORTED` + 30s 타임아웃 다발, **평소 7~11분의 3배 이상
