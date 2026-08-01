@@ -24,11 +24,39 @@
 | ~~**INSERT `WITH CHECK(true)` RLS 정책 7종**~~ | `sessions·readings·saju/shinjeom_readings·session_cards·daily_cards·shinjeom_messages` | **해소 완료 (migration 021, prod 적용 2026-06-24)** — 7테이블 병렬 심층 검증으로 anon/쿠키 클라이언트 INSERT 경로 부재 확인(모든 쓰기 getAdminDb=service_role) 후 `FOR INSERT WITH CHECK (true)` 정책 7종 제거. 적용 결과: 잔존 INSERT 정책 0행, service_role INSERT 성공·anon INSERT 차단(42501) 검증. ⚠️ 운영 shinjeom 정책이 파일 기준명(`shinjeom_*_insert`)이 아닌 `Anyone can insert shinjeom *`로 out-of-band 드리프트되어 있어 021 파일에 실측명 DROP 2종 추가(멱등 보정). | — | — |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 6건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절·claim userId 등 6건(110·119·128·149·153·171행) — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
 | 타로 `interpretation` 레거시 필드 (하위호환 fallback) | `src/services/tarot/tarot-service.ts`, `src/components/tarot/CardInterpretationList.tsx` | 프리미엄 3-섹션(symbolism/situation/action) 도입 후 구포맷 저장 리딩 표시 전용 fallback. 신규 리딩은 미사용. 즉시 제거 시 과거 저장 리딩 표시 깨짐. | 구포맷 저장 데이터 소멸(충분 기간 경과) 확인 후 필드·렌더 제거 검토 | Claude |
-| 의존성 취약점 현황 (2026-07-28 보안 점검) | `pnpm-lock.yaml`·`package.json` overrides | **runtime(prod) 0건**(`pnpm audit --prod` clean). 이번 처리: **next-auth beta.32·@auth/core 0.41.3**(Dependabot #506 머지 — Auth.js critical 인증우회·getToken DoS·이메일정규화·OAuth PKCE 등 11건 해소), **next 16.2.6→16.2.11**(patch 보안 bump, 정책상 자율 허용), **sharp `>=0.35.0`**(0.35.3, libvips CVE — `next>sharp` runtime 이미지최적화), **postcss `<8.5.18: ^8.5.18`**(source-map path traversal — @tailwindcss/postcss), **esbuild override**(`<0.25.0`+`>=0.27.3 <0.28.1` — tsx·drizzle-kit, tsx 동작 검증). 전 override는 type-check·lint·tsx·build로 실증 검증. **후속(2026-07-29)**: override로 새로 들어온 esbuild가 pnpm 승인 이력이 없어 `Ignored build scripts: esbuild@0.28.1`로 postinstall(플랫폼 바이너리 준비)이 차단됨 → `pnpm.onlyBuiltDependencies: ["esbuild"]` 명시로 해소(신규 클론·CI에서도 승인 상태 재현). `eslint-config-next`도 `next`와 어긋난 16.2.6 → 16.2.11 정렬. sharp 0.35.3은 install 계열 라이프사이클 스크립트가 없어(prebuilt 바이너리) 승인 목록 불필요. audit 9→1건. 잔여 **dev 전용 1건(보류·노출 없음)**: brace-expansion(`eslint>minimatch` 경유) — **블랭킷 override 시 `@eslint/config-array`/minimatch가 brace-expansion 5.x API 비호환으로 lint 크래시(실증)** → eslint 툴링을 깨지 않고는 불가. lint 타임 전용·프로덕션 번들 미포함·악용에 자기 eslint config에 악성 glob 주입 필요 → 실질 공격면 없음. ws·@babel/core·js-yaml은 기존 overrides로 해소. **Secret: 커밋된 `.env` 0·하드코딩 키 0·secret-scanning 알림 0. code-scanning 미활성(CodeQL 미설정).** | brace-expansion: 상류 eslint/minimatch가 patched 2.x line 채택 시 자동 해소 | 보류(노출 없음) |
+| 의존성 취약점 현황 | `pnpm-lock.yaml`·`package.json` overrides | **runtime(prod) 0건** (`pnpm audit --prod` clean). **dev 전용 1건 보류**: brace-expansion(`eslint>minimatch` 경유) — lint 타임 전용·번들 미포함이라 실질 공격면 없음. Secret: 커밋된 `.env` 0·하드코딩 키 0·secret-scanning 알림 0. code-scanning 미활성(CodeQL 미설정). 점검 경위·판단 근거는 아래 **의존성 보안 점검 이력** 참조. | brace-expansion: 상류 eslint/minimatch가 patched 2.x line 채택 시 자동 해소 | 보류(노출 없음) |
 | ~~E2E `load`/`networkidle` 대기 → web-first 점진 sweep~~ | `e2e/**` | **몰입형+홈 전면 sweep 완료 (2026-07-03, #459)** — 16 spec + 공유 헬퍼 `service-navigation.ts`에서 몰입형(6개 ServiceBackground 라우트) `goto` 기본-load→`domcontentloaded`(30건), 세션 `waitForURL` 기본-load→`commit`(12건, 헬퍼 4건 포함), 몰입형/홈 `networkidle`·`load`→web-first 어서션. 감사 워크플로우가 이전 추적(#457)이 놓친 파일(`tarot-flow`·`saju-flow`·`theme-atmosphere`·`theme-effects`·헬퍼 세션 `waitForURL`)을 발굴. 적대 검증으로 `form-validation` hydration 카운트 플레이키(성별 필터 12→6 재조정 전 one-shot `.count()`) 등 5건 사전 교정. **(site) 로컬 라우트 `networkidle` 37건도 전면 제거 완료 (#460)** — settings/login/mypage/result/terms/privacy/character를 web-first(`toBeVisible`/`toContainText`/`toHaveCount`/`waitForFunction`·404는 not-found 헤딩 대기)로 전환. **`eslint-plugin-playwright` `no-networkidle` 가드 도입**(`eslint.config.mjs`, e2e 스코프, error) → 이제 `e2e/`에 `networkidle` **0건**, 신규 사용은 CI lint 차단. | ✅ 완료 | Claude |
 | ~~E2E "Target closed" 크래시 (DC·MA·iOS)~~ | `playwright.config.ts`, `.github/workflows/deploy.yml` | **해소 (2026-08-01)** — 원인은 인프라가 아니라 **앱 결함 2건**이었다: 동작 줄이기 사용자의 hydration 붕괴(#525→#526·#527)와 이미지 큐 포화로 커밋되지 않는 네비게이션(#530). `Target closed`는 원인이 아니라 **테스트 예산 소진 후의 후행 증상**이다. #462가 든 "2코어/7GB → 호스트 OOM" 가설은 실측(#522→#524)으로 **반증**됐다 — 러너는 4코어/16GB, 메모리 피크 15~21%, OOM 흔적 0. 계측값·시간순 이력·폐기된 가설은 [`e2e-incidents.md`](./e2e-incidents.md)가 **정본**이며, 새 인시던트는 이 표가 아니라 그 파일에 기록한다. | ✅ 완료. 잔여는 WBS **S-3**(임계경로가 된 Desktop Chrome workers 상향) | Claude |
 | ~~CI E2E가 카드 이미지 전량 404 상태로 실행 (가드는 retries에 흡수)~~ | `.github/workflows/deploy.yml`, `e2e/cross-platform.spec.ts` | **해소 (2026-07-29)** — deploy.yml이 `NEXT_PUBLIC_ASSET_BASE_URL`을 설정하지 않아 `storageBase()`가 `NEXT_PUBLIC_SUPABASE_URL`(=`placeholder.supabase.co`)로 폴백했고, Supabase `card-styles` 버킷은 **2026-07-03 삭제(0객체)** 라 **CI에서 카드 아트·스킨·배경이 약 3.5주간 전량 404**였다. 무결성 가드(`cross-platform.spec.ts` 이미지 로드)가 이를 정확히 탐지했으나 `retries:2`가 재시도 통과시켜 리포트에 `1 flaky`로만 남고 CI는 green — **깨진 이미지를 잡는 가드가 있는데도 3.5주간 아무도 몰랐다.** 수정: ① `NEXT_PUBLIC_ASSET_BASE_URL: https://cdn.xzawed.xyz`를 **build 잡과 e2e 잡 양쪽에** 설정(`NEXT_PUBLIC_`은 빌드 타임 인라인이라 build 잡 누락 시 클라이언트 번들 미반영), ② 결함 탐지 가드(이미지 로드·콘솔 에러)를 `test.describe.configure({ retries: 0 })`로 분리해 1회 실패=실패로 취급. 검증: 404였던 `dark-fantasy/major/13.png`·`15.png`가 R2에서 **200 응답** 확인. | — | — |
 | SonarCloud CRITICAL Cognitive Complexity | — | **0건 해소 완료** (2026-05-01). Quality Gate PASSED. 재발 시 아래 섹션 참고. | — |
+
+### 의존성 보안 점검 이력
+
+> 표의 셀에 덧붙이지 않는다. 새 점검은 여기에 날짜 소제목으로 **추가**한다.
+> 3회차가 쌓이거나 이 절이 3,000자를 넘으면 `e2e-incidents.md`처럼 별도 파일로 승격한다.
+
+**2026-07-28 — 1차 점검**
+
+- **next-auth beta.32 · @auth/core 0.41.3** (Dependabot #506) — Auth.js critical 인증우회·getToken DoS·이메일정규화·OAuth PKCE 등 11건 해소
+- **next 16.2.6 → 16.2.11** (patch 보안 bump, 정책상 자율 허용)
+- **sharp `>=0.35.0`** (0.35.3, libvips CVE — `next>sharp` runtime 이미지 최적화)
+- **postcss `^8.5.18`** (source-map path traversal — @tailwindcss/postcss)
+- **esbuild override** (`<0.25.0` + `>=0.27.3 <0.28.1` — tsx·drizzle-kit)
+- 전 override를 type-check·lint·tsx·build로 실증 검증. audit 9건 → 1건
+
+**2026-07-29 — 후속 보정**
+
+- override로 새로 들어온 esbuild가 pnpm 승인 이력이 없어 `Ignored build scripts: esbuild@0.28.1`로 postinstall(플랫폼 바이너리 준비)이 차단됨
+  → `pnpm.onlyBuiltDependencies: ["esbuild"]` 명시로 해소(신규 클론·CI에서도 승인 상태 재현)
+- `eslint-config-next`가 `next`와 어긋난 16.2.6 → 16.2.11 정렬
+- sharp 0.35.3은 install 계열 라이프사이클 스크립트가 없어(prebuilt 바이너리) 승인 목록 불필요
+
+**판단 근거 — brace-expansion을 왜 보류하는가**
+
+블랭킷 override를 걸면 `@eslint/config-array`·minimatch가 brace-expansion 5.x API와 비호환이라
+**lint가 크래시한다(실증).** eslint 툴링을 깨지 않고는 올릴 수 없다. 반면 노출은 lint 타임 전용이고
+프로덕션 번들에 포함되지 않으며, 악용하려면 자기 eslint config에 악성 glob을 주입해야 한다.
+**같은 override를 다시 시도하지 말 것.**
 
 ### SonarCloud 이슈 현황 (2026-07-05 기준)
 
@@ -100,7 +128,7 @@ Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | **Open code smell: 0�
 | ~~**리딩 스키마 중복 근본 제거**~~ | `saju-service.ts`·`shinjeom-service.ts` 프롬프트 | **✅ 해소(2026-07-07, 리딩 신뢰성 기술부채 정리)** — 간헐 무결과의 뿌리이던 `sajuSections`/`shinjeomSections`(flat 필드와 내용 중복인 과적재 스키마)를 타입·프롬프트·파서·영속·UI·i18n 전 계층에서 제거하고 `overallReading`을 정본으로 통합. `promoteNestedFields`·`persistReadingSections`·`ReadingSectionBlock`의 사주·신점 렌더도 함께 제거(타로 카드별 3-섹션 렌더는 유지). 마이그 024 컬럼은 하위 호환 위해 DROP하지 않고 유지(미사용). | — |
 | ~~**parseError 실패 계량/dead-letter**~~ | reading route·`reading-saver.ts` | parseError 리딩은 저장 게이트로 미저장 + failed_readings에도 안 들어가 지배적 실패 모드가 관측 불가했다. **✅ 해소(2026-07-07)** — **①** `logReadingParseError` `[reading-parse-error]` grep 마커 + **②** DB 영속 계량 `parse_failures`(마이그 025, `recordParseFailure` best-effort, 3 라우트 배선). 재처리 큐(`failed_readings`)와 **분리**(retry 재저장 위험 차단). 집계는 db-abstraction.md §4의 SQL 쿼리(Supabase MCP/대시보드). 잔여(선택·低): 실시간 대시보드 UI(현재 온디맨드 SQL로 대체). | — |
 | **배포 이미지 추가 슬림** | `public/images/{icons,backgrounds}` | standalone+캐릭터R2로 ~300MB 달성. 잔여 이미지 내 `icons`(21MB)·`backgrounds`(13MB)도 R2 이전 시 추가 축소 가능(캐릭터와 동일 패턴). 효과 대비 소규모. | 低 |
-| **Railway 서비스 config 취약성** | Railway 서비스(startCommand·`HOSTNAME=0.0.0.0`) | standalone 배포 필수 2조건이 **repo가 아닌 Railway 서비스 config**에 있어 서비스 재생성 시 유실 위험. 문서화 완료 + **검증 자동화(2026-07-07): `pnpm verify:railway-config`**가 Railway API로 두 조건 assert(불일치 exit 1). 자동 *설정*은 아니라 재생성 시 수동 교정 필요하나 감지는 자동화됨. | 低 |
+| **Railway 서비스 config 취약성** | Railway 서비스(startCommand·`HOSTNAME=0.0.0.0`) | standalone 배포 필수 2조건이 **repo가 아닌 Railway 서비스 config**에 있어 서비스 재생성 시 유실 위험. 문서화 완료 + **검증 자동화(2026-07-07): `pnpm verify:railway-config`**가 Railway API로 두 조건 assert(불일치 exit 1). ⚠️ **감지는 자동화돼 있지 않다** — `verify:railway-config`를 호출하는 워크플로우가 0건이고(2026-08-01 실측), 이 스크립트는 `railway login` 또는 `RAILWAY_API_TOKEN`이 필요해 현재는 **수동 실행 전용**이다. 자동화하려면 `RAILWAY_API_TOKEN` 시크릿을 등록하고 배포 워크플로우에 스텝을 추가해야 한다. | 低 |
 | ~~**배포 후 자동 스모크 검증 부재**~~ | CI/배포 | 헬스체크(`/api/health`) 통과가 이미지·리딩 정상을 보장하지 않던 사각. **✅ 해소(2026-07-07)** — `.github/workflows/post-deploy-smoke.yml`이 main push마다 배포 대기 후 `pnpm smoke:prod`(health·홈 자산호스트 인라인·R2 이미지 200) 자동 실행. 리딩 스모크는 `--reading`/`pnpm eval:reading`로 온디맨드. | — |
 | **로컬 Docker의 IPv6 미재현** | 로컬 검증 | 로컬 Docker는 Railway의 IPv6-우선 `/etc/hosts`를 재현 못 함 → 바인딩 이슈가 로컬에서 안 보임. 인프라 수정은 프로덕션 실측으로 확정하는 원칙 준수. 도구화 여지 낮음. | 低 |
 
