@@ -122,16 +122,21 @@ async function main() {
         if (SKIP_EXISTING && (await keyExists(client, bucket, key))) { skipped++; continue; }
         const body = fs.readFileSync(local);
         const contentType = local.endsWith('.webp') ? 'image/webp' : 'image/png';
-        // 카드(`upload-to-r2.ts`)·스킨(`upload-skins-r2.ts`)과 같은 정책. 캐릭터만 빠져 있어서
-        // 응답에 `Cache-Control`이 없었고 `cf-cache-status: DYNAMIC` — **가장 무거운 자산이
-        // 매 요청 오리진을 타고 있었다.** 파일명이 내용에 고정(내용이 바뀌면 새 캐릭터/새 표정)이라
-        // immutable이 안전하다. 덮어쓰기 시 퍼지 규칙은 `docs/conventions/image-assets.md`.
+        // 캐릭터는 카드·스킨과 달리 **`immutable`을 쓰지 않는다.**
+        //
+        // 파일명이 `idle.png`처럼 고정이고 아트 개선 시 **같은 키를 덮어쓰는 것이 정규 절차**다
+        // (`character-add`의 `backup-v2/` 백업 절차가 그 전제이고, 저장소에 실제 백업 폴더가 있다).
+        // `max-age=31536000, immutable`을 걸면 교체 후에도 기존 방문자가 **최대 1년간 옛 얼굴**을 본다.
+        // Cloudflare 퍼지는 **엣지만** 비우고 이미 받아 둔 브라우저 캐시는 지우지 못한다.
+        //
+        // 값은 현재 엣지 기본 동작(`max-age=14400`)과 같게 두어 회귀를 만들지 않고, `stale-while-revalidate`로
+        // 만료 후 재검증이 사용자 대기를 만들지 않게 한다.
         const res = await client.send(new PutObjectCommand({
           Bucket: bucket,
           Key: key,
           Body: body,
           ContentType: contentType,
-          CacheControl: 'public, max-age=31536000, immutable',
+          CacheControl: 'public, max-age=14400, stale-while-revalidate=86400',
         }));
         const etag = (res.ETag ?? '').replace(/"/g, '');
         const local5 = md5(body);
