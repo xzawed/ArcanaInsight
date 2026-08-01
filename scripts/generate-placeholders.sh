@@ -138,7 +138,7 @@ create_character() {
   local char_name="$2"
   local color="$3"
 
-  declare -a MOODS=("default" "smile" "serious" "surprised" "wink" "mystical")
+  declare -a MOODS=("idle" "smile" "serious" "surprised" "wink" "mystical")
   declare -a MOOD_SYMBOLS=("◈" "◉" "▲" "◎" "◇" "✦")
   declare -a MOOD_LABELS=("Default" "Smile" "Serious" "Surprised" "Wink" "Mystical")
 

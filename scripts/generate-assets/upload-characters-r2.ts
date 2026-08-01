@@ -43,25 +43,40 @@ function getR2() {
   return { client, bucket: R2_BUCKET };
 }
 
+/** 배포 자산이 들어 있는 유일한 디렉터리. 이 이름이 아니면 업로드 대상이 아니다. */
+const DEPLOY_DIR = 'nukki-enhanced';
+
 /**
- * 업로드 대상 수집.
+ * 업로드 대상 수집 — **허용 목록 방식**이다.
  *
- * ⚠️ **백업 디렉터리는 제외한다.** 작업자가 이미지 교체 전에 남기는 로컬 백업
- * (`nukki-enhanced_backup/`, `backup-v2/`, `backup-v2-restored/` 등)은 배포 자산이 아니다.
- * 이전 구현은 모든 하위 디렉터리를 재귀해 이것들까지 프로덕션 CDN에 올렸다 —
- * 2026-08-01 변형 업로드 직전에 발견해 차단했다(백업 112장이 대상에 포함돼 있었다).
+ * `public/images/characters/<id>/nukki-enhanced/` 바로 아래 파일만 올린다.
+ * 그 밖의 디렉터리는 이름과 무관하게 전부 제외된다.
+ *
+ * ## 왜 블랙리스트를 버렸는가
+ *
+ * 이전 구현은 `/backup/i`에 걸리는 디렉터리만 건너뛰었다. 두 가지로 뚫린다.
+ *
+ *   1. **오타** — 실제로 `nukki-enhanced_bakup/`(b‑a‑k‑u‑p)가 저장소에 있다.
+ *      `backup`에 매칭되지 않으므로 다음 업로드에서 프로덕션 CDN에 올라갔을 것이다.
+ *   2. **중간 산출물** — `nukki/`는 파이프라인 1~3단계의 작업 폴더다(864×1536, 배경 있음).
+ *      이름에 backup이 없으니 통과한다.
+ *
+ * 금지 목록은 새 이름이 생길 때마다 뚫리지만, 허용 목록은 **배포 경로가 바뀔 때만**
+ * 손대면 된다. 자산을 프로덕션에 올리는 경로에서는 후자가 맞다.
+ * (2026-08-01 변형 업로드 직전에 백업 112장이 대상에 포함돼 있던 것을 발견한 것이 계기다.)
  */
 function walk(dir: string): string[] {
   const out: string[] = [];
   for (const entry of fs.readdirSync(dir)) {
     const p = path.join(dir, entry);
-    const stat = fs.statSync(p);
-    if (stat.isDirectory()) {
-      if (/backup/i.test(entry)) continue;
-      out.push(...walk(p));
-    } else if (p.endsWith('.png') || p.endsWith('.webp')) {
-      out.push(p);
+    if (fs.statSync(p).isDirectory()) {
+      // 캐릭터 디렉터리는 한 단계 더 들어가고, 그 안에서는 배포 폴더만 본다.
+      if (dir === SRC_DIR || entry === DEPLOY_DIR) out.push(...walk(p));
+      continue;
     }
+    // 배포 폴더 **직속** 파일만 대상. 그 하위(backup-v2 등)는 위 분기에서 이미 걸러진다.
+    if (path.basename(dir) !== DEPLOY_DIR) continue;
+    if (p.endsWith('.png') || p.endsWith('.webp')) out.push(p);
   }
   return out;
 }
