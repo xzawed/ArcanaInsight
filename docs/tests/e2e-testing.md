@@ -360,7 +360,16 @@ QA 실패 시 GitHub Issue(`🚨 주간 QA 실패`)가 자동 생성됩니다. m
 | Mobile Android (Pixel 7) | 412×915 | Chromium | PR CI + 주간 QA |
 | Mobile iOS (iPhone 14) | 390×844 | WebKit | **주간 QA만** (PR CI 제외) |
 
-> **CI 동시성 (`playwright.config.ts`)**: `workers: 1` — 3개 디바이스 프로젝트는 매트릭스 레벨에서 병렬 유지하되 한 프로젝트 내부는 워커 1개. 2코어/7GB 러너에서 브라우저 2개 + `pnpm start` + sharp 2816×1536 원본 디코드 공존이 호스트 OOM → OOM-killer가 브라우저 kill → "Target page/context/browser has been closed" 크래시(chromium·webkit 공통)를 유발했다 (#462). CI `retries: 2`, 로컬은 workers 무제한.
+> **CI 동시성**: 프로젝트마다 다르다 — `deploy.yml` 매트릭스가 `E2E_WORKERS`로 주입하고, `playwright.config.ts`는 미지정·비정상 값이면 1로 폴백한다.
+>
+> | 프로젝트 | workers | 근거 |
+> |---|---|---|
+> | Desktop Chrome | 1 | 현재 임계경로. 상향은 S-3으로 검토 중 |
+> | Mobile Android | **2** | 임계경로였던 잡을 상향해 테스트 시간 5.0m→2.9m·4.2m→2.7m 단축, 2런 flaky 0 (#531) |
+>
+> ⚠️ **"2코어/7GB 러너 → 호스트 OOM"이라는 옛 근거는 폐기됐다.** 실측 러너는 `nproc=4`·15989MiB이고 E2E 구간 메모리 피크는 총량의 15~21%, swap 0, dmesg OOM 흔적 0이다. `Target page/context/browser has been closed`는 **테스트 예산 소진 후 Playwright가 페이지를 정리하며 생기는 후행 증상**이지 원인이 아니다. 실제 제약은 CPU다. 상세: [`operations/known-issues.md`](../operations/known-issues.md), 이슈 #522·#525.
+>
+> CI `retries: 2`(결함 탐지 가드는 0), 로컬은 workers 무제한 — CI 재현은 `--workers=1`.
 
 **iOS-only 이슈**:
 - `100dvh`(dynamic viewport height) — iOS Safari 주소창 높이 변화 대응

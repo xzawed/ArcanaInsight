@@ -101,6 +101,15 @@ const CASES: readonly Case[] = [
     expect: "__guard-selftest-claudemd__",
   },
   {
+    name: "check-doc-links: 코드가 가리키는 문서 경로가 깨져도 잡아야 한다 (문서 이동 사고 방지)",
+    inject: () =>
+      temporarilyPatch("scripts/sync-test-count.ts", (s) =>
+        s.replace('"docs", "tests", "unit-testing.md"', '"docs", "__guard-selftest-moved__", "unit-testing.md"'),
+      ),
+    script: "scripts/check-doc-links.ts",
+    expect: "__guard-selftest-moved__",
+  },
+  {
     name: "check-workflow-artifacts: Playwright 리포트가 if:failure()로 되돌아가면 실패해야 한다",
     inject: () =>
       temporarilyPatch(".github/workflows/deploy.yml", (s) =>

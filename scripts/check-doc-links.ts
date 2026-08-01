@@ -126,6 +126,46 @@ for (const f of markdownFiles) {
   allBroken.push(...checkLinks(f));
 }
 
+// ── 코드 안의 문서 경로도 검사한다 ───────────────────────────────────────────
+// 마크다운 링크만 보면 **스크립트가 하드코딩한 문서 경로**를 놓친다. 2026-08-01,
+// docs/workflow/ → docs/tests/ 이동 후 sync-test-count.ts가 존재하지 않는 파일을
+// 가리키고 있었는데 링크 검사는 초록이었다. 같은 사고를 막는다.
+const CODE_DIRS = [path.join(ROOT, "scripts")];
+const DOC_PATH_RE = /["'`](docs\/[A-Za-z0-9._/-]+\.md)["'`]/g;
+/** `path.join(ROOT, "docs", "tests", "unit-testing.md")` 형태 */
+const DOC_JOIN_RE = /path\.join\([^)]*?"docs"\s*,\s*((?:"[^"]+"\s*,\s*)*"[^"]+\.md")\s*\)/g;
+
+function collectCodeFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...collectCodeFiles(full));
+    else if (/\.(ts|mjs|js)$/.test(entry.name)) out.push(full);
+  }
+  return out;
+}
+
+for (const file of CODE_DIRS.flatMap(collectCodeFiles)) {
+  const lines = fs.readFileSync(file, "utf-8").split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    // 주석 줄은 설명용 참조가 많아 제외한다 — 실제 파일 접근만 검사한다.
+    if (/^\s*(\*|\/\/)/.test(lines[i])) continue;
+
+    for (const m of lines[i].matchAll(DOC_PATH_RE)) {
+      if (!fs.existsSync(path.join(ROOT, m[1]))) {
+        allBroken.push({ file: path.relative(ROOT, file), line: i + 1, text: "코드 내 문서 경로", target: m[1] });
+      }
+    }
+    for (const m of lines[i].matchAll(DOC_JOIN_RE)) {
+      const rel = path.join("docs", ...m[1].split(",").map((s) => s.trim().replace(/^"|"$/g, "")));
+      if (!fs.existsSync(path.join(ROOT, rel))) {
+        allBroken.push({ file: path.relative(ROOT, file), line: i + 1, text: "코드 내 문서 경로", target: rel.replaceAll("\\", "/") });
+      }
+    }
+  }
+}
+
 if (allBroken.length === 0) {
   console.log(`[check-doc-links] 검사 통과. ${markdownFiles.length}개 파일, 깨진 링크 없음.`);
   process.exit(0);

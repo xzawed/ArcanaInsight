@@ -60,8 +60,11 @@ jobs:
 
 ```
 pnpm exec tsx scripts/check-env-docs.ts        # env-variables.md 정합성
-pnpm exec tsx scripts/check-doc-links.ts       # docs 상대 링크 검증
+pnpm exec tsx scripts/check-doc-links.ts       # 문서 링크 + 코드 내 docs 경로 (docs/·CLAUDE.md·.claude/·README·e2e/)
 pnpm exec tsx scripts/check-translation-keys.ts  # i18n 번역 키 drift 검출
+pnpm exec tsx scripts/check-guards-selftest.ts        # 가드가 결함에 반응하는지 (결함 주입 검증)
+pnpm exec tsx scripts/check-workflow-artifacts.ts     # Playwright 아티팩트 업로드 조건
+pnpm exec tsx scripts/check-character-image-budget.ts # 캐릭터 마스터 치수·용량
 ```
 
 > **sync-test-count**: 테스트 실행이 너무 느려 PR CI에서 제외. 로컬 수동 실행만: `pnpm exec tsx scripts/sync-test-count.ts --check`

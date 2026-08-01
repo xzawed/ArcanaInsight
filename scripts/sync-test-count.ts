@@ -12,7 +12,10 @@ import * as path from "node:path";
 
 const ROOT = path.resolve(__dirname, "..");
 const CLAUDE_MD = path.join(ROOT, "CLAUDE.md");
-const UNIT_TESTING_MD = path.join(ROOT, "docs", "workflow", "unit-testing.md");
+// 2026-08-01: docs/workflow/ → docs/tests/ 이동(#529) 시 이 경로가 함께 갱신되지 않아
+// 존재하지 않는 파일을 가리키고 있었다. 링크 검사는 마크다운 링크만 보므로 **스크립트 안의
+// 경로 문자열은 잡지 못한다** — 그래서 check-doc-links에 코드 내 문서 경로 검사를 추가했다.
+const UNIT_TESTING_MD = path.join(ROOT, "docs", "tests", "unit-testing.md");
 const CHECK_MODE = process.argv.includes("--check");
 
 function getActualTestCount(): number {

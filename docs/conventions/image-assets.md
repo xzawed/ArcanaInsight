@@ -24,6 +24,10 @@
 - **서빙(2026-07-06~)**: 컴포넌트는 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`으로 URL을 조회한다. `NEXT_PUBLIC_ASSET_BASE_URL`(cdn.xzawed.xyz) 설정 시 R2(`characters/[id]/nukki-enhanced/[mood].png`), 미설정 시 로컬 `/images/characters/...` 폴백. **배포 이미지는 `.dockerignore`로 `public/images/characters`(283MB)를 제외**하고 프로덕션은 R2로 서빙 → 배포 이미지 슬림화. 로컬/CI는 repo public 폴백. (⚠️ 프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수)
 - ⚠️ 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`)는 용량 절감을 위해 리포지토리에서 제거(#447)되어 현재는 `nukki-enhanced/`만 존재한다. 운영본 재생성 시에만 외부 백업(1408×768 색상 소스)을 참조한다.
 - 원본은 보존하고, UI에서는 `nukki-enhanced`를 우선 사용한다.
+- **사전 생성 반응형 변형 (2026-08-01~, #521)**: 마스터와 나란히 `[mood]-{320,640,960,1280,1920}.webp`를 둔다(마스터당 5개 = 총 420개, 약 29MB). `characterImageLoader`가 `next/image` 커스텀 로더로 요청 폭을 가장 가까운 변형에 매핑하며, **로더가 반환한 URL은 Next가 그대로 쓰므로 서버 디코드가 일어나지 않는다.**
+  - 활성 조건: `NEXT_PUBLIC_CHARACTER_VARIANTS=1`. **기본은 꺼짐** — 변형이 해당 환경에 없는데 켜면 이미지가 전량 404가 된다. 롤백은 이 env를 끄면 끝(마스터 경로는 그대로 살아 있다).
+  - 생성: `pnpm generate:character-variants` → 업로드: `pnpm upload:characters:r2 --variants-only --skip-existing` (신규 키라 CDN 퍼지 불필요).
+  - **왜 마스터를 줄이지 않았나**: 2816×1536은 고DPI 표시를 위한 의도적 선택이라 유지한다. 문제는 크기가 아니라 **런타임 디코드**였다 — 4.8MB 원본 12장이 이미지 최적화 큐를 포화시켜 32px 아이콘까지 굶었고, 홈 전이가 30초 넘게 커밋되지 않았다(CI trace 실측).
 - Next.js 이미지 optimizer 출력은 WebP를 사용한다. 대형 투명 PNG를 AVIF로 즉석 변환하면 일부 모바일 Chromium 환경에서 첫 요청이 지연될 수 있다.
 
 ---
