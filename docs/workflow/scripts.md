@@ -11,6 +11,7 @@
 | `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | 마크다운 링크 + **코드가 하드코딩한 `docs/…` 경로** 검증. 범위는 `docs/`뿐 아니라 **`CLAUDE.md`·`.claude/**`·루트 `README*.md`·`e2e/`** 까지(#529 — 이전에는 docs/ 안만 봐서 링크가 가장 많은 CLAUDE.md가 무검사였다). 동결 스냅샷(`superpowers/plans/archive`·`superpowers/specs`)은 제외. 깨진 링크·필수 대상 누락 시 exit 1 |
 | `check-guards-selftest.ts` | `docs-sync.yml` + `pnpm check:guards` | **가드가 결함에 실제로 반응하는지** 검증. 각 검사 스크립트에 결함을 주입해 실패를 확인한 뒤 원복한다. "존재하지만 무력한 가드"가 세 번 나온 뒤 도입(#532) |
 | `check-workflow-artifacts.ts` | `docs-sync.yml` + `pnpm check:workflow-artifacts` | Playwright 리포트 업로드가 `if: failure()`로 회귀하는 것 차단 — retries가 흡수한 flaky 실행의 trace가 폐기된다(#530) |
+| `check-workflow-env-parity.ts` | `docs-sync.yml` + `pnpm check:workflow-env-parity` | `deploy.yml`·`weekly-qa.yml`의 `NEXT_PUBLIC_*`가 **env 블록 단위로** 일치하는지 검사. 빌드 타임 인라인이라 잡 하나에서만 빠져도 그 번들에 반영되지 않는다 |
 | `check-character-image-budget.ts` | `docs-sync.yml` + `pnpm check:image-budget` | 캐릭터 마스터 치수 고정(2816×1536)·용량 상한(6.5MB) + **필수 표정 6종·WebP 변형 5단 존재**. `characterImageLoader`는 폴백이 없어 변형이 빠지면 프로덕션 404가 되는데, 세션 전용 mood는 홈 E2E에 걸리지 않는다 — 그 사각을 막는다 |
 | `generate-assets/generate-character-variants.ts` | `pnpm generate:character-variants` | 마스터에서 사전 생성 WebP 변형(320/640/960/1280/1920) 생성. 런타임 `next/image` 최적화 제거용(#521) |
 | `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |

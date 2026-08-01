@@ -40,6 +40,7 @@
     "check:guards": "tsx scripts/check-guards-selftest.ts",
     "check:workflow-artifacts": "tsx scripts/check-workflow-artifacts.ts",
     "check:image-budget": "tsx scripts/check-character-image-budget.ts",
+    "check:workflow-env-parity": "tsx scripts/check-workflow-env-parity.ts",
     "i18n:check": "tsx scripts/check-translation-keys.ts",
     "sync:test-count": "tsx scripts/sync-test-count.ts",
     "eval:reading": "tsx scripts/eval-reading.ts",

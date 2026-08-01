@@ -177,7 +177,13 @@ page.on("requestfailed", (r) => { if (r.resourceType() === "image") ... });
 
 `NEXT_PUBLIC_*`는 **빌드 타임에 인라인**된다. E2E 잡은 `build` 잡의 `.next` 아티팩트를 내려받아
 `pnpm start`로 서빙하므로, **E2E 잡에만 설정하면 클라이언트 번들에는 반영되지 않는다.**
-`deploy.yml`의 `build`·`e2e` 두 잡에 동일한 값을 설정한다(값이 갈리면 SSR/CSR URL 불일치).
+**`deploy.yml`과 `weekly-qa.yml` 양쪽의** build·e2e 잡에 동일한 값을 설정한다(값이 갈리면 SSR/CSR URL 불일치).
+
+> ⚠️ `weekly-qa.yml`은 **Mobile iOS(webkit)를 검증하는 유일한 워크플로우**다(`deploy.yml` 매트릭스는
+> Desktop Chrome·Mobile Android 2종뿐). 여기서 변수가 갈리면 webkit이 프로덕션 경로를 전혀 타지 않는다.
+> 실증(2026-08-01): 변형 도입 커밋에서 돌아간 주간 QA가 `NEXT_PUBLIC_CHARACTER_VARIANTS` 없이
+> 빌드·테스트하고 success로 끝났다 — 프로덕션 이미지 파이프라인이 한 번도 검증되지 않았다.
+> 자동 검증: `pnpm check:workflow-env-parity` (env 블록 단위 비교 — 잡 하나에서만 빠져도 잡는다)
 
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 
