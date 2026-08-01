@@ -7,6 +7,7 @@
  *
  * 검사(무비용, AI 호출 없음):
  *   1. GET /api/health            → 200
+ *   1-b. GET /api/health/db       → 200 + db:"ok" (DB 일시정지·자격증명 장애 감지)
  *   2. GET /                      → 200 + 본문에 자산 호스트(cdn.xzawed.xyz) 포함
  *                                    (= NEXT_PUBLIC_ASSET_BASE_URL 빌드 인라인 확인)
  *   3. GET <asset>/characters/... → 200 (R2 캐릭터 이미지 서빙 확인)
@@ -102,6 +103,16 @@ async function main() {
     const r = await status(`${BASE}/api/health`);
     if (r.status !== 200) throw new Error(`status ${r.status}`);
     return "200";
+  }));
+  // DB 준비 상태 — /api/health는 DB를 안 보므로 여기서 따로 확인한다.
+  // 2026-07-23~08-01 Supabase 일시정지 때 모든 자동 신호가 초록인 채로 DB가 죽어 있었다.
+  results.push(await check("GET /api/health/db = DB 연결 OK", async () => {
+    const r = await status(`${BASE}/api/health/db`);
+    const body = await r.json().catch(() => ({}));
+    if (r.status !== 200 || body.db !== "ok") {
+      throw new Error(`status ${r.status} db=${body.db ?? "?"} ${String(body.error ?? "").slice(0, 120)}`);
+    }
+    return `${body.latencyMs}ms`;
   }));
   results.push(await check("GET / = 200 + 자산 호스트 인라인", async () => {
     const r = await status(`${BASE}/`);

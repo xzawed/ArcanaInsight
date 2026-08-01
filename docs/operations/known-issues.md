@@ -23,7 +23,7 @@
 | ~~**C: 리딩 저장 fire-and-forget 관측성**~~ | `reading route`, `lib/db/reading-saver.ts` | **해소 (2026-06-30, A-1)** — `logReadingSaveFailure`가 `[reading-save-failed]` 단일 마커로 4개 저장 실패를 구조적 로깅(grep·알림 가능). 타로/사주/신점최종 저장을 `await`해 `saved:true/false` SSE 시그널 전송(결과는 `done`으로 선전송하여 가용성 유지). `fetchSSEStream`에 하위호환 `onSaveStatus` capability 추가. 설계: [`../superpowers/specs/2026-06-30-reading-save-observability-design.md`](../superpowers/specs/2026-06-30-reading-save-observability-design.md). **dead-letter 추가(2026-06-30)**: 마이그레이션 022 `failed_readings`(service_role RLS) + `recordFailedReading`(영구 실패 영속화) + 재처리 엔드포인트 `POST /api/internal/reading-dlq/retry`(secret 가드, MAX 5회). 설계: [`../superpowers/specs/2026-06-30-reading-dlq-design.md`](../superpowers/specs/2026-06-30-reading-dlq-design.md). **022 prod 적용 완료(2026-07-01)** — `failed_readings`(RLS on·정책 0건=service_role 전용·인덱스 2·컬럼 10) 생성 검증, Railway production에 `DLQ_RETRY_SECRET` 설정으로 재처리 엔드포인트(`POST /api/internal/reading-dlq/retry`) 활성화. | 잔여(선택): `saveStatus` UI 힌트(단 dead-letter 자가복구로 가치 재검토) | Claude |
 | ~~**INSERT `WITH CHECK(true)` RLS 정책 7종**~~ | `sessions·readings·saju/shinjeom_readings·session_cards·daily_cards·shinjeom_messages` | **해소 완료 (migration 021, prod 적용 2026-06-24)** — 7테이블 병렬 심층 검증으로 anon/쿠키 클라이언트 INSERT 경로 부재 확인(모든 쓰기 getAdminDb=service_role) 후 `FOR INSERT WITH CHECK (true)` 정책 7종 제거. 적용 결과: 잔존 INSERT 정책 0행, service_role INSERT 성공·anon INSERT 차단(42501) 검증. ⚠️ 운영 shinjeom 정책이 파일 기준명(`shinjeom_*_insert`)이 아닌 `Anyone can insert shinjeom *`로 out-of-band 드리프트되어 있어 021 파일에 실측명 DROP 2종 추가(멱등 보정). | — | — |
 | `postgres-adapter.ts` Drizzle `as any` 잔존 6건 | `src/lib/db/postgres-adapter.ts` | `.values(data as any)`·`.set(data as any)`·upsert SET 절·claim userId 등 6건(110·119·128·149·153·171행) — Drizzle `InferInsertModel`과 `DbClient` 제네릭 구조적 불일치. **3-에이전트 심층 검토 후 파기 확정(2026-04-26)**: 런타임 버그 없음, PostgreSQL 제약이 타입 검증 대체, 재설계 비용 불합리. | PostgresAdapter 전면 재설계 시 처리 (현시점 불필요) | 파기 확정 |
-| 타로 `interpretation` 레거시 필드 (하위호환 fallback) | `src/services/tarot/tarot-service.ts`, `CardInterpretationList`, `services/tarot/result-view.ts` | 프리미엄 3-섹션 도입(#414, 2026-05-26) 후 **구포맷 저장 리딩 표시 전용** fallback. ⚠️ **기존 해결 조건("구포맷 데이터 소멸 대기")은 성립하지 않는다** — 리딩에 TTL·보존 정책이 없어 영구 보관이고(2026-08-01 조사), 회원 탈퇴 삭제도 미구현이다. 유지 비용은 옵셔널 타입 1줄 + 판정 1줄로 매우 작다. | **파기 — 영구 하위호환 유지.** 제거 가치 < 리스크. 필요해지면 백필 마이그레이션이 선행돼야 한다 | 파기 확정 |
+| 타로 `interpretation` 레거시 필드 (하위호환 fallback) | `src/services/tarot/tarot-service.ts`, `CardInterpretationList`, `services/tarot/result-view.ts` | 프리미엄 3-섹션 도입(#414, 2026-05-26) 후 **구포맷 저장 리딩 표시 전용** fallback. ⚠️ **기존 해결 조건("구포맷 데이터 소멸 대기")은 성립하지 않는다** — 리딩에 TTL·보존 정책이 없어 영구 보관이고(2026-08-01 조사), 회원 탈퇴 삭제도 미구현이다. **프로덕션 실측(2026-08-01)**: 구포맷 **105건**(2026-03-29~05-26) · 신포맷 57건(05-26~) · 빈 배열 11건 — 구포맷이 전체의 **61%** 다. 사라질 데이터가 아니다. 유지 비용은 옵셔널 타입 1줄 + 판정 1줄로 매우 작다. | **파기 — 영구 하위호환 유지.** 제거 가치 < 리스크. 필요해지면 백필 마이그레이션이 선행돼야 한다 | 파기 확정 |
 | 의존성 취약점 현황 | `pnpm-lock.yaml`·`package.json` overrides | **runtime(prod) 0건** (`pnpm audit --prod` clean). **dev 전용 1건 보류**: brace-expansion(`eslint>minimatch` 경유) — lint 타임 전용·번들 미포함이라 실질 공격면 없음. Secret: 커밋된 `.env` 0·하드코딩 키 0·secret-scanning 알림 0. code-scanning 미활성(CodeQL 미설정). 점검 경위·판단 근거는 아래 **의존성 보안 점검 이력** 참조. | brace-expansion: 상류 eslint/minimatch가 patched 2.x line 채택 시 자동 해소 | 보류(노출 없음) |
 | ~~E2E `load`/`networkidle` 대기 → web-first 점진 sweep~~ | `e2e/**` | **몰입형+홈 전면 sweep 완료 (2026-07-03, #459)** — 16 spec + 공유 헬퍼 `service-navigation.ts`에서 몰입형(6개 ServiceBackground 라우트) `goto` 기본-load→`domcontentloaded`(30건), 세션 `waitForURL` 기본-load→`commit`(12건, 헬퍼 4건 포함), 몰입형/홈 `networkidle`·`load`→web-first 어서션. 감사 워크플로우가 이전 추적(#457)이 놓친 파일(`tarot-flow`·`saju-flow`·`theme-atmosphere`·`theme-effects`·헬퍼 세션 `waitForURL`)을 발굴. 적대 검증으로 `form-validation` hydration 카운트 플레이키(성별 필터 12→6 재조정 전 one-shot `.count()`) 등 5건 사전 교정. **(site) 로컬 라우트 `networkidle` 37건도 전면 제거 완료 (#460)** — settings/login/mypage/result/terms/privacy/character를 web-first(`toBeVisible`/`toContainText`/`toHaveCount`/`waitForFunction`·404는 not-found 헤딩 대기)로 전환. **`eslint-plugin-playwright` `no-networkidle` 가드 도입**(`eslint.config.mjs`, e2e 스코프, error) → 이제 `e2e/`에 `networkidle` **0건**, 신규 사용은 CI lint 차단. | ✅ 완료 | Claude |
 | ~~E2E "Target closed" 크래시 (DC·MA·iOS)~~ | `playwright.config.ts`, `.github/workflows/deploy.yml` | **해소 (2026-08-01)** — 원인은 인프라가 아니라 **앱 결함 2건**이었다: 동작 줄이기 사용자의 hydration 붕괴(#525→#526·#527)와 이미지 큐 포화로 커밋되지 않는 네비게이션(#530). `Target closed`는 원인이 아니라 **테스트 예산 소진 후의 후행 증상**이다. #462가 든 "2코어/7GB → 호스트 OOM" 가설은 실측(#522→#524)으로 **반증**됐다 — 러너는 4코어/16GB, 메모리 피크 15~21%, OOM 흔적 0. 계측값·시간순 이력·폐기된 가설은 [`e2e-incidents.md`](./e2e-incidents.md)가 **정본**이며, 새 인시던트는 이 표가 아니라 그 파일에 기록한다. | ✅ 완료. **S-3(workers 상향)은 이득 없음으로 종결**(임계경로가 DC↔MA 교대). 잔여는 `navigation.spec.ts:221` flake — trace로 실패 지점 확정이 선행 | Claude |
@@ -57,6 +57,42 @@
 **lint가 크래시한다(실증).** eslint 툴링을 깨지 않고는 올릴 수 없다. 반면 노출은 lint 타임 전용이고
 프로덕션 번들에 포함되지 않으며, 악용하려면 자기 eslint config에 악성 glob을 주입해야 한다.
 **같은 override를 다시 시도하지 말 것.**
+
+### 프로덕션 DB가 9일간 죽어 있었는데 모든 자동 신호가 초록이었다 (2026-07-23 ~ 08-01)
+
+프로덕션 Supabase 프로젝트(`hkjrupbauexapmmzbcgw`)가 **일시정지(INACTIVE)** 상태였다.
+그동안 세션·리딩 저장이 전부 실패했는데 **아무 신호도 울리지 않았다.**
+
+| 신호 | 상태 | 이유 |
+|---|---|---|
+| `/api/health` | **200** | DB를 보지 않는다(의도적 경량 — Railway 기동 판정용) |
+| `pnpm smoke:prod` | **5/5 통과** | health·홈·R2만 본다 |
+| Railway 배포 | **성공** | 앱 프로세스는 멀쩡했다 |
+| DLQ `failed_readings` | **0건** | ⚠️ **DLQ도 같은 DB에 쓴다** — 완전 다운이면 기록 자체가 안 남는다 |
+| `parse_failures` | **0건** | 동일 |
+
+> ⚠️ **"DLQ가 비었으니 피해가 없었다"는 틀린 추론이다.** 완전 다운이면 피해 기록도 못 남긴다.
+> 유실 규모는 DB만으로 복원할 수 없고 Railway 런타임 로그(`[reading-save-failed]`)가 정본이다.
+
+**데이터 공백만으로는 판정할 수 없다** — 이 프로젝트는 저트래픽이라 **평소에도 4~8일 공백**이
+흔하다(2026-04~07 내내 관측). 즉 "며칠 데이터가 없다"는 일시정지의 증거가 되지 못한다.
+
+#### 조치
+
+- **`GET /api/health/db` 신설** — DB 준비 상태 전용. `pnpm smoke:prod`가 매 배포마다 검사한다
+- ⚠️ **`/api/health`에는 DB 체크를 넣지 않는다.** `railway.toml`의 `healthcheckPath`가 그것을
+  가리켜, DB 장애 시 **배포 롤아웃이 막히고 재기동 루프**에 빠진다. 기동 판정과 의존성 상태는
+  다른 질문이므로 엔드포인트를 나눴다
+
+#### 남은 위험
+
+Supabase 저사양 플랜은 **비활동 시 자동 일시정지**된다. 스모크는 **배포 시에만** 돌므로,
+배포가 없는 기간에 정지되면 여전히 며칠간 모른다. 주기적 외부 모니터가 필요하다(미착수).
+
+복구 후 실측: RLS INSERT 정책 **0건 유지**(마이그 021), 마이그 022·023·025 **전부 적용**,
+리딩 173건·세션 269건 무손상.
+
+---
 
 ### 옵트인 검사는 아무도 안 누르면 죽은 검사다 (2026-08-01)
 

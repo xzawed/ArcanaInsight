@@ -118,3 +118,19 @@ railway deployment list --json   # MCP 미동작 시 대체
 | 트리거 | 호출 |
 |---|---|
 | 배포 이상 의심 | `railway deployment list --json` → `mcp__railway__get-logs` |
+
+
+## DB 준비 상태 확인
+
+```bash
+curl -s https://arcanainsight-production.up.railway.app/api/health/db
+#   {"db":"ok","latencyMs":42}          → 정상
+#   {"db":"unavailable","error":"..."}  → 503. Supabase 일시정지·자격증명·네트워크
+```
+
+⚠️ **`/api/health`는 DB를 보지 않는다.** Railway 기동 판정 전용이라 의도적으로 경량이며,
+DB가 죽어도 200을 돌려준다. 2026-07-23~08-01에 실제로 그 상태로 9일이 지났다 —
+경위는 [`known-issues.md`](known-issues.md).
+
+`pnpm smoke:prod`가 이 엔드포인트를 검사하지만 **배포 시에만** 돈다.
+배포가 없는 기간의 일시정지는 여전히 감지되지 않는다(주기 모니터 미착수).
