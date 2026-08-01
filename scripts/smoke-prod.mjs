@@ -20,6 +20,8 @@
  * 실패 시 exit 1. CI(post-deploy-smoke.yml) + 수동(`pnpm smoke:prod`) 공용.
  */
 
+import { pathToFileURL } from "node:url";
+
 const BASE = (process.env.SMOKE_BASE_URL ?? "https://arcanainsight-production.up.railway.app").replace(/\/$/, "");
 const ASSET_HOST = process.env.SMOKE_ASSET_HOST ?? "cdn.xzawed.xyz";
 // 마스터(변형이 꺼졌을 때의 폴백 경로)와 **라이브 변형** 양쪽을 본다.
@@ -55,13 +57,23 @@ async function status(url, opts = {}) {
   return res;
 }
 
+/**
+ * 타로 리딩 스모크의 요청 본문 — **export하는 이유**: 이 body가 `TarotReadingSchema`와 어긋나면
+ * 요청이 400으로 죽는데, `--reading`은 수동 실행(workflow_dispatch) 전용이라 아무도 안 눌러
+ * 드리프트가 조용히 방치된다. 실제로 `birthTime` 누락으로 이 경로가 죽어 있었다(~2026-08-01).
+ * `src/__tests__/smoke-request-schema.test.ts`가 AI 호출 없이 스키마 정합성을 검증한다.
+ */
+export const TAROT_SMOKE_BODY = {
+  topic: "general", spreadType: "three-card", characterId: "arcana",
+  // birthTime은 nullable이지만 **필수 키**다(TarotReadingSchema). 빠뜨리면 항상 400이라
+  // --reading 검증 경로가 통째로 죽는다 — 2026-08-01까지 실제로 그 상태였다.
+  userInfo: { name: "smoke", birthDate: "1993-05-14", gender: "male", birthTime: null },
+  freeQuestion: "smoke test",
+  cards: [0, 1, 2].map((i) => ({ cardId: `major-0${i}`, position: i, isReversed: false })),
+};
+
 async function readingSmoke() {
-  const body = {
-    topic: "general", spreadType: "three-card", characterId: "arcana",
-    userInfo: { name: "smoke", birthDate: "1993-05-14", gender: "male" },
-    freeQuestion: "smoke test",
-    cards: [0, 1, 2].map((i) => ({ cardId: `major-0${i}`, position: i, isReversed: false })),
-  };
+  const body = TAROT_SMOKE_BODY;
   const res = await fetch(`${BASE}/api/tarot/reading`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body), signal: AbortSignal.timeout(120000),
@@ -129,4 +141,9 @@ async function main() {
   if (passed !== results.length) process.exit(1);
 }
 
-main().catch((e) => { console.error("스모크 실행 오류:", e); process.exit(1); });
+// **직접 실행일 때만** 돌린다. 이 모듈은 요청 본문(TAROT_SMOKE_BODY)을 export하고
+// 단위 테스트가 그것을 import하는데, 무조건 실행하면 CI 테스트가 프로덕션에 실제 요청을 보낸다.
+const invokedDirectly = process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+if (invokedDirectly) {
+  main().catch((e) => { console.error("스모크 실행 오류:", e); process.exit(1); });
+}
