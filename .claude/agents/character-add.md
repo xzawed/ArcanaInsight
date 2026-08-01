@@ -42,14 +42,6 @@ ArcanaInsight에 새 캐릭터를 추가할 때 사용한다.
 {
   id: "{id}", name: "{name}", nameJp: "{nameJp}", gender: "{gender}",
   greeting: "{greeting}",
-  expressions: {
-    default: "/images/characters/{id}/nukki-enhanced/default.png",
-    smile: "/images/characters/{id}/nukki-enhanced/smile.png",
-    serious: "/images/characters/{id}/nukki-enhanced/serious.png",
-    surprised: "/images/characters/{id}/nukki-enhanced/surprised.png",
-    wink: "/images/characters/{id}/nukki-enhanced/wink.png",
-    mystical: "/images/characters/{id}/nukki-enhanced/mystical.png",
-  },
   idleAnimation: "float",
   personality: "{personality}",
   description: "{description}",
@@ -97,15 +89,19 @@ cp -r public/images/characters/{id}/nukki-enhanced/* public/images/characters/{i
 mkdir -p public/images/characters/{id}/nukki-enhanced
 ```
 
-필요한 파일 (7개 — 6개 고유 표정 + idle):
-- `nukki-enhanced/default.png`
+필요한 파일 (6개 — 표정 6종. **`default.png`은 만들지 않는다**):
+- `nukki-enhanced/idle.png`   ← 논리 표정 `default`의 파일명
 - `nukki-enhanced/smile.png`
 - `nukki-enhanced/serious.png`
 - `nukki-enhanced/surprised.png`
 - `nukki-enhanced/wink.png`
 - `nukki-enhanced/mystical.png`
 
-> `idle.png`은 `SpriteAnimator`가 `default` 무드에 사용하는 파일명이다. `default.png`을 복사해 `idle.png`으로 저장한다.
+> ⚠️ **`default.png`을 만들지 마라.** 예전 절차는 `default.png`을 만든 뒤 복사해 `idle.png`을
+> 생성하게 했는데, 그 결과 12명 전원이 **바이트 동일한 파일 두 벌**(마스터 12 + 변형 60,
+> R2 42MiB)을 갖게 됐고 홈이 같은 그림을 두 URL로 각각 내려받았다. 런타임이 요청하는 것은
+> `idle.png`이므로 처음부터 그 이름으로 만든다. 기존 12명의 잔존 `default.png` 정리는
+> `docs/wbs/README.md`의 R-4다.
 
 **이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용.
 
@@ -135,6 +131,7 @@ node scripts/generate-character-images-v2.mjs {id} smile
 프로덕션은 캐릭터 이미지를 **Cloudflare R2(`cdn.xzawed.xyz/characters`)**에서 서빙하고, `.dockerignore`가 `public/images/characters`를 배포 이미지에서 제외한다(배포 슬림화). 따라서 **로컬 생성만으로는 프로덕션에서 404**가 되므로 반드시 R2에 업로드한다.
 
 ```bash
+pnpm exec tsx scripts/generate-assets/generate-character-variants.ts   # ← 먼저! 변형 5단 생성
 pnpm upload:characters:r2        # 신규/변경분 R2 업로드 (md5 검증)
 pnpm upload:characters:r2:skip   # 이미 존재하는 키 건너뛰고 업로드
 ```
@@ -197,11 +194,12 @@ sonar.coverage.exclusions=\
 
 검증 항목:
 - [ ] `characters` 배열에 추가됨
-- [ ] `expressions` 경로가 실제 파일과 일치
 - [ ] `waitingLines`에 대사 추가됨
 - [ ] `buildCardPreviewLine`의 `cardPreviewTemplates`에 항목 추가됨
-- [ ] nukki-enhanced 이미지 7개(default/idle/smile/serious/surprised/wink/mystical) 존재
+- [ ] nukki-enhanced 마스터 6개(idle/smile/serious/surprised/wink/mystical) 존재 — `default.png`은 만들지 않는다
 - [ ] **모든 nukki-enhanced 이미지가 2816×1536 사이즈** (python3 사이즈 검증 명령으로 확인 · 고DPI 2x본, 다운스케일 금지)
+- [ ] **사전 생성 변형 5단(320·640·960·1280·1920 WebP) 생성 완료** — `characterImageLoader`는 폴백이 없어 변형이 없으면 프로덕션에서 즉시 404다
+- [ ] **`pnpm check:image-budget` 통과** (치수·용량·필수표정·변형 존재를 한 번에 검사)
 - [ ] **`pnpm upload:characters:r2`로 R2 업로드 완료** (프로덕션은 `cdn.xzawed.xyz/characters` 서빙 — 미업로드 시 프로덕션 404)
 - [ ] **캐릭터 이미지 표시 시 표준 mask 스타일 적용** (CharacterDisplay 사용 또는 직접 스타일 명시)
 - [ ] SpriteAnimator의 MOOD_TO_FILE 매핑과 파일명 일치 (default→idle.png)

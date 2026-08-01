@@ -11,8 +11,20 @@
  *   2. **용량 폭주** — 현재 최댓값 약 5.2MB. 무압축 재출력으로 8~15MB가 들어오면 런타임
  *      이미지 최적화 비용이 배가된다(#521에서 이미 네비게이션 지연으로 관측됨).
  *
- * ⚠️ **이 가드는 #521을 해결하지 않는다.** #521의 해법은 사전 생성 변형이며, 그것이 들어오면
- * 변형 존재·용량을 검사하는 가드를 따로 추가해야 한다.
+ * ## 사전 생성 변형 검사 (2026-08-01 추가)
+ *
+ * #533이 런타임 이미지 최적화를 사전 생성 WebP 변형으로 대체했다. 이 가드의 초판은
+ * "변형이 들어오면 존재·용량을 검사하는 가드를 따로 추가해야 한다"고 스스로 요구해 뒀는데
+ * **그 후속이 이행되지 않았다.** 그 사이 다음 구멍이 열려 있었다.
+ *
+ *   - `characterImageLoader`(`src/lib/storage/character-image.ts`)는 `.png` → `-<w>.webp` 를
+ *     **무조건** 치환하고 런타임 폴백이 없다. 변형이 하나라도 없으면 그 이미지는 404다.
+ *   - 세션에서만 쓰는 mood(`surprised`·`serious`·`mystical`)의 변형이 빠져도 홈은 멀쩡하므로
+ *     E2E 홈 검사에 걸리지 않는다. **리딩 도중에만 캐릭터가 사라진다.**
+ *   - 캐릭터 추가 절차에 변형 생성·업로드 단계가 없었다(같은 커밋에서 보강).
+ *
+ * 그래서 마스터마다 **폭 사다리 전체**가 있는지 검사한다. 사다리는 문자열로 베끼지 않고
+ * `CHARACTER_VARIANT_WIDTHS` 정본을 import한다 — 사다리가 바뀌면 이 가드가 자동으로 따라간다.
  *
  * 사용: pnpm exec tsx scripts/check-character-image-budget.ts
  */
@@ -20,8 +32,21 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+// 폭 사다리는 앱이 쓰는 정본을 그대로 가져온다. 여기에 숫자를 다시 적으면 드리프트가 생긴다.
+import { CHARACTER_VARIANT_WIDTHS } from "../src/lib/storage/character-image";
+
 const ROOT = path.resolve(__dirname, "..");
 const CHARACTERS_DIR = path.join(ROOT, "public", "images", "characters");
+
+/**
+ * 런타임이 요청하는 파일 stem — 이것들은 변형까지 반드시 있어야 한다.
+ *
+ * `Mood` 6종과 1:1이 아니다. `default` mood는 `MOOD_TO_FILE`이 `idle`로 매핑하므로
+ * 파일 이름은 `idle`이다(`src/components/character/SpriteAnimator.tsx`).
+ * `default.png`는 `idle.png`와 바이트 동일한 레거시 중복이라 **필수가 아니다** —
+ * 있으면 검사하고 없어도 통과한다(정리 경위는 `docs/wbs/README.md` R-4).
+ */
+const REQUIRED_STEMS = ["idle", "smile", "serious", "surprised", "wink", "mystical"] as const;
 
 /** 의도된 2x 마스터 치수 — `docs/conventions/image-assets.md` */
 const EXPECTED_WIDTH = 2816;
@@ -105,6 +130,58 @@ function main(): void {
     }
   }
 
+  // ── 필수 stem 존재 검사 ────────────────────────────────────────────────
+  // 캐릭터를 추가하면서 표정 하나를 빠뜨리면, 그 표정을 쓰는 화면에서만 깨진다.
+  // 세션 전용 mood는 홈 E2E에 걸리지 않으므로 여기서 잡아야 한다.
+  const characterIds = fs
+    .readdirSync(CHARACTERS_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && fs.existsSync(path.join(CHARACTERS_DIR, e.name, "nukki-enhanced")))
+    .map((e) => e.name);
+
+  for (const id of characterIds) {
+    for (const stem of REQUIRED_STEMS) {
+      const master = path.join(CHARACTERS_DIR, id, "nukki-enhanced", `${stem}.png`);
+      if (!fs.existsSync(master)) {
+        violations.push({
+          file: `public/images/characters/${id}/nukki-enhanced/${stem}.png`,
+          detail: "필수 표정 마스터가 없습니다 — 런타임이 이 파일을 요청합니다",
+        });
+      }
+    }
+  }
+
+  // ── 변형 존재 검사 ─────────────────────────────────────────────────────
+  // characterImageLoader는 폴백 없이 `.png` → `-<w>.webp` 로 치환한다.
+  // 변형이 없으면 그 이미지는 조용히 404가 되고, 홈 밖 화면이면 E2E도 놓친다.
+  let variantCount = 0;
+  for (const file of masters) {
+    const stem = path.basename(file, ".png");
+    const dir = path.dirname(file);
+    const masterBytes = fs.statSync(file).size;
+
+    for (const width of CHARACTER_VARIANT_WIDTHS) {
+      const variant = path.join(dir, `${stem}-${width}.webp`);
+      const rel = path.relative(ROOT, variant).replaceAll("\\", "/");
+      if (!fs.existsSync(variant)) {
+        violations.push({
+          file: rel,
+          detail:
+            `변형이 없습니다 — characterImageLoader가 폴백 없이 이 URL을 요청하므로 404가 됩니다.\n` +
+            `      생성: pnpm exec tsx scripts/generate-assets/generate-character-variants.ts`,
+        });
+        continue;
+      }
+      variantCount++;
+      const variantBytes = fs.statSync(variant).size;
+      if (variantBytes >= masterBytes) {
+        violations.push({
+          file: rel,
+          detail: `${(variantBytes / 1024).toFixed(0)}KB ≥ 마스터 ${(masterBytes / 1024).toFixed(0)}KB — 변형이 원본보다 크면 최적화가 아닙니다`,
+        });
+      }
+    }
+  }
+
   if (violations.length > 0) {
     console.error(`[check-character-image-budget] ${violations.length}건 위반:`);
     for (const v of violations) console.error(`  ${v.file}: ${v.detail}`);
@@ -113,7 +190,9 @@ function main(): void {
   }
 
   console.log(
-    `[check-character-image-budget] 검사 통과. 마스터 ${masters.length}장, 치수·용량 위반 없음.`,
+    `[check-character-image-budget] 검사 통과. ` +
+    `캐릭터 ${characterIds.length}명, 마스터 ${masters.length}장, 변형 ${variantCount}장 — ` +
+    `치수·용량·필수표정·변형 위반 없음.`,
   );
 }
 

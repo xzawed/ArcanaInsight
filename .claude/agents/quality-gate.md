@@ -64,10 +64,10 @@ Vitest가 이미 커버하는 도메인(사주 계산·상수 무결성·카드/
 ### Phase 4: 이미지 에셋 검증
 
 모든 캐릭터 디렉토리를 확인:
-- **모든 12캐릭터**: PNG 누끼 경로 (`/images/characters/{id}/nukki-enhanced/default.png` 형식)
-- 필수 표정 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- **모든 12캐릭터**: PNG 누끼 경로 (`/images/characters/{id}/nukki-enhanced/idle.png` 형식)
+- 필수 마스터 파일 6종: `idle`(=표정 `default`), `smile`, `serious`, `surprised`, `wink`, `mystical`
+  + 각각 WebP 변형 5단. 자동 검사: `pnpm check:image-budget`
 - SpriteAnimator MOOD_TO_FILE 매핑과 파일명 일치
-- expressions 경로가 실제 파일과 일치
 - **[필수] 모든 nukki PNG 사이즈가 2816×1536인지 검증** (고DPI 2x본 · 다운스케일 금지):
   ```bash
   python3 -c "

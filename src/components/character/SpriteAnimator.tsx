@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, type Easing, type TargetAndTransition, type Transition } from "framer-motion";
-import { Mood, IdleAnimationType, CharacterId } from "@/types/character";
+import { Mood, IdleAnimationType, CharacterId, type CharacterImageFileStem } from "@/types/character";
 import { hexToRgba } from "@/lib/color-utils";
 import { characterImageLoaderProp, getCharacterImageUrl } from "@/lib/storage/character-image";
 
@@ -21,7 +21,13 @@ const MOOD_CONFIGS: Record<Mood, MoodConfig> = {
   mystical: { loop: true, displayDuration: 0 },
 };
 
-const MOOD_TO_FILE: Record<Mood, string> = {
+/**
+ * 논리 표정(`Mood`) → 디스크 파일 stem 매핑. **`default`가 `idle.png`로 가는 유일한 지점이다.**
+ *
+ * 두 이름공간이 갈리는 곳이 여기뿐이라, 값 타입을 `CharacterImageFileStem`으로 못박아
+ * 존재하지 않는 파일명이 들어오는 것을 컴파일 단계에서 막는다(예전에는 `string`이었다).
+ */
+const MOOD_TO_FILE: Record<Mood, CharacterImageFileStem> = {
   default: "idle",
   smile: "smile",
   serious: "serious",

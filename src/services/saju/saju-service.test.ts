@@ -24,14 +24,6 @@ vi.mock("@/data/characters", () => ({
           accent: "#c084fc",
           particleStyle: "petal",
         },
-        expressions: {
-          default: "",
-          smile: "",
-          serious: "",
-          surprised: "",
-          wink: "",
-          mystical: "",
-        },
       };
     }
     return undefined;

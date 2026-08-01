@@ -273,12 +273,13 @@
 - [x] `screenshot_mobile_session.png` — 모바일(390×844) 타로 세션
 - [x] `screenshot_mobile_home.png` — 모바일(390×844) 홈 화면
 
-### 캐릭터 이미지 — `docs/design/characters/` (12명 × 7표정 = 84장)
+### 캐릭터 이미지 — `docs/design/characters/` (12명 × 7파일 = 84장 — 표정 6종 + `default`의 중복본 `idle`)
 
 > 파일명 규칙: `{캐릭터ID}_{표정}.png` / 원본: `public/images/characters/{id}/nukki-enhanced/{mood}.png`  
-> 표정 7종: `default` · `idle` · `mystical` · `serious` · `smile` · `surprised` · `wink`
+> 표정(`Mood`) 6종: `default` · `mystical` · `serious` · `smile` · `surprised` · `wink`
+> (파일명은 표정 `default` → `idle.png`. 자세한 것은 `docs/conventions/image-assets.md`)
 
-| 캐릭터 | 성별 | 오라 | 파티클 | 이미지 파일 (7장) |
+| 캐릭터 | 성별 | 오라 | 파티클 | 이미지 파일 (7장 — 중복 1 포함) |
 |---|---|---|---|---|
 | arcana (아르카나) | 여 | `#a78bfa`/`#c084fc` | sparkle | `arcana_default/idle/mystical/serious/smile/surprised/wink.png` |
 | miko (미코) | 여 | `#ef4444`/`#fbbf24` | petal | `miko_default/idle/mystical/serious/smile/surprised/wink.png` |
