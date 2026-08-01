@@ -31,6 +31,8 @@ const ASSET_HOST = process.env.SMOKE_ASSET_HOST ?? "cdn.xzawed.xyz";
 const ASSET_MASTER = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/idle.png`;
 const ASSET_VARIANT = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/idle-320.webp`;
 const WITH_READING = process.argv.includes("--reading");
+// 기대 커밋(7자리). 주면 프로덕션이 그 커밋이 아닐 때 실패한다 — 배포 누락 감지용.
+const EXPECT_COMMIT = process.env.SMOKE_EXPECT_COMMIT?.slice(0, 7) || "";
 const RETRIES = 3;
 const RETRY_GAP_MS = 8000;
 
@@ -99,10 +101,19 @@ async function readingSmoke() {
 async function main() {
   console.log(`배포 후 스모크 — 대상: ${BASE}\n`);
   const results = [];
+  // 배포된 커밋을 함께 남긴다. 2026-08-01, main 머지가 하루 넘게 배포되지 않았는데
+  // 새 엔드포인트 404가 "배포 안 됨"인지 "코드 결함"인지 구분되지 않아 진단이 오래 걸렸다.
+  // EXPECT_COMMIT(선택)을 주면 격차를 실패로 만든다 — CI가 배포 누락을 잡을 수 있다.
+  let deployedCommit = "unknown";
   results.push(await check("GET /api/health = 200", async () => {
     const r = await status(`${BASE}/api/health`);
     if (r.status !== 200) throw new Error(`status ${r.status}`);
-    return "200";
+    const body = await r.json().catch(() => ({}));
+    deployedCommit = body.commit ?? "unknown";
+    if (EXPECT_COMMIT && deployedCommit !== EXPECT_COMMIT) {
+      throw new Error(`배포된 커밋 ${deployedCommit} ≠ 기대 ${EXPECT_COMMIT} — 프로덕션이 main보다 뒤처져 있습니다`);
+    }
+    return `200, commit=${deployedCommit}`;
   }));
   // DB 준비 상태 — /api/health는 DB를 안 보므로 여기서 따로 확인한다.
   // 2026-07-23~08-01 Supabase 일시정지 때 모든 자동 신호가 초록인 채로 DB가 죽어 있었다.
