@@ -3,6 +3,16 @@ name: Post-Deploy Smoke
 # main push(= Railway 자동 재배포)마다 배포 완료를 기다린 뒤 프로덕션 기능 스모크를 실행한다.
 # 헬스체크(/api/health)가 통과해도 IPv6 바인딩·NEXT_PUBLIC_ASSET_BASE_URL 누락 등으로
 # 홈/이미지가 broken일 수 있는 사각을 잡는다(2026-07-06 배포 사고 방어). 정보성 체크 — main 미보호라 차단하지 않음.
+#
+# ⚠️ **이 워크플로는 절대 실패로 끝나면 안 된다.** Railway 서비스가 `checkSuites=true`로
+# 설정돼 있어 **GitHub 체크 스위트가 전부 통과해야 배포**한다(`validCheckSuites=3`).
+# post-deploy 검사가 배포를 게이트하면 순환이 생긴다 —
+#   배포 안 됨 → 새 엔드포인트 404 → 스모크 실패 → Railway가 배포 SKIP → 영원히 반복.
+# 2026-08-01에 실제로 이 데드락이 발생해 프로덕션이 하루 넘게 정체됐다(#546에서 스모크에
+# `/api/health/db` 검사를 추가한 것이 방아쇠였다 — 배포돼야 존재하는 것을 배포 전에 검사했다).
+#
+# 애초에 **post-deploy 검사로 배포를 막는 것은 방향이 반대**다: 프로덕션이 깨졌을 때
+# 정작 고칠 배포를 못 하게 된다. 그래서 실패는 **Issue로 알리고 체크는 통과**시킨다.
 
 on:
   push:
@@ -13,6 +23,11 @@ on:
         description: "타로 리딩 1건 포함 (AI 비용 발생)"
         type: boolean
         default: false
+
+# Issue 생성용 — 스모크 실패를 배포를 막지 않고 알리기 위해 필요하다.
+permissions:
+  contents: read
+  issues: write
 
 # 동시 배포 시 이전 스모크 취소(최신 배포만 검증)
 concurrency:
@@ -44,8 +59,52 @@ jobs:
           done
           echo "::warning::10분 내 배포 미반영 — 아래 스모크가 격차를 실패로 보고합니다"
       - name: 프로덕션 스모크
+        id: smoke
+        continue-on-error: true   # ← Railway 배포 데드락 방지 (위 주석)
         env:
           SMOKE_BASE_URL: https://arcanainsight-production.up.railway.app
           # 프로덕션이 이 커밋이 아니면 실패한다 — 배포 누락을 스모크가 직접 잡는다.
           SMOKE_EXPECT_COMMIT: ${{ github.sha }}
         run: node scripts/smoke-prod.mjs ${{ (github.event_name == 'workflow_dispatch' && inputs.with_reading) && '--reading' || '' }}
+
+
+      # 체크는 통과시키되 실패를 묻지 않는다 — 배포를 막지 않으면서 사람이 알게 한다.
+      - name: 스모크 실패 시 Issue 생성
+        if: steps.smoke.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const sha = context.sha.slice(0, 7);
+            core.error(`프로덕션 스모크 실패 (${sha}) — ${runUrl}`);
+            await core.summary
+              .addHeading('❌ 프로덕션 스모크 실패')
+              .addRaw(`커밋 \`${sha}\` 배포 후 검사가 실패했습니다. [로그](${runUrl})`)
+              .addRaw('\n\n체크 자체는 통과시킵니다 — Railway가 `checkSuites`로 배포를 게이트하므로 ')
+              .addRaw('여기서 실패하면 **고칠 배포조차 막힙니다**.')
+              .write();
+
+            const title = '🚨 프로덕션 스모크 실패';
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'post-deploy-smoke',
+            });
+            const body = [
+              `커밋 \`${sha}\` 배포 후 프로덕션 스모크가 실패했습니다.`,
+              '',
+              `- 실행 로그: ${runUrl}`,
+              '- 확인 순서: `/api/health`의 `commit`이 main과 같은지 → 다르면 **배포 미반영**이고 프로덕션 결함이 아닙니다',
+              '- 배포가 반영됐는데도 실패하면 프로덕션 결함입니다',
+            ].join('\n');
+
+            if (open.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open[0].number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['post-deploy-smoke'],
+              });
+            }
