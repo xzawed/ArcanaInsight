@@ -93,6 +93,35 @@ AI 생성 타로 카드 이미지·서비스 배경·**카드 스킨(6종)**·�
 - 생성: `pnpm generate:assets` (Replicate API, REPLICATE_API_KEY 필요).
 - **업로드(정본)**: `pnpm upload:assets:r2` — `public/images/cards`·`backgrounds` → R2(`card-styles/` 키, `Cache-Control: immutable`), 업로드 후 **ETag=md5 무결성 검증**. `.env.r2.local`에 R2 자격증명 필요. `:r2:skip`은 기존 키 스킵. (⚠️ 기존 `pnpm upload:assets`는 **Supabase 대상=정본 아님** — PreToolUse 훅이 오사용 시 확인 요청)
 - ⚠️ **수정(덮어쓰기) 시**: R2 객체가 `immutable` 캐시라 같은 키를 덮어써도 CDN이 구버전을 최대 1년 서빙 → **Cloudflare 캐시 퍼지 필수**.
+
+### 캐시 정책 — 자산군마다 다르다
+
+| 자산 | `Cache-Control` | 이유 |
+|---|---|---|
+| 카드(`card-styles/`)·스킨(`card-skins/`) | `public, max-age=31536000, immutable` | 덮어쓰기가 드물고, 할 때는 퍼지를 절차로 둔다 |
+| 캐릭터(`characters/`) | `public, max-age=14400, stale-while-revalidate=86400` | **아트 개선 시 같은 키를 덮어쓰는 것이 정규 절차**다(`backup-v2/` 백업 절차가 그 전제). `immutable`이면 교체 후에도 기존 방문자가 최대 1년간 옛 얼굴을 본다 |
+
+> ⚠️ **Cloudflare 퍼지는 엣지만 비운다.** 이미 브라우저가 받아 둔 캐시는 지우지 못한다.
+> 그래서 `immutable`은 "퍼지하면 되니까 안전"이 아니다 — 카드·스킨도 같은 구조적 부채를 안고 있고,
+> 다만 교체 빈도가 낮아 아직 드러나지 않았을 뿐이다. 근본 해결은 파일명에 content hash를 넣는 것이다(미착수).
+
+### ⚠️ 캐시 상태는 HEAD가 아니라 GET으로 판정한다
+
+```bash
+# ❌ 오판 — 이 존은 HEAD에 항상 DYNAMIC을 돌려준다 (404 응답에서도 동일)
+curl -sI https://cdn.xzawed.xyz/characters/arcana/nukki-enhanced/idle-640.webp
+#   cf-cache-status: DYNAMIC
+
+# ✅ 실제 상태
+curl -s -o /dev/null -D - https://cdn.xzawed.xyz/characters/arcana/nukki-enhanced/idle-640.webp
+#   Cache-Control: max-age=14400
+#   cf-cache-status: HIT
+#   Age: 180
+```
+
+2026-08-01에 HEAD 결과만 보고 "캐릭터 자산이 캐시되지 않아 매 요청 오리진을 탄다"고 판단해
+432개 전량 재업로드를 계획했다가, GET 실측으로 **이미 캐시되고 있음**을 확인하고 철회했다.
+
 - 절차/에이전트: [`.claude/skills/add-card-asset/SKILL.md`](../../.claude/skills/add-card-asset/SKILL.md), `card-style-manager` 에이전트.
 
 ---

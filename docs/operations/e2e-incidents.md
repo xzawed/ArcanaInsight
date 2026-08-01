@@ -349,16 +349,22 @@ Cloudflare 챌린지/인터스티셜, WAF·rate limit 페이지, 5xx, 또는 200
 - 가드에 **진단 메타 기록** 추가: 실패 시 `status`·`content-type`·`cf-cache-status`·`cf-ray`를
   함께 남긴다. 지금 형태는 "ORB only"라 **200+비이미지**와 **4xx**를 구분할 수 없다 —
   그것이 이번 조사를 어렵게 만든 구조적 맹점이었다
-- **캐릭터 자산에 `Cache-Control` 누락을 교정**(`upload-characters-r2.ts`). 카드·스킨은
-  `public, max-age=31536000, immutable`인데 캐릭터만 없어 `cf-cache-status: DYNAMIC`이었다 —
-  **가장 무거운 자산이 매 요청 오리진을 탔다.** ORB의 증명된 원인은 아니지만 노출을 줄인다
-  > ⚠️ 기존 R2 객체에는 소급 적용되지 않는다. 헤더를 실제로 반영하려면 재업로드가 필요하다
+- ~~**캐릭터 자산에 `Cache-Control` 누락을 교정**~~ → **아래 정정 참조.** 이 판단의 전제가 틀렸다
+
+> ⚠️ **정정 (같은 날)**: 위 "캐릭터만 `Cache-Control`이 없어 매 요청 오리진을 탔다"는 **틀렸다.**
+> `curl -sI`(HEAD)로 판단한 것이 착시였다 — 이 존은 **HEAD에 항상 `cf-cache-status: DYNAMIC`**을
+> 돌려준다(404 응답에서도 동일하게 재현). **GET으로 보면** 캐릭터 자산은 이미
+> `Cache-Control: max-age=14400` · `cf-cache-status: HIT` · `Age` 증가로 **엣지 캐시되고 있었다.**
+> 따라서 "헤더가 없어 캐시가 안 된다 → 전량 재업로드로 고친다"는 서사가 성립하지 않는다.
+>
+> **캐시 상태는 HEAD가 아니라 GET으로 판정한다.** 이 함정은 `docs/conventions/image-assets.md`에 기록했다.
 
 #### 재발하면 볼 것
 
 1. 실패 메시지의 **메타 필드** — `status<400 + ct=text/html`이면 챌린지/인터스티셜,
    `status>=400`이면 오리진·키 문제, `ct=image/*`인데 ORB면 본문 위장
-2. 러너에서 **독립 probe**: `curl -sI` + `curl -s --range 0-15 | xxd` (기대: `RIFF….WEBP`).
+2. 러너에서 **독립 probe** — **HEAD가 아니라 GET으로** 본다(이 존은 HEAD에 항상 `DYNAMIC`):
+   `curl -s -o /dev/null -D - <url>` (헤더) + `curl -s --range 0-15 <url> | xxd` (기대: `RIFF….WEBP`).
    브라우저만 막히고 curl은 정상이면 **엣지 차등**(봇/IP) 후보
 3. Cloudflare **Security Events**를 `cf-ray`·시각으로 조회 — Bot Fight Mode,
    Browser Integrity Check, rate limiting 규칙이 GitHub Actions IP를 오탐하는지
