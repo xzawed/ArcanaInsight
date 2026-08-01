@@ -58,6 +58,22 @@
 프로덕션 번들에 포함되지 않으며, 악용하려면 자기 eslint config에 악성 glob을 주입해야 한다.
 **같은 override를 다시 시도하지 말 것.**
 
+### 옵트인 검사는 아무도 안 누르면 죽은 검사다 (2026-08-01)
+
+`pnpm smoke:prod --reading`(리딩 1건 SSE)은 AI 비용 때문에 `post-deploy-smoke.yml`에서
+**`workflow_dispatch` + 입력 체크박스**로만 실행된다. 그래서 아무도 누르지 않는 동안
+요청 본문에 `birthTime`이 빠진 채로 **항상 400**이었고, 리딩 검증 경로가 통째로 죽어 있었다.
+(`TarotReadingSchema`는 `birthTime`을 nullable로 두지만 **키 자체는 필수**다.)
+
+기본 off 정책은 유지하되(비용), 드리프트는 **무료로** 잡는다 —
+`src/__tests__/smoke-request-schema.test.ts`가 스모크 요청 본문을 실제 Zod 스키마로
+매 CI마다 검증한다. 스모크가 실제로 통과하는지는 여전히 수동 실행이 판정하지만,
+**요청이 400으로 죽는 종류의 실패는 여기서 먼저 걸린다.**
+
+> 같은 패턴을 다른 옵트인 검사에도 적용할 것: `pnpm eval:reading`, `pnpm verify:railway-config`.
+
+---
+
 ### SonarCloud 이슈 현황 (2026-07-05 기준)
 
 Quality Gate: **PASSED** | Bugs: 0 | Vulnerabilities: 0 | **Open code smell: 0건**
