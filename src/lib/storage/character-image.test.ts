@@ -18,8 +18,8 @@ describe("getCharacterImageUrl", () => {
 
   it("base URL 끝 슬래시를 정규화한다(이중 슬래시 방지)", () => {
     process.env[KEY] = "https://cdn.xzawed.xyz/";
-    expect(getCharacterImageUrl("luna", "default")).toBe(
-      "https://cdn.xzawed.xyz/characters/luna/nukki-enhanced/default.png",
+    expect(getCharacterImageUrl("luna", "wink")).toBe(
+      "https://cdn.xzawed.xyz/characters/luna/nukki-enhanced/wink.png",
     );
   });
 

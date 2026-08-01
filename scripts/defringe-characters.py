@@ -14,7 +14,7 @@
 옵션:
     --spread     <1~5>   색상 번지기 반경 픽셀 (기본: 2)
     --threshold  <0~50>  어두운 픽셀 감지 임계값 (기본: 20, 낮을수록 더 어두운 픽셀만)
-    --preview            arcana/default.png 1장만 처리해 preview 파일 저장
+    --preview            arcana/idle.png 1장만 처리해 preview 파일 저장
     --dry-run            대상 목록만 출력
 
 예:
@@ -117,7 +117,7 @@ def main():
     print(f"  spread:{opts.spread}  threshold:{opts.threshold}")
 
     if opts.preview:
-        preview_src = IMAGES_ROOT / "arcana" / "nukki-enhanced" / "default.png"
+        preview_src = IMAGES_ROOT / "arcana" / "nukki-enhanced" / "idle.png"
         if not preview_src.exists():
             print(f"미리보기 대상 없음: {preview_src}")
             sys.exit(1)

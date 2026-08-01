@@ -16,7 +16,7 @@
     --blur       <0.5~3>  내부 선 블러 반경 (기본: 2.5)
     --strength   <0.1~1>  내부 선 블러 강도 (기본: 1.0)
     --line-thresh <20~120> 내부 선 감지 임계값 (기본: 70)
-    --preview            arcana/default.png 1장만 처리해 미리보기 저장
+    --preview            arcana/idle.png 1장만 처리해 미리보기 저장
     --dry-run            대상 목록만 출력
 
 예:
@@ -131,7 +131,7 @@ def main():
     print(f"  [소프트닝] blur:{opts.blur}  strength:{opts.strength}  line-threshold:{opts.line_thresh}")
 
     if opts.preview:
-        src = IMAGES_ROOT / "arcana" / "nukki-enhanced" / "default.png"
+        src = IMAGES_ROOT / "arcana" / "nukki-enhanced" / "idle.png"
         if not src.exists():
             print(f"미리보기 대상 없음: {src}")
             sys.exit(1)

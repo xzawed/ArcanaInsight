@@ -22,7 +22,7 @@
 - 운영 표시용 이미지: `nukki-enhanced/` 폴더 (2816×1536). **이 2배(원본 1408×768의 2x) 규격은 고DPI 대형 디스플레이·캐릭터 상세(모바일 100vw) 대응을 위한 의도적 선택이며 다운스케일 금지.**
 - 표정(`Mood`) **6종**: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 - 파일 stem은 표정과 1:1이 아니다 — 표정 `default`의 파일명은 **`idle`**이다(`MOOD_TO_FILE`).
-  `default.png`는 `idle.png`와 바이트 동일한 레거시 중복이며 정리 대상이다(`docs/wbs/README.md` R-4).
+  레거시 `default.png`(= `idle.png`와 바이트 동일)는 **R-4로 제거됐다**(2026-08-01, 로컬 72파일 + R2 동일 키). `CharacterImageFileStem` 타입에도 없으므로 이제 그 URL은 컴파일 단계에서 막힌다.
 - 각 마스터는 **사전 생성 WebP 변형 5단**(320·640·960·1280·1920)을 반드시 동반한다.
   `characterImageLoader`에 폴백이 없어 변형이 빠지면 그 이미지는 즉시 404다. 검사: `pnpm check:image-budget`
 - **서빙(2026-07-06~)**: 컴포넌트는 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`으로 URL을 조회한다. `NEXT_PUBLIC_ASSET_BASE_URL`(cdn.xzawed.xyz) 설정 시 R2(`characters/[id]/nukki-enhanced/[mood].png`), 미설정 시 로컬 `/images/characters/...` 폴백. **배포 이미지는 `.dockerignore`로 `public/images/characters`(283MB)를 제외**하고 프로덕션은 R2로 서빙 → 배포 이미지 슬림화. 로컬/CI는 repo public 폴백. (⚠️ 프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수)
@@ -84,7 +84,7 @@ AI 생성 타로 카드 이미지·서비스 배경·**카드 스킨(6종)**·�
 | 서비스 배경 | `card-styles/backgrounds/{service}/{theme}.png` | 타로/사주/신점 × 테마 |
 | 카드 스킨 앞면 | `card-skins/{skinId}/front/{cardId}.png` | 6종 스킨 × 78장 (`.png`) |
 | 카드 스킨 뒷면 | `card-skins/{skinId}/back.png` | 스킨별 전용 뒷면 (`.png`) |
-| 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 필수 stem 6종 = 72개 (+ 레거시 `default` 12장은 R-4 정리 대상, 현재 84장) (2026-07-06 배포 슬림화로 R2 이전) |
+| 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 필수 stem 6종 = **마스터 72장 + WebP 변형 360장** (2026-07-06 배포 슬림화로 R2 이전) |
 
 - 캐릭터 URL은 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`로 조회(`NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2, 미설정 시 로컬 public 폴백). 업로드: `pnpm upload:characters:r2`(`:skip` 지원) — `public/images/characters` → R2(`characters/` 키), ETag=md5 검증.
 - URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).
