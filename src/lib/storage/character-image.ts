@@ -22,10 +22,21 @@ export function getCharacterImageUrl(characterId: string, fileName: string): str
 }
 
 /**
- * 사전 생성 변형의 폭 사다리. `scripts/generate-assets/generate-character-variants.ts`와
- * **반드시 일치**해야 한다 — 여기에 없는 폭을 요청하면 404가 된다.
+ * 사전 생성 변형의 폭 사다리 — **이 파일이 정본이다.**
+ *
+ * 생성 스크립트(`scripts/generate-assets/generate-character-variants.ts`)가 이 상수를
+ * import해서 쓴다. 예전에는 양쪽에 각각 배열이 있고 주석으로 "반드시 일치"라고만 적어
+ * 두었는데, 어긋나면 **이미지가 전량 404**가 되면서도 아무것도 막지 못했다.
+ *
+ * 표시 폭에서 역산한 값이다.
+ *   320  홈 캐릭터 카드(모바일 33vw ≈ 130px, 2x DPI 여유)
+ *   640  홈 카드 고DPI / 태블릿
+ *   960  몰입형 캐릭터 표시(데스크탑 50vw)
+ *   1280 캐릭터 상세 데스크탑 / 고DPI 몰입형
+ *   1920 모바일 100vw 고DPI 상세
+ * 2816 마스터는 변형에 포함하지 않는다 — 그 크기가 필요한 표시가 없다.
  */
-const VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+export const CHARACTER_VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
 
 /**
  * 사전 생성 변형 사용 여부.
@@ -49,7 +60,7 @@ export const CHARACTER_VARIANTS_ENABLED = process.env.NEXT_PUBLIC_CHARACTER_VARI
  * 로더가 반환한 URL은 Next가 그대로 사용한다 — 서버 측 디코드·리사이즈가 아예 일어나지 않는다.
  */
 export function characterImageLoader({ src, width }: { src: string; width: number }): string {
-  const target = VARIANT_WIDTHS.find((w) => w >= width) ?? VARIANT_WIDTHS[VARIANT_WIDTHS.length - 1];
+  const target = CHARACTER_VARIANT_WIDTHS.find((w) => w >= width) ?? CHARACTER_VARIANT_WIDTHS[CHARACTER_VARIANT_WIDTHS.length - 1];
   return src.replace(/\.png$/, `-${target}.webp`);
 }
 

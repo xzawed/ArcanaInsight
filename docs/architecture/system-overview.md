@@ -14,7 +14,7 @@ ArcanaInsight의 3개 운세 서비스(타로·사주·신점) 사용자 흐름 
        │  └─ (site)/       — 홈, */result/[id], 마이페이지, 설정, 약관/개인정보, auth, dev. Footer 렌더
        │  (괄호 그룹은 URL 불변. api/·error·not-found·globals.css·layout.tsx는 app 루트 유지)
        ├─ UI 레이어 (src/components/)
-       │    ├─ card/         — CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector
+       │    ├─ card/         — CardFace, CardBack, CardItem, CardDeck, CardSpread
        │    ├─ character/    — 캐릭터 등장 컴포넌트
        │    ├─ common/       — UserInfoForm, PageSpinner, BirthTimeInput, ResultPageShell,
        │    │                  ResultShareButton, ReadingText, Toast, Icon, 모달 컴포넌트

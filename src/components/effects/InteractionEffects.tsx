@@ -78,14 +78,3 @@ export function InteractionClickParticles() {
   );
 }
 
-/** 버튼 등에서 사용할 hover glow 스타일 반환 hook */
-export function useInteractionGlow() {
-  const effectVars = useThemeEffectVars();
-  const shouldReduceMotion = useReducedMotion();
-
-  return {
-    hoverBoxShadow: shouldReduceMotion ? "none" : effectVars["--theme-border-glow"],
-    textShadow: shouldReduceMotion ? "none" : effectVars["--theme-text-glow"],
-    particleColor: effectVars["--theme-particle-color"],
-  };
-}

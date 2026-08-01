@@ -20,7 +20,9 @@
 
 **12캐릭터** (arcana, miko, seonhwa, hoshi, luna, rei, cairn, zero, haru, ren, lix, ethan):
 - 운영 표시용 이미지: `nukki-enhanced/` 폴더 (2816×1536). **이 2배(원본 1408×768의 2x) 규격은 고DPI 대형 디스플레이·캐릭터 상세(모바일 100vw) 대응을 위한 의도적 선택이며 다운스케일 금지.**
-- 7가지 mood: `default`, `idle`, `smile`, `serious`, `surprised`, `wink`, `mystical`
+- **무드는 6종**(`Mood` 타입, `src/types/character.ts`): `default`·`smile`·`serious`·`surprised`·`wink`·`mystical`
+- **파일은 7개** — 위 6개 이름 + `idle.png`. `SpriteAnimator`의 `MOOD_TO_FILE`이 무드 `default`를 **`idle.png`로 매핑**하므로, `idle`은 7번째 표정이 아니라 `default` 무드의 파일명이다.
+- ⚠️ `default.png`와 `idle.png`는 **12명 전원 md5가 동일한 중복 파일**이다(변형 60쌍도 동일). UI는 `idle` 쪽을 쓴다 — 통합 계획은 [`../wbs/README.md`](../wbs/README.md) 참조
 - **서빙(2026-07-06~)**: 컴포넌트는 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`으로 URL을 조회한다. `NEXT_PUBLIC_ASSET_BASE_URL`(cdn.xzawed.xyz) 설정 시 R2(`characters/[id]/nukki-enhanced/[mood].png`), 미설정 시 로컬 `/images/characters/...` 폴백. **배포 이미지는 `.dockerignore`로 `public/images/characters`(283MB)를 제외**하고 프로덕션은 R2로 서빙 → 배포 이미지 슬림화. 로컬/CI는 repo public 폴백. (⚠️ 프로덕션 `NEXT_PUBLIC_ASSET_BASE_URL` 필수)
 - ⚠️ 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`)는 용량 절감을 위해 리포지토리에서 제거(#447)되어 현재는 `nukki-enhanced/`만 존재한다. 운영본 재생성 시에만 외부 백업(1408×768 색상 소스)을 참조한다.
 - 원본은 보존하고, UI에서는 `nukki-enhanced`를 우선 사용한다.

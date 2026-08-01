@@ -221,7 +221,7 @@ export function DailyFortune() {
               }`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden">
-                <Image src={getCharacterImageUrl(char.id, "default")} {...characterImageLoaderProp} alt="" width={20} height={20} className="object-cover" />
+                <Image src={getCharacterImageUrl(char.id, "idle")} {...characterImageLoaderProp} alt="" width={20} height={20} className="object-cover" />
               </div>
               <span className="hidden sm:inline">{char.name}</span>
             </button>

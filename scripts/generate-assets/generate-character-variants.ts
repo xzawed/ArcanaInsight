@@ -32,20 +32,19 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import sharp from "sharp";
+import { CHARACTER_VARIANT_WIDTHS } from "../../src/lib/storage/character-image";
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const CHARACTERS_DIR = path.join(ROOT, "public", "images", "characters");
 
 /**
- * 생성할 폭. 실제 표시 폭에서 역산했다.
- *   320  — 홈 캐릭터 카드(모바일 33vw ≈ 130px, 2x DPI 여유)
- *   640  — 홈 카드 고DPI / 태블릿
- *   960  — 몰입형 캐릭터 표시(데스크탑 50vw)
- *   1280 — 캐릭터 상세 데스크탑 / 고DPI 몰입형
- *   1920 — 모바일 100vw 고DPI 상세
- * 2816 마스터는 그대로 두고 변형에 포함하지 않는다 — 그 크기가 필요한 표시는 없다.
+ * 생성할 폭 — **앱 로더와 같은 정본을 쓴다.**
+ *
+ * 예전에는 이 파일과 `character-image.ts`에 배열이 각각 있고 주석으로 "반드시 일치"라고만
+ * 적어 뒀는데, 어긋나면 로더가 존재하지 않는 폭을 가리켜 **이미지가 전량 404**가 되면서도
+ * 아무것도 막지 못했다. 정본을 하나로 두어 드리프트 자체를 없앤다.
  */
-export const VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+const VARIANT_WIDTHS = CHARACTER_VARIANT_WIDTHS;
 
 /** WebP 품질 — 누끼 캐릭터는 그라데이션이 넓어 82 아래에서 밴딩이 보인다. */
 const WEBP_QUALITY = 82;

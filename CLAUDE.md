@@ -33,7 +33,7 @@
 src/
 ├── app/             # App Router. 라우트 그룹 분리: (immersive)=몰입형(타로·사주·신점 세션/진입·character/[id], Footer 미렌더) / (site)=일반(홈·결과·마이페이지·약관 등, Footer 포함) / api
 ├── components/      # card, character, chat, common, effects, home, layout, saju, session, shinjeom, skin, tarot
-│   ├── card/        # CardFace, CardBack, CardItem, CardDeck, CardSpread, CardStyleSelector (스타일 선택 UI)
+│   ├── card/        # CardFace, CardBack, CardItem, CardDeck, CardSpread
 │   ├── common/      # UserInfoForm (mode: "tarot"|"saju"|"shinjeom"), PageSpinner, BirthTimeInput,
 │   │                # ResultPageShell, ResultShareButton, ReadingText, Toast, Icon,
 │   │                # LocaleConfirmModal, PrivacyConsentModal, SessionClaimer (로그인 시 익명 세션 claim)
@@ -100,7 +100,7 @@ supabase/migrations/ # Supabase SQL migrations
 ## 캐릭터/데이터 기준
 
 - 캐릭터 12명: `arcana`, `miko`, `seonhwa`, `hoshi`, `luna`, `rei`, `cairn`, `zero`, `haru`, `ren`, `lix`, `ethan`.
-- 캐릭터 표정 타입: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`.
+- 캐릭터 무드 6종: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`. 무드 `default`의 **파일명은 `idle.png`** 다(`MOOD_TO_FILE` 매핑).
 - 캐릭터 이미지는 `public/images/characters/[id]/nukki-enhanced/[mood].png` 경로를 사용한다.
 - 카드, 스프레드, 스킨, 토픽 정본은 `src/data/`에 있다. 문서 설명은 [`docs/architecture/data-model.md`](docs/architecture/data-model.md).
 
