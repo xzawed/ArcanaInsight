@@ -59,7 +59,8 @@
     "upload:skins:r2": "npx tsx scripts/generate-assets/upload-skins-r2.ts",
     "upload:skins:r2:skip": "npx tsx scripts/generate-assets/upload-skins-r2.ts --skip-existing",
     "enhance:images": "node scripts/enhance-character-images.mjs",
-    "polish:images": "python scripts/polish-character-images.py"
+    "polish:images": "python scripts/polish-character-images.py",
+    "generate:character-variants": "tsx scripts/generate-assets/generate-character-variants.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
@@ -90,6 +91,7 @@
     "eslint-config-next": "16.2.11",
     "eslint-plugin-playwright": "^2.10.4",
     "replicate": "^1.4.0",
+    "sharp": "0.35.3",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",

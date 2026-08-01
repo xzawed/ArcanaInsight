@@ -7,7 +7,7 @@ import { ScrollReveal } from "@/components/effects/ScrollReveal";
 import { GenderFilterToggle } from "@/components/home/GenderFilter";
 import { useGenderStore } from "@/hooks/useGenderStore";
 import { getCharactersByGender } from "@/data/characters";
-import { getCharacterImageUrl } from "@/lib/storage/character-image";
+import { characterImageLoaderProp, getCharacterImageUrl } from "@/lib/storage/character-image";
 import { getCharacterSpeciality } from "@/data/characters/locale-helpers";
 import { useT } from "@/i18n/useT";
 import { useLocaleStore } from "@/hooks/useLocaleStore";
@@ -42,6 +42,7 @@ export function CharacterGallery() {
                   <div className="relative aspect-[3/4] overflow-hidden">
                     <Image
                       src={getCharacterImageUrl(char.id, "idle")}
+                      {...characterImageLoaderProp}
                       alt={`${char.name} - ${char.personality}`}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 17vw"

@@ -43,15 +43,35 @@ function getR2() {
   return { client, bucket: R2_BUCKET };
 }
 
+/**
+ * 업로드 대상 수집.
+ *
+ * ⚠️ **백업 디렉터리는 제외한다.** 작업자가 이미지 교체 전에 남기는 로컬 백업
+ * (`nukki-enhanced_backup/`, `backup-v2/`, `backup-v2-restored/` 등)은 배포 자산이 아니다.
+ * 이전 구현은 모든 하위 디렉터리를 재귀해 이것들까지 프로덕션 CDN에 올렸다 —
+ * 2026-08-01 변형 업로드 직전에 발견해 차단했다(백업 112장이 대상에 포함돼 있었다).
+ */
 function walk(dir: string): string[] {
   const out: string[] = [];
   for (const entry of fs.readdirSync(dir)) {
     const p = path.join(dir, entry);
     const stat = fs.statSync(p);
-    if (stat.isDirectory()) out.push(...walk(p));
-    else if (p.endsWith('.png') || p.endsWith('.webp')) out.push(p);
+    if (stat.isDirectory()) {
+      if (/backup/i.test(entry)) continue;
+      out.push(...walk(p));
+    } else if (p.endsWith('.png') || p.endsWith('.webp')) {
+      out.push(p);
+    }
   }
   return out;
+}
+
+/** `--variants-only`: 사전 생성 변형(`<mood>-<width>.webp`)만 올린다. 마스터 PNG는 건드리지 않는다. */
+const VARIANTS_ONLY = process.argv.includes('--variants-only');
+
+function filterTargets(files: string[]): string[] {
+  if (!VARIANTS_ONLY) return files;
+  return files.filter((p) => /[\\/]nukki-enhanced[\\/][a-z]+-\d+\.webp$/i.test(p));
 }
 
 function md5(buf: Buffer): string {
@@ -70,8 +90,11 @@ async function keyExists(client: S3Client, bucket: string, key: string): Promise
 async function main() {
   if (!fs.existsSync(SRC_DIR)) throw new Error(`${SRC_DIR} 없음`);
   const { client, bucket } = getR2();
-  const files = walk(SRC_DIR);
-  console.log(`캐릭터 이미지 ${files.length}개 → R2(${bucket}) '${DEST_PREFIX}/' 업로드 (skip-existing=${SKIP_EXISTING})`);
+  const files = filterTargets(walk(SRC_DIR));
+  console.log(
+    `캐릭터 이미지 ${files.length}개 → R2(${bucket}) '${DEST_PREFIX}/' 업로드 ` +
+    `(skip-existing=${SKIP_EXISTING}, variants-only=${VARIANTS_ONLY})`,
+  );
 
   let done = 0, skipped = 0, failed = 0;
   const queue = [...files];

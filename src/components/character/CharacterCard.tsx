@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { CharacterConfig } from "@/types/character";
-import { getCharacterImageUrl } from "@/lib/storage/character-image";
+import { characterImageLoaderProp, getCharacterImageUrl } from "@/lib/storage/character-image";
 
 interface CharacterCardProps {
   readonly character: CharacterConfig;
@@ -30,6 +30,7 @@ export function CharacterCard({ character, isSelected, onClick, index }: Charact
       <div className="relative w-full aspect-[2/3] mb-3 overflow-hidden rounded-xl">
         <Image
           src={getCharacterImageUrl(character.id, "idle")}
+          {...characterImageLoaderProp}
           alt={character.name}
           fill
           sizes="(max-width: 768px) 33vw, (max-width: 1024px) 13vw, 9vw"

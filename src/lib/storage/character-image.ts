@@ -20,3 +20,40 @@ export function getCharacterImageUrl(characterId: string, fileName: string): str
   }
   return `/images/characters/${characterId}/nukki-enhanced/${fileName}.png`;
 }
+
+/**
+ * 사전 생성 변형의 폭 사다리. `scripts/generate-assets/generate-character-variants.ts`와
+ * **반드시 일치**해야 한다 — 여기에 없는 폭을 요청하면 404가 된다.
+ */
+const VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+
+/**
+ * 사전 생성 변형 사용 여부.
+ *
+ * 기본은 꺼짐이다. 변형이 R2에 올라가기 전에 켜면 프로덕션 이미지가 전량 404가 되므로,
+ * **업로드가 끝난 환경에서만** 켠다. 로컬·CI는 변형이 저장소에 함께 커밋돼 있어 바로 켤 수 있다.
+ * 롤백은 이 env 하나를 끄면 끝난다(마스터 PNG 경로는 그대로 살아 있다).
+ */
+export const CHARACTER_VARIANTS_ENABLED = process.env.NEXT_PUBLIC_CHARACTER_VARIANTS === "1";
+
+/**
+ * `next/image` 커스텀 로더 — 런타임 최적화를 **건너뛰고** 사전 생성 WebP를 직접 가리킨다.
+ *
+ * ## 왜 필요한가 (#521)
+ *
+ * 마스터는 2816×1536·약 4.8MB PNG다. `next/image` 기본 경로는 요청 폭마다 이 원본을
+ * 디코드(≈16.5MiB 비트맵)하는데, 홈에 12장이 깔리면 **이미지 최적화 큐가 포화되어 32px
+ * 내비 아이콘까지 굶는다.** App Router는 새 트리 커밋까지 이전 URL을 유지하므로 사용자에게는
+ * 홈 탭을 눌러도 URL조차 바뀌지 않는 무응답으로 보인다(2026-08-01 CI trace 실측).
+ *
+ * 로더가 반환한 URL은 Next가 그대로 사용한다 — 서버 측 디코드·리사이즈가 아예 일어나지 않는다.
+ */
+export function characterImageLoader({ src, width }: { src: string; width: number }): string {
+  const target = VARIANT_WIDTHS.find((w) => w >= width) ?? VARIANT_WIDTHS[VARIANT_WIDTHS.length - 1];
+  return src.replace(/\.png$/, `-${target}.webp`);
+}
+
+/** 변형이 켜져 있을 때만 로더를 붙인다. 꺼져 있으면 기존 동작(런타임 최적화) 그대로. */
+export const characterImageLoaderProp = CHARACTER_VARIANTS_ENABLED
+  ? { loader: characterImageLoader }
+  : {};

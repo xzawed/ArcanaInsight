@@ -26,7 +26,7 @@ import { useT } from "@/i18n/useT";
 import Image from "next/image";
 import type { CardStyleId } from "@/data/cardStyles";
 import type { CharacterId } from "@/types/character";
-import { getCharacterImageUrl } from "@/lib/storage/character-image";
+import { characterImageLoaderProp, getCharacterImageUrl } from "@/lib/storage/character-image";
 
 const deckManager = new DeckManager();
 
@@ -221,7 +221,7 @@ export function DailyFortune() {
               }`}
             >
               <div className="w-5 h-5 rounded-full overflow-hidden">
-                <Image src={getCharacterImageUrl(char.id, "default")} alt="" width={20} height={20} className="object-cover" />
+                <Image src={getCharacterImageUrl(char.id, "default")} {...characterImageLoaderProp} alt="" width={20} height={20} className="object-cover" />
               </div>
               <span className="hidden sm:inline">{char.name}</span>
             </button>
