@@ -84,7 +84,7 @@ AI 생성 타로 카드 이미지·서비스 배경·**카드 스킨(6종)**·�
 | 서비스 배경 | `card-styles/backgrounds/{service}/{theme}.png` | 타로/사주/신점 × 테마 |
 | 카드 스킨 앞면 | `card-skins/{skinId}/front/{cardId}.png` | 6종 스킨 × 78장 (`.png`) |
 | 카드 스킨 뒷면 | `card-skins/{skinId}/back.png` | 스킨별 전용 뒷면 (`.png`) |
-| 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 7 mood = 84개 (2026-07-06 배포 슬림화로 R2 이전) |
+| 캐릭터 이미지 | `characters/{id}/nukki-enhanced/{mood}.png` | 12명 × 필수 stem 6종 = 72개 (+ 레거시 `default` 12장은 R-4 정리 대상, 현재 84장) (2026-07-06 배포 슬림화로 R2 이전) |
 
 - 캐릭터 URL은 `src/lib/storage/character-image.ts`의 `getCharacterImageUrl(id, fileName)`로 조회(`NEXT_PUBLIC_ASSET_BASE_URL` 설정 시 R2, 미설정 시 로컬 public 폴백). 업로드: `pnpm upload:characters:r2`(`:skip` 지원) — `public/images/characters` → R2(`characters/` 키), ETag=md5 검증.
 - URL은 `src/lib/storage/card-style.ts`의 `getCardStyleImageUrl()` / `getCardStyleBackUrl()` / `getServiceBackgroundUrl()`로 조회. `storageBase()`가 `NEXT_PUBLIC_ASSET_BASE_URL`(설정 시 R2) ↔ Supabase(폴백)를 분기 → env 정본: [`../operations/env-variables.md`](../operations/env-variables.md).

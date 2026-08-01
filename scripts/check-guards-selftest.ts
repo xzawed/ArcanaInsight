@@ -167,10 +167,12 @@ const CASES: readonly Case[] = [
     expect: "deploy.yml",
   },
   {
+    // ⚠️ 이 가짜 PNG는 변형(webp)도 없어서 **변형 검사만으로도** exit≠0이 된다.
+    // 파일명만 기대하면 치수 검사가 죽어도 통과하므로, 치수 위반 문구를 기대해 원인을 고정한다.
     name: "check-character-image-budget: 치수가 다른 마스터를 잡아야 한다",
     inject: () => createBogusPng("public/images/characters/arcana/nukki-enhanced/__selftest__.png"),
     script: "scripts/check-character-image-budget.ts",
-    expect: "__selftest__.png",
+    expect: "기대 2816×1536",
   },
   {
     name: "check-character-image-budget: 사전 생성 변형이 빠지면 잡아야 한다 (프로덕션 404 방지)",
