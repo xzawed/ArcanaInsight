@@ -25,7 +25,9 @@ ArcanaInsight의 정적 데이터(캐릭터, 카드, 스프레드, 스킨) 모�
 
 각 캐릭터는 6가지 표정(Mood): `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`
 
-> `idle.png` 파일도 존재하며 `CharacterGallery` 컴포넌트에서 하드코딩으로 사용. `Mood` 타입에는 포함되지 않음.
+> `idle.png`는 **표정 `default`가 저장된 파일**이다 — `SpriteAnimator`의 `MOOD_TO_FILE`이 `default → idle`로
+> 매핑하므로 세션 스프라이트의 기본 이미지가 곧 `idle.png`다. 홈 갤러리·캐릭터 카드·하단 CTA·캐릭터 상세도
+> 직접 `idle`을 요청한다. `Mood` 타입에는 포함되지 않으며, 파일명 타입은 `CharacterImageFileStem`이다.
 
 ### CharacterConfig 인터페이스 (`src/types/character.ts`)
 
@@ -38,7 +40,6 @@ export interface CharacterConfig {
   greeting: string;         // 기본(한국어) 인사말
   greetingEn?: string;
   greetingJa?: string;
-  expressions: Record<Mood, string>;  // mood → 이미지 경로
   idleAnimation: IdleAnimationType;   // "float" | "float-strong" | "bounce" | "breathe"
   personality: string;
   description: string;
@@ -65,13 +66,15 @@ export interface EffectTheme {
 
 ## 2. 세션 중 캐릭터 표정 규칙
 
-캐릭터는 부수적 요소이므로 표정 변경을 최소화하여 타로·사주 콘텐츠에 집중시킨다. **3단계만** 사용:
+캐릭터는 부수적 요소이므로 표정 변경을 최소화한다. 실제 런타임에서 전환되는 것은 **5종**이다
+(`wink`는 타입·자산에는 있으나 프로덕션에서 `setMood("wink")` 호출이 없다 — dev 프리뷰 전용):
 
 | 장면 | 표정 | 설명 |
 |------|------|------|
 | 세션 진입 + 카드 선택 대기 | `default` | 차분한 기본 표정 |
-| 카드 선택 순간 + 리딩/분석 대기 | `mystical` | 신비로운 톤, 카드를 읽는 느낌 |
-| 결과 도착 | `smile` | 따뜻한 미소로 결과 전달 |
+| 카드 선택 순간 | `surprised` | 1.5s 노출 후 `default` 복귀 (`useTarotCardSelection`) |
+| 리딩/분석 대기 | `mystical` | 신비로운 톤, 카드를 읽는 느낌 |
+| 결과 도착 | `smile` 또는 `serious` | 캐릭터별 `CHARACTER_RESULT_MOODS` — rei·zero·miko·ren은 `serious` |
 
 - 에러 발생 시: `default`로 복귀
 - 대기 대사 중: 표정 변경 없음 (`mystical` 유지)
@@ -87,8 +90,8 @@ export interface EffectTheme {
 | 운영용 enhanced nukki PNG | PNG RGB (2816×1536, 고DPI 의도적 2배 · 다운스케일 금지) | `[id]/nukki-enhanced/[mood].png` | 12명 전체 (표시 경로 유일) |
 
 - 운영용 enhanced 이미지는 1408×768 색상 소스를 2배로 업스케일한 2816×1536 RGB PNG이다. 고DPI 대형 표시(캐릭터 상세 모바일 100vw)를 위한 의도적 2배이므로 다운스케일하지 않는다.
-- 예: `/images/characters/arcana/nukki-enhanced/default.png`
-- 예: `/images/characters/miko/nukki-enhanced/default.png`
+- 예: `/images/characters/arcana/nukki-enhanced/idle.png`
+- 예: `/images/characters/miko/nukki-enhanced/idle.png`
 - 소스·백업 폴더(`nukki/`, `nukki/backup-v2/`, `_backup/`)는 #447에서 리포지토리에서 제거되어 현재는 `nukki-enhanced/`만 존재한다(롤백용 사본은 git 히스토리·외부 백업).
 
 ---

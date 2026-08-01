@@ -233,18 +233,18 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     test.setTimeout(90_000);
 
     const testPaths = [
-      "/images/characters/arcana/nukki-enhanced/default.png",
-      "/images/characters/miko/nukki-enhanced/default.png",
-      "/images/characters/seonhwa/nukki-enhanced/default.png",
-      "/images/characters/hoshi/nukki-enhanced/default.png",
-      "/images/characters/luna/nukki-enhanced/default.png",
+      "/images/characters/arcana/nukki-enhanced/idle.png",
+      "/images/characters/miko/nukki-enhanced/idle.png",
+      "/images/characters/seonhwa/nukki-enhanced/idle.png",
+      "/images/characters/hoshi/nukki-enhanced/idle.png",
+      "/images/characters/luna/nukki-enhanced/idle.png",
       "/images/characters/rei/nukki-enhanced/wink.png",
-      "/images/characters/cairn/nukki-enhanced/default.png",
-      "/images/characters/zero/nukki-enhanced/default.png",
-      "/images/characters/haru/nukki-enhanced/default.png",
-      "/images/characters/ren/nukki-enhanced/default.png",
-      "/images/characters/lix/nukki-enhanced/default.png",
-      "/images/characters/ethan/nukki-enhanced/default.png",
+      "/images/characters/cairn/nukki-enhanced/idle.png",
+      "/images/characters/zero/nukki-enhanced/idle.png",
+      "/images/characters/haru/nukki-enhanced/idle.png",
+      "/images/characters/ren/nukki-enhanced/idle.png",
+      "/images/characters/lix/nukki-enhanced/idle.png",
+      "/images/characters/ethan/nukki-enhanced/idle.png",
     ];
 
     for (const path of testPaths) {
@@ -310,7 +310,9 @@ test.describe("크로스 플랫폼 품질 검증", () => {
     test.skip(testInfo.project.name !== "Desktop Chrome", "전체 캐릭터 원본 에셋 검사는 데스크톱 1회만 수행");
 
     const characters = ["arcana", "miko", "seonhwa", "hoshi", "luna", "rei", "cairn", "zero", "haru", "ren", "lix", "ethan"];
-    const moods = ["default", "idle", "smile", "serious", "surprised", "wink", "mystical"];
+    // 런타임이 요청하는 파일 stem 6종. "default"는 여기 없다 — idle과 바이트 동일한 레거시
+    // 중복이고 신규 캐릭터는 만들지 않는다(정리는 docs/wbs/README.md R-4).
+    const moods = ["idle", "smile", "serious", "surprised", "wink", "mystical"];
 
     await page.goto("/", { waitUntil: "domcontentloaded" });
     const failures = await page.evaluate(

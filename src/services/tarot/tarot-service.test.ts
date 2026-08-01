@@ -18,14 +18,6 @@ vi.mock("@/data/characters", () => ({
         voiceTone: "soft-mystical",
         unlocked: true,
         idleAnimation: "float",
-        expressions: {
-          default: "/img/default.png",
-          smile: "/img/smile.png",
-          serious: "/img/serious.png",
-          surprised: "/img/surprised.png",
-          wink: "/img/wink.png",
-          mystical: "/img/mystical.png",
-        },
         effectTheme: {
           primary: "#a78bfa",
           secondary: "#c084fc",

@@ -202,10 +202,11 @@ ${mood.desc}`;
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
-  const outputPath = path.join(outputDir, `${moodKey}.png`);
-
-  // default 표정은 idle.png로도 저장 (CharacterGallery에서 idle.png를 참조)
-  const idlePath = moodKey === "default" ? path.join(outputDir, "idle.png") : null;
+  // 표정 `default`의 **파일 이름은 `idle`**이다(SpriteAnimator의 MOOD_TO_FILE 매핑).
+  // 예전에는 `default.png`를 쓴 뒤 같은 버퍼를 `idle.png`로 한 번 더 기록했는데, 그 결과
+  // 12명 전원이 바이트 동일한 파일 두 벌을 갖게 됐다(R2까지 약 42MiB 중복). 처음부터 하나만 쓴다.
+  const fileStem = moodKey === "default" ? "idle" : moodKey;
+  const outputPath = path.join(outputDir, `${fileStem}.png`);
 
   console.log(`🎨 [${character.name}/${moodKey}] 생성 중...`);
 
@@ -239,20 +240,17 @@ ${mood.desc}`;
   if (imageData.b64_json) {
     const buffer = Buffer.from(imageData.b64_json, "base64");
     fs.writeFileSync(outputPath, buffer);
-    if (idlePath) fs.writeFileSync(idlePath, buffer);
   } else if (imageData.url) {
     const imgResponse = await fetch(imageData.url);
     const arrayBuffer = await imgResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     fs.writeFileSync(outputPath, buffer);
-    if (idlePath) fs.writeFileSync(idlePath, buffer);
   } else {
     console.error(`❌ [${character.name}/${moodKey}] 알 수 없는 응답 형식`);
     return false;
   }
 
   console.log(`✅ [${character.name}/${moodKey}] 저장: ${outputPath}`);
-  if (idlePath) console.log(`   ↳ idle.png로도 복사`);
   return true;
 }
 

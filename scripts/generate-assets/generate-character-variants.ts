@@ -33,6 +33,8 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import sharp from "sharp";
 
+import { CHARACTER_VARIANT_WIDTHS } from "../../src/lib/storage/character-image";
+
 const ROOT = path.resolve(__dirname, "..", "..");
 const CHARACTERS_DIR = path.join(ROOT, "public", "images", "characters");
 
@@ -44,8 +46,12 @@ const CHARACTERS_DIR = path.join(ROOT, "public", "images", "characters");
  *   1280 — 캐릭터 상세 데스크탑 / 고DPI 몰입형
  *   1920 — 모바일 100vw 고DPI 상세
  * 2816 마스터는 그대로 두고 변형에 포함하지 않는다 — 그 크기가 필요한 표시는 없다.
+ *
+ * ⚠️ 값은 여기서 정의하지 않는다. 앱이 실제로 요청하는 폭(`characterImageLoader`)이 정본이며
+ * 여기서는 그것을 import해 쓴다. 예전에는 같은 배열을 양쪽에 적어 두고 주석으로만
+ * "일치시켜라"고 했는데, 한쪽만 바뀌면 앱이 없는 폭을 요청해 조용히 404가 된다.
  */
-export const VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+export const VARIANT_WIDTHS = CHARACTER_VARIANT_WIDTHS;
 
 /** WebP 품질 — 누끼 캐릭터는 그라데이션이 넓어 82 아래에서 밴딩이 보인다. */
 const WEBP_QUALITY = 82;

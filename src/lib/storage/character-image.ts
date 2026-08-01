@@ -1,3 +1,5 @@
+import type { CharacterImageFileStem } from "@/types/character";
+
 /**
  * 캐릭터 이미지(nukki-enhanced) URL 생성.
  *
@@ -10,9 +12,10 @@
  * 로컬 개발·CI는 env 미설정 시 repo의 public 폴더에서 서빙한다.
  *
  * @param characterId 캐릭터 id (예: "arcana")
- * @param fileName    확장자 없는 파일명 (예: "idle", "default", "smile", "mystical")
+ * @param fileName    **파일 stem**이지 `Mood`가 아니다. 상태 `default`의 파일명은 `idle`이며,
+ *                    변환은 `SpriteAnimator`의 `MOOD_TO_FILE`이 담당한다.
  */
-export function getCharacterImageUrl(characterId: string, fileName: string): string {
+export function getCharacterImageUrl(characterId: string, fileName: CharacterImageFileStem): string {
   const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
   if (base) {
     const b = base.endsWith("/") ? base.slice(0, -1) : base;
@@ -22,10 +25,14 @@ export function getCharacterImageUrl(characterId: string, fileName: string): str
 }
 
 /**
- * 사전 생성 변형의 폭 사다리. `scripts/generate-assets/generate-character-variants.ts`와
- * **반드시 일치**해야 한다 — 여기에 없는 폭을 요청하면 404가 된다.
+ * 사전 생성 변형의 폭 사다리 — **정본은 여기 하나다.**
+ *
+ * 이전에는 이 배열이 `scripts/generate-assets/generate-character-variants.ts`에도 똑같이
+ * 복제돼 있었고, 지킴 장치는 "반드시 일치해야 한다"는 주석뿐이었다. 한쪽만 바꾸면
+ * 생성되지 않은 폭을 앱이 요청하게 되고, 로더에 폴백이 없어 **조용히 404**가 된다.
+ * 이제 생성 스크립트와 `scripts/check-character-image-budget.ts`가 이 값을 import한다.
  */
-const VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+export const CHARACTER_VARIANT_WIDTHS = [320, 640, 960, 1280, 1920] as const;
 
 /**
  * 사전 생성 변형 사용 여부.
@@ -49,7 +56,9 @@ export const CHARACTER_VARIANTS_ENABLED = process.env.NEXT_PUBLIC_CHARACTER_VARI
  * 로더가 반환한 URL은 Next가 그대로 사용한다 — 서버 측 디코드·리사이즈가 아예 일어나지 않는다.
  */
 export function characterImageLoader({ src, width }: { src: string; width: number }): string {
-  const target = VARIANT_WIDTHS.find((w) => w >= width) ?? VARIANT_WIDTHS[VARIANT_WIDTHS.length - 1];
+  const target =
+    CHARACTER_VARIANT_WIDTHS.find((w) => w >= width) ??
+    CHARACTER_VARIANT_WIDTHS[CHARACTER_VARIANT_WIDTHS.length - 1];
   return src.replace(/\.png$/, `-${target}.webp`);
 }
 

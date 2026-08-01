@@ -100,7 +100,8 @@ supabase/migrations/ # Supabase SQL migrations
 ## 캐릭터/데이터 기준
 
 - 캐릭터 12명: `arcana`, `miko`, `seonhwa`, `hoshi`, `luna`, `rei`, `cairn`, `zero`, `haru`, `ren`, `lix`, `ethan`.
-- 캐릭터 표정 타입: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`.
+- 캐릭터 표정(`Mood`)은 **6종**: `default`, `smile`, `serious`, `surprised`, `wink`, `mystical`.
+  `idle`은 표정이 아니라 **`default`가 저장된 파일 이름**이다(`SpriteAnimator`의 `MOOD_TO_FILE`이 매핑). 파일명을 다루는 타입은 `CharacterImageFileStem`.
 - 캐릭터 이미지는 `public/images/characters/[id]/nukki-enhanced/[mood].png` 경로를 사용한다.
 - 카드, 스프레드, 스킨, 토픽 정본은 `src/data/`에 있다. 문서 설명은 [`docs/architecture/data-model.md`](docs/architecture/data-model.md).
 

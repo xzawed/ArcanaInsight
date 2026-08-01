@@ -152,6 +152,19 @@ const CASES: readonly Case[] = [
     script: "scripts/check-character-image-budget.ts",
     expect: "__selftest__.png",
   },
+  {
+    name: "check-character-image-budget: 사전 생성 변형이 빠지면 잡아야 한다 (프로덕션 404 방지)",
+    // 세션에서만 쓰는 mood를 고른다 — 홈 E2E에 걸리지 않는 사각이라 이 가드가 유일한 방어선이다.
+    inject: () => temporarilyMove("public/images/characters/rei/nukki-enhanced/mystical-960.webp"),
+    script: "scripts/check-character-image-budget.ts",
+    expect: "mystical-960.webp",
+  },
+  {
+    name: "check-character-image-budget: 필수 표정 마스터가 없으면 잡아야 한다",
+    inject: () => temporarilyMove("public/images/characters/haru/nukki-enhanced/wink.png"),
+    script: "scripts/check-character-image-budget.ts",
+    expect: "wink.png",
+  },
 ];
 
 /** IHDR만 유효한 최소 PNG를 만든다 — 가드는 헤더만 읽으므로 이걸로 치수 위반을 재현할 수 있다. */
