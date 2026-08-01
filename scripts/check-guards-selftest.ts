@@ -176,8 +176,8 @@ const CASES: readonly Case[] = [
     inject: () =>
       temporarilyPatch("e2e/navigation.spec.ts", (s) =>
         s.replace(
-          "window.scrollY > 0, undefined, { timeout: 3_000 }",
-          "window.scrollY > 0, { timeout: 3_000 }",
+          "window.scrollY > 0, undefined, { timeout: 2000 }",
+          "window.scrollY > 0, { timeout: 2000 }",
         ),
       ),
     script: "__eslint__",
