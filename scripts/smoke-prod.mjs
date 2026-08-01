@@ -22,7 +22,11 @@
 
 const BASE = (process.env.SMOKE_BASE_URL ?? "https://arcanainsight-production.up.railway.app").replace(/\/$/, "");
 const ASSET_HOST = process.env.SMOKE_ASSET_HOST ?? "cdn.xzawed.xyz";
-const ASSET_IMAGE = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/default.png`;
+// 마스터(변형이 꺼졌을 때의 폴백 경로)와 **라이브 변형** 양쪽을 본다.
+// 예전에는 마스터 default.png 하나만 봤는데, 변형이 프로덕션에 켜진 뒤로는
+// **변형이 전부 깨져도 이 검사는 초록**이었다 — 스모크가 잡아야 할 바로 그 유형이다.
+const ASSET_MASTER = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/idle.png`;
+const ASSET_VARIANT = `https://${ASSET_HOST}/characters/arcana/nukki-enhanced/idle-320.webp`;
 const WITH_READING = process.argv.includes("--reading");
 const RETRIES = 3;
 const RETRY_GAP_MS = 8000;
@@ -94,10 +98,27 @@ async function main() {
     if (!html.includes(ASSET_HOST)) throw new Error(`홈 본문에 ${ASSET_HOST} 없음 (NEXT_PUBLIC_ASSET_BASE_URL 미인라인 의심)`);
     return `200, ${ASSET_HOST} 인라인`;
   }));
-  results.push(await check("캐릭터 이미지(R2) = 200", async () => {
-    const r = await status(ASSET_IMAGE, { method: "GET" });
-    if (r.status !== 200) throw new Error(`${ASSET_IMAGE} status ${r.status}`);
+  results.push(await check("캐릭터 마스터(R2) = 200", async () => {
+    const r = await status(ASSET_MASTER, { method: "GET" });
+    if (r.status !== 200) throw new Error(`${ASSET_MASTER} status ${r.status}`);
     return "R2 서빙 OK";
+  }));
+  results.push(await check("캐릭터 변형(WebP) = 200", async () => {
+    const r = await status(ASSET_VARIANT, { method: "GET" });
+    if (r.status !== 200) throw new Error(`${ASSET_VARIANT} status ${r.status}`);
+    const ct = r.headers.get("content-type") ?? "";
+    if (!ct.includes("image/webp")) throw new Error(`${ASSET_VARIANT} content-type ${ct}`);
+    return "변형 서빙 OK";
+  }));
+  results.push(await check("홈이 변형 URL을 실제로 사용", async () => {
+    // 배포가 NEXT_PUBLIC_CHARACTER_VARIANTS를 잃어버리면 조용히 런타임 최적화로 되돌아간다.
+    // 자산이 멀쩡해도 앱이 안 쓰면 의미가 없으므로 HTML에서 직접 확인한다.
+    const r = await status(`${BASE}/`, { method: "GET" });
+    const html = await r.text();
+    if (!/\/characters\/[a-z]+\/nukki-enhanced\/[a-z]+-\d+\.webp/.test(html)) {
+      throw new Error("홈 HTML에 변형 URL이 없음 (NEXT_PUBLIC_CHARACTER_VARIANTS 미설정 의심)");
+    }
+    return "변형 URL 인라인 확인";
   }));
   if (WITH_READING) {
     results.push(await check("타로 리딩 1건(SSE)", readingSmoke));

@@ -257,18 +257,52 @@ test.describe("크로스 플랫폼 품질 검증", () => {
       expect(body.readUInt32BE(20), `${path} height`).toBe(1536);
     }
 
-    // /_next/image cold-start 최적화: 5.7MB PNG 최초 처리가 CI에서 90s를 초과할 수 있음.
-    // 30s 이내 응답 시 WebP 포맷 검증, 초과 시 soft-skip (이미지 존재·해상도는 위 Range 검증에서 확인됨).
-    const optimized = await request
-      .get(
-        "/_next/image?url=%2Fimages%2Fcharacters%2Farcana%2Fnukki-enhanced%2Fidle.png&w=48&q=75",
-        { headers: { accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" }, timeout: 30_000 },
-      )
-      .catch(() => null);
-    if (optimized) {
-      expect(optimized.status(), "optimized character thumbnail should load").toBeLessThan(400);
-      expect(optimized.headers()["content-type"]).toContain("image/webp");
+  });
+
+  // 이 가드는 두 번 무력했다. ① `.catch(() => null)` + `if (res)` 로 **어떤 실패도 통과**시켰고,
+  // ② 검사 대상이 `/_next/image`인데 `NEXT_PUBLIC_CHARACTER_VARIANTS=1`인 환경(CI·프로덕션)에서는
+  //    앱이 커스텀 로더로 변형을 직접 가리켜 **그 경로를 아예 타지 않는다.** 즉 변형이 전부
+  //    깨져도 초록이었다. 그래서 **홈이 실제로 요청하는 URL**을 HTML에서 뽑아 검증한다.
+  test("캐릭터 이미지 서빙 경로 — 홈이 실제로 쓰는 URL이 200", async ({ request, baseURL }) => {
+    test.setTimeout(90_000);
+
+    const home = await request.get("/");
+    expect(home.status()).toBe(200);
+    const html = await home.text();
+
+    // 변형이 켜져 있으면 HTML에 `<mood>-<width>.webp`가 박힌다(커스텀 로더 산출물).
+    // ⚠️ **첫 매칭 하나만 보면 안 된다** — 초안 가드가 그렇게 했다가, 없는 파일을 만들어도
+    // 다른 URL이 먼저 잡혀 통과했다. 홈이 요청하는 **모든 고유 변형**을 검사한다.
+    const found = [...html.matchAll(
+      /(?:https?:\/\/[^"'\\\s]+|\/images)\/characters\/[a-z]+\/nukki-enhanced\/[a-z]+-(\d+)\.webp/g,
+    )];
+
+    if (found.length > 0) {
+      const unique = [...new Map(found.map((m) => [m[0], m])).values()];
+      const results = await Promise.all(
+        unique.map(async (m) => {
+          const url = m[0].startsWith("http") ? m[0] : new URL(m[0], baseURL).toString();
+          const res = await request.get(url, { timeout: 20_000 });
+          return { url, width: Number(m[1]), status: res.status(), type: res.headers()["content-type"] ?? "" };
+        }),
+      );
+
+      const broken = results.filter((r) => r.status !== 200 || !r.type.includes("image/webp"));
+      expect(broken.map((b) => `${b.status} ${b.type} ${b.url}`), "홈이 요청하는 변형은 전부 200/webp여야 한다").toEqual([]);
+
+      // 로더의 폭 사다리와 생성 스크립트가 어긋나면 여기서 걸린다.
+      const outOfLadder = results.filter((r) => ![320, 640, 960, 1280, 1920].includes(r.width));
+      expect(outOfLadder.map((r) => r.url), "사다리 밖 폭이 요청됐다").toEqual([]);
+      return;
     }
+
+    // 변형이 꺼진 환경(로컬 기본)에서는 런타임 최적화 경로가 정본이다. soft-skip하지 않는다.
+    const optimized = await request.get(
+      "/_next/image?url=%2Fimages%2Fcharacters%2Farcana%2Fnukki-enhanced%2Fidle.png&w=48&q=75",
+      { headers: { accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8" }, timeout: 60_000 },
+    );
+    expect(optimized.status(), "변형이 꺼진 환경에서는 런타임 최적화가 동작해야 한다").toBeLessThan(400);
+    expect(optimized.headers()["content-type"] ?? "").toContain("image/webp");
   });
 
   test("캐릭터 이미지 에셋 — 전체 해상도(2816×1536) 유지", async ({ page }, testInfo) => {
