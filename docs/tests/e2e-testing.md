@@ -367,7 +367,7 @@ QA 실패 시 GitHub Issue(`🚨 주간 QA 실패`)가 자동 생성됩니다. m
 > | Desktop Chrome | 1 | 현재 임계경로. 상향은 S-3으로 검토 중 |
 > | Mobile Android | **2** | 임계경로였던 잡을 상향해 테스트 시간 5.0m→2.9m·4.2m→2.7m 단축, 2런 flaky 0 (#531) |
 >
-> ⚠️ **"2코어/7GB 러너 → 호스트 OOM"이라는 옛 근거는 폐기됐다.** 실측 러너는 `nproc=4`·15989MiB이고 E2E 구간 메모리 피크는 총량의 15~21%, swap 0, dmesg OOM 흔적 0이다. `Target page/context/browser has been closed`는 **테스트 예산 소진 후 Playwright가 페이지를 정리하며 생기는 후행 증상**이지 원인이 아니다. 실제 제약은 CPU다. 상세: [`operations/known-issues.md`](../operations/known-issues.md), 이슈 #522·#525.
+> ⚠️ **제약 자원은 메모리가 아니라 CPU다.** `Target page/context/browser has been closed`는 **테스트 예산 소진 후의 후행 증상**이지 원인이 아니며, #462의 "2코어/7GB → 호스트 OOM" 가설은 실측으로 반증됐다. 계측값·시간순 이력·폐기된 가설은 [`operations/e2e-incidents.md`](../operations/e2e-incidents.md)가 **정본**이다.
 >
 > CI `retries: 2`(결함 탐지 가드는 0), 로컬은 workers 무제한 — CI 재현은 `--workers=1`.
 

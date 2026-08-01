@@ -73,7 +73,7 @@ src/
 ├── test-helpers/    # Vitest 공통 mock/setup
 └── types/           # 공유 타입
 
-docs/                # architecture, archive, conventions, design, operations, superpowers, workflow
+docs/                # specs(SDD), tests(TDD), wbs, architecture, conventions, design, operations, workflow, archive, superpowers
 e2e/                 # Playwright specs
 scripts/
 ├── e2e-full/        # E2E 전수 검증 오케스트레이터

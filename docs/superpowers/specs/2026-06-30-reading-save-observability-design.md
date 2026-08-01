@@ -70,7 +70,7 @@ controller.close()
 - `parseError` 경로: 저장·saved 이벤트 모두 없음(기존 `result.parseError` 시그널 유지).
 - 영구 에러(23xxx 등): `withRetry`가 즉시 throw → catch → `saved:false` + 구조적 로그.
 - transient: `withRetry` 3회 후 throw → 동일 처리.
-- 저장 행(hang): 결과는 이미 전송됨. 페이지 240s 하드타임아웃 + `AbortController`가 극단 케이스 커버.
+- 저장 행(hang): 결과는 이미 전송됨. 페이지 240s 하드타임아웃 + `AbortController`가 극단 케이스 커버. <br>⚠️ **(2026-08-01 갱신)** 이 시점 기록이다. 현재 클라이언트 하드 타임아웃은 **280s**이며 서버 `AI_TIMEOUT_MS`가 240s다(의도된 40s 마진). 정본: `docs/architecture/ai-infrastructure.md`
 
 ## 테스트 (TDD)
 
