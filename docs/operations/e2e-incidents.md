@@ -286,6 +286,21 @@ TypeScript도(`arg: any`) 기본 lint 규칙도(해당 규칙 없음) 이것을 
 - 예산 재산정: `test.setTimeout` 90s → **60s**, 단계 예산 합 46s
   (성공 시도 trace 실측 총시간은 **2.1초**였다)
 
+#### 후속 (같은 날, 수정 검증 중 드러난 2차 원인)
+
+타임아웃을 고치자 **경계 안에서 정확히 실패**했다 — 93초 hang 대신
+`TimeoutError: page.waitForFunction: Timeout 3000ms exceeded` (`navigation.spec.ts:258`).
+이것이 수정의 첫 성과다: 이제 실패가 원인을 가리킨다.
+
+드러난 2차 원인: `/tarot`은 `useResetScrollOnStep(step)`을 쓰는데, 이 훅이 마운트 시
+`window.scrollTo(0, 0)`을 **즉시 + rAF + rAF 이중**으로 세 번 실행한다
+("다양한 렌더링 타이밍에 대응"이 의도). 테스트의 `scrollTo(0, 300)`가 그 사이에 끼면
+곧바로 0으로 되돌려져 `scrollY > 0`이 영원히 참이 되지 않는다. hydration 타이밍에 달려
+있어 **간헐적**이다. 홈에서 같은 패턴이 통과하는 이유가 이것이다 — **홈은 이 훅을 쓰지 않는다.**
+
+앱 동작은 의도된 것이므로 테스트가 맞췄다: `expect.poll`로 **스크롤이 유지될 때까지 재시도**하고,
+진짜로 불가능하면 5초 안에 실패한다. 로컬 Mobile Android **5회 연속 통과**(8.5~10.5초).
+
 ---
 
 ### 2026-08-01 (4차) — `ERR_BLOCKED_BY_ORB` 최초 관측 (미해결, 관측 중)

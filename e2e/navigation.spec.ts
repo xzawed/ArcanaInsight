@@ -244,18 +244,26 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
       { timeout: 5_000 },
     );
 
-    // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
-    await page.evaluate(() => window.scrollTo(0, 300));
-    // 스크롤이 실제로 먹었는지 확인한다. 이제는 hard wait다 — 여기서 실패하면 이 테스트의
-    // 전제가 깨진 것이므로 조용히 넘어가면 안 된다.
+    // 타로 페이지에서 아래로 스크롤 — **성공할 때까지 재시도**한다.
     //
-    // ⚠️ 옵션은 **3번째 인자**여야 한다. 2번째는 `arg`(페이지 함수 인자)라 옵션 객체를 넣으면
-    // 조용히 무시되고 타임아웃이 걸리지 않는다(`actionTimeout` 기본 0 = 무제한).
-    // 2026-08-01 trace 실측: 5초를 의도한 이 대기가 **93.1초**를 태워 테스트 예산을 통째로
-    // 소진했고, 그것이 이 테스트가 만성적으로 flaky했던 실제 원인이었다.
-    // 브라우저는 90초 내내 살아 있었고(스크린캐스트 454프레임) 네트워크도 83건 전부 완료였다.
-    // lint 가드: `arcana/no-waitforfunction-options-as-arg`
-    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 3_000 });
+    // 한 번만 스크롤하면 안 되는 이유(2026-08-01 CI 실측으로 확인): `/tarot`은
+    // `useResetScrollOnStep(step)`을 쓰는데, 이 훅이 마운트 시 `window.scrollTo(0, 0)`을
+    // **즉시 + rAF + rAF 이중**으로 세 번 실행한다("다양한 렌더링 타이밍에 대응"이 의도).
+    // 우리 `scrollTo(0, 300)`가 그 세 번 사이에 끼면 곧바로 0으로 되돌려지고,
+    // `scrollY > 0`은 영원히 참이 되지 않는다. hydration 타이밍에 달려 있어 **간헐적**이다.
+    // 홈(`:174`)에서 같은 패턴이 통과하는 이유가 이것이다 — 홈은 이 훅을 쓰지 않는다.
+    //
+    // 앱 동작은 의도된 것이므로 테스트가 맞춰야 한다. 리셋과 경합해도 결국 스크롤이 남는지를
+    // 폴링으로 확인하고, 진짜로 스크롤이 불가능하면 5초 안에 실패한다.
+    await expect
+      .poll(
+        async () => {
+          await page.evaluate(() => window.scrollTo(0, 300));
+          return page.evaluate(() => window.scrollY);
+        },
+        { timeout: 5_000, message: "/tarot에서 window 스크롤이 유지되지 않음(리셋 훅과 경합)" },
+      )
+      .toBeGreaterThan(0);
 
     // 홈으로 이동 — 안정 testid(mobile-nav-home) + Playwright 신뢰 클릭(액셔너빌리티 자동 대기).
     // `nav a[href='/']`.last()+synthetic evaluate-click+waitUntil:"commit"은 홈(소프트) 네비게이션에서
