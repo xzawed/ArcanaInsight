@@ -27,9 +27,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Railway 배포 완료 대기 (standalone ~1-2분 + 스왑 여유)
-        run: sleep 180
+      # 고정 sleep 대신 **배포된 커밋이 이 커밋이 될 때까지** 폴링한다.
+      # 2026-08-01: 180초 sleep 뒤 스모크가 돌았는데 Railway 배포가 끝나지 않아 옛 빌드를
+      # 검사했다. 실패는 났지만 "배포 안 됨"인지 "코드 결함"인지 구분되지 않았다.
+      - name: Railway 배포 완료 대기 (커밋 반영까지 폴링, 최대 10분)
+        env:
+          EXPECT: ${{ github.sha }}
+          BASE: https://arcanainsight-production.up.railway.app
+        run: |
+          expect="${EXPECT:0:7}"
+          for i in $(seq 1 40); do
+            got=$(curl -s --max-time 15 "$BASE/api/health" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(JSON.parse(d).commit??"")}catch{process.stdout.write("")}})')
+            echo "[$i/40] deployed=${got:-?} expect=$expect"
+            [ "$got" = "$expect" ] && exit 0
+            sleep 15
+          done
+          echo "::warning::10분 내 배포 미반영 — 아래 스모크가 격차를 실패로 보고합니다"
       - name: 프로덕션 스모크
         env:
           SMOKE_BASE_URL: https://arcanainsight-production.up.railway.app
+          # 프로덕션이 이 커밋이 아니면 실패한다 — 배포 누락을 스모크가 직접 잡는다.
+          SMOKE_EXPECT_COMMIT: ${{ github.sha }}
         run: node scripts/smoke-prod.mjs ${{ (github.event_name == 'workflow_dispatch' && inputs.with_reading) && '--reading' || '' }}

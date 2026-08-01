@@ -58,6 +58,31 @@
 프로덕션 번들에 포함되지 않으며, 악용하려면 자기 eslint config에 악성 glob을 주입해야 한다.
 **같은 override를 다시 시도하지 말 것.**
 
+### 프로덕션이 main보다 뒤처져도 알 방법이 없었다 (2026-08-01~02)
+
+#546을 머지했는데 **하루가 지나도 Railway가 배포하지 않았다.** 신설한 `/api/health/db`가
+404였는데, 그것이 **"배포 안 됨"인지 "코드 결함"인지 구분할 수단이 없었다** —
+로컬 standalone 빌드로 직접 재현(`{"db":"ok","latencyMs":74}`)해 보고서야 배포 누락임을 알았다.
+
+| 신호 | 당시 |
+|---|---|
+| `/api/health` | 200 — **어느 코드인지 알 수 없음** |
+| post-deploy-smoke | 실패했지만 원인 불명 |
+| 고정 `sleep 180` | 배포가 더 오래 걸리면 **옛 빌드를 검사** |
+
+#### 조치
+
+- `/api/health`가 `RAILWAY_GIT_COMMIT_SHA`(7자리)를 함께 반환한다. 비밀이 아니다
+- 워크플로가 **고정 sleep 대신 커밋 반영까지 폴링**한다(최대 10분)
+- 스모크가 `SMOKE_EXPECT_COMMIT`과 대조해 **격차를 실패로** 보고한다
+
+> ⚠️ Railway 배포가 왜 누락됐는지는 **미규명**이다. Railway 대시보드 접근이 필요하며
+> `pnpm verify:railway-config`는 토큰이 있어야 한다(`~/.railway/config.json`에 토큰 없음).
+> 서비스 config 드리프트(`startCommand`·`HOSTNAME=0.0.0.0`)로 배포가 FAILED 되는 알려진
+> 실패 모드가 있으므로 재발 시 그것부터 확인한다.
+
+---
+
 ### 프로덕션 DB가 9일간 죽어 있었는데 모든 자동 신호가 초록이었다 (2026-07-23 ~ 08-01)
 
 프로덕션 Supabase 프로젝트(`hkjrupbauexapmmzbcgw`)가 **일시정지(INACTIVE)** 상태였다.
