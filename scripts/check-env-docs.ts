@@ -4,7 +4,8 @@
  * 사용법:
  *   pnpm exec tsx scripts/check-env-docs.ts          # 검사 (불일치 시 exit 1)
  *
- * docs/operations/env-variables.md가 존재하지 않으면 경고 후 종료(exit 0).
+ * docs/operations/env-variables.md가 존재하지 않으면 **실패(exit 1)** 한다. 예전에는 exit 0으로
+ * 건너뛰었는데, 문서를 옮기면 검사가 꺼진 채 CI가 초록이 되는 구멍이었다(#529).
  */
 
 import * as fs from "node:fs";

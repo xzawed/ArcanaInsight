@@ -116,8 +116,11 @@ pnpm test:e2e             # Playwright
 pnpm test:e2e:full        # 전수 E2E
 pnpm test:e2e:full:ci     # 대표 케이스 E2E
 pnpm sync:test-count      # 고정 테스트 수가 있는 문서 동기화
-pnpm check:env-docs       # env.ts와 env 문서 정합성
-pnpm check:doc-links      # 문서 링크 검증
+pnpm check:env-docs       # env.ts와 env 문서 정합성 (정본 문서 실종 시 하드 실패)
+pnpm check:doc-links      # 문서 링크 + 코드가 하드코딩한 docs 경로 검증 (docs/·CLAUDE.md·.claude/·README·e2e/)
+pnpm check:guards         # 가드가 결함에 실제로 반응하는지 검증 (결함 주입 → 실패해야 통과)
+pnpm check:workflow-artifacts # Playwright 리포트가 if:failure()로 회귀하는 것 차단
+pnpm check:image-budget   # 캐릭터 마스터 치수 고정·용량 상한
 pnpm i18n:check           # 번역 키 drift 검출
 pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·overallReading·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
 pnpm smoke:prod           # 배포 후 프로덕션 스모크(health·홈+자산호스트 인라인·R2 이미지 200). --reading=리딩1건. post-deploy-smoke.yml이 main push마다 자동 실행
@@ -155,7 +158,7 @@ pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Sup
 
 - 레이아웃: 캐릭터 등장 페이지의 5:5 규칙과 모바일 배치는 [`docs/conventions/layout-rules.md`](docs/conventions/layout-rules.md)를 따른다.
 - 크로스 플랫폼: `100vh` 대신 `100dvh`, safe-area, focus-visible 규칙은 [`docs/conventions/cross-platform.md`](docs/conventions/cross-platform.md)를 따른다.
-- SSR/Hydration: 비결정 값(`Date`, `Math.random`, `window`)은 클라이언트 effect 안에서만 다룬다.
+- SSR/Hydration: **렌더 트리 모양을 클라이언트 전용 값으로 가르지 않는다.** 미디어 쿼리·`persist` 스토어·`window`·`Date`·`Math.random`으로 `return null`이나 요소 종류를 바꾸면 hydration이 깨져 그 사이 클릭이 유실된다(실측: React #418). 렌더 유무를 가르는 자리는 `useReducedMotionSafe`/`useHydrated`(`useSyncExternalStore`)를 쓰고, `useEffect`+`setState` 방식은 lint가 막는다. 값만 바꾸는(예: `animate` prop) 용도는 제약 없음. 정본: [`docs/specs/platform/rendering-contract.md`](docs/specs/platform/rendering-contract.md)
 - API 입력: 타입 단언보다 Zod schema와 `safeParse`를 사용한다.
 - i18n: UI 텍스트는 번역 키를 우선 추가하고 `t()`/`useT()`로 노출한다.
 - 테스트 파일: API 라우트 테스트는 `src/__tests__/api/`에 둔다.

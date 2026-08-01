@@ -8,7 +8,11 @@
 |---|---|---|
 | `pre-push-checks.sh` | `.claude/settings.json` PreToolUse hook | `tsc --noEmit` + `eslint` + `next build` 통과 확인 후 push 허용 |
 | `hooks/upload-assets-r2-guard.sh` | `.claude/settings.json` PreToolUse `Bash(pnpm upload:assets*)` | `upload:assets`(`:r2` 없음=Supabase) 실행 시 "card-styles는 R2로 이전됨 → `upload:assets:r2` 사용" 확인 요청 |
-| `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | docs/ 내 상대 링크(파일 존재) 검증. 동결 스냅샷(`superpowers/plans/archive`·`superpowers/specs`)은 제외, 깨진 링크 발견 시 exit 1(push·CI 차단) |
+| `check-doc-links.ts` | `.github/workflows/docs-sync.yml` + `pnpm check:doc-links` | 마크다운 링크 + **코드가 하드코딩한 `docs/…` 경로** 검증. 범위는 `docs/`뿐 아니라 **`CLAUDE.md`·`.claude/**`·루트 `README*.md`·`e2e/`** 까지(#529 — 이전에는 docs/ 안만 봐서 링크가 가장 많은 CLAUDE.md가 무검사였다). 동결 스냅샷(`superpowers/plans/archive`·`superpowers/specs`)은 제외. 깨진 링크·필수 대상 누락 시 exit 1 |
+| `check-guards-selftest.ts` | `docs-sync.yml` + `pnpm check:guards` | **가드가 결함에 실제로 반응하는지** 검증. 각 검사 스크립트에 결함을 주입해 실패를 확인한 뒤 원복한다. "존재하지만 무력한 가드"가 세 번 나온 뒤 도입(#532) |
+| `check-workflow-artifacts.ts` | `docs-sync.yml` + `pnpm check:workflow-artifacts` | Playwright 리포트 업로드가 `if: failure()`로 회귀하는 것 차단 — retries가 흡수한 flaky 실행의 trace가 폐기된다(#530) |
+| `check-character-image-budget.ts` | `docs-sync.yml` + `pnpm check:image-budget` | 캐릭터 마스터 치수 고정(2816×1536)·용량 상한(6.5MB). 의도된 2x 마스터를 부정하지 않고 드리프트·무압축 재출력만 막는다 |
+| `generate-assets/generate-character-variants.ts` | `pnpm generate:character-variants` | 마스터에서 사전 생성 WebP 변형(320/640/960/1280/1920) 생성. 런타임 `next/image` 최적화 제거용(#521) |
 | `check-translation-keys.ts` | `.github/workflows/docs-sync.yml` + `pnpm i18n:check` | 번역 키 drift 검출 (ko/en/ja 동기화 검증) |
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
 | `eval-reading.ts` | `pnpm eval:reading` | 리딩 품질 계약 회귀 검증 — 타로·사주·신점 리딩 API에 익명 요청→SSE 파싱→directAnswer·overallReading·parseError·본문 검증. CI 미연동(실 AI 호출·온디맨드), `EVAL_BASE_URL`로 대상 지정 |
@@ -21,8 +25,12 @@
 |---|---|---|
 | `pnpm check:doc-links` | `check-doc-links.ts` | docs 링크 검증 (로컬·CI) |
 | `pnpm check:env-docs` | `check-env-docs.ts` | `src/lib/env.ts` ↔ `docs/operations/env-variables.md` 정합성 |
+| `pnpm check:guards` | `check-guards-selftest.ts` | 가드가 결함에 실제로 반응하는지 검증 (결함 주입 → 실패해야 통과) |
+| `pnpm check:workflow-artifacts` | `check-workflow-artifacts.ts` | Playwright 아티팩트 업로드 조건 회귀 차단 |
+| `pnpm check:image-budget` | `check-character-image-budget.ts` | 캐릭터 마스터 치수·용량 검사 |
+| `pnpm generate:character-variants` | `generate-assets/generate-character-variants.ts` | 사전 생성 WebP 변형 생성 (`--force`로 전량 재생성) |
 | `pnpm i18n:check` | `check-translation-keys.ts` | 번역 키 drift 검출 (로컬·CI) |
-| `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·unit-testing.md 자동 갱신 |
+| `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·`docs/tests/unit-testing.md` 갱신. ⚠️ 현재 두 문서 모두 고정 개수를 두지 않아 갱신 대상이 없다 — 개수를 다시 명시할 때만 의미가 있다 |
 | `pnpm eval:reading` | `eval-reading.ts` | 리딩 품질 계약 검증(directAnswer·overallReading·parseError·SSE). `EVAL_BASE_URL` 지정(기본 프로덕션), `--service=` 필터. 실 AI 호출·온디맨드 |
 | `pnpm smoke:prod` | `smoke-prod.mjs` | 배포 후 프로덕션 스모크(health·홈 자산호스트·R2 이미지). `SMOKE_BASE_URL` 지정, `--reading`=타로 1건. main push마다 CI 자동 실행 |
 | `pnpm verify:railway-config` | `verify-railway-config.mjs` | standalone 배포 필수조건(startCommand·HOSTNAME) Railway API 검증 |
