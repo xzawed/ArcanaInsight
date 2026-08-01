@@ -45,7 +45,7 @@
 - **실패 로그는 CLI에 안 뜰 수 있음.** create-container/헬스체크 실패는 `railway logs`에 비어 나옴 → **대시보드 Details** 또는 SSH·GraphQL `deploymentLogs`(로그인 필요)로 확인.
 - **squash 머지**는 stacked 브랜치의 merge-base를 어긋내 후속 PR에 전체 충돌을 유발 → 배포/문서 PR은 항상 main 최신에서 분기.
 
-> **자동 검증**: `pnpm verify:railway-config` — 위 2필수조건(`startCommand=node server.js`·서비스 변수 `HOSTNAME=0.0.0.0`)을 Railway API로 assert(불일치 시 exit 1). 서비스 재생성/배포 의심 시 실행. `railway login` 또는 `RAILWAY_API_TOKEN` 필요.
+> **자동 검증**: `pnpm verify:railway-config` — 위 2필수조건(`startCommand=node server.js`·서비스 변수 `HOSTNAME=0.0.0.0`)을 Railway API로 assert(불일치 시 exit 1). 서비스 재생성/배포 의심 시 실행. 인증은 `RAILWAY_TOKEN`(프로젝트 토큰)·`RAILWAY_API_TOKEN`(계정/팀 토큰)·`railway login` 중 하나 — **토큰 종류마다 헤더가 달라** 스크립트가 변수명으로 구분한다. 배포 트리거의 `checkSuites` 게이팅 상태도 함께 출력한다.
 
 ---
 
