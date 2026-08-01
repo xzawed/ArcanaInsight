@@ -27,7 +27,7 @@
 | GitHub Actions 러너는 **`nproc=4` · `15989 MiB`**(AMD EPYC 7763/9V74) | 6런 24잡 실측 (#522) |
 | 제약 자원은 **메모리가 아니라 CPU**다 | 메모리 피크 2.4~3.4GiB(15~21%)·swap 0·dmesg OOM 흔적 0 |
 | `Target page/context/browser has been closed`는 **원인이 아니라 후행 증상**이다 | 테스트가 예산을 소진해 타임아웃되면 Playwright가 페이지를 정리하며 이 메시지를 남긴다 |
-| 만성 flake의 **대부분**은 앱 결함이었다 — 다만 **완전 해소는 아니다** | hydration 붕괴(#525)·커밋되지 않는 네비게이션(#530)·런타임 최적화(#533)로 크게 줄었으나, `navigation.spec.ts:221`은 #533 이후에도 재시도를 유발한다(아래 2026-08-01 정정 항목) |
+| 만성 flake의 **최종 원인은 테스트 코드**였다 | `waitForFunction` 옵션이 2번째 인자에 있어 타임아웃이 걸리지 않았다 — 5초 의도가 93.1초를 태웠다(아래 2026-08-01(3차)). 앞선 앱 결함 수정(#525·#530·#533)은 별개로 유효하다 |
 | 현재 CI workers — **Desktop Chrome 1 · Mobile Android 2** | `deploy.yml` 매트릭스가 `E2E_WORKERS`로 주입, 미지정·비정상 값이면 1로 폴백 |
 | 현재 평균 CPU busy — **58~63%**(DC workers:1) / **86~88%**(MA workers:2) | #536 런 실측(job 91309224089·91309224110). 피크 loadavg 3.79~8.84 / nproc=4 |
 | E2E 임계경로는 **고정돼 있지 않다** — DC·MA가 교대한다 | 7런 실측에서 DC 3회·MA 4회, 격차 10~104s (아래 2026-08-01 정정 항목) |
@@ -218,6 +218,153 @@ DC만 올렸을 때의 이득 기댓값은 **0에 가깝다.** WBS **S-3은 이 
 
 workers:1에서도 이미 60% 안팎이고 피크는 97% 이상이다 — **DC 상향의 자원 여유는 문서가
 말하던 것보다 얇다.** 이것도 S-3 종결 근거에 포함된다.
+
+---
+
+### 2026-08-01 (3차) — 만성 flake의 진짜 원인: 캡이 걸리지 않은 대기 하나
+
+`navigation.spec.ts`의 잔여 flake를 trace 아티팩트로 추적해 원인을 확정했다.
+**인프라도 앱도 아니었다 — 테스트 코드의 시그니처 오용이었다.**
+
+#### 실측 (run 30676659221, job 91305502434, Mobile Android)
+
+| 단계 | 소요 |
+|---|---:|
+| Navigate to `/tarot` | 0.5s |
+| Expect `toBeVisible` (캐릭터 카드) | 0.2s |
+| Evaluate `window.scrollTo(0, 300)` | 0.1s |
+| **Wait for function** | **93.1s** ← 전 예산 소진 |
+| After Hooks (teardown) | 4.1s |
+| **테스트 총계** | **94.2s** |
+
+문제의 코드는 **5초 캡을 의도**했다.
+
+```ts
+await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 }).catch(() => {});
+```
+
+#### 왜 5초가 93초가 되는가
+
+시그니처는 `waitForFunction(pageFunction, arg?, options?)`이고 **`arg`의 타입이 `any`**다.
+따라서 `{ timeout: 5000 }`은 `options`가 아니라 **`arg`로 직렬화되어 페이지에 넘어가고**,
+predicate가 인자를 쓰지 않으면 조용히 버려진다. `options`는 `{}`가 된다 —
+`playwright-core/lib/client/frame.js`에 옵션을 추론하는 휴리스틱은 **없다**.
+
+그리고 이 저장소는 `use.actionTimeout`을 설정하지 않으므로 기본값이 **0 = 무제한**이다
+(`playwright/lib/index.js`의 `actionTimeout: [0, …]` → `_defaultContextTimeout = 0`).
+결국 이 대기는 **테스트 예산을 전부 태울 때까지 멈추지 않는다.**
+
+`.catch(() => {})`로 soft wait를 의도한 자리도 **거부가 발생하지 않아 catch가 실행되지 않는다.**
+TypeScript도(`arg: any`) 기본 lint 규칙도(해당 규칙 없음) 이것을 잡지 못한다.
+
+#### 배제한 가설 — 전부 증거로
+
+| 가설 | 반증 |
+|---|---|
+| 브라우저 사망·OOM | 스크린캐스트 프레임 **454개가 90초 내내 균일**(~4.6fps) — 살아서 렌더 중이었다 |
+| 네트워크 지연 | 네트워크 trace **83건 요청 전부 완료**, 미완료 0 |
+| 목적지(홈)가 느림 | 홈에 도달조차 못 했다. `/tarot`의 scrollY 대기에서 멈췄다 |
+| CPU 압박 | 같은 테스트가 Desktop Chrome workers:1 · **평균 CPU 46.6%** 에서도 실패했다 |
+
+> 이 표가 중요한 이유: 이 flake는 그동안 **인프라 문제로 세 번 오진**됐다(OOM → workers →
+> 목적지 속도). 매번 그럴듯했고 매번 틀렸다. 원인은 처음부터 테스트 코드 한 줄에 있었다.
+
+#### 간헐적이었던 이유
+
+`window.scrollY > 0`은 보통 즉시 참이 된다. 참이 되지 않는 경우 —
+문서가 뷰포트보다 짧아 `scrollTo`가 no-op이 되는 순간 — 에만 무한 대기가 된다.
+**예산을 90초로 올린 조치는 실패를 더 느리게 만들었을 뿐이다.**
+
+#### 조치
+
+- 저장소 전체에서 같은 오용 **27곳**을 찾아 `waitForFunction(fn, undefined, { … })`로 교정.
+  이미 올바르던 3인자 2곳(`theme.spec.ts`·`cross-platform.spec.ts`)은 건드리지 않았다
+- **ESLint 커스텀 룰** `arcana/no-waitforfunction-options-as-arg` 신설 —
+  `eslint-plugin-playwright`에 해당 규칙이 없어 직접 만들었다. 셀프테스트에 등록해 red 검증
+- `navigation.spec.ts:221`에 **스크롤 가능 여부 hard gate** 추가. 이게 없으면 문서가 짧을 때
+  scrollY가 0→0이라 "초기화 성공"으로 **공허하게 통과**한다 — 정작 검증하려던 것을 못 본다
+- 예산 재산정: `test.setTimeout` 90s → **60s**, 단계 예산 합 46s
+  (성공 시도 trace 실측 총시간은 **2.1초**였다)
+
+#### 후속 (같은 날, 수정 검증 중 드러난 2차 원인)
+
+타임아웃을 고치자 **경계 안에서 정확히 실패**했다 — 93초 hang 대신
+`TimeoutError: page.waitForFunction: Timeout 3000ms exceeded` (`navigation.spec.ts:258`).
+이것이 수정의 첫 성과다: 이제 실패가 원인을 가리킨다.
+
+드러난 2차 원인: `/tarot`은 `useResetScrollOnStep(step)`을 쓰는데, 이 훅이 마운트 시
+`window.scrollTo(0, 0)`을 **즉시 + rAF + rAF 이중**으로 세 번 실행한다
+("다양한 렌더링 타이밍에 대응"이 의도). 테스트의 `scrollTo(0, 300)`가 그 사이에 끼면
+곧바로 0으로 되돌려져 `scrollY > 0`이 영원히 참이 되지 않는다. hydration 타이밍에 달려
+있어 **간헐적**이다. 홈에서 같은 패턴이 통과하는 이유가 이것이다 — **홈은 이 훅을 쓰지 않는다.**
+
+앱 동작은 의도된 것이므로 테스트가 맞췄다: `expect.poll`로 **스크롤이 유지될 때까지 재시도**하고,
+진짜로 불가능하면 5초 안에 실패한다. 로컬 Mobile Android **5회 연속 통과**(8.5~10.5초).
+
+---
+
+### 2026-08-01 (4차) — `ERR_BLOCKED_BY_ORB` 최초 관측 (미해결, 관측 중)
+
+PR #542 CI에서 이미지 무결성 가드(`retries: 0`)가 처음 보는 실패를 냈다.
+
+```
+[Desktop Chrome] › e2e/cross-platform.spec.ts › 이미지 — 모든 이미지 로드 성공
+Error: 네트워크 이미지 실패: net::ERR_BLOCKED_BY_ORB
+       https://cdn.xzawed.xyz/characters/haru/nukki-enhanced/idle-320.webp
+```
+
+#### 사후 실측 — 자산은 온전하다
+
+| 검사 | 결과 |
+|---|---|
+| `haru/idle-320.webp` | **200 · `Content-Type: image/webp` · 4950 bytes** |
+| 12캐릭터 `idle-320.webp` content-type | **전부 `image/webp`** |
+| R2 ↔ 로컬 무결성(크기 + ETag=md5) | **12/12 완전 일치** |
+| 이 시그니처의 CI 이력 | 최근 5런 **0건 — 이번이 최초** |
+| 동일 커밋 재실행 | **통과** (재현 안 됨) |
+
+#### 판정: 일시적 전달 조건 — 다만 **해결이 아니라 관측 중**이다
+
+ORB(Opaque Response Blocking)는 Chrome이 no-cors `<img>` 응답을 "이미지로 안전하게 쓸 수
+있는가"로 걸러 막는 기능이다. **정상 webp 바이트 + `image/webp` + 200이면 발동할 이유가 없다.**
+따라서 사후 실측과 모순되지 않으려면 **CI 그 순간의 응답이 지금과 달랐어야** 한다 —
+Cloudflare 챌린지/인터스티셜, WAF·rate limit 페이지, 5xx, 또는 200으로 위장한 비이미지 본문.
+
+> R-4(default 72키 삭제)와의 인과는 **약하다.** 삭제 대상은 `default*`뿐이고 idle은 전수 200이며,
+> 삭제 직후 돌아간 런 2건(30682887736·30681342481)은 ORB 0건이었다.
+
+#### ⚠️ ORB를 `ERR_ABORTED`처럼 예외로 넣지 마라
+
+| | `net::ERR_ABORTED` | `net::ERR_BLOCKED_BY_ORB` |
+|---|---|---|
+| 의미 | 요청 **취소**(hydration `src` 교체·언마운트) | 응답 수신 후 **"이미지가 아니다"로 차단** |
+| 사용자 체감 | 교체 성공 시 정상 | **그 이미지는 실제로 깨져 보인다** |
+| 예외 처리 | 정당 | **금지** |
+
+예외로 넣으면 200으로 위장한 챌린지 페이지·잘못된 본문을 삼키게 된다. 그것은 카드 이미지 404를
+**3.5주간 green으로 통과**시킨 2026-07-29 사고와 같은 방향의 후퇴다.
+
+#### 조치 — 예외가 아니라 관측과 위생
+
+- 가드에 **진단 메타 기록** 추가: 실패 시 `status`·`content-type`·`cf-cache-status`·`cf-ray`를
+  함께 남긴다. 지금 형태는 "ORB only"라 **200+비이미지**와 **4xx**를 구분할 수 없다 —
+  그것이 이번 조사를 어렵게 만든 구조적 맹점이었다
+- **캐릭터 자산에 `Cache-Control` 누락을 교정**(`upload-characters-r2.ts`). 카드·스킨은
+  `public, max-age=31536000, immutable`인데 캐릭터만 없어 `cf-cache-status: DYNAMIC`이었다 —
+  **가장 무거운 자산이 매 요청 오리진을 탔다.** ORB의 증명된 원인은 아니지만 노출을 줄인다
+  > ⚠️ 기존 R2 객체에는 소급 적용되지 않는다. 헤더를 실제로 반영하려면 재업로드가 필요하다
+
+#### 재발하면 볼 것
+
+1. 실패 메시지의 **메타 필드** — `status<400 + ct=text/html`이면 챌린지/인터스티셜,
+   `status>=400`이면 오리진·키 문제, `ct=image/*`인데 ORB면 본문 위장
+2. 러너에서 **독립 probe**: `curl -sI` + `curl -s --range 0-15 | xxd` (기대: `RIFF….WEBP`).
+   브라우저만 막히고 curl은 정상이면 **엣지 차등**(봇/IP) 후보
+3. Cloudflare **Security Events**를 `cf-ray`·시각으로 조회 — Bot Fight Mode,
+   Browser Integrity Check, rate limiting 규칙이 GitHub Actions IP를 오탐하는지
+4. 다수 URL 동시 ORB면 WAF/CF 장애, 특정 캐릭터·폭만 반복이면 객체·키 문제
+
+**임계값**: 2주 내 2회 이상 같은 시그니처면 CDN 설정 조사를 우선한다. 그때도 가드 예외는 금지다.
 
 ---
 

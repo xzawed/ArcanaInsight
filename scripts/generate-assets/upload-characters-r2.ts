@@ -122,7 +122,17 @@ async function main() {
         if (SKIP_EXISTING && (await keyExists(client, bucket, key))) { skipped++; continue; }
         const body = fs.readFileSync(local);
         const contentType = local.endsWith('.webp') ? 'image/webp' : 'image/png';
-        const res = await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }));
+        // 카드(`upload-to-r2.ts`)·스킨(`upload-skins-r2.ts`)과 같은 정책. 캐릭터만 빠져 있어서
+        // 응답에 `Cache-Control`이 없었고 `cf-cache-status: DYNAMIC` — **가장 무거운 자산이
+        // 매 요청 오리진을 타고 있었다.** 파일명이 내용에 고정(내용이 바뀌면 새 캐릭터/새 표정)이라
+        // immutable이 안전하다. 덮어쓰기 시 퍼지 규칙은 `docs/conventions/image-assets.md`.
+        const res = await client.send(new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: body,
+          ContentType: contentType,
+          CacheControl: 'public, max-age=31536000, immutable',
+        }));
         const etag = (res.ETag ?? '').replace(/"/g, '');
         const local5 = md5(body);
         if (etag && etag !== local5) {

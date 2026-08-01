@@ -34,7 +34,7 @@ test.describe("UI 품질 — 텍스트 깨짐 감지", () => {
       // 외부 CDN(R2) 배경/카드 이미지가 window.load·networkidle을 지연시키므로(Mobile Android 타임아웃)
       // load 이벤트가 아닌 콘텐츠 렌더 자체를 대기한다 (web-first).
       await page.goto(p.path, { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, { timeout: 15_000 });
+      await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, undefined, { timeout: 15_000 });
       const bodyText = await page.textContent("body");
 
       for (const pattern of JSON_ARTIFACTS) {
@@ -49,7 +49,7 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
   test("홈 — 필수 섹션 타이틀", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     // CharacterGallery는 dynamic import이므로 "상담사" 텍스트가 hydration 후 렌더링될 때까지 대기 (아래 waitForFunction이 준비 신호)
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
 
     const body = await page.textContent("body");
     expect(body).toContain("상담사");
@@ -58,21 +58,21 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 
   test("타로 — 캐릭터 선택 텍스트", async ({ page }) => {
     await page.goto("/tarot", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const body = await page.textContent("body");
     expect(body).toContain("상담사");
   });
 
   test("사주 — 캐릭터 선택 텍스트", async ({ page }) => {
     await page.goto("/saju", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const body = await page.textContent("body");
     expect(body).toContain("상담사");
   });
 
   test("신점 — 캐릭터 선택 + 주제", async ({ page }) => {
     await page.goto("/shinjeom", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const body = await page.textContent("body");
     expect(body).toContain("신점");
     expect(body).toContain("상담사");
@@ -113,7 +113,7 @@ test.describe("UI 품질 — 핵심 텍스트 존재 확인", () => {
 test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
   test("홈 — 가로 스크롤 없음 (오버플로우)", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
@@ -121,7 +121,7 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
 
   test("타로 — 가로 스크롤 없음", async ({ page }) => {
     await page.goto("/tarot", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
@@ -145,7 +145,7 @@ test.describe("UI 품질 — 레이아웃 깨짐 감지", () => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     // 이미지 로드 검사 — 페이지 콘텐츠 렌더 대기 후, 로드가 끝난(complete) 뷰포트 이미지만 판정.
     // (networkidle은 외부 R2 lazy 카드까지 기다려 Mobile Android 지연 → web-first 콘텐츠 신호 사용)
-    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), { timeout: 15_000 });
+    await page.waitForFunction(() => document.body.textContent?.includes("상담사"), undefined, { timeout: 15_000 });
     const images = page.locator("img");
     const count = await images.count();
 
@@ -174,7 +174,7 @@ test.describe("UI 품질 — 의도하지 않은 동작 감지", () => {
     const paths = ["/", "/tarot", "/saju", "/shinjeom", "/settings", "/terms", "/privacy"];
     for (const path of paths) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, { timeout: 15_000 });
+      await page.waitForFunction(() => (document.body.textContent?.length ?? 0) > 100, undefined, { timeout: 15_000 });
       const text = await page.textContent("body");
       expect(text?.length ?? 0, `${path} 페이지가 비어있음`).toBeGreaterThan(100);
     }
@@ -196,7 +196,7 @@ test.describe("UI 품질 — 의도하지 않은 동작 감지", () => {
 
   test("에러 경계 — 존재하지 않는 캐릭터 → 에러 메시지", async ({ page }) => {
     await page.goto("/character/nonexistent", { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => /찾을 수 없|404|not found/i.test(document.body.textContent ?? ""), { timeout: 15_000 });
+    await page.waitForFunction(() => /찾을 수 없|404|not found/i.test(document.body.textContent ?? ""), undefined, { timeout: 15_000 });
     const text = await page.textContent("body");
     expect(text).toMatch(/찾을 수 없|404|not found/i);
   });

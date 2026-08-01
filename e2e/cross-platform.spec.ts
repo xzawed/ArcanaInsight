@@ -111,8 +111,16 @@ test.describe("크로스 플랫폼 품질 검증", () => {
       // 네트워크 시그널이 정본 — DOM complete 폴링은 로딩 미완료(!complete) 깨진 이미지를 스킵해
       // CI에서 카드 이미지 404가 flaky-pass로 빠져나갔던 결함을 막는다. goto 전에 리스너 부착 필수.
       const networkFailures: string[] = [];
+      // 실패 분류에 필요한 응답 메타. 실패했을 때만 읽으므로 정상 경로 비용은 무시할 수 있다.
+      const imageMeta = new Map<string, string>();
       page.on("response", (response) => {
         if (response.request().resourceType() !== "image") return;
+        const h = response.headers();
+        imageMeta.set(
+          response.url(),
+          `status=${response.status()} ct=${h["content-type"] ?? "-"} ` +
+            `cf-cache=${h["cf-cache-status"] ?? "-"} cf-ray=${h["cf-ray"] ?? "-"}`,
+        );
         if (response.status() < 400) return;
         networkFailures.push(`${response.status()} ${response.url()}`);
       });
@@ -122,8 +130,15 @@ test.describe("크로스 플랫폼 품질 검증", () => {
         // net::ERR_ABORTED는 결함이 아님 — 홈 StyleSelector lazy R2 카드가 hydration/src 교체·언마운트로
         // 진행 중 요청을 취소할 때 Playwright가 requestfailed를 낸다. retries:0 가드에서 이 취소만으로
         // 적색이 되면 정상 페이지가 flaky-fail 한다. 진짜 깨진 이미지는 status>=400 또는 DOM naturalWidth=0으로 잡힌다.
+        //
+        // ⚠️ **`net::ERR_BLOCKED_BY_ORB`를 여기에 추가하지 마라.** ERR_ABORTED는 요청 *취소*(사용자에게
+        // 보이는 결과 정상)지만, ORB는 응답을 받은 뒤 브라우저가 "이미지가 아니다"라고 판정해 차단한 것이라
+        // **그 이미지는 실제로 깨져 보인다**. 예외로 넣으면 200으로 위장한 챌린지 페이지·잘못된 본문을
+        // 삼키게 되고, 그것은 카드 이미지 404를 3.5주간 green으로 통과시킨 #509와 같은 방향의 후퇴다.
+        // 대신 아래 메타를 함께 남겨 "일시적 CDN 조건"과 "진짜 자산 결함"을 사후에 구분할 수 있게 한다.
         if (failure === "net::ERR_ABORTED") return;
-        networkFailures.push(`${failure} ${request.url()}`);
+        const meta = imageMeta.get(request.url());
+        networkFailures.push(`${failure} ${request.url()}${meta ? ` [${meta}]` : " [응답 없음]"}`);
       });
 
       await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -142,6 +157,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
               });
             return imgs.length > 0 && imgs.every((el) => el.complete);
           },
+          undefined,
           { timeout: 15_000 }
         )
         .catch(() => {
@@ -206,6 +222,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
           document.scrollingElement?.scrollTop ||
           document.documentElement.scrollTop ||
           document.body.scrollTop) > 0,
+      undefined,
       { timeout: 10000 }
     );
 

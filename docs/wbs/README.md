@@ -37,7 +37,7 @@ E2E 안정성 확보 ──▶ workers 재평가 ──▶ CI 시간 단축
 
 > **S-1a를 먼저 둔 것이 옳았다.** 원래 WBS는 S-1을 무조건 선행으로 두었는데, 그 사이 hydration 결함이 해소된 상태였다. 재측정 없이 "안정성 확보"를 선행 조건으로 걸었다면 S-2는 열리지 않았을 것이다.
 >
-> ⚠️ **`navigation.spec.ts:221` flake는 아직 해소되지 않았다.** #530·#533으로 크게 줄었으나 #533 이후 런에서도 `1 flaky`가 관측된다(job 91301390897 DC workers:1 CPU 46.6%, job 91305502434 MA workers:2 CPU 78.2% — **부하가 낮은 쪽에서도 났다**). 잡 결론은 success라 로그의 `1 flaky`를 직접 봐야 드러난다. 다음 조치는 테스트를 더 고치는 것이 아니라 **flaky 런의 trace로 실패 지점을 확정하는 것**이다. 상세: [`../operations/e2e-incidents.md`](../operations/e2e-incidents.md) 2026-08-01(2차) 항목.
+> ✅ **`navigation.spec.ts:221` flake 해소 (2026-08-01).** trace 실측으로 원인을 확정했다 — 인프라도 앱도 아니고 **`waitForFunction`의 옵션이 2번째 인자에 있어 타임아웃이 무시된 것**이었다(5초 의도 → **93.1초** 소진). 저장소 전체 27곳을 교정하고 ESLint 룰 `arcana/no-waitforfunction-options-as-arg`로 재발을 막았다. 상세: [`../operations/e2e-incidents.md`](../operations/e2e-incidents.md) 2026-08-01(3차) 항목.
 
 > **S-3 종결 근거 (2026-08-01 실측)**
 >

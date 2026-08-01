@@ -3,9 +3,13 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import playwright from "eslint-plugin-playwright";
 import noImagePriorityRemote from "./eslint-rules/no-image-priority-remote.mjs";
+import noWaitForFunctionOptionsAsArg from "./eslint-rules/no-waitforfunction-options-as-arg.mjs";
 
 const arcana = {
-  rules: { "no-image-priority-remote": noImagePriorityRemote },
+  rules: {
+    "no-image-priority-remote": noImagePriorityRemote,
+    "no-waitforfunction-options-as-arg": noWaitForFunctionOptionsAsArg,
+  },
 };
 
 const eslintConfig = defineConfig([
@@ -20,8 +24,13 @@ const eslintConfig = defineConfig([
   // 살아남아 `pnpm test:e2e:full`만 조용히 flaky했다(2026-07-29 검토에서 발견).
   {
     files: ["e2e/**/*.ts", "scripts/e2e-full/**/*.ts"],
-    plugins: { playwright },
-    rules: { "playwright/no-networkidle": "error" },
+    plugins: { playwright, arcana },
+    rules: {
+      "playwright/no-networkidle": "error",
+      // waitForFunction의 옵션을 2번째 인자에 두면 `arg`로 먹혀 **타임아웃이 무시된다**.
+      // 5초를 의도한 대기가 93초를 태운 것이 만성 flake의 실제 원인이었다(2026-08-01 trace 실측).
+      "arcana/no-waitforfunction-options-as-arg": "error",
+    },
   },
   // 재발 방지 가드: <Image priority>는 로컬 정적 경로에만. 외부 CDN URL에 붙이면 preload가
   // window.load를 게이트해 E2E 타임아웃·LCP 악화를 만든다(PR #412). 이 규칙은
