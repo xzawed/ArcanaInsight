@@ -142,6 +142,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
               });
             return imgs.length > 0 && imgs.every((el) => el.complete);
           },
+          undefined,
           { timeout: 15_000 }
         )
         .catch(() => {
@@ -206,6 +207,7 @@ test.describe("크로스 플랫폼 품질 검증", () => {
           document.scrollingElement?.scrollTop ||
           document.documentElement.scrollTop ||
           document.body.scrollTop) > 0,
+      undefined,
       { timeout: 10000 }
     );
 

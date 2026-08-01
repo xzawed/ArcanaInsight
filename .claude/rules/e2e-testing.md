@@ -185,6 +185,32 @@ page.on("requestfailed", (r) => { if (r.resourceType() === "image") ... });
 > 빌드·테스트하고 success로 끝났다 — 프로덕션 이미지 파이프라인이 한 번도 검증되지 않았다.
 > 자동 검증: `pnpm check:workflow-env-parity` (env 블록 단위 비교 — 잡 하나에서만 빠져도 잡는다)
 
+## ⚠️ `waitForFunction`의 옵션은 **3번째 인자**다
+
+시그니처는 `waitForFunction(pageFunction, arg?, options?)`이고 `arg`가 `any`라,
+옵션을 2번째에 두면 **조용히 `arg`로 먹히고 타임아웃이 걸리지 않는다.**
+
+```ts
+// ❌ 금지 — timeout이 무시되어 테스트 예산을 전부 태운다
+await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 });
+
+// ✅ 인자가 없으면 undefined를 명시
+await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 5000 });
+
+// ✅ 인자가 있으면 그대로
+await page.waitForFunction((vh) => document.body.scrollHeight > vh, viewportHeight, { timeout: 10_000 });
+```
+
+이 저장소는 `use.actionTimeout`을 두지 않아 기본값이 **0 = 무제한**이다. 그래서 실패가
+"5초 뒤 타임아웃"이 아니라 **테스트 예산 소진**으로 나타나고, `.catch(() => {})`도
+거부가 없어 실행되지 않는다. 2026-08-01 trace 실측: 5초를 의도한 대기가 **93.1초**를 태웠고
+이것이 만성 flake의 실제 원인이었다(그 전까지 OOM·workers·목적지 속도로 **세 번 오진**).
+
+lint로 강제된다 — `arcana/no-waitforfunction-options-as-arg`. 상세: [`e2e-incidents.md`](../../docs/operations/e2e-incidents.md)
+
+> 스크롤 검증은 **스크롤 가능 여부를 먼저 hard gate**로 확인한다. 문서가 뷰포트보다 짧으면
+> `scrollTo`가 no-op이라 scrollY가 0→0이 되고, "초기화 성공"으로 **공허하게 통과**한다.
+
 ## 텍스트 변경 시 E2E 동시 수정 규칙
 
 버튼·레이블 텍스트를 변경할 때는 **같은 커밋**에 E2E 셀렉터도 수정한다.

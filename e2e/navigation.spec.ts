@@ -66,7 +66,7 @@ test.describe("네비게이션 — Header 테마 드롭다운", () => {
     const sunsetBtn = page.locator("button:has-text('황혼의 노을')").first();
     if (await sunsetBtn.isVisible()) {
       await sunsetBtn.click();
-      await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "sunset", { timeout: 3000 }).catch(() => {});
+      await page.waitForFunction(() => localStorage.getItem("arcana-theme-mode") === "sunset", undefined, { timeout: 3000 }).catch(() => {});
       // localStorage에 저장되었는지 확인
       const saved = await page.evaluate(() => localStorage.getItem("arcana-theme-mode"));
       expect(saved).toBe("sunset");
@@ -171,7 +171,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 홈에서 아래로 스크롤
     await page.evaluate(() => window.scrollTo(0, 500));
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
+    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 2000 });
     const scrollBefore = await page.evaluate(() => window.scrollY);
     expect(scrollBefore).toBeGreaterThan(0);
 
@@ -179,7 +179,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const tarotTab = page.locator("nav a[href='/tarot']").last();
     await tarotTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/tarot", { waitUntil: "commit" });
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(() => window.scrollY === 0, undefined, { timeout: 2000 }).catch(() => {});
     const scrollAfterTarot = await page.evaluate(() => window.scrollY);
     expect(scrollAfterTarot).toBe(0);
 
@@ -187,7 +187,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const sajuTab = page.locator("nav a[href='/saju']").last();
     await sajuTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/saju", { waitUntil: "commit" });
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(() => window.scrollY === 0, undefined, { timeout: 2000 }).catch(() => {});
     const scrollAfterSaju = await page.evaluate(() => window.scrollY);
     expect(scrollAfterSaju).toBe(0);
 
@@ -195,7 +195,7 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     const shinjeomTab = page.locator("nav a[href='/shinjeom']").last();
     await shinjeomTab.evaluate((el) => (el as HTMLElement).click());
     await page.waitForURL("**/shinjeom", { waitUntil: "commit" });
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(() => window.scrollY === 0, undefined, { timeout: 2000 }).catch(() => {});
     const scrollAfterShinjeom = await page.evaluate(() => window.scrollY);
     expect(scrollAfterShinjeom).toBe(0);
   });
@@ -207,50 +207,67 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
 
     // 홈에서 아래로 스크롤
     await page.evaluate(() => window.scrollTo(0, 800));
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 2000 });
+    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 2000 });
 
     // 타로 링크 클릭
     const tarotLink = page.locator("nav a[href='/tarot']").first();
     await tarotLink.click();
     await page.waitForURL("**/tarot", { waitUntil: "commit" });
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(() => window.scrollY === 0, undefined, { timeout: 2000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });
 
   test("페이지 내 스크롤 후 다른 페이지 이동 시 초기화", async ({ page }) => {
-    // 이 테스트는 두 무거운 라우트를 연달아 지난다: /tarot 진입(외부 R2 배경) → 홈(캐릭터
-    // 12장이 next/image 런타임 최적화를 탄다, #521). 단계별 예산(진입 15s + 목적지 30s)의
-    // 합이 60s에 근접해 실제로 예산 소진으로 깨졌으므로 90s로 둔다.
-    // 이 값은 "느려도 통과시키자"가 아니라 **목적지가 실제로 그만큼 느리다**는 실측 반영이다 —
-    // 근본 해소는 #521이고, 그것이 끝나면 이 값을 되돌린다.
-    test.setTimeout(90_000);
+    // 예산 근거 (2026-08-01 재산정). 성공 시도의 trace 실측 총시간은 **2.1초**다.
+    // 이전 90s는 "목적지가 느리다"는 판단에서 나왔는데, 그 판단 자체가 틀렸다 —
+    // 실제 원인은 캡이 걸리지 않은 `waitForFunction` 하나였고(아래 참조) #533이
+    // 런타임 이미지 최적화까지 제거했다. 단계 예산 합(10+5+3+5+20+3=46s)에
+    // 여유를 둔 60s로 내린다.
+    test.setTimeout(60_000);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/tarot", { waitUntil: "domcontentloaded" });
     // 캐릭터 그리드(로컬 이미지 + CSS aspect-[2/3]로 높이 확정)가 렌더되면 페이지가 스크롤 가능해진다.
     // ServiceBackground(fixed inset-0, 외부 R2)는 scrollHeight에 기여하지 않아 load 대기가 불필요하다.
     const characterCards = page.locator("button").filter({ hasText: /아르카나|미코|선화|루나/ });
-    await expect(characterCards.first()).toBeVisible({ timeout: 15_000 });
+    await expect(characterCards.first()).toBeVisible({ timeout: 10_000 });
+
+    // ⚠️ **스크롤 가능해질 때까지 먼저 기다린다.** 이 게이트가 없으면 테스트가 공허해진다 —
+    // 문서가 뷰포트보다 짧으면 `scrollTo`가 no-op이라 scrollY가 0에 머물고, 이동 후에도
+    // 0이므로 "초기화 성공"으로 통과해 버린다. 정작 검증하려던 것(스크롤 → 이동 → 초기화)은
+    // 하나도 확인되지 않는다. `cross-platform.spec.ts`가 이미 쓰는 패턴이다.
+    const viewportHeight = await page.evaluate(() => window.innerHeight);
+    await page.waitForFunction(
+      (vh) => Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) > vh + 100,
+      viewportHeight,
+      { timeout: 5_000 },
+    );
 
     // 타로 페이지에서 아래로 스크롤 (캐릭터 그리드 영역)
     await page.evaluate(() => window.scrollTo(0, 300));
-    // Mobile Android 에뮬에서 scrollTo 반영이 늦거나 무시될 수 있으므로 soft 대기
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 }).catch(() => {});
+    // 스크롤이 실제로 먹었는지 확인한다. 이제는 hard wait다 — 여기서 실패하면 이 테스트의
+    // 전제가 깨진 것이므로 조용히 넘어가면 안 된다.
+    //
+    // ⚠️ 옵션은 **3번째 인자**여야 한다. 2번째는 `arg`(페이지 함수 인자)라 옵션 객체를 넣으면
+    // 조용히 무시되고 타임아웃이 걸리지 않는다(`actionTimeout` 기본 0 = 무제한).
+    // 2026-08-01 trace 실측: 5초를 의도한 이 대기가 **93.1초**를 태워 테스트 예산을 통째로
+    // 소진했고, 그것이 이 테스트가 만성적으로 flaky했던 실제 원인이었다.
+    // 브라우저는 90초 내내 살아 있었고(스크린캐스트 454프레임) 네트워크도 83건 전부 완료였다.
+    // lint 가드: `arcana/no-waitforfunction-options-as-arg`
+    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 3_000 });
 
     // 홈으로 이동 — 안정 testid(mobile-nav-home) + Playwright 신뢰 클릭(액셔너빌리티 자동 대기).
     // `nav a[href='/']`.last()+synthetic evaluate-click+waitUntil:"commit"은 홈(소프트) 네비게이션에서
     // 클릭이 네비게이션을 트리거하지 못해 waitForURL이 60s 타임아웃(#460 CI, error-context: 페이지가 /tarot 유지).
     // web-first toHaveURL은 소프트/하드 네비게이션 무관하게 URL을 폴링하므로 commit 라이프사이클에 비의존.
-    // 홈은 이 앱에서 가장 무거운 목적지다 — 캐릭터 12장이 next/image 런타임 최적화를 타고
-    // (원본 2816×1536·약 4.8MB, 이슈 #521), DailyFortune이 API를 호출한다. App Router는
-    // 새 트리가 커밋될 때까지 **이전 URL을 유지**하므로, 메인 스레드가 포화되면 URL 갱신이
-    // 15s를 넘긴다. 2026-08-01 trace 실측: `click action done` 직후 toHaveURL이 계속
-    // `/tarot`를 보고, 미완료 요청은 `_next/image` 6건 + `/api/daily-fortune`이었다.
-    // 클릭은 성공했고 문제는 목적지 준비 속도이므로, URL이 아니라 **목적지가 실제로
-    // 그려졌는지**로 게이트하고 예산을 현실에 맞춘다.
+    // 홈은 #533 이전까지 이 앱에서 가장 무거운 목적지였다(캐릭터 12장이 next/image 런타임
+    // 최적화를 탔다, #521). **지금은 사전 생성 WebP 변형이라 그 비용이 없다** —
+    // 프로덕션 홈의 캐릭터 `_next/image` 요청은 24 → 0이 됐다. 예산을 그에 맞춰 줄였다.
+    // App Router는 새 트리가 커밋될 때까지 이전 URL을 유지하므로, URL이 아니라 목적지가
+    // 실제로 그려졌는지로 게이트한다는 원칙은 유지한다.
     const homeTab = page.locator("[data-testid='mobile-nav-home']");
-    await expect(homeTab).toBeVisible({ timeout: 10_000 });
+    await expect(homeTab).toBeVisible({ timeout: 5_000 });
     // `locator.click()`을 쓰지 않는 이유: trace상 클릭 자체는 성공하지만("click action done"),
     // 그 뒤 click()이 **"waiting for scheduled navigations to finish"** 단계에서 대기한다.
     // App Router 전이가 목적지 커밋까지 끝나지 않으면 이 대기가 60s 예산을 통째로 태우고
@@ -260,13 +277,13 @@ test.describe("네비게이션 — 페이지 이동 후 스크롤 최상단 초�
     // #460이 evaluate에서 물러났던 이유는 `waitForURL(..., "commit")`이 소프트 네비게이션에서
     // 해소되지 않아서였다. 라이프사이클 이벤트에 의존하지 않는 URL 폴링으로 게이트한다.
     //
-    // 예산이 큰 이유: 홈은 캐릭터 12장이 next/image 런타임 최적화를 타는 가장 무거운
-    // 목적지이고(#521), App Router는 새 트리가 커밋될 때까지 이전 URL을 유지한다.
+    // 예산 20s: #533으로 목적지 비용이 사라져 실측은 1초 미만이지만, App Router가 새 트리를
+    // 커밋할 때까지 이전 URL을 유지하는 특성상 여유를 둔다.
     // ⚠️ CharacterGallery의 텍스트로 게이트하지 말 것 — next/dynamic 지연 로드라 가장 늦게
     //    나타나며, 실제로 30s 예산을 넘겨 이 테스트를 다시 깨뜨렸다.
-    await expect(page).toHaveURL(/\/$/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/$/, { timeout: 20_000 });
     // 라우트 전환 시 스크롤 최상단 초기화 확인 (load 대기 불필요)
-    await page.waitForFunction(() => window.scrollY === 0, { timeout: 5000 }).catch(() => {});
+    await page.waitForFunction(() => window.scrollY === 0, undefined, { timeout: 3_000 }).catch(() => {});
     const scrollAfter = await page.evaluate(() => window.scrollY);
     expect(scrollAfter).toBe(0);
   });

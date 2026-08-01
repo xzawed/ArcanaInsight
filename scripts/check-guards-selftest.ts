@@ -37,9 +37,12 @@ interface Case {
   readonly expect: string;
 }
 
+/** `__eslint__`는 스크립트가 아니라 lint 실행을 뜻한다 — 커스텀 룰도 결함에 반응해야 한다. */
 function runScript(script: string): { code: number; output: string } {
+  const argv = script === "__eslint__" ? ["eslint"] : ["tsx", script];
+
   try {
-    const output = execFileSync("npx", ["tsx", script], {
+    const output = execFileSync("npx", argv, {
       cwd: ROOT,
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "pipe"],
@@ -165,6 +168,20 @@ const CASES: readonly Case[] = [
       ),
     script: "scripts/check-workflow-env-parity.ts",
     expect: "deploy.yml",
+  },
+  {
+    // 5초를 의도한 대기가 93초를 태운 만성 flake의 원인. 옵션이 2번째 인자에 있으면
+    // `arg`로 먹혀 타임아웃이 아예 걸리지 않는다 — 타입도 lint 기본 규칙도 못 잡는다.
+    name: "eslint: waitForFunction 옵션이 2번째 인자면 잡아야 한다 (타임아웃 무시 회귀 방지)",
+    inject: () =>
+      temporarilyPatch("e2e/navigation.spec.ts", (s) =>
+        s.replace(
+          "window.scrollY > 0, undefined, { timeout: 3_000 }",
+          "window.scrollY > 0, { timeout: 3_000 }",
+        ),
+      ),
+    script: "__eslint__",
+    expect: "no-waitforfunction-options-as-arg",
   },
   {
     // ⚠️ 이 가짜 PNG는 변형(webp)도 없어서 **변형 검사만으로도** exit≠0이 된다.
