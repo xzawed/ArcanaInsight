@@ -18,7 +18,6 @@
 | `e2e-full/orchestrator.ts` | `pnpm test:e2e:full` / `pnpm test:e2e:full:ci` | 252 조합 멀티 에이전트 E2E (CI 자동 미연동, 수동 또는 별도 트리거) |
 | `eval-reading.ts` | `pnpm eval:reading` | 리딩 품질 계약 회귀 검증 — 타로·사주·신점 리딩 API에 익명 요청→SSE 파싱→directAnswer·overallReading·parseError·본문 검증. CI 미연동(실 AI 호출·온디맨드), `EVAL_BASE_URL`로 대상 지정 |
 | `smoke-prod.mjs` | `.github/workflows/post-deploy-smoke.yml` + `pnpm smoke:prod` | 배포 후 프로덕션 스모크 — health·홈+자산호스트 인라인·R2 이미지 200 검증(무비용). main push마다 배포 대기 후 자동 실행. `--reading`으로 타로 1건 포함(AI 비용), `SMOKE_BASE_URL`로 대상 지정 |
-| `verify-railway-config.mjs` | `pnpm verify:railway-config` | standalone 배포 필수조건 검증 — Railway API로 `startCommand=node server.js`·서비스 변수 `HOSTNAME=0.0.0.0` assert(불일치 exit 1). `railway login`/`RAILWAY_API_TOKEN` 필요 |
 
 ## 2. 명령어 등록 (`pnpm <name>`)
 
@@ -33,7 +32,7 @@
 | `pnpm sync:test-count` | `sync-test-count.ts` | vitest 실제 테스트 수 측정 후 CLAUDE.md·`docs/tests/unit-testing.md` 갱신. ⚠️ 현재 두 문서 모두 고정 개수를 두지 않아 갱신 대상이 없다 — 개수를 다시 명시할 때만 의미가 있다 |
 | `pnpm eval:reading` | `eval-reading.ts` | 리딩 품질 계약 검증(directAnswer·overallReading·parseError·SSE). `EVAL_BASE_URL` 지정(기본 프로덕션), `--service=` 필터. 실 AI 호출·온디맨드 |
 | `pnpm smoke:prod` | `smoke-prod.mjs` | 배포 후 프로덕션 스모크(health·홈 자산호스트·R2 이미지). `SMOKE_BASE_URL` 지정, `--reading`=타로 1건. main push마다 CI 자동 실행 |
-| `pnpm verify:railway-config` | `verify-railway-config.mjs` | standalone 배포 필수조건(startCommand·HOSTNAME) Railway API 검증 |
+| `pnpm verify:railway-config` | `verify-railway-config.mjs` | standalone 배포 필수조건(`startCommand=node server.js`·`HOSTNAME=0.0.0.0`)을 Railway API로 assert. ⚠️ **CI에서 호출되지 않는다**(`railway login` 또는 `RAILWAY_API_TOKEN` 필요) — 서비스 재생성·변경 후 **수동 실행**한다 |
 | `pnpm check:image-budget` | `check-character-image-budget.ts` | 캐릭터 마스터 치수·용량 + **필수 표정·WebP 변형 존재** 검증 |
 | `pnpm upload:characters:r2` | `generate-assets/upload-characters-r2.ts` | 캐릭터 마스터+변형을 R2에 업로드 (**프로덕션 배포 경로** — 미실행 시 404) |
 | `pnpm upload:characters:r2:skip` | `upload-characters-r2.ts --skip-existing` | 이미 있는 키를 건너뛰고 업로드 |

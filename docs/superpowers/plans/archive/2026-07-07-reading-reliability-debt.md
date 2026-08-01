@@ -4,7 +4,7 @@
 
 **Goal:** parseError를 관측 가능하게 만들고(②), 사주·신점 리딩 스키마에서 중복 섹션을 제거해(①) 토큰 압박·중복 UX·파서 방어 복잡도를 해소한다.
 
-**Architecture:** ② 통합 grep 마커(`logReadingParseError`)를 parseError 브랜치에 배선. ① `overallReading`(【】 헤더 서사)을 정본으로 두고 `sajuSections`/`shinjeomSections`를 프롬프트·타입·파서·영속·UI·i18n에서 제거. 마이그 024 컬럼은 drop하지 않음(구 행 보존, UI만 미사용). 정본은 [스펙](../specs/2026-07-07-reading-reliability-debt-design.md).
+**Architecture:** ② 통합 grep 마커(`logReadingParseError`)를 parseError 브랜치에 배선. ① `overallReading`(【】 헤더 서사)을 정본으로 두고 `sajuSections`/`shinjeomSections`를 프롬프트·타입·파서·영속·UI·i18n에서 제거. 마이그 024 컬럼은 drop하지 않음(구 행 보존, UI만 미사용). 정본은 [스펙](../../specs/2026-07-07-reading-reliability-debt-design.md).
 
 **Tech Stack:** TypeScript strict, Next.js 16 App Router, Vitest, 자체 i18n(ko/en/ja).
 
