@@ -9,7 +9,7 @@
  * 배경: card-skins 6종(474객체·224MB)이 Supabase Storage에 남은 유일한 자산으로
  *   public URL 직접 서빙 → egress를 소비했다. card-styles와 동일하게 R2로 이관해
  *   Supabase Storage를 0으로, egress를 R2(무료)로 옮긴다.
- *   설계: docs/superpowers/plans/2026-06-26-supabase-storage-r2-migration.md(card-styles 선례)
+ *   설계: docs/superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md(card-styles 선례)
  *
  * 소스 준비: `pnpm download:skins`로 Supabase에서 public/images/skins/에 먼저 내려받는다.
  *

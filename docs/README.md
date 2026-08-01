@@ -91,6 +91,7 @@ docs/
 ├── operations/
 │   ├── deployment.md
 │   ├── deploy-safety-guide.md
+│   ├── e2e-incidents.md      # E2E CI 인시던트 계측·이력 정본
 │   ├── env-variables.md
 │   ├── known-issues.md
 │   ├── monitoring.md
@@ -98,11 +99,15 @@ docs/
 ├── archive/
 │   └── ai-quality-roadmap.md
 └── superpowers/         # 방법론 기반 계획·설계 보관소
-    ├── plans/           # 활성 계획 1
-    │   └── archive/     # 완료 계획 38 (+README 인벤토리)
-    └── specs/           # 활성 설계 20
-        └── archive/     # 완료 설계 12 (+README 인벤토리)
+    ├── plans/           # 활성 계획 (완료분은 archive/, 각 archive에 README 인벤토리)
+    │   └── archive/     # 동결 — 링크 검사 제외
+    └── specs/           # 활성 설계 — 살아있는 문서가 링크하므로 링크 검사 대상
+        └── archive/     # 동결 — 링크 검사 제외
 ```
+
+> **개수는 적지 않는다.** 예전에는 "활성 설계 20 / 완료 설계 12"처럼 수치를 박아뒀는데
+> 실제와 3배 넘게 어긋난 채 방치됐다. 파일 목록은 `check:doc-links`가 강제하지만
+> 수치는 검증되지 않는다 — 애초에 적지 않는 편이 정확하다.
 
 ## 관리 원칙
 

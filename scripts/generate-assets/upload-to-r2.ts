@@ -16,7 +16,7 @@
  *    구버전을 계속 서빙한다 → cdn 커스텀 도메인에서 해당 URL 캐시 퍼지 필요.
  *
  * 정본: docs/conventions/image-assets.md §5,
- *       docs/superpowers/plans/2026-06-26-supabase-storage-r2-migration.md
+ *       docs/superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md
  */
 import { config } from 'dotenv';
 config({ path: '.env.r2.local' });

@@ -9,7 +9,7 @@ const BUCKET = CARD_SKINS_BUCKET
  *   2) postgres(self-host) 모드 → 로컬 public 폴백(/images/skins).
  *   3) supabase 모드 → Supabase Storage public(폴백, env 미설정 시).
  * env 토글만으로 R2↔Supabase 즉시 전환/롤백 가능.
- * 설계: docs/superpowers/plans/2026-06-26-supabase-storage-r2-migration.md(card-styles 선례)
+ * 설계: docs/superpowers/plans/archive/2026-06-26-supabase-storage-r2-migration.md(card-styles 선례)
  */
 function skinBase(): string {
   const assetBase = process.env.NEXT_PUBLIC_ASSET_BASE_URL

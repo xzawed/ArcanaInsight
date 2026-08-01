@@ -145,4 +145,5 @@ E2E가 깨졌을 때 **테스트를 고치기 전에** 앱이 옳은지 확인�
 - [`specs/platform/rendering-contract.md`](../specs/platform/rendering-contract.md) — E2E 가드가 검증하는 SSR 계약
 - [`tests/e2e-testing.md`](../tests/e2e-testing.md) — 셀렉터·대기 패턴 정본
 - [`tests/unit-testing.md`](../tests/unit-testing.md) — 단위 테스트 작성 규칙
-- [`operations/known-issues.md`](../operations/known-issues.md) — 재발 기록
+- [`operations/known-issues.md`](../operations/known-issues.md) — 기술 부채 현황
+- [`operations/e2e-incidents.md`](../operations/e2e-incidents.md) — E2E CI 인시던트 계측·재발 기록

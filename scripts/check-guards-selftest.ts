@@ -110,6 +110,31 @@ const CASES: readonly Case[] = [
     expect: "__guard-selftest-moved__",
   },
   {
+    name: "check-doc-links: 주석이 가리키는 문서 경로가 깨져도 잡아야 한다 (길잡이 주석 rot 방지)",
+    inject: () =>
+      temporarilyPatch("src/lib/storage/card-style.ts", (s) =>
+        s.replace("plans/archive/2026-06-26-", "plans/__guard-selftest-comment__/2026-06-26-"),
+      ),
+    script: "scripts/check-doc-links.ts",
+    expect: "__guard-selftest-comment__",
+  },
+  {
+    name: "check-doc-links: 활성 설계(superpowers/specs)도 검사 범위여야 한다 (제외 비대칭 회귀 방지)",
+    inject: () =>
+      temporarilyPatch("docs/superpowers/specs/2026-06-23-anon-session-claim-design.md", (s) =>
+        `${s}\n\n[셀프테스트용 깨진 링크](./__guard-selftest-activespec__.md)\n`,
+      ),
+    script: "scripts/check-doc-links.ts",
+    expect: "__guard-selftest-activespec__",
+  },
+  {
+    name: "check-doc-links: docs/README.md 인벤토리에서 빠진 문서를 잡아야 한다 (지도 드리프트 방지)",
+    inject: () =>
+      temporarilyPatch("docs/README.md", (s) => s.replace(/^.*e2e-incidents\.md.*\r?\n/m, "")),
+    script: "scripts/check-doc-links.ts",
+    expect: "e2e-incidents.md",
+  },
+  {
     name: "check-workflow-artifacts: Playwright 리포트가 if:failure()로 되돌아가면 실패해야 한다",
     inject: () =>
       temporarilyPatch(".github/workflows/deploy.yml", (s) =>
