@@ -8,8 +8,15 @@
  *
  * 필요: GROK_API_KEY 환경변수 (.env.local에서 로드)
  *
- * 이미지 저장 위치: public/images/characters/{id}/nukki/{mood}.png
- * 해상도: 세로형 864x1536 (3:5.33 비율, 864x1296 권장이지만 API가 지원하는 최근접값 사용)
+ * ⚠️ 이 스크립트는 **파이프라인 1단계**다. 여기 출력은 런타임 경로가 아니다.
+ *   1) 이 스크립트  → public/images/characters/{id}/nukki/{stem}.png  (864×1536, 배경 있음)
+ *   2) remove-character-bg.mjs  → 배경 제거 (nukki/ 제자리)
+ *   3) enhance-character-images.mjs → 2816×1536 업스케일 (nukki/ 제자리)
+ *   4) nukki/ → nukki-enhanced/ 로 이동   ← 앱이 읽는 경로
+ *   5) generate-character-variants.ts → WebP 변형 5단
+ * 전체 절차: .claude/agents/character-add.md
+ *
+ * 새 캐릭터는 아래 CHARACTERS 객체에 먼저 등록해야 한다(미등록 id는 처리되지 않는다).
  */
 
 import fs from "fs";

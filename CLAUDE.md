@@ -119,9 +119,10 @@ pnpm test:e2e:full:ci     # 대표 케이스 E2E
 pnpm sync:test-count      # 고정 테스트 수가 있는 문서 동기화
 pnpm check:env-docs       # env.ts와 env 문서 정합성 (정본 문서 실종 시 하드 실패)
 pnpm check:doc-links      # 문서 링크 + 코드가 하드코딩한 docs 경로 검증 (docs/·CLAUDE.md·.claude/·README·e2e/)
-pnpm check:guards         # 가드가 결함에 실제로 반응하는지 검증 (결함 주입 → 실패해야 통과)
+pnpm check:guards         # 가드가 결함에 실제로 반응하는지 검증 (결함 주입 → 실패해야 통과, 13건)
+pnpm check:workflow-env-parity # deploy.yml↔weekly-qa.yml의 NEXT_PUBLIC_* 빌드 변수 일치(블록 단위)
 pnpm check:workflow-artifacts # Playwright 리포트가 if:failure()로 회귀하는 것 차단
-pnpm check:image-budget   # 캐릭터 마스터 치수 고정·용량 상한
+pnpm check:image-budget   # 캐릭터 마스터 치수·용량 + 필수표정 6종·WebP 변형 5단 존재(누락 시 프로덕션 404)
 pnpm i18n:check           # 번역 키 drift 검출
 pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·overallReading·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
 pnpm smoke:prod           # 배포 후 프로덕션 스모크(health·홈+자산호스트 인라인·R2 이미지 200). --reading=리딩1건. post-deploy-smoke.yml이 main push마다 자동 실행

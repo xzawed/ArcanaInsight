@@ -10,7 +10,7 @@
 1. `src/data/characters/index.ts` — 캐릭터 메타데이터 추가
 2. `src/data/characters/waiting-lines.ts` — 대기 대사 추가
 3. `src/types/character.ts` — 타입 확인
-4. `public/images/characters/[id]/nukki-enhanced/[stem].png` — 마스터 **6종**(`idle`·`smile`·`serious`·`surprised`·`wink`·`mystical`, 2816×1536 고DPI 2x본) 배치. 표정 `default`의 파일명은 `idle`이며 **`default.png`은 만들지 않는다**. ⚠️ `nukki/`·`nukki/backup-v2/` 폴더는 #447로 제거됨
+4. **이미지 파이프라인 4단계** — 생성(`nukki/` 864×1536) → 배경 제거 → 업스케일(2816×1536) → **`nukki-enhanced/`로 이동**. 생성·배경제거·업스케일은 모두 `nukki/`에서 제자리로 동작하므로 마지막 이동을 빼먹으면 앱이 아무것도 못 본다. 마스터는 **6종**(`idle`·`smile`·`serious`·`surprised`·`wink`·`mystical`)이며 `default.png`은 만들지 않는다. 상세: `.claude/agents/character-add.md`
 5. `pnpm exec tsx scripts/generate-assets/generate-character-variants.ts` — **사전 생성 WebP 변형 5단**(320·640·960·1280·1920) 생성. ⚠️ **건너뛰면 프로덕션에서 그 캐릭터 이미지가 전량 404다** — `characterImageLoader`가 `.png`→`-<w>.webp`를 폴백 없이 치환한다
 6. `pnpm check:image-budget` — 치수·용량·필수표정·변형 존재를 한 번에 검증
 7. `pnpm upload:characters:r2` — 마스터+변형을 Cloudflare R2에 업로드(프로덕션은 `cdn.xzawed.xyz/characters` 서빙, `.dockerignore`가 배포 이미지에서 제외)

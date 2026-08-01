@@ -64,7 +64,7 @@ pnpm exec tsx scripts/check-doc-links.ts       # 문서 링크 + 코드 내 docs
 pnpm exec tsx scripts/check-translation-keys.ts  # i18n 번역 키 drift 검출
 pnpm exec tsx scripts/check-guards-selftest.ts        # 가드가 결함에 반응하는지 (결함 주입 검증)
 pnpm exec tsx scripts/check-workflow-artifacts.ts     # Playwright 아티팩트 업로드 조건
-pnpm exec tsx scripts/check-character-image-budget.ts # 캐릭터 마스터 치수·용량
+pnpm exec tsx scripts/check-character-image-budget.ts # 마스터 치수·용량 + 필수표정 6종·WebP 변형 5단 존재
 ```
 
 > **sync-test-count**: 테스트 실행이 너무 느려 PR CI에서 제외. 로컬 수동 실행만: `pnpm exec tsx scripts/sync-test-count.ts --check`

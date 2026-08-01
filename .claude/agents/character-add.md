@@ -103,15 +103,38 @@ mkdir -p public/images/characters/{id}/nukki-enhanced
 > `idle.png`이므로 처음부터 그 이름으로 만든다. 기존 12명의 잔존 `default.png` 정리는
 > `docs/wbs/README.md`의 R-4다.
 
-**이미지 생성**: `scripts/generate-character-images-v2.mjs` 스크립트 사용.
+### 이미지 파이프라인은 4단계다 — 1단계만 돌리면 아무것도 안 된다
+
+생성 스크립트는 **`nukki/`에 864×1536 원본**을 만든다. 런타임이 읽는 것은
+**`nukki-enhanced/`의 2816×1536**이다. 그 사이에 배경 제거·업스케일·이동이 있고,
+**배경 제거와 업스케일은 `nukki/`에서 제자리로 동작한다**(별도 출력 폴더를 만들지 않는다).
 
 ```bash
-# 특정 캐릭터 전체 표정 생성
-node scripts/generate-character-images-v2.mjs {id}
+# 0) 생성 스크립트에 캐릭터 등록 — 이걸 빼먹으면 1단계에서 "알 수 없는 캐릭터"로 끝난다
+#    scripts/generate-character-images-v2.mjs 의 CHARACTERS 객체에 {id}: { name, base } 추가
 
-# 특정 캐릭터 + 특정 표정만 생성
-node scripts/generate-character-images-v2.mjs {id} smile
+# 1) 생성 → public/images/characters/{id}/nukki/ (864×1536, 배경 있음)
+node scripts/generate-character-images-v2.mjs {id}
+node scripts/generate-character-images-v2.mjs {id} smile   # 표정 하나만 재생성
+
+# 2) 배경 제거 (nukki/ 제자리)
+pnpm remove:bg:pilot     # 1장으로 먼저 확인
+pnpm remove:bg:full
+
+# 3) 업스케일 2816×1536 (nukki/ 제자리, backup_nukki_<timestamp>/ 자동 백업)
+pnpm enhance:images
+
+# 4) 런타임 경로로 이동 — 이 단계가 없으면 앱은 아무것도 못 본다
+mkdir -p public/images/characters/{id}/nukki-enhanced
+mv public/images/characters/{id}/nukki/*.png public/images/characters/{id}/nukki-enhanced/
+
+# 5) 변형 5단 생성 → 6) 검증 → 7) 업로드 (아래 절 참조)
 ```
+
+> ⚠️ **왜 이렇게 적어 두는가**: 예전에는 이 절이 1단계만 적고 있었다. 지시대로 따르면
+> `nukki/`에 864×1536 배경 있는 이미지가 생기고 `nukki-enhanced/`는 비어 있어,
+> 변형 생성(`nukki-enhanced/`만 스캔)이 0건이 되고 프로덕션에서 그 캐릭터가 전량 404가 된다.
+> `check:image-budget`이 막아 주지만, **가드가 막는 것과 절차가 통하는 것은 다르다.**
 
 > **[필수] 이미지 사이즈 규격: 2816×1536** (고DPI 표시용 의도적 2x본 — **다운스케일 금지**)
 > `nukki-enhanced` 이미지는 캐릭터 상세(모바일 100vw)·세션 등 큰 표시를 위해 2816×1536 2x본으로 유지한다.

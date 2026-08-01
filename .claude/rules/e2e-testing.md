@@ -41,7 +41,7 @@ grep -rn "service-navigation" e2e/ --include="*.ts"
 2. **CI vs 로컬 차이**
    - CI: `pnpm start` (프로덕션 빌드), retries: 2(단 **결함 탐지 가드는 0** — 아래 참조), **프로젝트당 2샤드**
    - CI workers는 **프로젝트마다 다르다** — `deploy.yml` 매트릭스가 `E2E_WORKERS`로 주입하고, 미지정·비정상 값이면 1로 폴백한다.
-     - **Desktop Chrome: 1** — 현재 임계경로. 상향은 S-3으로 검토 중
+     - **Desktop Chrome: 1** — 상향 검토(S-3) **종결** — 임계경로가 DC↔MA 교대라 이득 없음(7런 실측)
      - **Mobile Android: 2** — 임계경로였던 잡을 올려 5.0m→2.9m·4.2m→2.7m 단축, 2런 flaky 0 (#531)
    - 로컬: `pnpm dev`, retries: 0, workers 무제한, reuseExistingServer: true → CI 재현은 `--workers=1`
    - workers 판단 근거는 **2026-07-31~08-01 실측이다(#522·#531).** 매트릭스 레벨 프로젝트 병렬은 유지.

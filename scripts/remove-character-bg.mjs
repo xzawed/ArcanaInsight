@@ -25,7 +25,8 @@ const CHARACTER_IDS = [
   'ethan',
 ];
 
-const MOODS = ['default', 'idle', 'smile', 'serious', 'surprised', 'wink', 'mystical'];
+// 런타임이 요청하는 파일 stem 6종. 'default'는 idle과 바이트 동일한 레거시라 신규 생성 대상이 아니다.
+const MOODS = ['idle', 'smile', 'serious', 'surprised', 'wink', 'mystical'];
 
 class RemoveBgError extends Error {
   constructor(message, { status, detail } = {}) {
