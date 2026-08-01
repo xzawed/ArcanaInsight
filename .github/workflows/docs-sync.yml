@@ -47,6 +47,9 @@ jobs:
       - name: 워크플로우 아티팩트 정책 검사
         run: pnpm exec tsx scripts/check-workflow-artifacts.ts
 
+      - name: 워크플로우 env 정합성 검사 (빌드 타임 인라인 변수)
+        run: pnpm exec tsx scripts/check-workflow-env-parity.ts
+
       # 캐릭터 마스터의 치수 고정·용량 상한. 런타임 이미지 최적화 비용 폭주 방지(#521 관련).
       - name: 캐릭터 이미지 예산 검사
         run: pnpm exec tsx scripts/check-character-image-budget.ts

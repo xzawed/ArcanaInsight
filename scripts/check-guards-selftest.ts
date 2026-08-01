@@ -147,6 +147,26 @@ const CASES: readonly Case[] = [
     expect: "if: failure()",
   },
   {
+    name: "check-workflow-env-parity: weekly-qa에서 빌드 변수가 빠지면 실패해야 한다",
+    inject: () =>
+      temporarilyPatch(".github/workflows/weekly-qa.yml", (s) =>
+        s.replace(/^.*NEXT_PUBLIC_CHARACTER_VARIANTS.*\r?\n/m, ""),
+      ),
+    script: "scripts/check-workflow-env-parity.ts",
+    expect: "NEXT_PUBLIC_CHARACTER_VARIANTS",
+  },
+  {
+    // 2026-07-29 사고 유형: e2e 잡에는 있는데 build 잡에 빠져 번들에 반영되지 않았다.
+    // 파일 단위로 비교하면 다른 잡에 남아 있다는 이유로 통과해 버린다 — 블록 단위여야 한다.
+    name: "check-workflow-env-parity: 잡 하나에서만 빠져도 잡아야 한다 (파일 단위 비교 회귀 방지)",
+    inject: () =>
+      temporarilyPatch(".github/workflows/deploy.yml", (s) =>
+        s.replace(/^.*NEXT_PUBLIC_CHARACTER_VARIANTS.*\r?\n/m, ""),
+      ),
+    script: "scripts/check-workflow-env-parity.ts",
+    expect: "deploy.yml",
+  },
+  {
     name: "check-character-image-budget: 치수가 다른 마스터를 잡아야 한다",
     inject: () => createBogusPng("public/images/characters/arcana/nukki-enhanced/__selftest__.png"),
     script: "scripts/check-character-image-budget.ts",
