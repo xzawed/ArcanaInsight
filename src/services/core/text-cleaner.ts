@@ -16,7 +16,17 @@ export function extractFallbackText(raw: string): string {
 }
 
 /** AI 응답 텍스트에서 이스케이프/JSON 잔여물을 정리 */
-export function cleanReadingText(text: string): string {
+/**
+ * 저장된 리딩 텍스트에서 JSON 잔여물·이스케이프를 정리한다.
+ *
+ * `undefined`/`null`을 허용하는 이유: 호출부 상당수가 **JSONB 컬럼에서 꺼낸 값**을 넘긴다.
+ * 스키마가 진화하면(예: 타로가 `interpretation` 단일 필드 → 3-섹션으로 바뀐 #414) 예전 코드가
+ * 기대하던 키가 **없는 행**이 생기는데, 그때 `undefined.replace`로 서버 컴포넌트가 통째로
+ * 터진다. 2026-05-26~08-01 사이에 실제로 공유·마이페이지 결과 페이지가 그렇게 깨져 있었다.
+ * 값이 없으면 빈 문자열을 돌려주고, **표시 여부는 호출부가 정한다.**
+ */
+export function cleanReadingText(text: string | null | undefined): string {
+  if (!text) return "";
   return text
     // JSON 구조 잔여물 제거
     .replace(/"(cardInterpretations|cardId|position|interpretation|overallReading|topicReading|advice|isReversed|result|done|error)":\s*/g, "")
