@@ -125,12 +125,41 @@ function main(): void {
     }
   }
 
-  if (incomplete.length === 0 && conflicts.length === 0) {
+  // ── Dockerfile ARG 선언 검사 ─────────────────────────────────────────────
+  // Railway는 Dockerfile로 빌드한다. `NEXT_PUBLIC_*`는 빌드 타임 인라인이라
+  // **ARG로 선언되지 않으면 `RUN pnpm build`가 그 값을 볼 수 없다**(Docker 명세).
+  // 2026-08-01 실측: `NEXT_PUBLIC_CHARACTER_VARIANTS`가 CI 5종 중 유일하게 ARG 미선언이었다.
+  // 프로덕션이 우연히 동작 중이었을 뿐 문서화되지 않은 주입 경로에 의존하는 상태였다.
+  const dockerfile = path.join(ROOT, "Dockerfile");
+  const undeclared: string[] = [];
+  if (fs.existsSync(dockerfile)) {
+    const declared = new Set(
+      [...fs.readFileSync(dockerfile, "utf-8").matchAll(/^ARG\s+(NEXT_PUBLIC_[A-Z0-9_]+)/gm)].map(
+        (m) => m[1],
+      ),
+    );
+    for (const key of canonical.keys()) {
+      if (!declared.has(key)) undeclared.push(key);
+    }
+  }
+
+  if (incomplete.length === 0 && conflicts.length === 0 && undeclared.length === 0) {
     console.log(
       `[check-workflow-env-parity] 검사 통과. env 블록 ${blocks.length}개가 ` +
-        `NEXT_PUBLIC_ 변수 ${canonical.size}종을 동일하게 설정합니다.`,
+        `NEXT_PUBLIC_ 변수 ${canonical.size}종을 동일하게 설정하고, Dockerfile이 전부 ARG로 선언합니다.`,
     );
     return;
+  }
+
+  if (undeclared.length > 0) {
+    console.error(
+      `[check-workflow-env-parity] Dockerfile에 ARG 선언이 없는 NEXT_PUBLIC_ 변수 ${undeclared.length}건:\n` +
+        undeclared.map((k) => `    - ${k}`).join("\n") +
+        "\n  Docker는 선언되지 않은 build-arg를 RUN 단계에 노출하지 않습니다 —\n" +
+        "  Railway 빌드에서 이 값이 조용히 비게 되어 번들에 반영되지 않습니다.\n" +
+        "  Dockerfile에 `ARG <이름>`과 ENV 승격을 추가하세요.",
+    );
+    if (incomplete.length === 0 && conflicts.length === 0) process.exit(1);
   }
 
   console.error("[check-workflow-env-parity] 워크플로우 간 빌드 변수 불일치:");

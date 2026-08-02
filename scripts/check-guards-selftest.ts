@@ -170,6 +170,17 @@ const CASES: readonly Case[] = [
     expect: "deploy.yml",
   },
   {
+    // Docker는 선언되지 않은 build-arg를 RUN에 노출하지 않는다. ARG가 빠지면 Railway 빌드에서
+    // 그 값이 조용히 비어 번들에 반영되지 않는다 — 2026-08-01에 실제로 그 상태였다.
+    name: "check-workflow-env-parity: Dockerfile ARG 선언이 빠지면 잡아야 한다",
+    inject: () =>
+      temporarilyPatch("Dockerfile", (s) =>
+        s.replace(new RegExp(`^ARG NEXT_PUBLIC_CHARACTER_VARIANTS=1\\r?\\n`, "m"), ""),
+      ),
+    script: "scripts/check-workflow-env-parity.ts",
+    expect: "ARG 선언이 없는",
+  },
+  {
     // 5초를 의도한 대기가 93초를 태운 만성 flake의 원인. 옵션이 2번째 인자에 있으면
     // `arg`로 먹혀 타임아웃이 아예 걸리지 않는다 — 타입도 lint 기본 규칙도 못 잡는다.
     name: "eslint: waitForFunction 옵션이 2번째 인자면 잡아야 한다 (타임아웃 무시 회귀 방지)",

@@ -97,6 +97,29 @@
 
 ### 프로덕션이 main보다 뒤처져도 알 방법이 없었다 (2026-08-01~02)
 
+> ⚠️ **후속 (2026-08-01 16:28): 재현 확인. 코드는 무결하고 Railway 쪽 문제다.**
+>
+> GitHub Deployments 기록상 웹훅은 **정상 발화**했다. 문제는 배포가 `success`에 도달하지 못하는 것이다.
+>
+> | 커밋 | 상태 추이 |
+> |---|---|
+> | `9942c12` | `in_progress@11:56` → `inactive@12:00` — **success 없음** |
+> | `57fab59` | `in_progress@16:17` → `inactive@16:28` — **success 없음** |
+> | `58f60d8` | `in_progress` → `success` (정상) |
+>
+> 다른 배포의 `inactive`는 전부 `success` **뒤에** 오는 정상 교체다. 연속 2회 같은 양상이므로
+> 일시적 문제가 아니다.
+>
+> **코드 배제 근거 (Railway와 동일 파이프라인 로컬 재현)**:
+> `docker build`(같은 Dockerfile·build-arg) **exit 0**, 405MB 이미지 →
+> `node server.js` + `HOSTNAME=0.0.0.0` 기동 → `/api/health` **200**.
+> 빌드도 헬스체크도 통과한다.
+>
+> 남은 후보는 **Railway 서비스 config 드리프트**(`startCommand`·`HOSTNAME`), 리소스 한도, 인프라다.
+> 확정에는 대시보드 로그가 필요하다:
+> `https://railway.com/project/24bdc6b7-db99-4487-896e-d4bd68dbb6b3`
+
+
 #546을 머지했는데 **하루가 지나도 Railway가 배포하지 않았다.** 신설한 `/api/health/db`가
 404였는데, 그것이 **"배포 안 됨"인지 "코드 결함"인지 구분할 수단이 없었다** —
 로컬 standalone 빌드로 직접 재현(`{"db":"ok","latencyMs":74}`)해 보고서야 배포 누락임을 알았다.
