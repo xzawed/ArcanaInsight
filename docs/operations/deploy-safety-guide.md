@@ -53,7 +53,11 @@
 
 > `/api/health` 200 = "서버가 떴다"일 뿐, **기능이 정상이란 뜻은 아니다.** (예: NEXT_PUBLIC_ASSET_BASE_URL 누락 시 헬스체크는 통과해도 이미지가 전부 404)
 
-**자동**: `.github/workflows/post-deploy-smoke.yml`이 **main push마다** 배포 완료를 기다린 뒤 `pnpm smoke:prod`를 실행한다(health·홈+자산호스트 인라인·R2 이미지 200 검증, 실패 시 워크플로 red). 수동 실행도 가능: `pnpm smoke:prod` (리딩 포함은 `node scripts/smoke-prod.mjs --reading`, AI 비용).
+**자동**: `.github/workflows/post-deploy-smoke.yml`이 **Railway 배포 성공 직후**(`on: deployment_status`) `pnpm smoke:prod`를 실행한다(health·DB·홈+자산호스트 인라인·R2 이미지·캐릭터 변형 검증).
+
+⚠️ **실패해도 워크플로는 green이고 대신 Issue(`post-deploy-smoke` 라벨)가 열린다.** 의도된 설계다 — Railway가 `checkSuites`로 배포를 게이트하므로 빨간 체크가 **롤백 재배포까지 막을 수 있다**. `on: push`였을 때 실제로 데드락이 나 프로덕션이 하루 넘게 정체됐다(경위: [`known-issues.md`](./known-issues.md)).
+
+수동 실행: `pnpm smoke:prod` (리딩 포함은 `node scripts/smoke-prod.mjs --reading`, AI 비용).
 
 배포 SUCCESS 후 확인 항목(스모크 스크립트가 1~2 자동 커버):
 1. `/api/health` 200, 홈 `/` 200 + 본문에 `cdn.xzawed.xyz` 인라인(=NEXT_PUBLIC_ASSET_BASE_URL 빌드 반영)

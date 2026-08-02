@@ -93,6 +93,69 @@
 > ⚠️ **새 검사를 스모크에 추가할 때는 "배포 전에도 참인가"를 먼저 물어라.** 아니라면
 > 그 검사는 배포를 막는다. 이것이 `checkSuites=true`인 환경의 구조적 제약이다.
 
+#### 검증 (2026-08-02 02:04) — 데드락 해소 확인
+
+`ebdf36e`(#549) 머지 후 실측:
+
+| 커밋 | Post-Deploy Smoke | Railway |
+|---|---|---|
+| `3f200c0` | failure (구 워크플로) | **SKIPPED** |
+| `ebdf36e` | **success** (`continue-on-error`) | **BUILDING → 배포 완료** |
+
+프로덕션 `/api/health`가 `{"status":"ok"}`(commit 필드 없음 = #547 이전 빌드)에서
+`{"status":"ok","commit":"ebdf36e"}`로 전환됐고, 스모크 **6/6 통과**(`/api/health/db` 포함).
+
+#### 남은 잡음과 최종 교정 — `on: push` → `on: deployment_status`
+
+`continue-on-error`는 데드락을 풀었지만 **오탐 Issue가 매 push마다 생기는 문제**가 남았다
+(#551이 1호). 원인은 순서다 — Railway가 이 체크를 기다리므로 스모크는 **원리적으로 자기 커밋을
+볼 수 없다**:
+
+```
+push → 스모크(커밋 불일치로 실패) → 체크 통과 → 그제서야 Railway 배포 시작
+```
+
+트리거를 **`on: deployment_status`**(state=success, environment=`xzawed / production`)로 바꿔
+배포 완료 후에 돌게 하면 순환이 사라진다. Railway가 `success` 상태를 실제로 올리는 것을 확인했다
+(`ebdf36e` → `success` 02:04:50Z. 반면 SKIP된 배포는 `inactive`로 끝나 발화하지 않는다).
+
+⚠️ **`continue-on-error`는 그대로 유지한다.** 이유가 바뀌었을 뿐 필요는 남는다 — 이 워크플로가
+만드는 체크 스위트는 커밋 X에 붙고, **X를 롤백 재배포할 때 다시 평가될 수 있다.** 빨간 스모크가
+롤백을 막으면 "프로덕션이 깨졌는데 되돌릴 수도 없는" 최악이 된다.
+
+⚠️ **`deployment_status` 워크플로는 기본 브랜치의 파일만 실행된다** — PR에서 시험할 수 없으므로
+머지 직후 실제 발화 여부를 반드시 확인한다.
+
+#### 그 교정에서 다시 걸린 함정 — concurrency가 자기 스모크를 죽인다
+
+`deployment_status` 전환 1차안은 기존 `concurrency`를 그대로 뒀다가 **매 배포마다 스모크가
+취소되는** 설계가 됐다. 적대 검증에서 제기돼 실측으로 확정했다.
+
+`deployment_status`는 in_progress·success·inactive **모든 상태마다** 런을 만들고,
+job-level `if`는 **런이 만들어진 뒤에** 평가되므로 그룹 합류를 막지 못한다. 그리고 Railway는
+새 배포가 성공하는 **바로 그 순간** 이전 배포를 inactive로 바꾼다:
+
+```
+e9d149a  success   02:18:36Z   ← 새 배포 성공, 진짜 스모크 시작
+ebdf36e  inactive  02:18:36Z   ← 같은 초
+ebdf36e  inactive  02:18:38Z   ← 2초 뒤 한 번 더
+```
+
+상수 그룹 + `cancel-in-progress: true`였다면 저 inactive 런이 방금 시작한 스모크를 **0~2초 만에**
+취소한다. 결과는 잡음 제거가 아니라 **커버리지 0**이고, 게다가 **취소는 `continue-on-error`로
+막을 수 없어** 커밋에 `cancelled` 체크런이 영구히 남는다(= 롤백 재배포를 막는 상태). 스텝이
+돌지 않았으니 Issue도 안 열려 아무도 모른다.
+
+교정: 그룹 키에 커밋을 넣고(`post-deploy-smoke-${{ github.event.deployment.sha || github.sha }}`)
+`cancel-in-progress: false`로 둔다. 다른 커밋의 이벤트는 서로를 취소할 수 없고, 같은 커밋의
+후행 inactive는 취소 대신 대기한다.
+
+> ⚠️ **워크플로 레벨 `concurrency`는 job-level `if`로 걸러질 런까지 포함한다.**
+> 이벤트가 많은 트리거(`deployment_status` 등)에서 상수 그룹 + 취소는 자기 자신을 죽인다.
+
+`checkout`·`setup-node`에도 `continue-on-error`를 붙였다. 일시적 네트워크·레이트리밋 실패
+한 번이 커밋에 빨간 체크를 남기면 나중에 그 커밋으로 롤백할 수 없다.
+
 ---
 
 ### 프로덕션이 main보다 뒤처져도 알 방법이 없었다 (2026-08-01~02)
