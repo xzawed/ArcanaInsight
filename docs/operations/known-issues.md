@@ -58,6 +58,43 @@
 프로덕션 번들에 포함되지 않으며, 악용하려면 자기 eslint config에 악성 glob을 주입해야 한다.
 **같은 override를 다시 시도하지 말 것.**
 
+### post-deploy 검사가 배포를 게이트해 데드락이 났다 (2026-08-01~02)
+
+**원인 확정.** Railway 서비스가 `checkSuites=true`로 설정돼 있어 **GitHub 체크 스위트가
+전부 통과해야 배포**한다(`validCheckSuites=3` = QA Recheck·SonarCloud·Post-Deploy Smoke).
+
+| 커밋 | Post-Deploy Smoke | Railway 배포 |
+|---|---|---|
+| `58f60d8` | success | **SUCCESS** |
+| `9942c12` | **failure** | **SKIPPED** |
+| `57fab59` | **failure** | **SKIPPED** |
+
+`SKIPPED`는 실패가 아니라 **빌드조차 시작되지 않은 상태**다 — 배포 이벤트 0건,
+`"Deployment does not have an associated build"`. 그래서 실패 로그가 없었다.
+
+#### 방아쇠는 우리가 당겼다
+
+#546이 스모크에 `/api/health/db` 검사를 추가했다. **배포돼야 존재하는 것을 배포 전 게이트가
+검사**하므로 순환이 닫힌다.
+
+```
+배포 안 됨 → 새 엔드포인트 404 → 스모크 실패 → Railway가 배포 SKIP → 영원히 반복
+```
+
+#547이 커밋 대조를 추가해 순환을 더 단단히 만들었다(배포 전에는 반드시 불일치).
+
+#### 교정 — post-deploy 검사는 배포를 막으면 안 된다
+
+애초에 **방향이 반대**다: 프로덕션이 깨졌을 때 정작 고칠 배포를 못 하게 된다.
+`post-deploy-smoke.yml`의 스모크 스텝을 `continue-on-error: true`로 두고, 실패는
+**Issue로 알린다**(라벨 `post-deploy-smoke`, 열린 이슈가 있으면 코멘트로 누적).
+체크는 통과하므로 Railway가 배포를 진행한다.
+
+> ⚠️ **새 검사를 스모크에 추가할 때는 "배포 전에도 참인가"를 먼저 물어라.** 아니라면
+> 그 검사는 배포를 막는다. 이것이 `checkSuites=true`인 환경의 구조적 제약이다.
+
+---
+
 ### 프로덕션이 main보다 뒤처져도 알 방법이 없었다 (2026-08-01~02)
 
 #546을 머지했는데 **하루가 지나도 Railway가 배포하지 않았다.** 신설한 `/api/health/db`가
