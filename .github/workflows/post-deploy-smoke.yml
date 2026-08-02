@@ -45,7 +45,12 @@ jobs:
       # 고정 sleep 대신 **배포된 커밋이 이 커밋이 될 때까지** 폴링한다.
       # 2026-08-01: 180초 sleep 뒤 스모크가 돌았는데 Railway 배포가 끝나지 않아 옛 빌드를
       # 검사했다. 실패는 났지만 "배포 안 됨"인지 "코드 결함"인지 구분되지 않았다.
+      #
+      # 이 스텝은 **기다리기만** 한다 — 실패가 무언가를 막을 이유가 없다. 현재 로직은
+      # 최악 경로(엔드포인트 불통 + 커밋 영구 불일치)에서도 exit 0임을 실측했지만,
+      # 그 보장은 앞으로의 편집에 취약하다(`set -e`에서 실패하는 한 줄이면 데드락 재발).
       - name: Railway 배포 완료 대기 (커밋 반영까지 폴링, 최대 10분)
+        continue-on-error: true
         env:
           EXPECT: ${{ github.sha }}
           BASE: https://arcanainsight-production.up.railway.app
@@ -69,8 +74,13 @@ jobs:
 
 
       # 체크는 통과시키되 실패를 묻지 않는다 — 배포를 막지 않으면서 사람이 알게 한다.
+      #
+      # 이 스텝도 continue-on-error다. 알림이 깨졌다고 배포까지 막으면 본말전도이고,
+      # 하필 이 스텝은 **스모크가 이미 실패했을 때만** 돈다 — 배포가 가장 절실한 순간이다.
+      # (Issue API 오류·이슈 비활성화·레이트리밋 등 우리 통제 밖의 실패가 실재한다.)
       - name: 스모크 실패 시 Issue 생성
         if: steps.smoke.outcome == 'failure'
+        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
