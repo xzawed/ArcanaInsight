@@ -46,6 +46,11 @@ export function Footer() {
           <h3 className="font-serif font-bold text-arcana-text text-sm mb-3">{t("footer.section.info")}</h3>
           <ul className="space-y-2">
             <li>
+              <Link href="/notice" className="text-sm font-bold text-arcana-gold hover:text-arcana-purple transition-colors">
+                {t("footer.link.notice")}
+              </Link>
+            </li>
+            <li>
               <Link href="/terms" className="text-sm text-arcana-muted hover:text-arcana-purple transition-colors">
                 {t("footer.link.terms")}
               </Link>
