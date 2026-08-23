@@ -102,13 +102,17 @@ Archive는 되돌릴 수 있다(Unarchive). 저장소 **삭제는 되돌릴 수 
 
 ## 실행 수단 (2026-08-23 확인)
 
-3~6단계는 **대시보드 수동 작업**이다. 자동화 경로가 현재 전부 막혀 있다.
+Railway는 조회 경로가 있고, Supabase는 대시보드 수동 작업이다.
 
-| 수단 | 상태 | 영향 |
+| 수단 | 상태 | 쓸 수 있는 것 |
 |---|---|---|
-| Railway MCP | 연결 실패 (`CONNECTION_CLOSED`) | 3단계를 MCP로 못 한다 |
-| Railway CLI 4.40.0 | 설치됨, **미로그인** | `railway login` 후에야 사용 가능 |
-| Supabase MCP | 미인증 | 4단계를 MCP로 못 한다 |
+| `.env.local`의 `RAILWAY_TOKEN` (프로젝트 토큰) | **사용 가능** | `pnpm verify:railway-config`, Railway GraphQL로 배포 상태·빌드 로그 조회 (`Project-Access-Token` 헤더) |
+| Railway MCP | 연결 실패 (`CONNECTION_CLOSED`) | 없음 |
+| Railway CLI 4.40.0 | 설치됨, **미로그인** | `railway login` 또는 `RAILWAY_TOKEN` 주입 후 사용 |
+| Supabase MCP | 미인증 | 없음 — 4단계는 대시보드에서 수동 |
+
+⚠️ **서비스 중지·프로젝트 삭제는 조회와 다르다.** 위 토큰으로 상태를 읽는 것까지는 확인했지만,
+파괴적 변경은 대시보드에서 사람이 확인하며 수행한다.
 
 Supabase 저사양 플랜은 비활동 시 자동 일시정지되므로, 파기 직전 프로젝트가 INACTIVE여도
 정상이다(삭제에는 지장 없다). 배경은 [`known-issues.md`](known-issues.md).

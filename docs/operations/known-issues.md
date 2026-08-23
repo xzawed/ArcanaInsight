@@ -199,10 +199,17 @@ ebdf36e  inactive  02:18:38Z   ← 2초 뒤 한 번 더
 - 워크플로가 **고정 sleep 대신 커밋 반영까지 폴링**한다(최대 10분)
 - 스모크가 `SMOKE_EXPECT_COMMIT`과 대조해 **격차를 실패로** 보고한다
 
-> ⚠️ Railway 배포가 왜 누락됐는지는 **미규명**이다. Railway 대시보드 접근이 필요하며
-> `pnpm verify:railway-config`는 토큰이 있어야 한다(`~/.railway/config.json`에 토큰 없음).
-> 서비스 config 드리프트(`startCommand`·`HOSTNAME=0.0.0.0`)로 배포가 FAILED 되는 알려진
-> 실패 모드가 있으므로 재발 시 그것부터 확인한다.
+> ✅ **원인 규명 완료 (2026-08-23).** 배포 누락의 정체는 `checkSuites=true` 게이팅에 걸린
+> **`SKIPPED`** 였다 — 위쪽 "post-deploy 검사가 배포를 막았다" 항목이 정본이다.
+> Railway API 실측: `9942c12`·`57fab59`·`3f200c0` = **SKIPPED**(빌드 미시작),
+> 체크가 모두 green이 된 `23ec24a` = **SUCCESS**.
+> **서비스 config 드리프트는 아니었다** — `startCommand="node server.js"`,
+> `HOSTNAME="0.0.0.0"` 둘 다 정상이었다(같은 날 `pnpm verify:railway-config` 통과).
+>
+> 조회 수단도 있다: `.env.local`의 **`RAILWAY_TOKEN`(프로젝트 토큰)** 으로
+> `pnpm verify:railway-config`가 동작하고, 배포 상태·빌드 로그도 같은 토큰을
+> `Project-Access-Token` 헤더로 `backboard.railway.com/graphql/v2`에 보내 조회된다.
+> (`~/.railway/config.json`은 비어 있어 `railway whoami`는 여전히 Unauthorized다.)
 
 ---
 
