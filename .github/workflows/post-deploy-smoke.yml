@@ -1,22 +1,42 @@
 name: Post-Deploy Smoke
 
-# main push(= Railway 자동 재배포)마다 배포 완료를 기다린 뒤 프로덕션 기능 스모크를 실행한다.
-# 헬스체크(/api/health)가 통과해도 IPv6 바인딩·NEXT_PUBLIC_ASSET_BASE_URL 누락 등으로
-# 홈/이미지가 broken일 수 있는 사각을 잡는다(2026-07-06 배포 사고 방어). 정보성 체크 — main 미보호라 차단하지 않음.
+# 배포된 프로덕션의 기능 스모크. 헬스체크(/api/health)가 통과해도 IPv6 바인딩·
+# NEXT_PUBLIC_ASSET_BASE_URL 누락 등으로 홈/이미지가 broken일 수 있는 사각을 잡는다
+# (2026-07-06 배포 사고 방어).
 #
-# ⚠️ **이 워크플로는 절대 실패로 끝나면 안 된다.** Railway 서비스가 `checkSuites=true`로
-# 설정돼 있어 **GitHub 체크 스위트가 전부 통과해야 배포**한다(`validCheckSuites=3`).
-# post-deploy 검사가 배포를 게이트하면 순환이 생긴다 —
-#   배포 안 됨 → 새 엔드포인트 404 → 스모크 실패 → Railway가 배포 SKIP → 영원히 반복.
-# 2026-08-01에 실제로 이 데드락이 발생해 프로덕션이 하루 넘게 정체됐다(#546에서 스모크에
-# `/api/health/db` 검사를 추가한 것이 방아쇠였다 — 배포돼야 존재하는 것을 배포 전에 검사했다).
+# ## 왜 `push`가 아니라 `deployment_status`인가 — 순환이 있었다
 #
-# 애초에 **post-deploy 검사로 배포를 막는 것은 방향이 반대**다: 프로덕션이 깨졌을 때
-# 정작 고칠 배포를 못 하게 된다. 그래서 실패는 **Issue로 알리고 체크는 통과**시킨다.
+# Railway 서비스가 `checkSuites=true`라 **GitHub 체크 스위트가 전부 통과해야 배포**한다.
+# 이 워크플로가 `on: push`이면 자기 자신이 그 체크 중 하나가 되어 순환이 닫힌다:
+#
+#   push → 스모크 시작 → 배포된 커밋이 자기 커밋인지 검사 → 아직 배포 전이라 불일치 →
+#     실패 → (Railway는 이 체크를 기다리는 중) → 그제서야 배포 시작
+#
+# 즉 **원리적으로 통과할 수 없다.** 2026-08-01에 이 순환이 데드락이 되어 프로덕션이
+# 하루 넘게 정체됐고(#546이 배포돼야 존재하는 `/api/health/db`를 배포 전 게이트에 넣은 것이
+# 방아쇠), #549가 `continue-on-error`로 데드락은 풀었지만 **main push마다 오탐 Issue가
+# 생기는 잡음**이 남았다(#551이 그 1호였다).
+#
+# `deployment_status`는 Railway가 배포를 마치고 상태를 올릴 때 발화하므로 순서가 바로잡힌다:
+#
+#   push → (체크: QA Recheck·Sonar) → Railway 배포 → success 상태 → **그 다음** 스모크
+#
+# 커밋 대조가 비로소 의미를 갖고, 10분 폴링도 필요 없어진다.
+#
+# ⚠️ `deployment_status` 워크플로는 **기본 브랜치(main)의 파일만 실행된다.** PR 브랜치에서
+# 고쳐도 머지 전에는 시험할 수 없다 — 머지 직후 실제 발화 여부를 반드시 확인할 것.
+#
+# ## 이 워크플로는 실패로 끝나지 않는다 (의도)
+#
+# `deployment_status`로 순환은 사라졌지만 `continue-on-error`는 유지한다. 이 워크플로가 만드는
+# 체크 스위트는 커밋 X에 붙는데, **X를 롤백 재배포할 때 Railway가 그 체크를 다시 볼 수 있다** —
+# 빨간 스모크가 롤백을 막으면 "프로덕션이 깨졌는데 되돌릴 수도 없는" 최악이 된다.
+# 실패는 `weekly-qa.yml`과 같은 방식으로 **Issue로 알린다.**
+#
+# 새 검사를 추가할 때는 **"배포 후에 참인가"**만 물으면 된다(배포 전 조건은 더 이상 필요 없다).
 
 on:
-  push:
-    branches: [main]
+  deployment_status:
   workflow_dispatch:
     inputs:
       with_reading:
@@ -29,53 +49,83 @@ permissions:
   contents: read
   issues: write
 
-# 동시 배포 시 이전 스모크 취소(최신 배포만 검증)
+# ⚠️ **그룹 키에 반드시 커밋이 들어가야 하고, 취소를 켜면 안 된다.**
+#
+# `deployment_status`는 in_progress·success·inactive **모든 상태마다** 워크플로 런을 만든다.
+# 아래 job-level `if`는 런이 만들어진 **뒤에** 평가되므로 그룹 합류를 막지 못한다.
+#
+# 그리고 Railway는 새 배포가 성공하는 **바로 그 순간** 이전 배포를 inactive로 바꾼다(실측):
+#
+#   e9d149a  success   02:18:36Z   ← 새 배포 성공, 진짜 스모크 시작
+#   ebdf36e  inactive  02:18:36Z   ← 같은 초
+#   ebdf36e  inactive  02:18:38Z   ← 2초 뒤 한 번 더
+#
+# 상수 그룹 + `cancel-in-progress: true`였다면 저 inactive 런이 방금 시작한 스모크를
+# **0~2초 만에 취소**한다 — 매 배포마다. 취소는 `continue-on-error`로 막을 수 없어
+# 커밋에 `cancelled` 체크런이 영구히 남고(= 롤백 재배포를 막는 상태), 스텝이 돌지 않았으니
+# Issue도 안 열린다. 커버리지 0 + 롤백 차단이 동시에 발생한다.
+#
+# 커밋으로 키를 가르면 다른 커밋의 이벤트가 서로를 취소할 수 없고, `cancel-in-progress: false`면
+# **같은** 커밋의 후행 inactive도 취소 대신 대기한다.
 concurrency:
-  group: post-deploy-smoke
-  cancel-in-progress: true
+  group: post-deploy-smoke-${{ github.event.deployment.sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   smoke:
+    # `deployment_status`는 in_progress·inactive·failure·success 모든 상태마다 발화한다.
+    # **성공한 프로덕션 배포**에만 반응한다 — environment 문자열은 실측값이다
+    # (`gh api repos/:owner/:repo/deployments`의 `environment` 필드, railway-app[bot]이 생성).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment_status.environment == 'xzawed / production')
     runs-on: ubuntu-latest
     steps:
+      # 인프라 스텝도 보호한다. checkout·setup-node는 일시적 네트워크·레이트리밋으로 실패할 수
+      # 있고, 그 한 번이 커밋에 빨간 체크를 남기면 나중에 그 커밋으로 롤백할 수 없게 된다.
+      # (실패하면 아래 스모크가 스크립트를 못 찾아 실패 → Issue로 드러난다.)
       - uses: actions/checkout@v4
+        continue-on-error: true
       - uses: actions/setup-node@v4
+        continue-on-error: true
         with:
           node-version: 20
-      # 고정 sleep 대신 **배포된 커밋이 이 커밋이 될 때까지** 폴링한다.
-      # 2026-08-01: 180초 sleep 뒤 스모크가 돌았는데 Railway 배포가 끝나지 않아 옛 빌드를
-      # 검사했다. 실패는 났지만 "배포 안 됨"인지 "코드 결함"인지 구분되지 않았다.
+
+      # Railway가 success를 올린 시점엔 헬스체크가 이미 통과했지만, 도메인 라우팅이
+      # 새 컨테이너로 넘어가는 데 짧은 지연이 있을 수 있다. 배포를 기다리는 게 아니라
+      # **라우팅 전환만** 기다리므로 2분이면 충분하다(구 10분 폴링은 순환 때문이었다).
       #
-      # 이 스텝은 **기다리기만** 한다 — 실패가 무언가를 막을 이유가 없다. 현재 로직은
-      # 최악 경로(엔드포인트 불통 + 커밋 영구 불일치)에서도 exit 0임을 실측했지만,
-      # 그 보장은 앞으로의 편집에 취약하다(`set -e`에서 실패하는 한 줄이면 데드락 재발).
-      - name: Railway 배포 완료 대기 (커밋 반영까지 폴링, 최대 10분)
+      # 이 스텝은 기다리기만 한다 — 실패가 무언가를 막을 이유가 없다.
+      - name: 라우팅 전환 대기 (최대 2분)
+        if: github.event_name == 'deployment_status'
         continue-on-error: true
         env:
-          EXPECT: ${{ github.sha }}
+          EXPECT: ${{ github.event.deployment.sha }}
           BASE: https://arcanainsight-production.up.railway.app
         run: |
           expect="${EXPECT:0:7}"
-          for i in $(seq 1 40); do
+          for i in $(seq 1 8); do
             got=$(curl -s --max-time 15 "$BASE/api/health" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(JSON.parse(d).commit??"")}catch{process.stdout.write("")}})')
-            echo "[$i/40] deployed=${got:-?} expect=$expect"
+            echo "[$i/8] serving=${got:-?} expect=$expect"
             [ "$got" = "$expect" ] && exit 0
             sleep 15
           done
-          echo "::warning::10분 내 배포 미반영 — 아래 스모크가 격차를 실패로 보고합니다"
+          echo "::warning::2분 내 라우팅 미전환 — 아래 스모크가 격차를 보고합니다"
+
       - name: 프로덕션 스모크
         id: smoke
-        continue-on-error: true   # ← Railway 배포 데드락 방지 (위 주석)
+        continue-on-error: true # ← 롤백 재배포를 막지 않기 위함 (위 주석)
         env:
           SMOKE_BASE_URL: https://arcanainsight-production.up.railway.app
-          # 프로덕션이 이 커밋이 아니면 실패한다 — 배포 누락을 스모크가 직접 잡는다.
-          SMOKE_EXPECT_COMMIT: ${{ github.sha }}
+          # 배포 이벤트일 때만 커밋을 강제한다. 수동 실행은 "지금 떠 있는 것"을 보는
+          # 용도라 main과 어긋나는 게 정상이고, 강제하면 항상 실패한다(빈 값=검사 생략).
+          SMOKE_EXPECT_COMMIT: ${{ github.event_name == 'deployment_status' && github.event.deployment.sha || '' }}
         run: node scripts/smoke-prod.mjs ${{ (github.event_name == 'workflow_dispatch' && inputs.with_reading) && '--reading' || '' }}
 
-
-      # 체크는 통과시키되 실패를 묻지 않는다 — 배포를 막지 않으면서 사람이 알게 한다.
+      # 체크는 통과시키되 실패를 묻지 않는다 — 롤백을 막지 않으면서 사람이 알게 한다.
       #
-      # 이 스텝도 continue-on-error다. 알림이 깨졌다고 배포까지 막으면 본말전도이고,
+      # 이 스텝도 continue-on-error다. 알림이 깨졌다고 배포·롤백까지 막으면 본말전도이고,
       # 하필 이 스텝은 **스모크가 이미 실패했을 때만** 돈다 — 배포가 가장 절실한 순간이다.
       # (Issue API 오류·이슈 비활성화·레이트리밋 등 우리 통제 밖의 실패가 실재한다.)
       - name: 스모크 실패 시 Issue 생성
@@ -89,9 +139,8 @@ jobs:
             core.error(`프로덕션 스모크 실패 (${sha}) — ${runUrl}`);
             await core.summary
               .addHeading('❌ 프로덕션 스모크 실패')
-              .addRaw(`커밋 \`${sha}\` 배포 후 검사가 실패했습니다. [로그](${runUrl})`)
-              .addRaw('\n\n체크 자체는 통과시킵니다 — Railway가 `checkSuites`로 배포를 게이트하므로 ')
-              .addRaw('여기서 실패하면 **고칠 배포조차 막힙니다**.')
+              .addRaw(`배포 \`${sha}\` 직후 검사가 실패했습니다. [로그](${runUrl})`)
+              .addRaw('\n\n체크 자체는 통과시킵니다 — 빨간 체크가 **롤백 재배포를 막을 수 있기** 때문입니다.')
               .write();
 
             const title = '🚨 프로덕션 스모크 실패';
@@ -100,11 +149,12 @@ jobs:
               state: 'open', labels: 'post-deploy-smoke',
             });
             const body = [
-              `커밋 \`${sha}\` 배포 후 프로덕션 스모크가 실패했습니다.`,
+              `배포 \`${sha}\` 직후 프로덕션 스모크가 실패했습니다.`,
               '',
               `- 실행 로그: ${runUrl}`,
-              '- 확인 순서: `/api/health`의 `commit`이 main과 같은지 → 다르면 **배포 미반영**이고 프로덕션 결함이 아닙니다',
-              '- 배포가 반영됐는데도 실패하면 프로덕션 결함입니다',
+              '- 이 워크플로는 **배포 완료 후에** 도므로, 커밋 불일치는 라우팅 지연이 아니면 실제 문제입니다',
+              '- `/api/health`의 `commit`을 먼저 확인하세요',
+              '- 로그가 `Cannot find module`이면 프로덕션이 아니라 **checkout/setup-node 실패**입니다(재실행하면 됩니다)',
             ].join('\n');
 
             if (open.length > 0) {

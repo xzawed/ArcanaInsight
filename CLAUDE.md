@@ -125,7 +125,7 @@ pnpm check:workflow-artifacts # Playwright 리포트가 if:failure()로 회귀�
 pnpm check:image-budget   # 캐릭터 마스터 치수·용량 + 필수표정 6종·WebP 변형 5단 존재(누락 시 프로덕션 404)
 pnpm i18n:check           # 번역 키 drift 검출
 pnpm eval:reading         # 리딩 품질 계약 검증(directAnswer·overallReading·parseError, SSE 파싱). EVAL_BASE_URL로 대상 지정, 실 AI 호출(온디맨드)
-pnpm smoke:prod           # 배포 후 프로덕션 스모크(health·홈+자산호스트 인라인·R2 이미지 200). --reading=리딩1건. post-deploy-smoke.yml이 main push마다 자동 실행
+pnpm smoke:prod           # 배포 후 프로덕션 스모크(health·DB·홈+자산호스트 인라인·R2 이미지·캐릭터 변형). --reading=리딩1건. post-deploy-smoke.yml이 Railway 배포 성공 직후 자동 실행(실패 시 워크플로는 green, Issue로 알림)
 pnpm verify:railway-config # standalone 배포 필수조건 검증(startCommand=node server.js·HOSTNAME=0.0.0.0). railway login 필요
 pnpm generate:assets      # Replicate API로 카드/배경/데코 이미지 생성 (REPLICATE_API_KEY 필요)
 pnpm generate:assets:skip # 이미 존재하는 이미지 건너뛰고 생성

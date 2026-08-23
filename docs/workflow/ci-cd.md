@@ -106,7 +106,11 @@ Railway가 빌드를 시작한다. 하나라도 실패하면 배포는 `SKIPPED`
 [`known-issues.md`](../operations/known-issues.md)가 정본이다. 핵심 규칙:
 
 > **post-deploy 검사는 배포를 막으면 안 된다.** 배포돼야 참이 되는 것을 배포 전 게이트가
-> 검사하면 순환이 닫힌다. 새 검사를 스모크에 넣기 전에 **"배포 전에도 참인가"**를 먼저 물어라.
+> 검사하면 순환이 닫힌다.
+
+그래서 `post-deploy-smoke.yml`은 **`on: deployment_status`**(배포 성공 후)로 돌고,
+실패해도 워크플로는 green이며 대신 Issue를 연다. 빨간 체크가 **롤백 재배포를 막을 수 있기**
+때문이다 — 프로덕션이 깨진 순간 되돌릴 수단까지 잃는 것이 최악이다.
 
 현재 게이팅 상태는 `pnpm verify:railway-config`가 출력한다.
 
