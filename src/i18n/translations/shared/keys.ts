@@ -48,6 +48,7 @@ export interface SharedKeys {
     "link.mypage": string;
     "link.terms": string;
     "link.privacy": string;
+    "link.notice": string;
     "copyright": string;
   };
   home: {
@@ -403,6 +404,31 @@ export interface SharedKeys {
     "session.btn.get-result": string;
     "session.btn.share": string;
     "session.share.title": string;
+  };
+  /** 서비스 종료 공지 (2026-08-31 종료) */
+  notice: {
+    "banner.label": string;
+    "banner.text": string;
+    "banner.cta": string;
+    "page.title": string;
+    "page.back": string;
+    "page.published": string;
+    "page.intro": string;
+    "page.schedule.heading": string;
+    "page.schedule.service": string;
+    "page.schedule.data": string;
+    "page.schedule.after": string;
+    "page.data.heading": string;
+    "page.data.intro": string;
+    "page.data.account": string;
+    "page.data.reading": string;
+    "page.data.birth": string;
+    "page.data.irreversible": string;
+    "page.save.heading": string;
+    "page.save.body": string;
+    "page.contact.heading": string;
+    "page.contact.body": string;
+    "page.contact.email": string;
   };
 }
 

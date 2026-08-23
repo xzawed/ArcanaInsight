@@ -180,6 +180,7 @@ pnpm upload:assets:skip   # (구) 이미 존재하는 이미지 건너뛰고 Sup
 | 캐릭터/카드/스킨 | [`docs/architecture/data-model.md`](docs/architecture/data-model.md) |
 | 새 기능/페이지/API | [`docs/workflow/task-playbooks.md`](docs/workflow/task-playbooks.md) |
 | 배포/운영 | [`docs/operations/deployment.md`](docs/operations/deployment.md), [`docs/operations/operation-guide.md`](docs/operations/operation-guide.md) |
+| **서비스 종료·폐쇄** | [`docs/operations/service-shutdown.md`](docs/operations/service-shutdown.md) |
 | 미구현/기술부채 | [`docs/operations/known-issues.md`](docs/operations/known-issues.md) |
 
 ## Claude 자율 관리 규칙

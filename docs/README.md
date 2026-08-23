@@ -48,6 +48,7 @@
 | 배포/롤백 | [operations/deployment.md](operations/deployment.md) |
 | 배포 품질/안전 가이드 | [operations/deploy-safety-guide.md](operations/deploy-safety-guide.md) |
 | 모니터링/QA | [operations/monitoring.md](operations/monitoring.md) |
+| 서비스 종료·저장소 폐쇄 | [operations/service-shutdown.md](operations/service-shutdown.md) |
 
 ## 폴더 구조
 
@@ -95,7 +96,8 @@ docs/
 │   ├── env-variables.md
 │   ├── known-issues.md
 │   ├── monitoring.md
-│   └── operation-guide.md
+│   ├── operation-guide.md
+│   └── service-shutdown.md  # 운영 종료·데이터 파기·저장소 폐쇄 절차 정본
 ├── archive/
 │   └── ai-quality-roadmap.md
 └── superpowers/         # 방법론 기반 계획·설계 보관소
