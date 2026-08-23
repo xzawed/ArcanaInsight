@@ -392,8 +392,8 @@ export const ko: SharedKeys = {
   },
   notice: {
     "banner.label": "서비스 종료 안내",
-    "banner.text": "ArcanaInsight는 2026년 8월 31일 24시(KST)에 서비스를 종료합니다. 저장된 리딩 기록과 회원 정보는 2026년 9월 1일 전량 파기됩니다.",
-    "banner.cta": "자세히 보기",
+    "banner.text": "2026년 8월 31일 서비스 종료 · 데이터 전량 파기",
+    "banner.cta": "안내 보기",
     "page.title": "서비스 종료 안내",
     "page.back": "← 홈으로",
     "page.published": "공지일: 2026년 8월 23일",

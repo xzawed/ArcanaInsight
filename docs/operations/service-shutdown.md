@@ -32,6 +32,7 @@ ArcanaInsight 운영 종료와 저장소 폐쇄 절차의 **정본**이다.
 - Footer 정보 컬럼에 공지 링크
 
 > 배너를 Header 위/안에 넣지 않은 이유: Header가 `fixed h-14`이고 각 라우트 그룹이 `pt-14`로 오프셋하므로, 그 위에 얹으면 `pt-14`와 몰입형 스테이지 `calc(100dvh-7rem)` 계산이 함께 어긋나 이중 스크롤이 생긴다. 자세한 높이 계약은 [`../conventions/cross-platform.md`](../conventions/cross-platform.md).
+> ⚠️ **배너 높이는 `h-14 md:h-11`로 고정돼 있고, `auth/login`의 `min-h-[calc(100dvh-10.5rem)] md:min-h-[calc(100dvh-6.25rem)]`이 그 높이를 빼도록 보정돼 있다.** `(site) main`은 sticky-footer 플렉스에서 이미 뷰포트를 채우므로 여기에 더해지는 흐름 높이는 그대로 `유령 스크롤`이 된다(실측: 배너 높이 = 유령 스크롤). 배너 높이·문구를 바꾸면 로그인 보정도 함께 바꾼다. 회귀는 `e2e/site-layout.spec.ts`(모바일·데스크탑 유령 스크롤)와 `e2e/static-pages.spec.ts`(문구 잘림, retries 0)가 잡는다.
 
 ## 2단계 — 운영 유지 (2026-08-24 ~ 08-31)
 
@@ -44,9 +45,17 @@ ArcanaInsight 운영 종료와 저장소 폐쇄 절차의 **정본**이다.
 1. Railway 대시보드 → ArcanaInsight 서비스 → 배포 중지(또는 서비스 삭제).
 2. 중단 직후 `/api/health`가 응답하지 않는 것을 확인한다.
 
-중단 방식은 두 가지다. **Railway 서비스를 즉시 내리면** 도메인이 502를 반환하고, **정적 안내 페이지로 교체하면** 종료 사실을 계속 알릴 수 있다. 후자를 택할 경우 5단계의 R2·도메인 해지를 그만큼 미뤄야 한다.
+**중단 방식은 "Railway 즉시 중지"로 확정한다.** 앱은 커스텀 도메인 없이 Railway가 발급한
+`arcanainsight-production.up.railway.app`으로만 서빙된다(`cdn.xzawed.xyz`는 R2 자산 전용). 즉
+종료 후 트래픽을 돌려놓을 자체 도메인이 없어 **정적 안내 페이지를 띄워도 찾아올 경로가 없고**,
+그러자고 Railway를 계속 켜두면 비용과 5단계 정리만 미뤄진다. 공지를 8/23~8/31 9일간 상시
+노출하는 것으로 고지 의무를 대신한다.
 
 ## 4단계 — 데이터 파기 (2026-09-01)
+
+대상 프로젝트는 **Supabase `hkjrupbauexapmmzbcgw`** 하나다(프로덕션 정본).
+2026-08-01 복구 실측 기준 **리딩 173건 · 세션 269건**이 남아 있었다 — 실제 이용자 데이터가 있으므로
+공지 없이 지우면 안 되는 사안이었다.
 
 개인정보처리방침의 "복구 불가능한 방법으로 영구 삭제" 원칙을 따른다. 파기 대상:
 
@@ -88,6 +97,21 @@ ArcanaInsight 운영 종료와 저장소 폐쇄 절차의 **정본**이다.
 3. GitHub → Settings → **Archive this repository**
 
 Archive는 되돌릴 수 있다(Unarchive). 저장소 **삭제는 되돌릴 수 없으므로** 하지 않는다.
+
+---
+
+## 실행 수단 (2026-08-23 확인)
+
+3~6단계는 **대시보드 수동 작업**이다. 자동화 경로가 현재 전부 막혀 있다.
+
+| 수단 | 상태 | 영향 |
+|---|---|---|
+| Railway MCP | 연결 실패 (`CONNECTION_CLOSED`) | 3단계를 MCP로 못 한다 |
+| Railway CLI 4.40.0 | 설치됨, **미로그인** | `railway login` 후에야 사용 가능 |
+| Supabase MCP | 미인증 | 4단계를 MCP로 못 한다 |
+
+Supabase 저사양 플랜은 비활동 시 자동 일시정지되므로, 파기 직전 프로젝트가 INACTIVE여도
+정상이다(삭제에는 지장 없다). 배경은 [`known-issues.md`](known-issues.md).
 
 ---
 

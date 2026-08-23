@@ -396,8 +396,8 @@ export const en: Partial<SharedKeys> = {
   },
   notice: {
     "banner.label": "Service closure notice",
-    "banner.text": "ArcanaInsight closes on August 31, 2026 at 24:00 (KST). All stored readings and account data will be permanently deleted on September 1, 2026.",
-    "banner.cta": "Read the notice",
+    "banner.text": "Closing Aug 31, 2026 · all data deleted",
+    "banner.cta": "Read notice",
     "page.title": "Service Closure Notice",
     "page.back": "← Back to home",
     "page.published": "Posted: August 23, 2026",

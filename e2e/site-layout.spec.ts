@@ -74,6 +74,23 @@ test.describe("(site) 레이아웃 — Footer 가림 / 유령 스크롤 (모바�
 test.describe("(site) 레이아웃 — 데스크탑 회귀 가드", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
+  test("데스크탑 짧은 (site) 페이지도 Footer 외 유령 스크롤이 없다", async ({ page }) => {
+    // 모바일 가드(위)는 base 분기만 덮는다. 로그인 래퍼의 md: 보정과 종료 배너의
+    // md:h-11이 어긋나면 여기서만 드러나므로 데스크탑 폭에서도 같은 불변식을 건다.
+    await page.goto("/auth/login", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("footer")).toHaveCount(1);
+
+    const m = await page.evaluate(() => {
+      const footer = document.querySelector("footer");
+      return {
+        overflow: document.documentElement.scrollHeight - window.innerHeight,
+        footerHeight: footer ? Math.round(footer.getBoundingClientRect().height) : 0,
+      };
+    });
+    const phantom = m.overflow - m.footerHeight;
+    expect(phantom, `유령 스크롤 ${phantom}px (Footer 외 빈 스크롤)`).toBeLessThanOrEqual(40);
+  });
+
   test("데스크탑은 고정 네비가 없고 Footer 하단 여백(모바일 회피 패딩)이 제거된다", async ({ page }) => {
     await page.goto("/terms", { waitUntil: "domcontentloaded" });
     const m = await page.evaluate(() => {

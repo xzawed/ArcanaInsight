@@ -399,8 +399,8 @@ export const ja: Partial<SharedKeys> = {
   },
   notice: {
     "banner.label": "サービス終了のお知らせ",
-    "banner.text": "ArcanaInsightは2026年8月31日24時（KST）をもってサービスを終了します。保存されたリーディング記録と会員情報は2026年9月1日にすべて削除されます。",
-    "banner.cta": "詳細を見る",
+    "banner.text": "2026年8月31日サービス終了 · データ全削除",
+    "banner.cta": "詳細",
     "page.title": "サービス終了のお知らせ",
     "page.back": "← ホームへ",
     "page.published": "掲載日：2026年8月23日",

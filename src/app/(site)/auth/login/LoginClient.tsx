@@ -38,7 +38,7 @@ export default function LoginClient({ useNextAuth }: Readonly<Props>) {
   }
 
   return (
-    <div className="min-h-[calc(100dvh-7rem)] md:min-h-[calc(100dvh-3.5rem)] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-[calc(100dvh-10.5rem)] md:min-h-[calc(100dvh-6.25rem)] flex items-center justify-center px-4 relative overflow-hidden">
       {/* 배경 이미지 */}
       <div className="fixed inset-0 -z-10">
         <Image src="/images/backgrounds/login-bg.jpg" alt="" fill className="object-cover"  sizes="100vw" />
