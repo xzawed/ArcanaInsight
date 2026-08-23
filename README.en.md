@@ -2,6 +2,19 @@
 
 <p align="right"><a href="README.md">🇰🇷 한국어</a></p>
 
+> [!IMPORTANT]
+> **🛑 Service Closure Notice**
+>
+> ArcanaInsight shuts down on **August 31, 2026 at 24:00 (KST)**.
+> On **September 1, 2026** all account data, reading records, and Saju inputs (date and time of birth, and similar) will be **permanently deleted beyond recovery**.
+>
+> - If there are readings you want to keep, save them before closure using the share button on each result page.
+> - Deleted data cannot be restored, reissued, or transferred, and every share link issued will stop working.
+> - In-app notice: [/notice](https://arcanainsight-production.up.railway.app/notice)
+> - Closure, deletion, and repository shutdown runbook: [`docs/operations/service-shutdown.md`](docs/operations/service-shutdown.md)
+>
+> After closure this repository will be made **Private and archived** (not deleted).
+
 > **A fortune-telling platform where you converse with anime-style characters for tarot readings, Four Pillars analysis, and spiritual consultations**
 > **Available in 3 locales** (한국어 · English · 日本語) — switched automatically via the `ai_locale` cookie
 
@@ -11,7 +24,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
-  <img src="https://img.shields.io/badge/status-Live-brightgreen?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/status-Closing%202026--08--31-critical?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
@@ -25,7 +38,7 @@
 </p>
 
 <p align="center">
-  <a href="https://arcanainsight-production.up.railway.app"><strong>🌐 Live Demo</strong></a> &nbsp;·&nbsp;
+  <a href="https://arcanainsight-production.up.railway.app"><strong>🌐 Live Demo</strong></a> <sub>(closing 2026-08-31)</sub> &nbsp;·&nbsp;
   <a href="CLAUDE.md"><strong>🤖 Dev Guide</strong></a> &nbsp;·&nbsp;
   <a href="e2e/README.md"><strong>🧪 E2E Guide</strong></a>
 </p>
@@ -289,7 +302,7 @@ The 7-step development process lives in [docs/workflow/code-change-process.md](d
 
 | Service | URL |
 |---------|-----|
-| 🌐 Live Demo | [arcanainsight-production.up.railway.app](https://arcanainsight-production.up.railway.app) |
+| 🌐 Live Demo | [arcanainsight-production.up.railway.app](https://arcanainsight-production.up.railway.app) — **closes 2026-08-31 24:00 KST** |
 | 🔄 n8n Automation | [xzawed.app.n8n.cloud](https://xzawed.app.n8n.cloud) |
 
 ---
