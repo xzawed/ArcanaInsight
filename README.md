@@ -2,6 +2,19 @@
 
 <p align="right"><a href="README.en.md">🇺🇸 English</a></p>
 
+> [!IMPORTANT]
+> **🛑 서비스 종료 안내**
+>
+> ArcanaInsight는 **2026년 8월 31일 24:00 (KST)** 를 끝으로 서비스를 종료합니다.
+> **2026년 9월 1일**에 회원 계정·리딩 기록·사주 입력값(생년월일시 등)을 **복구 불가능한 방법으로 전량 파기**합니다.
+>
+> - 보관을 원하는 리딩 결과는 종료 전에 각 결과 페이지의 공유 기능으로 저장해주세요.
+> - 파기 후에는 복구·재발급·이관이 불가능하며, 발급된 공유 링크도 모두 접속할 수 없게 됩니다.
+> - 서비스 내 공지: [/notice](https://arcanainsight-production.up.railway.app/notice)
+> - 종료·파기·저장소 폐쇄 절차 정본: [`docs/operations/service-shutdown.md`](docs/operations/service-shutdown.md)
+>
+> 서비스 종료 후 이 저장소는 **Private + Archive** 처리됩니다(삭제하지 않습니다).
+
 > **애니메이션 캐릭터와 대화하며 타로 리딩 · 사주 분석 · 신점 상담을 받는 운세 종합 플랫폼**
 > **3개 locale 지원** (한국어 · English · 日本語) — `ai_locale` 쿠키 기반 자동 전환
 
@@ -11,7 +24,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License" /></a>
-  <img src="https://img.shields.io/badge/status-Live-brightgreen?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/status-Closing%202026--08--31-critical?style=for-the-badge" alt="Status" />
   <img src="https://img.shields.io/badge/%E2%9A%9B%EF%B8%8F%20Frontend-Next.js%2016%20%2B%20React%2019-61DAFB?style=for-the-badge&labelColor=20232a" alt="Frontend" />
   <img src="https://img.shields.io/badge/%F0%9F%97%84%EF%B8%8F%20Backend-Node.js%20%2B%20Supabase-3ECF8E?style=for-the-badge&labelColor=1a1a2e" alt="Backend" />
   <img src="https://img.shields.io/badge/%F0%9F%A4%96%20AI-xAI%20Grok%20%2B%20Claude-FF6B35?style=for-the-badge&labelColor=1a1a2e" alt="AI" />
@@ -25,7 +38,7 @@
 </p>
 
 <p align="center">
-  <a href="https://arcanainsight-production.up.railway.app"><strong>🌐 라이브 데모</strong></a> &nbsp;·&nbsp;
+  <a href="https://arcanainsight-production.up.railway.app"><strong>🌐 라이브 데모</strong></a> <sub>(2026-08-31 종료)</sub> &nbsp;·&nbsp;
   <a href="CLAUDE.md"><strong>🤖 개발 가이드</strong></a> &nbsp;·&nbsp;
   <a href="e2e/README.md"><strong>🧪 E2E 가이드</strong></a>
 </p>
@@ -289,7 +302,7 @@ pnpm test:e2e:ui   # 🖥️  Playwright UI 모드 (시각적 디버깅)
 
 | 서비스 | URL |
 |--------|-----|
-| 🌐 라이브 데모 | [arcanainsight-production.up.railway.app](https://arcanainsight-production.up.railway.app) |
+| 🌐 라이브 데모 | [arcanainsight-production.up.railway.app](https://arcanainsight-production.up.railway.app) — **2026-08-31 24:00 KST 종료** |
 | 🔄 n8n 자동화 | [xzawed.app.n8n.cloud](https://xzawed.app.n8n.cloud) |
 
 ---
